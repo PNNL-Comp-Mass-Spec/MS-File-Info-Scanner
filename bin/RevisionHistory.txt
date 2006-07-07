@@ -1,0 +1,24 @@
+MS File Info Scanner Change Log
+
+Version 1.0.2333; May 22, 2006
+	- Minor updates to error handling
+
+Version 1.0.2253; March 3, 2006
+	- Created installer for the application
+
+Version 1.0.2095; September 26, 2005
+	- Fixed bug in the FillFileInfo function of the XRawFileIO class
+		- Bug caused empty Instrument Method text to be read
+
+Version 1.0.2088; September 19, 2005
+	- Updated to read zipped S-folders using SharpZipLib.dll; allows program to extract MS file info from FTICR-MS data folders that do not have a "1" folder
+
+Version 1.0.2086; September 17, 2005
+	- Updated to use a separate class for each instrument, utilizing interface iMSFileInfoProcessor
+
+Version 1.0.2086; September 17, 2005
+	- Initial release
+	- Note: This program requires the following software be installed
+		- ICR-2LS, which will install the icr2ls32.dll file at C:\Windows\System32\
+		- Finnigan's "XCalibur" software for reading Finnigan .Raw files
+		- "Analyst QS for Agilent TOF" software for reading Agilent TOF .wiff files
