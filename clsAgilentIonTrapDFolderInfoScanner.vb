@@ -190,6 +190,11 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
             With udtFileInfo
                 .FileSystemCreationTime = ioFolderInfo.CreationTime
                 .FileSystemModificationTime = ioFolderInfo.LastWriteTime
+
+                ' The acquisition times will get updated below to more accurate values
+                .AcqTimeStart = .FileSystemModificationTime
+                .AcqTimeEnd = .FileSystemModificationTime
+
                 .DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
                 .FileExtension = ioFolderInfo.Extension
 

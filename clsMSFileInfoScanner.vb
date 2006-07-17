@@ -40,6 +40,8 @@ Public Class clsMSFileScanner
     Private Const COL_NAME_FILE_SIZE_BYTES As String = "FileSizeBytes"
     Private Const COL_NAME_LAST_MODIFIED As String = "InfoLastModified"
 
+    Private Const MINIMUM_DATETIME As DateTime = #1/1/1900#
+
     Public Enum eMSFileScannerErrorCodes
         NoError = 0
         InvalidInputFilePath = 1
@@ -177,6 +179,17 @@ Public Class clsMSFileScanner
         End Get
     End Property
 #End Region
+
+    Private Function AssureMinimumDate(ByVal dtDate As DateTime, ByVal dtMinimumDate As DateTime) As DateTime
+        ' Assures that dtDate is >= dtMinimumDate
+
+        If dtDate < dtMinimumDate Then
+            Return dtMinimumDate
+        Else
+            Return dtDate
+        End If
+
+    End Function
 
     Private Sub AutosaveCachedResults()
 
@@ -539,11 +552,11 @@ Public Class clsMSFileScanner
             .Item(COL_NAME_DATASET_ID) = udtFileInfo.DatasetID
             .Item(COL_NAME_DATASET_NAME) = udtFileInfo.DatasetName
             .Item(COL_NAME_FILE_EXTENSION) = udtFileInfo.FileExtension
-            .Item(COL_NAME_ACQ_TIME_START) = udtFileInfo.AcqTimeStart
-            .Item(COL_NAME_ACQ_TIME_END) = udtFileInfo.AcqTimeEnd
+            .Item(COL_NAME_ACQ_TIME_START) = AssureMinimumDate(udtFileInfo.AcqTimeStart, MINIMUM_DATETIME)
+            .Item(COL_NAME_ACQ_TIME_END) = AssureMinimumDate(udtFileInfo.AcqTimeEnd, MINIMUM_DATETIME)
             .Item(COL_NAME_SCAN_COUNT) = udtFileInfo.ScanCount
             .Item(COL_NAME_FILE_SIZE_BYTES) = udtFileInfo.FileSizeBytes
-            .Item(COL_NAME_LAST_MODIFIED) = dtLastModified
+            .Item(COL_NAME_LAST_MODIFIED) = AssureMinimumDate(dtLastModified, MINIMUM_DATETIME)
         End With
     End Sub
 

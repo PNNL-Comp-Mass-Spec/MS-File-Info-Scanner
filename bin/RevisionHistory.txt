@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.0.2389; July 17, 2006
+	- Updated the file readers to initially set the acquisition start and end time to the file modification date, in case the actual acquisition times cannot be determined
+	- Now validating the acquisition start and end date values to make sure they are at least January 1, 1900
+
 Version 1.0.2333; May 22, 2006
 	- Minor updates to error handling
 

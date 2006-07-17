@@ -350,6 +350,7 @@ Public Class clsBrukerOneFolderInfoScanner
             If ioFileInfo.Exists() Then
                 ' Parsing a zipped S folder
                 blnParsingBrukerOneFolder = False
+
                 ' The dataset name is equivalent to the name of the folder containing strDataFilePath
                 ioZippedSFilesFolderInfo = ioFileInfo.Directory
                 blnSuccess = True
@@ -379,6 +380,11 @@ Public Class clsBrukerOneFolderInfoScanner
                 With udtFileInfo
                     .FileSystemCreationTime = ioZippedSFilesFolderInfo.CreationTime
                     .FileSystemModificationTime = ioZippedSFilesFolderInfo.LastWriteTime
+
+                    ' The acquisition times will get updated below to more accurate values
+                    .AcqTimeStart = .FileSystemModificationTime
+                    .AcqTimeEnd = .FileSystemModificationTime
+
                     .DatasetName = ioZippedSFilesFolderInfo.Name
                     .FileExtension = String.Empty
                     .FileSizeBytes = 0
@@ -493,7 +499,6 @@ Public Class clsBrukerOneFolderInfoScanner
                     End If
                 End If
             End With
-
         End If
 
         Return blnSuccess

@@ -46,10 +46,17 @@ Public Class clsFinniganRawFileInfoScanner
         With udtFileInfo
             .FileSystemCreationTime = ioFileInfo.CreationTime
             .FileSystemModificationTime = ioFileInfo.LastWriteTime
+
+            ' The acquisition times will get updated below to more accurate values
+            .AcqTimeStart = .FileSystemModificationTime
+            .AcqTimeEnd = .FileSystemModificationTime
+
             .DatasetID = intDatasetID
             .DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFileInfo.Name)
             .FileExtension = ioFileInfo.Extension
             .FileSizeBytes = ioFileInfo.Length
+
+            .ScanCount = 0
         End With
 
         ' Use Xraw to read the .Raw file
@@ -92,15 +99,6 @@ Public Class clsFinniganRawFileInfoScanner
         ' Close the handle to the data file
         objXcaliberAccessor.CloseRawFile()
         objXcaliberAccessor = Nothing
-
-        If blnReadError Then
-            With udtFileInfo
-                ' Use the file modification date for .AcqTimeStart and .AcqTimeEnd
-                .AcqTimeStart = ioFileInfo.LastWriteTime
-                .AcqTimeEnd = .AcqTimeStart
-                .ScanCount = 0
-            End With
-        End If
 
         Return Not blnReadError
 

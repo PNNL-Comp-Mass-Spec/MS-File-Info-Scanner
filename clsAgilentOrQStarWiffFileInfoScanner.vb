@@ -57,6 +57,11 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
         With udtFileInfo
             .FileSystemCreationTime = ioFileInfo.CreationTime
             .FileSystemModificationTime = ioFileInfo.LastWriteTime
+
+            ' The acquisition times will get updated below to more accurate values
+            .AcqTimeStart = .FileSystemModificationTime
+            .AcqTimeEnd = .FileSystemModificationTime
+
             .DatasetID = 0
             .DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFileInfo.Name)
             .FileExtension = ioFileInfo.Extension

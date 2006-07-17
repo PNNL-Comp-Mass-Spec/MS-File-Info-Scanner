@@ -65,6 +65,11 @@ Public Class clsMicromassRawFolderInfoScanner
             With udtFileInfo
                 .FileSystemCreationTime = ioFolderInfo.CreationTime
                 .FileSystemModificationTime = ioFolderInfo.LastWriteTime
+
+                ' The acquisition times will get updated below to more accurate values
+                .AcqTimeStart = .FileSystemModificationTime
+                .AcqTimeEnd = .FileSystemModificationTime
+
                 .DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
                 .FileExtension = ioFolderInfo.Extension
 
@@ -75,7 +80,7 @@ Public Class clsMicromassRawFolderInfoScanner
                     .FileSizeBytes += ioFileInfo.Length
 
                     If intFileCount = 0 Then
-                        ' Assing the first file's modification time to .AcqTimeStart and .AcqTimeEnd
+                        ' Assign the first file's modification time to .AcqTimeStart and .AcqTimeEnd
                         ' Necessary in case _header.txt is missing
                         .AcqTimeStart = ioFileInfo.LastWriteTime
                         .AcqTimeEnd = ioFileInfo.LastWriteTime
