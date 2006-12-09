@@ -7,7 +7,7 @@ Option Strict On
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "July 17, 2006"
+    Public Const PROGRAM_DATE As String = "November 6, 2006"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -190,7 +190,9 @@ Module modMain
         Dim ioPath As System.IO.Path
 
         Try
-            strSyntax = "This program will read a Finnigan .RAW file and extract the file acquisition time, saving the value in the file " & clsMSFileScanner.DefaultAcquisitionTimeFilename & " & ControlChars.NewLine"
+            strSyntax = "This program will scan a series of MS data files (or data folders) and extract the acquisition start and end times, number of spectra, and the total size of the data, saving the values in the file " & clsMSFileScanner.DefaultAcquisitionTimeFilename & ". "
+            strSyntax &= "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar .WIFF files, Masslynx .Raw folders, and Bruker 1 folders." & ControlChars.NewLine & ControlChars.NewLine
+
             strSyntax &= "Program syntax:" & ControlChars.NewLine & ioPath.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location)
             strSyntax &= " /I:InputFilePath.raw [/O:OutputFolderName] [/P:ParamFilePath] [/S:[MaxLevel]] [/R] [/Q]" & ControlChars.NewLine & ControlChars.NewLine
             strSyntax &= "The input file path can contain the wildcard character *" & ControlChars.NewLine

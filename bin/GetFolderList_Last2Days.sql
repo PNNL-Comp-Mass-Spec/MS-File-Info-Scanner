@@ -9,8 +9,8 @@ FROM (SELECT DISTINCT Storage_Path
             FROM dbo.T_Dataset DS INNER JOIN
                  dbo.T_Event_Log EL ON DS.Dataset_ID = EL.Target_ID AND EL.Target_Type = 4 INNER JOIN
                  dbo.t_storage_path S ON DS.DS_storage_path_ID = S.SP_path_ID
-            WHERE (EL.Prev_Target_State = 2 AND EL.Target_State = 3) AND 
-                  (EL.Entered >= GETDATE() - 2)
+            WHERE (EL.Target_State = 3) AND 
+                  (EL.Entered >= GETDATE() - 2) -- AND S.SP_vol_name_client <> '\\proto-7\'
 			) RecentDatasetQ
 	  ) LookupQ
 ORDER BY Storage_Path
