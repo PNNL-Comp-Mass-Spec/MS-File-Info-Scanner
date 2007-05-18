@@ -7,7 +7,7 @@ Option Strict On
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "November 6, 2006"
+    Public Const PROGRAM_DATE As String = "May 17, 2007"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -18,6 +18,7 @@ Module modMain
 
     Private mPreventDuplicateEntriesInAcquisitionTimeFile As Boolean
     Private mReprocessingExistingFiles As Boolean
+    Private mReprocessIfCachedSizeIsZero As Boolean
 
     Private mQuietMode As Boolean
 
@@ -84,6 +85,7 @@ Module modMain
         mRecurseFoldersMaxLevels = 0
 
         mReprocessingExistingFiles = False
+        mReprocessIfCachedSizeIsZero = False
 
         ''TestZipper("\\proto-6\Db_Backups\Albert_Backup\MT_Shewanella_P196", "*.BAK.zip")
         ''Return 0
@@ -103,6 +105,8 @@ Module modMain
                 With objMSFileScanner
                     .ShowMessages = Not mQuietMode
                     .ReprocessExistingFiles = mReprocessingExistingFiles
+                    .ReprocessIfCachedSizeIsZero = mReprocessIfCachedSizeIsZero
+
                     If Not mParameterFilePath Is Nothing AndAlso mParameterFilePath.Length > 0 Then
                         .LoadParameterFileSettings(mParameterFilePath)
                     End If
@@ -146,7 +150,7 @@ Module modMain
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String
-        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "R", "Q"}
+        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "R", "Z", "Q"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -168,6 +172,7 @@ Module modMain
                     End If
 
                     If .RetrieveValueForParameter("R", strValue) Then mReprocessingExistingFiles = True
+                    If .RetrieveValueForParameter("Z", strValue) Then mReprocessIfCachedSizeIsZero = True
                     If .RetrieveValueForParameter("Q", strValue) Then mQuietMode = True
                 End With
 
@@ -194,12 +199,13 @@ Module modMain
             strSyntax &= "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar .WIFF files, Masslynx .Raw folders, and Bruker 1 folders." & ControlChars.NewLine & ControlChars.NewLine
 
             strSyntax &= "Program syntax:" & ControlChars.NewLine & ioPath.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location)
-            strSyntax &= " /I:InputFilePath.raw [/O:OutputFolderName] [/P:ParamFilePath] [/S:[MaxLevel]] [/R] [/Q]" & ControlChars.NewLine & ControlChars.NewLine
+            strSyntax &= " /I:InputFilePath.raw [/O:OutputFolderName] [/P:ParamFilePath] [/S:[MaxLevel]] [/R] [/Z] [/Q]" & ControlChars.NewLine & ControlChars.NewLine
             strSyntax &= "The input file path can contain the wildcard character *" & ControlChars.NewLine
             strSyntax &= "The output folder name is optional.  If omitted, the acquisition time file will be created in the program directory.  If included, then a subfolder is created with the name OutputFolderName and the acquisition time file placed there." & ControlChars.NewLine
             strSyntax &= "The param file switch is optional.  If supplied, it should point to a valid XML parameter file.  If omitted, defaults are used." & ControlChars.NewLine
             strSyntax &= "Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine." & ControlChars.NewLine
             strSyntax &= "Use /R to reprocess files that are already defined in the acquisition time file." & ControlChars.NewLine
+            strSyntax &= "Use /Z to reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes." & ControlChars.NewLine
             strSyntax &= "The optional /Q switch will suppress all error messages." & ControlChars.NewLine & ControlChars.NewLine
 
             strSyntax &= "Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005" & ControlChars.NewLine

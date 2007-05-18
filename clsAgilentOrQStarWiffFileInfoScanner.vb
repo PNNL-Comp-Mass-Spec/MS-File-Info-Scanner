@@ -24,11 +24,6 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 
     Protected mDeconTools As DeconWrapperManaged.clsDeconWrapperManaged
 
-    Private Function GetAppFolderPath() As String
-        ' Could use Application.StartupPath, but .GetExecutingAssembly is better
-        Return System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
-    End Function
-
     Public Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String Implements iMSFileInfoProcessor.GetDatasetNameViaPath
         ' The dataset name is simply the file name without .wiff
         Try
@@ -74,14 +69,12 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 
         Try
             blnDeleteLocalFile = False
-            strDataFilePathLocal = System.IO.Path.Combine(GetAppFolderPath, System.IO.Path.GetFileName(strDataFilePath))
+            strDataFilePathLocal = System.IO.Path.Combine(clsMSFileScanner.GetAppFolderPath, System.IO.Path.GetFileName(strDataFilePath))
 
             If strDataFilePathLocal.ToLower <> strDataFilePath.ToLower Then
-                If Not System.IO.File.Exists(strDataFilePathLocal) Then
-                    Console.WriteLine("Copying file " & System.IO.Path.GetFileName(strDataFilePath) & " to the working folder")
-                    System.IO.File.Copy(strDataFilePath, strDataFilePathLocal)
-                    blnDeleteLocalFile = True
-                End If
+                Console.WriteLine("Copying file " & System.IO.Path.GetFileName(strDataFilePath) & " to the working folder")
+                System.IO.File.Copy(strDataFilePath, strDataFilePathLocal, True)
+                blnDeleteLocalFile = True
             End If
         Catch ex As System.Exception
             Return False
@@ -148,7 +141,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
                 System.IO.File.Delete(strDataFilePathLocal)
             Catch ex As System.Exception
                 ' Deletion failed
-                Console.WriteLine("Deletion failed for: " & System.IO.Path.GetFileName(strDataFilePath))
+                Console.WriteLine("Deletion failed for: " & System.IO.Path.GetFileName(strDataFilePathLocal))
             End Try
         End If
 

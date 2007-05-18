@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.0.2693; May 17, 2007
+	- Updated clsFinniganRawFileInfoScanner to copy .Raw files locally if a read error occurs when the file is first opened by XRaw
+	- Added option /Z which will reprocess files defined in the acquisition time file only if their cached size is 0 bytes; use in conjunction with /R
+
 Version 1.0.2501; November 6, 2006
 	- Updated program description on syntax screen to list the various file formats supported
 

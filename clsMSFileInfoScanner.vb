@@ -101,6 +101,7 @@ Public Class clsMSFileScanner
     Private mAcquisitionTimeFileSepChar As Char
 
     Private mReprocessExistingFiles As Boolean
+    Private mReprocessIfCachedSizeIsZero As Boolean
 
     Private mCachedResultsAutoSaveIntervalMinutes As Integer
     Private mCachedResultsLastSaveTime As DateTime
@@ -161,6 +162,15 @@ Public Class clsMSFileScanner
         End Get
         Set(ByVal Value As Boolean)
             mReprocessExistingFiles = Value
+        End Set
+    End Property
+
+    Public Property ReprocessIfCachedSizeIsZero() As Boolean
+        Get
+            Return mReprocessIfCachedSizeIsZero
+        End Get
+        Set(ByVal Value As Boolean)
+            mReprocessIfCachedSizeIsZero = Value
         End Set
     End Property
 
@@ -247,7 +257,7 @@ Public Class clsMSFileScanner
                 COL_NAME_LAST_MODIFIED
     End Function
 
-    Private Function GetAppFolderPath() As String
+    Public Shared Function GetAppFolderPath() As String
         ' Could use Application.StartupPath, but .GetExecutingAssembly is better
         Return System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
     End Function
@@ -460,6 +470,7 @@ Public Class clsMSFileScanner
         mCachedResultsLastSaveTime = System.DateTime.Now()
 
         mReprocessExistingFiles = False
+        mReprocessIfCachedSizeIsZero = False
 
         InitializeDatasets()
 
@@ -627,6 +638,9 @@ Public Class clsMSFileScanner
         Dim blnIsFolder As Boolean
         Dim objFileSystemInfo As System.IO.FileSystemInfo
 
+        Dim objRow As System.Data.DataRow
+        Dim lngCachedSizeBytes As Long
+
         If blnResetErrorCode Then
             SetErrorCode(eMSFileScannerErrorCodes.NoError)
         End If
@@ -700,11 +714,23 @@ Public Class clsMSFileScanner
 
                 If Not mReprocessExistingFiles Then
                     ' See if the strDatasetName in strInputFileOrFolderPath is already present in mCachedResults
-                    ' If it is present, then don't process it
+                    ' If it is present, then don't process it (unless mReprocessIfCachedSizeIsZero = True and it's size is 0)
                     Dim strDatasetName As String
                     strDatasetName = objMSInfoScanner.GetDatasetNameViaPath(objFileSystemInfo.FullName)
-                    If strDatasetName.Length > 0 AndAlso CachedResultsContainsDataset(strDatasetName) Then
-                        Return True
+                    If strDatasetName.Length > 0 AndAlso CachedResultsContainsDataset(strDatasetName, objRow) Then
+                        If mReprocessIfCachedSizeIsZero Then
+                            Try
+                                lngCachedSizeBytes = CLng(objRow.Item(COL_NAME_FILE_SIZE_BYTES))
+                            Catch ex2 As System.Exception
+                                lngCachedSizeBytes = 1
+                            End Try
+
+                            If lngCachedSizeBytes > 0 Then
+                                Return True
+                            End If
+                        Else
+                            Return True
+                        End If
                     End If
                 End If
 

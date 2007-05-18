@@ -47,6 +47,7 @@ echo 4) Creating %SourceAndSupportingDLLsFile%
 If Exist %SourceAndSupportingDLLsFile% (Del %SourceAndSupportingDLLsFile%)
 "c:\program files\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% SourceAndSupportingDLLs\*.zip
 "c:\program files\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% ..\bin\ReadMe.txt
+"c:\program files\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% ..\bin\RevisionHistory.txt
 
 echo.
 echo 5) Copying %SourceAndSupportingDLLsFile% to %DistributionFolderFinal%
@@ -57,6 +58,7 @@ echo 6) Creating Zipped Installer file
 If Exist %ZippedInstallerFile% (Del %ZippedInstallerFile%)
 "c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\%InstallerFolder%\*.msi
 "c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\bin\ReadMe.txt
+"c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\bin\RevisionHistory.txt
 
 echo.
 echo 7) Copying %ZippedInstallerFile% to %DistributionFolderFinal%

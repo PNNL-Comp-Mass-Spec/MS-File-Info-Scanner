@@ -31,11 +31,17 @@ Public Class clsFinniganRawFileInfoScanner
         Dim intScanEnd As Integer
 
         Dim strStatusMessage As String
+        Dim strDataFilePathLocal As String
 
         Dim blnReadError As Boolean
+        Dim blnDeleteLocalFile As Boolean
 
         ' Obtain the full path to the file
         ioFileInfo = New System.IO.FileInfo(strDataFilePath)
+
+        If Not ioFileInfo.Exists Then
+            Return False
+        End If
 
         ' Future, optional: Determine the DatasetID
         ' Unfortunately, this is not present in metadata.txt
@@ -59,15 +65,52 @@ Public Class clsFinniganRawFileInfoScanner
             .ScanCount = 0
         End With
 
-        ' Use Xraw to read the .Raw file
-        objXcaliberAccessor = New FinniganFileIO.XRawFileIO
+
+        blnDeleteLocalFile = False
         blnReadError = False
+
+        ' Use Xraw to read the .Raw file
+        ' If reading from a SAMBA-mounted network share, and if the current user has 
+        '  Read privileges but not Read&Execute privileges, then we will need to copy the file locally
+        objXcaliberAccessor = New FinniganFileIO.XRawFileIO
 
         ' Open a handle to the data file
         If Not objXcaliberAccessor.OpenRawFile(ioFileInfo.FullName) Then
             ' File open failed
+            Console.WriteLine("Call to .OpenRawFile failed for: " & ioFileInfo.FullName)
             blnReadError = True
-        Else
+
+            If clsMSFileScanner.GetAppFolderPath.Substring(0, 2).ToLower <> ioFileInfo.FullName.Substring(0, 2).ToLower Then
+                ' Copy the file locally and try again
+
+                Try
+                    strDataFilePathLocal = System.IO.Path.Combine(clsMSFileScanner.GetAppFolderPath, System.IO.Path.GetFileName(strDataFilePath))
+
+                    If strDataFilePathLocal.ToLower <> strDataFilePath.ToLower Then
+                        Console.WriteLine("Copying file " & System.IO.Path.GetFileName(strDataFilePath) & " to the working folder")
+                        System.IO.File.Copy(strDataFilePath, strDataFilePathLocal, True)
+
+                        strDataFilePath = String.Copy(strDataFilePathLocal)
+                        blnDeleteLocalFile = True
+
+                        ' Update ioFileInfo then try to re-open
+                        ioFileInfo = New System.IO.FileInfo(strDataFilePath)
+
+                        If Not objXcaliberAccessor.OpenRawFile(ioFileInfo.FullName) Then
+                            ' File open failed
+                            Console.WriteLine("Call to .OpenRawFile failed for: " & ioFileInfo.FullName)
+                            blnReadError = True
+                        Else
+                            blnReadError = False
+                        End If
+                    End If
+                Catch ex As System.Exception
+                    blnReadError = True
+                End Try
+            End If
+        End If
+
+        If Not blnReadError Then
             ' Read the file info
             Try
                 udtFileInfo.AcqTimeStart = objXcaliberAccessor.FileInfo.CreationDate
@@ -99,6 +142,16 @@ Public Class clsFinniganRawFileInfoScanner
         ' Close the handle to the data file
         objXcaliberAccessor.CloseRawFile()
         objXcaliberAccessor = Nothing
+
+        ' Delete the local copy of the data file
+        If blnDeleteLocalFile Then
+            Try
+                System.IO.File.Delete(strDataFilePathLocal)
+            Catch ex As System.Exception
+                ' Deletion failed
+                Console.WriteLine("Deletion failed for: " & System.IO.Path.GetFileName(strDataFilePathLocal))
+            End Try
+        End If
 
         Return Not blnReadError
 
