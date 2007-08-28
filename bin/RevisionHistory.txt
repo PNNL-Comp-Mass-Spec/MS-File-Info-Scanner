@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.0.2795; August 27, 2007
+	- Now writing the File Modification Time to the acquisition time file as the 9th column
+
 Version 1.0.2693; May 17, 2007
 	- Updated clsFinniganRawFileInfoScanner to copy .Raw files locally if a read error occurs when the file is first opened by XRaw
 	- Added option /Z which will reprocess files defined in the acquisition time file only if their cached size is 0 bytes; use in conjunction with /R

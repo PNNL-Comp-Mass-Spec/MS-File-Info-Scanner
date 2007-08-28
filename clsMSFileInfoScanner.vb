@@ -39,6 +39,7 @@ Public Class clsMSFileScanner
     Private Const COL_NAME_SCAN_COUNT As String = "ScanCount"
     Private Const COL_NAME_FILE_SIZE_BYTES As String = "FileSizeBytes"
     Private Const COL_NAME_LAST_MODIFIED As String = "InfoLastModified"
+    Private Const COL_NAME_FILE_MODIFICATION_DATE As String = "FileModificationDate"
 
     Private Const MINIMUM_DATETIME As DateTime = #1/1/1900#
 
@@ -66,6 +67,7 @@ Public Class clsMSFileScanner
         ScanCount = 5
         FileSizeBytes = 6
         LastModified = 7
+        FileModificationDate = 8
     End Enum
 
     Private Enum eCachedResultsStateConstants
@@ -254,7 +256,8 @@ Public Class clsMSFileScanner
                 COL_NAME_ACQ_TIME_END & mAcquisitionTimeFileSepChar & _
                 COL_NAME_SCAN_COUNT & mAcquisitionTimeFileSepChar & _
                 COL_NAME_FILE_SIZE_BYTES & mAcquisitionTimeFileSepChar & _
-                COL_NAME_LAST_MODIFIED
+                COL_NAME_LAST_MODIFIED & mAcquisitionTimeFileSepChar & _
+                COL_NAME_FILE_MODIFICATION_DATE
     End Function
 
     Public Shared Function GetAppFolderPath() As String
@@ -403,6 +406,10 @@ Public Class clsMSFileScanner
                                             .ScanCount = CType(strSplitLine(eResultsFileColumns.ScanCount), Integer)
                                             .FileSizeBytes = CType(strSplitLine(eResultsFileColumns.FileSizeBytes), Long)
                                             dtLastModified = CType(strSplitLine(eResultsFileColumns.LastModified), DateTime)
+
+                                            If strSplitLine.Length >= 9 Then
+                                                .FileSystemModificationTime = CType(strSplitLine(eResultsFileColumns.FileModificationDate), DateTime)
+                                            End If
                                         End With
 
                                         PopulateDataRowWithInfo(udtFileInfo, objNewRow, dtLastModified)
@@ -443,6 +450,7 @@ Public Class clsMSFileScanner
         SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(dtMSFileInfo, COL_NAME_SCAN_COUNT)
         SharedVBNetRoutines.ADONetRoutines.AppendColumnLongToTable(dtMSFileInfo, COL_NAME_FILE_SIZE_BYTES)
         SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(dtMSFileInfo, COL_NAME_LAST_MODIFIED, dtDefaultDate)
+        SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(dtMSFileInfo, COL_NAME_FILE_MODIFICATION_DATE, dtDefaultDate)
 
         ' Use the dataset name as the primary key since we won't always know Dataset_ID
         With dtMSFileInfo
@@ -568,6 +576,7 @@ Public Class clsMSFileScanner
             .Item(COL_NAME_SCAN_COUNT) = udtFileInfo.ScanCount
             .Item(COL_NAME_FILE_SIZE_BYTES) = udtFileInfo.FileSizeBytes
             .Item(COL_NAME_LAST_MODIFIED) = AssureMinimumDate(dtLastModified, MINIMUM_DATETIME)
+            .Item(COL_NAME_FILE_MODIFICATION_DATE) = AssureMinimumDate(udtFileInfo.FileSystemModificationTime, MINIMUM_DATETIME)
         End With
     End Sub
 
@@ -1282,7 +1291,9 @@ Public Class clsMSFileScanner
                                 CType(.Item(COL_NAME_ACQ_TIME_END), DateTime).ToString("yyyy-MM-dd HH:mm:ss") & mAcquisitionTimeFileSepChar & _
                                 .Item(COL_NAME_SCAN_COUNT).ToString & mAcquisitionTimeFileSepChar & _
                                 .Item(COL_NAME_FILE_SIZE_BYTES).ToString & mAcquisitionTimeFileSepChar & _
-                                .Item(COL_NAME_LAST_MODIFIED).ToString)
+                                .Item(COL_NAME_LAST_MODIFIED).ToString & mAcquisitionTimeFileSepChar & _
+                                CType(.Item(COL_NAME_FILE_MODIFICATION_DATE), DateTime).ToString("yyyy-MM-dd HH:mm:ss"))
+
         End With
     End Sub
 
