@@ -70,11 +70,6 @@
                     AssemblyName = "System.Xml"
                 />
                 <Reference
-                    Name = "PRISM"
-                    AssemblyName = "PRISM"
-                    HintPath = "bin\PRISM.dll"
-                />
-                <Reference
                     Name = "SharedVBNetRoutines"
                     AssemblyName = "SharedVBNetRoutines"
                     HintPath = "bin\SharedVBNetRoutines.dll"
@@ -83,14 +78,6 @@
                     Name = "System.Windows.Forms"
                     AssemblyName = "System.Windows.Forms"
                     HintPath = "C:\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.Windows.Forms.dll"
-                />
-                <Reference
-                    Name = "XRAWFILE2Lib"
-                    Guid = "{5FE970A2-29C3-11D3-811D-00104B304896}"
-                    VersionMajor = "1"
-                    VersionMinor = "0"
-                    Lcid = "0"
-                    WrapperTool = "tlbimp"
                 />
                 <Reference
                     Name = "ICSharpCode.SharpZipLib"
@@ -106,6 +93,14 @@
                     Name = "DeconWrapper"
                     AssemblyName = "DeconWrapper"
                     HintPath = "C:\Program Files\Battelle PNNL\Decon.netSetup\DeconWrapper.dll"
+                />
+                <Reference
+                    Name = "XRAWFILE2Lib"
+                    Guid = "{5FE970A2-29C3-11D3-811D-00104B304896}"
+                    VersionMajor = "1"
+                    VersionMinor = "0"
+                    Lcid = "0"
+                    WrapperTool = "tlbimp"
                 />
             </References>
             <Imports>
@@ -165,6 +160,11 @@
                 />
                 <File
                     RelPath = "clsMSFileInfoScanner.vb"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "clsXmlSettingsFileAccessor.vb"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

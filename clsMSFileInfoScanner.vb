@@ -486,7 +486,7 @@ Public Class clsMSFileScanner
 
     Public Function LoadParameterFileSettings(ByVal strParameterFilePath As String) As Boolean
 
-        Dim objSettingsFile As New PRISM.Files.XmlSettingsFileAccessor
+        Dim objSettingsFile As New XmlSettingsFileAccessor
 
         Try
 
@@ -1143,7 +1143,7 @@ Public Class clsMSFileScanner
 
     Public Function SaveParameterFileSettings(ByVal strParameterFilePath As String) As Boolean
 
-        Dim objSettingsFile As New PRISM.Files.XmlSettingsFileAccessor
+        Dim objSettingsFile As New XmlSettingsFileAccessor
 
         Dim intIndex As Integer
 

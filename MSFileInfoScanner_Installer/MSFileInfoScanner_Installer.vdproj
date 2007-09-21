@@ -39,48 +39,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_78E8AB82C32D4967B74C8FC5B72401C3"
-        "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_78E8AB82C32D4967B74C8FC5B72401C3"
-        "OwnerKey" = "8:_625E1B8A0FB6F9A633FBDCF7DDE381C8"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_78E8AB82C32D4967B74C8FC5B72401C3"
-        "OwnerKey" = "8:_3BE3EB5285310B5BB4B8E2C900A35CAF"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_78E8AB82C32D4967B74C8FC5B72401C3"
-        "OwnerKey" = "8:_FE809BF7E6653C772F5717E5FEA436A2"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_78E8AB82C32D4967B74C8FC5B72401C3"
-        "OwnerKey" = "8:_DD208CCDA6521B1A173D084ADBD99C70"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_78E8AB82C32D4967B74C8FC5B72401C3"
-        "OwnerKey" = "8:_8B4B8080736C948F4A36A57D6750658B"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_78E8AB82C32D4967B74C8FC5B72401C3"
-        "OwnerKey" = "8:_EAFA4BE2401142DA731B21B50C1382FB"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_8B4B8080736C948F4A36A57D6750658B"
         "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
         "MsmSig" = "8:_UNDEFINED"
@@ -105,6 +63,42 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_C9B53A734FCE43CE8358AF27B41C52CB"
+        "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C9B53A734FCE43CE8358AF27B41C52CB"
+        "OwnerKey" = "8:_625E1B8A0FB6F9A633FBDCF7DDE381C8"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C9B53A734FCE43CE8358AF27B41C52CB"
+        "OwnerKey" = "8:_3BE3EB5285310B5BB4B8E2C900A35CAF"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C9B53A734FCE43CE8358AF27B41C52CB"
+        "OwnerKey" = "8:_DD208CCDA6521B1A173D084ADBD99C70"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C9B53A734FCE43CE8358AF27B41C52CB"
+        "OwnerKey" = "8:_8B4B8080736C948F4A36A57D6750658B"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C9B53A734FCE43CE8358AF27B41C52CB"
+        "OwnerKey" = "8:_EAFA4BE2401142DA731B21B50C1382FB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_DD208CCDA6521B1A173D084ADBD99C70"
         "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
         "MsmSig" = "8:_UNDEFINED"
@@ -125,12 +119,6 @@
         {
         "MsmKey" = "8:_F29A0A8DE3234FF6B142D45C3693D8D6"
         "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_FE809BF7E6653C772F5717E5FEA436A2"
-        "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -202,7 +190,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:SharedVBNetRoutines, Version=1.0.2517.35494, Culture=neutral"
+            "AssemblyAsmDisplayName" = "8:SharedVBNetRoutines, Version=1.0.2797.40342, Culture=neutral"
                 "ScatterAssemblies"
                 {
                     "_3BE3EB5285310B5BB4B8E2C900A35CAF"
@@ -473,37 +461,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{FB480208-1853-44D0-9ABD-A3B734C3FAAA}:_FE809BF7E6653C772F5717E5FEA436A2"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PRISM, Version=1.0.2523.23438, Culture=neutral"
-                "ScatterAssemblies"
-                {
-                    "_FE809BF7E6653C772F5717E5FEA436A2"
-                    {
-                    "Name" = "8:PRISM.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:PRISM.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_4F551CB233C740748796EF290C7B231A"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
         }
         "FileType"
         {
@@ -570,13 +527,13 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:MSFileInfoScanner"
-        "ProductCode" = "8:{7674E236-0FC7-4E99-BAE4-43D33C9AE598}"
-        "PackageCode" = "8:{21C1C8E2-85AE-4CCA-A62D-AAA4A34783D9}"
+        "ProductCode" = "8:{EC174F52-B5C4-46BA-BF3D-D0946CEC9FB5}"
+        "PackageCode" = "8:{CA4F8DDA-4570-4618-B589-F916137BDCEE}"
         "UpgradeCode" = "8:{5B7DD97A-9979-4302-9840-188A941F61F1}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
-        "ProductVersion" = "8:1.0.1"
+        "ProductVersion" = "8:1.0.2"
         "Manufacturer" = "8:Battelle Memorial Institute"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -1082,7 +1039,7 @@
         }
         "MergeModule"
         {
-            "{35A69C6E-5BA4-440D-803D-762B59A45393}:_78E8AB82C32D4967B74C8FC5B72401C3"
+            "{35A69C6E-5BA4-440D-803D-762B59A45393}:_C9B53A734FCE43CE8358AF27B41C52CB"
             {
             "UseDynamicProperties" = "11:TRUE"
             "IsDependency" = "11:TRUE"

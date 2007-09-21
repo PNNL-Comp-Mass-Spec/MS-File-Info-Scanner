@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.0.2819; September 20, 2007
+	- New version of SharedVBNetRoutines.dll and Interop.XRAWFILE2Lib.dll
+		- No longer uses Prism.DLL
+
 Version 1.0.2795; August 27, 2007
 	- Now writing the File Modification Time to the acquisition time file as the 9th column
 
