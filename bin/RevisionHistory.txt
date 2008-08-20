@@ -1,5 +1,13 @@
 MS File Info Scanner Change Log
 
+Version 1.0.3084; June 11, 2008
+	- Added the option to perform an integrity check on all known file types
+		- Enable this option using /C
+		- This process will open known file types and verify that they contain the expected number of columns, column headers, etc.
+		- Files that don't pass the test are logged
+		- Use /M to specify the maximum number of lines to process when checking text or .CSV files (default is 500)
+		- Use /QZ to specify a quick zip-file validation test
+
 Version 1.0.2819; September 20, 2007
 	- New version of SharedVBNetRoutines.dll and Interop.XRAWFILE2Lib.dll
 		- No longer uses Prism.DLL

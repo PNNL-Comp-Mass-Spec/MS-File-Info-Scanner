@@ -6,7 +6,7 @@ Option Strict On
 ' Last modified September 17, 2005
 
 Public Class clsBrukerOneFolderInfoScanner
-    Implements MSFileInfoScanner.iMSFileInfoProcessor
+    Inherits clsMSFileInfoProcessorBaseClass
 
     Public Const BRUKER_ONE_FOLDER_NAME As String = "1"
 
@@ -25,9 +25,9 @@ Public Class clsBrukerOneFolderInfoScanner
 
     Private Const MINIMUM_ACCEPTABLE_ACQ_START_TIME As DateTime = #1/1/1975#
 
-    Public Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String Implements iMSFileInfoProcessor.GetDatasetNameViaPath
+    Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
         Dim ioFolderInfo As System.IO.DirectoryInfo
-        Dim strDatasetName As String
+        Dim strDatasetName As String = String.Empty
 
         Try
             ' The dataset name for a Bruker 1 folder or zipped S folder is the name of the parent directory
@@ -215,7 +215,6 @@ Public Class clsBrukerOneFolderInfoScanner
         Dim strLineIn As String
 
         Dim intFileListCount As Integer
-        Dim blnParsingTICFileList As Boolean
         Dim blnSuccess As Boolean
 
         For Each ioFileMatch In ioFolderInfo.GetFiles("*.pek")
@@ -328,7 +327,7 @@ Public Class clsBrukerOneFolderInfoScanner
 
     End Function
 
-    Public Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean Implements iMSFileInfoProcessor.ProcessDatafile
+    Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
         ' Process a Bruker 1 folder or Bruker s001.zip file, specified by strDataFilePath
         ' If a Bruker 1 folder, then it must contain file acqu and typically contains file LOCK
 

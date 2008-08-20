@@ -1523,7 +1523,6 @@ NativeIOReadHeaderErrorHandler:
 
     Private Function ExtractFromBitsInt32(ByRef lngPackedValue As Integer, ByRef intStartBit As Byte, ByRef intEndBit As Byte) As Int32
 
-        Dim intMask As Integer
         Dim intUnpackedValue As Integer
 
         If intEndBit < 31 Then

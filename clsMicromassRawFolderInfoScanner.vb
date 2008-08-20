@@ -6,14 +6,14 @@ Option Strict On
 ' Last modified September 17, 2005
 
 Public Class clsMicromassRawFolderInfoScanner
-    Implements MSFileInfoScanner.iMSFileInfoProcessor
+    Inherits clsMSFileInfoProcessorBaseClass
 
     ' Note: The extension must be in all caps
     Public Const MICROMASS_RAW_FOLDER_EXTENSION As String = ".RAW"
 
     Private Const MINIMUM_ACCEPTABLE_ACQ_START_TIME As DateTime = #1/1/1975#
 
-    Public Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String Implements iMSFileInfoProcessor.GetDatasetNameViaPath
+    Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
         ' The dataset name is simply the folder name without .Raw
         Try
             Return System.IO.Path.GetFileNameWithoutExtension(strDataFilePath)
@@ -41,7 +41,7 @@ Public Class clsMicromassRawFolderInfoScanner
 
     End Function
 
-    Public Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean Implements iMSFileInfoProcessor.ProcessDatafile
+    Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
         ' Returns True if success, False if an error
 
         Dim blnSuccess As Boolean
@@ -159,4 +159,5 @@ Public Class clsMicromassRawFolderInfoScanner
 
         Return blnSuccess
     End Function
+
 End Class

@@ -5,16 +5,31 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified November 11, 2004
+' Last modified April 21, 2008
 
 Namespace FinniganFileIO
 
     Public MustInherit Class FinniganFileReaderBaseClass
 
+#Region "Constants and Enums"
+        Public Enum MRMScanTypeConstants
+            NotMRM = 0
+            MRMQMS = 1              ' Multiple SIM ranges in a single scan
+            SRM = 2                 ' Monitoring a parent ion and one or more daughter ions
+        End Enum
+#End Region
+
 #Region "Structures"
 
+        Public Structure udtTuneMethodType
+            Public Count As Integer
+            Public SettingCategory() As String
+            Public SettingName() As String
+            Public SettingValue() As String
+        End Structure
+
         Public Structure udtFileInfoType
-            'Public AcquistionDate As String         ' Typically only defined for instruments converted from other formats
+            'Public AcquisitionDate As String         ' Typically only defined for instruments converted from other formats
             'Public AcquisitionFilename As String    ' Typically only defined for instruments converted from other formats
             'Public Comment1 As String               ' Typically only defined for instruments converted from other formats
             'Public Comment2 As String               ' Typically only defined for instruments converted from other formats
@@ -23,21 +38,34 @@ Namespace FinniganFileIO
             Public InstFlags As String              ' Values should be one of the constants in InstFlags
             Public InstHardwareVersion As String
             Public InstSoftwareVersion As String
-            Public InstMethod As String
+            Public InstMethods() As String          ' Typically only have one instrument method; the length of this array defines the number of instrument methods
             Public InstModel As String
             Public InstName As String
             Public InstrumentDescription As String  ' Typically only defined for instruments converted from other formats
             Public InstSerialNumber As String
+            Public TuneMethods() As udtTuneMethodType   ' Typically have one or two tune methods; the length of this array defines the number of tune methods defined
             Public VersionNumber As Integer         ' File format Version Number
             Public MassResolution As Double
             Public ScanStart As Integer
             Public ScanEnd As Integer
         End Structure
 
+        Public Structure udtMRMMassRangeType
+            Public StartMass As Double
+            Public EndMass As Double
+            Public CentralMass As Double        ' Useful for MRM/SRM experiments
+        End Structure
+
+        Public Structure udtMRMInfoType
+            Public MRMMassCount As Integer                  ' List of mass ranges monitored by the first quadrupole
+            Public MRMMassList() As udtMRMMassRangeType
+        End Structure
+
         Public Structure udtScanHeaderInfoType
             Public MSLevel As Integer                   ' 1 means MS, 2 means MS/MS, 3 means MS^3 aka MS/MS/MS
             Public EventNumber As Integer               ' 1 for parent-ion scan; 2 for 1st frag scan, 3 for 2nd frag scan, etc.
-            Public SIMScan As Boolean                   ' True if this is a selected ion monitoring scan (i.e. a small scan range is being examined)
+            Public SIMScan As Boolean                   ' True if this is a selected ion monitoring (SIM) scan (i.e. a small scan range is being examined); if multiple selected ion ranges are examined simultaneously, then this will be false by MRMScanType will be .MRMQMS
+            Public MRMScanType As MRMScanTypeConstants  ' 1 or 2 if this is a multiple reaction monitoring scan (MRMQMS or SRM)
 
             Public NumPeaks As Integer                  ' Number of mass intensity value pairs in the specified scan (may not be defined until .GetScanData() is called; -1 if unknown)
             Public RetentionTime As Double              ' Retention time (in minutes)
@@ -49,6 +77,9 @@ Namespace FinniganFileIO
 
             Public FilterText As String
             Public ParentIonMZ As Double
+            Public CollisionMode As String
+
+            Public MRMInfo As udtMRMInfoType
 
             Public NumChannels As Integer
             Public UniformTime As Boolean               ' Indicates whether the sampling time increment for the controller is constant
@@ -77,6 +108,11 @@ Namespace FinniganFileIO
         End Property
 #End Region
 
+#Region "Events"
+        Public Event ReportError(ByVal strMessage As String)
+        Public Event ReportWarning(ByVal strMessage As String)
+#End Region
+
         Public MustOverride Function CheckFunctionality() As Boolean
         Public MustOverride Sub CloseRawFile()
         Public MustOverride Function GetNumScans() As Integer
@@ -88,6 +124,27 @@ Namespace FinniganFileIO
         Public MustOverride Function OpenRawFile(ByVal FileName As String) As Boolean
 
         Protected MustOverride Function FillFileInfo() As Boolean
+
+        Public Shared Sub DuplicateMRMInfo(ByRef udtSource As udtMRMInfoType, ByRef udtTarget As udtMRMInfoType)
+            With udtSource
+                udtTarget.MRMMassCount = .MRMMassCount
+
+                If .MRMMassList Is Nothing Then
+                    ReDim udtTarget.MRMMassList(-1)
+                Else
+                    ReDim udtTarget.MRMMassList(.MRMMassList.Length - 1)
+                    Array.Copy(.MRMMassList, udtTarget.MRMMassList, .MRMMassList.Length)
+                End If
+            End With
+        End Sub
+
+        Protected Sub RaiseErrorMessage(ByVal strMessage As String)
+            RaiseEvent ReportError(strMessage)
+        End Sub
+
+        Protected Sub RaiseWarningMessage(ByVal strMessage As String)
+            RaiseEvent ReportWarning(strMessage)
+        End Sub
 
     End Class
 End Namespace

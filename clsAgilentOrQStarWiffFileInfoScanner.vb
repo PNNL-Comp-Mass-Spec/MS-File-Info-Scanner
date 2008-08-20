@@ -6,7 +6,7 @@ Option Strict On
 ' Last modified December 09, 2005
 
 Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
-    Implements MSFileInfoScanner.iMSFileInfoProcessor
+    Inherits clsMSFileInfoProcessorBaseClass
 
     ' Note: The extension must be in all caps
     Public Const AGILENT_TOF_OR_QSTAR_FILE_EXTENSION As String = ".WIFF"
@@ -24,7 +24,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 
     Protected mDeconTools As DeconWrapperManaged.clsDeconWrapperManaged
 
-    Public Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String Implements iMSFileInfoProcessor.GetDatasetNameViaPath
+    Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
         ' The dataset name is simply the file name without .wiff
         Try
             Return System.IO.Path.GetFileNameWithoutExtension(strDataFilePath)
@@ -33,7 +33,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
         End Try
     End Function
 
-    Public Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean Implements iMSFileInfoProcessor.ProcessDatafile
+    Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
         ' Returns True if success, False if an error
 
         Dim ioFileInfo As System.IO.FileInfo

@@ -1,7 +1,7 @@
 "DeployProject"
 {
-"VSVersion" = "3:701"
-"ProjectType" = "8:{2C2AF0D9-9B47-4FE5-BEF2-169778172667}"
+"VSVersion" = "3:800"
+"ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
 "IsWebType" = "8:FALSE"
 "ProjectName" = "8:MSFileInfoScanner_Installer"
 "LanguageId" = "3:1033"
@@ -15,6 +15,12 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_1709457C8981DC34369E1FE4EA77BC12"
+        "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_3BE3EB5285310B5BB4B8E2C900A35CAF"
         "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
         "MsmSig" = "8:_UNDEFINED"
@@ -22,19 +28,13 @@
         "Entry"
         {
         "MsmKey" = "8:_4A0B943B9C5E0AF6FA125A4485E94A43"
-        "OwnerKey" = "8:_625E1B8A0FB6F9A633FBDCF7DDE381C8"
+        "OwnerKey" = "8:_D815CDE422245B6E84D43CEA86384A3C"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
         "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_625E1B8A0FB6F9A633FBDCF7DDE381C8"
-        "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -63,38 +63,8 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_C9B53A734FCE43CE8358AF27B41C52CB"
+        "MsmKey" = "8:_D815CDE422245B6E84D43CEA86384A3C"
         "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_C9B53A734FCE43CE8358AF27B41C52CB"
-        "OwnerKey" = "8:_625E1B8A0FB6F9A633FBDCF7DDE381C8"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_C9B53A734FCE43CE8358AF27B41C52CB"
-        "OwnerKey" = "8:_3BE3EB5285310B5BB4B8E2C900A35CAF"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_C9B53A734FCE43CE8358AF27B41C52CB"
-        "OwnerKey" = "8:_DD208CCDA6521B1A173D084ADBD99C70"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_C9B53A734FCE43CE8358AF27B41C52CB"
-        "OwnerKey" = "8:_8B4B8080736C948F4A36A57D6750658B"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_C9B53A734FCE43CE8358AF27B41C52CB"
-        "OwnerKey" = "8:_EAFA4BE2401142DA731B21B50C1382FB"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -121,6 +91,48 @@
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_D815CDE422245B6E84D43CEA86384A3C"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_1709457C8981DC34369E1FE4EA77BC12"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_3BE3EB5285310B5BB4B8E2C900A35CAF"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_DD208CCDA6521B1A173D084ADBD99C70"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_8B4B8080736C948F4A36A57D6750658B"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_EAFA4BE2401142DA731B21B50C1382FB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
     }
     "Configurations"
     {
@@ -139,6 +151,17 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:1"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:FALSE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                }
+            }
         }
         "Release"
         {
@@ -155,6 +178,17 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                }
+            }
         }
     }
     "Deployable"
@@ -172,21 +206,51 @@
         {
             "LaunchCondition"
             {
-                "{2522A265-4974-4402-83C5-3B575A2E935A}:_CED89DF74D9544C6BAA2346FE1279891"
+                "{A06ECF26-33A3-4562-8140-9B0E340D4F24}:_CED89DF74D9544C6BAA2346FE1279891"
                 {
                 "Name" = "8:.NET Framework"
                 "Message" = "8:[VSDNETMSG]"
-                "SupportedRuntimes" = "8:1.1.4322"
+                "Version" = "8:2.0.50727"
+                "AllowLaterVersions" = "11:FALSE"
                 "InstallUrl" = "8:http://go.microsoft.com/fwlink/?LinkId=9832"
+                "SupportedRuntimes" = "8:1.1.4322"
                 }
             }
         }
-        "Feature"
-        {
-        }
         "File"
         {
-            "{FB480208-1853-44D0-9ABD-A3B734C3FAAA}:_3BE3EB5285310B5BB4B8E2C900A35CAF"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_1709457C8981DC34369E1FE4EA77BC12"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:ZedGraph, Version=5.1.4.31904, Culture=neutral, PublicKeyToken=02a83cbd123fcd60, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_1709457C8981DC34369E1FE4EA77BC12"
+                    {
+                    "Name" = "8:ZedGraph.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:ZedGraph.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_4F551CB233C740748796EF290C7B231A"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_3BE3EB5285310B5BB4B8E2C900A35CAF"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
@@ -217,7 +281,7 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{A582A373-4685-4296-BEFE-614B80A702C3}:_4A0B943B9C5E0AF6FA125A4485E94A43"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4A0B943B9C5E0AF6FA125A4485E94A43"
             {
             "SourcePath" = "8:XRawfile2.dll"
             "TargetName" = "8:XRawfile2.dll"
@@ -237,38 +301,7 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{FB480208-1853-44D0-9ABD-A3B734C3FAAA}:_625E1B8A0FB6F9A633FBDCF7DDE381C8"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Interop.XRAWFILE2Lib, Version=1.0.0.0, Culture=neutral"
-                "ScatterAssemblies"
-                {
-                    "_625E1B8A0FB6F9A633FBDCF7DDE381C8"
-                    {
-                    "Name" = "8:Interop.XRAWFILE2Lib.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:Interop.XRAWFILE2Lib.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_4F551CB233C740748796EF290C7B231A"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{FB480208-1853-44D0-9ABD-A3B734C3FAAA}:_8B4B8080736C948F4A36A57D6750658B"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_8B4B8080736C948F4A36A57D6750658B"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
@@ -299,7 +332,7 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{A582A373-4685-4296-BEFE-614B80A702C3}:_9FC0A84545B943E98458FD400F1FF87F"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_9FC0A84545B943E98458FD400F1FF87F"
             {
             "SourcePath" = "8:..\\bin\\netcdf.dll"
             "TargetName" = "8:netcdf.dll"
@@ -319,7 +352,7 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{A582A373-4685-4296-BEFE-614B80A702C3}:_A5D4DF74A5604A17857936D7624B4D38"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A5D4DF74A5604A17857936D7624B4D38"
             {
             "SourcePath" = "8:..\\bin\\RevisionHistory.txt"
             "TargetName" = "8:RevisionHistory.txt"
@@ -339,7 +372,7 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{A582A373-4685-4296-BEFE-614B80A702C3}:_C91CB59DCAF1445CBD0B1C86D1AF222C"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C91CB59DCAF1445CBD0B1C86D1AF222C"
             {
             "SourcePath" = "8:..\\bin\\C12.pek"
             "TargetName" = "8:C12.pek"
@@ -359,7 +392,38 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{FB480208-1853-44D0-9ABD-A3B734C3FAAA}:_DD208CCDA6521B1A173D084ADBD99C70"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_D815CDE422245B6E84D43CEA86384A3C"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Interop.XRAWFILE2Lib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_D815CDE422245B6E84D43CEA86384A3C"
+                    {
+                    "Name" = "8:Interop.XRAWFILE2Lib.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Interop.XRAWFILE2Lib.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_4F551CB233C740748796EF290C7B231A"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_DD208CCDA6521B1A173D084ADBD99C70"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
@@ -390,7 +454,7 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{A582A373-4685-4296-BEFE-614B80A702C3}:_DD51FB68649442C7AAAE2E68F2557CE9"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_DD51FB68649442C7AAAE2E68F2557CE9"
             {
             "SourcePath" = "8:..\\bin\\AutoRunMSFileInfoScanner.bat"
             "TargetName" = "8:AutoRunMSFileInfoScanner.bat"
@@ -410,7 +474,7 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{FB480208-1853-44D0-9ABD-A3B734C3FAAA}:_EAFA4BE2401142DA731B21B50C1382FB"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_EAFA4BE2401142DA731B21B50C1382FB"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
@@ -441,7 +505,7 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{A582A373-4685-4296-BEFE-614B80A702C3}:_F29A0A8DE3234FF6B142D45C3693D8D6"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_F29A0A8DE3234FF6B142D45C3693D8D6"
             {
             "SourcePath" = "8:..\\bin\\Normal.pek"
             "TargetName" = "8:Normal.pek"
@@ -467,7 +531,7 @@
         }
         "Folder"
         {
-            "{58C0ADA3-3CEA-43BD-A3B3-2EA121BC8217}:_4F551CB233C740748796EF290C7B231A"
+            "{3C67513D-01DD-4637-8A68-80971EB9504F}:_4F551CB233C740748796EF290C7B231A"
             {
             "DefaultLocation" = "8:[ProgramFilesFolder]\\[ProductName]"
             "Name" = "8:#1925"
@@ -479,7 +543,7 @@
                 {
                 }
             }
-            "{78BAF5CE-F2E5-45BE-83BC-DB6AF387E941}:_9ADF700FC7124E098E36F0F9B35CAAFF"
+            "{1525181F-901A-416C-8A58-119130FE478E}:_9ADF700FC7124E098E36F0F9B35CAAFF"
             {
             "Name" = "8:#1916"
             "AlwaysCreate" = "11:FALSE"
@@ -490,7 +554,7 @@
                 {
                 }
             }
-            "{78BAF5CE-F2E5-45BE-83BC-DB6AF387E941}:_BDD62D94C38A41ADA141D5EAA8EB4164"
+            "{1525181F-901A-416C-8A58-119130FE478E}:_BDD62D94C38A41ADA141D5EAA8EB4164"
             {
             "Name" = "8:#1919"
             "AlwaysCreate" = "11:FALSE"
@@ -499,7 +563,7 @@
             "Property" = "8:ProgramMenuFolder"
                 "Folders"
                 {
-                    "{F27BD5C5-A65D-4608-96D4-7C5DA1F76302}:_D10FB0B9B19A4260A0108F9FAE094B03"
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_D10FB0B9B19A4260A0108F9FAE094B03"
                     {
                     "Name" = "8:PAST Toolkit"
                     "AlwaysCreate" = "11:FALSE"
@@ -522,17 +586,19 @@
         "MsiBootstrapper"
         {
         "LangId" = "3:1033"
+        "RequiresElevation" = "11:FALSE"
         }
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:MSFileInfoScanner"
         "ProductCode" = "8:{EC174F52-B5C4-46BA-BF3D-D0946CEC9FB5}"
-        "PackageCode" = "8:{CA4F8DDA-4570-4618-B589-F916137BDCEE}"
+        "PackageCode" = "8:{17D7BF1D-573A-4642-9E79-58C34B66BB29}"
         "UpgradeCode" = "8:{5B7DD97A-9979-4302-9840-188A941F61F1}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
+        "InstallAllUsers" = "11:FALSE"
         "ProductVersion" = "8:1.0.2"
         "Manufacturer" = "8:Battelle Memorial Institute"
         "ARPHELPTELEPHONE" = "8:"
@@ -547,6 +613,10 @@
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
+        "TargetPlatform" = "3:0"
+        "PreBuildEvent" = "8:"
+        "PostBuildEvent" = "8:"
+        "RunPostBuildEvent" = "3:0"
         }
         "Registry"
         {
@@ -554,7 +624,7 @@
             {
                 "Keys"
                 {
-                    "{6A471EEF-D31B-40F8-BCF6-C9E8EC783F36}:_63E133A3CC634E39A1D878D851AC715F"
+                    "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_63E133A3CC634E39A1D878D851AC715F"
                     {
                     "Name" = "8:Software"
                     "Condition" = "8:"
@@ -563,7 +633,7 @@
                     "Transitive" = "11:FALSE"
                         "Keys"
                         {
-                            "{6A471EEF-D31B-40F8-BCF6-C9E8EC783F36}:_737D33D4822148AEA8B179387C4D094E"
+                            "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_737D33D4822148AEA8B179387C4D094E"
                             {
                             "Name" = "8:[Manufacturer]"
                             "Condition" = "8:"
@@ -588,7 +658,7 @@
             {
                 "Keys"
                 {
-                    "{6A471EEF-D31B-40F8-BCF6-C9E8EC783F36}:_B873FA039C7B43DCB15ABF490C4EB856"
+                    "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_B873FA039C7B43DCB15ABF490C4EB856"
                     {
                     "Name" = "8:Software"
                     "Condition" = "8:"
@@ -597,7 +667,7 @@
                     "Transitive" = "11:FALSE"
                         "Keys"
                         {
-                            "{6A471EEF-D31B-40F8-BCF6-C9E8EC783F36}:_1BD21E7540D542599C005EBF0384ABA6"
+                            "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_1BD21E7540D542599C005EBF0384ABA6"
                             {
                             "Name" = "8:[Manufacturer]"
                             "Condition" = "8:"
@@ -642,7 +712,7 @@
         }
         "Shortcut"
         {
-            "{478F747B-8505-45D1-9AAE-8C3B645C26E3}:_0187DFE358AF4C39B9EE93468E6668C3"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_0187DFE358AF4C39B9EE93468E6668C3"
             {
             "Name" = "8:MS File Info Scanner"
             "Arguments" = "8:"
@@ -659,14 +729,14 @@
         }
         "UserInterface"
         {
-            "{8D9DEE8B-DD8B-4F48-9072-C4364E4F4011}:_3FEB32A906D24B2C90091159F3B2083C"
+            "{DF760B10-853B-4699-99F2-AFF7185B4A62}:_3FEB32A906D24B2C90091159F3B2083C"
             {
             "Name" = "8:#1900"
             "Sequence" = "3:1"
             "Attributes" = "3:1"
                 "Dialogs"
                 {
-                    "{18ADD6EC-89FE-4ED7-AD3E-211C40278470}:_00DD36B1D4684C5A959A9194CF1A7123"
+                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_00DD36B1D4684C5A959A9194CF1A7123"
                     {
                     "Sequence" = "3:100"
                     "DisplayName" = "8:Welcome"
@@ -714,7 +784,7 @@
                             }
                         }
                     }
-                    "{18ADD6EC-89FE-4ED7-AD3E-211C40278470}:_13A4FDE7C80B45D7B6C5FBD4FFC3EE6F"
+                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_13A4FDE7C80B45D7B6C5FBD4FFC3EE6F"
                     {
                     "Sequence" = "3:200"
                     "DisplayName" = "8:Installation Folder"
@@ -734,9 +804,22 @@
                             "Setting" = "3:1"
                             "UsePlugInResources" = "11:TRUE"
                             }
+                            "InstallAllUsersVisible"
+                            {
+                            "Name" = "8:InstallAllUsersVisible"
+                            "DisplayName" = "8:#1059"
+                            "Description" = "8:#1159"
+                            "Type" = "3:5"
+                            "ContextData" = "8:1;True=1;False=0"
+                            "Attributes" = "3:0"
+                            "Setting" = "3:0"
+                            "Value" = "3:1"
+                            "DefaultValue" = "3:1"
+                            "UsePlugInResources" = "11:TRUE"
+                            }
                         }
                     }
-                    "{18ADD6EC-89FE-4ED7-AD3E-211C40278470}:_35DC52EAF16A4FA2A3B00DB3D7C0B00F"
+                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_35DC52EAF16A4FA2A3B00DB3D7C0B00F"
                     {
                     "Sequence" = "3:300"
                     "DisplayName" = "8:Confirm Installation"
@@ -760,14 +843,14 @@
                     }
                 }
             }
-            "{8D9DEE8B-DD8B-4F48-9072-C4364E4F4011}:_48064545142B4A75A24FBFA72016FEDD"
+            "{DF760B10-853B-4699-99F2-AFF7185B4A62}:_48064545142B4A75A24FBFA72016FEDD"
             {
             "Name" = "8:#1900"
             "Sequence" = "3:2"
             "Attributes" = "3:1"
                 "Dialogs"
                 {
-                    "{18ADD6EC-89FE-4ED7-AD3E-211C40278470}:_2F15F136722D4CADAD628761BB0054F9"
+                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_2F15F136722D4CADAD628761BB0054F9"
                     {
                     "Sequence" = "3:300"
                     "DisplayName" = "8:Confirm Installation"
@@ -789,7 +872,7 @@
                             }
                         }
                     }
-                    "{18ADD6EC-89FE-4ED7-AD3E-211C40278470}:_706CFB3A21664960A7C61E34A4539583"
+                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_706CFB3A21664960A7C61E34A4539583"
                     {
                     "Sequence" = "3:100"
                     "DisplayName" = "8:Welcome"
@@ -837,7 +920,7 @@
                             }
                         }
                     }
-                    "{18ADD6EC-89FE-4ED7-AD3E-211C40278470}:_97F751EB83BE477C917F8DAE1106A5BA"
+                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_97F751EB83BE477C917F8DAE1106A5BA"
                     {
                     "Sequence" = "3:200"
                     "DisplayName" = "8:Installation Folder"
@@ -861,14 +944,14 @@
                     }
                 }
             }
-            "{8D9DEE8B-DD8B-4F48-9072-C4364E4F4011}:_894934D7AD5E4F2A95EBA4A4EF4BFE70"
+            "{DF760B10-853B-4699-99F2-AFF7185B4A62}:_894934D7AD5E4F2A95EBA4A4EF4BFE70"
             {
             "Name" = "8:#1901"
             "Sequence" = "3:2"
             "Attributes" = "3:2"
                 "Dialogs"
                 {
-                    "{18ADD6EC-89FE-4ED7-AD3E-211C40278470}:_0C152E65AC0341528626F1F380B32900"
+                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_0C152E65AC0341528626F1F380B32900"
                     {
                     "Sequence" = "3:100"
                     "DisplayName" = "8:Progress"
@@ -905,20 +988,20 @@
                     }
                 }
             }
-            "{B654A020-6903-4E6A-A86C-75DC463DB54B}:_A7BF1DF234AC42178DD751D414C8BF88"
+            "{2479F3F5-0309-486D-8047-8187E2CE5BA0}:_A7BF1DF234AC42178DD751D414C8BF88"
             {
             "UseDynamicProperties" = "11:FALSE"
             "IsDependency" = "11:FALSE"
             "SourcePath" = "8:<VsdDialogDir>\\VsdUserInterface.wim"
             }
-            "{8D9DEE8B-DD8B-4F48-9072-C4364E4F4011}:_D17AC2487ABD41C1B0C45B3CC5A9B7A6"
+            "{DF760B10-853B-4699-99F2-AFF7185B4A62}:_D17AC2487ABD41C1B0C45B3CC5A9B7A6"
             {
             "Name" = "8:#1901"
             "Sequence" = "3:1"
             "Attributes" = "3:2"
                 "Dialogs"
                 {
-                    "{18ADD6EC-89FE-4ED7-AD3E-211C40278470}:_FC285833C873488A822225B7AF54A950"
+                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_FC285833C873488A822225B7AF54A950"
                     {
                     "Sequence" = "3:100"
                     "DisplayName" = "8:Progress"
@@ -955,20 +1038,20 @@
                     }
                 }
             }
-            "{B654A020-6903-4E6A-A86C-75DC463DB54B}:_E8C10897666943E6BC631771443924E4"
+            "{2479F3F5-0309-486D-8047-8187E2CE5BA0}:_E8C10897666943E6BC631771443924E4"
             {
             "UseDynamicProperties" = "11:FALSE"
             "IsDependency" = "11:FALSE"
             "SourcePath" = "8:<VsdDialogDir>\\VsdBasicDialogs.wim"
             }
-            "{8D9DEE8B-DD8B-4F48-9072-C4364E4F4011}:_F3D2AA9FDEF54DE38D5DA2D64184176A"
+            "{DF760B10-853B-4699-99F2-AFF7185B4A62}:_F3D2AA9FDEF54DE38D5DA2D64184176A"
             {
             "Name" = "8:#1902"
             "Sequence" = "3:1"
             "Attributes" = "3:3"
                 "Dialogs"
                 {
-                    "{18ADD6EC-89FE-4ED7-AD3E-211C40278470}:_DCC581A92C934080ACBCDEF192E4C8D0"
+                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_DCC581A92C934080ACBCDEF192E4C8D0"
                     {
                     "Sequence" = "3:100"
                     "DisplayName" = "8:Finished"
@@ -1005,14 +1088,14 @@
                     }
                 }
             }
-            "{8D9DEE8B-DD8B-4F48-9072-C4364E4F4011}:_F53470CFCDED4FFBADFEFFA7EC4FE261"
+            "{DF760B10-853B-4699-99F2-AFF7185B4A62}:_F53470CFCDED4FFBADFEFFA7EC4FE261"
             {
             "Name" = "8:#1902"
             "Sequence" = "3:2"
             "Attributes" = "3:3"
                 "Dialogs"
                 {
-                    "{18ADD6EC-89FE-4ED7-AD3E-211C40278470}:_9E4BFB8F4F4E4B88A5D1F996EB2BD56A"
+                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_9E4BFB8F4F4E4B88A5D1F996EB2BD56A"
                     {
                     "Sequence" = "3:100"
                     "DisplayName" = "8:Finished"
@@ -1039,24 +1122,10 @@
         }
         "MergeModule"
         {
-            "{35A69C6E-5BA4-440D-803D-762B59A45393}:_C9B53A734FCE43CE8358AF27B41C52CB"
-            {
-            "UseDynamicProperties" = "11:TRUE"
-            "IsDependency" = "11:TRUE"
-            "SourcePath" = "8:dotnetfxredist_x86.msm"
-                "Properties"
-                {
-                }
-            "LanguageId" = "3:1033"
-            "Exclude" = "11:TRUE"
-            "Folder" = "8:"
-            "Feature" = "8:"
-            "IsolateTo" = "8:"
-            }
         }
         "ProjectOutput"
         {
-            "{8062640A-2EEE-46E9-AB67-688E9A886E9F}:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
             {
             "SourcePath" = "8:..\\obj\\Debug\\MSFileInfoScanner.exe"
             "TargetName" = "8:"

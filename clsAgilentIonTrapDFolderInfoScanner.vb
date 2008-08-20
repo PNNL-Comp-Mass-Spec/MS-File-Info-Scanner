@@ -6,7 +6,7 @@ Option Strict On
 ' Last modified September 17, 2005
 
 Public Class clsAgilentIonTrapDFolderInfoScanner
-    Implements MSFileInfoScanner.iMSFileInfoProcessor
+    Inherits clsMSFileInfoProcessorBaseClass
 
     ' Note: The extension must be in all caps
     Public Const AGILENT_ION_TRAP_D_EXTENSION As String = ".D"
@@ -38,7 +38,7 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
         Return blnSuccess
     End Function
 
-    Public Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String Implements iMSFileInfoProcessor.GetDatasetNameViaPath
+    Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
         ' The dataset name is simply the folder name without .D
         Try
             Return System.IO.Path.GetFileNameWithoutExtension(strDataFilePath)
@@ -64,7 +64,7 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
     Private Function ParseRunLogFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
         Dim srInFile As System.IO.StreamReader
         Dim strLineIn As String
-        Dim strMostRecentMethodLine As String
+        Dim strMostRecentMethodLine As String = String.Empty
 
         Dim intCharLoc As Integer
         Dim dtMethodDate As DateTime
@@ -176,7 +176,7 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 
     End Function
 
-    Public Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean Implements iMSFileInfoProcessor.ProcessDatafile
+    Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
         ' Returns True if success, False if an error
 
         Dim blnSuccess As Boolean
@@ -247,4 +247,5 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 
         Return blnSuccess
     End Function
+
 End Class
