@@ -102,7 +102,6 @@ Public Class clsParseCommandLine
 
         Dim strCmdLine As String
         Dim strKey As String, strValue As String
-        Dim strValueTrimmed As String
 
         Dim intCharLoc As Integer
         Dim intNonSwitchParameterCount As Integer
@@ -210,7 +209,7 @@ Public Class clsParseCommandLine
     End Function
 
     Public Function RetrieveNonSwitchParameter(ByVal intParameterIndex As Integer) As String
-        Dim strValue As String
+        Dim strValue As String = String.Empty
 
         If Not mNonSwitchParameters Is Nothing Then
             If intParameterIndex < mNonSwitchParameters.Length Then

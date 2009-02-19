@@ -11,7 +11,7 @@ rem 6. Create the zipped installer file
 rem 7. Copy the zipped installer file to the final folder
 
 Set ProgramName=MSFileInfoScanner
-Set DistributionFolderBase=D:\Public\Software
+Set DistributionFolderBase=F:\Public\Software
 
 Set SourceCodeFolder=%ProgramName%_SourceCode
 Set SourceCodeFile=%ProgramName%_Source_v*.zip
@@ -19,7 +19,7 @@ Set SourceAndSupportingDLLsFile=%ProgramName%_SourceAndSupportingDLLs.zip
 
 Set ZippedInstallerFile=%ProgramName%_Installer.zip
 
-Set InstallerFolder=%ProgramName%_Installer\Release
+Set InstallerFolder=%ProgramName%_Installer\Debug
 Set DistributionFolderFinal=%DistributionFolderBase%\%ProgramName%
 
 echo.
@@ -37,7 +37,7 @@ echo.
 echo 3) Updating Source Code file for %ProgramName%
 Move %SourceCodeFile% ..\..\
 CD ..\..
-"c:\program files\winrar\winRar.exe" f %SourceCodeFile%
+for %%i in (%SourceCodeFile%) do "c:\program files (x86)\winrar\winRar.exe" f %%i
 Move %SourceCodeFile% %SourceCodeFolder%\SourceAndSupportingDLLs\
 
 cd %SourceCodeFolder%
@@ -45,9 +45,9 @@ cd %SourceCodeFolder%
 echo.
 echo 4) Creating %SourceAndSupportingDLLsFile%
 If Exist %SourceAndSupportingDLLsFile% (Del %SourceAndSupportingDLLsFile%)
-"c:\program files\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% SourceAndSupportingDLLs\*.zip
-"c:\program files\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% ..\bin\ReadMe.txt
-"c:\program files\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% ..\bin\RevisionHistory.txt
+"c:\program files (x86)\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% SourceAndSupportingDLLs\*.zip
+"c:\program files (x86)\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% ..\bin\ReadMe.txt
+"c:\program files (x86)\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% ..\bin\RevisionHistory.txt
 
 echo.
 echo 5) Copying %SourceAndSupportingDLLsFile% to %DistributionFolderFinal%
@@ -56,9 +56,9 @@ Copy %SourceAndSupportingDLLsFile% %DistributionFolderFinal%
 echo.
 echo 6) Creating Zipped Installer file
 If Exist %ZippedInstallerFile% (Del %ZippedInstallerFile%)
-"c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\%InstallerFolder%\*.msi
-"c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\bin\ReadMe.txt
-"c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\bin\RevisionHistory.txt
+"c:\program files (x86)\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\%InstallerFolder%\*.msi
+"c:\program files (x86)\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\bin\ReadMe.txt
+"c:\program files (x86)\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\bin\RevisionHistory.txt
 
 echo.
 echo 7) Copying %ZippedInstallerFile% to %DistributionFolderFinal%
