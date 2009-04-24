@@ -41,7 +41,7 @@ Public Class XmlSettingsFileAccessor
     Public Event InformationMessage(ByVal msg As String)
 
     ''' <summary>
-    ' Loads the settings for the defined Xml Settings File.  Assumes names are not case sensitive
+    ''' Loads the settings for the defined Xml Settings File.  Assumes names are not case sensitive
     ''' </summary>
     ''' <return>The function returns a boolean that shows if the file was successfully loaded.</return>
     Public Function LoadSettings() As Boolean
@@ -49,7 +49,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' Loads the settings for the defined Xml Settings File.   Assumes names are not case sensitive
+    ''' Loads the settings for the defined Xml Settings File.   Assumes names are not case sensitive
     ''' </summary>
     ''' <param name="XmlSettingsFilePath">The path to the XML settings file.</param>
     ''' <return>The function returns a boolean that shows if the file was successfully loaded.</return>
@@ -58,7 +58,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' Loads the settings for the defined Xml Settings File
+    ''' Loads the settings for the defined Xml Settings File
     ''' </summary>
     ''' <param name="XmlSettingsFilePath">The path to the XML settings file.</param>
     ''' <param name="IsCaseSensitive">Case sensitive names if True.  Non-case sensitive if false.</param>
@@ -82,7 +82,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' Saves the settings for the defined Xml Settings File.  Note that you must call LoadSettings to initialize the class prior to setting any values.
+    ''' Saves the settings for the defined Xml Settings File.  Note that you must call LoadSettings to initialize the class prior to setting any values.
     ''' </summary>
     ''' <return>The function returns a boolean that shows if the file was successfully saved.</return>
     Public Function SaveSettings() As Boolean
@@ -252,7 +252,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function gets the name of the "value" attribute in section "sectionName".
+    ''' The function gets the name of the "value" attribute in section "sectionName".
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -286,7 +286,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function gets the name of the "value" attribute in section "sectionName".
+    ''' The function gets the name of the "value" attribute in section "sectionName".
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -312,7 +312,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function gets the name of the "value" attribute in section "sectionName".
+    ''' The function gets the name of the "value" attribute in section "sectionName".
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -349,7 +349,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function gets the name of the "value" attribute in section "sectionName".
+    ''' The function gets the name of the "value" attribute in section "sectionName".
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -386,7 +386,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function gets the name of the "value" attribute in section "sectionName".
+    ''' The function gets the name of the "value" attribute in section "sectionName".
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -423,7 +423,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function gets the name of the "value" attribute in section "sectionName".
+    ''' The function gets the name of the "value" attribute in section "sectionName".
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -460,7 +460,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function gets the name of the "value" attribute in section "sectionName".
+    ''' The function gets the name of the "value" attribute in section "sectionName".
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -497,7 +497,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function sets the path to the Xml Settings File.
+    ''' The function sets the path to the Xml Settings File.
     ''' </summary>
     ''' <param name="XmlSettingsFilePath">The path to the XML settings file.</param>
     Public Sub SetIniFilePath(ByVal XmlSettingsFilePath As String)
@@ -505,7 +505,7 @@ Public Class XmlSettingsFileAccessor
     End Sub
 
     ''' <summary>
-    ' The function sets a new String value for the "value" attribute.
+    ''' The function sets a new String value for the "value" attribute.
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -535,7 +535,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function sets a new Boolean value for the "value" attribute.
+    ''' The function sets a new Boolean value for the "value" attribute.
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -546,7 +546,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function sets a new Short value for the "value" attribute.
+    ''' The function sets a new Short value for the "value" attribute.
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -557,7 +557,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function sets a new Integer value for the "value" attribute.
+    ''' The function sets a new Integer value for the "value" attribute.
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -568,7 +568,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function sets a new Long value for the "value" attribute.
+    ''' The function sets a new Long value for the "value" attribute.
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -579,7 +579,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function sets a new Single value for the "value" attribute.
+    ''' The function sets a new Single value for the "value" attribute.
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -590,7 +590,7 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function sets a new Double value for the "value" attribute.
+    ''' The function sets a new Double value for the "value" attribute.
     ''' </summary>
     ''' <param name="sectionName">The name of the section.</param>
     ''' <param name="keyName">The name of the key.</param>
@@ -601,15 +601,14 @@ Public Class XmlSettingsFileAccessor
     End Function
 
     ''' <summary>
-    ' The function renames a section.
+    ''' The function renames a section.
     ''' </summary>
-    ''' <param name="oldSection">The name of the old ini section name.</param>
-    ''' <param name="newSection">The new name for the ini section.</param>
+    ''' <param name="sectionNameOld">The name of the old ini section name.</param>
+    ''' <param name="sectionNameNew">The new name for the ini section.</param>
     ''' <return>The function returns a boolean that shows if the change was done.</return>
     Public Function RenameSection(ByVal sectionNameOld As String, ByVal sectionNameNew As String) As Boolean
 
         Dim strSectionName As String
-        Dim strKeyName As String
 
         If Not mCaseSensitive Then
             strSectionName = GetCachedSectionName(sectionNameOld)
@@ -628,7 +627,9 @@ Public Class XmlSettingsFileAccessor
     End Sub
 
 
-    ''' <summary>Tools to manipulates INI files.</summary>
+    ''' <summary>
+    ''' Tools to manipulates INI files.
+    ''' </summary>
     Protected Class IniFileReader
 
         Enum IniItemTypeEnum
@@ -664,7 +665,7 @@ Public Class XmlSettingsFileAccessor
             InitIniFileReader(IniFilename, IsCaseSensitive)
         End Sub
         ''' <summary>
-        ' This routine is called by each of the constructors to make the actual assignments.
+        ''' This routine is called by each of the constructors to make the actual assignments.
         ''' </summary>
         Private Sub InitIniFileReader(ByVal IniFilename As String, ByVal IsCaseSensitive As Boolean)
             Dim fi As System.IO.FileInfo
@@ -714,7 +715,7 @@ Public Class XmlSettingsFileAccessor
             End Try
         End Sub
         ''' <summary>
-        ' This routine returns the name of the ini file.
+        ''' This routine returns the name of the ini file.
         ''' </summary>
         ''' <return>The function returns the name of ini file.</return>
         Public ReadOnly Property IniFilename() As String
@@ -724,7 +725,7 @@ Public Class XmlSettingsFileAccessor
             End Get
         End Property
         ''' <summary>
-        ' This routine returns a boolean showing if the file was initialized or not.
+        ''' This routine returns a boolean showing if the file was initialized or not.
         ''' </summary>
         ''' <return>The function returns a Boolean.</return>
         Public ReadOnly Property Initialized() As Boolean
@@ -733,7 +734,7 @@ Public Class XmlSettingsFileAccessor
             End Get
         End Property
         ''' <summary>
-        ' This routine returns a boolean showing if the name is case sensitive or not.
+        ''' This routine returns a boolean showing if the name is case sensitive or not.
         ''' </summary>
         ''' <return>The function returns a Boolean.</return>
         Public ReadOnly Property CaseSensitive() As Boolean
@@ -743,7 +744,7 @@ Public Class XmlSettingsFileAccessor
         End Property
 
         ''' <summary>
-        ' This routine sets a name.
+        ''' This routine sets a name.
         ''' </summary>
         ''' <param name="aName">The name to be set.</param>
         ''' <return>The function returns a string.</return>
@@ -755,14 +756,14 @@ Public Class XmlSettingsFileAccessor
             End If
         End Function
         ''' <summary>
-        ' TBD.
+        ''' TBD.
         ''' </summary>
         Private Function GetRoot() As System.Xml.XmlElement
             Return m_XmlDoc.DocumentElement
         End Function
 
         ''' <summary>
-        ' The function gets the last section.
+        ''' The function gets the last section.
         ''' </summary>
         ''' <return>The function returns the last section as System.Xml.XmlElement.</return>
         Private Function GetLastSection() As System.Xml.XmlElement
@@ -773,7 +774,7 @@ Public Class XmlSettingsFileAccessor
             End If
         End Function
         ''' <summary>
-        ' The function gets a section as System.Xml.XmlElement.
+        ''' The function gets a section as System.Xml.XmlElement.
         ''' </summary>
         ''' <param name="sectionName">The name of a section.</param>
         ''' <return>The function returns a section as System.Xml.XmlElement.</return>
@@ -786,7 +787,7 @@ Public Class XmlSettingsFileAccessor
         End Function
 
         ''' <summary>
-        ' The function gets an item.
+        ''' The function gets an item.
         ''' </summary>
         ''' <param name="sectionName">The name of the section.</param>
         ''' <param name="keyName">The name of the key.</param>
@@ -804,7 +805,7 @@ Public Class XmlSettingsFileAccessor
         End Function
 
         ''' <summary>
-        ' The function sets the ini section name.
+        ''' The function sets the ini section name.
         ''' </summary>
         ''' <param name="oldSection">The name of the old ini section name.</param>
         ''' <param name="newSection">The new name for the ini section.</param>
@@ -879,7 +880,7 @@ Public Class XmlSettingsFileAccessor
         End Function
 
         ''' <summary>
-        ' The function deletes a section in the file.
+        ''' The function deletes a section in the file.
         ''' </summary>
         ''' <param name="sectionName">The name of the section.</param>
         ''' <return>The function returns a boolean that shows if the delete was completed.</return>
@@ -894,7 +895,7 @@ Public Class XmlSettingsFileAccessor
         End Function
 
         ''' <summary>
-        ' The function deletes a item in a specific section.
+        ''' The function deletes a item in a specific section.
         ''' </summary>
         ''' <param name="sectionName">The name of the section.</param>
         ''' <param name="keyName">The name of the key.</param>
@@ -909,7 +910,7 @@ Public Class XmlSettingsFileAccessor
         End Function
 
         ''' <summary>
-        ' The function sets a new value for the "key" attribute.
+        ''' The function sets a new value for the "key" attribute.
         ''' </summary>
         ''' <param name="sectionName">The name of the section.</param>
         ''' <param name="keyName">The name of the key.</param>
@@ -926,7 +927,7 @@ Public Class XmlSettingsFileAccessor
         End Function
 
         ''' <summary>
-        ' The function gets the name of the "value" attribute.
+        ''' The function gets the name of the "value" attribute.
         ''' </summary>
         ''' <param name="sectionName">The name of the section.</param>
         ''' <param name="keyName">The name of the key.</param>
@@ -968,7 +969,7 @@ Public Class XmlSettingsFileAccessor
         End Function
 
         ''' <summary>
-        ' The function sets a the comments for a section name.
+        ''' The function sets a the comments for a section name.
         ''' </summary>
         ''' <param name="sectionName">The name of the section.</param>
         ''' <param name="comments">A string collection.</param>
@@ -1006,7 +1007,7 @@ Public Class XmlSettingsFileAccessor
         End Function
 
         ''' <summary>
-        ' The subroutine updades the sections.
+        ''' The subroutine updades the sections.
         ''' </summary>
         Private Sub UpdateSections()
             sections = New System.Collections.Specialized.StringCollection
@@ -1016,7 +1017,7 @@ Public Class XmlSettingsFileAccessor
             Next
         End Sub
         ''' <summary>
-        ' The subroutine gets the sections.
+        ''' The subroutine gets the sections.
         ''' </summary>
         ''' <return>The subroutine returns a strin collection of sections.</return>
         Public ReadOnly Property AllSections() As System.Collections.Specialized.StringCollection
@@ -1029,7 +1030,7 @@ Public Class XmlSettingsFileAccessor
         End Property
 
         ''' <summary>
-        ' The function gets a collection of items for a section name.
+        ''' The function gets a collection of items for a section name.
         ''' </summary>
         ''' <param name="sectionName">The name of the section.</param>
         ''' <param name="itemType">Item type.</param>

@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.0.3401; April 24, 2009
+	- Updated to xrawfile2.dll v2.1
+
 Version 1.0.3084; June 11, 2008
 	- Added the option to perform an integrity check on all known file types
 		- Enable this option using /C

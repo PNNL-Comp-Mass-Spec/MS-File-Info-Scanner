@@ -8,7 +8,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified April 21, 2008
+' Last modified October 30, 2008
 
 Namespace FinniganFileIO
 
@@ -20,9 +20,13 @@ Namespace FinniganFileIO
         ' Note that each of these strings has a space at the end; this is important to avoid matching inappropriate text in the filter string
         Private Const MS_ONLY_C_TEXT As String = " c ms "
         Private Const MS_ONLY_P_TEXT As String = " p ms "
-        Private Const MS_ONLY_PZ_TEXT As String = " p Z ms "
+
+        Private Const MS_ONLY_PZ_TEXT As String = " p Z ms "            ' Likely a zoom scan
+        Private Const MS_ONLY_DZ_TEXT As String = " d Z ms "            ' Dependent zoom scan; MASIC quantitation may not work properly with this scan type
         Private Const MS_ONLY_Z_TEXT As String = " NSI Z ms "           ' Likely a zoom scan; MASIC quantitation may not work properly with this scan type
+
         Private Const FULL_MS_TEXT As String = "Full ms "
+        Private Const FULL_PR_TEXT As String = "Full pr "       ' TSQ: Full Parent Scan, Product Mass
         Private Const SIM_MS_TEXT As String = "SIM ms "
         Private Const MRM_QMS_TEXT As String = "Q1MS "
         Private Const MRM_SRM_TEXT As String = "SRM ms2"
@@ -87,10 +91,9 @@ Namespace FinniganFileIO
 #End Region
 
 #Region "Classwide Variables"
-#If Not XRAW_MISSING Then
+
         ' Cached XRawFile object, for faster accessing
         Private mXRawFile As XRAWFILE2Lib.XRawfile
-#End If
 
 #End Region
 
@@ -98,10 +101,8 @@ Namespace FinniganFileIO
             ' I have a feeling this doesn't actually work, and will always return True
 
             Try
-#If Not XRAW_MISSING Then
                 Dim objXRawFile As New XRAWFILE2Lib.XRawfile
                 objXRawFile = Nothing
-#End If
 
                 ' If we get here, then all is fine
                 Return True
@@ -113,7 +114,6 @@ Namespace FinniganFileIO
 
         Public Overrides Sub CloseRawFile()
 
-#If Not XRAW_MISSING Then
             Try
                 If Not mXRawFile Is Nothing Then
                     mXRawFile.Close()
@@ -122,10 +122,8 @@ Namespace FinniganFileIO
                 ' Ignore any errors
             Finally
                 mXRawFile = Nothing
+                mCachedFileName = String.Empty
             End Try
-#End If
-
-            mCachedFileName = String.Empty
 
         End Sub
 
@@ -158,7 +156,6 @@ Namespace FinniganFileIO
             Static reMassRanges As System.Text.RegularExpressions.Regex
 
             Dim reMatch As System.Text.RegularExpressions.Match
-            Dim intGroupIndex As Integer
 
             If reMassList Is Nothing Then
                 reMassList = New System.Text.RegularExpressions.Regex(MASSLIST_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
@@ -458,31 +455,6 @@ Namespace FinniganFileIO
             Dim strWarningMessage As String
 
             Try
-#If XRAW_Missing Then
-                With mFileInfo
-                    .CreationDate = System.DateTime.Now
-                    .CreatorID = "MS_User"
-                    .InstFlags = String.Empty
-                    .InstHardwareVersion = "1.0"
-                    .InstSoftwareVersion = "1.0"
-                    ReDim .InstMethods(0)
-                    .InstMethods(0) = "In-silico method 1"
-
-                    .InstModel = "In-silico"
-                    .InstName = "In-Silico1"
-                    .InstrumentDescription = "In-silico instrument"
-
-                    .InstSerialNumber = String.Empty
-                    ReDim .TuneMethods(0)
-                    .TuneMethods(0).Count = 0
-
-                    .VersionNumber = 0
-                    .MassResolution = 0
-                    .ScanStart = 1
-                    .ScanEnd = 1000
-                End With
-#Else
-
                 If mXRawFile Is Nothing Then Return False
 
                 ' Make sure the MS controller is selected
@@ -618,7 +590,7 @@ Namespace FinniganFileIO
 
                 End With
 
-#End If
+
             Catch ex As System.Exception
                 Return False
             End Try
@@ -634,10 +606,6 @@ Namespace FinniganFileIO
             Dim intScanCount As Integer
 
             Try
-#If XRAW_Missing Then
-                Return 1000
-#Else
-
                 If mXRawFile Is Nothing Then Return -1
 
                 mXRawFile.GetNumSpectra(intScanCount)
@@ -647,8 +615,6 @@ Namespace FinniganFileIO
                 Else
                     Return -1
                 End If
-#End If
-
             Catch ex As System.Exception
                 Return -1
             End Try
@@ -665,7 +631,6 @@ Namespace FinniganFileIO
 
             Dim intArrayCount As Integer
             Dim intIndex As Integer
-            Dim intCharIndex As Integer
 
             Dim strFilterText As String
 
@@ -674,13 +639,10 @@ Namespace FinniganFileIO
 
             Dim dblParentIonMZ As Double
             Dim intMSLevel As Integer
-            Dim strCollisionMode As String
+            Dim strCollisionMode As String = String.Empty
 
             Try
-
-#If Not XRAW_Missing Then
                 If mXRawFile Is Nothing Then Return False
-#End If
 
                 If Scan < mFileInfo.ScanStart Then
                     Scan = mFileInfo.ScanStart
@@ -691,45 +653,6 @@ Namespace FinniganFileIO
                 ' Make sure the MS controller is selected
                 If Not SetMSController() Then Return False
 
-#If XRAW_Missing Then
-                With udtScanHeaderInfo
-                    ' Use dummy values
-                    .MSLevel = 2
-                    .EventNumber = 1
-                    .SIMScan = False
-                    .MRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.NotMRM
-
-                    .NumPeaks = 5
-                    .RetentionTime = 1
-                    .LowMass = 200
-                    .HighMass = 2000
-
-                    .TotalIonCurrent = 10
-                    .BasePeakIntensity = 5
-
-                    .FilterText = "ITMS + c NSI d Full ms2 756.98@cid35.00 [195.00-2000.00]"
-                    .ParentIonMZ = 756.98
-                    .CollisionMode = "cid"
-
-                    .MRMInfo.MRMMassCount = 0
-
-                    .NumChannels = 1
-                    .UniformTime = False
-                    .Frequency = 1
-                    .IsCentroidScan = True
-
-                    ReDim .ScanEventNames(0)
-                    ReDim .ScanEventValues(0)
-                    .ScanEventNames(0) = "Test Event"
-                    .ScanEventNames(0) = "Test Event Value"
-
-                    ReDim .StatusLogNames(0)
-                    ReDim .StatusLogValues(0)
-                    .StatusLogNames(0) = "Test Log"
-                    .StatusLogValues(0) = "Test Log Value"
-                End With
-
-#Else
                 With udtScanHeaderInfo
                     ' Reset the values
                     .NumPeaks = 0
@@ -740,12 +663,9 @@ Namespace FinniganFileIO
                     .FilterText = String.Empty
 
                     mXRawFile.GetScanHeaderInfoForScanNum(Scan, .NumPeaks, .RetentionTime, .LowMass, .HighMass, .TotalIonCurrent, .BasePeakMZ, .BasePeakIntensity, .NumChannels, intBooleanVal, .Frequency)
-                End With
+                    mXRawFile.IsError(intResult)        ' Unfortunately, .IsError() always returns 0, even if an error occurred
 
-                mXRawFile.IsError(intResult)        ' Unfortunately, .IsError() always returns 0, even if an error occurred
-
-                If intResult = 0 Then
-                    With udtScanHeaderInfo
+                    If intResult = 0 Then
                         .UniformTime = CBool(intBooleanVal)
 
                         intBooleanVal = 0
@@ -797,7 +717,7 @@ Namespace FinniganFileIO
 
                         If .EventNumber <= 1 Then
                             ' XRaw periodically mislabels a scan as .EventNumber = 1 when it's really an MS/MS scan; check for this
-                            If ExtractMSLevel(strFilterText, intMSLevel, "") Then
+                            If ExtractMSLevel(.FilterText, intMSLevel, "") Then
                                 .EventNumber = intMSLevel
                             End If
                         End If
@@ -805,20 +725,54 @@ Namespace FinniganFileIO
                         If .EventNumber > 1 Then
                             udtScanHeaderInfo.MSLevel = 2
 
-                            ' Parse out the parent ion and collision energy from .FilterText
-                            If ExtractParentIonMZFromFilterText(.FilterText, dblParentIonMZ, intMSLevel, strCollisionMode) Then
-                                .ParentIonMZ = dblParentIonMZ
-                                .CollisionMode = strCollisionMode
-
-                                If intMSLevel > 2 Then
-                                    udtScanHeaderInfo.MSLevel = intMSLevel
-                                End If
-
-                                ' Check whether this is an SRM MS2 scan
-                                .MRMScanType = DetermineMRMScanType(strFilterText)
+                            If .FilterText = String.Empty Then
+                                ' FilterText is empty; this indicates a problem with the .Raw file
+                                ' This is rare, but does happen (see scans 2 and 3 in QC_Shew_08_03_pt5_1_MAXPRO_27Oct08_Raptor_08-01-01.raw)
+                                ' We'll set the Parent Ion to 0 m/z and the collision mode to CID
+                                .ParentIonMZ = 0
+                                .CollisionMode = "cid"
+                                .MRMScanType = MRMScanTypeConstants.NotMRM
                             Else
-                                ' Could not find "Full ms2" in .FilterText
-                                ' XRaw periodically mislabels a scan as .EventNumber > 1 when it's really an MS scan; check for this
+
+                                ' Parse out the parent ion and collision energy from .FilterText
+                                If ExtractParentIonMZFromFilterText(.FilterText, dblParentIonMZ, intMSLevel, strCollisionMode) Then
+                                    .ParentIonMZ = dblParentIonMZ
+                                    .CollisionMode = strCollisionMode
+
+                                    If intMSLevel > 2 Then
+                                        udtScanHeaderInfo.MSLevel = intMSLevel
+                                    End If
+
+                                    ' Check whether this is an SRM MS2 scan
+                                    .MRMScanType = DetermineMRMScanType(.FilterText)
+                                Else
+                                    ' Could not find "Full ms2" in .FilterText
+                                    ' XRaw periodically mislabels a scan as .EventNumber > 1 when it's really an MS scan; check for this
+                                    If ValidateMSScan(.FilterText, .MSLevel, .SIMScan, .MRMScanType) Then
+                                        ' Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
+                                    Else
+                                        ' Unknown format for .FilterText; return an error
+                                        RaiseErrorMessage("Unknown format for Scan Filter: " & .FilterText)
+                                        Return False
+                                    End If
+                                End If
+                            End If
+                        Else
+                            ' Make sure .FilterText contains one of the following:
+                            '   FULL_MS_TEXT = "Full ms "
+                            '   FULL_PR_TEXT = "Full pr "
+                            '   SIM_MS_TEXT = "SIM ms "
+                            '   MRM_QMS_TEXT = "Q1MS "
+                            '   MRM_SRM_TEXT = "SRM "
+
+                            If .FilterText = String.Empty Then
+                                ' FilterText is empty; this indicates a problem with the .Raw file
+                                ' This is rare, but does happen (see scans 2 and 3 in QC_Shew_08_03_pt5_1_MAXPRO_27Oct08_Raptor_08-01-01.raw)
+                                .MSLevel = 1
+                                .SIMScan = False
+                                .MRMScanType = MRMScanTypeConstants.NotMRM
+                            Else
+
                                 If ValidateMSScan(.FilterText, .MSLevel, .SIMScan, .MRMScanType) Then
                                     ' Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
                                 Else
@@ -828,20 +782,6 @@ Namespace FinniganFileIO
                                 End If
                             End If
 
-                        Else
-                            ' Make sure .FilterText contains one of the following:
-                            '   FULL_MS_TEXT = "Full ms "
-                            '   SIM_MS_TEXT = "SIM ms "
-                            '   MRM_QMS_TEXT = "Q1MS "
-                            '   MRM_SRM_TEXT = "SRM "
-
-                            If ValidateMSScan(.FilterText, .MSLevel, .SIMScan, .MRMScanType) Then
-                                ' Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
-                            Else
-                                ' Unknown format for .FilterText; return an error
-                                RaiseErrorMessage("Unknown format for Scan Filter: " & .FilterText)
-                                Return False
-                            End If
                         End If
 
 
@@ -867,10 +807,8 @@ Namespace FinniganFileIO
                             ReDim .StatusLogValues(-1)
                         End If
 
-                    End With
-                End If
-
-#End If
+                    End If
+                End With
 
             Catch ex As System.Exception
                 Return False
@@ -886,9 +824,6 @@ Namespace FinniganFileIO
 
             Dim intResult As Integer
 
-#If XRAW_Missing Then
-            Return True
-#Else
             mXRawFile.SetCurrentController(ControllerTypeConstants.MS, 1)
             mXRawFile.IsError(intResult)        ' Unfortunately, .IsError() always returns 0, even if an error occurred
 
@@ -897,7 +832,6 @@ Namespace FinniganFileIO
             Else
                 Return False
             End If
-#End If
 
         End Function
 
@@ -912,7 +846,7 @@ Namespace FinniganFileIO
             If strFilterText.ToLower.IndexOf(FULL_MS_TEXT.ToLower) > 0 OrElse _
                 strFilterText.ToLower.IndexOf(MS_ONLY_C_TEXT.ToLower) > 0 OrElse _
                 strFilterText.ToLower.IndexOf(MS_ONLY_P_TEXT.ToLower) > 0 OrElse _
-                strFilterText.ToLower.IndexOf(MS_ONLY_PZ_TEXT.ToLower) > 0 Then
+                strFilterText.ToLower.IndexOf(FULL_PR_TEXT.ToLower) > 0 Then
                 ' This is really a Full MS scan
                 intMSLevel = 1
                 blnSIMScan = False
@@ -923,7 +857,9 @@ Namespace FinniganFileIO
                     intMSLevel = 1
                     blnSIMScan = True
                     blnValidScan = True
-                ElseIf strFilterText.ToLower.IndexOf(MS_ONLY_Z_TEXT.ToLower) > 0 Then
+                ElseIf strFilterText.ToLower.IndexOf(MS_ONLY_Z_TEXT.ToLower) > 0 OrElse _
+                       strFilterText.ToLower.IndexOf(MS_ONLY_PZ_TEXT.ToLower) > 0 OrElse _
+                       strFilterText.ToLower.IndexOf(MS_ONLY_DZ_TEXT.ToLower) > 0 Then
                     intMSLevel = 1
                     blnValidScan = True            ' ToDo: Add full support for Zoom scan data
                 Else
@@ -970,13 +906,10 @@ Namespace FinniganFileIO
             intDataCount = 0
 
             Try
-
-#If Not XRAW_Missing Then
                 If mXRawFile Is Nothing Then
                     intDataCount = -1
                     Exit Try
                 End If
-#End If
 
                 ' Make sure the MS controller is selected
                 If Not SetMSController() Then
@@ -995,17 +928,6 @@ Namespace FinniganFileIO
 
                 If intMaxNumberOfPeaks < 0 Then intMaxNumberOfPeaks = 0
                 intCentroidResult = 0           ' Set to 1 to indicate that peaks should be centroided (only appropriate for profile data)
-
-#If XRAW_Missing Then
-                ReDim dblMZList(9)
-                ReDim dblIntensityList(dblMZList.Length - 1)
-                Dim objRnd As New System.Random()
-
-                For intIndex = 0 To dblMZList.Length - 1
-                    dblMZList(intIndex) = 200 + Scan Mod 10 + intIndex * 3 + objRnd.NextDouble() * 2
-                    dblIntensityList(intIndex) = Math.Sin(intIndex / 5.0)
-                Next
-#Else
 
                 mXRawFile.GetMassListFromScanNum(Scan, strFilter, IntensityCutoffTypeConstants.None, _
                                                  intIntensityCutoffValue, intMaxNumberOfPeaks, intCentroidResult, dblCentroidPeakWidth, _
@@ -1027,7 +949,6 @@ Namespace FinniganFileIO
                     Next intIndex
 
                 End If
-#End If
 
             Catch
                 intDataCount = -1
@@ -1039,7 +960,6 @@ Namespace FinniganFileIO
             End If
 
             Return intDataCount
-
 
         End Function
 
@@ -1064,16 +984,12 @@ Namespace FinniganFileIO
                 ' Make sure any existing open files are closed
                 CloseRawFile()
 
-#If Not XRAW_MISSING Then
                 If mXRawFile Is Nothing Then
                     mXRawFile = New XRAWFILE2Lib.XRawfile
                 End If
 
                 mXRawFile.Open(FileName)
                 mXRawFile.IsError(intResult)        ' Unfortunately, .IsError() always returns 0, even if an error occurred
-#Else
-                intResult = 0
-#End If
 
                 If intResult = 0 Then
                     mCachedFileName = FileName
