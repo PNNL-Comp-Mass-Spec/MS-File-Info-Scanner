@@ -37,7 +37,7 @@ echo.
 echo 3) Updating Source Code file for %ProgramName%
 Move %SourceCodeFile% ..\..\
 CD ..\..
-for %%i in (%SourceCodeFile%) do "c:\program files (x86)\winrar\winRar.exe" f %%i
+for %%i in (%SourceCodeFile%) do "c:\program files\winrar\winRar.exe" f %%i
 Move %SourceCodeFile% %SourceCodeFolder%\SourceAndSupportingDLLs\
 
 cd %SourceCodeFolder%
@@ -45,9 +45,9 @@ cd %SourceCodeFolder%
 echo.
 echo 4) Creating %SourceAndSupportingDLLsFile%
 If Exist %SourceAndSupportingDLLsFile% (Del %SourceAndSupportingDLLsFile%)
-"c:\program files (x86)\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% SourceAndSupportingDLLs\*.zip
-"c:\program files (x86)\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% ..\bin\ReadMe.txt
-"c:\program files (x86)\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% ..\bin\RevisionHistory.txt
+"c:\program files\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% SourceAndSupportingDLLs\*.zip
+"c:\program files\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% ..\bin\ReadMe.txt
+"c:\program files\winrar\winRar.exe" a -ep %SourceAndSupportingDLLsFile% ..\bin\RevisionHistory.txt
 
 echo.
 echo 5) Copying %SourceAndSupportingDLLsFile% to %DistributionFolderFinal%
@@ -56,9 +56,9 @@ Copy %SourceAndSupportingDLLsFile% %DistributionFolderFinal%
 echo.
 echo 6) Creating Zipped Installer file
 If Exist %ZippedInstallerFile% (Del %ZippedInstallerFile%)
-"c:\program files (x86)\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\%InstallerFolder%\*.msi
-"c:\program files (x86)\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\bin\ReadMe.txt
-"c:\program files (x86)\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\bin\RevisionHistory.txt
+"c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\%InstallerFolder%\*.msi
+"c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\bin\ReadMe.txt
+"c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\bin\RevisionHistory.txt
 
 echo.
 echo 7) Copying %ZippedInstallerFile% to %DistributionFolderFinal%

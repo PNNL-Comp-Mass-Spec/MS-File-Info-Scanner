@@ -3,11 +3,11 @@ Option Strict On
 ' Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 
-' See clsMSFileScanner for a program description
+' See clsMSFileInfoScanner for a program description
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "April 24, 2009"
+    Public Const PROGRAM_DATE As String = "November 17, 2009"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -119,6 +119,7 @@ Module modMain
 
             If Not blnProceed OrElse _
                objParseCommandLine.NeedToShowHelp OrElse _
+               objParseCommandLine.ParameterCount + objParseCommandLine.NonSwitchParameterCount = 0 OrElse _
                mInputDataFilePath.Length = 0 Then
                 ShowProgramHelp()
                 intReturnCode = -1
@@ -156,7 +157,7 @@ Module modMain
                     Else
                         intReturnCode = objMSFileScanner.ErrorCode
                         If intReturnCode <> 0 AndAlso Not mQuietMode Then
-                            System.Windows.Forms.MessageBox.Show("Error while processing: " & objMSFileScanner.GetErrorMessage(), "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
+                            Console.WriteLine("Error while processing: " & objMSFileScanner.GetErrorMessage())
                         End If
                     End If
                 End If
@@ -169,7 +170,7 @@ Module modMain
             If mQuietMode Then
                 Throw ex
             Else
-                System.Windows.Forms.MessageBox.Show("Error occurred: " & ControlChars.NewLine & ex.Message, "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
+                Console.WriteLine("Error occurred in modMain->Main: " & ControlChars.NewLine & ex.Message)
             End If
             intReturnCode = -1
         End Try
@@ -189,15 +190,12 @@ Module modMain
             If objParseCommandLine.InvalidParametersPresent(strValidParameters) Then
                 Return False
             Else
-
-                ' Query objParseCommandLine to see if various parameters are present
                 With objParseCommandLine
+                    ' Query objParseCommandLine to see if various parameters are present
                     If .RetrieveValueForParameter("I", strValue) Then
                         mInputDataFilePath = strValue
-                    Else
-                        If .NonSwitchParameterCount > 0 Then
-                            mInputDataFilePath = .RetrieveNonSwitchParameter(0)
-                        End If
+                    ElseIf .NonSwitchParameterCount > 0 Then
+                        mInputDataFilePath = .RetrieveNonSwitchParameter(0)
                     End If
 
                     If .RetrieveValueForParameter("O", strValue) Then mOutputFolderName = strValue
@@ -236,8 +234,7 @@ Module modMain
             If mQuietMode Then
                 Throw New System.Exception("Error parsing the command line parameters", ex)
             Else
-
-                System.Windows.Forms.MessageBox.Show("Error parsing the command line parameters: " & ControlChars.NewLine & ex.Message, "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
+                Console.WriteLine("Error parsing the command line parameters: " & ControlChars.NewLine & ex.Message)
             End If
         End Try
 
@@ -245,50 +242,53 @@ Module modMain
 
     Private Sub ShowProgramHelp()
 
-        Dim strSyntax As String
-
         Try
-            strSyntax = "This program will scan a series of MS data files (or data folders) and extract the acquisition start and end times, number of spectra, and the total size of the data, saving the values in the file " & clsMSFileScanner.DefaultAcquisitionTimeFilename & ". "
-            strSyntax &= "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar .WIFF files, Masslynx .Raw folders, and Bruker 1 folders." & ControlChars.NewLine & ControlChars.NewLine
+            Console.WriteLine("This program will scan a series of MS data files (or data folders) and extract the acquisition start and end times, number of spectra, and the total size of the data, saving the values in the file " & clsMSFileScanner.DefaultAcquisitionTimeFilename & ". " & _
+                              "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar .WIFF files, Masslynx .Raw folders, and Bruker 1 folders.")
+            Console.WriteLine()
 
-            strSyntax &= "Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location)
-            strSyntax &= " /I:InputFileNameOrFolderPath [/O:OutputFolderName] [/P:ParamFilePath] [/S:[MaxLevel]] [IE] [/T] [/C] [/M:nnn] [/H] /[QZ] [/R] [/Z] [/QS] [/Q]" & ControlChars.NewLine & ControlChars.NewLine
-            strSyntax &= "Use /I to specify the name of a file or folder to scan; the path can contain the wildcard character *" & ControlChars.NewLine
-            strSyntax &= "The output folder name is optional.  If omitted, the acquisition time file will be created in the program directory.  If included, then a subfolder is created with the name OutputFolderName and the acquisition time file placed there." & ControlChars.NewLine & ControlChars.NewLine
+            Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location))
+            Console.WriteLine(" /I:InputFileNameOrFolderPath [/O:OutputFolderName]")
+            Console.WriteLine(" [/P:ParamFilePath] [/S:[MaxLevel]] [IE] [/T]")
+            Console.WriteLine(" [/C] [/M:nnn] [/H] /[QZ] [/R] [/Z] [/QS] [/Q]")
+            Console.WriteLine()
+            Console.WriteLine("Use /I to specify the name of a file or folder to scan; the path can contain the wildcard character *")
+            Console.WriteLine("The output folder name is optional.  If omitted, the acquisition time file will be created in the program directory.  If included, then a subfolder is created with the name OutputFolderName and the acquisition time file placed there.")
+            Console.WriteLine()
 
-            strSyntax &= "The param file switch is optional.  If supplied, it should point to a valid XML parameter file.  If omitted, defaults are used." & ControlChars.NewLine
-            strSyntax &= "Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine. Use /IE to ignore errors when recursing." & ControlChars.NewLine
-            strSyntax &= "Use /T to save TIC and BPI plots (this process could take 1 to 3 minutes for each dataset).'" & ControlChars.NewLine & ControlChars.NewLine
-            strSyntax &= "Use /QS to compute an overall quality score for the data in each datasets." & ControlChars.NewLine & ControlChars.NewLine
+            Console.WriteLine("The param file switch is optional.  If supplied, it should point to a valid XML parameter file.  If omitted, defaults are used.")
+            Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine. Use /IE to ignore errors when recursing.")
+            Console.WriteLine("Use /T to save TIC and BPI plots (this process could take 1 to 3 minutes for each dataset).'")
+            Console.WriteLine()
+            Console.WriteLine("Use /QS to compute an overall quality score for the data in each datasets.")
+            Console.WriteLine()
 
-            strSyntax &= "Use /C to perform an integrity check on all known file types; this process will open known file types and verify that they contain the expected data." & ControlChars.NewLine
-            strSyntax &= "Use /M to define the maximum number of lines to process when checking text or csv files; default is /M:" & clsFileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK.ToString & ControlChars.NewLine & ControlChars.NewLine
+            Console.WriteLine("Use /C to perform an integrity check on all known file types; this process will open known file types and verify that they contain the expected data.")
+            Console.WriteLine("Use /M to define the maximum number of lines to process when checking text or csv files; default is /M:" & clsFileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK.ToString)
+            Console.WriteLine()
 
-            strSyntax &= "Use /H to compute Sha-1 file hashes when verifying file integrity." & ControlChars.NewLine
-            strSyntax &= "Use /QZ to run a quick zip-file validation test when verifying file integrity (the test does not check all data in the .Zip file)." & ControlChars.NewLine
+            Console.WriteLine("Use /H to compute Sha-1 file hashes when verifying file integrity.")
+            Console.WriteLine("Use /QZ to run a quick zip-file validation test when verifying file integrity (the test does not check all data in the .Zip file).")
 
-            strSyntax &= "Use /R to reprocess files that are already defined in the acquisition time file." & ControlChars.NewLine
-            strSyntax &= "Use /Z to reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes." & ControlChars.NewLine
+            Console.WriteLine("Use /R to reprocess files that are already defined in the acquisition time file.")
+            Console.WriteLine("Use /Z to reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes.")
 
-            strSyntax &= "Use /Q to specify quiet mode (no messages displayed as popups)" & ControlChars.NewLine & ControlChars.NewLine
+            Console.WriteLine("Use /Q to specify quiet mode (no messages displayed as popups)")
+            Console.WriteLine()
 
-            strSyntax &= "Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005" & ControlChars.NewLine
-            strSyntax &= "Copyright 2005, Battelle Memorial Institute.  All Rights Reserved." & ControlChars.NewLine
-            strSyntax &= "This is version " & System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")" & ControlChars.NewLine & ControlChars.NewLine
+            Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005")
+            Console.WriteLine("Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.")
+            Console.WriteLine("This is version " & System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")")
+            Console.WriteLine()
 
-            strSyntax &= "E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com" & ControlChars.NewLine
-            strSyntax &= "Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/"
+            Console.WriteLine("E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com")
+            Console.WriteLine("Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/")
 
-            If Not mQuietMode Then
-                System.Windows.Forms.MessageBox.Show(strSyntax, "Syntax", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Information)
-            End If
+            ' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
+            System.Threading.Thread.Sleep(750)
 
         Catch ex As System.Exception
-            If mQuietMode Then
-                Throw New System.Exception("Error displaying the program syntax", ex)
-            Else
-                System.Windows.Forms.MessageBox.Show("Error displaying the program syntax: " & ControlChars.NewLine & ex.Message, "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
-            End If
+             Console.WriteLine("Error displaying the program syntax: " & ex.Message)
         End Try
 
     End Sub

@@ -1,12 +1,10 @@
 Option Strict On
 
-' This class will read an MS/MS data file from either a Finnigan LCQ (.Raw file)
-'   or Agilent Ion Trap (.MGF and .CDF files) and create selected ion chromatograms
-'   for each of the parent ion masses chosen for fragmentation
-' It will create several output files, including a BPI for the survey scan,
-'   a BPI for the fragmentation scans, an XML file containing the SIC data
-'   for each parent ion, and a "flat file" ready for import into the database
-'   containing summaries of the SIC data statistics
+' Scans a series of MS data files (or data folders) and extracts the acquisition start and end times, 
+' number of spectra, and the total size of the data.  Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
+'
+' Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar .WIFF files, 
+' Masslynx .Raw folders, and Bruker 1 folders
 '
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
@@ -1016,7 +1014,7 @@ Public Class clsMSFileScanner
     End Sub
 
     Public Shared Function IsNumber(ByVal strValue As String) As Boolean
-        Dim objFormatProvider As System.Globalization.NumberFormatInfo
+        Dim objFormatProvider As New System.Globalization.NumberFormatInfo
         Try
             Return Double.TryParse(strValue, Globalization.NumberStyles.Any, objFormatProvider, 0)
         Catch ex As System.Exception
@@ -2053,8 +2051,6 @@ Public Class clsMSFileScanner
     Public Function SaveParameterFileSettings(ByVal strParameterFilePath As String) As Boolean
 
         Dim objSettingsFile As New XmlSettingsFileAccessor
-
-        Dim intIndex As Integer
 
         Try
 

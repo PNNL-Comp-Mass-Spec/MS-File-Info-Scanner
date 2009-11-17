@@ -21,12 +21,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_18A49AD246E48D690F1ED469084F5792"
-        "OwnerKey" = "8:_23F3F374B0C12555C45C88431B2A2F73"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_23F3F374B0C12555C45C88431B2A2F73"
         "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
         "MsmSig" = "8:_UNDEFINED"
@@ -71,6 +65,12 @@
         {
         "MsmKey" = "8:_A6A16A03F349A3645FCEF5B6CBB6E6BA"
         "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C20EAC0968E4B208F59A310BD74105EB"
+        "OwnerKey" = "8:_23F3F374B0C12555C45C88431B2A2F73"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -250,26 +250,6 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_18A49AD246E48D690F1ED469084F5792"
-            {
-            "SourcePath" = "8:xrawfile2.dll"
-            "TargetName" = "8:XRawfile2.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_4F551CB233C740748796EF290C7B231A"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:4"
-            "Exclude" = "11:TRUE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_23F3F374B0C12555C45C88431B2A2F73"
             {
             "AssemblyRegister" = "3:1"
@@ -367,7 +347,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:SharedVBNetRoutines, Version=1.0.2797.40342, Culture=neutral"
+            "AssemblyAsmDisplayName" = "8:SharedVBNetRoutines, Version=1.0.3224.30718, Culture=neutral"
                 "ScatterAssemblies"
                 {
                     "_984F3FF664540EA6FFC72082BBFE6049"
@@ -462,6 +442,26 @@
             "PackageAs" = "3:1"
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C20EAC0968E4B208F59A310BD74105EB"
+            {
+            "SourcePath" = "8:xrawfile2.dll"
+            "TargetName" = "8:XRawfile2.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_4F551CB233C740748796EF290C7B231A"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:4"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -592,14 +592,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:MSFileInfoScanner"
-        "ProductCode" = "8:{27BAE2F3-F777-4A54-9773-E4F8123374A9}"
-        "PackageCode" = "8:{F3D7D4B7-9B77-48CD-8B73-909B990C7BD5}"
+        "ProductCode" = "8:{B3D8C004-EF68-4610-968A-44B774C052DA}"
+        "PackageCode" = "8:{66317C71-ED75-4290-A600-91DECACE33DA}"
         "UpgradeCode" = "8:{5B7DD97A-9979-4302-9840-188A941F61F1}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.3"
+        "ProductVersion" = "8:1.0.4"
         "Manufacturer" = "8:Battelle Memorial Institute"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

@@ -1,7 +1,11 @@
 MS File Info Scanner Change Log
 
+Version 1.0.3608; November 17, 2009
+	- Added 750 msec delay when showing syntax at the command line
+
 Version 1.0.3401; April 24, 2009
 	- Updated to xrawfile2.dll v2.1
+	- Updated to Visual Studio 2008
 
 Version 1.0.3084; June 11, 2008
 	- Added the option to perform an integrity check on all known file types

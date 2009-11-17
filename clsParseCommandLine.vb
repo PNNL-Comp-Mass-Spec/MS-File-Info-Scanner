@@ -94,6 +94,7 @@ Public Class clsParseCommandLine
 
     End Function
 
+
     Public Function ParseCommandLine(Optional ByVal strSwitchStartChar As Char = "/"c, Optional ByVal strSwitchParameterChar As Char = ":"c) As Boolean
         ' Returns True if any command line parameters were found
         ' Otherwise, returns false
@@ -121,8 +122,20 @@ Public Class clsParseCommandLine
                 ' This command will fail if the program is called from a network share
                 strCmdLine = System.Environment.CommandLine()
                 strParameters = System.Environment.GetCommandLineArgs()
+
             Catch ex As System.Exception
-                Windows.Forms.MessageBox.Show("This program cannot be run from a network share.  Please map a drive to the network share you are currently accessing or copy the program files and required DLL's to your local computer.", "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
+                ' In .NET 1.x, programs would fail if called from a network share
+                ' This appears to be fixed in .NET 2.0 and above
+                ' If an exception does occur here, we'll show the error message at the console, then sleep for 2 seconds
+
+                Console.WriteLine("------------------------------------------------------------------------------")
+                Console.WriteLine("This program cannot be run from a network share.  Please map a drive to the")
+                Console.WriteLine(" network share you are currently accessing or copy the program files and")
+                Console.WriteLine(" required DLL's to your local computer.")
+                Console.WriteLine("------------------------------------------------------------------------------")
+
+                PauseAtConsole(5000, 1000)
+
                 mShowHelp = True
                 Return False
             End Try
@@ -207,6 +220,35 @@ Public Class clsParseCommandLine
         End If
 
     End Function
+
+    Public Shared Sub PauseAtConsole(ByVal intMillisecondsToPause As Integer, ByVal intMillisecondsBetweenDots As Integer)
+
+        Dim intIteration As Integer
+        Dim intTotalIterations As Integer
+
+        Console.WriteLine()
+        Console.Write("Continuing in " & (intMillisecondsToPause / 1000.0).ToString("0") & " seconds ")
+
+        Try
+            If intMillisecondsBetweenDots = 0 Then intMillisecondsBetweenDots = intMillisecondsToPause
+
+            intTotalIterations = CInt(Math.Round(intMillisecondsToPause / intMillisecondsBetweenDots, 0))
+        Catch ex As System.Exception
+            intTotalIterations = 1
+        End Try
+
+        intIteration = 0
+        Do
+            Console.Write("."c)
+
+            Threading.Thread.Sleep(intMillisecondsBetweenDots)
+
+            intIteration += 1
+        Loop While intIteration < intTotalIterations
+
+        Console.WriteLine()
+
+    End Sub
 
     Public Function RetrieveNonSwitchParameter(ByVal intParameterIndex As Integer) As String
         Dim strValue As String = String.Empty
