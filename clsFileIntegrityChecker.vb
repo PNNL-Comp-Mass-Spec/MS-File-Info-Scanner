@@ -1322,6 +1322,7 @@ Public Class clsFileIntegrityChecker
                                 objMSInfoScanner = New clsFinniganRawFileInfoScanner
                                 objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, False)
                                 objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, False)
+                                objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, False)
 
                                 blnPassedIntegrityCheck = objMSInfoScanner.ProcessDatafile(ioFile.FullName, udtFileInfo)
 
@@ -1332,6 +1333,7 @@ Public Class clsFileIntegrityChecker
                                 objMSInfoScanner = New clsAgilentTOFOrQStarWiffFileInfoScanner
                                 objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, False)
                                 objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, False)
+                                objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, False)
 
                                 blnPassedIntegrityCheck = objMSInfoScanner.ProcessDatafile(ioFile.FullName, udtFileInfo)
 

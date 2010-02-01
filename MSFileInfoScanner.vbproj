@@ -121,6 +121,7 @@
     <Compile Include="clsBrukerOneFolderInfoScanner.vb">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="clsDatasetStatsSummarizer.vb" />
     <Compile Include="clsFileIntegrityChecker.vb" />
     <Compile Include="clsFinniganDataFileFunctions.vb">
       <SubType>Code</SubType>

@@ -5,7 +5,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified April 21, 2008
+' Last modified June 26, 2009
 
 Namespace FinniganFileIO
 
@@ -16,6 +16,7 @@ Namespace FinniganFileIO
             NotMRM = 0
             MRMQMS = 1              ' Multiple SIM ranges in a single scan
             SRM = 2                 ' Monitoring a parent ion and one or more daughter ions
+            FullNL = 3              ' Full neutral loss scan
         End Enum
 #End Region
 
@@ -64,8 +65,9 @@ Namespace FinniganFileIO
         Public Structure udtScanHeaderInfoType
             Public MSLevel As Integer                   ' 1 means MS, 2 means MS/MS, 3 means MS^3 aka MS/MS/MS
             Public EventNumber As Integer               ' 1 for parent-ion scan; 2 for 1st frag scan, 3 for 2nd frag scan, etc.
-            Public SIMScan As Boolean                   ' True if this is a selected ion monitoring (SIM) scan (i.e. a small scan range is being examined); if multiple selected ion ranges are examined simultaneously, then this will be false by MRMScanType will be .MRMQMS
+            Public SIMScan As Boolean                   ' True if this is a selected ion monitoring (SIM) scan (i.e. a small mass range is being examined); if multiple selected ion ranges are examined simultaneously, then this will be false but MRMScanType will be .MRMQMS
             Public MRMScanType As MRMScanTypeConstants  ' 1 or 2 if this is a multiple reaction monitoring scan (MRMQMS or SRM)
+            Public ZoomScan As Boolean                  ' True when the given scan is a zoomed in mass region; these spectra are typically skipped when creating SICs
 
             Public NumPeaks As Integer                  ' Number of mass intensity value pairs in the specified scan (may not be defined until .GetScanData() is called; -1 if unknown)
             Public RetentionTime As Double              ' Retention time (in minutes)
@@ -98,6 +100,10 @@ Namespace FinniganFileIO
 #Region "Classwide Variables"
         Protected mCachedFileName As String
         Protected mFileInfo As udtFileInfoType
+
+        Protected mLoadMSMethodInfo As Boolean = True
+        Protected mLoadMSTuneInfo As Boolean = True
+
 #End Region
 
 #Region "Interface Functions"
@@ -105,6 +111,24 @@ Namespace FinniganFileIO
             Get
                 Return mFileInfo
             End Get
+        End Property
+
+        Public Property LoadMSMethodInfo() As Boolean
+            Get
+                Return mLoadMSMethodInfo
+            End Get
+            Set(ByVal value As Boolean)
+                mLoadMSMethodInfo = value
+            End Set
+        End Property
+
+        Public Property LoadMSTuneInfo() As Boolean
+            Get
+                Return mLoadMSTuneInfo
+            End Get
+            Set(ByVal value As Boolean)
+                mLoadMSTuneInfo = value
+            End Set
         End Property
 #End Region
 

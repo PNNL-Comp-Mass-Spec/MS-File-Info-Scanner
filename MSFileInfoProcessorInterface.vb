@@ -3,13 +3,14 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified September 17, 2005
+' Last modified February 1, 2010
 
 Public Interface iMSFileInfoProcessor
 
     Enum ProcessingOptions
         CreateTICAndBPI = 0
         ComputeOverallQualityScores = 1
+        CreateDatasetInfoFile = 2
     End Enum
 
     ' ToDo: Update udtFileInfo to include some overall quality scores
@@ -48,6 +49,7 @@ Public Interface iMSFileInfoProcessor
     End Structure
 
     Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As udtFileInfoType) As Boolean
+    Function CreateDatasetInfoFile(ByVal strInputFileName As String, ByVal strOutputFolderPath As String) As Boolean
     Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
 
     ReadOnly Property BPI() As udtChromatogramInfoType

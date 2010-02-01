@@ -170,6 +170,7 @@ Public Class clsMSFileScanner
 
     Private mSaveTICAndBPIPlots As Boolean
     Private mComputeOverallQualityScores As Boolean
+    Private mCreateDatasetInfoFile As Boolean
 
     Private mCheckFileIntegrity As Boolean
 
@@ -322,6 +323,15 @@ Public Class clsMSFileScanner
             If Not mFileIntegrityChecker Is Nothing Then
                 mFileIntegrityChecker.ComputeFileHashes = value
             End If
+        End Set
+    End Property
+
+    Public Property CreateDatasetInfoFile() As Boolean
+        Get
+            Return mCreateDatasetInfoFile
+        End Get
+        Set(ByVal value As Boolean)
+            mCreateDatasetInfoFile = value
         End Set
     End Property
 
@@ -999,6 +1009,7 @@ Public Class clsMSFileScanner
 
         mSaveTICAndBPIPlots = False
         mComputeOverallQualityScores = False
+        mCreateDatasetInfoFile = False
 
         mCheckFileIntegrity = False
 
@@ -1217,6 +1228,7 @@ Public Class clsMSFileScanner
             ' Set the processing options
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, mSaveTICAndBPIPlots)
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, mComputeOverallQualityScores)
+            objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, mCreateDatasetInfoFile)
 
             ' Process the data file
             blnSuccess = objMSInfoScanner.ProcessDatafile(strInputFileOrFolderPath, udtFileInfo)
@@ -1250,6 +1262,11 @@ Public Class clsMSFileScanner
                 ' Write out the TIC and BPI plots
                 SaveTICAndBPIPlotFiles(objMSInfoScanner, strDatasetName, strOutputFolderPath)
             End If
+
+            If mCreateDatasetInfoFile Then
+                objMSInfoScanner.CreateDatasetInfoFile(strInputFileOrFolderPath, strOutputFolderPath)
+            End If
+
 
             ' Update the results database
             blnSuccess = UpdateCachedMSFileInfo(udtFileInfo)

@@ -3,7 +3,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified September 17, 2005
+' Last modified February 1, 2010
 
 Public Class clsFinniganRawFileInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -11,7 +11,7 @@ Public Class clsFinniganRawFileInfoScanner
     ' Note: The extension must be in all caps
     Public Const FINNIGAN_RAW_FILE_EXTENSION As String = ".RAW"
 
-    Protected Sub ComputeQualityScores(ByRef objXcaliberAccessor As FinniganFileIO.FinniganFileReaderBaseClass, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType)
+    Protected Sub ComputeQualityScores(ByRef objXcaliburAccessor As FinniganFileIO.FinniganFileReaderBaseClass, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType)
         ' This function is used to determine one or more overall quality scores
 
         Dim intScanCount As Integer
@@ -32,10 +32,10 @@ Public Class clsFinniganRawFileInfoScanner
         dblOverallAvgIntensitySum = 0
         intOverallAvgCount = 0
 
-        intScanCount = objXcaliberAccessor.GetNumScans
+        intScanCount = objXcaliburAccessor.GetNumScans
         For intScanNumber = 1 To intScanCount
             ' This function returns the number of points in dblIonMZ() and dblIonIntensity()
-            intReturnCode = objXcaliberAccessor.GetScanData(intScanNumber, dblIonMZ, dblIonIntensity, udtScanHeaderInfo)
+            intReturnCode = objXcaliburAccessor.GetScanData(intScanNumber, dblIonMZ, dblIonIntensity, udtScanHeaderInfo)
 
             If intReturnCode > 0 Then
 
@@ -66,39 +66,6 @@ Public Class clsFinniganRawFileInfoScanner
 
     End Sub
 
-    Protected Sub CreateTICandBPI(ByRef objXcaliberAccessor As FinniganFileIO.FinniganFileReaderBaseClass)
-
-        Dim intScanCount As Integer
-        Dim intScanNumber As Integer
-
-        Dim udtScanHeaderInfo As FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
-        Dim blnSuccess As Boolean
-
-        ' Initialize the TIC and BPI arrays
-        MyBase.InitializeTICandBPI()
-
-        intScanCount = objXcaliberAccessor.GetNumScans
-        For intScanNumber = 1 To intScanCount
-            blnSuccess = objXcaliberAccessor.GetScanInfo(intScanNumber, udtScanHeaderInfo)
-
-            If blnSuccess Then
-                With udtScanHeaderInfo
-                    AddChromatogramPoint(mBPI, intScanNumber, .BasePeakIntensity, .MSLevel)
-                    AddChromatogramPoint(mTIC, intScanNumber, .TotalIonCurrent, .MSLevel)
-                End With
-            End If
-        Next intScanNumber
-
-        ' Trim the TIC and BPI array to length
-        If mBPI.ScanCount > 0 Then
-            mBPI.TrimArrays()
-        End If
-
-        If mTIC.ScanCount > 0 Then
-            mTIC.TrimArrays()
-        End If
-
-    End Sub
 
     Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
         ' The dataset name is simply the file name without .Raw
@@ -109,10 +76,81 @@ Public Class clsFinniganRawFileInfoScanner
         End Try
     End Function
 
+    Protected Sub LoadScanDetails(ByRef objXcaliburAccessor As FinniganFileIO.FinniganFileReaderBaseClass)
+
+        Dim intScanCount As Integer
+        Dim intScanNumber As Integer
+
+        Dim udtScanHeaderInfo As FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
+        Dim blnSuccess As Boolean
+
+        If mCreateTICAndBPI Then
+            ' Initialize the TIC and BPI arrays
+            MyBase.InitializeTICandBPI()
+        End If
+
+        intScanCount = objXcaliburAccessor.GetNumScans
+        For intScanNumber = 1 To intScanCount
+            blnSuccess = objXcaliburAccessor.GetScanInfo(intScanNumber, udtScanHeaderInfo)
+
+            If blnSuccess Then
+                If mCreateTICAndBPI Then
+                    With udtScanHeaderInfo
+                        AddChromatogramPoint(mBPI, intScanNumber, .BasePeakIntensity, .MSLevel)
+                        AddChromatogramPoint(mTIC, intScanNumber, .TotalIonCurrent, .MSLevel)
+                    End With
+                End If
+
+                If mCreateDatasetInfoFile Then
+
+                    Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
+
+                    With udtScanHeaderInfo
+                        objScanStatsEntry.ScanNumber = intScanNumber
+                        objScanStatsEntry.ScanType = .MSLevel
+
+                        objScanStatsEntry.ScanTypeName = FinniganFileIO.XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(.FilterText)
+                        objScanStatsEntry.ScanFilterText = FinniganFileIO.XRawFileIO.MakeGenericFinniganScanFilter(.FilterText)
+
+                        objScanStatsEntry.ElutionTime = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(.RetentionTime, 5)
+                        objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(.TotalIonCurrent, 5)
+                        objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(.BasePeakIntensity, 5)
+                        objScanStatsEntry.BasePeakMZ = Math.Round(.BasePeakMZ, 4).ToString
+
+                        ' Base peak signal to noise ratio
+                        objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
+
+                        objScanStatsEntry.IonCount = 0
+                        objScanStatsEntry.IonCountRaw = 0
+                    End With
+                    mDatasetScanStats.Add(objScanStatsEntry)
+
+                End If
+             
+
+            End If
+        Next intScanNumber
+
+        If mCreateTICAndBPI Then
+            ' Note that the TIC and BPI are actually written to disk by clsMSFileScanner.SaveTICAndBPIPlotFiles
+
+            ' Trim the TIC and BPI array to length
+            If mBPI.ScanCount > 0 Then
+                mBPI.TrimArrays()
+            End If
+
+            If mTIC.ScanCount > 0 Then
+                mTIC.TrimArrays()
+            End If
+
+        End If
+     
+    End Sub
+
     Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
         ' Returns True if success, False if an error
 
-        Dim objXcaliberAccessor As FinniganFileIO.FinniganFileReaderBaseClass
+        Dim objXcaliburAccessor As FinniganFileIO.FinniganFileReaderBaseClass
         Dim ioFileInfo As System.IO.FileInfo
         Dim udtScanHeaderInfo As MSFileInfoScanner.FinniganFileIO.XRawFileIO.udtScanHeaderInfoType
 
@@ -153,6 +191,11 @@ Public Class clsFinniganRawFileInfoScanner
             .ScanCount = 0
         End With
 
+        If mDatasetScanStats Is Nothing Then
+            mDatasetScanStats = New System.Collections.Generic.List(Of DSSummarizer.clsScanStatsEntry)
+        Else
+            mDatasetScanStats.Clear()
+        End If
 
         blnDeleteLocalFile = False
         blnReadError = False
@@ -160,10 +203,10 @@ Public Class clsFinniganRawFileInfoScanner
         ' Use Xraw to read the .Raw file
         ' If reading from a SAMBA-mounted network share, and if the current user has 
         '  Read privileges but not Read&Execute privileges, then we will need to copy the file locally
-        objXcaliberAccessor = New FinniganFileIO.XRawFileIO
+        objXcaliburAccessor = New FinniganFileIO.XRawFileIO
 
         ' Open a handle to the data file
-        If Not objXcaliberAccessor.OpenRawFile(ioFileInfo.FullName) Then
+        If Not objXcaliburAccessor.OpenRawFile(ioFileInfo.FullName) Then
             ' File open failed
             Console.WriteLine("Call to .OpenRawFile failed for: " & ioFileInfo.FullName)
             blnReadError = True
@@ -184,7 +227,7 @@ Public Class clsFinniganRawFileInfoScanner
                         ' Update ioFileInfo then try to re-open
                         ioFileInfo = New System.IO.FileInfo(strDataFilePath)
 
-                        If Not objXcaliberAccessor.OpenRawFile(ioFileInfo.FullName) Then
+                        If Not objXcaliburAccessor.OpenRawFile(ioFileInfo.FullName) Then
                             ' File open failed
                             Console.WriteLine("Call to .OpenRawFile failed for: " & ioFileInfo.FullName)
                             blnReadError = True
@@ -201,7 +244,7 @@ Public Class clsFinniganRawFileInfoScanner
         If Not blnReadError Then
             ' Read the file info
             Try
-                udtFileInfo.AcqTimeStart = objXcaliberAccessor.FileInfo.CreationDate
+                udtFileInfo.AcqTimeStart = objXcaliburAccessor.FileInfo.CreationDate
             Catch ex As System.Exception
                 ' Read error
                 blnReadError = True
@@ -210,12 +253,12 @@ Public Class clsFinniganRawFileInfoScanner
             If Not blnReadError Then
                 Try
                     ' Look up the end scan time then compute .AcqTimeEnd
-                    intScanEnd = objXcaliberAccessor.FileInfo.ScanEnd
-                    objXcaliberAccessor.GetScanInfo(intScanEnd, udtScanHeaderInfo)
+                    intScanEnd = objXcaliburAccessor.FileInfo.ScanEnd
+                    objXcaliburAccessor.GetScanInfo(intScanEnd, udtScanHeaderInfo)
 
                     With udtFileInfo
                         .AcqTimeEnd = .AcqTimeStart.AddMinutes(udtScanHeaderInfo.RetentionTime)
-                        .ScanCount = objXcaliberAccessor.GetNumScans()
+                        .ScanCount = objXcaliburAccessor.GetNumScans()
                     End With
                 Catch ex As System.Exception
                     ' Error; use default values
@@ -225,22 +268,40 @@ Public Class clsFinniganRawFileInfoScanner
                     End With
                 End Try
 
-                If mCreateTICAndBPI Then
-                    ' Create the BPI for this dataset and save to disk
-                    CreateTICandBPI(objXcaliberAccessor)
+                If mCreateTICAndBPI OrElse mCreateDatasetInfoFile Then
+                    ' Load data from each scan
+                    ' This is used to create the TIC and BPI, and/or to create the Dataset Info File
+                    LoadScanDetails(objXcaliburAccessor)
                 End If
 
                 If mComputeOverallQualityScores Then
                     ' Note that this call will also create the TICs and BPIs
-                    ComputeQualityScores(objXcaliberAccessor, udtFileInfo)
+                    ComputeQualityScores(objXcaliburAccessor, udtFileInfo)
                 End If
-
             End If
         End If
 
         ' Close the handle to the data file
-        objXcaliberAccessor.CloseRawFile()
-        objXcaliberAccessor = Nothing
+        objXcaliburAccessor.CloseRawFile()
+        objXcaliburAccessor = Nothing
+
+
+        ' Read the file info from the file system
+        ' (much of this is already in udtFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
+        UpdateDatasetFileStats(mDatasetFileInfo, ioFileInfo, intDatasetID)
+
+        ' Copy over the upadted filetime info from udtFileInfo to mDatasetFileInfo
+        With mDatasetFileInfo
+            .FileSystemCreationTime = udtFileInfo.FileSystemCreationTime
+            .FileSystemModificationTime = udtFileInfo.FileSystemModificationTime
+            .DatasetID = udtFileInfo.DatasetID
+            .DatasetName = String.Copy(udtFileInfo.DatasetName)
+            .FileExtension = String.Copy(udtFileInfo.FileExtension)
+            .AcqTimeStart = udtFileInfo.AcqTimeStart
+            .AcqTimeEnd = udtFileInfo.AcqTimeEnd
+            .ScanCount = udtFileInfo.ScanCount
+            .FileSizeBytes = udtFileInfo.FileSizeBytes
+        End With
 
         ' Delete the local copy of the data file
         If blnDeleteLocalFile Then

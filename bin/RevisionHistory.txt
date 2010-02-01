@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.0.3684; February 1, 2009
+	- Added the option to create a DatasetInfo .XML file
+		- Use switch /DI
+
 Version 1.0.3608; November 17, 2009
 	- Added 750 msec delay when showing syntax at the command line
 

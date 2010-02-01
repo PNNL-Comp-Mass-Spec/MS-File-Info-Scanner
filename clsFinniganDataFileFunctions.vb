@@ -8,9 +8,10 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified October 30, 2008
+' Last modified October 15, 2009
 
 Namespace FinniganFileIO
+
 
     Public Class XRawFileIO
         Inherits FinniganFileReaderBaseClass
@@ -22,14 +23,16 @@ Namespace FinniganFileIO
         Private Const MS_ONLY_P_TEXT As String = " p ms "
 
         Private Const MS_ONLY_PZ_TEXT As String = " p Z ms "            ' Likely a zoom scan
-        Private Const MS_ONLY_DZ_TEXT As String = " d Z ms "            ' Dependent zoom scan; MASIC quantitation may not work properly with this scan type
-        Private Const MS_ONLY_Z_TEXT As String = " NSI Z ms "           ' Likely a zoom scan; MASIC quantitation may not work properly with this scan type
+        Private Const MS_ONLY_DZ_TEXT As String = " d Z ms "            ' Dependent zoom scan
+        Private Const MS_ONLY_Z_TEXT As String = " NSI Z ms "           ' Likely a zoom scan
 
         Private Const FULL_MS_TEXT As String = "Full ms "
-        Private Const FULL_PR_TEXT As String = "Full pr "       ' TSQ: Full Parent Scan, Product Mass
+        Private Const FULL_PR_TEXT As String = "Full pr "               ' TSQ: Full Parent Scan, Product Mass
         Private Const SIM_MS_TEXT As String = "SIM ms "
-        Private Const MRM_QMS_TEXT As String = "Q1MS "
+        Private Const MRM_Q1MS_TEXT As String = "Q1MS "
+        Private Const MRM_Q3MS_TEXT As String = "Q3MS "
         Private Const MRM_SRM_TEXT As String = "SRM ms2"
+        Private Const MRM_FullNL_TEXT As String = "Full cnl "           ' MRM neutral loss
 
         ' This RegEx matches Full ms2, Full ms3, ..., Full ms10, Full ms11, ...
         ' It also matches p ms2
@@ -95,6 +98,8 @@ Namespace FinniganFileIO
         ' Cached XRawFile object, for faster accessing
         Private mXRawFile As XRAWFILE2Lib.XRawfile
 
+        Private mCorruptMemoryEncountered As Boolean
+
 #End Region
 
         Public Overrides Function CheckFunctionality() As Boolean
@@ -118,6 +123,8 @@ Namespace FinniganFileIO
                 If Not mXRawFile Is Nothing Then
                     mXRawFile.Close()
                 End If
+                mCorruptMemoryEncountered = False
+
             Catch ex As System.Exception
                 ' Ignore any errors
             Finally
@@ -127,15 +134,18 @@ Namespace FinniganFileIO
 
         End Sub
 
-        Protected Function DetermineMRMScanType(ByVal strFilterText As String) As MRMScanTypeConstants
+        Protected Shared Function DetermineMRMScanType(ByVal strFilterText As String) As MRMScanTypeConstants
             Dim eMRMScanType As MRMScanTypeConstants
 
             eMRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.NotMRM
             If Not strFilterText Is Nothing Then
-                If strFilterText.ToLower.IndexOf(MRM_QMS_TEXT.ToLower) > 0 Then
+                If strFilterText.ToLower.IndexOf(MRM_Q1MS_TEXT.ToLower) > 0 OrElse _
+                   strFilterText.ToLower.IndexOf(MRM_Q3MS_TEXT.ToLower) > 0 Then
                     eMRMScanType = MRMScanTypeConstants.MRMQMS
                 ElseIf strFilterText.ToLower.IndexOf(MRM_SRM_TEXT.ToLower) > 0 Then
                     eMRMScanType = MRMScanTypeConstants.SRM
+                ElseIf strFilterText.ToLower.IndexOf(MRM_FullNL_TEXT.ToLower) > 0 Then
+                    eMRMScanType = MRMScanTypeConstants.FullNL
                 End If
             End If
 
@@ -145,9 +155,14 @@ Namespace FinniganFileIO
         Private Sub ExtractMRMMasses(ByVal strFilterText As String, ByVal eMRMScanType As MRMScanTypeConstants, ByRef udtMRMInfo As udtMRMInfoType)
             ' Parse out the MRM_QMS or SRM mass info from strFilterText
             ' It should be of the form 
-            ' MRM_QMS_TEXT: p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]
+            ' MRM_Q1MS_TEXT:    p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]
             ' or
-            ' MRM_SRM_TEXT: c NSI SRM ms2 489.270@cid17.00 [397.209-392.211, 579.289-579.291]
+            ' MRM_Q3MS_TEXT:    p NSI Q3MS [150.070-1500.000]
+            ' or
+            ' MRM_SRM_TEXT:    c NSI SRM ms2 489.270@cid17.00 [397.209-392.211, 579.289-579.291]
+
+            ' Note: we do not parse mass information out for Full Neutral Loss scans
+            ' MRM_FullNL_TEXT: c NSI Full cnl 162.053 [300.000-1200.000]
 
             Const MASSLIST_REGEX As String = "\[[0-9.]+-[0-9.]+.*\]"
             Const MASSRANGES_REGEX As String = "([0-9.]+)-([0-9.]+)"
@@ -230,7 +245,7 @@ Namespace FinniganFileIO
 
         End Sub
 
-        Private Function ExtractParentIonMZFromFilterText(ByVal strFilterText As String, ByRef dblParentIonMZ As Double, ByRef intMSLevel As Integer, ByRef strCollisionMode As String) As Boolean
+        Private Shared Function ExtractParentIonMZFromFilterText(ByVal strFilterText As String, ByRef dblParentIonMZ As Double, ByRef intMSLevel As Integer, ByRef strCollisionMode As String) As Boolean
 
             ' Parse out the parent ion and collision energy from strFilterText
             ' It should be of the form "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
@@ -240,10 +255,14 @@ Namespace FinniganFileIO
             ' or "ITMS + c NSI d Full ms2 467.16@etd100.00 [50.00-1880.00]" 
             ' or "ITMS + c NSI d Full ms2 756.98@cid35.00 [195.00-2000.00]"
             ' or "ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]"
+            ' or "ITMS + c ESI d Full ms2 342.90@cid35.00 [50.00-2000.00]"
+            ' or "FTMS + p NSI Full ms [400.00-2000.00]"  (high res full MS)
+            ' or "ITMS + c ESI Full ms [300.00-2000.00]"  (low res full MS)
+            ' or "ITMS + p ESI d Z ms [1108.00-1118.00]"  (zoom scan)
             ' or "+ p ms2 777.00@cid30.00 [210.00-1200.00]
             ' or "+ c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]
 
-            ' This RegEx matches text like 1312.95@45.00
+            ' This RegEx matches text like 1312.95@45.00 or 756.98@cid35.00
             Const PARENTION_REGEX As String = "([0-9.]+)@([a-z]*)[0-9.]+"
 
             ' This RegEx looks for "sa" prior to Full ms"
@@ -268,6 +287,7 @@ Namespace FinniganFileIO
             intMSLevel = 1
             dblParentIonMZ = 0
             strCollisionMode = String.Empty
+            strMZText = String.Empty
             blnMatchFound = False
 
             Try
@@ -357,6 +377,7 @@ Namespace FinniganFileIO
                             Catch ex As System.Exception
                                 dblParentIonMZ = 0
                             End Try
+
                         ElseIf strMZText.Length > 0 Then
                             ' Find the longest contiguous number that strMZText starts with
 
@@ -389,7 +410,7 @@ Namespace FinniganFileIO
 
         End Function
 
-        Protected Function ExtractMSLevel(ByVal strFilterText As String, ByRef intMSLevel As Integer, ByRef strMZText As String) As Boolean
+        Protected Shared Function ExtractMSLevel(ByVal strFilterText As String, ByRef intMSLevel As Integer, ByRef strMZText As String) As Boolean
             ' Looks for "Full ms2" or "Full ms3" or " p ms2" or "SRM ms2" in strFilterText
             ' Returns True if found and False if no match
 
@@ -444,7 +465,7 @@ Namespace FinniganFileIO
             Dim intNumTuneData As Integer
             Dim intTuneMethodCountValid As Integer
 
-            Dim strMethod As String
+            Dim strMethod As String = String.Empty
 
             Dim strTuneCategory As String
             Dim strTuneSettingNames() As String
@@ -472,13 +493,18 @@ Namespace FinniganFileIO
                     mXRawFile.GetInstHardwareVersion(.InstHardwareVersion)
                     mXRawFile.GetInstSoftwareVersion(.InstSoftwareVersion)
 
-                    mXRawFile.GetNumInstMethods(intMethodCount)
-                    ReDim .InstMethods(intMethodCount - 1)
+                    If Not mLoadMSMethodInfo Then
+                        ReDim .InstMethods(-1)
+                    Else
 
-                    For intIndex = 0 To intMethodCount - 1
-                        mXRawFile.GetInstMethod(intIndex, strMethod)
-                        .InstMethods(intIndex) = String.Copy(strMethod)
-                    Next intIndex
+                        mXRawFile.GetNumInstMethods(intMethodCount)
+                        ReDim .InstMethods(intMethodCount - 1)
+
+                        For intIndex = 0 To intMethodCount - 1
+                            mXRawFile.GetInstMethod(intIndex, strMethod)
+                            .InstMethods(intIndex) = String.Copy(strMethod)
+                        Next intIndex
+                    End If
 
                     mXRawFile.GetInstModel(.InstModel)
                     mXRawFile.GetInstName(.InstName)
@@ -497,101 +523,124 @@ Namespace FinniganFileIO
                     'mXRawFile.GetComment1(.Comment1)
                     'mXRawFile.GetComment2(.Comment2)
 
-                    ' Note that intTuneMethodCount is set to 0, but we initially reserve space for intNumTuneData methods
-                    intTuneMethodCountValid = 0
-                    mXRawFile.GetNumTuneData(intNumTuneData)
-                    ReDim .TuneMethods(intNumTuneData - 1)
+                    If Not mLoadMSTuneInfo Then
+                        ReDim .TuneMethods(-1)
+                    Else
+                        ' Note that intTuneMethodCount is set to 0, but we initially reserve space for intNumTuneData methods
+                        intTuneMethodCountValid = 0
+                        mXRawFile.GetNumTuneData(intNumTuneData)
+                        ReDim .TuneMethods(intNumTuneData - 1)
 
-                    For intIndex = 0 To intNumTuneData - 1
-                        intTuneLabelCount = 0
-                        objLabels = Nothing
-                        objValues = Nothing
-                        mXRawFile.GetTuneData(intIndex, objLabels, objValues, intTuneLabelCount)
+                        For intIndex = 0 To intNumTuneData - 1
+                            intTuneLabelCount = 0
+                            objLabels = Nothing
+                            objValues = Nothing
 
-                        If intTuneLabelCount > 0 Then
-                            strWarningMessage = String.Empty
-                            If objLabels Is Nothing Then
-                                ' .GetTuneData returned a non-zero count, but no parameter names; unable to continue
-                                strWarningMessage = "Warning: the GetTuneData function returned a positive tune parameter count but no parameter names"
-                            ElseIf objValues Is Nothing Then
-                                ' .GetTuneData returned parameter names, but objValues is nothing; unable to continue
-                                strWarningMessage = "Warning: the GetTuneData function returned tune parameter names but no tune values"
-                            End If
-
-                            If strWarningMessage.Length > 0 Then
-                                strWarningMessage &= " (Tune Method " & (intIndex + 1).ToString & ")"
+                            Try
+                                If Not mCorruptMemoryEncountered Then
+                                    mXRawFile.GetTuneData(intIndex, objLabels, objValues, intTuneLabelCount)
+                                End If
+                            Catch ex As System.Exception
+                                ' Exception getting TuneData
+                                strWarningMessage = "Warning: Exception calling mXRawFile.GetTuneData for Index " & intIndex.ToString & ": " & ex.Message
                                 RaiseWarningMessage(strWarningMessage)
                                 intTuneLabelCount = 0
+
+                                If ex.Message.ToLower.Contains("memory is corrupt") Then
+                                    intNumTuneData = 0
+                                    mCorruptMemoryEncountered = True
+                                    Exit For
+                                End If
+                            End Try
+
+
+                            If intTuneLabelCount > 0 Then
+                                strWarningMessage = String.Empty
+                                If objLabels Is Nothing Then
+                                    ' .GetTuneData returned a non-zero count, but no parameter names; unable to continue
+                                    strWarningMessage = "Warning: the GetTuneData function returned a positive tune parameter count but no parameter names"
+                                ElseIf objValues Is Nothing Then
+                                    ' .GetTuneData returned parameter names, but objValues is nothing; unable to continue
+                                    strWarningMessage = "Warning: the GetTuneData function returned tune parameter names but no tune values"
+                                End If
+
+                                If strWarningMessage.Length > 0 Then
+                                    strWarningMessage &= " (Tune Method " & (intIndex + 1).ToString & ")"
+                                    RaiseWarningMessage(strWarningMessage)
+                                    intTuneLabelCount = 0
+                                End If
+
                             End If
 
-                        End If
+                            If intTuneLabelCount > 0 Then
+                                If intTuneMethodCountValid >= .TuneMethods.Length Then
+                                    ReDim Preserve .TuneMethods(.TuneMethods.Length * 2 - 1)
+                                End If
 
-                        If intTuneLabelCount > 0 Then
-                            If intTuneMethodCountValid >= .TuneMethods.Length Then
-                                ReDim Preserve .TuneMethods(.TuneMethods.Length * 2 - 1)
-                            End If
+                                With .TuneMethods(intTuneMethodCountValid)
 
-                            With .TuneMethods(intTuneMethodCountValid)
+                                    ' Note that .Count is initially 0, but we reserve space for intTuneLabelCount settings
+                                    .Count = 0
+                                    ReDim .SettingCategory(intTuneLabelCount - 1)
+                                    ReDim .SettingName(intTuneLabelCount - 1)
+                                    ReDim .SettingValue(intTuneLabelCount - 1)
 
-                                ' Note that .Count is initially 0, but we reserve space for intTuneLabelCount settings
-                                .Count = 0
-                                ReDim .SettingCategory(intTuneLabelCount - 1)
-                                ReDim .SettingName(intTuneLabelCount - 1)
-                                ReDim .SettingValue(intTuneLabelCount - 1)
+                                    If intTuneLabelCount > 0 Then
 
-                                If intTuneLabelCount > 0 Then
+                                        strTuneSettingNames = CType(objLabels, String())
+                                        strTuneSettingValues = CType(objValues, String())
 
-                                    strTuneSettingNames = CType(objLabels, String())
-                                    strTuneSettingValues = CType(objValues, String())
-
-                                    ' Step through the names and store in the .Setting() arrays
-                                    strTuneCategory = "General"
-                                    For intSettingIndex = 0 To intTuneLabelCount - 1
-                                        If strTuneSettingValues(intSettingIndex).Length = 0 AndAlso _
-                                        Not strTuneSettingNames(intSettingIndex).EndsWith(":") Then
-                                            ' New category
-                                            If strTuneSettingNames(intSettingIndex).Length > 0 Then
-                                                strTuneCategory = String.Copy(strTuneSettingNames(intSettingIndex))
+                                        ' Step through the names and store in the .Setting() arrays
+                                        strTuneCategory = "General"
+                                        For intSettingIndex = 0 To intTuneLabelCount - 1
+                                            If strTuneSettingValues(intSettingIndex).Length = 0 AndAlso _
+                                            Not strTuneSettingNames(intSettingIndex).EndsWith(":") Then
+                                                ' New category
+                                                If strTuneSettingNames(intSettingIndex).Length > 0 Then
+                                                    strTuneCategory = String.Copy(strTuneSettingNames(intSettingIndex))
+                                                Else
+                                                    strTuneCategory = "General"
+                                                End If
                                             Else
-                                                strTuneCategory = "General"
+                                                .SettingCategory(.Count) = String.Copy(strTuneCategory)
+                                                .SettingName(.Count) = strTuneSettingNames(intSettingIndex).TrimEnd(":"c)
+                                                .SettingValue(.Count) = String.Copy(strTuneSettingValues(intSettingIndex))
+
+                                                .Count += 1
                                             End If
-                                        Else
-                                            .SettingCategory(.Count) = String.Copy(strTuneCategory)
-                                            .SettingName(.Count) = strTuneSettingNames(intSettingIndex).TrimEnd(":"c)
-                                            .SettingValue(.Count) = String.Copy(strTuneSettingValues(intSettingIndex))
 
-                                            .Count += 1
+                                        Next intSettingIndex
+
+                                        If .Count < .SettingName.Length Then
+                                            ReDim Preserve .SettingCategory(.Count - 1)
+                                            ReDim Preserve .SettingName(.Count - 1)
+                                            ReDim Preserve .SettingValue(.Count - 1)
                                         End If
+                                    End If
+                                End With
+                                intTuneMethodCountValid += 1
 
-                                    Next intSettingIndex
-
-                                    If .Count < .SettingName.Length Then
-                                        ReDim Preserve .SettingCategory(.Count - 1)
-                                        ReDim Preserve .SettingName(.Count - 1)
-                                        ReDim Preserve .SettingValue(.Count - 1)
+                                If intTuneMethodCountValid > 1 Then
+                                    ' Compare this tune method to the previous one; if identical, then don't keep it
+                                    If TuneMethodsMatch(.TuneMethods(intTuneMethodCountValid - 2), .TuneMethods(intTuneMethodCountValid - 1)) Then
+                                        intTuneMethodCountValid -= 1
                                     End If
                                 End If
-                            End With
-                            intTuneMethodCountValid += 1
-
-                            If intTuneMethodCountValid > 1 Then
-                                ' Compare this tune method to the previous one; if identical, then don't keep it
-                                If TuneMethodsMatch(.TuneMethods(intTuneMethodCountValid - 2), .TuneMethods(intTuneMethodCountValid - 1)) Then
-                                    intTuneMethodCountValid -= 1
-                                End If
                             End If
+
+                        Next intIndex
+
+                        If .TuneMethods.Length <> intTuneMethodCountValid Then
+                            ReDim Preserve .TuneMethods(intTuneMethodCountValid - 1)
                         End If
-
-                    Next intIndex
-
-                    If .TuneMethods.Length <> intTuneMethodCountValid Then
-                        ReDim Preserve .TuneMethods(intTuneMethodCountValid - 1)
                     End If
 
                 End With
 
 
             Catch ex As System.Exception
+                Dim strError As String = "Error: Exception in FillFileInfo: " & ex.Message
+                RaiseErrorMessage(strError)
                 Return False
             End Try
 
@@ -641,6 +690,8 @@ Namespace FinniganFileIO
             Dim intMSLevel As Integer
             Dim strCollisionMode As String = String.Empty
 
+            Dim strWarningMessage As String
+
             Try
                 If mXRawFile Is Nothing Then Return False
 
@@ -659,6 +710,7 @@ Namespace FinniganFileIO
                     .TotalIonCurrent = 0
                     .SIMScan = False
                     .MRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.NotMRM
+                    .ZoomScan = False
                     .CollisionMode = String.Empty
                     .FilterText = String.Empty
 
@@ -672,8 +724,24 @@ Namespace FinniganFileIO
                         mXRawFile.IsCentroidScanForScanNum(Scan, intBooleanVal)
                         .IsCentroidScan = CBool(intBooleanVal)
 
-                        ' Retrieve the additional parameters for this scan (including Scan Event)
-                        mXRawFile.GetTrailerExtraForScanNum(Scan, objLabels, objValues, intArrayCount)
+                        intArrayCount = 0
+                        objLabels = Nothing
+                        objValues = Nothing
+
+                        Try
+                            If Not mCorruptMemoryEncountered Then
+                                ' Retrieve the additional parameters for this scan (including Scan Event)
+                                mXRawFile.GetTrailerExtraForScanNum(Scan, objLabels, objValues, intArrayCount)
+                            End If
+                        Catch ex As System.Exception
+                            strWarningMessage = "Warning: Exception calling mXRawFile.GetTrailerExtraForScanNum for scan " & Scan & ": " & ex.Message
+                            RaiseWarningMessage(strWarningMessage)
+                            intArrayCount = 0
+
+                            If ex.Message.ToLower.Contains("memory is corrupt") Then
+                                mCorruptMemoryEncountered = True
+                            End If
+                        End Try
 
                         .EventNumber = 1
                         If intArrayCount > 0 Then
@@ -748,7 +816,7 @@ Namespace FinniganFileIO
                                 Else
                                     ' Could not find "Full ms2" in .FilterText
                                     ' XRaw periodically mislabels a scan as .EventNumber > 1 when it's really an MS scan; check for this
-                                    If ValidateMSScan(.FilterText, .MSLevel, .SIMScan, .MRMScanType) Then
+                                    If ValidateMSScan(.FilterText, .MSLevel, .SIMScan, .MRMScanType, .ZoomScan) Then
                                         ' Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
                                     Else
                                         ' Unknown format for .FilterText; return an error
@@ -762,7 +830,7 @@ Namespace FinniganFileIO
                             '   FULL_MS_TEXT = "Full ms "
                             '   FULL_PR_TEXT = "Full pr "
                             '   SIM_MS_TEXT = "SIM ms "
-                            '   MRM_QMS_TEXT = "Q1MS "
+                            '   MRM_Q1MS_TEXT = "Q1MS "
                             '   MRM_SRM_TEXT = "SRM "
 
                             If .FilterText = String.Empty Then
@@ -773,7 +841,7 @@ Namespace FinniganFileIO
                                 .MRMScanType = MRMScanTypeConstants.NotMRM
                             Else
 
-                                If ValidateMSScan(.FilterText, .MSLevel, .SIMScan, .MRMScanType) Then
+                                If ValidateMSScan(.FilterText, .MSLevel, .SIMScan, .MRMScanType, .ZoomScan) Then
                                     ' Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
                                 Else
                                     ' Unknown format for .FilterText; return an error
@@ -795,10 +863,24 @@ Namespace FinniganFileIO
 
                         ' Retrieve the Status Log for this scan using the following
                         ' The Status Log includes numerous instrument parameters, including voltages, temperatures, pressures, turbo pump speeds, etc. 
+                        intArrayCount = 0
                         objLabels = Nothing
                         objValues = Nothing
 
-                        mXRawFile.GetStatusLogForScanNum(Scan, dblStatusLogRT, objLabels, objValues, intArrayCount)
+                        Try
+                            If Not mCorruptMemoryEncountered Then
+                                mXRawFile.GetStatusLogForScanNum(Scan, dblStatusLogRT, objLabels, objValues, intArrayCount)
+                            End If
+                        Catch ex As System.Exception
+                            strWarningMessage = "Warning: Exception calling mXRawFile.GetStatusLogForScanNum for scan " & Scan & ": " & ex.Message
+                            RaiseWarningMessage(strWarningMessage)
+                            intArrayCount = 0
+
+                            If ex.Message.ToLower.Contains("memory is corrupt") Then
+                                mCorruptMemoryEncountered = True
+                            End If
+                        End Try
+
                         If intArrayCount > 0 Then
                             .StatusLogNames = CType(objLabels, String())
                             .StatusLogValues = CType(objValues, String())
@@ -811,10 +893,263 @@ Namespace FinniganFileIO
                 End With
 
             Catch ex As System.Exception
+                Dim strError As String = "Error: Exception in GetScanInfo: " & ex.Message
+                RaiseWarningMessage(strError)
                 Return False
             End Try
 
             Return True
+
+        End Function
+
+        Public Shared Function GetScanTypeNameFromFinniganScanFilterText(ByVal strFilterText As String) As String
+
+            ' Examines strFilterText to determine what the scan type is
+            ' Examples:
+            ' Given                                                                ScanTypeName
+            ' ITMS + c ESI Full ms [300.00-2000.00]                                MS
+            ' FTMS + p NSI Full ms [400.00-2000.00]                                HMS
+            ' ITMS + p ESI d Z ms [579.00-589.00]                                  Zoom-MS
+            ' ITMS + c ESI d Full ms2 583.26@cid35.00 [150.00-1180.00]             CID-MSn
+            ' ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]              PQD-MSn
+            ' FTMS + c NSI d Full ms2 516.03@hcd40.00 [100.00-2000.00]             HCD-HMSn
+            ' ITMS + c NSI d sa Full ms2 516.03@etd100.00 [50.00-2000.00]          ETD-MSn
+
+            ' + c d Full ms2 1312.95@45.00 [ 350.00-2000.00]                       MSn
+            ' + c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]          MSn
+            ' ITMS + c NSI d Full ms10 421.76@35.00                                MSn
+
+            ' + p ms2 777.00@cid30.00 [210.00-1200.00]                             CID-MSn
+            ' + c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]   CID-SRM
+            ' + p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]     Q1MS
+            ' + p NSI Q3MS [150.070-1500.000]                                      Q3MS
+            ' c NSI Full cnl 162.053 [300.000-1200.000]                            MRM_Full_NL
+
+            Dim strScanTypeName As String = "MS"
+            Dim intMSLevel As Integer
+            Dim dblParentIonMZ As Double
+            Dim strCollisionMode As String
+            Dim eMRMScanType As MRMScanTypeConstants
+
+            Dim blnSIMScan As Boolean
+            Dim blnZoomScan As Boolean
+
+            Dim blnValidScanFilter As Boolean
+
+            Try
+                blnValidScanFilter = True
+                intMSLevel = 1
+                strCollisionMode = ""
+                eMRMScanType = MRMScanTypeConstants.NotMRM
+                blnSIMScan = False
+                blnZoomScan = False
+
+                If strFilterText.Length = 0 Then
+                    strScanTypeName = "MS"
+                    Exit Try
+                End If
+
+                If Not ExtractMSLevel(strFilterText, intMSLevel, "") Then
+                    ' Assume this is an MS scan
+                    intMSLevel = 1
+                End If
+
+                If intMSLevel > 1 Then
+                    ' Parse out the parent ion and collision energy from strFilterText
+                    If ExtractParentIonMZFromFilterText(strFilterText, dblParentIonMZ, intMSLevel, strCollisionMode) Then
+
+                        ' Check whether this is an SRM MS2 scan
+                        eMRMScanType = DetermineMRMScanType(strFilterText)
+                    Else
+                        ' Could not find "Full ms2" in strFilterText
+                        ' XRaw periodically mislabels a scan as .EventNumber > 1 when it's really an MS scan; check for this
+                        If ValidateMSScan(strFilterText, intMSLevel, blnSIMScan, eMRMScanType, blnZoomScan) Then
+                            ' Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
+                        Else
+                            ' Unknown format for strFilterText; return an error
+                            blnValidScanFilter = False
+                        End If
+                    End If
+
+                Else
+                    ' Make sure strFilterText contains one of the following:
+                    '   FULL_MS_TEXT = "Full ms "
+                    '   FULL_PR_TEXT = "Full pr "
+                    '   SIM_MS_TEXT = "SIM ms "
+                    '   MRM_Q1MS_TEXT = "Q1MS "
+                    '   MRM_SRM_TEXT = "SRM "
+                    If ValidateMSScan(strFilterText, intMSLevel, blnSIMScan, eMRMScanType, blnZoomScan) Then
+                        ' Yes, scan is an MS, SIM, or MRMQMS, or SRM scan
+                    Else
+                        ' Unknown format for strFilterText; return an error
+                        blnValidScanFilter = False
+                    End If
+                End If
+
+
+                If blnValidScanFilter Then
+                    If eMRMScanType = MRMScanTypeConstants.NotMRM Then
+                        If blnSIMScan Then
+                            strScanTypeName = SIM_MS_TEXT.Trim
+                        ElseIf blnZoomScan Then
+                            strScanTypeName = "Zoom-MS"
+                        Else
+
+                            ' Normal, plain MS or MSn scan
+
+                            If intMSLevel > 1 Then
+                                strScanTypeName = "MSn"
+                            Else
+                                strScanTypeName = "MS"
+                            End If
+
+                            If strFilterText.ToUpper.IndexOf("FTMS") >= 0 Then
+                                ' HMS or HMSn scan
+                                strScanTypeName = "H" & strScanTypeName
+                            End If
+
+                            If intMSLevel > 1 AndAlso strCollisionMode.Length > 0 Then
+                                strScanTypeName = strCollisionMode.ToUpper() & "-" & strScanTypeName
+                            End If
+
+                        End If
+                    Else
+                        ' This is an MRM or SRM scan
+
+                        Select Case eMRMScanType
+                            Case MRMScanTypeConstants.MRMQMS
+                                If strFilterText.ToLower.IndexOf(MRM_Q1MS_TEXT.ToLower) > 0 Then
+                                    strScanTypeName = MRM_Q1MS_TEXT.Trim
+
+                                ElseIf strFilterText.ToLower.IndexOf(MRM_Q3MS_TEXT.ToLower) > 0 Then
+                                    strScanTypeName = MRM_Q3MS_TEXT.Trim
+                                Else
+                                    ' Unknown QMS mode
+                                    strScanTypeName = "MRM QMS"
+                                End If
+
+                            Case MRMScanTypeConstants.SRM
+                                If strCollisionMode.Length > 0 Then
+                                    strScanTypeName = strCollisionMode.ToUpper() & "-SRM"
+                                Else
+                                    strScanTypeName = "CID-SRM"
+                                End If
+
+
+                            Case MRMScanTypeConstants.FullNL
+                                strScanTypeName = "MRM_Full_NL"
+
+                            Case Else
+                                strScanTypeName = "MRM"
+                        End Select
+
+                    End If
+
+
+                End If
+
+            Catch ex As System.Exception
+
+            End Try
+
+            Return strScanTypeName
+
+        End Function
+
+
+        Public Shared Function MakeGenericFinniganScanFilter(ByVal strFilterText As String) As String
+
+            ' Will make a generic version of the FilterText in strFilterText
+            ' Examples:
+            ' From                                                                 To
+            ' ITMS + c ESI Full ms [300.00-2000.00]                                ITMS + c ESI Full ms
+            ' FTMS + p NSI Full ms [400.00-2000.00]                                FTMS + p NSI Full ms
+            ' ITMS + p ESI d Z ms [579.00-589.00]                                  ITMS + p ESI d Z ms
+            ' ITMS + c ESI d Full ms2 583.26@cid35.00 [150.00-1180.00]             ITMS + c ESI d Full ms2 0@cid35.00
+            ' ITMS + c NSI d Full ms2 606.30@pqd27.00 [50.00-2000.00]              ITMS + c NSI d Full ms2 0@pqd27.00
+            ' FTMS + c NSI d Full ms2 516.03@hcd40.00 [100.00-2000.00]             FTMS + c NSI d Full ms2 0@hcd40.00
+            ' ITMS + c NSI d sa Full ms2 516.03@etd100.00 [50.00-2000.00]          ITMS + c NSI d sa Full ms2 0@etd100.00
+
+            ' + c d Full ms2 1312.95@45.00 [ 350.00-2000.00]                       + c d Full ms2 0@45.00
+            ' + c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]          + c d Full ms3 0@45.00 0@45.00
+            ' ITMS + c NSI d Full ms10 421.76@35.00                                ITMS + c NSI d Full ms10 0@35.00
+
+            ' + p ms2 777.00@cid30.00 [210.00-1200.00]                             + p ms2 0@cid30.00
+            ' + c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]   + c NSI SRM ms2 0@cid15.00
+            ' + p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]     + p NSI Q1MS
+            ' + p NSI Q3MS [150.070-1500.000]                                      + p NSI Q3MS
+            ' c NSI Full cnl 162.053 [300.000-1200.000]                            c NSI Full cnl
+
+            Const COLLISION_SPEC_REGEX As String = "[0-9.]+@"
+
+
+            Dim strGenericScanFilterText As String = "MS"
+            Dim intCharIndex As Integer
+
+            Dim reCollisionSpecs As System.Text.RegularExpressions.Regex
+
+            Try
+                If strFilterText Is Nothing Then Exit Try
+
+                strGenericScanFilterText = String.Copy(strFilterText)
+
+                ' First look for and remove numbers between square brackets
+                intCharIndex = strGenericScanFilterText.IndexOf("["c)
+                If intCharIndex > 0 Then
+                    strGenericScanFilterText = strGenericScanFilterText.Substring(0, intCharIndex).TrimEnd(" "c)
+                End If
+
+                intCharIndex = strGenericScanFilterText.ToLower.IndexOf(MRM_FullNL_TEXT.ToLower)
+                If intCharIndex > 0 Then
+                    ' MRM neutral loss
+                    ' Remove any text after MRM_FullNL_TEXT
+                    strGenericScanFilterText = strGenericScanFilterText.Substring(0, intCharIndex + MRM_FullNL_TEXT.Length).Trim
+                    Exit Try
+                End If
+
+                ' Replace any digits before any @ sign with a 0
+                If strGenericScanFilterText.IndexOf("@"c) > 0 Then
+                    reCollisionSpecs = New System.Text.RegularExpressions.Regex(COLLISION_SPEC_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
+
+                    strGenericScanFilterText = reCollisionSpecs.Replace(strGenericScanFilterText, "0@")
+
+                    ''reMatch = reCollisionSpecs.Match(strGenericScanFilterText)
+                    ''If Not reMatch Is Nothing Then
+
+                    ''    Do While reMatch.Success
+                    ''        Try
+                    ''            ' Note that group 0 is the full mass range (two mass values, separated by a dash)
+                    ''            ' Group 1 is the first mass value
+                    ''            ' Group 2 is the second mass value
+
+                    ''            If reMatch.Groups.Count >= 3 Then
+                    ''                If udtMRMInfo.MRMMassCount = udtMRMInfo.MRMMassList.Length Then
+                    ''                    ' Need to reserve more room
+                    ''                    ReDim Preserve udtMRMInfo.MRMMassList(udtMRMInfo.MRMMassList.Length * 2 - 1)
+                    ''                End If
+
+                    ''                With udtMRMInfo.MRMMassList(udtMRMInfo.MRMMassCount)
+                    ''                    .StartMass = Double.Parse(reMatch.Groups(1).Value)
+                    ''                    .EndMass = Double.Parse(reMatch.Groups(2).Value)
+                    ''                    .CentralMass = Math.Round(.StartMass + (.EndMass - .StartMass) / 2, 6)
+                    ''                End With
+                    ''                udtMRMInfo.MRMMassCount += 1
+                    ''            End If
+
+                    ''        Catch ex As System.Exception
+                    ''            ' Error parsing out the mass values; skip this group
+                    ''        End Try
+
+                    ''        reMatch = reMatch.NextMatch
+                    ''    Loop
+                    ''End If
+                End If
+
+            Catch ex As System.Exception
+                ' Ignore errors
+            End Try
+
+            Return strGenericScanFilterText
 
         End Function
 
@@ -835,13 +1170,27 @@ Namespace FinniganFileIO
 
         End Function
 
-        Private Function ValidateMSScan(ByVal strFilterText As String, ByRef intMSLevel As Integer, ByRef blnSIMScan As Boolean, ByRef eMRMScanType As MRMScanTypeConstants) As Boolean
-            ' Returns True if strFilterText contains a known MS scan type
+        ''' <summary>
+        ''' Examines strFilterText to validate that it is a supported scan type
+        ''' </summary>
+        ''' <param name="strFilterText"></param>
+        ''' <param name="intMSLevel"></param>
+        ''' <param name="blnSIMScan"></param>
+        ''' <param name="eMRMScanType"></param>
+        ''' <param name="blnZoomScan"></param>
+        ''' <returns>True if strFilterText contains a known MS scan type</returns>
+        ''' <remarks></remarks>
+        Private Shared Function ValidateMSScan(ByVal strFilterText As String, _
+                                               ByRef intMSLevel As Integer, _
+                                               ByRef blnSIMScan As Boolean, _
+                                               ByRef eMRMScanType As MRMScanTypeConstants, _
+                                               ByRef blnZoomScan As Boolean) As Boolean
 
             Dim blnValidScan As Boolean
 
             blnSIMScan = False
             eMRMScanType = MRMScanTypeConstants.NotMRM
+            blnZoomScan = False
 
             If strFilterText.ToLower.IndexOf(FULL_MS_TEXT.ToLower) > 0 OrElse _
                 strFilterText.ToLower.IndexOf(MS_ONLY_C_TEXT.ToLower) > 0 OrElse _
@@ -861,7 +1210,8 @@ Namespace FinniganFileIO
                        strFilterText.ToLower.IndexOf(MS_ONLY_PZ_TEXT.ToLower) > 0 OrElse _
                        strFilterText.ToLower.IndexOf(MS_ONLY_DZ_TEXT.ToLower) > 0 Then
                     intMSLevel = 1
-                    blnValidScan = True            ' ToDo: Add full support for Zoom scan data
+                    blnZoomScan = True
+                    blnValidScan = True
                 Else
                     eMRMScanType = DetermineMRMScanType(strFilterText)
                     Select Case eMRMScanType
@@ -871,6 +1221,9 @@ Namespace FinniganFileIO
                         Case FinniganFileReaderBaseClass.MRMScanTypeConstants.SRM
                             intMSLevel = 2
                             blnValidScan = True            ' ToDo: Add support for TSQ SRM data
+                        Case MRMScanTypeConstants.FullNL
+                            intMSLevel = 2
+                            blnValidScan = True            ' ToDo: Add support for TSQ Full NL data
                         Case Else
                             blnValidScan = False
                     End Select

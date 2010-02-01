@@ -23,6 +23,7 @@ Module modMain
 
     Private mSaveTICandBPIPlots As Boolean
     Private mComputeOverallQualityScores As Boolean
+    Private mCreateDatasetInfoFile As Boolean
 
     Private mCheckFileIntegrity As Boolean
     Private mMaximumTextFileLinesToCheck As Integer
@@ -99,6 +100,7 @@ Module modMain
         mReprocessIfCachedSizeIsZero = False
         mSaveTICandBPIPlots = False
         mComputeOverallQualityScores = False
+        mCreateDatasetInfoFile = False
 
         mCheckFileIntegrity = False
         mComputeFileHashes = False
@@ -132,6 +134,7 @@ Module modMain
                     .ReprocessIfCachedSizeIsZero = mReprocessIfCachedSizeIsZero
                     .SaveTICAndBPIPlots = mSaveTICandBPIPlots
                     .ComputeOverallQualityScores = mComputeOverallQualityScores
+                    .CreateDatasetInfoFile = mCreateDatasetInfoFile
 
                     .CheckFileIntegrity = mCheckFileIntegrity
                     .MaximumTextFileLinesToCheck = mMaximumTextFileLinesToCheck
@@ -183,7 +186,7 @@ Module modMain
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String = String.Empty
-        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "T", "C", "M", "H", "QZ", "R", "Z", "QS", "Q"}
+        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "T", "C", "M", "H", "QZ", "R", "Z", "QS", "DI", "Q"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -224,6 +227,8 @@ Module modMain
                     If .RetrieveValueForParameter("Z", strValue) Then mReprocessIfCachedSizeIsZero = True
                     If .RetrieveValueForParameter("QS", strValue) Then mComputeOverallQualityScores = True
 
+                    If .RetrieveValueForParameter("DI", strValue) Then mCreateDatasetInfoFile = True
+                    
                     If .RetrieveValueForParameter("Q", strValue) Then mQuietMode = True
                 End With
 
@@ -250,7 +255,7 @@ Module modMain
             Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location))
             Console.WriteLine(" /I:InputFileNameOrFolderPath [/O:OutputFolderName]")
             Console.WriteLine(" [/P:ParamFilePath] [/S:[MaxLevel]] [IE] [/T]")
-            Console.WriteLine(" [/C] [/M:nnn] [/H] /[QZ] [/R] [/Z] [/QS] [/Q]")
+            Console.WriteLine(" [/C] [/M:nnn] [/H] /[QZ] [/R] [/Z] [/QS] [/DI] [/Q]")
             Console.WriteLine()
             Console.WriteLine("Use /I to specify the name of a file or folder to scan; the path can contain the wildcard character *")
             Console.WriteLine("The output folder name is optional.  If omitted, the acquisition time file will be created in the program directory.  If included, then a subfolder is created with the name OutputFolderName and the acquisition time file placed there.")
@@ -261,6 +266,7 @@ Module modMain
             Console.WriteLine("Use /T to save TIC and BPI plots (this process could take 1 to 3 minutes for each dataset).'")
             Console.WriteLine()
             Console.WriteLine("Use /QS to compute an overall quality score for the data in each datasets.")
+            Console.WriteLine("Use /DI to create a dataset info XML file for each dataset.")
             Console.WriteLine()
 
             Console.WriteLine("Use /C to perform an integrity check on all known file types; this process will open known file types and verify that they contain the expected data.")
