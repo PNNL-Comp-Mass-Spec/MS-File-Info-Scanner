@@ -28,13 +28,9 @@ Namespace DSSummarizer
 
     Public Class clsDatasetStatsSummarizer
 
-        Public Sub New()
-            mFileDate = "February 1, 2010"
-            InitializeLocalVariables()
-        End Sub
-
 #Region "Constants and Enums"
-        Public Const SCANTYPE_STATS_SEPCHAR As String = ":::"
+        Public Const SCANTYPE_STATS_SEPCHAR As String = "::###::"
+        Public Const DATASET_INFO_FILE_SUFFIX As String = "_DatasetInfo.xml"
 #End Region
 
 #Region "Structures"
@@ -69,6 +65,13 @@ Namespace DSSummarizer
         Protected mFileDate As String
         Protected mDatasetStatsSummaryFileName As String
         Protected mErrorMessage As String = String.Empty
+
+        Protected mDatasetScanStats As System.Collections.Generic.List(Of clsScanStatsEntry)
+        Public DatasetFileInfo As udtDatasetFileInfoType
+
+        Protected mDatasetSummaryStatsUpToDate As Boolean
+        Protected mDatasetSummaryStats As clsDatasetSummaryStats
+
 #End Region
 
 #Region "Properties"
@@ -98,6 +101,36 @@ Namespace DSSummarizer
 
 #End Region
 
+        Public Sub New()
+            mFileDate = "April 30, 2010"
+            InitializeLocalVariables()
+        End Sub
+
+        Public Sub AddDatasetScan(ByVal objScanStats As clsScanStatsEntry)
+
+            mDatasetScanStats.Add(objScanStats)
+            mDatasetSummaryStatsUpToDate = False
+
+        End Sub
+
+        Public Sub ClearCachedData()
+            If mDatasetScanStats Is Nothing Then
+                mDatasetScanStats = New System.Collections.Generic.List(Of clsScanStatsEntry)
+            Else
+                mDatasetScanStats.Clear()
+            End If
+
+            If mDatasetSummaryStats Is Nothing Then
+                mDatasetSummaryStats = New clsDatasetSummaryStats
+            Else
+                mDatasetSummaryStats.Clear()
+            End If
+
+            Me.DatasetFileInfo.Clear()
+
+            mDatasetSummaryStatsUpToDate = False
+
+        End Sub
         ''' <summary>
         ''' Summarizes the scan info in objScanStats()
         ''' </summary>
@@ -128,7 +161,7 @@ Namespace DSSummarizer
             Dim intBPIListMSnCount As Integer = 0
 
             Try
-                
+
                 If objScanStats Is Nothing Then
                     mErrorMessage = "objScanStats is Nothing; unable to continue"
                     Return False
@@ -275,20 +308,34 @@ Namespace DSSummarizer
 
         End Function
 
+        ''' <summary>
+        ''' Creates an XML file summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
+        ''' </summary>
+        ''' <param name="strDatasetName">Dataset Name</param>
+        ''' <param name="strDatasetInfoFilePath">File path to write the XML to</param>
+        ''' <returns>True if success; False if failure</returns>
+        ''' <remarks></remarks>
+        Public Function CreateDatasetInfoFile(ByVal strDatasetName As String, _
+                                              ByVal strDatasetInfoFilePath As String) As Boolean
+
+            Return CreateDatasetInfoFile(strDatasetName, strDatasetInfoFilePath, mDatasetScanStats, Me.DatasetFileInfo)
+        End Function
+
+        ''' <summary>
+        ''' Creates an XML file summarizing the data in objScanStats and udtDatasetFileInfo
+        ''' </summary>
+        ''' <param name="strDatasetName">Dataset Name</param>
+        ''' <param name="strDatasetInfoFilePath">File path to write the XML to</param>
+        ''' <param name="objScanStats">Scan stats to parse</param>
+        ''' <param name="udtDatasetFileInfo">Dataset Info</param>
+        ''' <returns>True if success; False if failure</returns>
+        ''' <remarks></remarks>
         Public Function CreateDatasetInfoFile(ByVal strDatasetName As String, _
                                               ByVal strDatasetInfoFilePath As String, _
                                               ByRef objScanStats As System.Collections.Generic.List(Of clsScanStatsEntry), _
                                               ByRef udtDatasetFileInfo As udtDatasetFileInfoType) As Boolean
 
-            Dim objDSInfo As System.Xml.XmlTextWriter
-            Dim objEnum As System.Collections.Generic.Dictionary(Of String, Integer).Enumerator
-
-            Dim objMASICScanStatsParser As DSSummarizer.clsDatasetStatsSummarizer
-            Dim objSummaryStats As DSSummarizer.clsDatasetSummaryStats
-
-            Dim intIndexMatch As Integer
-            Dim strScanType As String
-            Dim strScanFilterText As String
+            Dim swOutFile As System.IO.StreamWriter
 
             Dim blnSuccess As Boolean
 
@@ -300,15 +347,137 @@ Namespace DSSummarizer
                     mErrorMessage = ""
                 End If
 
-                objMASICScanStatsParser = New DSSummarizer.clsDatasetStatsSummarizer()
-                objSummaryStats = New DSSummarizer.clsDatasetSummaryStats
+                ' If CreateDatasetInfoXML() used a StringBuilder to cache the XML data, then we would have to use System.Text.Encoding.Unicode
+                ' However, CreateDatasetInfoXML() now uses a MemoryStream, so we're able to use UTF8
+                swOutFile = New System.IO.StreamWriter(New System.IO.FileStream(strDatasetInfoFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read), System.Text.Encoding.UTF8)
 
-                ' Parse the data in mScanStats to compute the bulk values
-                objMASICScanStatsParser.ComputeScanStatsSummary(objScanStats, objSummaryStats)
+                swOutFile.WriteLine(CreateDatasetInfoXML(strDatasetName, objScanStats, udtDatasetFileInfo))
 
-                objDSInfo = New System.Xml.XmlTextWriter(strDatasetInfoFilePath, System.Text.Encoding.UTF8)
-                objDSInfo.Formatting = System.Xml.Formatting.Indented
-                objDSInfo.Indentation = 2
+                swOutFile.Close()
+
+                blnSuccess = True
+
+            Catch ex As System.Exception
+                blnSuccess = False
+                mErrorMessage = "Error in CreateDatasetInfoFile: " & ex.Message
+            End Try
+
+            Return blnSuccess
+
+        End Function
+
+        ''' <summary>
+        ''' Creates XML summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
+        ''' Auto-determines the dataset name using Me.DatasetFileInfo.DatasetName
+        ''' </summary>
+        ''' <returns>XML (as string)</returns>
+        ''' <remarks></remarks>
+        Public Function CreateDatasetInfoXML() As String
+            Return CreateDatasetInfoXML(Me.DatasetFileInfo.DatasetName, mDatasetScanStats, Me.DatasetFileInfo)
+        End Function
+
+        ''' <summary>
+        ''' Creates XML summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
+        ''' Auto-determines the dataset name using Me.DatasetFileInfo.DatasetName
+        ''' </summary>
+        ''' <param name="strDatasetName">Dataset Name</param>
+        ''' <returns>XML (as string)</returns>
+        ''' <remarks></remarks>
+        Public Function CreateDatasetInfoXML(ByVal strDatasetName As String) As String
+            Return CreateDatasetInfoXML(strDatasetName, mDatasetScanStats, Me.DatasetFileInfo)
+        End Function
+
+
+        ''' <summary>
+        ''' Creates XML summarizing the data in objScanStats and udtDatasetFileInfo
+        ''' Auto-determines the dataset name using udtDatasetFileInfo.DatasetName
+        ''' </summary>
+        ''' <param name="objScanStats">Scan stats to parse</param>
+        ''' <param name="udtDatasetFileInfo">Dataset Info</param>
+        ''' <returns>XML (as string)</returns>
+        ''' <remarks></remarks>
+        Public Function CreateDatasetInfoXML(ByRef objScanStats As System.Collections.Generic.List(Of clsScanStatsEntry), _
+                                             ByRef udtDatasetFileInfo As udtDatasetFileInfoType) As String
+
+            Return CreateDatasetInfoXML(udtDatasetFileInfo.DatasetName, objScanStats, udtDatasetFileInfo)
+        End Function
+
+        ''' <summary>
+        ''' Creates XML summarizing the data in objScanStats and udtDatasetFileInfo
+        ''' </summary>
+        ''' <param name="strDatasetName">Dataset Name</param>
+        ''' <param name="objScanStats">Scan stats to parse</param>
+        ''' <param name="udtDatasetFileInfo">Dataset Info</param>
+        ''' <returns>XML (as string)</returns>
+        ''' <remarks></remarks>
+        Public Function CreateDatasetInfoXML(ByVal strDatasetName As String, _
+                                             ByRef objScanStats As System.Collections.Generic.List(Of clsScanStatsEntry), _
+                                             ByRef udtDatasetFileInfo As udtDatasetFileInfoType) As String
+
+            ' Create a MemoryStream to hold the results
+            Dim objMemStream As System.IO.MemoryStream
+            Dim objXMLSettings As System.Xml.XmlWriterSettings
+
+            Dim objDSInfo As System.Xml.XmlWriter
+            Dim objEnum As System.Collections.Generic.Dictionary(Of String, Integer).Enumerator
+
+            Dim objSummaryStats As DSSummarizer.clsDatasetSummaryStats
+
+            Dim intIndexMatch As Integer
+            Dim strScanType As String
+            Dim strScanFilterText As String
+
+            Dim blnSuccess As Boolean
+
+            Try
+
+                If objScanStats Is Nothing Then
+                    mErrorMessage = "objScanStats is Nothing; unable to continue"
+                    Return String.Empty
+                Else
+                    mErrorMessage = ""
+                End If
+
+                If objScanStats Is mDatasetScanStats Then
+                    objSummaryStats = GetDatasetSummaryStats()
+                Else
+                    objSummaryStats = New clsDatasetSummaryStats
+
+                    ' Parse the data in objScanStats to compute the bulk values
+                    Me.ComputeScanStatsSummary(objScanStats, objSummaryStats)
+                End If
+
+                objXMLSettings = New System.Xml.XmlWriterSettings()
+
+                With objXMLSettings
+                    .CheckCharacters = True
+                    .Indent = True
+                    .IndentChars = "  "
+                    .Encoding = System.Text.Encoding.UTF8
+
+                    ' Do not close output automatically so that MemoryStream
+                    ' can be read after the XmlWriter has been closed
+                    .CloseOutput = False
+                End With
+
+                ' We could cache the text using a StringBuilder, like this:
+                '
+                ' Dim sbDatasetInfo As New System.Text.StringBuilder
+                ' Dim objStringWriter As System.IO.StringWriter
+                ' objStringWriter = New System.IO.StringWriter(sbDatasetInfo)
+                ' objDSInfo = New System.Xml.XmlTextWriter(objStringWriter)
+                ' objDSInfo.Formatting = System.Xml.Formatting.Indented
+                ' objDSInfo.Indentation = 2
+
+                ' However, when you send the output to a StringBuilder it is always encoded as Unicode (UTF-16) 
+                '  since this is the only character encoding used in the .NET Framework for String values, 
+                '  and thus you'll see the attribute encoding="utf-16" in the opening XML declaration 
+                ' The alternative is to use a MemoryStream.  Here, the stream encoding is set by the XmlWriter 
+                '  and so you see the attribute encoding="utf-8" in the opening XML declaration encoding 
+                '  (since we used objXMLSettings.Encoding = System.Text.Encoding.UTF8)
+                '
+                objMemStream = New System.IO.MemoryStream()
+                objDSInfo = System.Xml.XmlWriter.Create(objMemStream, objXMLSettings)
 
                 objDSInfo.WriteStartDocument(True)
 
@@ -376,20 +545,72 @@ Namespace DSSummarizer
                 objDSInfo.Close()
                 objDSInfo = Nothing
 
+                ' Now Rewind the memory stream and output as a string
+                objMemStream.Position = 0
+                Dim srStreamReader As System.IO.StreamReader
+                srStreamReader = New System.IO.StreamReader(objMemStream)
+
+                ' Return the XML as text
+                Return srStreamReader.ReadToEnd()
+
                 blnSuccess = True
 
             Catch ex As System.Exception
                 blnSuccess = False
-                mErrorMessage = "Error in CreateDatasetInfoFile: " & ex.Message
+                mErrorMessage = "Error in CreateDatasetInfoXML: " & ex.Message
             End Try
 
-            Return blnSuccess
+            ' This code will not typically be reached
+            Return String.Empty
+
+        End Function
+
+        Public Function GetDatasetSummaryStats() As clsDatasetSummaryStats
+
+            If Not mDatasetSummaryStatsUpToDate Then
+                ComputeScanStatsSummary(mDatasetScanStats, mDatasetSummaryStats)
+                mDatasetSummaryStatsUpToDate = True
+            End If
+
+            Return mDatasetSummaryStats
 
         End Function
 
         Private Sub InitializeLocalVariables()
             mErrorMessage = String.Empty
+            ClearCachedData()
         End Sub
+
+        ''' <summary>
+        ''' Updates the scan type information for the specified scan number
+        ''' </summary>
+        ''' <param name="intScanNumber"></param>
+        ''' <param name="intScanType"></param>
+        ''' <param name="strScanTypeName"></param>
+        ''' <returns>True if the scan was found and updated; otherwise false</returns>
+        ''' <remarks></remarks>
+        Public Function UpdateDatasetScanType(ByVal intScanNumber As Integer, _
+                                              ByVal intScanType As Integer, _
+                                              ByVal strScanTypeName As String) As Boolean
+
+            Dim intIndex As Integer
+            Dim blnMatchFound As Boolean
+
+            ' Look for scan intScanNumber in mDatasetScanStats
+            For intIndex = 0 To mDatasetScanStats.Count - 1
+                If mDatasetScanStats(intIndex).ScanNumber = intScanNumber Then
+                    mDatasetScanStats(intIndex).ScanType = intScanType
+                    mDatasetScanStats(intIndex).ScanTypeName = strScanTypeName
+                    mDatasetSummaryStatsUpToDate = False
+
+                    blnMatchFound = True
+                    Exit For
+                End If
+            Next
+
+            Return blnMatchFound
+
+        End Function
 
         Public Shared Function ValueToString(ByVal sngValue As Single, ByVal intDigitsOfPrecision As Integer, Optional ByVal sngScientificNotationThreshold As Single = 1000000) As String
             Return ValueToString(CDbl(sngValue), intDigitsOfPrecision, CDbl(sngScientificNotationThreshold))

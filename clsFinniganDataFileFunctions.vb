@@ -24,6 +24,7 @@ Namespace FinniganFileIO
 
         Private Const MS_ONLY_PZ_TEXT As String = " p Z ms "            ' Likely a zoom scan
         Private Const MS_ONLY_DZ_TEXT As String = " d Z ms "            ' Dependent zoom scan
+        Private Const MS_ONLY_PZ_MS2_TEXT As String = " d Z ms2 "           ' Dependent MS2 zoom scan
         Private Const MS_ONLY_Z_TEXT As String = " NSI Z ms "           ' Likely a zoom scan
 
         Private Const FULL_MS_TEXT As String = "Full ms "
@@ -1209,6 +1210,12 @@ Namespace FinniganFileIO
                 ElseIf strFilterText.ToLower.IndexOf(MS_ONLY_Z_TEXT.ToLower) > 0 OrElse _
                        strFilterText.ToLower.IndexOf(MS_ONLY_PZ_TEXT.ToLower) > 0 OrElse _
                        strFilterText.ToLower.IndexOf(MS_ONLY_DZ_TEXT.ToLower) > 0 Then
+                    intMSLevel = 1
+                    blnZoomScan = True
+                    blnValidScan = True
+                ElseIf strFilterText.ToLower.IndexOf(MS_ONLY_PZ_MS2_TEXT.ToLower) > 0 Then
+                    ' Technically, this should have MSLevel = 2, but that would cause a bunch of problems elsewhere in MASIC
+                    ' Thus, we'll pretend it's MS1
                     intMSLevel = 1
                     blnZoomScan = True
                     blnValidScan = True

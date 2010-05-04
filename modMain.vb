@@ -7,11 +7,12 @@ Option Strict On
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "November 17, 2009"
+    Public Const PROGRAM_DATE As String = "May 3, 2010"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
     Private mParameterFilePath As String            ' Optional
+    Private mLogFilePath As String
 
     Private mRecurseFolders As Boolean
     Private mRecurseFoldersMaxLevels As Integer
@@ -20,6 +21,7 @@ Module modMain
     Private mPreventDuplicateEntriesInAcquisitionTimeFile As Boolean
     Private mReprocessingExistingFiles As Boolean
     Private mReprocessIfCachedSizeIsZero As Boolean
+    Private mUseCacheFiles As Boolean
 
     Private mSaveTICandBPIPlots As Boolean
     Private mComputeOverallQualityScores As Boolean
@@ -30,8 +32,8 @@ Module modMain
     Private mComputeFileHashes As Boolean
     Private mZipFileCheckAllData As Boolean
 
+    Private WithEvents mMSFileScanner As clsMSFileInfoScanner
 
-    Private mQuietMode As Boolean
 
     ''Private Function TestZipper(ByVal strFolderPath As String, ByVal strFileMatch As String) As Boolean
 
@@ -83,7 +85,6 @@ Module modMain
         ' Returns 0 if no error, error code if an error
 
         Dim intReturnCode As Integer
-        Dim objMSFileScanner As clsMSFileScanner
         Dim objParseCommandLine As New clsParseCommandLine
         Dim blnProceed As Boolean
 
@@ -91,6 +92,7 @@ Module modMain
         mInputDataFilePath = String.Empty
         mOutputFolderName = String.Empty
         mParameterFilePath = String.Empty
+        mLogFilePath = String.Empty
 
         mRecurseFolders = False
         mRecurseFoldersMaxLevels = 0
@@ -98,6 +100,8 @@ Module modMain
 
         mReprocessingExistingFiles = False
         mReprocessIfCachedSizeIsZero = False
+        mUseCacheFiles = True
+
         mSaveTICandBPIPlots = False
         mComputeOverallQualityScores = False
         mCreateDatasetInfoFile = False
@@ -126,13 +130,18 @@ Module modMain
                 ShowProgramHelp()
                 intReturnCode = -1
             Else
-                objMSFileScanner = New clsMSFileScanner
+                mMSFileScanner = New clsMSFileInfoScanner
 
-                With objMSFileScanner
-                    .ShowMessages = Not mQuietMode
+                With mMSFileScanner
+                    ' Note: These values will be overridden if /P was used and they are defined in the parameter file
+
+                    .UseCacheFiles = mUseCacheFiles
                     .ReprocessExistingFiles = mReprocessingExistingFiles
                     .ReprocessIfCachedSizeIsZero = mReprocessIfCachedSizeIsZero
+
                     .SaveTICAndBPIPlots = mSaveTICandBPIPlots
+                    .SaveLCMS2DPlots = mSaveTICandBPIPlots
+
                     .ComputeOverallQualityScores = mComputeOverallQualityScores
                     .CreateDatasetInfoFile = mCreateDatasetInfoFile
 
@@ -143,38 +152,38 @@ Module modMain
 
                     .IgnoreErrorsWhenRecursing = mIgnoreErrorsWhenRecursing
 
+                    If mLogFilePath.Length > 0 Then
+                        .LogMessagesToFile = True
+                        .LogFilePath = mLogFilePath
+                    End If
+
                     If Not mParameterFilePath Is Nothing AndAlso mParameterFilePath.Length > 0 Then
                         .LoadParameterFileSettings(mParameterFilePath)
                     End If
                 End With
 
                 If mRecurseFolders Then
-                    If objMSFileScanner.ProcessMSFilesAndRecurseFolders(mInputDataFilePath, mOutputFolderName, mRecurseFoldersMaxLevels) Then
+                    If mMSFileScanner.ProcessMSFilesAndRecurseFolders(mInputDataFilePath, mOutputFolderName, mRecurseFoldersMaxLevels) Then
                         intReturnCode = 0
                     Else
-                        intReturnCode = objMSFileScanner.ErrorCode
+                        intReturnCode = mMSFileScanner.ErrorCode
                     End If
                 Else
-                    If objMSFileScanner.ProcessMSFileOrFolderWildcard(mInputDataFilePath, mOutputFolderName, True) Then
+                    If mMSFileScanner.ProcessMSFileOrFolderWildcard(mInputDataFilePath, mOutputFolderName, True) Then
                         intReturnCode = 0
                     Else
-                        intReturnCode = objMSFileScanner.ErrorCode
-                        If intReturnCode <> 0 AndAlso Not mQuietMode Then
-                            Console.WriteLine("Error while processing: " & objMSFileScanner.GetErrorMessage())
+                        intReturnCode = mMSFileScanner.ErrorCode
+                        If intReturnCode <> 0 Then
+                            Console.WriteLine("Error while processing: " & mMSFileScanner.GetErrorMessage())
                         End If
                     End If
                 End If
 
-
-                objMSFileScanner.SaveCachedResults()
+                mMSFileScanner.SaveCachedResults()
             End If
 
         Catch ex As System.Exception
-            If mQuietMode Then
-                Throw ex
-            Else
-                Console.WriteLine("Error occurred in modMain->Main: " & ControlChars.NewLine & ex.Message)
-            End If
+            Console.WriteLine("Error occurred in modMain->Main: " & ControlChars.NewLine & ex.Message)
             intReturnCode = -1
         End Try
 
@@ -182,11 +191,17 @@ Module modMain
 
     End Function
 
+    Private Function GetAppVersion() As String
+        'Return System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")"
+
+        Return System.Reflection.Assembly.GetExecutingAssembly.GetName.Version.ToString & " (" & PROGRAM_DATE & ")"
+    End Function
+
     Private Function SetOptionsUsingCommandLineParameters(ByVal objParseCommandLine As clsParseCommandLine) As Boolean
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String = String.Empty
-        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "T", "C", "M", "H", "QZ", "R", "Z", "QS", "DI", "Q"}
+        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "T", "L", "C", "M", "H", "QZ", "R", "X", "Z", "QS", "DI"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -198,6 +213,7 @@ Module modMain
                     If .RetrieveValueForParameter("I", strValue) Then
                         mInputDataFilePath = strValue
                     ElseIf .NonSwitchParameterCount > 0 Then
+                        ' Treat the first non-switch parameter as the input file
                         mInputDataFilePath = .RetrieveNonSwitchParameter(0)
                     End If
 
@@ -211,6 +227,8 @@ Module modMain
                         End If
                     End If
                     If .RetrieveValueForParameter("IE", strValue) Then mIgnoreErrorsWhenRecursing = True
+
+                    If .RetrieveValueForParameter("L", strValue) Then mLogFilePath = strValue
 
                     If .RetrieveValueForParameter("C", strValue) Then mCheckFileIntegrity = True
                     If .RetrieveValueForParameter("M", strValue) Then
@@ -228,19 +246,15 @@ Module modMain
                     If .RetrieveValueForParameter("QS", strValue) Then mComputeOverallQualityScores = True
 
                     If .RetrieveValueForParameter("DI", strValue) Then mCreateDatasetInfoFile = True
-                    
-                    If .RetrieveValueForParameter("Q", strValue) Then mQuietMode = True
+
+                    If .RetrieveValueForParameter("X", strValue) Then mUseCacheFiles = False
                 End With
 
                 Return True
             End If
 
         Catch ex As System.Exception
-            If mQuietMode Then
-                Throw New System.Exception("Error parsing the command line parameters", ex)
-            Else
-                Console.WriteLine("Error parsing the command line parameters: " & ControlChars.NewLine & ex.Message)
-            End If
+            Console.WriteLine("Error parsing the command line parameters: " & ControlChars.NewLine & ex.Message)
         End Try
 
     End Function
@@ -248,14 +262,14 @@ Module modMain
     Private Sub ShowProgramHelp()
 
         Try
-            Console.WriteLine("This program will scan a series of MS data files (or data folders) and extract the acquisition start and end times, number of spectra, and the total size of the data, saving the values in the file " & clsMSFileScanner.DefaultAcquisitionTimeFilename & ". " & _
+            Console.WriteLine("This program will scan a series of MS data files (or data folders) and extract the acquisition start and end times, number of spectra, and the total size of the data, saving the values in the file " & clsMSFileInfoScanner.DefaultAcquisitionTimeFilename & ". " & _
                               "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar .WIFF files, Masslynx .Raw folders, and Bruker 1 folders.")
             Console.WriteLine()
 
             Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location))
             Console.WriteLine(" /I:InputFileNameOrFolderPath [/O:OutputFolderName]")
-            Console.WriteLine(" [/P:ParamFilePath] [/S:[MaxLevel]] [IE] [/T]")
-            Console.WriteLine(" [/C] [/M:nnn] [/H] /[QZ] [/R] [/Z] [/QS] [/DI] [/Q]")
+            Console.WriteLine(" [/P:ParamFilePath] [/S:[MaxLevel]] [IE] [/T] [/L:LogFilePath]")
+            Console.WriteLine(" [/C] [/M:nnn] [/H] /[QZ] [/R] [/Z] [/QS] [/DI]")
             Console.WriteLine()
             Console.WriteLine("Use /I to specify the name of a file or folder to scan; the path can contain the wildcard character *")
             Console.WriteLine("The output folder name is optional.  If omitted, the acquisition time file will be created in the program directory.  If included, then a subfolder is created with the name OutputFolderName and the acquisition time file placed there.")
@@ -263,7 +277,8 @@ Module modMain
 
             Console.WriteLine("The param file switch is optional.  If supplied, it should point to a valid XML parameter file.  If omitted, defaults are used.")
             Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine. Use /IE to ignore errors when recursing.")
-            Console.WriteLine("Use /T to save TIC and BPI plots (this process could take 1 to 3 minutes for each dataset).'")
+            Console.WriteLine("Use /T to save TIC and BPI plots (this process could take several minutes for each dataset).")
+            Console.WriteLine("Use /L to specify the file path for logging messages.")
             Console.WriteLine()
             Console.WriteLine("Use /QS to compute an overall quality score for the data in each datasets.")
             Console.WriteLine("Use /DI to create a dataset info XML file for each dataset.")
@@ -275,16 +290,15 @@ Module modMain
 
             Console.WriteLine("Use /H to compute Sha-1 file hashes when verifying file integrity.")
             Console.WriteLine("Use /QZ to run a quick zip-file validation test when verifying file integrity (the test does not check all data in the .Zip file).")
+            Console.WriteLine()
 
             Console.WriteLine("Use /R to reprocess files that are already defined in the acquisition time file.")
             Console.WriteLine("Use /Z to reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes.")
-
-            Console.WriteLine("Use /Q to specify quiet mode (no messages displayed as popups)")
+            Console.WriteLine("Use /X to not use the acquisition time file.  This is useful if you use /DI and/or /T.")
             Console.WriteLine()
 
             Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005")
-            Console.WriteLine("Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.")
-            Console.WriteLine("This is version " & System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")")
+            Console.WriteLine("Version: " & GetAppVersion())
             Console.WriteLine()
 
             Console.WriteLine("E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com")
@@ -294,10 +308,20 @@ Module modMain
             System.Threading.Thread.Sleep(750)
 
         Catch ex As System.Exception
-             Console.WriteLine("Error displaying the program syntax: " & ex.Message)
+            Console.WriteLine("Error displaying the program syntax: " & ex.Message)
         End Try
 
     End Sub
 
+
+    Private Sub mMSFileScanner_ErrorEvent(ByVal Message As String) Handles mMSFileScanner.ErrorEvent
+        ' We could any error messages here
+        ' However, mMSFileScanner already will have written out to the console, so there is no need to do so again
+    End Sub
+
+    Private Sub mMSFileScanner_MessageEvent(ByVal Message As String) Handles mMSFileScanner.MessageEvent
+        ' We could any status messages here
+        ' However, mMSFileScanner already will have written out to the console, so there is no need to do so again
+    End Sub
 
 End Module

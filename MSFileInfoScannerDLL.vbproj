@@ -3,14 +3,14 @@
     <ProjectType>Local</ProjectType>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{97AED2CA-6650-4E06-A7BE-BF85D9A83653}</ProjectGuid>
+    <ProjectGuid>{E151DC79-60C0-4F15-9E50-099C8E2617F9}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ApplicationIcon>
     </ApplicationIcon>
     <AssemblyKeyContainerName>
     </AssemblyKeyContainerName>
-    <AssemblyName>MSFileInfoScanner</AssemblyName>
+    <AssemblyName>MSFileInfoScannerDLL</AssemblyName>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <AssemblyOriginatorKeyMode>None</AssemblyOriginatorKeyMode>
@@ -18,15 +18,16 @@
     <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
     <DelaySign>false</DelaySign>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <OptionCompare>Binary</OptionCompare>
     <OptionExplicit>On</OptionExplicit>
     <OptionStrict>On</OptionStrict>
     <RootNamespace>MSFileInfoScanner</RootNamespace>
-    <StartupObject>MSFileInfoScanner.modMain</StartupObject>
+    <StartupObject>
+    </StartupObject>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
-    <MyType>Console</MyType>
+    <MyType>Windows</MyType>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>2.0</OldToolsVersion>
@@ -34,11 +35,12 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>bin\</OutputPath>
-    <DocumentationFile>MSFileInfoScanner.xml</DocumentationFile>
+    <DocumentationFile>MSFileInfoScannerDLL.xml</DocumentationFile>
     <BaseAddress>285212672</BaseAddress>
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
-    <DefineConstants>XRAW_Missing=False</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <DebugSymbols>true</DebugSymbols>
@@ -53,7 +55,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\</OutputPath>
-    <DocumentationFile>MSFileInfoScanner.xml</DocumentationFile>
+    <DocumentationFile>MSFileInfoScannerDLL.xml</DocumentationFile>
     <BaseAddress>285212672</BaseAddress>
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
@@ -150,9 +152,6 @@
     <Compile Include="clsParseCommandLine.vb" />
     <Compile Include="clsTICandBPIPlotter.vb" />
     <Compile Include="clsXmlSettingsFileAccessor.vb">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="modMain.vb">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MSFileInfoProcessorInterface.vb">

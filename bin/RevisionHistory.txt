@@ -1,5 +1,21 @@
 MS File Info Scanner Change Log
 
+Version 1.1.3775; May 3, 2010
+	- Updated to create the _DatasetInfo.xml files as UTF8 instead of as Unicode
+	- Updated to allow for compiling as a DLL to be called via the Dataset Capture Manager
+
+Version 1.1.3771; April 29, 2010
+	- Added option to create a 2D plot of m/z vs. scan number
+		- Enabled if /T is used, or if defined in the settings file
+
+Version 1.1.3768; April 26, 2010
+	- Added option to create TIC and BPI plots
+		- Use switch /T
+		- Creates a BPI for each scan type (MS, MSn) plus an overall TIC
+	- Added support for Bruker XMass folders
+	- Added switch /QS to compute an overall quality score for the data in each datasets
+		- Not yet implemented
+
 Version 1.0.3684; February 1, 2009
 	- Added the option to create a DatasetInfo .XML file
 		- Use switch /DI

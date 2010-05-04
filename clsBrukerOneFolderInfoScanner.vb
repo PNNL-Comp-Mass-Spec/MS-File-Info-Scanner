@@ -342,7 +342,7 @@ Public Class clsBrukerOneFolderInfoScanner
         Dim blnSuccess As Boolean
 
         Try
-            ' Determine wheterh strDataFilePath points to a file or a folder
+            ' Determine whether strDataFilePath points to a file or a folder
             ' See if strFileOrFolderPath points to a valid file
             ioFileInfo = New System.IO.FileInfo(strDataFilePath)
 

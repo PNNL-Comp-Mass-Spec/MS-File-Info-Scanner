@@ -69,7 +69,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 
         Try
             blnDeleteLocalFile = False
-            strDataFilePathLocal = System.IO.Path.Combine(clsMSFileScanner.GetAppFolderPath, System.IO.Path.GetFileName(strDataFilePath))
+            strDataFilePathLocal = System.IO.Path.Combine(clsMSFileInfoScanner.GetAppFolderPath, System.IO.Path.GetFileName(strDataFilePath))
 
             If strDataFilePathLocal.ToLower <> strDataFilePath.ToLower Then
                 Console.WriteLine("Copying file " & System.IO.Path.GetFileName(strDataFilePath) & " to the working folder")
@@ -141,7 +141,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
                 System.IO.File.Delete(strDataFilePathLocal)
             Catch ex As System.Exception
                 ' Deletion failed
-                Console.WriteLine("Deletion failed for: " & System.IO.Path.GetFileName(strDataFilePathLocal))
+                ReportError("Deletion failed for: " & System.IO.Path.GetFileName(strDataFilePathLocal))
             End Try
         End If
 

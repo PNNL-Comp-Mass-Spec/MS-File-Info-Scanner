@@ -11,6 +11,7 @@ Public Interface iMSFileInfoProcessor
         CreateTICAndBPI = 0
         ComputeOverallQualityScores = 1
         CreateDatasetInfoFile = 2
+        CreateLCMS2DPlots = 3
     End Enum
 
     ' ToDo: Update udtFileInfo to include some overall quality scores
@@ -28,34 +29,20 @@ Public Interface iMSFileInfoProcessor
         Public OverallQualityScore As Single
     End Structure
 
-    Structure udtChromatogramInfoType
-        Public ScanCount As Integer
-        Public ScanNum() As Integer
-        Public ScanIntensity() As Double
-        Public ScanMSLevel() As Integer
-
-        Public Sub Initialize()
-            ScanCount = 0
-            ReDim ScanNum(9)
-            ReDim ScanIntensity(9)
-            ReDim ScanMSLevel(9)
-        End Sub
-
-        Public Sub TrimArrays()
-            ReDim Preserve ScanNum(ScanCount - 1)
-            ReDim Preserve ScanIntensity(ScanCount - 1)
-            ReDim Preserve ScanMSLevel(ScanCount - 1)
-        End Sub
-    End Structure
-
     Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As udtFileInfoType) As Boolean
-    Function CreateDatasetInfoFile(ByVal strInputFileName As String, ByVal strOutputFolderPath As String) As Boolean
+    Function CreateOutputFiles(ByVal strInputFileName As String, ByVal strOutputFolderPath As String) As Boolean
+
+    Function GetDatasetInfoXML() As String
     Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
 
-    ReadOnly Property BPI() As udtChromatogramInfoType
-    ReadOnly Property TIC() As udtChromatogramInfoType
+    'ReadOnly Property BPI() As udtChromatogramInfoType
+    'ReadOnly Property TIC() As udtChromatogramInfoType
+
+    Property LCMS2DPlotOptions() As clsLCMSDataPlotter.clsOptions
 
     Function GetOption(ByVal eOption As ProcessingOptions) As Boolean
     Sub SetOption(ByVal eOption As ProcessingOptions, ByVal blnValue As Boolean)
+
+    Event ErrorEvent(ByVal Message As String)
 End Interface
 

@@ -32,34 +32,43 @@ Public Class clsFinniganRawFileInfoScanner
         dblOverallAvgIntensitySum = 0
         intOverallAvgCount = 0
 
-        intScanCount = objXcaliburAccessor.GetNumScans
-        For intScanNumber = 1 To intScanCount
-            ' This function returns the number of points in dblIonMZ() and dblIonIntensity()
-            intReturnCode = objXcaliburAccessor.GetScanData(intScanNumber, dblIonMZ, dblIonIntensity, udtScanHeaderInfo)
-
-            If intReturnCode > 0 Then
-
-                If Not dblIonIntensity Is Nothing AndAlso dblIonIntensity.Length > 0 Then
-                    ' ToDo: Analyze dblIonMZ and dblIonIntensity to compute a quality scores
-                    ' Keep track of the quality scores and then store one or more overall quality scores in udtFileInfo.OverallQualityScore
-                    ' For now, this just computes the average intensity for each scan and then computes and overall average intensity value
-
-                    dblIntensitySum = 0
-                    For intIonIndex = 0 To dblIonIntensity.Length - 1
-                        dblIntensitySum += dblIonIntensity(intIonIndex)
-                    Next intIonIndex
-
-                    dblOverallAvgIntensitySum += dblIntensitySum / dblIonIntensity.Length
-
-                    intOverallAvgCount += 1
-                End If
-            End If
-        Next intScanNumber
-
-        If intOverallAvgCount > 0 Then
-            sngOverallScore = CSng(dblOverallAvgIntensitySum / intOverallAvgCount)
+        If mLCMS2DPlot.ScanCountCached > 0 Then
+            ' Obtain the overall average intensity value using the data cached in mLCMS2DPlot
+            ' This avoids having to reload all of the data using objXcaliburAccessor
+            Dim intMSLevelFilter As Integer = 1
+            sngOverallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(intMSLevelFilter)
         Else
-            sngOverallScore = 0
+
+            intScanCount = objXcaliburAccessor.GetNumScans
+            For intScanNumber = 1 To intScanCount
+                ' This function returns the number of points in dblIonMZ() and dblIonIntensity()
+                intReturnCode = objXcaliburAccessor.GetScanData(intScanNumber, dblIonMZ, dblIonIntensity, udtScanHeaderInfo)
+
+                If intReturnCode > 0 Then
+
+                    If Not dblIonIntensity Is Nothing AndAlso dblIonIntensity.Length > 0 Then
+                        ' ToDo: Analyze dblIonMZ and dblIonIntensity to compute a quality scores
+                        ' Keep track of the quality scores and then store one or more overall quality scores in udtFileInfo.OverallQualityScore
+                        ' For now, this just computes the average intensity for each scan and then computes and overall average intensity value
+
+                        dblIntensitySum = 0
+                        For intIonIndex = 0 To dblIonIntensity.Length - 1
+                            dblIntensitySum += dblIonIntensity(intIonIndex)
+                        Next intIonIndex
+
+                        dblOverallAvgIntensitySum += dblIntensitySum / dblIonIntensity.Length
+
+                        intOverallAvgCount += 1
+                    End If
+                End If
+            Next intScanNumber
+
+            If intOverallAvgCount > 0 Then
+                sngOverallScore = CSng(dblOverallAvgIntensitySum / intOverallAvgCount)
+            Else
+                sngOverallScore = 0
+            End If
+
         End If
 
         udtFileInfo.OverallQualityScore = sngOverallScore
@@ -84,24 +93,30 @@ Public Class clsFinniganRawFileInfoScanner
         Dim udtScanHeaderInfo As FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
         Dim blnSuccess As Boolean
 
-        If mCreateTICAndBPI Then
+        Console.Write("  Loading scan details")
+        
+        If mSaveTICAndBPI Then
             ' Initialize the TIC and BPI arrays
-            MyBase.InitializeTICandBPI()
+            MyBase.InitializeTICAndBPI()
+        End If
+
+        If mSaveLCMS2DPlots Then
+            MyBase.InitializeLCMS2DPlot()
         End If
 
         intScanCount = objXcaliburAccessor.GetNumScans
         For intScanNumber = 1 To intScanCount
-            blnSuccess = objXcaliburAccessor.GetScanInfo(intScanNumber, udtScanHeaderInfo)
+            Try
 
-            If blnSuccess Then
-                If mCreateTICAndBPI Then
-                    With udtScanHeaderInfo
-                        AddChromatogramPoint(mBPI, intScanNumber, .BasePeakIntensity, .MSLevel)
-                        AddChromatogramPoint(mTIC, intScanNumber, .TotalIonCurrent, .MSLevel)
-                    End With
-                End If
+                blnSuccess = objXcaliburAccessor.GetScanInfo(intScanNumber, udtScanHeaderInfo)
 
-                If mCreateDatasetInfoFile Then
+                If blnSuccess Then
+                    If mSaveTICAndBPI Then
+                        With udtScanHeaderInfo
+                            mTICandBPIPlot.AddData(intScanNumber, .MSLevel, CSng(.RetentionTime), .BasePeakIntensity, .TotalIonCurrent)
+                        End With
+                    End If
+
 
                     Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
 
@@ -120,31 +135,48 @@ Public Class clsFinniganRawFileInfoScanner
                         ' Base peak signal to noise ratio
                         objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
 
-                        objScanStatsEntry.IonCount = 0
-                        objScanStatsEntry.IonCountRaw = 0
+                        objScanStatsEntry.IonCount = .NumPeaks
+                        objScanStatsEntry.IonCountRaw = .NumPeaks
                     End With
-                    mDatasetScanStats.Add(objScanStatsEntry)
+                    mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
 
                 End If
-             
+            Catch ex As System.Exception
+                ReportError("Error loading header info for scan " & intScanNumber & ": " & ex.Message)
+            End Try
 
+            Try
+
+                If mSaveLCMS2DPlots Then
+                    ' Also need to load the raw data
+
+                    Dim intIonCount As Integer
+                    Dim dblMZList() As Double
+                    Dim dblIntensityList() As Double
+
+                    ' Load the ions for this scan
+
+                    intIonCount = objXcaliburAccessor.GetScanData(intScanNumber, dblMZList, dblIntensityList, udtScanHeaderInfo)
+
+                    If intIonCount > 0 Then
+                        mLCMS2DPlot.AddScan(intScanNumber, udtScanHeaderInfo.MSLevel, CSng(udtScanHeaderInfo.RetentionTime), _
+                                            intIonCount, dblMZList, dblIntensityList)
+                    End If
+
+                End If
+
+            Catch ex As System.Exception
+                ReportError("Error loading m/z and intensity values for scan " & intScanNumber & ": " & ex.Message)
+            End Try
+
+            If intScanNumber Mod 100 = 0 Then
+                Console.Write(".")
             End If
+
         Next intScanNumber
 
-        If mCreateTICAndBPI Then
-            ' Note that the TIC and BPI are actually written to disk by clsMSFileScanner.SaveTICAndBPIPlotFiles
+        Console.WriteLine()
 
-            ' Trim the TIC and BPI array to length
-            If mBPI.ScanCount > 0 Then
-                mBPI.TrimArrays()
-            End If
-
-            If mTIC.ScanCount > 0 Then
-                mTIC.TrimArrays()
-            End If
-
-        End If
-     
     End Sub
 
     Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
@@ -191,11 +223,7 @@ Public Class clsFinniganRawFileInfoScanner
             .ScanCount = 0
         End With
 
-        If mDatasetScanStats Is Nothing Then
-            mDatasetScanStats = New System.Collections.Generic.List(Of DSSummarizer.clsScanStatsEntry)
-        Else
-            mDatasetScanStats.Clear()
-        End If
+        mDatasetStatsSummarizer.ClearCachedData()
 
         blnDeleteLocalFile = False
         blnReadError = False
@@ -208,14 +236,14 @@ Public Class clsFinniganRawFileInfoScanner
         ' Open a handle to the data file
         If Not objXcaliburAccessor.OpenRawFile(ioFileInfo.FullName) Then
             ' File open failed
-            Console.WriteLine("Call to .OpenRawFile failed for: " & ioFileInfo.FullName)
+            ReportError("Call to .OpenRawFile failed for: " & ioFileInfo.FullName)
             blnReadError = True
 
-            If clsMSFileScanner.GetAppFolderPath.Substring(0, 2).ToLower <> ioFileInfo.FullName.Substring(0, 2).ToLower Then
+            If clsMSFileInfoScanner.GetAppFolderPath.Substring(0, 2).ToLower <> ioFileInfo.FullName.Substring(0, 2).ToLower Then
                 ' Copy the file locally and try again
 
                 Try
-                    strDataFilePathLocal = System.IO.Path.Combine(clsMSFileScanner.GetAppFolderPath, System.IO.Path.GetFileName(strDataFilePath))
+                    strDataFilePathLocal = System.IO.Path.Combine(clsMSFileInfoScanner.GetAppFolderPath, System.IO.Path.GetFileName(strDataFilePath))
 
                     If strDataFilePathLocal.ToLower <> strDataFilePath.ToLower Then
                         Console.WriteLine("Copying file " & System.IO.Path.GetFileName(strDataFilePath) & " to the working folder")
@@ -268,9 +296,9 @@ Public Class clsFinniganRawFileInfoScanner
                     End With
                 End Try
 
-                If mCreateTICAndBPI OrElse mCreateDatasetInfoFile Then
+                If mSaveTICAndBPI OrElse mCreateDatasetInfoFile OrElse mSaveLCMS2DPlots Then
                     ' Load data from each scan
-                    ' This is used to create the TIC and BPI, and/or to create the Dataset Info File
+                    ' This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
                     LoadScanDetails(objXcaliburAccessor)
                 End If
 
@@ -288,10 +316,10 @@ Public Class clsFinniganRawFileInfoScanner
 
         ' Read the file info from the file system
         ' (much of this is already in udtFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
-        UpdateDatasetFileStats(mDatasetFileInfo, ioFileInfo, intDatasetID)
+        UpdateDatasetFileStats(ioFileInfo, intDatasetID)
 
-        ' Copy over the upadted filetime info from udtFileInfo to mDatasetFileInfo
-        With mDatasetFileInfo
+        ' Copy over the updated filetime info from udtFileInfo to mDatasetFileInfo
+        With mDatasetStatsSummarizer.DatasetFileInfo
             .FileSystemCreationTime = udtFileInfo.FileSystemCreationTime
             .FileSystemModificationTime = udtFileInfo.FileSystemModificationTime
             .DatasetID = udtFileInfo.DatasetID
@@ -309,7 +337,7 @@ Public Class clsFinniganRawFileInfoScanner
                 System.IO.File.Delete(strDataFilePathLocal)
             Catch ex As System.Exception
                 ' Deletion failed
-                Console.WriteLine("Deletion failed for: " & System.IO.Path.GetFileName(strDataFilePathLocal))
+                ReportError("Deletion failed for: " & System.IO.Path.GetFileName(strDataFilePathLocal))
             End Try
         End If
 

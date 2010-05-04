@@ -10,12 +10,13 @@ Option Strict On
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 ' Started October 11, 2003
 
-Public Class clsMSFileScanner
+Public Class clsMSFileInfoScanner
 
     Public Sub New()
-        mFileDate = modMain.PROGRAM_DATE
+        mFileDate = "May 3, 2010"
 
         mFileIntegrityChecker = New clsFileIntegrityChecker
+        mMSFileInfoDataCache = New clsMSFileInfoDataCache
 
         InitializeLocalVariables()
     End Sub
@@ -34,36 +35,12 @@ Public Class clsMSFileScanner
     Public Const DEFAULT_FILE_INTEGRITY_ERRORS_FILENAME_XML As String = "FileIntegrityErrors.xml"
 
     Public Const ABORT_PROCESSING_FILENAME As String = "AbortProcessing.txt"
-    Public Const XML_SECTION_MSFILESCANNER_SETTINGS As String = "MSFileScanner"
+    Public Const XML_SECTION_MSFILESCANNER_SETTINGS As String = "MSFileInfoScannerSettings"
 
     Private Const FILE_MODIFICATION_WINDOW_MINUTES As Integer = 60
-    Private Const MAX_FILE_READ_MAX_ACCESS_ATTEMPTS As Integer = 2
-    Private Const USE_XML_OUTPUT_FILE As Boolean = False
+    Private Const MAX_FILE_READ_ACCESS_ATTEMPTS As Integer = 2
+    Public Const USE_XML_OUTPUT_FILE As Boolean = False
     Private Const SKIP_FILES_IN_ERROR As Boolean = True
-
-    Private Const MS_FILEINFO_DATATABLE As String = "MSFileInfoTable"
-    Private Const COL_NAME_DATASET_ID As String = "DatasetID"
-    Private Const COL_NAME_DATASET_NAME As String = "DatasetName"
-    Private Const COL_NAME_FILE_EXTENSION As String = "FileExtension"
-    Private Const COL_NAME_ACQ_TIME_START As String = "AcqTimeStart"
-    Private Const COL_NAME_ACQ_TIME_END As String = "AcqTimeEnd"
-    Private Const COL_NAME_SCAN_COUNT As String = "ScanCount"
-    Private Const COL_NAME_FILE_SIZE_BYTES As String = "FileSizeBytes"
-    Private Const COL_NAME_INFO_LAST_MODIFIED As String = "InfoLastModified"
-    Private Const COL_NAME_FILE_MODIFICATION_DATE As String = "FileModificationDate"
-
-    Private Const FOLDER_INTEGRITY_INFO_DATATABLE As String = "FolderIntegrityInfoTable"
-    Private Const COL_NAME_FOLDER_ID As String = "FolderID"
-    Private Const COL_NAME_FOLDER_PATH As String = "FolderPath"
-    Private Const COL_NAME_FILE_COUNT As String = "FileCount"
-    Private Const COL_NAME_COUNT_FAIL_INTEGRITY As String = "FileCountFailedIntegrity"
-
-    Private Const COL_NAME_FILE_NAME As String = "FileName"
-    Private Const COL_NAME_FAILED_INTEGRITY_CHECK As String = "FailedIntegrityCheck"
-    Private Const COL_NAME_SHA1_HASH As String = "Sha1Hash"
-
-
-    Private Const MINIMUM_DATETIME As DateTime = #1/1/1900#     ' Equivalent to DateTime.MinValue
 
     Public Enum eMSFileScannerErrorCodes
         NoError = 0
@@ -79,44 +56,9 @@ Public Class clsMSFileScanner
         OutputFileWriteError = 256
         FileIntegrityCheckError = 512
 
+        DatabasePostingError = 1024
+
         UnspecifiedError = -1
-    End Enum
-
-    Public Enum eDataFileTypeConstants
-        MSFileInfo = 0
-        FolderIntegrityInfo = 1
-        FileIntegrityDetails = 2
-        FileIntegrityErrors = 3
-    End Enum
-
-    Public Enum eMSFileInfoResultsFileColumns
-        DatasetID = 0
-        DatasetName = 1
-        FileExtension = 2
-        AcqTimeStart = 3
-        AcqTimeEnd = 4
-        ScanCount = 5
-        FileSizeBytes = 6
-        InfoLastModified = 7
-        FileModificationDate = 8
-    End Enum
-
-    Public Enum eFolderIntegrityInfoFileColumns
-        FolderID = 0
-        FolderPath = 1
-        FileCount = 2
-        FileCountFailedIntegrity = 3
-        InfoLastModified = 4
-    End Enum
-
-    Public Enum eFileIntegrityDetailsFileColumns
-        FolderID = 0
-        FileName = 1
-        FileSizeBytes = 2
-        FileModified = 3
-        FailedIntegrityCheck = 4
-        Sha1Hash = 5
-        InfoLastModified = 6
     End Enum
 
     Public Enum eMSFileProcessingStateConstants
@@ -126,10 +68,11 @@ Public Class clsMSFileScanner
         ProcessedSuccessfully = 3
     End Enum
 
-    Private Enum eCachedResultsStateConstants
-        NotInitialized = 0
-        InitializedButUnmodified = 1
-        Modified = 2
+    Public Enum eDataFileTypeConstants
+        MSFileInfo = 0
+        FolderIntegrityInfo = 1
+        FileIntegrityDetails = 2
+        FileIntegrityErrors = 3
     End Enum
 
     ''Private Enum eMSFileTypeConstants
@@ -139,6 +82,12 @@ Public Class clsMSFileScanner
     ''    MicromassRawFolder = 3
     ''    AgilentOrQStarWiffFile = 4
     ''End Enum
+
+    Protected Enum eMessageTypeConstants
+        Normal = 0
+        ErrorMsg = 1
+        Warning = 2
+    End Enum
 
 #End Region
 
@@ -150,17 +99,15 @@ Public Class clsMSFileScanner
 
     Private mFileDate As String
     Private mErrorCode As eMSFileScannerErrorCodes
-    Private mShowMessages As Boolean
 
-    Private mStatusMessage As String
     Private mAbortProcessing As Boolean
 
-    Private mAcquisitionTimeFilePath As String
-    Private mFolderIntegrityInfoFilePath As String
+    ' If the following is false, then data is not loaded/saved from/to the DatasetTimeFile.txt or the FolderIntegrityInfo.txt file
+    Private mUseCacheFiles As Boolean
+
     Private mFileIntegrityDetailsFilePath As String
     Private mFileIntegrityErrorsFilePath As String
 
-    Private mDataFileSepChar As Char
     Private mIgnoreErrorsWhenRecursing As Boolean
 
     Private mReprocessExistingFiles As Boolean
@@ -169,25 +116,42 @@ Public Class clsMSFileScanner
     Private mRecheckFileIntegrityForExistingFolders As Boolean
 
     Private mSaveTICAndBPIPlots As Boolean
+    Private mSaveLCMS2DPlots As Boolean
+
     Private mComputeOverallQualityScores As Boolean
     Private mCreateDatasetInfoFile As Boolean
 
     Private mCheckFileIntegrity As Boolean
 
-    Private mCachedResultsAutoSaveIntervalMinutes As Integer
-    Private mCachedMSInfoResultsLastSaveTime As DateTime
-    Private mCachedFolderIntegrityInfoLastSaveTime As DateTime
+    Private mDSInfoConnectionString As String
+    Private mDSInfoDBPostingEnabled As Boolean
+    Private mDSInfoStoredProcedure As String
 
-    Private mMSFileInfoDataset As System.Data.DataSet
-    Private mMSFileInfoCachedResultsState As eCachedResultsStateConstants
+    Private mLCMS2DPlotOptions As clsLCMSDataPlotter.clsOptions
 
-    Private mFolderIntegrityInfoDataset As System.Data.DataSet
-    Private mFolderIntegrityInfoResultsState As eCachedResultsStateConstants
-    Private mMaximumFolderIntegrityInfoFolderID As Integer = 0
+    Protected mLogMessagesToFile As Boolean
+    Protected mLogFilePath As String
+    Protected mLogFile As System.IO.StreamWriter
+
+    ' This variable is updated in ProcessMSFileOrFolder
+    Protected mOutputFolderPath As String
+    Protected mLogFolderPath As String          ' If blank, then mOutputFolderPath will be used; if mOutputFolderPath is also blank, then the log is created in the same folder as the executing assembly
+
+    Protected mDatasetInfoXML As String = ""
 
     Private WithEvents mFileIntegrityChecker As clsFileIntegrityChecker
     Private mFileIntegrityDetailsWriter As System.IO.StreamWriter
     Private mFileIntegrityErrorsWriter As System.IO.StreamWriter
+
+    Private WithEvents mMSInfoScanner As MSFileInfoScanner.iMSFileInfoProcessor
+
+    Private WithEvents mMSFileInfoDataCache As clsMSFileInfoDataCache
+
+    Private WithEvents mExecuteSP As clsExecuteDatabaseSP
+
+    Public Event MessageEvent(ByVal Message As String)
+    Public Event ErrorEvent(ByVal Message As String)
+
 #End Region
 
 #Region "Processing Options and Interface Functions"
@@ -207,15 +171,6 @@ Public Class clsMSFileScanner
         End Get
         Set(ByVal value As String)
             SetDataFileFilename(value, eDataFileTypeConstants.MSFileInfo)
-        End Set
-    End Property
-
-    Public Property AcquisitionTimeFileSepChar() As Char
-        Get
-            Return mDataFileSepChar
-        End Get
-        Set(ByVal value As Char)
-            mDataFileSepChar = value
         End Set
     End Property
 
@@ -240,12 +195,21 @@ Public Class clsMSFileScanner
         End Set
     End Property
 
+    ''' <summary>
+    ''' Returns the dataset info, formatted as XML
+    ''' </summary>
+    Public ReadOnly Property DatasetInfoXML() As String
+        Get
+            Return mDatasetInfoXML
+        End Get
+    End Property
+
     Public Function GetDataFileFilename(ByVal eDataFileType As eDataFileTypeConstants) As String
         Select Case eDataFileType
             Case eDataFileTypeConstants.MSFileInfo
-                Return mAcquisitionTimeFilePath
+                Return mMSFileInfoDataCache.AcquisitionTimeFilePath
             Case eDataFileTypeConstants.FolderIntegrityInfo
-                Return mFolderIntegrityInfoFilePath
+                Return mMSFileInfoDataCache.FolderIntegrityInfoFilePath
             Case eDataFileTypeConstants.FileIntegrityDetails
                 Return mFileIntegrityDetailsFilePath
             Case eDataFileTypeConstants.FileIntegrityErrors
@@ -258,9 +222,9 @@ Public Class clsMSFileScanner
     Public Sub SetDataFileFilename(ByVal strFilePath As String, ByVal eDataFileType As eDataFileTypeConstants)
         Select Case eDataFileType
             Case eDataFileTypeConstants.MSFileInfo
-                mAcquisitionTimeFilePath = strFilePath
+                mMSFileInfoDataCache.AcquisitionTimeFilePath = strFilePath
             Case eDataFileTypeConstants.FolderIntegrityInfo
-                mFolderIntegrityInfoFilePath = strFilePath
+                mMSFileInfoDataCache.FolderIntegrityInfoFilePath = strFilePath
             Case eDataFileTypeConstants.FileIntegrityDetails
                 mFileIntegrityDetailsFilePath = strFilePath
             Case eDataFileTypeConstants.FileIntegrityErrors
@@ -326,12 +290,42 @@ Public Class clsMSFileScanner
         End Set
     End Property
 
+    ''' <summary>
+    ''' If True, then will create the _DatasetInfo.xml file
+    ''' </summary>   
     Public Property CreateDatasetInfoFile() As Boolean
         Get
             Return mCreateDatasetInfoFile
         End Get
         Set(ByVal value As Boolean)
             mCreateDatasetInfoFile = value
+        End Set
+    End Property
+
+    Public Property DSInfoConnectionString() As String
+        Get
+            Return mDSInfoConnectionString
+        End Get
+        Set(ByVal value As String)
+            mDSInfoConnectionString = value
+        End Set
+    End Property
+
+    Public Property DSInfoDBPostingEnabled() As Boolean
+        Get
+            Return mDSInfoDBPostingEnabled
+        End Get
+        Set(ByVal value As Boolean)
+            mDSInfoDBPostingEnabled = value
+        End Set
+    End Property
+
+    Public Property DSInfoStoredProcedure() As String
+        Get
+            Return mDSInfoStoredProcedure
+        End Get
+        Set(ByVal value As String)
+            mDSInfoStoredProcedure = value
         End Set
     End Property
 
@@ -347,6 +341,70 @@ Public Class clsMSFileScanner
         End Get
         Set(ByVal value As Boolean)
             mIgnoreErrorsWhenRecursing = value
+        End Set
+    End Property
+
+    Public Property LCMS2DPlotMZResolution() As Single
+        Get
+            Return mLCMS2DPlotOptions.MZResolution
+        End Get
+        Set(ByVal value As Single)
+            mLCMS2DPlotOptions.MZResolution = value
+        End Set
+    End Property
+
+    Public Property LCMS2DPlotMaxPointsToPlot() As Integer
+        Get
+            Return mLCMS2DPlotOptions.MaxPointsToPlot
+        End Get
+        Set(ByVal value As Integer)
+            mLCMS2DPlotOptions.MaxPointsToPlot = value
+        End Set
+    End Property
+
+    Public Property LCMS2DPlotMinPointsPerSpectrum() As Integer
+        Get
+            Return mLCMS2DPlotOptions.MinPointsPerSpectrum
+        End Get
+        Set(ByVal value As Integer)
+            mLCMS2DPlotOptions.MinPointsPerSpectrum = value
+        End Set
+    End Property
+
+    Public Property LCMS2DPlotMinIntensity() As Single
+        Get
+            Return mLCMS2DPlotOptions.MinIntensity
+        End Get
+        Set(ByVal value As Single)
+            mLCMS2DPlotOptions.MinIntensity = value
+        End Set
+    End Property
+
+
+    Public Property LogMessagesToFile() As Boolean
+        Get
+            Return mLogMessagesToFile
+        End Get
+        Set(ByVal value As Boolean)
+            mLogMessagesToFile = value
+        End Set
+    End Property
+
+    Public Property LogFilePath() As String
+        Get
+            Return mLogFilePath
+        End Get
+        Set(ByVal value As String)
+            mLogFilePath = value
+        End Set
+    End Property
+
+    Public Property LogFolderPath() As String
+        Get
+            Return mLogFolderPath
+        End Get
+        Set(ByVal value As String)
+            mLogFolderPath = value
         End Set
     End Property
 
@@ -407,6 +465,9 @@ Public Class clsMSFileScanner
         End Set
     End Property
 
+    ''' <summary>
+    ''' If True, then saves TIC and BPI plots as PNG files
+    ''' </summary>
     Public Property SaveTICAndBPIPlots() As Boolean
         Get
             Return mSaveTICAndBPIPlots
@@ -416,19 +477,30 @@ Public Class clsMSFileScanner
         End Set
     End Property
 
-    Public Property ShowMessages() As Boolean
+    ''' <summary>
+    ''' If True, then saves a 2D plot of m/z vs. Intensity (requires reading every data point in the data file, which will slow down the processing)
+    ''' </summary>
+    ''' <value></value>
+    Public Property SaveLCMS2DPlots() As Boolean
         Get
-            Return mShowMessages
+            Return mSaveLCMS2DPlots
         End Get
         Set(ByVal value As Boolean)
-            mShowMessages = value
+            mSaveLCMS2DPlots = value
         End Set
     End Property
 
-    Public ReadOnly Property StatusMessage() As String
+    ''' <summary>
+    ''' If True, then saves/loads data from/to the cache files (DatasetTimeFile.txt and FolderIntegrityInfo.txt)
+    ''' If you simply want to create TIC and BPI files, and/or the _DatasetInfo.xml file for a single dataset, then set this to False
+    ''' </summary>
+    Public Property UseCacheFiles() As Boolean
         Get
-            Return mStatusMessage
+            Return mUseCacheFiles
         End Get
+        Set(ByVal value As Boolean)
+            mUseCacheFiles = value
+        End Set
     End Property
 
     Public Property ZipFileCheckAllData() As Boolean
@@ -463,89 +535,13 @@ Public Class clsMSFileScanner
 
     End Sub
 
-    Private Function AssureMinimumDate(ByVal dtDate As DateTime, ByVal dtMinimumDate As DateTime) As DateTime
-        ' Assures that dtDate is >= dtMinimumDate
-
-        If dtDate < dtMinimumDate Then
-            Return dtMinimumDate
-        Else
-            Return dtDate
-        End If
-
-    End Function
-
     Private Sub AutosaveCachedResults()
 
-        If mCachedResultsAutoSaveIntervalMinutes > 0 Then
-            If mMSFileInfoCachedResultsState = eCachedResultsStateConstants.Modified Then
-                If System.DateTime.Now.Subtract(mCachedMSInfoResultsLastSaveTime).TotalMinutes >= mCachedResultsAutoSaveIntervalMinutes Then
-                    ' Auto save the cached results
-                    SaveCachedMSInfoResults(False)
-                End If
-            End If
-
-            If mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.Modified Then
-                If System.DateTime.Now.Subtract(mCachedFolderIntegrityInfoLastSaveTime).TotalMinutes >= mCachedResultsAutoSaveIntervalMinutes Then
-                    ' Auto save the cached results
-                    SaveCachedFolderIntegrityInfoResults(False)
-                End If
-            End If
+        If mUseCacheFiles Then
+            mMSFileInfoDataCache.AutosaveCachedResults()
         End If
 
     End Sub
-
-    Private Function CachedMSInfoContainsDataset(ByVal strDatasetName As String) As Boolean
-        Return CachedMSInfoContainsDataset(strDatasetName, Nothing)
-    End Function
-
-    Private Function CachedMSInfoContainsDataset(ByVal strDatasetName As String, ByRef objRowMatch As System.Data.DataRow) As Boolean
-        Return DatasetTableContainsPrimaryKeyValue(mMSFileInfoDataset, MS_FILEINFO_DATATABLE, strDatasetName, objRowMatch)
-    End Function
-
-
-    Private Function CachedFolderIntegrityInfoContainsFolder(ByVal strFolderPath As String, ByRef intFolderID As Integer) As Boolean
-        Return CachedFolderIntegrityInfoContainsFolder(strFolderPath, intFolderID, Nothing)
-    End Function
-
-    Private Function CachedFolderIntegrityInfoContainsFolder(ByVal strFolderPath As String, ByRef intFolderID As Integer, ByRef objRowMatch As System.Data.DataRow) As Boolean
-        If DatasetTableContainsPrimaryKeyValue(mFolderIntegrityInfoDataset, FOLDER_INTEGRITY_INFO_DATATABLE, strFolderPath, objRowMatch) Then
-            intFolderID = CInt(objRowMatch(COL_NAME_FOLDER_ID))
-            Return True
-        Else
-            Return False
-        End If
-    End Function
-
-    Private Function DatasetTableContainsPrimaryKeyValue(ByRef dsDataset As System.Data.DataSet, ByVal strTableName As String, ByVal strValueToFind As String) As Boolean
-        Return DatasetTableContainsPrimaryKeyValue(dsDataset, strTableName, strValueToFind, Nothing)
-    End Function
-
-    Private Function DatasetTableContainsPrimaryKeyValue(ByRef dsDataset As System.Data.DataSet, ByVal strTableName As String, ByVal strValueToFind As String, ByRef objRowMatch As System.Data.DataRow) As Boolean
-
-        Try
-            If dsDataset Is Nothing OrElse dsDataset.Tables(strTableName).Rows.Count = 0 Then
-                objRowMatch = Nothing
-                Return False
-            End If
-
-            ' Look for strValueToFind in dsDataset
-            Try
-                objRowMatch = dsDataset.Tables(strTableName).Rows.Find(strValueToFind)
-
-                If objRowMatch Is Nothing Then
-                    Return False
-                Else
-                    Return True
-                End If
-            Catch ex As System.Exception
-                Return False
-            End Try
-
-        Catch ex As System.Exception
-            Return False
-        End Try
-
-    End Function
 
     Private Sub CheckForAbortProcessingFile()
         Static dtLastCheckTime As DateTime
@@ -573,7 +569,9 @@ Public Class clsMSFileScanner
         End Try
     End Sub
 
-    Private Sub CheckIntegrityOfFilesInFolder(ByVal strFolderPath As String, ByVal blnForceRecheck As Boolean, ByRef strProcessedFileList() As String)
+    Private Sub CheckIntegrityOfFilesInFolder(ByVal strFolderPath As String, _
+                                              ByVal blnForceRecheck As Boolean, _
+                                              ByRef strProcessedFileList() As String)
 
         Dim ioFolderInfo As System.IO.DirectoryInfo
         Dim intFileCount As Integer
@@ -601,10 +599,10 @@ Public Class clsMSFileScanner
 
             If intFileCount > 0 Then
                 blnCheckFolder = True
-                If Not blnForceRecheck Then
-                    If CachedFolderIntegrityInfoContainsFolder(ioFolderInfo.FullName, intFolderID, objRow) Then
-                        intCachedFileCount = CInt(objRow(COL_NAME_FILE_COUNT))
-                        intCachedCountFailIntegrity = CInt(objRow(COL_NAME_COUNT_FAIL_INTEGRITY))
+                If mUseCacheFiles AndAlso Not blnForceRecheck Then
+                    If mMSFileInfoDataCache.CachedFolderIntegrityInfoContainsFolder(ioFolderInfo.FullName, intFolderID, objRow) Then
+                        intCachedFileCount = CInt(objRow(clsMSFileInfoDataCache.COL_NAME_FILE_COUNT))
+                        intCachedCountFailIntegrity = CInt(objRow(clsMSFileInfoDataCache.COL_NAME_COUNT_FAIL_INTEGRITY))
 
                         If intCachedFileCount = intFileCount AndAlso intCachedCountFailIntegrity = 0 Then
                             ' Folder contains the same number of files as last time, and no files failed the integrity check last time
@@ -620,8 +618,10 @@ Public Class clsMSFileScanner
 
                     blnAllFilesAreValid = mFileIntegrityChecker.CheckIntegrityOfFilesInFolder(strFolderPath, udtFolderStats, udtFileStats, strProcessedFileList)
 
-                    If Not UpdateCachedFolderIntegrityInfo(udtFolderStats, intFolderID) Then
-                        intFolderID = -1
+                    If mUseCacheFiles Then
+                        If Not mMSFileInfoDataCache.UpdateCachedFolderIntegrityInfo(udtFolderStats, intFolderID) Then
+                            intFolderID = -1
+                        End If
                     End If
 
                     WriteFileIntegrityDetails(mFileIntegrityDetailsWriter, intFolderID, udtFileStats)
@@ -630,60 +630,10 @@ Public Class clsMSFileScanner
             End If
 
         Catch ex As System.Exception
-            LogErrors("CheckIntegrityOfFilesInFolder", "Error calling mFileIntegrityChecker", ex, True, False, True, eMSFileScannerErrorCodes.FileIntegrityCheckError)
+            HandleException("Error calling mFileIntegrityChecker", ex)
         End Try
 
     End Sub
-
-    Private Sub ClearCachedMSInfoResults()
-        mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).Clear()
-        mMSFileInfoCachedResultsState = eCachedResultsStateConstants.NotInitialized
-    End Sub
-
-    Private Sub ClearCachedFolderIntegrityInfoResults()
-        mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).Clear()
-        mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized
-        mMaximumFolderIntegrityInfoFolderID = 0
-    End Sub
-
-    Private Function ConstructHeaderLine(ByVal eDataFileType As eDataFileTypeConstants) As String
-        Select Case eDataFileType
-            Case eDataFileTypeConstants.MSFileInfo
-                ' Note: The order of the output should match eMSFileInfoResultsFileColumns
-                Return COL_NAME_DATASET_ID & mDataFileSepChar & _
-                        COL_NAME_DATASET_NAME & mDataFileSepChar & _
-                        COL_NAME_FILE_EXTENSION & mDataFileSepChar & _
-                        COL_NAME_ACQ_TIME_START & mDataFileSepChar & _
-                        COL_NAME_ACQ_TIME_END & mDataFileSepChar & _
-                        COL_NAME_SCAN_COUNT & mDataFileSepChar & _
-                        COL_NAME_FILE_SIZE_BYTES & mDataFileSepChar & _
-                        COL_NAME_INFO_LAST_MODIFIED & mDataFileSepChar & _
-                        COL_NAME_FILE_MODIFICATION_DATE
-
-            Case eDataFileTypeConstants.FolderIntegrityInfo
-                ' Note: The order of the output should match eFolderIntegrityInfoFileColumns
-                Return COL_NAME_FOLDER_ID & mDataFileSepChar & _
-                        COL_NAME_FOLDER_PATH & mDataFileSepChar & _
-                        COL_NAME_FILE_COUNT & mDataFileSepChar & _
-                        COL_NAME_COUNT_FAIL_INTEGRITY & mDataFileSepChar & _
-                        COL_NAME_INFO_LAST_MODIFIED
-
-            Case eDataFileTypeConstants.FileIntegrityDetails
-                ' Note: The order of the output should match eFileIntegrityDetailsFileColumns
-                Return COL_NAME_FOLDER_ID & mDataFileSepChar & _
-                        COL_NAME_FILE_NAME & mDataFileSepChar & _
-                        COL_NAME_FILE_SIZE_BYTES & mDataFileSepChar & _
-                        COL_NAME_FILE_MODIFICATION_DATE & mDataFileSepChar & _
-                        COL_NAME_FAILED_INTEGRITY_CHECK & mDataFileSepChar & _
-                        COL_NAME_SHA1_HASH & mDataFileSepChar & _
-                        COL_NAME_INFO_LAST_MODIFIED
-
-            Case eDataFileTypeConstants.FileIntegrityErrors
-                Return "File_Path" & mDataFileSepChar & "Error_Message" & mDataFileSepChar & COL_NAME_INFO_LAST_MODIFIED
-            Case Else
-                Return "Unknown_File_Type"
-        End Select
-    End Function
 
     Public Shared Function GetAppFolderPath() As String
         ' Could use Application.StartupPath, but .GetExecutingAssembly is better
@@ -691,10 +641,11 @@ Public Class clsMSFileScanner
     End Function
 
     Public Function GetKnownFileExtensions() As String()
-        Dim strExtensionsToParse(1) As String
+        Dim strExtensionsToParse(2) As String
 
         strExtensionsToParse(0) = clsFinniganRawFileInfoScanner.FINNIGAN_RAW_FILE_EXTENSION
         strExtensionsToParse(1) = clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION
+        strExtensionsToParse(2) = clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION
 
         Return strExtensionsToParse
     End Function
@@ -737,8 +688,12 @@ Public Class clsMSFileScanner
                 strErrorMessage = "Error writing output file"
             Case eMSFileScannerErrorCodes.FileIntegrityCheckError
                 strErrorMessage = "Error checking file integrity"
+            Case eMSFileScannerErrorCodes.DatabasePostingError
+                strErrorMessage = "Database posting error"
+
             Case eMSFileScannerErrorCodes.UnspecifiedError
                 strErrorMessage = "Unspecified localized error"
+
             Case Else
                 ' This shouldn't happen
                 strErrorMessage = "Unknown error state"
@@ -778,260 +733,135 @@ Public Class clsMSFileScanner
 
     End Function
 
-    Private Sub LoadCachedResults()
-        LoadCachedMSFileInfoResults()
-        LoadCachedFolderIntegrityInfoResults()
-    End Sub
-
-    Private Sub LoadCachedFolderIntegrityInfoResults()
-
-        Dim fsInFile As System.IO.FileStream
-        Dim srInFile As System.IO.StreamReader
-
-        Dim strLineIn As String
-        Dim strSplitLine() As String
-        Dim strSepChars() As Char
-
-        Dim intFolderID As Integer
-        Dim strFolderPath As String
-        Dim udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType
-        Dim dtInfoLastModified As DateTime
-
-        Dim objNewRow As System.Data.DataRow
-
-        strSepChars = New Char() {mDataFileSepChar}
-
-        ' Clear the Folder Integrity Info Table
-        ClearCachedFolderIntegrityInfoResults()
-
-        ValidateDataFilePath(mFolderIntegrityInfoFilePath, eDataFileTypeConstants.FolderIntegrityInfo)
-
-        If System.IO.File.Exists(mFolderIntegrityInfoFilePath) Then
-            ' Read the entries from mFolderIntegrityInfoFilePath, populating mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE)
-
-            If USE_XML_OUTPUT_FILE Then
-                fsInFile = New System.IO.FileStream(mFolderIntegrityInfoFilePath, IO.FileMode.OpenOrCreate, IO.FileAccess.ReadWrite, IO.FileShare.Read)
-                mFolderIntegrityInfoDataset.ReadXml(fsInFile)
-                fsInFile.Close()
-            Else
-                srInFile = New System.IO.StreamReader(mFolderIntegrityInfoFilePath)
-                Do While srInFile.Peek() >= 0
-                    strLineIn = srInFile.ReadLine()
-
-                    If Not strLineIn Is Nothing Then
-                        strSplitLine = strLineIn.Split(strSepChars)
-
-                        If strSplitLine.Length >= 5 Then
-                            strFolderPath = strSplitLine(eFolderIntegrityInfoFileColumns.FolderPath)
-
-                            If IsNumber(strSplitLine(eFolderIntegrityInfoFileColumns.FolderID)) Then
-                                If Not CachedFolderIntegrityInfoContainsFolder(strFolderPath, intFolderID) Then
-                                    Try
-                                        objNewRow = mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).NewRow()
-
-                                        With udtFolderStats
-                                            intFolderID = CType(strSplitLine(eFolderIntegrityInfoFileColumns.FolderID), Integer)
-                                            .FolderPath = strFolderPath
-                                            .FileCount = CType(strSplitLine(eFolderIntegrityInfoFileColumns.FileCount), Integer)
-                                            .FileCountFailIntegrity = CType(strSplitLine(eFolderIntegrityInfoFileColumns.FileCountFailedIntegrity), Integer)
-                                            dtInfoLastModified = CType(strSplitLine(eFolderIntegrityInfoFileColumns.InfoLastModified), DateTime)
-                                        End With
-
-                                        PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objNewRow, dtInfoLastModified)
-                                        mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).Rows.Add(objNewRow)
-
-                                    Catch ex As System.Exception
-                                        ' Do not add this entry
-                                    End Try
-                                End If
-                            End If
-
-                        End If
-                    End If
-                Loop
-                srInFile.Close()
-
-            End If
+    Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As System.Exception)
+        If strBaseMessage Is Nothing OrElse strBaseMessage.Length = 0 Then
+            strBaseMessage = "Error"
         End If
 
-        mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.InitializedButUnmodified
+        ' Note that ShowErrorMessage() will call LogMessage()
+        ShowErrorMessage(strBaseMessage & ": " & ex.Message, True)
 
     End Sub
 
-    Private Sub LoadCachedMSFileInfoResults()
+    Private Sub LoadCachedResults(ByVal blnForceLoad As Boolean)
+        If mUseCacheFiles Then
+            mMSFileInfoDataCache.LoadCachedResults(blnForceLoad)
+        End If
+    End Sub
 
-        Dim fsInFile As System.IO.FileStream
-        Dim srInFile As System.IO.StreamReader
+    Protected Sub LogMessage(ByVal strMessage As String)
+        LogMessage(strMessage, eMessageTypeConstants.Normal)
+    End Sub
 
-        Dim strLineIn As String
-        Dim strSplitLine() As String
-        Dim strSepChars() As Char
+    Protected Sub LogMessage(ByVal strMessage As String, ByVal eMessageType As eMessageTypeConstants)
+        ' Note that ProcessMSFileOrFolder() will update mOutputFolderPath, which is used here if mLogFolderPath is blank
 
-        Dim strDatasetName As String
-        Dim udtFileInfo As MSFileInfoScanner.iMSFileInfoProcessor.udtFileInfoType
-        Dim dtInfoLastModified As DateTime
+        Dim strMessageType As String
+        Dim blnOpeningExistingFile As Boolean = False
 
-        Dim objNewRow As System.Data.DataRow
+        If mLogFile Is Nothing AndAlso mLogMessagesToFile Then
+            Try
+                If mLogFilePath Is Nothing OrElse mLogFilePath.Length = 0 Then
+                    ' Auto-name the log file
+                    mLogFilePath = System.IO.Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetExecutingAssembly().Location)
+                    mLogFilePath &= "_log_" & System.DateTime.Now.ToString("yyyy-MM-dd") & ".txt"
+                End If
 
-        strSepChars = New Char() {mDataFileSepChar}
+                Try
+                    If mLogFolderPath Is Nothing Then mLogFolderPath = String.Empty
 
-        ' Clear the MS Info Table
-        ClearCachedMSInfoResults()
-
-        ValidateDataFilePath(mAcquisitionTimeFilePath, eDataFileTypeConstants.MSFileInfo)
-
-        If System.IO.File.Exists(mAcquisitionTimeFilePath) Then
-            ' Read the entries from mAcquisitionTimeFilePath, populating mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE)
-
-            If USE_XML_OUTPUT_FILE Then
-                fsInFile = New System.IO.FileStream(mAcquisitionTimeFilePath, IO.FileMode.OpenOrCreate, IO.FileAccess.ReadWrite, IO.FileShare.Read)
-                mMSFileInfoDataset.ReadXml(fsInFile)
-                fsInFile.Close()
-            Else
-                srInFile = New System.IO.StreamReader(mAcquisitionTimeFilePath)
-                Do While srInFile.Peek() >= 0
-                    strLineIn = srInFile.ReadLine()
-
-                    If Not strLineIn Is Nothing Then
-                        strSplitLine = strLineIn.Split(strSepChars)
-
-                        If strSplitLine.Length >= 8 Then
-                            strDatasetName = strSplitLine(eMSFileInfoResultsFileColumns.DatasetName)
-
-                            If IsNumber(strSplitLine(eMSFileInfoResultsFileColumns.DatasetID)) Then
-                                If Not CachedMSInfoContainsDataset(strDatasetName) Then
-                                    Try
-                                        objNewRow = mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).NewRow()
-
-                                        With udtFileInfo
-                                            .DatasetID = CType(strSplitLine(eMSFileInfoResultsFileColumns.DatasetID), Integer)
-                                            .DatasetName = String.Copy(strDatasetName)
-                                            .FileExtension = String.Copy(strSplitLine(eMSFileInfoResultsFileColumns.FileExtension))
-                                            .AcqTimeStart = CType(strSplitLine(eMSFileInfoResultsFileColumns.AcqTimeStart), DateTime)
-                                            .AcqTimeEnd = CType(strSplitLine(eMSFileInfoResultsFileColumns.AcqTimeEnd), DateTime)
-                                            .ScanCount = CType(strSplitLine(eMSFileInfoResultsFileColumns.ScanCount), Integer)
-                                            .FileSizeBytes = CType(strSplitLine(eMSFileInfoResultsFileColumns.FileSizeBytes), Long)
-                                            dtInfoLastModified = CType(strSplitLine(eMSFileInfoResultsFileColumns.InfoLastModified), DateTime)
-
-                                            If strSplitLine.Length >= 9 Then
-                                                .FileSystemModificationTime = CType(strSplitLine(eMSFileInfoResultsFileColumns.FileModificationDate), DateTime)
-                                            End If
-                                        End With
-
-                                        PopulateMSInfoDataRow(udtFileInfo, objNewRow, dtInfoLastModified)
-                                        mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).Rows.Add(objNewRow)
-
-                                    Catch ex As System.Exception
-                                        ' Do not add this entry
-                                    End Try
-                                End If
-                            End If
-
+                    If mLogFolderPath.Length = 0 Then
+                        ' Log folder is undefined; use mOutputFolderPath if it is defined
+                        If Not mOutputFolderPath Is Nothing AndAlso mOutputFolderPath.Length > 0 Then
+                            mLogFolderPath = String.Copy(mOutputFolderPath)
                         End If
                     End If
-                Loop
-                srInFile.Close()
 
-            End If
+                    If mLogFolderPath.Length > 0 Then
+                        ' Create the log folder if it doesn't exist
+                        If Not System.IO.Directory.Exists(mLogFolderPath) Then
+                            System.IO.Directory.CreateDirectory(mLogFolderPath)
+                        End If
+                    End If
+                Catch ex As System.Exception
+                    mLogFolderPath = String.Empty
+                End Try
+
+                If mLogFolderPath.Length > 0 Then
+                    mLogFilePath = System.IO.Path.Combine(mLogFolderPath, mLogFilePath)
+                End If
+
+                blnOpeningExistingFile = System.IO.File.Exists(mLogFilePath)
+
+                mLogFile = New System.IO.StreamWriter(New System.IO.FileStream(mLogFilePath, IO.FileMode.Append, IO.FileAccess.Write, IO.FileShare.Read))
+                mLogFile.AutoFlush = True
+
+                If Not blnOpeningExistingFile Then
+                    mLogFile.WriteLine("Date" & ControlChars.Tab & _
+                                       "Type" & ControlChars.Tab & _
+                                       "Message")
+                End If
+
+            Catch ex As System.Exception
+                ' Error creating the log file; set mLogMessagesToFile to false so we don't repeatedly try to create it
+                mLogMessagesToFile = False
+            End Try
+
         End If
 
-        mMSFileInfoCachedResultsState = eCachedResultsStateConstants.InitializedButUnmodified
+        If Not mLogFile Is Nothing Then
+            Select Case eMessageType
+                Case eMessageTypeConstants.Normal
+                    strMessageType = "Normal"
+                Case eMessageTypeConstants.ErrorMsg
+                    strMessageType = "Error"
+                Case eMessageTypeConstants.Warning
+                    strMessageType = "Warning"
+                Case Else
+                    strMessageType = "Unknown"
+            End Select
 
-    End Sub
+            mLogFile.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab & _
+                               strMessageType & ControlChars.Tab & _
+                               strMessage)
+        End If
 
-    Private Sub InitializeDatasets()
-
-        Dim dtDefaultDate As DateTime = System.DateTime.Now()
-
-        ' Make the MSFileInfo datatable
-        Dim dtMSFileInfo As System.Data.DataTable = New System.Data.DataTable(MS_FILEINFO_DATATABLE)
-
-        ' Add the columns to the datatable
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(dtMSFileInfo, COL_NAME_DATASET_ID)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnStringToTable(dtMSFileInfo, COL_NAME_DATASET_NAME)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnStringToTable(dtMSFileInfo, COL_NAME_FILE_EXTENSION)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(dtMSFileInfo, COL_NAME_ACQ_TIME_START, dtDefaultDate)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(dtMSFileInfo, COL_NAME_ACQ_TIME_END, dtDefaultDate)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(dtMSFileInfo, COL_NAME_SCAN_COUNT)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnLongToTable(dtMSFileInfo, COL_NAME_FILE_SIZE_BYTES)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(dtMSFileInfo, COL_NAME_INFO_LAST_MODIFIED, dtDefaultDate)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(dtMSFileInfo, COL_NAME_FILE_MODIFICATION_DATE, dtDefaultDate)
-
-        ' Use the dataset name as the primary key since we won't always know Dataset_ID
-        With dtMSFileInfo
-            Dim MSInfoPrimaryKeyColumn As System.Data.DataColumn() = New System.Data.DataColumn() {.Columns(COL_NAME_DATASET_NAME)}
-            .PrimaryKey = MSInfoPrimaryKeyColumn
-        End With
-
-
-        ' Make the Folder Integrity Info datatable
-        Dim dtFolderIntegrityInfo As System.Data.DataTable = New System.Data.DataTable(FOLDER_INTEGRITY_INFO_DATATABLE)
-
-        ' Add the columns to the datatable
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(dtFolderIntegrityInfo, COL_NAME_FOLDER_ID)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnStringToTable(dtFolderIntegrityInfo, COL_NAME_FOLDER_PATH)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(dtFolderIntegrityInfo, COL_NAME_FILE_COUNT)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(dtFolderIntegrityInfo, COL_NAME_COUNT_FAIL_INTEGRITY)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(dtFolderIntegrityInfo, COL_NAME_INFO_LAST_MODIFIED, dtDefaultDate)
-
-        ' Use the folder path as the primary key
-        With dtFolderIntegrityInfo
-            Dim FolderInfoPrimaryKeyColumn As System.Data.DataColumn() = New System.Data.DataColumn() {.Columns(COL_NAME_FOLDER_PATH)}
-            .PrimaryKey = FolderInfoPrimaryKeyColumn
-        End With
-
-        ' Instantiate the datasets
-        mMSFileInfoDataset = New System.Data.DataSet("MSFileInfoDataset")
-        mFolderIntegrityInfoDataset = New System.Data.DataSet("FolderIntegrityInfoDataset")
-
-        ' Add the new DataTable to each DataSet
-        mMSFileInfoDataset.Tables.Add(dtMSFileInfo)
-        mFolderIntegrityInfoDataset.Tables.Add(dtFolderIntegrityInfo)
-
-        mMSFileInfoCachedResultsState = eCachedResultsStateConstants.NotInitialized
-        mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized
     End Sub
 
     Private Sub InitializeLocalVariables()
         mErrorCode = eMSFileScannerErrorCodes.NoError
 
-        mStatusMessage = String.Empty
-        mDataFileSepChar = ControlChars.Tab
         mIgnoreErrorsWhenRecursing = False
 
-        mCachedResultsAutoSaveIntervalMinutes = 5
-        mCachedMSInfoResultsLastSaveTime = System.DateTime.Now()
-        mCachedFolderIntegrityInfoLastSaveTime = System.DateTime.Now()
+        mUseCacheFiles = True
+
+        mLogMessagesToFile = False
+        mLogFilePath = String.Empty
+        mLogFolderPath = String.Empty
 
         mReprocessExistingFiles = False
         mReprocessIfCachedSizeIsZero = False
         mRecheckFileIntegrityForExistingFolders = False
 
         mSaveTICAndBPIPlots = False
+        mSaveLCMS2DPlots = False
+        mLCMS2DPlotOptions = New clsLCMSDataPlotter.clsOptions
+
         mComputeOverallQualityScores = False
         mCreateDatasetInfoFile = False
 
         mCheckFileIntegrity = False
 
-        mAcquisitionTimeFilePath = System.IO.Path.Combine(GetAppFolderPath(), clsMSFileScanner.DefaultDataFileName(eDataFileTypeConstants.MSFileInfo))
-        mFolderIntegrityInfoFilePath = System.IO.Path.Combine(GetAppFolderPath(), clsMSFileScanner.DefaultDataFileName(eDataFileTypeConstants.FolderIntegrityInfo))
-        mFileIntegrityDetailsFilePath = System.IO.Path.Combine(GetAppFolderPath(), clsMSFileScanner.DefaultDataFileName(eDataFileTypeConstants.FileIntegrityDetails))
-        mFileIntegrityErrorsFilePath = System.IO.Path.Combine(GetAppFolderPath(), clsMSFileScanner.DefaultDataFileName(eDataFileTypeConstants.FileIntegrityErrors))
+        mDSInfoConnectionString = "Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;"
+        mDSInfoDBPostingEnabled = False
+        mDSInfoStoredProcedure = "UpdateDatasetFileInfoXML"
 
-        ValidateDataFilePath(mAcquisitionTimeFilePath, eDataFileTypeConstants.MSFileInfo)
+        mFileIntegrityDetailsFilePath = System.IO.Path.Combine(GetAppFolderPath(), clsMSFileInfoScanner.DefaultDataFileName(eDataFileTypeConstants.FileIntegrityDetails))
+        mFileIntegrityErrorsFilePath = System.IO.Path.Combine(GetAppFolderPath(), clsMSFileInfoScanner.DefaultDataFileName(eDataFileTypeConstants.FileIntegrityErrors))
 
-        InitializeDatasets()
+        mMSFileInfoDataCache.InitializeVariables()
 
     End Sub
-
-    Public Shared Function IsNumber(ByVal strValue As String) As Boolean
-        Dim objFormatProvider As New System.Globalization.NumberFormatInfo
-        Try
-            Return Double.TryParse(strValue, Globalization.NumberStyles.Any, objFormatProvider, 0)
-        Catch ex As System.Exception
-            Return False
-        End Try
-    End Function
 
     Public Function LoadParameterFileSettings(ByVal strParameterFilePath As String) As Boolean
 
@@ -1048,7 +878,7 @@ Public Class clsMSFileScanner
                 ' See if strParameterFilePath points to a file in the same directory as the application
                 strParameterFilePath = System.IO.Path.Combine(GetAppFolderPath(), System.IO.Path.GetFileName(strParameterFilePath))
                 If Not System.IO.File.Exists(strParameterFilePath) Then
-                    LogErrors("LoadParameterFileSettings", "Parameter file not found: " & strParameterFilePath, Nothing, True, False, False)
+                    ShowErrorMessage("Parameter file not found: " & strParameterFilePath)
                     SetErrorCode(eMSFileScannerErrorCodes.ParameterFileNotFound)
                     Return False
                 End If
@@ -1060,18 +890,52 @@ Public Class clsMSFileScanner
 
                     If Not .SectionPresent(XML_SECTION_MSFILESCANNER_SETTINGS) Then
                         ' MS File Scanner section not found; that's ok
+                        ShowMessage("Warning: Parameter file " & strParameterFilePath & " does not have section """ & XML_SECTION_MSFILESCANNER_SETTINGS & """", eMessageTypeConstants.Warning)
                     Else
-                        'Me.DatabaseConnectionString = .GetParam(XML_SECTION_DATABASE_SETTINGS, "ConnectionString", Me.DatabaseConnectionString)
+                        Me.DSInfoConnectionString = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoConnectionString", Me.DSInfoConnectionString)
+                        Me.DSInfoDBPostingEnabled = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoDBPostingEnabled", Me.DSInfoDBPostingEnabled)
+                        Me.DSInfoStoredProcedure = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoStoredProcedure", Me.DSInfoStoredProcedure)
+
+                        Me.LogMessagesToFile = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogMessagesToFile", Me.LogMessagesToFile)
+                        Me.LogFilePath = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogFilePath", Me.LogFilePath)
+                        Me.LogFolderPath = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogFolderPath", Me.LogFolderPath)
+
+                        Me.UseCacheFiles = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UseCacheFiles", Me.UseCacheFiles)
+                        Me.ReprocessExistingFiles = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessExistingFiles", Me.ReprocessExistingFiles)
+                        Me.ReprocessIfCachedSizeIsZero = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessIfCachedSizeIsZero", Me.ReprocessIfCachedSizeIsZero)
+
+                        Me.SaveTICAndBPIPlots = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveTICAndBPIPlots", Me.SaveTICAndBPIPlots)
+                        Me.SaveLCMS2DPlots = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveLCMS2DPlots", Me.SaveLCMS2DPlots)
+
+                        Me.LCMS2DPlotMZResolution = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMZResolution", Me.LCMS2DPlotMZResolution)
+                        Me.LCMS2DPlotMinPointsPerSpectrum = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinPointsPerSpectrum", Me.LCMS2DPlotMinPointsPerSpectrum)
+
+                        Me.LCMS2DPlotMaxPointsToPlot = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMaxPointsToPlot", Me.LCMS2DPlotMaxPointsToPlot)
+                        Me.LCMS2DPlotMinIntensity = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinIntensity", Me.LCMS2DPlotMinIntensity)
+
+                        Me.ComputeOverallQualityScores = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeOverallQualityScores", Me.ComputeOverallQualityScores)
+                        Me.CreateDatasetInfoFile = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateDatasetInfoFile", Me.CreateDatasetInfoFile)
+
+                        Me.CheckFileIntegrity = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckFileIntegrity", Me.CheckFileIntegrity)
+                        Me.RecheckFileIntegrityForExistingFolders = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "RecheckFileIntegrityForExistingFolders", Me.RecheckFileIntegrityForExistingFolders)
+
+                        Me.MaximumTextFileLinesToCheck = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MaximumTextFileLinesToCheck", Me.MaximumTextFileLinesToCheck)
+                        Me.MaximumXMLElementNodesToCheck = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MaximumXMLElementNodesToCheck", Me.MaximumXMLElementNodesToCheck)
+                        Me.ComputeFileHashes = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeFileHashes", Me.ComputeFileHashes)
+                        Me.ZipFileCheckAllData = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ZipFileCheckAllData", Me.ZipFileCheckAllData)
+
+                        Me.IgnoreErrorsWhenRecursing = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "IgnoreErrorsWhenRecursing", Me.IgnoreErrorsWhenRecursing)
+
                     End If
 
                 End With
             Else
-                LogErrors("LoadParameterFileSettings", "Error calling objSettingsFile.LoadSettings for " & strParameterFilePath, Nothing, True, False, True, eMSFileScannerErrorCodes.ParameterFileReadError)
+                ShowErrorMessage("Error calling objSettingsFile.LoadSettings for " & strParameterFilePath)
                 Return False
             End If
 
         Catch ex As System.Exception
-            LogErrors("LoadParameterFileSettings", "Error in LoadParameterFileSettings", ex, True, False, True, eMSFileScannerErrorCodes.ParameterFileReadError)
+            HandleException("Error in LoadParameterFileSettings", ex)
             Return False
         End Try
 
@@ -1079,45 +943,45 @@ Public Class clsMSFileScanner
 
     End Function
 
-    Private Sub LogErrors(ByVal strSource As String, ByVal strMessage As String, ByVal ex As System.Exception, Optional ByVal blnAllowInformUser As Boolean = True, Optional ByVal blnAllowThrowingException As Boolean = True, Optional ByVal blnLogLocalOnly As Boolean = True, Optional ByVal eNewErrorCode As eMSFileScannerErrorCodes = eMSFileScannerErrorCodes.NoError)
-        Dim strMessageWithoutCRLF As String
-        Dim fsErrorLogFile As System.IO.StreamWriter
+    'Private Sub LogErrors(ByVal strSource As String, ByVal strMessage As String, ByVal ex As System.Exception, Optional ByVal blnAllowInformUser As Boolean = True, Optional ByVal blnAllowThrowingException As Boolean = True, Optional ByVal blnLogLocalOnly As Boolean = True, Optional ByVal eNewErrorCode As eMSFileScannerErrorCodes = eMSFileScannerErrorCodes.NoError)
+    '    Dim strMessageWithoutCRLF As String
+    '    Dim fsErrorLogFile As System.IO.StreamWriter
 
-        mStatusMessage = String.Copy(strMessage)
+    '    mStatusMessage = String.Copy(strMessage)
 
-        strMessageWithoutCRLF = mStatusMessage.Replace(ControlChars.NewLine, "; ")
+    '    strMessageWithoutCRLF = mStatusMessage.Replace(ControlChars.NewLine, "; ")
 
-        If ex Is Nothing Then
-            ex = New System.Exception("Error")
-        Else
-            If Not ex.Message Is Nothing AndAlso ex.Message.Length > 0 Then
-                strMessageWithoutCRLF &= "; " & ex.Message
-            End If
-        End If
+    '    If ex Is Nothing Then
+    '        ex = New System.Exception("Error")
+    '    Else
+    '        If Not ex.Message Is Nothing AndAlso ex.Message.Length > 0 Then
+    '            strMessageWithoutCRLF &= "; " & ex.Message
+    '        End If
+    '    End If
 
-        Console.WriteLine(Now.ToLongTimeString & "; " & strSource & ": " & strMessageWithoutCRLF)
+    '    ShowErrorMessage(strSource & ": " & strMessageWithoutCRLF)
 
-        Try
-            fsErrorLogFile = New System.IO.StreamWriter("MSFileInfoScanner_Errors.txt", True)
-            fsErrorLogFile.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab & strSource & ControlChars.Tab & strMessageWithoutCRLF)
-        Catch ex2 As System.Exception
-            ' Ignore errors here
-        Finally
-            If Not fsErrorLogFile Is Nothing Then
-                fsErrorLogFile.Close()
-            End If
-        End Try
+    '    Try
+    '        fsErrorLogFile = New System.IO.StreamWriter("MSFileInfoScanner_Errors.txt", True)
+    '        fsErrorLogFile.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab & strSource & ControlChars.Tab & strMessageWithoutCRLF)
+    '    Catch ex2 As System.Exception
+    '        ' Ignore errors here
+    '    Finally
+    '        If Not fsErrorLogFile Is Nothing Then
+    '            fsErrorLogFile.Close()
+    '        End If
+    '    End Try
 
-        If Not eNewErrorCode = eMSFileScannerErrorCodes.NoError Then
-            SetErrorCode(eNewErrorCode, True)
-        End If
+    '    If Not eNewErrorCode = eMSFileScannerErrorCodes.NoError Then
+    '        SetErrorCode(eNewErrorCode, True)
+    '    End If
 
-        If Me.ShowMessages AndAlso blnAllowInformUser Then
-            System.Windows.Forms.MessageBox.Show(mStatusMessage & ControlChars.NewLine & ex.Message, "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
-        ElseIf blnAllowThrowingException Then
-            Throw New System.Exception(mStatusMessage, ex)
-        End If
-    End Sub
+    '    If Me.ShowMessages AndAlso blnAllowInformUser Then
+    '        System.Windows.Forms.MessageBox.Show(mStatusMessage & ControlChars.NewLine & ex.Message, "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
+    '    ElseIf blnAllowThrowingException Then
+    '        Throw New System.Exception(mStatusMessage, ex)
+    '    End If
+    'End Sub
 
     Protected Sub OpenFileIntegrityDetailsFile()
         OpenFileIntegrityOutputFile(eDataFileTypeConstants.FileIntegrityDetails, mFileIntegrityDetailsFilePath, mFileIntegrityDetailsWriter)
@@ -1142,7 +1006,7 @@ Public Class clsMSFileScanner
             fsFileStream = New System.IO.FileStream(strFilePath, IO.FileMode.Append, IO.FileAccess.Write, IO.FileShare.Read)
 
         Catch ex As System.Exception
-            LogErrors("OpenFileIntegrityFile", "Error opening/creating " & strFilePath & "; will try " & strDefaultFileName, ex, True, True, True, eMSFileScannerErrorCodes.FileIntegrityCheckError)
+            HandleException("Error opening/creating " & strFilePath & "; will try " & strDefaultFileName, ex)
 
             Try
                 If System.IO.File.Exists(strDefaultFileName) Then
@@ -1151,7 +1015,7 @@ Public Class clsMSFileScanner
 
                 fsFileStream = New System.IO.FileStream(strDefaultFileName, IO.FileMode.Append, IO.FileAccess.Write, IO.FileShare.Read)
             Catch ex2 As System.Exception
-                LogErrors("OpenFileIntegrityFile", "Error opening/creating " & strDefaultFileName, ex, True, True, True, eMSFileScannerErrorCodes.FileIntegrityCheckError)
+                HandleException("Error opening/creating " & strDefaultFileName, ex2)
             End Try
         End Try
 
@@ -1160,55 +1024,218 @@ Public Class clsMSFileScanner
                 objStreamWriter = New System.IO.StreamWriter(fsFileStream)
 
                 If Not blnOpenedExistingFile Then
-                    objStreamWriter.WriteLine(ConstructHeaderLine(eDataFileType))
+                    objStreamWriter.WriteLine(mMSFileInfoDataCache.ConstructHeaderLine(eDataFileType))
                 End If
             End If
         Catch ex As System.Exception
-            LogErrors("OpenFileIntegrityFile", "Error opening/creating the StreamWriter for " & fsFileStream.Name, ex, True, True, True, eMSFileScannerErrorCodes.FileIntegrityCheckError)
+            HandleException("Error opening/creating the StreamWriter for " & fsFileStream.Name, ex)
         End Try
 
     End Sub
 
-    Private Sub PopulateMSInfoDataRow(ByRef udtFileInfo As MSFileInfoScanner.iMSFileInfoProcessor.udtFileInfoType, ByRef objRow As System.Data.DataRow)
-        PopulateMSInfoDataRow(udtFileInfo, objRow, System.DateTime.Now())
-    End Sub
+    ''' <summary>
+    ''' Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
+    ''' </summary>
+    ''' <returns>True if success; false if failure</returns>
+    Public Function PostDatasetInfoToDB() As Boolean
+        Return PostDatasetInfoToDB(mDatasetInfoXML, mDSInfoConnectionString, mDSInfoStoredProcedure)
+    End Function
 
-    Private Sub PopulateMSInfoDataRow(ByRef udtFileInfo As MSFileInfoScanner.iMSFileInfoProcessor.udtFileInfoType, ByRef objRow As System.Data.DataRow, ByVal dtInfoLastModified As DateTime)
+    ''' <summary>
+    ''' Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
+    ''' </summary>
+    ''' <param name="strDatasetInfoXML">Database info XML</param>
+    ''' <returns>True if success; false if failure</returns>
+    Public Function PostDatasetInfoToDB(ByVal strDatasetInfoXML As String) As Boolean
+        Return PostDatasetInfoToDB(strDatasetInfoXML, mDSInfoConnectionString, mDSInfoStoredProcedure)
+    End Function
 
-        ' ToDo: Update udtFileInfo to include some overall quality scores
+    ''' <summary>
+    ''' Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
+    ''' </summary>
+    ''' <param name="strConnectionString">Database connection string</param>
+    ''' <param name="strStoredProcedure">Stored procedure</param>
+    ''' <returns>True if success; false if failure</returns>
+    Public Function PostDatasetInfoToDB(ByVal strConnectionString As String, _
+                                        ByVal strStoredProcedure As String) As Boolean
 
-        With objRow
-            .Item(COL_NAME_DATASET_ID) = udtFileInfo.DatasetID
-            .Item(COL_NAME_DATASET_NAME) = udtFileInfo.DatasetName
-            .Item(COL_NAME_FILE_EXTENSION) = udtFileInfo.FileExtension
-            .Item(COL_NAME_ACQ_TIME_START) = AssureMinimumDate(udtFileInfo.AcqTimeStart, MINIMUM_DATETIME)
-            .Item(COL_NAME_ACQ_TIME_END) = AssureMinimumDate(udtFileInfo.AcqTimeEnd, MINIMUM_DATETIME)
-            .Item(COL_NAME_SCAN_COUNT) = udtFileInfo.ScanCount
-            .Item(COL_NAME_FILE_SIZE_BYTES) = udtFileInfo.FileSizeBytes
-            .Item(COL_NAME_INFO_LAST_MODIFIED) = AssureMinimumDate(dtInfoLastModified, MINIMUM_DATETIME)
-            .Item(COL_NAME_FILE_MODIFICATION_DATE) = AssureMinimumDate(udtFileInfo.FileSystemModificationTime, MINIMUM_DATETIME)
-            '.Item(COL_NAME_QUALITY_SCORE) = udtFileInfo.OverallQualityScore
-        End With
-    End Sub
+        Return PostDatasetInfoToDB(Me.DatasetInfoXML, strConnectionString, strStoredProcedure)
+    End Function
 
-    Private Sub PopulateFolderIntegrityInfoDataRow(ByVal intFolderID As Integer, ByRef udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType, ByRef objRow As System.Data.DataRow)
-        PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow, System.DateTime.Now())
-    End Sub
+    ''' <summary>
+    ''' Post the dataset info in strDatasetInfoXML to the database, using the specified connection string and stored procedure
+    ''' </summary>
+    ''' <param name="strDatasetInfoXML">Database info XML</param>
+    ''' <param name="strConnectionString">Database connection string</param>
+    ''' <param name="strStoredProcedure">Stored procedure</param>
+    ''' <returns>True if success; false if failure</returns>
+    Public Function PostDatasetInfoToDB(ByVal strDatasetInfoXML As String, _
+                                        ByVal strConnectionString As String, _
+                                        ByVal strStoredProcedure As String) As Boolean
 
-    Private Sub PopulateFolderIntegrityInfoDataRow(ByVal intFolderID As Integer, ByRef udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType, ByRef objRow As System.Data.DataRow, ByVal dtInfoLastModified As DateTime)
+        Const MAX_RETRY_COUNT As Integer = 3
+        Const SEC_BETWEEN_RETRIES As Integer = 20
 
-        With objRow
-            .Item(COL_NAME_FOLDER_ID) = intFolderID
-            .Item(COL_NAME_FOLDER_PATH) = udtFolderStats.FolderPath
-            .Item(COL_NAME_FILE_COUNT) = udtFolderStats.FileCount
-            .Item(COL_NAME_COUNT_FAIL_INTEGRITY) = udtFolderStats.FileCountFailIntegrity
-            .Item(COL_NAME_INFO_LAST_MODIFIED) = AssureMinimumDate(dtInfoLastModified, MINIMUM_DATETIME)
-        End With
+        Dim intStartIndex As Integer
+        Dim intResult As Integer
 
-        If intFolderID > mMaximumFolderIntegrityInfoFolderID Then
-            mMaximumFolderIntegrityInfoFolderID = intFolderID
-        End If
-    End Sub
+        Dim strDSInfoXMLClean As String
+
+        Dim objCommand As System.Data.SqlClient.SqlCommand
+
+        Dim blnSuccess As Boolean
+
+        Try
+            ShowMessage("  Posting DatasetInfo XML to the database")
+
+            ' We need to remove the encoding line from strDatasetInfoXML before posting to the DB
+            ' This line will look like this:
+            '   <?xml version="1.0" encoding="utf-16" standalone="yes"?>
+
+            intStartIndex = strDatasetInfoXML.IndexOf("?>")
+            If intStartIndex > 0 Then
+                strDSInfoXMLClean = strDatasetInfoXML.Substring(intStartIndex + 2).Trim
+            Else
+                strDSInfoXMLClean = strDatasetInfoXML
+            End If
+
+            ' Call stored procedure strStoredProcedure using connection string strConnectionString
+
+            If strConnectionString Is Nothing OrElse strConnectionString.Length = 0 Then
+                ShowErrorMessage("Connection string not defined; unable to post the dataset info to the database")
+                Return False
+            End If
+
+            If strStoredProcedure Is Nothing OrElse strStoredProcedure.Length = 0 Then
+                strStoredProcedure = "UpdateDatasetFileInfoXML"
+            End If
+
+            objCommand = New System.Data.SqlClient.SqlCommand()
+
+            With objCommand
+                .CommandType = CommandType.StoredProcedure
+                .CommandText = strStoredProcedure
+                .Parameters.Add(New SqlClient.SqlParameter("@Return", SqlDbType.Int))
+                .Parameters.Item("@Return").Direction = ParameterDirection.ReturnValue
+
+                .Parameters.Add(New SqlClient.SqlParameter("@DatasetInfoXML", SqlDbType.Xml))
+                .Parameters.Item("@DatasetInfoXML").Direction = ParameterDirection.Input
+                .Parameters.Item("@DatasetInfoXML").Value = strDSInfoXMLClean
+            End With
+
+            mExecuteSP = New clsExecuteDatabaseSP(strConnectionString)
+
+            intResult = mExecuteSP.ExecuteSP(objCommand, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES)
+
+            If intResult = clsExecuteDatabaseSP.RET_VAL_OK Then
+                ' No errors
+                blnSuccess = True
+            Else
+                blnSuccess = False
+            End If
+
+            ' Uncomment this to test calling PostDatasetInfoToDB with a DatasetID value
+            ' Note that dataset Shew119-01_17july02_earth_0402-10_4-20 is DatasetID 6787
+            ' PostDatasetInfoToDB(32, strDatasetInfoXML, "Data Source=gigasax;Initial Catalog=DMS_Capture_T3;Integrated Security=SSPI;", "CacheDatasetInfoXML")
+
+        Catch ex As System.Exception
+            HandleException("Error calling stored procedure", ex)
+            blnSuccess = False
+        Finally
+            mExecuteSP = Nothing
+        End Try
+
+        Return blnSuccess
+    End Function
+
+    ''' <summary>
+    ''' Post the dataset info in strDatasetInfoXML to the database, using the specified connection string and stored procedure
+    ''' This version assumes the stored procedure takes DatasetID as the first parameter
+    ''' </summary>
+    ''' <param name="intDatasetID">Dataset ID to send to the stored procedure</param>
+    ''' <param name="strDatasetInfoXML">Database info XML</param>
+    ''' <param name="strConnectionString">Database connection string</param>
+    ''' <param name="strStoredProcedure">Stored procedure</param>
+    ''' <returns>True if success; false if failure</returns>
+    Public Function PostDatasetInfoToDB(ByVal intDatasetID As Integer, _
+                                        ByVal strDatasetInfoXML As String, _
+                                        ByVal strConnectionString As String, _
+                                        ByVal strStoredProcedure As String) As Boolean
+
+        Const MAX_RETRY_COUNT As Integer = 3
+        Const SEC_BETWEEN_RETRIES As Integer = 20
+
+        Dim intStartIndex As Integer
+        Dim intResult As Integer
+
+        Dim strDSInfoXMLClean As String
+
+        Dim objCommand As System.Data.SqlClient.SqlCommand
+
+        Dim blnSuccess As Boolean
+
+        Try
+            ShowMessage("  Posting DatasetInfo XML to the database (using Dataset ID " & intDatasetID.ToString & ")")
+
+            ' We need to remove the encoding line from strDatasetInfoXML before posting to the DB
+            ' This line will look like this:
+            '   <?xml version="1.0" encoding="utf-16" standalone="yes"?>
+
+            intStartIndex = strDatasetInfoXML.IndexOf("?>")
+            If intStartIndex > 0 Then
+                strDSInfoXMLClean = strDatasetInfoXML.Substring(intStartIndex + 2).Trim
+            Else
+                strDSInfoXMLClean = strDatasetInfoXML
+            End If
+
+            ' Call stored procedure strStoredProcedure using connection string strConnectionString
+
+            If strConnectionString Is Nothing OrElse strConnectionString.Length = 0 Then
+                ShowErrorMessage("Connection string not defined; unable to post the dataset info to the database")
+                Return False
+            End If
+
+            If strStoredProcedure Is Nothing OrElse strStoredProcedure.Length = 0 Then
+                strStoredProcedure = "CacheDatasetInfoXML"
+            End If
+
+            objCommand = New System.Data.SqlClient.SqlCommand()
+
+            With objCommand
+                .CommandType = CommandType.StoredProcedure
+                .CommandText = strStoredProcedure
+                .Parameters.Add(New SqlClient.SqlParameter("@Return", SqlDbType.Int))
+                .Parameters.Item("@Return").Direction = ParameterDirection.ReturnValue
+
+                .Parameters.Add(New SqlClient.SqlParameter("@DatasetID", SqlDbType.Int))
+                .Parameters.Item("@DatasetID").Direction = ParameterDirection.Input
+                .Parameters.Item("@DatasetID").Value = intDatasetID
+
+                .Parameters.Add(New SqlClient.SqlParameter("@DatasetInfoXML", SqlDbType.Xml))
+                .Parameters.Item("@DatasetInfoXML").Direction = ParameterDirection.Input
+                .Parameters.Item("@DatasetInfoXML").Value = strDSInfoXMLClean
+            End With
+
+            mExecuteSP = New clsExecuteDatabaseSP(strConnectionString)
+
+            intResult = mExecuteSP.ExecuteSP(objCommand, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES)
+
+            If intResult = clsExecuteDatabaseSP.RET_VAL_OK Then
+                ' No errors
+                blnSuccess = True
+            Else
+                blnSuccess = False
+            End If
+
+        Catch ex As System.Exception
+            HandleException("Error calling stored procedure", ex)
+            blnSuccess = False
+        Finally
+            mExecuteSP = Nothing
+        End Try
+
+        Return blnSuccess
+    End Function
 
     Private Function ProcessMSDataset( _
             ByVal strInputFileOrFolderPath As String, _
@@ -1227,8 +1254,11 @@ Public Class clsMSFileScanner
         Do
             ' Set the processing options
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, mSaveTICAndBPIPlots)
+            objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots, mSaveLCMS2DPlots)
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, mComputeOverallQualityScores)
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, mCreateDatasetInfoFile)
+
+            objMSInfoScanner.LCMS2DPlotOptions = mLCMS2DPlotOptions
 
             ' Process the data file
             blnSuccess = objMSInfoScanner.ProcessDatafile(strInputFileOrFolderPath, udtFileInfo)
@@ -1236,7 +1266,7 @@ Public Class clsMSFileScanner
             If Not blnSuccess Then
                 intRetryCount += 1
 
-                If intRetryCount < MAX_FILE_READ_MAX_ACCESS_ATTEMPTS Then
+                If intRetryCount < MAX_FILE_READ_ACCESS_ATTEMPTS Then
                     ' Retry if the file modification or creation time is within FILE_MODIFICATION_WINDOW_MINUTES minutes of the current time
                     If System.DateTime.Now.Subtract(udtFileInfo.FileSystemCreationTime).TotalMinutes < FILE_MODIFICATION_WINDOW_MINUTES OrElse _
                        System.DateTime.Now.Subtract(udtFileInfo.FileSystemModificationTime).TotalMinutes < FILE_MODIFICATION_WINDOW_MINUTES Then
@@ -1244,13 +1274,13 @@ Public Class clsMSFileScanner
                         ' Sleep for 10 seconds then try again
                         System.Threading.Thread.Sleep(10000)
                     Else
-                        intRetryCount = MAX_FILE_READ_MAX_ACCESS_ATTEMPTS
+                        intRetryCount = MAX_FILE_READ_ACCESS_ATTEMPTS
                     End If
                 End If
             End If
-        Loop While Not blnSuccess And intRetryCount < MAX_FILE_READ_MAX_ACCESS_ATTEMPTS
+        Loop While Not blnSuccess And intRetryCount < MAX_FILE_READ_ACCESS_ATTEMPTS
 
-        If Not blnSuccess And intRetryCount >= MAX_FILE_READ_MAX_ACCESS_ATTEMPTS Then
+        If Not blnSuccess And intRetryCount >= MAX_FILE_READ_ACCESS_ATTEMPTS Then
             If udtFileInfo.DatasetName.Length > 0 Then
                 ' Make an entry anyway; probably a corrupted file
                 blnSuccess = True
@@ -1258,21 +1288,32 @@ Public Class clsMSFileScanner
         End If
 
         If blnSuccess Then
-            If mSaveTICAndBPIPlots Then
-                ' Write out the TIC and BPI plots
-                SaveTICAndBPIPlotFiles(objMSInfoScanner, strDatasetName, strOutputFolderPath)
+
+            blnSuccess = objMSInfoScanner.CreateOutputFiles(strInputFileOrFolderPath, strOutputFolderPath)
+            If Not blnSuccess Then
+                SetErrorCode(eMSFileScannerErrorCodes.OutputFileWriteError)
             End If
 
-            If mCreateDatasetInfoFile Then
-                objMSInfoScanner.CreateDatasetInfoFile(strInputFileOrFolderPath, strOutputFolderPath)
+            ' Cache the Dataset Info XML
+            mDatasetInfoXML = objMSInfoScanner.GetDatasetInfoXML()
+
+            If mUseCacheFiles Then
+                ' Update the results database
+                blnSuccess = mMSFileInfoDataCache.UpdateCachedMSFileInfo(udtFileInfo)
+
+                ' Possibly auto-save the cached results
+                AutosaveCachedResults()
             End If
 
+            If mDSInfoDBPostingEnabled Then
+                blnSuccess = PostDatasetInfoToDB(mDatasetInfoXML)
+                If Not blnSuccess Then
+                    SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError)
+                End If
+            Else
+                blnSuccess = True
+            End If
 
-            ' Update the results database
-            blnSuccess = UpdateCachedMSFileInfo(udtFileInfo)
-
-            ' Possibly auto-save the cached results
-            AutosaveCachedResults()
         Else
             If SKIP_FILES_IN_ERROR Then
                 blnSuccess = True
@@ -1284,7 +1325,19 @@ Public Class clsMSFileScanner
     End Function
 
     ' Main processing function
-    Public Function ProcessMSFileOrFolder(ByVal strInputFileOrFolderPath As String, ByVal strOutputFolderPath As String, ByVal blnResetErrorCode As Boolean, ByRef eMSFileProcessingState As eMSFileProcessingStateConstants) As Boolean
+    Public Function ProcessMSFileOrFolder(ByVal strInputFileOrFolderPath As String, _
+                                          ByVal strOutputFolderPath As String) As Boolean
+
+        Dim eMSFileProcessingState As eMSFileProcessingStateConstants
+
+        Return ProcessMSFileOrFolder(strInputFileOrFolderPath, strOutputFolderPath, True, eMSFileProcessingState)
+    End Function
+
+    Public Function ProcessMSFileOrFolder(ByVal strInputFileOrFolderPath As String, _
+                                          ByVal strOutputFolderPath As String, _
+                                          ByVal blnResetErrorCode As Boolean, _
+                                          ByRef eMSFileProcessingState As eMSFileProcessingStateConstants) As Boolean
+
         ' Note: strInputFileOrFolderPath must be a known MS data file or MS data folder
         ' See function ProcessMSFilesAndRecurseFolders for more details
         ' This function returns True if it processed a file (or the dataset was processed previously)
@@ -1293,9 +1346,9 @@ Public Class clsMSFileScanner
         ' eMSFileProcessingState will be updated based on whether the file is processed, skipped, etc.
 
         Dim blnSuccess As Boolean
-        Dim objMSInfoScanner As MSFileInfoScanner.iMSFileInfoProcessor
-
         Dim blnIsFolder As Boolean
+        Dim blnKnownMSDataType As Boolean
+
         Dim objFileSystemInfo As System.IO.FileSystemInfo
 
         Dim objRow As System.Data.DataRow
@@ -1305,7 +1358,6 @@ Public Class clsMSFileScanner
             SetErrorCode(eMSFileScannerErrorCodes.NoError)
         End If
 
-        mStatusMessage = String.Empty
         eMSFileProcessingState = eMSFileProcessingStateConstants.NotProcessed
 
         If strOutputFolderPath Is Nothing OrElse strOutputFolderPath.Length = 0 Then
@@ -1313,21 +1365,23 @@ Public Class clsMSFileScanner
             strOutputFolderPath = GetAppFolderPath()
         End If
 
-        If mMSFileInfoCachedResultsState = eCachedResultsStateConstants.NotInitialized Then
-            LoadCachedResults()
-        End If
+        ' Update mOutputFolderPath
+        mOutputFolderPath = String.Copy(strOutputFolderPath)
+
+        mDatasetInfoXML = String.Empty
+
+        LoadCachedResults(False)
 
         Try
             If strInputFileOrFolderPath Is Nothing OrElse strInputFileOrFolderPath.Length = 0 Then
-                LogErrors("ProcessMSFileOrFolder", "Input file name is empty", Nothing, False, False, True, eMSFileScannerErrorCodes.InvalidInputFilePath)
+                ShowErrorMessage("Input file name is empty")
             Else
-                mStatusMessage = " Parsing " & System.IO.Path.GetFileName(strInputFileOrFolderPath)
-                Console.WriteLine(mStatusMessage)
+                ShowMessage(" Parsing " & System.IO.Path.GetFileName(strInputFileOrFolderPath))
 
                 ' Determine whether strInputFileOrFolderPath points to a file or a folder
 
                 If Not GetFileOrFolderInfo(strInputFileOrFolderPath, blnIsFolder, objFileSystemInfo) Then
-                    LogErrors("ProcessMSFileOrFolder", "File or folder not found: " & strInputFileOrFolderPath, Nothing, False, False, True, eMSFileScannerErrorCodes.InvalidInputFilePath)
+                    ShowErrorMessage("File or folder not found: " & strInputFileOrFolderPath)
                     If SKIP_FILES_IN_ERROR Then
                         Return True
                     Else
@@ -1335,19 +1389,24 @@ Public Class clsMSFileScanner
                     End If
                 End If
 
+                blnKnownMSDataType = False
+
                 ' Only continue if it's a known type
                 If blnIsFolder Then
                     If objFileSystemInfo.Name = clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME Then
                         ' Bruker 1 folder
-                        objMSInfoScanner = New clsBrukerOneFolderInfoScanner
+                        mMSInfoScanner = New clsBrukerOneFolderInfoScanner
+                        blnKnownMSDataType = True
                     Else
                         Select Case System.IO.Path.GetExtension(strInputFileOrFolderPath).ToUpper
                             Case clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION
                                 ' Agilent .D folder
-                                objMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
+                                mMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
+                                blnKnownMSDataType = True
                             Case clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION
                                 ' Micromass .Raw folder
-                                objMSInfoScanner = New clsMicromassRawFolderInfoScanner
+                                mMSInfoScanner = New clsMicromassRawFolderInfoScanner
+                                blnKnownMSDataType = True
                             Case Else
                                 ' Unknown folder extension
                         End Select
@@ -1356,34 +1415,40 @@ Public Class clsMSFileScanner
                     ' Examine the extension on strInputFileOrFolderPath
                     Select Case objFileSystemInfo.Extension.ToUpper
                         Case clsFinniganRawFileInfoScanner.FINNIGAN_RAW_FILE_EXTENSION
-                            objMSInfoScanner = New clsFinniganRawFileInfoScanner
+                            mMSInfoScanner = New clsFinniganRawFileInfoScanner
+                            blnKnownMSDataType = True
                         Case clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION
-                            objMSInfoScanner = New clsAgilentTOFOrQStarWiffFileInfoScanner
+                            mMSInfoScanner = New clsAgilentTOFOrQStarWiffFileInfoScanner
+                            blnKnownMSDataType = True
+                        Case clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION
+                            mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+                            blnKnownMSDataType = True
                         Case Else
                             ' Unknown file extension; check for a zipped folder 
                             If clsBrukerOneFolderInfoScanner.IsZippedSFolder(objFileSystemInfo.Name) Then
                                 ' Bruker s001.zip file
-                                objMSInfoScanner = New clsBrukerOneFolderInfoScanner
+                                mMSInfoScanner = New clsBrukerOneFolderInfoScanner
+                                blnKnownMSDataType = True
                             End If
                     End Select
                 End If
 
-                If objMSInfoScanner Is Nothing Then
-                    LogErrors("ProcessMSFileOrFolder", "Unknown file type: " & System.IO.Path.GetFileName(strInputFileOrFolderPath), Nothing, False, False, True, eMSFileScannerErrorCodes.UnknownFileExtension)
+                If Not blnKnownMSDataType Then
+                    ShowErrorMessage("Unknown file type: " & System.IO.Path.GetFileName(strInputFileOrFolderPath))
                     Return False
                 End If
 
                 Dim strDatasetName As String
-                strDatasetName = objMSInfoScanner.GetDatasetNameViaPath(objFileSystemInfo.FullName)
+                strDatasetName = mMSInfoScanner.GetDatasetNameViaPath(objFileSystemInfo.FullName)
 
-                If Not mReprocessExistingFiles Then
+                If mUseCacheFiles AndAlso Not mReprocessExistingFiles Then
                     ' See if the strDatasetName in strInputFileOrFolderPath is already present in mCachedResults
                     ' If it is present, then don't process it (unless mReprocessIfCachedSizeIsZero = True and it's size is 0)
 
-                    If strDatasetName.Length > 0 AndAlso CachedMSInfoContainsDataset(strDatasetName, objRow) Then
+                    If strDatasetName.Length > 0 AndAlso mMSFileInfoDataCache.CachedMSInfoContainsDataset(strDatasetName, objRow) Then
                         If mReprocessIfCachedSizeIsZero Then
                             Try
-                                lngCachedSizeBytes = CLng(objRow.Item(COL_NAME_FILE_SIZE_BYTES))
+                                lngCachedSizeBytes = CLng(objRow.Item(clsMSFileInfoDataCache.COL_NAME_FILE_SIZE_BYTES))
                             Catch ex2 As System.Exception
                                 lngCachedSizeBytes = 1
                             End Try
@@ -1402,7 +1467,7 @@ Public Class clsMSFileScanner
                 End If
 
                 ' Process the data file or folder
-                blnSuccess = ProcessMSDataset(strInputFileOrFolderPath, objMSInfoScanner, strDatasetName, strOutputFolderPath)
+                blnSuccess = ProcessMSDataset(strInputFileOrFolderPath, mMSInfoScanner, strDatasetName, strOutputFolderPath)
                 If blnSuccess Then
                     eMSFileProcessingState = eMSFileProcessingStateConstants.ProcessedSuccessfully
                 Else
@@ -1412,10 +1477,10 @@ Public Class clsMSFileScanner
             End If
 
         Catch ex As System.Exception
+            HandleException("Error in ProcessMSFileOrFolder", ex)
             blnSuccess = False
-            LogErrors("ProcessMSFileOrFolder", "Error in ProcessMSFileOrFolder", ex, True, False, False, eMSFileScannerErrorCodes.UnspecifiedError)
         Finally
-            ' Could place Finally code here
+            mMSInfoScanner = Nothing
         End Try
 
         Return blnSuccess
@@ -1436,8 +1501,6 @@ Public Class clsMSFileScanner
 
         Dim ioFileInfo As System.IO.FileInfo
         Dim ioFolderInfo As System.IO.DirectoryInfo
-
-        Dim strMessage As String
 
         Dim eMSFileProcessingState As eMSFileProcessingStateConstants
 
@@ -1521,14 +1584,9 @@ Public Class clsMSFileScanner
                     CheckIntegrityOfFilesInFolder(ioFolderInfo.FullName, mRecheckFileIntegrityForExistingFolders, strProcessedFileList)
                 End If
 
-                If intMatchCount = 0 And Me.ShowMessages Then
+                If intMatchCount = 0 Then
                     If mErrorCode = eMSFileScannerErrorCodes.NoError Then
-                        strMessage = "No match was found for the input file path:" & ControlChars.NewLine & strInputFileOrFolderPath
-                        If Me.ShowMessages Then
-                            System.Windows.Forms.MessageBox.Show(strMessage, "File not found", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
-                        Else
-                            Console.WriteLine(strMessage)
-                        End If
+                        ShowMessage("No match was found for the input file path:" & strInputFileOrFolderPath, eMessageTypeConstants.Warning)
                     End If
                 Else
                     Console.WriteLine()
@@ -1538,12 +1596,8 @@ Public Class clsMSFileScanner
             End If
 
         Catch ex As System.Exception
-            If Me.ShowMessages Then
-                strMessage = "Error in ProcessMSFileOrFolderWildcard: " & ControlChars.NewLine & ex.Message
-                System.Windows.Forms.MessageBox.Show(strMessage, "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
-            Else
-                Throw New System.Exception("Error in ProcessMSFileOrFolderWildcard", ex)
-            End If
+            HandleException("Error in ProcessMSFileOrFolderWildcard", ex)
+            blnSuccess = False
         Finally
             If Not mFileIntegrityDetailsWriter Is Nothing Then
                 mFileIntegrityDetailsWriter.Close()
@@ -1557,21 +1611,25 @@ Public Class clsMSFileScanner
 
     End Function
 
-    Public Function ProcessMSFilesAndRecurseFolders(ByVal strInputFilePathOrFolder As String, ByVal strOutputFolderPath As String, ByVal intRecurseFoldersMaxLevels As Integer) As Boolean
-        ' Calls ProcessFile for all files in strInputFilePathOrFolder and below having a known extension
-        ' Known extensions are:
-        '  .Raw for Finnigan files
-        '  .Wiff for Agilent TOF files and for Q-Star files
-        ' 
-        ' Furthermore, for each folder that does not have a file matching a known extension,
-        '  it then looks for special folder names:
-        '  Folders matching *.Raw for Micromass data
-        '  Folders matching *.D for Agilent Ion Trap data
-        '  A folder named 1 for Bruker FTICR-MS data
-
-        ' If strInputFilePathOrFolder contains a filename with a wildcard (* or ?), then that information will be 
-        '  used to filter the files that are processed
-        ' If intRecurseFoldersMaxLevels is <=0 then we recurse infinitely
+    ''' <summary>
+    ''' Calls ProcessMSFileOrFolder for all files in strInputFilePathOrFolder and below having a known extension
+    '''  Known extensions are:
+    '''   .Raw for Finnigan files
+    '''   .Wiff for Agilent TOF files and for Q-Star files
+    '''   .Baf for Bruker XMASS folders (contains file analysis.baf, and hopefully files scan.xml and Log.txt)
+    ''' For each folder that does not have any files matching a known extension, will then look for special folder names:
+    '''   Folders matching *.Raw for Micromass data
+    '''   Folders matching *.D for Agilent Ion Trap data
+    '''   A folder named 1 for Bruker FTICR-MS data
+    ''' </summary>
+    ''' <param name="strInputFilePathOrFolder">Path to the input file or folder; can contain a wildcard (* or ?)</param>
+    ''' <param name="strOutputFolderPath">Folder to write any results files to</param>
+    ''' <param name="intRecurseFoldersMaxLevels">Maximum folder depth to process; Set to 0 to process all folders</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function ProcessMSFilesAndRecurseFolders(ByVal strInputFilePathOrFolder As String, _
+                                                    ByVal strOutputFolderPath As String, _
+                                                    ByVal intRecurseFoldersMaxLevels As Integer) As Boolean
 
         Dim strCleanPath As String
         Dim strInputFolderPath As String
@@ -1591,10 +1649,18 @@ Public Class clsMSFileScanner
                 strCleanPath = strCleanPath.Replace("?", "_")
 
                 ioFileInfo = New System.IO.FileInfo(strCleanPath)
+                If System.IO.Path.IsPathRooted(strCleanPath) Then
+                    If Not ioFileInfo.Directory.Exists Then
+                        ShowErrorMessage("Folder not found: " & ioFileInfo.DirectoryName)
+                        SetErrorCode(eMSFileScannerErrorCodes.InvalidInputFilePath)
+                        Return False
+                    End If
+                End If
+
                 If ioFileInfo.Directory.Exists Then
                     strInputFolderPath = ioFileInfo.DirectoryName
                 Else
-                    ' Use the current working directory
+                    ' Folder not found; use the current working directory
                     strInputFolderPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
                 End If
 
@@ -1624,9 +1690,7 @@ Public Class clsMSFileScanner
                 intFileProcessCount = 0
                 intFileProcessFailCount = 0
 
-                If mMSFileInfoCachedResultsState = eCachedResultsStateConstants.NotInitialized Then
-                    LoadCachedResults()
-                End If
+                LoadCachedResults(False)
 
                 ' Call RecurseFoldersWork
                 blnSuccess = RecurseFoldersWork(strInputFolderPath, strInputFilePathOrFolder, strOutputFolderPath, intFileProcessCount, intFileProcessFailCount, 1, intRecurseFoldersMaxLevels)
@@ -1637,7 +1701,7 @@ Public Class clsMSFileScanner
             End If
 
         Catch ex As System.Exception
-            LogErrors("ProcessMSFilesAndRecurseFolders", ex.Message, ex, False, False, True, eMSFileScannerErrorCodes.InputFileReadError)
+            HandleException("Error in ProcessMSFilesAndRecurseFolders", ex)
             blnSuccess = False
         Finally
             If Not mFileIntegrityDetailsWriter Is Nothing Then
@@ -1652,7 +1716,14 @@ Public Class clsMSFileScanner
 
     End Function
 
-    Private Function RecurseFoldersWork(ByVal strInputFolderPath As String, ByVal strFileNameMatch As String, ByVal strOutputFolderPath As String, ByRef intFileProcessCount As Integer, ByRef intFileProcessFailCount As Integer, ByVal intRecursionLevel As Integer, ByVal intRecurseFoldersMaxLevels As Integer) As Boolean
+    Private Function RecurseFoldersWork(ByVal strInputFolderPath As String, _
+                                        ByVal strFileNameMatch As String, _
+                                        ByVal strOutputFolderPath As String, _
+                                        ByRef intFileProcessCount As Integer, _
+                                        ByRef intFileProcessFailCount As Integer, _
+                                        ByVal intRecursionLevel As Integer, _
+                                        ByVal intRecurseFoldersMaxLevels As Integer) As Boolean
+
         Const MAX_ACCESS_ATTEMPTS As Integer = 2
 
         ' If intRecurseFoldersMaxLevels is <=0 then we recurse infinitely
@@ -1691,7 +1762,7 @@ Public Class clsMSFileScanner
                 Exit Do
             Catch ex As System.Exception
                 ' Input folder path error
-                LogErrors("RecurseFoldersWork", "Populate ioInputFolderInfo for" & strInputFolderPath, ex, False, False, True, eMSFileScannerErrorCodes.InvalidInputFilePath)
+                HandleException("Error populating ioInputFolderInfo for " & strInputFolderPath, ex)
                 If Not ex.Message.Contains("no longer available") Then
                     Return False
                 End If
@@ -1716,7 +1787,7 @@ Public Class clsMSFileScanner
             blnProcessAllFileExtensions = ValidateExtensions(strFileExtensionsToParse)
             ValidateExtensions(strFolderExtensionsToParse)
         Catch ex As System.Exception
-            LogErrors("RecurseFoldersWork", ex.Message, ex, False, False, True, eMSFileScannerErrorCodes.UnspecifiedError)
+            HandleException("Error in RecurseFoldersWork", ex)
             Return False
         End Try
 
@@ -1769,7 +1840,7 @@ Public Class clsMSFileScanner
 
                     Catch ex As System.Exception
                         ' Error parsing file
-                        LogErrors("RecurseFoldersWork", "For Each ioFileMatch in " & strInputFolderPath, ex, False, False, True, eMSFileScannerErrorCodes.InvalidInputFilePath)
+                        HandleException("Error in RecurseFoldersWork at For Each ioFileMatch in " & strInputFolderPath, ex)
                         If Not ex.Message.Contains("no longer available") Then
                             Return False
                         End If
@@ -1804,7 +1875,7 @@ Public Class clsMSFileScanner
             End If
 
         Catch ex As System.Exception
-            LogErrors("RecurseFoldersWork", "Examining files in " & strInputFolderPath, ex, False, False, True, eMSFileScannerErrorCodes.InvalidInputFilePath)
+            HandleException("Error in RecurseFoldersWork Examining files in " & strInputFolderPath, ex)
             Return False
         End Try
 
@@ -1856,7 +1927,7 @@ Public Class clsMSFileScanner
 
                         Catch ex As System.Exception
                             ' Error parsing folder
-                            LogErrors("RecurseFoldersWork", "For Each ioSubFolderInfo(A) in " & strInputFolderPath, ex, False, False, True, eMSFileScannerErrorCodes.InvalidInputFilePath)
+                            HandleException("Error in RecurseFoldersWork at For Each ioSubFolderInfo(A) in " & strInputFolderPath, ex)
                             If Not ex.Message.Contains("no longer available") Then
                                 Return False
                             End If
@@ -1900,7 +1971,7 @@ Public Class clsMSFileScanner
 
                             Catch ex As System.Exception
                                 ' Error parsing file
-                                LogErrors("RecurseFoldersWork", "For Each ioSubFolderInfo(B) in " & strInputFolderPath, ex, False, False, True, eMSFileScannerErrorCodes.InvalidInputFilePath)
+                                HandleException("Error in RecurseFoldersWork at For Each ioSubFolderInfo(B) in " & strInputFolderPath, ex)
                                 If Not ex.Message.Contains("no longer available") Then
                                     Return False
                                 End If
@@ -1922,7 +1993,7 @@ Public Class clsMSFileScanner
 
 
             Catch ex As System.Exception
-                LogErrors("RecurseFoldersWork", "Examining subfolders in " & strInputFolderPath, ex, False, False, True, eMSFileScannerErrorCodes.InvalidInputFilePath)
+                HandleException("Error in RecurseFoldersWork examining subfolders in " & strInputFolderPath, ex)
                 Return False
             End Try
 
@@ -1933,136 +2004,15 @@ Public Class clsMSFileScanner
     End Function
 
     Public Function SaveCachedResults() As Boolean
-        Return SaveCachedResults(True)
+        Return Me.SaveCachedResults(True)
     End Function
 
-    Private Function SaveCachedResults(ByVal blnClearCachedData As Boolean) As Boolean
-        Dim blnSuccess1 As Boolean
-        Dim blnSuccess2 As Boolean
-
-        blnSuccess1 = SaveCachedMSInfoResults(blnClearCachedData)
-        blnSuccess2 = SaveCachedFolderIntegrityInfoResults(blnClearCachedData)
-
-        Return blnSuccess1 And blnSuccess2
-    End Function
-
-    Private Function SaveCachedFolderIntegrityInfoResults(ByVal blnClearCachedData As Boolean) As Boolean
-
-        Dim fsOutfile As System.IO.FileStream
-        Dim srOutFile As System.IO.StreamWriter
-
-        Dim objRow As System.Data.DataRow
-        Dim blnSuccess As Boolean
-
-        If Not mFolderIntegrityInfoDataset Is Nothing AndAlso _
-           mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).Rows.Count > 0 AndAlso _
-           mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.Modified Then
-
-            Try
-                ' Write all of mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE) to the results file
-                If USE_XML_OUTPUT_FILE Then
-                    fsOutfile = New System.IO.FileStream(mFolderIntegrityInfoFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read)
-                    mFolderIntegrityInfoDataset.WriteXml(fsOutfile)
-                    fsOutfile.Close()
-                Else
-                    fsOutfile = New System.IO.FileStream(mFolderIntegrityInfoFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read)
-                    srOutFile = New System.IO.StreamWriter(fsOutfile)
-
-                    srOutFile.WriteLine(ConstructHeaderLine(eDataFileTypeConstants.FolderIntegrityInfo))
-
-                    For Each objRow In mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).Rows
-                        WriteFolderIntegrityInfoDataLine(srOutFile, objRow)
-                    Next objRow
-
-                    srOutFile.Close()
-                End If
-
-                mCachedFolderIntegrityInfoLastSaveTime = System.DateTime.Now()
-
-                If blnClearCachedData Then
-                    ' Clear the data table
-                    ClearCachedFolderIntegrityInfoResults()
-                Else
-                    mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.InitializedButUnmodified
-                End If
-
-                blnSuccess = True
-
-            Catch ex As System.Exception
-                blnSuccess = False
-                LogErrors("SaveCachedFolderIntegrityInfoResults", "Error in SaveCachedFolderIntegrityInfoResults", ex, True, False, False, eMSFileScannerErrorCodes.OutputFileWriteError)
-            Finally
-                If USE_XML_OUTPUT_FILE Then
-                    fsOutfile = Nothing
-                Else
-                    fsOutfile = Nothing
-                    srOutFile = Nothing
-                End If
-            End Try
+    Public Function SaveCachedResults(ByVal blnClearCachedData As Boolean) As Boolean
+        If mUseCacheFiles Then
+            Return mMSFileInfoDataCache.SaveCachedResults(blnClearCachedData)
+        Else
+            Return True
         End If
-
-        Return blnSuccess
-
-    End Function
-
-
-    Private Function SaveCachedMSInfoResults(ByVal blnClearCachedData As Boolean) As Boolean
-
-        Dim fsOutfile As System.IO.FileStream
-        Dim srOutFile As System.IO.StreamWriter
-
-        Dim objRow As System.Data.DataRow
-        Dim blnSuccess As Boolean
-
-        If Not mMSFileInfoDataset Is Nothing AndAlso _
-           mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).Rows.Count > 0 AndAlso _
-           mMSFileInfoCachedResultsState = eCachedResultsStateConstants.Modified Then
-
-            Try
-                ' Write all of mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE) to the results file
-                If USE_XML_OUTPUT_FILE Then
-                    fsOutfile = New System.IO.FileStream(mAcquisitionTimeFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read)
-                    mMSFileInfoDataset.WriteXml(fsOutfile)
-                    fsOutfile.Close()
-                Else
-                    fsOutfile = New System.IO.FileStream(mAcquisitionTimeFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read)
-                    srOutFile = New System.IO.StreamWriter(fsOutfile)
-
-                    srOutFile.WriteLine(ConstructHeaderLine(eDataFileTypeConstants.MSFileInfo))
-
-                    For Each objRow In mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).Rows
-                        WriteMSInfoDataLine(srOutFile, objRow)
-                    Next objRow
-
-                    srOutFile.Close()
-                End If
-
-                mCachedMSInfoResultsLastSaveTime = System.DateTime.Now()
-
-                If blnClearCachedData Then
-                    ' Clear the data table
-                    ClearCachedMSInfoResults()
-                Else
-                    mMSFileInfoCachedResultsState = eCachedResultsStateConstants.InitializedButUnmodified
-                End If
-
-                blnSuccess = True
-
-            Catch ex As System.Exception
-                blnSuccess = False
-                LogErrors("SaveCachedMSInfoResults", "Error in SaveCachedMSInfoResults", ex, True, False, False, eMSFileScannerErrorCodes.OutputFileWriteError)
-            Finally
-                If USE_XML_OUTPUT_FILE Then
-                    fsOutfile = Nothing
-                Else
-                    fsOutfile = Nothing
-                    srOutFile = Nothing
-                End If
-            End Try
-        End If
-
-        Return blnSuccess
-
     End Function
 
     Public Function SaveParameterFileSettings(ByVal strParameterFilePath As String) As Boolean
@@ -2089,113 +2039,13 @@ Public Class clsMSFileScanner
             End If
 
         Catch ex As System.Exception
-            LogErrors("SaveParameterFileSettings", "Error in SaveParameterFileSettings", ex, True, False, False, eMSFileScannerErrorCodes.OutputFileWriteError)
+            HandleException("Error in SaveParameterFileSettings", ex)
             Return False
         Finally
             objSettingsFile = Nothing
         End Try
 
         Return True
-
-    End Function
-
-    Private Function InitializeGraphPane(ByRef objData As MSFileInfoScanner.iMSFileInfoProcessor.udtChromatogramInfoType, ByVal strTitle As String, ByVal intMSLevelFilter As Integer) As ZedGraph.GraphPane
-        Dim myPane As New ZedGraph.GraphPane
-
-        Dim intDataCount As Integer
-        Dim dblXVals() As Double
-        Dim dblYVals() As Double
-
-        Dim intIndex As Integer
-
-        With objData
-            intDataCount = 0
-            ReDim dblXVals(.ScanCount - 1)
-            ReDim dblYVals(.ScanCount - 1)
-
-            For intIndex = 0 To .ScanCount - 1
-                If intMSLevelFilter = 0 OrElse _
-                   .ScanMSLevel(intIndex) = intMSLevelFilter OrElse _
-                   intMSLevelFilter = 2 And .ScanMSLevel(intIndex) >= 2 Then
-                    dblXVals(intDataCount) = .ScanNum(intIndex)
-                    dblYVals(intDataCount) = .ScanIntensity(intIndex)
-                    intDataCount += 1
-                End If
-            Next intIndex
-
-            If intDataCount <> dblXVals.Length Then
-                ReDim Preserve dblXVals(intDataCount - 1)
-                ReDim Preserve dblYVals(intDataCount - 1)
-            End If
-        End With
-
-        ' Set the titles and axis labels
-        myPane.Title.Text = String.Copy(strTitle)
-        myPane.XAxis.Title.Text = "Scan Number"
-        myPane.YAxis.Title.Text = "Intensity"
-
-        ' Generate a black curve with no symbols
-        Dim myCurve As ZedGraph.LineItem
-        myPane.CurveList.Clear()
-
-        If intDataCount > 0 Then
-            myCurve = myPane.AddCurve(strTitle, dblXVals, dblYVals, System.Drawing.Color.Black, ZedGraph.SymbolType.None)
-        End If
-
-        ' Show the x axis grid
-        myPane.XAxis.MajorGrid.IsVisible = True
-
-        '' Make the Y axis scale black
-        'myPane.YAxis.Scale.FontSpec.FontColor = Color.Red
-        'myPane.YAxis.Title.FontSpec.FontColor = Color.Red
-
-        '' Align the Y axis labels so they are flush to the axis
-        'myPane.YAxis.Scale.Align = AlignP.Inside
-
-        ' Fill the axis background with a gradient
-        myPane.Chart.Fill = New ZedGraph.Fill(System.Drawing.Color.White, System.Drawing.Color.LightGray, 45.0F)
-
-        ' Hide the legend
-        myPane.Legend.IsVisible = False
-
-        ' Force a plot update
-        myPane.AxisChange()
-
-        Return myPane
-
-    End Function
-
-    Private Function SaveTICAndBPIPlotFiles(ByRef objMSInfoScanner As MSFileInfoScanner.iMSFileInfoProcessor, ByVal strDatasetName As String, ByVal strOutputFolderPath As String) As Boolean
-        Dim myPane As ZedGraph.GraphPane
-        Dim strPNGFilePath As String
-        Dim blnSuccess As Boolean
-
-        Try
-            myPane = InitializeGraphPane(objMSInfoScanner.BPI, "BPI - MS Spectra", 1)
-            If myPane.CurveList.Count > 0 Then
-                strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName & "_BPI_MS.png")
-                myPane.GetImage(800, 400, 300, False).Save(strPNGFilePath, System.Drawing.Imaging.ImageFormat.Png)
-            End If
-
-            myPane = InitializeGraphPane(objMSInfoScanner.BPI, "BPI - MS2 Spectra", 2)
-            If myPane.CurveList.Count > 0 Then
-                strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName & "_BPI_MSn.png")
-                myPane.GetImage(800, 400, 300, False).Save(strPNGFilePath, System.Drawing.Imaging.ImageFormat.Png)
-            End If
-
-            myPane = InitializeGraphPane(objMSInfoScanner.TIC, "TIC - All Spectra", 0)
-            If myPane.CurveList.Count > 0 Then
-                strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName & "_TIC.png")
-                myPane.GetImage(800, 400, 300, False).Save(strPNGFilePath, System.Drawing.Imaging.ImageFormat.Png)
-            End If
-
-            blnSuccess = True
-        Catch ex As System.Exception
-            LogErrors("SaveTICAndBPIPlotFiles", ex.Message, Nothing, False, False, True, eMSFileScannerErrorCodes.UnknownFileExtension)
-            blnSuccess = False
-        End Try
-
-        Return blnSuccess
 
     End Function
 
@@ -2213,98 +2063,63 @@ Public Class clsMSFileScanner
 
     End Sub
 
-    Private Function UpdateCachedMSFileInfo(ByVal udtFileInfo As MSFileInfoScanner.iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        ' Update the entry for this dataset in mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE)
+    Protected Sub ShowErrorMessage(ByVal strMessage As String)
+        ShowErrorMessage(strMessage, True)
+    End Sub
 
-        Dim objRow As System.Data.DataRow
+    Protected Sub ShowErrorMessage(ByVal strMessage As String, ByVal blnAllowLogToFile As Boolean)
+        Dim strSeparator As String = "------------------------------------------------------------------------------"
 
-        Dim blnSuccess As Boolean
+        Console.WriteLine()
+        Console.WriteLine(strSeparator)
+        Console.WriteLine(strMessage)
+        Console.WriteLine(strSeparator)
+        Console.WriteLine()
 
-        Try
-            ' Examine the data in memory and add or update the data for strDataset
-            If CachedMSInfoContainsDataset(udtFileInfo.DatasetName, objRow) Then
-                ' Item already present; update it
-                Try
-                    PopulateMSInfoDataRow(udtFileInfo, objRow)
-                Catch ex As System.Exception
-                    ' Ignore errors updating the entry
-                End Try
-            Else
-                ' Item not present; add it
-                objRow = mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).NewRow
-                PopulateMSInfoDataRow(udtFileInfo, objRow)
-                mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).Rows.Add(objRow)
-            End If
+        RaiseEvent ErrorEvent(strMessage)
 
-            mMSFileInfoCachedResultsState = eCachedResultsStateConstants.Modified
+        If blnAllowLogToFile Then
+            LogMessage(strMessage, eMessageTypeConstants.ErrorMsg)
+        End If
 
-            blnSuccess = True
-        Catch ex As System.Exception
-            blnSuccess = False
-            LogErrors("ProcessFile", "Error in UpdateCachedMSFileInfo", ex, True, False, False, eMSFileScannerErrorCodes.OutputFileWriteError)
-        End Try
+    End Sub
 
-        Return blnSuccess
+    Protected Sub ShowMessage(ByVal strMessage As String)
+        ShowMessage(strMessage, True, False, eMessageTypeConstants.Normal)
+    End Sub
 
-    End Function
+    Protected Sub ShowMessage(ByVal strMessage As String, ByVal eMessageType As eMessageTypeConstants)
+        ShowMessage(strMessage, True, False, eMessageType)
+    End Sub
 
+    Protected Sub ShowMessage(ByVal strMessage As String, ByVal blnAllowLogToFile As Boolean)
+        ShowMessage(strMessage, blnAllowLogToFile, False, eMessageTypeConstants.Normal)
+    End Sub
 
-    Private Function UpdateCachedFolderIntegrityInfo(ByVal udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType, ByRef intFolderID As Integer) As Boolean
-        ' Update the entry for this dataset in mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE)
+    Protected Sub ShowMessage(ByVal strMessage As String, ByVal blnAllowLogToFile As Boolean, ByVal blnPrecedeWithNewline As Boolean, ByVal eMessageType As eMessageTypeConstants)
 
-        Dim objRow As System.Data.DataRow
+        If blnPrecedeWithNewline Then
+            Console.WriteLine()
+        End If
+        Console.WriteLine(strMessage)
 
-        Dim blnSuccess As Boolean
+        RaiseEvent MessageEvent(strMessage)
 
-        Try
-            If mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized Then
-                ' Coding error; this shouldn't be the case
-                Console.WriteLine("mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized in UpdateCachedFolderIntegrityInfo; unable to continue")
-                End
-            End If
+        If blnAllowLogToFile Then
+            LogMessage(strMessage, eMessageType)
+        End If
 
-            intFolderID = -1
+    End Sub
 
-            ' Examine the data in memory and add or update the data for strDataset
-            If CachedFolderIntegrityInfoContainsFolder(udtFolderStats.FolderPath, intFolderID, objRow) Then
-                ' Item already present; update it
-                Try
-                    PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow)
-                Catch ex As System.Exception
-                    ' Ignore errors updating the entry
-                End Try
-            Else
-                ' Item not present; add it
-
-                ' Auto-assign the next available FolderID value
-                intFolderID = mMaximumFolderIntegrityInfoFolderID + 1
-
-                objRow = mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).NewRow
-                PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow)
-                mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).Rows.Add(objRow)
-            End If
-
-            mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.Modified
-
-            blnSuccess = True
-        Catch ex As System.Exception
-            blnSuccess = False
-            LogErrors("ProcessFile", "Error in UpdateCachedFolderIntegrityInfo", ex, True, False, False, eMSFileScannerErrorCodes.OutputFileWriteError)
-        End Try
-
-        Return blnSuccess
-
-    End Function
-
-    Private Function ValidateDataFilePath(ByRef strFilePath As String, ByVal eDataFileType As eDataFileTypeConstants) As Boolean
+    Public Shared Function ValidateDataFilePath(ByRef strFilePath As String, ByVal eDataFileType As eDataFileTypeConstants) As Boolean
         If strFilePath Is Nothing OrElse strFilePath.Length = 0 Then
             strFilePath = System.IO.Path.Combine(GetAppFolderPath(), DefaultDataFileName(eDataFileType))
         End If
 
-        ValidateDataTableFilePath(strFilePath)
+        ValidateDataFilePathCheckDir(strFilePath)
     End Function
 
-    Private Function ValidateDataTableFilePath(ByVal strFilePath As String) As Boolean
+    Private Shared Function ValidateDataFilePathCheckDir(ByVal strFilePath As String) As Boolean
 
         Dim ioFileInfo As System.IO.FileInfo
         Dim blnValidFile As Boolean
@@ -2354,33 +2169,6 @@ Public Class clsMSFileScanner
         Return blnProcessAllExtensions
     End Function
 
-    Private Sub WriteMSInfoDataLine(ByRef srOutFile As System.IO.StreamWriter, ByRef objRow As System.Data.DataRow)
-        With objRow
-            ' Note: HH:mm:ss corresponds to time in 24 hour format
-            srOutFile.WriteLine(.Item(COL_NAME_DATASET_ID).ToString & mDataFileSepChar & _
-                                .Item(COL_NAME_DATASET_NAME).ToString & mDataFileSepChar & _
-                                .Item(COL_NAME_FILE_EXTENSION).ToString & mDataFileSepChar & _
-                                CType(.Item(COL_NAME_ACQ_TIME_START), DateTime).ToString("yyyy-MM-dd HH:mm:ss") & mDataFileSepChar & _
-                                CType(.Item(COL_NAME_ACQ_TIME_END), DateTime).ToString("yyyy-MM-dd HH:mm:ss") & mDataFileSepChar & _
-                                .Item(COL_NAME_SCAN_COUNT).ToString & mDataFileSepChar & _
-                                .Item(COL_NAME_FILE_SIZE_BYTES).ToString & mDataFileSepChar & _
-                                .Item(COL_NAME_INFO_LAST_MODIFIED).ToString & mDataFileSepChar & _
-                                CType(.Item(COL_NAME_FILE_MODIFICATION_DATE), DateTime).ToString("yyyy-MM-dd HH:mm:ss"))
-
-        End With
-    End Sub
-
-    Private Sub WriteFolderIntegrityInfoDataLine(ByRef srOutFile As System.IO.StreamWriter, ByRef objRow As System.Data.DataRow)
-
-        With objRow
-            srOutFile.WriteLine(.Item(COL_NAME_FOLDER_ID).ToString & mDataFileSepChar & _
-                                .Item(COL_NAME_FOLDER_PATH).ToString & mDataFileSepChar & _
-                                .Item(COL_NAME_FILE_COUNT).ToString & mDataFileSepChar & _
-                                .Item(COL_NAME_COUNT_FAIL_INTEGRITY).ToString & mDataFileSepChar & _
-                                .Item(COL_NAME_INFO_LAST_MODIFIED).ToString)
-        End With
-    End Sub
-
     Private Sub WriteFileIntegrityDetails(ByRef srOutFile As System.IO.StreamWriter, ByVal intFolderID As Integer, ByVal udtFileStats() As clsFileIntegrityChecker.udtFileStatsType)
         Static dtLastWriteTime As DateTime
 
@@ -2392,12 +2180,12 @@ Public Class clsMSFileScanner
         For intIndex = 0 To udtFileStats.Length - 1
             With udtFileStats(intIndex)
                 ' Note: HH:mm:ss corresponds to time in 24 hour format
-                srOutFile.WriteLine(intFolderID.ToString & mDataFileSepChar & _
-                                    .FileName & mDataFileSepChar & _
-                                    .SizeBytes.ToString & mDataFileSepChar & _
-                                    .ModificationDate.ToString("yyyy-MM-dd HH:mm:ss") & mDataFileSepChar & _
-                                    .FailIntegrity & mDataFileSepChar & _
-                                    .FileHash & mDataFileSepChar & _
+                srOutFile.WriteLine(intFolderID.ToString & ControlChars.Tab & _
+                                    .FileName & ControlChars.Tab & _
+                                    .SizeBytes.ToString & ControlChars.Tab & _
+                                    .ModificationDate.ToString("yyyy-MM-dd HH:mm:ss") & ControlChars.Tab & _
+                                    .FailIntegrity & ControlChars.Tab & _
+                                    .FileHash & ControlChars.Tab & _
                                     dtTimeStamp.ToString("yyyy-MM-dd HH:mm:ss"))
             End With
         Next intIndex
@@ -2415,8 +2203,8 @@ Public Class clsMSFileScanner
         If srOutFile Is Nothing Then Exit Sub
 
         ' Note: HH:mm:ss corresponds to time in 24 hour format
-        srOutFile.WriteLine(strFilePath & mDataFileSepChar & _
-                            strMessage & mDataFileSepChar & _
+        srOutFile.WriteLine(strFilePath & ControlChars.Tab & _
+                            strMessage & ControlChars.Tab & _
                             System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
 
         If System.DateTime.Now.Subtract(dtLastWriteTime).TotalMinutes > 1 Then
@@ -2447,13 +2235,8 @@ Public Class clsMSFileScanner
 
     ''End Function
 
-    Protected Overrides Sub Finalize()
-        Me.SaveCachedResults()
-        MyBase.Finalize()
-    End Sub
-
     Private Sub mFileIntegrityChecker_ErrorCaught(ByVal strMessage As String) Handles mFileIntegrityChecker.ErrorCaught
-        Me.LogErrors("FileIntegrityChecker", strMessage, Nothing, True, False, True, eMSFileScannerErrorCodes.FileIntegrityCheckError)
+        ShowErrorMessage("Error caught in FileIntegrityChecker: " & strMessage)
     End Sub
 
     Private Sub mFileIntegrityChecker_FileIntegrityFailure(ByVal strFilePath As String, ByVal strMessage As String) Handles mFileIntegrityChecker.FileIntegrityFailure
@@ -2462,5 +2245,17 @@ Public Class clsMSFileScanner
         End If
 
         WriteFileIntegrityFailure(mFileIntegrityErrorsWriter, strFilePath, strMessage)
+    End Sub
+
+    Private Sub mMSInfoScanner_ErrorEvent(ByVal Message As String) Handles mMSInfoScanner.ErrorEvent
+        ShowErrorMessage(Message)
+    End Sub
+
+    Private Sub mMSFileInfoDataCache_ErrorEvent(ByVal Message As String) Handles mMSFileInfoDataCache.ErrorEvent
+        ShowErrorMessage(Message)
+    End Sub
+
+    Private Sub mExecuteSP_DBErrorEvent(ByVal Message As String) Handles mExecuteSP.DBErrorEvent
+        ShowErrorMessage(Message)
     End Sub
 End Class
