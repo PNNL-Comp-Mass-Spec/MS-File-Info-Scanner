@@ -4,7 +4,7 @@ Option Strict On
 ' number of spectra, and the total size of the data.  Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
 '
 ' Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar .WIFF files, 
-' Masslynx .Raw folders, and Bruker 1 folders
+' Masslynx .Raw folders, Bruker 1 folders, and Bruker XMass analysis.baf files
 '
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
@@ -13,7 +13,7 @@ Option Strict On
 Public Class clsMSFileInfoScanner
 
     Public Sub New()
-        mFileDate = "May 3, 2010"
+        mFileDate = "May 4, 2010"
 
         mFileIntegrityChecker = New clsFileIntegrityChecker
         mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -183,6 +183,10 @@ Public Class clsMSFileInfoScanner
         End Get
         Set(ByVal value As Boolean)
             mCheckFileIntegrity = value
+            If mCheckFileIntegrity Then
+                ' Make sure Cache Files are enabled
+                Me.UseCacheFiles = True
+            End If
         End Set
     End Property
 
@@ -833,7 +837,7 @@ Public Class clsMSFileInfoScanner
 
         mIgnoreErrorsWhenRecursing = False
 
-        mUseCacheFiles = True
+        mUseCacheFiles = False
 
         mLogMessagesToFile = False
         mLogFilePath = String.Empty
@@ -1455,11 +1459,13 @@ Public Class clsMSFileInfoScanner
 
                             If lngCachedSizeBytes > 0 Then
                                 ' File is present in mCachedResults, and its size is > 0, so we won't re-process it
+                                ShowMessage("  Skipping " & System.IO.Path.GetFileName(strInputFileOrFolderPath) & " since already in cached results")
                                 eMSFileProcessingState = eMSFileProcessingStateConstants.SkippedSinceFoundInCache
                                 Return True
                             End If
                         Else
                             ' File is present in mCachedResults, and mReprocessIfCachedSizeIsZero=False, so we won't re-process it
+                            ShowMessage("  Skipping " & System.IO.Path.GetFileName(strInputFileOrFolderPath) & " since already in cached results")
                             eMSFileProcessingState = eMSFileProcessingStateConstants.SkippedSinceFoundInCache
                             Return True
                         End If
@@ -2255,7 +2261,12 @@ Public Class clsMSFileInfoScanner
         ShowErrorMessage(Message)
     End Sub
 
+    Private Sub mMSFileInfoDataCache_StatusEvent(ByVal Message As String) Handles mMSFileInfoDataCache.StatusEvent
+        ShowMessage(Message)
+    End Sub
+
     Private Sub mExecuteSP_DBErrorEvent(ByVal Message As String) Handles mExecuteSP.DBErrorEvent
         ShowErrorMessage(Message)
     End Sub
+
 End Class

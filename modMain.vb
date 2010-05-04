@@ -7,7 +7,7 @@ Option Strict On
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "May 3, 2010"
+    Public Const PROGRAM_DATE As String = "May 4, 2010"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -24,6 +24,9 @@ Module modMain
     Private mUseCacheFiles As Boolean
 
     Private mSaveTICandBPIPlots As Boolean
+    Private mSaveLCMS2DPlots As Boolean
+    Private mLCMS2DMaxPointsToPlot As Integer
+
     Private mComputeOverallQualityScores As Boolean
     Private mCreateDatasetInfoFile As Boolean
 
@@ -100,9 +103,12 @@ Module modMain
 
         mReprocessingExistingFiles = False
         mReprocessIfCachedSizeIsZero = False
-        mUseCacheFiles = True
+        mUseCacheFiles = False
 
-        mSaveTICandBPIPlots = False
+        mSaveTICandBPIPlots = True
+        mSaveLCMS2DPlots = False
+        mLCMS2DMaxPointsToPlot = clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_POINTS_TO_PLOT
+
         mComputeOverallQualityScores = False
         mCreateDatasetInfoFile = False
 
@@ -132,6 +138,8 @@ Module modMain
             Else
                 mMSFileScanner = New clsMSFileInfoScanner
 
+                If mCheckFileIntegrity Then mUseCacheFiles = True
+
                 With mMSFileScanner
                     ' Note: These values will be overridden if /P was used and they are defined in the parameter file
 
@@ -140,7 +148,8 @@ Module modMain
                     .ReprocessIfCachedSizeIsZero = mReprocessIfCachedSizeIsZero
 
                     .SaveTICAndBPIPlots = mSaveTICandBPIPlots
-                    .SaveLCMS2DPlots = mSaveTICandBPIPlots
+                    .SaveLCMS2DPlots = mSaveLCMS2DPlots
+                    .LCMS2DPlotMaxPointsToPlot = mLCMS2DMaxPointsToPlot
 
                     .ComputeOverallQualityScores = mComputeOverallQualityScores
                     .CreateDatasetInfoFile = mCreateDatasetInfoFile
@@ -201,7 +210,7 @@ Module modMain
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String = String.Empty
-        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "T", "L", "C", "M", "H", "QZ", "R", "X", "Z", "QS", "DI"}
+        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "L", "C", "M", "H", "QZ", "NoTIC", "LC", "QS", "DI", "CF", "R", "Z"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -240,14 +249,22 @@ Module modMain
                     If .RetrieveValueForParameter("H", strValue) Then mComputeFileHashes = True
                     If .RetrieveValueForParameter("QZ", strValue) Then mZipFileCheckAllData = False
 
-                    If .RetrieveValueForParameter("T", strValue) Then mSaveTICandBPIPlots = True
-                    If .RetrieveValueForParameter("R", strValue) Then mReprocessingExistingFiles = True
-                    If .RetrieveValueForParameter("Z", strValue) Then mReprocessIfCachedSizeIsZero = True
+                    If .RetrieveValueForParameter("NoTIC", strValue) Then mSaveTICandBPIPlots = False
+
+                    If .RetrieveValueForParameter("LC", strValue) Then
+                        mSaveLCMS2DPlots = True
+                        If Integer.TryParse(strValue, 0) Then
+                            mLCMS2DMaxPointsToPlot = CInt(strValue)
+                        End If
+                    End If
+
                     If .RetrieveValueForParameter("QS", strValue) Then mComputeOverallQualityScores = True
 
                     If .RetrieveValueForParameter("DI", strValue) Then mCreateDatasetInfoFile = True
 
-                    If .RetrieveValueForParameter("X", strValue) Then mUseCacheFiles = False
+                    If .RetrieveValueForParameter("CF", strValue) Then mUseCacheFiles = True
+                    If .RetrieveValueForParameter("R", strValue) Then mReprocessingExistingFiles = True
+                    If .RetrieveValueForParameter("Z", strValue) Then mReprocessIfCachedSizeIsZero = True
                 End With
 
                 Return True
@@ -263,28 +280,32 @@ Module modMain
 
         Try
             Console.WriteLine("This program will scan a series of MS data files (or data folders) and extract the acquisition start and end times, number of spectra, and the total size of the data, saving the values in the file " & clsMSFileInfoScanner.DefaultAcquisitionTimeFilename & ". " & _
-                              "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar .WIFF files, Masslynx .Raw folders, and Bruker 1 folders.")
+                              "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar .WIFF files, Masslynx .Raw folders, Bruker 1 folders, and Bruker XMass analysis.baf files")
             Console.WriteLine()
 
             Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location))
             Console.WriteLine(" /I:InputFileNameOrFolderPath [/O:OutputFolderName]")
-            Console.WriteLine(" [/P:ParamFilePath] [/S:[MaxLevel]] [IE] [/T] [/L:LogFilePath]")
-            Console.WriteLine(" [/C] [/M:nnn] [/H] /[QZ] [/R] [/Z] [/QS] [/DI]")
+            Console.WriteLine(" [/P:ParamFilePath] [/S[:MaxLevel]] [IE] [/L:LogFilePath]")
+            Console.WriteLine(" [/LC[:MaxPointsToPlot]] [/NoTIC] [/DI] [/QS]")
+            Console.WriteLine(" [/C] [/M:nnn] [/H] /[QZ]")
+            Console.WriteLine(" [/CF] [/R] [/Z]")
             Console.WriteLine()
             Console.WriteLine("Use /I to specify the name of a file or folder to scan; the path can contain the wildcard character *")
-            Console.WriteLine("The output folder name is optional.  If omitted, the acquisition time file will be created in the program directory.  If included, then a subfolder is created with the name OutputFolderName and the acquisition time file placed there.")
+            Console.WriteLine("The output folder name is optional.  If omitted, the output files will be created in the program directory.")
             Console.WriteLine()
 
             Console.WriteLine("The param file switch is optional.  If supplied, it should point to a valid XML parameter file.  If omitted, defaults are used.")
             Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine. Use /IE to ignore errors when recursing.")
-            Console.WriteLine("Use /T to save TIC and BPI plots (this process could take several minutes for each dataset).")
             Console.WriteLine("Use /L to specify the file path for logging messages.")
             Console.WriteLine()
-            Console.WriteLine("Use /QS to compute an overall quality score for the data in each datasets.")
+
+            Console.WriteLine("Use /LC to create 2D LCMS plots (this process could take several minutes for each dataset).  By default, plots the top " & clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_POINTS_TO_PLOT & " points.  To plot the top 20000 points, use /L:20000.")
+            Console.WriteLine("Use /NoTIC to not save TIC and BPI plots.")
             Console.WriteLine("Use /DI to create a dataset info XML file for each dataset.")
+            Console.WriteLine("Use /QS to compute an overall quality score for the data in each datasets.")
             Console.WriteLine()
 
-            Console.WriteLine("Use /C to perform an integrity check on all known file types; this process will open known file types and verify that they contain the expected data.")
+            Console.WriteLine("Use /C to perform an integrity check on all known file types; this process will open known file types and verify that they contain the expected data.  This option is only used if you specify an Input Folder and use a wildcard; you will typically also want to use /S when using /C.")
             Console.WriteLine("Use /M to define the maximum number of lines to process when checking text or csv files; default is /M:" & clsFileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK.ToString)
             Console.WriteLine()
 
@@ -292,9 +313,9 @@ Module modMain
             Console.WriteLine("Use /QZ to run a quick zip-file validation test when verifying file integrity (the test does not check all data in the .Zip file).")
             Console.WriteLine()
 
+            Console.WriteLine("Use /CF to save/load information from the acquisition time file (cache file).  This option is auto-enabled if you use /C.")
             Console.WriteLine("Use /R to reprocess files that are already defined in the acquisition time file.")
             Console.WriteLine("Use /Z to reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes.")
-            Console.WriteLine("Use /X to not use the acquisition time file.  This is useful if you use /DI and/or /T.")
             Console.WriteLine()
 
             Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005")

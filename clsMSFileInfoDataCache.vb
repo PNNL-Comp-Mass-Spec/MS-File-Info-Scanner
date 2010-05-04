@@ -80,6 +80,7 @@ Public Class clsMSFileInfoDataCache
     Private mMaximumFolderIntegrityInfoFolderID As Integer = 0
 
     Public Event ErrorEvent(ByVal Message As String)
+    Public Event StatusEvent(ByVal Message As String)
 #End Region
 
 #Region "Properties"
@@ -343,6 +344,8 @@ Public Class clsMSFileInfoDataCache
 
         clsMSFileInfoScanner.ValidateDataFilePath(mFolderIntegrityInfoFilePath, clsMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo)
 
+        RaiseEvent StatusEvent("Loading cached folder integrity info from: " & System.IO.Path.GetFileName(mFolderIntegrityInfoFilePath))
+
         If System.IO.File.Exists(mFolderIntegrityInfoFilePath) Then
             ' Read the entries from mFolderIntegrityInfoFilePath, populating mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE)
 
@@ -416,6 +419,8 @@ Public Class clsMSFileInfoDataCache
         ClearCachedMSInfoResults()
 
         clsMSFileInfoScanner.ValidateDataFilePath(mAcquisitionTimeFilePath, clsMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo)
+
+        RaiseEvent StatusEvent("Loading cached acquisition time file data from: " & System.IO.Path.GetFileName(mAcquisitionTimeFilePath))
 
         If System.IO.File.Exists(mAcquisitionTimeFilePath) Then
             ' Read the entries from mAcquisitionTimeFilePath, populating mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE)
@@ -549,6 +554,8 @@ Public Class clsMSFileInfoDataCache
            mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).Rows.Count > 0 AndAlso _
            mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.Modified Then
 
+            RaiseEvent StatusEvent("Saving cached folder integrity info to: " & System.IO.Path.GetFileName(mFolderIntegrityInfoFilePath))
+
             Try
                 ' Write all of mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE) to the results file
                 If clsMSFileInfoScanner.USE_XML_OUTPUT_FILE Then
@@ -607,6 +614,8 @@ Public Class clsMSFileInfoDataCache
         If Not mMSFileInfoDataset Is Nothing AndAlso _
            mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).Rows.Count > 0 AndAlso _
            mMSFileInfoCachedResultsState = eCachedResultsStateConstants.Modified Then
+
+            RaiseEvent StatusEvent("Saving cached acquisition time file data to: " & System.IO.Path.GetFileName(mAcquisitionTimeFilePath))
 
             Try
                 ' Write all of mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE) to the results file
@@ -700,7 +709,7 @@ Public Class clsMSFileInfoDataCache
         Try
             If mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized Then
                 ' Coding error; this shouldn't be the case
-                Console.WriteLine("mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized in UpdateCachedFolderIntegrityInfo; unable to continue")
+                RaiseEvent ErrorEvent("mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized in UpdateCachedFolderIntegrityInfo; unable to continue")
                 Return False
             End If
 

@@ -171,12 +171,15 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         Dim strErrorMessage As String
         Dim strDatasetName As String
 
+        Dim blnCreateQCPlotHtmlFile As Boolean
+
         Dim ioFolderInfo As System.IO.DirectoryInfo
 
         Try
 
             strDatasetName = Me.GetDatasetNameViaPath(strInputFileName)
             blnSuccessOverall = True
+            blnCreateQCPlotHtmlFile = False
 
             If strOutputFolderPath Is Nothing Then strOutputFolderPath = String.Empty
 
@@ -199,7 +202,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
                     ReportError("Error calling SaveTICAndBPIPlotFiles: " & strErrorMessage)
                     blnSuccessOverall = False
                 End If
-
+                blnCreateQCPlotHtmlFile = True
             End If
 
             If mSaveLCMS2DPlots Then
@@ -210,6 +213,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
                     ReportError("Error saving LCMS2D Plot: " & strErrorMessage)
                     blnSuccessOverall = False
                 End If
+                blnCreateQCPlotHtmlFile = True
             End If
 
             If mCreateDatasetInfoFile Then
@@ -218,11 +222,14 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
                 If Not blnSuccess Then
                     blnSuccessOverall = False
                 End If
+                blnCreateQCPlotHtmlFile = True
             End If
 
-            blnSuccess = CreateQCPlotHTMLFile(strDatasetName, ioFolderInfo.FullName)
-            If Not blnSuccess Then
-                blnSuccessOverall = False
+            If blnCreateQCPlotHtmlFile Then
+                blnSuccess = CreateQCPlotHTMLFile(strDatasetName, ioFolderInfo.FullName)
+                If Not blnSuccess Then
+                    blnSuccessOverall = False
+                End If
             End If
 
         Catch ex As System.Exception

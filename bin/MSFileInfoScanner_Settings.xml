@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sections>
+  <section name="MSFileInfoScannerSettings">
+  
+    <!-- Connection string that specifies a username: "Data Source=gigasax;Initial Catalog=DMS5;User=DMSReader;Password=passwordHere" -->
+    <item key="DSInfoConnectionString" value="Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;" />
+    <item key="DSInfoDBPostingEnabled" value="False" />
+    <item key="DSInfoStoredProcedure" value="UpdateDatasetFileInfoXML" />
+
+    <item key="LogMessagesToFile" value="False" />
+    <item key="LogFilePath" value="" />
+    <item key="LogFolderPath" value="." />
+    
+    <!-- When UseCacheFiles is True, then saves/loads data from/to the cache files (DatasetTimeFile.txt and FolderIntegrityInfo.txt) -->
+    <!-- If you simply want to create TIC and BPI files, and/or the _DatasetInfo.xml file for a single dataset, then set this to False -->    
+    <item key="UseCacheFiles" value="False" />
+    
+    <item key="ReprocessExistingFiles" value="False" />
+    <item key="ReprocessIfCachedSizeIsZero" value="False" />
+
+    <item key="SaveTICAndBPIPlots" value="True" />
+    <item key="SaveLCMS2DPlots" value="True" />
+
+    <item key="LCMS2DPlotMZResolution" value="0.4" />
+    <item key="LCMS2DPlotMaxPointsToPlot" value="50000" />
+    <item key="LCMS2DPlotMinPointsPerSpectrum" value="2" />
+    <item key="LCMS2DPlotMinIntensity" value="0" />
+        
+    <item key="ComputeOverallQualityScores" value="True" />
+    <item key="CreateDatasetInfoFile" value="True" />
+
+    <item key="CheckFileIntegrity" value="False" />
+	<item key="RecheckFileIntegrityForExistingFolders" value="False" />
+    
+    <item key="MaximumTextFileLinesToCheck" value="500" />
+    <item key="MaximumXMLElementNodesToCheck" value="500" />
+    <item key="ComputeFileHashes" value="False" />
+    <item key="ZipFileCheckAllData" value="True" />
+
+    <item key="IgnoreErrorsWhenRecursing" value="False" />
+
+  </section>
+</sections>

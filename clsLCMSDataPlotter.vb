@@ -1094,7 +1094,7 @@ Public Class clsLCMSDataPlotter
     ''' </summary>
     ''' <remarks></remarks>
     Public Class clsOptions
-        Public Const DEFAULT_MAX_POINTS_TO_PLOT As Integer = 50000
+        Public Const DEFAULT_MAX_POINTS_TO_PLOT As Integer = 100000
         Public Const DEFAULT_MIN_POINTS_PER_SPECTRUM As Integer = 2
 
         Public Const DEFAULT_MZ_RESOLUTION As Single = 0.4
