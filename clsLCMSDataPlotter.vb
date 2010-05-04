@@ -184,13 +184,49 @@ Public Class clsLCMSDataPlotter
 
 
         Catch ex As System.Exception
-            RaiseEvent ErrorEvent("Error in AddScan: " & ex.Message)
+            RaiseEvent ErrorEvent("Error in clsLCMSDataPlotter.AddScan: " & ex.Message)
             blnSuccess = False
         End Try
 
         Return blnSuccess
 
     End Function
+
+    Public Function AddScanSkipFilters(ByRef objSourceData As clsScanData) As Boolean
+
+        Dim blnSuccess As Boolean
+        Dim objScanData As clsScanData
+
+        Try
+            If objSourceData Is Nothing OrElse objSourceData.IonCount <= 0 Then
+                ' No data to add
+                Return False
+            End If
+
+            ' Copy the data in objSourceScan
+            objScanData = New clsLCMSDataPlotter.clsScanData(objSourceData.ScanNumber, objSourceData.MSLevel, objSourceData.ScanTimeMinutes, _
+                                                             objSourceData.IonCount, objSourceData.IonsMZ, objSourceData.IonsIntensity)
+
+            Me.mScans.Add(objScanData)
+            mPointCountCached += objScanData.IonCount
+
+            If mPointCountCached > mOptions.MaxPointsToPlot * 5 Then
+                ' Need to step through the scans and reduce the number of points in memory
+                TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum)
+            End If
+
+        Catch ex As System.Exception
+            RaiseEvent ErrorEvent("Error in clsLCMSDataPlotter.AddScanSkipFilters: " & ex.Message)
+            blnSuccess = False
+        End Try
+
+        Return blnSuccess
+
+    End Function
+
+    Public Sub ClearRecentFileInfo()
+        mRecentFiles.Clear()
+    End Sub
 
     Public Function ComputeAverageIntensityAllScans(ByVal intMSLevelFilter As Integer) As Single
 
@@ -372,7 +408,7 @@ Public Class clsLCMSDataPlotter
             intIonCount = intIonCountNew
 
         Catch ex As System.Exception
-            RaiseEvent ErrorEvent("Error in CentroidMSData: " & ex.Message)
+            RaiseEvent ErrorEvent("Error in clsLCMSDataPlotter.CentroidMSData: " & ex.Message)
         End Try
 
     End Sub
@@ -482,7 +518,7 @@ Public Class clsLCMSDataPlotter
 
             End With
         Catch ex As System.Exception
-            Throw New System.Exception("Error in DiscardDataToLimitIonCount", ex)
+            Throw New System.Exception("Error in clsLCMSDataPlotter.DiscardDataToLimitIonCount", ex)
         End Try
 
     End Sub
@@ -521,6 +557,22 @@ Public Class clsLCMSDataPlotter
             End If
         Next
         Return False
+    End Function
+
+    ''' <summary>
+    ''' Returns the cached scan data for the scan index
+    ''' </summary>
+    ''' <param name="intIndex"></param>
+    ''' <returns>ScanData class</returns>
+    ''' <remarks></remarks>
+    Public Function GetCachedScanByIndex(ByVal intIndex As Integer) As clsScanData
+
+        If intIndex >= 0 AndAlso intIndex < mScans.Count Then
+            Return mScans(intIndex)
+        Else
+            Return Nothing
+        End If
+
     End Function
 
     ''' <summary>
@@ -696,10 +748,26 @@ Public Class clsLCMSDataPlotter
 
         End If
 
+        ' Add a label showing the number of points displayed
+        Dim objPointCountText As New ZedGraph.TextObj(objPoints.Count.ToString("0,000") & " points plotted", 0, 1, ZedGraph.CoordType.PaneFraction)
+
+        With objPointCountText
+            .FontSpec.Angle = 0
+            .FontSpec.FontColor = Drawing.Color.Black
+            .FontSpec.IsBold = False
+            .FontSpec.Size = FONT_SIZE_BASE
+            .FontSpec.Border.IsVisible = False
+            .FontSpec.Fill.IsVisible = False
+            .Location.AlignH = ZedGraph.AlignH.Left
+            .Location.AlignV = ZedGraph.AlignV.Bottom
+        End With
+        myPane.GraphObjList.Add(objPointCountText)
+
+
         ' Possibly add a label showing the maximum elution time
         If dblScanTimeMax > 0 Then
 
-            Dim objScanTimeMaxText As New ZedGraph.TextObj(dblScanTimeMax.ToString("0") & " minutes", 1, 1, ZedGraph.CoordType.PaneFraction)
+            Dim objScanTimeMaxText As New ZedGraph.TextObj(Math.Round(dblScanTimeMax, 0).ToString("0") & " minutes", 1, 1, ZedGraph.CoordType.PaneFraction)
 
             With objScanTimeMaxText
                 .FontSpec.Angle = 0
@@ -784,12 +852,19 @@ Public Class clsLCMSDataPlotter
             mScans.Clear()
         End If
 
-        mRecentFiles.Clear()
+        ClearRecentFileInfo()
     End Sub
 
     Public Function Save2DPlots(ByVal strDatasetName As String, _
+                                ByVal strOutputFolderPath As String) As Boolean
+
+        Return Save2DPlots(strDatasetName, strOutputFolderPath, "")
+
+    End Function
+
+    Public Function Save2DPlots(ByVal strDatasetName As String, _
                                 ByVal strOutputFolderPath As String, _
-                                ByRef strErrorMessage As String) As Boolean
+                                ByVal strFileNameSuffixAddon As String) As Boolean
 
         Const EMBED_FILTER_SETTINGS_IN_NAME As Boolean = False
 
@@ -798,21 +873,22 @@ Public Class clsLCMSDataPlotter
         Dim blnSuccess As Boolean
 
         Try
-            strErrorMessage = String.Empty
 
-            mRecentFiles.Clear()
+            ClearRecentFileInfo()
 
             ' Check whether all of the spectra have .MSLevel = 0
             ' If they do, change the level to 1
             ValidateMSLevel()
 
+            If strFileNameSuffixAddon Is Nothing Then strFileNameSuffixAddon = String.Empty
+
             Do
                 myPane = InitializeGraphPane(strDatasetName & " - MS Spectra", 1, False)
                 If myPane.CurveList.Count > 0 Then
                     If EMBED_FILTER_SETTINGS_IN_NAME Then
-                        strPNGFilePath = strDatasetName & "_LCMS_" & mOptions.MaxPointsToPlot & "_" & mOptions.MinPointsPerSpectrum & "_" & mOptions.MZResolution.ToString("0.00") & ".png"
+                        strPNGFilePath = strDatasetName & "_" & strFileNameSuffixAddon & "LCMS_" & mOptions.MaxPointsToPlot & "_" & mOptions.MinPointsPerSpectrum & "_" & mOptions.MZResolution.ToString("0.00") & ".png"
                     Else
-                        strPNGFilePath = strDatasetName & "_LCMS.png"
+                        strPNGFilePath = strDatasetName & "_" & strFileNameSuffixAddon & "LCMS.png"
                     End If
                     strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strPNGFilePath)
                     myPane.GetImage(1024, 700, 300, False).Save(strPNGFilePath, System.Drawing.Imaging.ImageFormat.Png)
@@ -822,7 +898,7 @@ Public Class clsLCMSDataPlotter
 
             myPane = InitializeGraphPane(strDatasetName & " - MS2 Spectra", 2, True)
             If myPane.CurveList.Count > 0 Then
-                strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName & "_LCMS_MSn.png")
+                strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName & "_" & strFileNameSuffixAddon & "LCMS_MSn.png")
                 myPane.GetImage(1024, 700, 300, False).Save(strPNGFilePath, System.Drawing.Imaging.ImageFormat.Png)
                 AddRecentFile(strPNGFilePath, eOutputFileTypes.LCMSMSn)
             End If
@@ -830,7 +906,7 @@ Public Class clsLCMSDataPlotter
             blnSuccess = True
 
         Catch ex As System.Exception
-            strErrorMessage = ex.Message
+            RaiseEvent ErrorEvent("Error in clsLCMSDataPlotter.Save2DPlots: " & ex.Message)
             blnSuccess = False
         End Try
 
@@ -977,7 +1053,7 @@ Public Class clsLCMSDataPlotter
 
 
         Catch ex As System.Exception
-            Throw New System.Exception("Error in TrimCachedData", ex)
+            Throw New System.Exception("Error in clsLCMSDataPlotter.TrimCachedData", ex)
         End Try
 
     End Sub
@@ -1028,7 +1104,7 @@ Public Class clsLCMSDataPlotter
     ''' If you decrease .IonCount, you can optionally call .ShrinkArrays to reduce the allocated space
     ''' </summary>
     ''' <remarks></remarks>
-    Protected Class clsScanData
+    Public Class clsScanData
 
         Protected mScanNumber As Integer
         Protected mMSLevel As Integer
@@ -1094,7 +1170,7 @@ Public Class clsLCMSDataPlotter
     ''' </summary>
     ''' <remarks></remarks>
     Public Class clsOptions
-        Public Const DEFAULT_MAX_POINTS_TO_PLOT As Integer = 100000
+        Public Const DEFAULT_MAX_POINTS_TO_PLOT As Integer = 500000
         Public Const DEFAULT_MIN_POINTS_PER_SPECTRUM As Integer = 2
 
         Public Const DEFAULT_MZ_RESOLUTION As Single = 0.4
@@ -1145,6 +1221,21 @@ Public Class clsLCMSDataPlotter
                 mMinIntensity = value
             End Set
         End Property
+
+        Public Function Clone() As clsOptions
+            Dim objClone As New clsOptions
+
+            With objClone
+                .MaxPointsToPlot = Me.MaxPointsToPlot
+                .MinPointsPerSpectrum = Me.MinPointsPerSpectrum
+
+                .MZResolution = Me.MZResolution
+                .MinIntensity = Me.MinIntensity
+            End With
+
+            Return objClone
+
+        End Function
 
         Public Sub New()
             mMaxPointsToPlot = DEFAULT_MAX_POINTS_TO_PLOT

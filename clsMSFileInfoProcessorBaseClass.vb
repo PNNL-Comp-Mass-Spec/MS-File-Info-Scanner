@@ -12,15 +12,22 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         InitializeLocalVariables()
     End Sub
 
+#Region "Constants"
+    Public Const DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR As Integer = 10
+#End Region
+
 #Region "Member variables"
     Protected mSaveTICAndBPI As Boolean
     Protected mSaveLCMS2DPlots As Boolean
 
     Protected mComputeOverallQualityScores As Boolean
     Protected mCreateDatasetInfoFile As Boolean
+    Protected mLCMS2DOverviewPlotDivisor As Integer
 
     Protected WithEvents mTICandBPIPlot As clsTICandBPIPlotter
     Protected WithEvents mLCMS2DPlot As clsLCMSDataPlotter
+    Protected WithEvents mLCMS2DPlotOverview As clsLCMSDataPlotter
+
     Protected mDatasetStatsSummarizer As DSSummarizer.clsDatasetStatsSummarizer
 
     Public Event ErrorEvent(ByVal Message As String) Implements iMSFileInfoProcessor.ErrorEvent
@@ -33,6 +40,16 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         End Get
         Set(ByVal value As clsLCMSDataPlotter.clsOptions)
             mLCMS2DPlot.Options = value
+            mLCMS2DPlotOverview.Options = value.Clone()
+        End Set
+    End Property
+
+    Public Property LCMS2DOverviewPlotDivisor() As Integer Implements iMSFileInfoProcessor.LCMS2DOverviewPlotDivisor
+        Get
+            Return mLCMS2DOverviewPlotDivisor
+        End Get
+        Set(ByVal value As Integer)
+            mLCMS2DOverviewPlotDivisor = value
         End Set
     End Property
 
@@ -112,7 +129,11 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     Protected Sub InitializeLocalVariables()
 
         mTICandBPIPlot = New clsTICandBPIPlotter()
+
         mLCMS2DPlot = New clsLCMSDataPlotter()
+        mLCMS2DPlotOverview = New clsLCMSDataPlotter
+
+        mLCMS2DOverviewPlotDivisor = DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
 
         mDatasetStatsSummarizer = New DSSummarizer.clsDatasetStatsSummarizer
 
@@ -126,6 +147,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     Protected Sub InitializeLCMS2DPlot()
         ' Initialize object that tracks m/z vs. time
         mLCMS2DPlot.Reset()
+        mLCMS2DPlotOverview.Reset()
     End Sub
 
     Protected Sub ReportError(ByVal strMessage As String)
@@ -159,6 +181,42 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         End Try
 
         Return True
+
+    End Function
+
+    Protected Function CreateOverview2DPlots(ByVal strDatasetName As String, _
+                                             ByVal strOutputFolderPath As String, _
+                                             ByVal intLCMS2DOverviewPlotDivisor As Integer) As Boolean
+
+        Dim objScan As clsLCMSDataPlotter.clsScanData
+
+        Dim blnSuccess As Boolean
+        Dim intIndex As Integer
+
+        If intLCMS2DOverviewPlotDivisor <= 1 Then
+            ' Nothing to do; just return True
+            Return True
+        End If
+
+        mLCMS2DPlotOverview.Reset()
+
+        ' Set MaxPointsToPlot in mLCMS2DPlotOverview to be intLCMS2DOverviewPlotDivisor times smaller 
+        ' than the MaxPointsToPlot value in mLCMS2DPlot
+        mLCMS2DPlotOverview.Options.MaxPointsToPlot = CInt(Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / intLCMS2DOverviewPlotDivisor, 0))
+
+        ' Copy the data from mLCMS2DPlot to mLCMS2DPlotOverview
+        ' mLCMS2DPlotOverview will auto-filter the data to track, at most, mLCMS2DPlotOverview.Options.MaxPointsToPlot points
+        For intIndex = 0 To mLCMS2DPlot.ScanCountCached - 1
+            objScan = mLCMS2DPlot.GetCachedScanByIndex(intIndex)
+
+            mLCMS2DPlotOverview.AddScanSkipFilters(objScan)
+        Next
+
+        ' Write out the Overview 2D plot of m/z vs. intensity
+        ' Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
+        blnSuccess = mLCMS2DPlotOverview.Save2DPlots(strDatasetName, strOutputFolderPath, "HighAbu_")
+
+        Return blnSuccess
 
     End Function
 
@@ -207,11 +265,20 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
             If mSaveLCMS2DPlots Then
                 ' Write out the 2D plot of m/z vs. intensity
-                strErrorMessage = String.Empty
-                blnSuccess = mLCMS2DPlot.Save2DPlots(strDatasetName, ioFolderInfo.FullName, strErrorMessage)
+                ' Plots will be named Dataset_LCMS.png and Dataset_LCMSn.png
+                blnSuccess = mLCMS2DPlot.Save2DPlots(strDatasetName, ioFolderInfo.FullName)
                 If Not blnSuccess Then
-                    ReportError("Error saving LCMS2D Plot: " & strErrorMessage)
                     blnSuccessOverall = False
+                Else
+                    If mLCMS2DOverviewPlotDivisor > 0 Then
+                        ' Also save the Overview 2D Plots
+                        blnSuccess = CreateOverview2DPlots(strDatasetName, strOutputFolderPath, mLCMS2DOverviewPlotDivisor)
+                        If Not blnSuccess Then
+                            blnSuccessOverall = False
+                        End If
+                    Else
+                        mLCMS2DPlotOverview.ClearRecentFileInfo()
+                    End If
                 End If
                 blnCreateQCPlotHtmlFile = True
             End If
@@ -249,6 +316,9 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         Dim strHTMLFilePath As String
         Dim strFile1 As String
         Dim strFile2 As String
+        Dim strTop As String
+
+        Dim strDSInfoFileName As String
 
         Dim blnSuccess As Boolean
 
@@ -276,11 +346,26 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
             swOutFile.WriteLine("")
             swOutFile.WriteLine("  <table>")
 
-            strFile1 = mLCMS2DPlot.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS)
-            strFile2 = mLCMS2DPlot.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn)
+            strFile1 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS)
+            strFile2 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn)
+            strTop = IntToEngineeringNotation(mLCMS2DPlotOverview.Options.MaxPointsToPlot)
+
             If strFile1.Length > 0 OrElse strFile2.Length > 0 Then
                 swOutFile.WriteLine("    <tr>")
-                swOutFile.WriteLine("      <td valign=""middle"">LCMS</td>")
+                swOutFile.WriteLine("      <td valign=""middle"">LCMS<br>(Top " & strTop & ")</td>")
+                swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile1, 250) & "</td>")
+                swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile2, 250) & "</td>")
+                swOutFile.WriteLine("    </tr>")
+                swOutFile.WriteLine("")
+            End If
+
+            strFile1 = mLCMS2DPlot.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS)
+            strFile2 = mLCMS2DPlot.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn)
+            strTop = IntToEngineeringNotation(mLCMS2DPlot.Options.MaxPointsToPlot)
+
+            If strFile1.Length > 0 OrElse strFile2.Length > 0 Then
+                swOutFile.WriteLine("    <tr>")
+                swOutFile.WriteLine("      <td valign=""middle"">LCMS<br>(Top " & strTop & ")</td>")
                 swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile1, 250) & "</td>")
                 swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile2, 250) & "</td>")
                 swOutFile.WriteLine("    </tr>")
@@ -312,8 +397,9 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
             swOutFile.WriteLine("      <td>&nbsp;</td>")
             swOutFile.WriteLine("      <td align=""center"">DMS <a href=""http://dms2.pnl.gov/dataset/show/" & strDatasetName & """>Dataset Detail Report</a></td>")
 
-            If mCreateDatasetInfoFile Then
-                swOutFile.WriteLine("      <td align=""center""><a href=""" & strDatasetName & DSSummarizer.clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX & """>Dataset Info XML file</a></td>")
+            strDSInfoFileName = strDatasetName & DSSummarizer.clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX
+            If mCreateDatasetInfoFile OrElse System.IO.File.Exists(System.IO.Path.Combine(strOutputFolderPath, strDSInfoFileName)) Then
+                swOutFile.WriteLine("      <td align=""center""><a href=""" & strDSInfoFileName & """>Dataset Info XML file</a></td>")
             Else
                 swOutFile.WriteLine("      <td>&nbsp;</td>")
             End If
@@ -394,6 +480,27 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
     End Sub
 
+    ''' <summary>
+    ''' Converts an integer to engineering notation
+    ''' For example, 50000 will be returned as 50K
+    ''' </summary>
+    ''' <param name="intValue"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Protected Function IntToEngineeringNotation(ByVal intValue As Integer) As String
+        Dim strValue As String
+        strValue = String.Empty
+
+        If intValue < 1000 Then
+            Return intValue.ToString
+        ElseIf intValue < 1000000.0 Then
+            Return CInt(Math.Round(intValue / 1000, 0)).ToString & "K"
+        Else
+            Return CInt(Math.Round(intValue / 1000 / 1000, 0)).ToString & "M"
+        End If
+
+    End Function
+
     Public MustOverride Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean Implements iMSFileInfoProcessor.ProcessDatafile
     Public MustOverride Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String Implements iMSFileInfoProcessor.GetDatasetNameViaPath
 
@@ -401,4 +508,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         ReportError("Error in LCMS2DPlot: " & Message)
     End Sub
 
+    Private Sub mLCMS2DPlotOverview_ErrorEvent(ByVal Message As String) Handles mLCMS2DPlotOverview.ErrorEvent
+        ReportError("Error in LCMS2DPlotOverview: " & Message)
+    End Sub
 End Class

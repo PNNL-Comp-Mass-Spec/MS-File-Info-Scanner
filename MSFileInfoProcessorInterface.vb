@@ -39,6 +39,7 @@ Public Interface iMSFileInfoProcessor
     'ReadOnly Property TIC() As udtChromatogramInfoType
 
     Property LCMS2DPlotOptions() As clsLCMSDataPlotter.clsOptions
+    Property LCMS2DOverviewPlotDivisor() As Integer
 
     Function GetOption(ByVal eOption As ProcessingOptions) As Boolean
     Sub SetOption(ByVal eOption As ProcessingOptions, ByVal blnValue As Boolean)

@@ -9,6 +9,13 @@ Version 1.1.3776; May 4, 2010
 	- Added switch /LC, which enables creation of the 2D LCMS plots
 		- By default, plots the top 100000 points
 		- Can customize the max points to plot, e.g. /LC:50000
+	- Now creating two versions of the LCMS plots
+		- The first version has MaxPointsToPlot points
+		- The second version has MaxPointsToPlot divided by LCMS2DOverviewPlotDivisor points
+		- MaxPointsToPlot defaults to 500000 and LCMS2DOverviewPlotDivisor defaults to 10, and thus
+		  by default the first set of plots has 500K data points while the second has 50K
+		- If LCMS2DOverviewPlotDivisor=0, then the second set of plots is not created
+		- Customize the divisor using /LCDiv at the command line or using "LCMS2DOverviewPlotDivisor" in the settings file
 
 Version 1.1.3775; May 3, 2010
 	- Updated to create the _DatasetInfo.xml files as UTF8 instead of as Unicode

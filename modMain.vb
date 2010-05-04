@@ -26,6 +26,7 @@ Module modMain
     Private mSaveTICandBPIPlots As Boolean
     Private mSaveLCMS2DPlots As Boolean
     Private mLCMS2DMaxPointsToPlot As Integer
+    Private mLCMS2DOverviewPlotDivisor As Integer
 
     Private mComputeOverallQualityScores As Boolean
     Private mCreateDatasetInfoFile As Boolean
@@ -108,6 +109,7 @@ Module modMain
         mSaveTICandBPIPlots = True
         mSaveLCMS2DPlots = False
         mLCMS2DMaxPointsToPlot = clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_POINTS_TO_PLOT
+        mLCMS2DOverviewPlotDivisor = clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
 
         mComputeOverallQualityScores = False
         mCreateDatasetInfoFile = False
@@ -150,6 +152,7 @@ Module modMain
                     .SaveTICAndBPIPlots = mSaveTICandBPIPlots
                     .SaveLCMS2DPlots = mSaveLCMS2DPlots
                     .LCMS2DPlotMaxPointsToPlot = mLCMS2DMaxPointsToPlot
+                    .LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor
 
                     .ComputeOverallQualityScores = mComputeOverallQualityScores
                     .CreateDatasetInfoFile = mCreateDatasetInfoFile
@@ -210,7 +213,7 @@ Module modMain
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String = String.Empty
-        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "L", "C", "M", "H", "QZ", "NoTIC", "LC", "QS", "DI", "CF", "R", "Z"}
+        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "L", "C", "M", "H", "QZ", "NoTIC", "LC", "LCDiv", "QS", "DI", "CF", "R", "Z"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -258,6 +261,12 @@ Module modMain
                         End If
                     End If
 
+                    If .RetrieveValueForParameter("LCDiv", strValue) Then
+                        If Integer.TryParse(strValue, 0) Then
+                            mLCMS2DOverviewPlotDivisor = CInt(strValue)
+                        End If
+                    End If
+
                     If .RetrieveValueForParameter("QS", strValue) Then mComputeOverallQualityScores = True
 
                     If .RetrieveValueForParameter("DI", strValue) Then mCreateDatasetInfoFile = True
@@ -300,6 +309,7 @@ Module modMain
             Console.WriteLine()
 
             Console.WriteLine("Use /LC to create 2D LCMS plots (this process could take several minutes for each dataset).  By default, plots the top " & clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_POINTS_TO_PLOT & " points.  To plot the top 20000 points, use /L:20000.")
+            Console.WriteLine("Use /LCDiv to specify the divisor to use when creating the overview 2D LCMS plots.  By default, uses /LCDiv:" & clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR & "; use /LCDiv:0 to disable creation of the overview plots.")
             Console.WriteLine("Use /NoTIC to not save TIC and BPI plots.")
             Console.WriteLine("Use /DI to create a dataset info XML file for each dataset.")
             Console.WriteLine("Use /QS to compute an overall quality score for the data in each datasets.")

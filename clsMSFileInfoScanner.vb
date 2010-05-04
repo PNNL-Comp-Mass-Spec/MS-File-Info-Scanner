@@ -128,6 +128,7 @@ Public Class clsMSFileInfoScanner
     Private mDSInfoStoredProcedure As String
 
     Private mLCMS2DPlotOptions As clsLCMSDataPlotter.clsOptions
+    Private mLCMS2DOverviewPlotDivisor As Integer
 
     Protected mLogMessagesToFile As Boolean
     Protected mLogFilePath As String
@@ -363,6 +364,15 @@ Public Class clsMSFileInfoScanner
         End Get
         Set(ByVal value As Integer)
             mLCMS2DPlotOptions.MaxPointsToPlot = value
+        End Set
+    End Property
+
+    Public Property LCMS2DOverviewPlotDivisor() As Integer
+        Get
+            Return mLCMS2DOverviewPlotDivisor
+        End Get
+        Set(ByVal value As Integer)
+            mLCMS2DOverviewPlotDivisor = value
         End Set
     End Property
 
@@ -849,7 +859,9 @@ Public Class clsMSFileInfoScanner
 
         mSaveTICAndBPIPlots = False
         mSaveLCMS2DPlots = False
+
         mLCMS2DPlotOptions = New clsLCMSDataPlotter.clsOptions
+        mLCMS2DOverviewPlotDivisor = clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
 
         mComputeOverallQualityScores = False
         mCreateDatasetInfoFile = False
@@ -916,6 +928,8 @@ Public Class clsMSFileInfoScanner
 
                         Me.LCMS2DPlotMaxPointsToPlot = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMaxPointsToPlot", Me.LCMS2DPlotMaxPointsToPlot)
                         Me.LCMS2DPlotMinIntensity = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinIntensity", Me.LCMS2DPlotMinIntensity)
+
+                        Me.LCMS2DOverviewPlotDivisor = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DOverviewPlotDivisor", Me.LCMS2DOverviewPlotDivisor)
 
                         Me.ComputeOverallQualityScores = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeOverallQualityScores", Me.ComputeOverallQualityScores)
                         Me.CreateDatasetInfoFile = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateDatasetInfoFile", Me.CreateDatasetInfoFile)
@@ -1263,6 +1277,7 @@ Public Class clsMSFileInfoScanner
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, mCreateDatasetInfoFile)
 
             objMSInfoScanner.LCMS2DPlotOptions = mLCMS2DPlotOptions
+            objMSInfoScanner.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor
 
             ' Process the data file
             blnSuccess = objMSInfoScanner.ProcessDatafile(strInputFileOrFolderPath, udtFileInfo)
