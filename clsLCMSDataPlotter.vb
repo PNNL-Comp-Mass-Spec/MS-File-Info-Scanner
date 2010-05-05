@@ -29,6 +29,8 @@ Public Class clsLCMSDataPlotter
 #Region "Member variables"
 
     Protected mPointCountCached As Integer              ' Keeps track of the total number of data points cached in mScans
+    Protected mPointCountCachedAfterLastTrim As Integer
+
     Protected mScans As System.Collections.Generic.List(Of clsLCMSDataPlotter.clsScanData)
 
     Protected mOptions As clsOptions
@@ -178,13 +180,18 @@ Public Class clsLCMSDataPlotter
             mPointCountCached += objScanData.IonCount
 
             If mPointCountCached > mOptions.MaxPointsToPlot * 5 Then
-                ' Need to step through the scans and reduce the number of points in memory
-                TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum)
+                ' Only repeat the trim if the number of cached data points has increased by 10%
+                ' This helps speed up program execution by avoiding trimming data after every new scan is added
+                If mPointCountCached > mPointCountCachedAfterLastTrim * 1.1 Then
+
+                    ' Step through the scans and reduce the number of points in memory
+                    TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum)
+
+                End If
             End If
 
-
         Catch ex As System.Exception
-            RaiseEvent ErrorEvent("Error in clsLCMSDataPlotter.AddScan: " & ex.Message)
+            RaiseEvent ErrorEvent("Error in clsLCMSDataPlotter.AddScan: " & ex.Message & "; inner exception: " & ex.InnerException.Message)
             blnSuccess = False
         End Try
 
@@ -211,8 +218,14 @@ Public Class clsLCMSDataPlotter
             mPointCountCached += objScanData.IonCount
 
             If mPointCountCached > mOptions.MaxPointsToPlot * 5 Then
-                ' Need to step through the scans and reduce the number of points in memory
-                TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum)
+                ' Only repeat the trim if the number of cached data points has increased by 10%
+                ' This helps speed up program execution by avoiding trimming data after every new scan is added
+                If mPointCountCached > mPointCountCachedAfterLastTrim * 1.1 Then
+
+                    ' Step through the scans and reduce the number of points in memory
+                    TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum)
+
+                End If
             End If
 
         Catch ex As System.Exception
@@ -248,6 +261,7 @@ Public Class clsLCMSDataPlotter
             '  (see TrimCachedData for more details)
 
             TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum)
+
         End If
 
 
@@ -441,7 +455,7 @@ Public Class clsLCMSDataPlotter
             With objMSSpectrum
 
                 If objMSSpectrum.IonCount > intMaxIonCountToRetain Then
-                    objFilterDataArray = New clsFilterDataArrayMaxCount
+                    objFilterDataArray = New clsFilterDataArrayMaxCount(objMSSpectrum.IonCount)
 
                     objFilterDataArray.MaximumDataCountToLoad = intMaxIonCountToRetain
                     objFilterDataArray.TotalIntensityPercentageFilterEnabled = False
@@ -622,6 +636,7 @@ Public Class clsLCMSDataPlotter
             '  (see TrimCachedData for more details)
 
             TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum)
+
         End If
 
 
@@ -845,6 +860,7 @@ Public Class clsLCMSDataPlotter
     Public Sub Reset()
 
         mPointCountCached = 0
+        mPointCountCachedAfterLastTrim = 0
 
         If mScans Is Nothing Then
             mScans = New System.Collections.Generic.List(Of clsLCMSDataPlotter.clsScanData)
@@ -1051,6 +1067,8 @@ Public Class clsLCMSDataPlotter
 
             Next intScanIndex
 
+            ' Update mPointCountCachedAfterLastTrim
+            mPointCountCachedAfterLastTrim = mPointCountCached
 
         Catch ex As System.Exception
             Throw New System.Exception("Error in clsLCMSDataPlotter.TrimCachedData", ex)

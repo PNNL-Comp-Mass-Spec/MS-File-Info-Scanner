@@ -1121,6 +1121,7 @@ Public Class clsMSFileInfoScanner
 
             If strConnectionString Is Nothing OrElse strConnectionString.Length = 0 Then
                 ShowErrorMessage("Connection string not defined; unable to post the dataset info to the database")
+                SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError)
                 Return False
             End If
 
@@ -1133,6 +1134,7 @@ Public Class clsMSFileInfoScanner
             With objCommand
                 .CommandType = CommandType.StoredProcedure
                 .CommandText = strStoredProcedure
+
                 .Parameters.Add(New SqlClient.SqlParameter("@Return", SqlDbType.Int))
                 .Parameters.Item("@Return").Direction = ParameterDirection.ReturnValue
 
@@ -1149,6 +1151,8 @@ Public Class clsMSFileInfoScanner
                 ' No errors
                 blnSuccess = True
             Else
+                ShowErrorMessage("Error calling stored procedure, return code = " & intResult)
+                SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError)
                 blnSuccess = False
             End If
 
@@ -1158,6 +1162,7 @@ Public Class clsMSFileInfoScanner
 
         Catch ex As System.Exception
             HandleException("Error calling stored procedure", ex)
+            SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError)
             blnSuccess = False
         Finally
             mExecuteSP = Nothing
@@ -1226,6 +1231,7 @@ Public Class clsMSFileInfoScanner
 
             If strConnectionString Is Nothing OrElse strConnectionString.Length = 0 Then
                 ShowErrorMessage("Connection string not defined; unable to post the dataset info to the database")
+                SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError)
                 Return False
             End If
 
@@ -1238,6 +1244,7 @@ Public Class clsMSFileInfoScanner
             With objCommand
                 .CommandType = CommandType.StoredProcedure
                 .CommandText = strStoredProcedure
+
                 .Parameters.Add(New SqlClient.SqlParameter("@Return", SqlDbType.Int))
                 .Parameters.Item("@Return").Direction = ParameterDirection.ReturnValue
 
@@ -1258,11 +1265,14 @@ Public Class clsMSFileInfoScanner
                 ' No errors
                 blnSuccess = True
             Else
+                ShowErrorMessage("Error calling stored procedure, return code = " & intResult)
+                SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError)
                 blnSuccess = False
             End If
 
         Catch ex As System.Exception
             HandleException("Error calling stored procedure", ex)
+            SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError)
             blnSuccess = False
         Finally
             mExecuteSP = Nothing
@@ -1420,6 +1430,7 @@ Public Class clsMSFileInfoScanner
                     If SKIP_FILES_IN_ERROR Then
                         Return True
                     Else
+                        SetErrorCode(eMSFileScannerErrorCodes.FilePathError)
                         Return False
                     End If
                 End If
@@ -1470,6 +1481,7 @@ Public Class clsMSFileInfoScanner
 
                 If Not blnKnownMSDataType Then
                     ShowErrorMessage("Unknown file type: " & System.IO.Path.GetFileName(strInputFileOrFolderPath))
+                    SetErrorCode(eMSFileScannerErrorCodes.UnknownFileExtension)
                     Return False
                 End If
 

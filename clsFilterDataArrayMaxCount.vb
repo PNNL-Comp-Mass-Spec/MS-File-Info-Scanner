@@ -10,7 +10,8 @@ Public Class clsFilterDataArrayMaxCount
 	'  This routine will determine which data points to retain
 	'  For the remaining points, their data values will be changed to mSkipDataPointFlag (defaults to -1)
 	
-	
+    Private Const INITIAL_MEMORY_RESERVE As Integer = 50000
+
 	Private Const DEFAULT_SKIP_DATA_POINT_FLAG As Single = -1
 	    
 	' 4 steps in Sub FilterDataByMaxDataCountToLoad
@@ -32,6 +33,7 @@ Public Class clsFilterDataArrayMaxCount
 
     Public Event ProgressChanged(ByVal Progress As Single)
 
+#Region "Properties"
     Public Property MaximumDataCountToLoad() As Integer
         Get
             Return mMaximumDataCountToKeep
@@ -73,10 +75,15 @@ Public Class clsFilterDataArrayMaxCount
             mTotalIntensityPercentageFilter = value
         End Set
     End Property
+#End Region
 
     Public Sub New()
+        Me.New(INITIAL_MEMORY_RESERVE)
+    End Sub
+
+    Public Sub New(ByVal InitialCapacity As Integer)
         mSkipDataPointFlag = DEFAULT_SKIP_DATA_POINT_FLAG
-        Me.Clear()
+        Me.Clear(InitialCapacity)
     End Sub
 
     Public Sub AddDataPoint(ByVal sngAbundance As Single, ByVal intDataPointIndex As Integer)
@@ -92,17 +99,19 @@ Public Class clsFilterDataArrayMaxCount
         mDataCount += 1
     End Sub
 
-    Public Sub Clear()
-        Const INITIAL_MEMORY_RESERVE As Integer = 50000
-
+    Public Sub Clear(ByVal InitialCapacity As Integer)
         mMaximumDataCountToKeep = 400000
 
         mTotalIntensityPercentageFilterEnabled = False
         mTotalIntensityPercentageFilter = 90
 
+        If InitialCapacity < 4 Then
+            InitialCapacity = 4
+        End If
+
         mDataCount = 0
-        ReDim mDataValues(INITIAL_MEMORY_RESERVE - 1)
-        ReDim mDataIndices(INITIAL_MEMORY_RESERVE - 1)
+        ReDim mDataValues(InitialCapacity - 1)
+        ReDim mDataIndices(InitialCapacity - 1)
     End Sub
 
     Public Function GetAbundanceByIndex(ByVal intDataPointIndex As Integer) As Single
@@ -119,9 +128,11 @@ Public Class clsFilterDataArrayMaxCount
         If mDataCount <= 0 Then
             ' Nothing to do
         Else
-            ' Shrink the arrays to mDataCount
-            ReDim Preserve mDataValues(mDataCount - 1)
-            ReDim Preserve mDataIndices(mDataCount - 1)
+            '' Shrink the arrays to mDataCount
+            If mDataCount < mDataValues.Length Then
+                ReDim Preserve mDataValues(mDataCount - 1)
+                ReDim Preserve mDataIndices(mDataCount - 1)
+            End If
 
             FilterDataByMaxDataCountToKeep()
 
