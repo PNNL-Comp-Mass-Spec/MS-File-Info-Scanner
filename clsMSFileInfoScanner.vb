@@ -13,7 +13,7 @@ Option Strict On
 Public Class clsMSFileInfoScanner
 
     Public Sub New()
-        mFileDate = "May 4, 2010"
+        mFileDate = "May 5, 2010"
 
         mFileIntegrityChecker = New clsFileIntegrityChecker
         mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -1171,14 +1171,30 @@ Public Class clsMSFileInfoScanner
     ''' This version assumes the stored procedure takes DatasetID as the first parameter
     ''' </summary>
     ''' <param name="intDatasetID">Dataset ID to send to the stored procedure</param>
+    ''' <param name="strConnectionString">Database connection string</param>
+    ''' <param name="strStoredProcedure">Stored procedure</param>
+    ''' <returns>True if success; false if failure</returns>
+    Public Function PostDatasetInfoUseDatasetID(ByVal intDatasetID As Integer, _
+                                                ByVal strConnectionString As String, _
+                                                ByVal strStoredProcedure As String) As Boolean
+
+        Return PostDatasetInfoUseDatasetID(intDatasetID, Me.DatasetInfoXML, strConnectionString, strStoredProcedure)
+    End Function
+
+
+    ''' <summary>
+    ''' Post the dataset info in strDatasetInfoXML to the database, using the specified connection string and stored procedure
+    ''' This version assumes the stored procedure takes DatasetID as the first parameter
+    ''' </summary>
+    ''' <param name="intDatasetID">Dataset ID to send to the stored procedure</param>
     ''' <param name="strDatasetInfoXML">Database info XML</param>
     ''' <param name="strConnectionString">Database connection string</param>
     ''' <param name="strStoredProcedure">Stored procedure</param>
     ''' <returns>True if success; false if failure</returns>
-    Public Function PostDatasetInfoToDB(ByVal intDatasetID As Integer, _
-                                        ByVal strDatasetInfoXML As String, _
-                                        ByVal strConnectionString As String, _
-                                        ByVal strStoredProcedure As String) As Boolean
+    Public Function PostDatasetInfoUseDatasetID(ByVal intDatasetID As Integer, _
+                                                ByVal strDatasetInfoXML As String, _
+                                                ByVal strConnectionString As String, _
+                                                ByVal strStoredProcedure As String) As Boolean
 
         Const MAX_RETRY_COUNT As Integer = 3
         Const SEC_BETWEEN_RETRIES As Integer = 20

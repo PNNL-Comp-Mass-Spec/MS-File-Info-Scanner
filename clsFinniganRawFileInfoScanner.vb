@@ -90,6 +90,9 @@ Public Class clsFinniganRawFileInfoScanner
         Dim intScanCount As Integer
         Dim intScanNumber As Integer
 
+        Dim sngProgress As Single
+        Dim dtLastProgressTime As System.DateTime
+
         Dim udtScanHeaderInfo As FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
         Dim blnSuccess As Boolean
 
@@ -103,6 +106,8 @@ Public Class clsFinniganRawFileInfoScanner
         If mSaveLCMS2DPlots Then
             MyBase.InitializeLCMS2DPlot()
         End If
+
+        dtLastProgressTime = System.DateTime.Now()
 
         intScanCount = objXcaliburAccessor.GetNumScans
         For intScanNumber = 1 To intScanCount
@@ -171,6 +176,17 @@ Public Class clsFinniganRawFileInfoScanner
 
             If intScanNumber Mod 100 = 0 Then
                 Console.Write(".")
+
+                If intScanCount > 0 Then
+                    sngProgress = CSng(intScanNumber / intScanCount * 100)
+
+                    If System.DateTime.Now.Subtract(dtLastProgressTime).TotalSeconds > 30 Then
+                        dtLastProgressTime = System.DateTime.Now
+                        Console.WriteLine()
+                        Console.Write(sngProgress.ToString("0.0") & "% ")
+                    End If
+                End If
+
             End If
 
         Next intScanNumber

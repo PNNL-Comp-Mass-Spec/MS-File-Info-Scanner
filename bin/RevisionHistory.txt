@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.1.3777; May 5, 2010
+	- Added public function PostDatasetInfoUseDatasetID
+		- Posts the Dataset Info to a stored procedure that takes DatasetID as the first argument
+
 Version 1.1.3776; May 4, 2010
 	- Updated to disable use of the acquisition time file (cache file) by default
 		- To enable, use parameter line switch /CF or set option "UseCacheFiles" to True in the XML settings file

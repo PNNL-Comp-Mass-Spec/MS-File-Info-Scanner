@@ -31,6 +31,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     Protected mDatasetStatsSummarizer As DSSummarizer.clsDatasetStatsSummarizer
 
     Public Event ErrorEvent(ByVal Message As String) Implements iMSFileInfoProcessor.ErrorEvent
+    'Public Event ProgressUpdate(ByVal Progress As Single)
 #End Region
 
 #Region "Properties"

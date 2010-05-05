@@ -216,7 +216,7 @@ Public Class clsLCMSDataPlotter
             End If
 
         Catch ex As System.Exception
-            RaiseEvent ErrorEvent("Error in clsLCMSDataPlotter.AddScanSkipFilters: " & ex.Message)
+            RaiseEvent ErrorEvent("Error in clsLCMSDataPlotter.AddScanSkipFilters: " & ex.Message & "; inner exception: " & ex.InnerException.Message)
             blnSuccess = False
         End Try
 
