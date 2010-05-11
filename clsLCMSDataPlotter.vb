@@ -532,7 +532,7 @@ Public Class clsLCMSDataPlotter
 
             End With
         Catch ex As System.Exception
-            Throw New System.Exception("Error in clsLCMSDataPlotter.DiscardDataToLimitIonCount", ex)
+            Throw New System.Exception("Error in clsLCMSDataPlotter.DiscardDataToLimitIonCount: " & ex.Message, ex)
         End Try
 
     End Sub
@@ -1071,7 +1071,7 @@ Public Class clsLCMSDataPlotter
             mPointCountCachedAfterLastTrim = mPointCountCached
 
         Catch ex As System.Exception
-            Throw New System.Exception("Error in clsLCMSDataPlotter.TrimCachedData", ex)
+            Throw New System.Exception("Error in clsLCMSDataPlotter.TrimCachedData: " & ex.Message, ex)
         End Try
 
     End Sub

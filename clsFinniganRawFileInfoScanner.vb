@@ -256,33 +256,39 @@ Public Class clsFinniganRawFileInfoScanner
             blnReadError = True
 
             If clsMSFileInfoScanner.GetAppFolderPath.Substring(0, 2).ToLower <> ioFileInfo.FullName.Substring(0, 2).ToLower Then
-                ' Copy the file locally and try again
 
-                Try
-                    strDataFilePathLocal = System.IO.Path.Combine(clsMSFileInfoScanner.GetAppFolderPath, System.IO.Path.GetFileName(strDataFilePath))
+                If mCopyFileLocalOnReadError Then
+                    ' Copy the file locally and try again
 
-                    If strDataFilePathLocal.ToLower <> strDataFilePath.ToLower Then
-                        Console.WriteLine("Copying file " & System.IO.Path.GetFileName(strDataFilePath) & " to the working folder")
-                        System.IO.File.Copy(strDataFilePath, strDataFilePathLocal, True)
+                    Try
+                        strDataFilePathLocal = System.IO.Path.Combine(clsMSFileInfoScanner.GetAppFolderPath, System.IO.Path.GetFileName(strDataFilePath))
 
-                        strDataFilePath = String.Copy(strDataFilePathLocal)
-                        blnDeleteLocalFile = True
+                        If strDataFilePathLocal.ToLower <> strDataFilePath.ToLower Then
 
-                        ' Update ioFileInfo then try to re-open
-                        ioFileInfo = New System.IO.FileInfo(strDataFilePath)
+                            ShowMessage("Copying file " & System.IO.Path.GetFileName(strDataFilePath) & " to the working folder")
+                            System.IO.File.Copy(strDataFilePath, strDataFilePathLocal, True)
 
-                        If Not objXcaliburAccessor.OpenRawFile(ioFileInfo.FullName) Then
-                            ' File open failed
-                            Console.WriteLine("Call to .OpenRawFile failed for: " & ioFileInfo.FullName)
-                            blnReadError = True
-                        Else
-                            blnReadError = False
+                            strDataFilePath = String.Copy(strDataFilePathLocal)
+                            blnDeleteLocalFile = True
+
+                            ' Update ioFileInfo then try to re-open
+                            ioFileInfo = New System.IO.FileInfo(strDataFilePath)
+
+                            If Not objXcaliburAccessor.OpenRawFile(ioFileInfo.FullName) Then
+                                ' File open failed
+                                ReportError("Call to .OpenRawFile failed for: " & ioFileInfo.FullName)
+                                blnReadError = True
+                            Else
+                                blnReadError = False
+                            End If
                         End If
-                    End If
-                Catch ex As System.Exception
-                    blnReadError = True
-                End Try
+                    Catch ex As System.Exception
+                        blnReadError = True
+                    End Try
+                End If
+
             End If
+
         End If
 
         If Not blnReadError Then

@@ -1,5 +1,13 @@
 MS File Info Scanner Change Log
 
+Version 1.1.3892; May 10, 2010
+	- Added option CopyFileLocalOnReadError, which defaults to False
+		- If True, and if there is a problem reading a .Raw file, then will copy the file to the working directory, then try to re-read the file again
+		- This used to be necessary when reading files from the NWFS Archive, but is no longer necessary
+	- Fixed array indexing bug in clsFilterDataArrayMaxCount
+	- Improved exception handling in clsLCMSDataPlotter
+	- Added Status Message event to clsMSFileInfoProcessorBaseClass
+
 Version 1.1.3777; May 5, 2010
 	- Added public function PostDatasetInfoUseDatasetID
 		- Posts the Dataset Info to a stored procedure that takes DatasetID as the first argument

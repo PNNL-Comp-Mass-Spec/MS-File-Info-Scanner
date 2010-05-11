@@ -43,6 +43,10 @@ MSFileInfoScanner
 	<summary>
  When True, then computes an Sha1 hash on every file
  </summary>
+</member><member name="P:MSFileInfoScanner.clsMSFileInfoScanner.CopyFileLocalOnReadError">
+	<summary>
+ If True, then copies .Raw files to the local drive if unable to read the file over the network
+ </summary>
 </member><member name="P:MSFileInfoScanner.clsMSFileInfoScanner.CreateDatasetInfoFile">
 	<summary>
  If True, then will create the _DatasetInfo.xml file

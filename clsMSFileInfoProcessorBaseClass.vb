@@ -24,6 +24,8 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     Protected mCreateDatasetInfoFile As Boolean
     Protected mLCMS2DOverviewPlotDivisor As Integer
 
+    Protected mCopyFileLocalOnReadError As Boolean
+
     Protected WithEvents mTICandBPIPlot As clsTICandBPIPlotter
     Protected WithEvents mLCMS2DPlot As clsLCMSDataPlotter
     Protected WithEvents mLCMS2DPlotOverview As clsLCMSDataPlotter
@@ -31,6 +33,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     Protected mDatasetStatsSummarizer As DSSummarizer.clsDatasetStatsSummarizer
 
     Public Event ErrorEvent(ByVal Message As String) Implements iMSFileInfoProcessor.ErrorEvent
+    Public Event MessageEvent(ByVal Message As String) Implements iMSFileInfoProcessor.MessageEvent
     'Public Event ProgressUpdate(ByVal Progress As Single)
 #End Region
 
@@ -66,6 +69,8 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
                 Return mCreateDatasetInfoFile
             Case iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots
                 Return mSaveLCMS2DPlots
+            Case iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError
+                Return mCopyFileLocalOnReadError
         End Select
     End Function
 
@@ -79,6 +84,8 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
                 mCreateDatasetInfoFile = blnValue
             Case iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots
                 mSaveLCMS2DPlots = blnValue
+            Case iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError
+                mCopyFileLocalOnReadError = blnValue
         End Select
 
     End Sub
@@ -138,6 +145,8 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
         mDatasetStatsSummarizer = New DSSummarizer.clsDatasetStatsSummarizer
 
+        mCopyFileLocalOnReadError = False
+
     End Sub
 
     Protected Sub InitializeTICAndBPI()
@@ -153,6 +162,10 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
     Protected Sub ReportError(ByVal strMessage As String)
         RaiseEvent ErrorEvent(strMessage)
+    End Sub
+
+    Protected Sub ShowMessage(ByVal strMessage As String)
+        RaiseEvent MessageEvent(strMessage)
     End Sub
 
     Protected Function UpdateDatasetFileStats(ByRef ioFileInfo As System.IO.FileInfo, _

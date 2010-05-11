@@ -13,7 +13,7 @@ Option Strict On
 Public Class clsMSFileInfoScanner
 
     Public Sub New()
-        mFileDate = "May 5, 2010"
+        mFileDate = "May 10, 2010"
 
         mFileIntegrityChecker = New clsFileIntegrityChecker
         mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -120,6 +120,8 @@ Public Class clsMSFileInfoScanner
 
     Private mComputeOverallQualityScores As Boolean
     Private mCreateDatasetInfoFile As Boolean
+
+    Private mCopyFileLocalOnReadError As Boolean
 
     Private mCheckFileIntegrity As Boolean
 
@@ -292,6 +294,18 @@ Public Class clsMSFileInfoScanner
             If Not mFileIntegrityChecker Is Nothing Then
                 mFileIntegrityChecker.ComputeFileHashes = value
             End If
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' If True, then copies .Raw files to the local drive if unable to read the file over the network
+    ''' </summary>
+    Public Property CopyFileLocalOnReadError() As Boolean
+        Get
+            Return mCopyFileLocalOnReadError
+        End Get
+        Set(ByVal value As Boolean)
+            mCopyFileLocalOnReadError = value
         End Set
     End Property
 
@@ -857,6 +871,8 @@ Public Class clsMSFileInfoScanner
         mReprocessIfCachedSizeIsZero = False
         mRecheckFileIntegrityForExistingFolders = False
 
+        mCreateDatasetInfoFile = False
+
         mSaveTICAndBPIPlots = False
         mSaveLCMS2DPlots = False
 
@@ -864,7 +880,8 @@ Public Class clsMSFileInfoScanner
         mLCMS2DOverviewPlotDivisor = clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
 
         mComputeOverallQualityScores = False
-        mCreateDatasetInfoFile = False
+
+        mCopyFileLocalOnReadError = False
 
         mCheckFileIntegrity = False
 
@@ -919,6 +936,8 @@ Public Class clsMSFileInfoScanner
                         Me.UseCacheFiles = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UseCacheFiles", Me.UseCacheFiles)
                         Me.ReprocessExistingFiles = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessExistingFiles", Me.ReprocessExistingFiles)
                         Me.ReprocessIfCachedSizeIsZero = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessIfCachedSizeIsZero", Me.ReprocessIfCachedSizeIsZero)
+
+                        Me.CopyFileLocalOnReadError = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CopyFileLocalOnReadError", Me.CopyFileLocalOnReadError)
 
                         Me.SaveTICAndBPIPlots = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveTICAndBPIPlots", Me.SaveTICAndBPIPlots)
                         Me.SaveLCMS2DPlots = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveLCMS2DPlots", Me.SaveLCMS2DPlots)
@@ -1301,6 +1320,7 @@ Public Class clsMSFileInfoScanner
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots, mSaveLCMS2DPlots)
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, mComputeOverallQualityScores)
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, mCreateDatasetInfoFile)
+            objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError, mCopyFileLocalOnReadError)
 
             objMSInfoScanner.LCMS2DPlotOptions = mLCMS2DPlotOptions
             objMSInfoScanner.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor
@@ -2298,6 +2318,10 @@ Public Class clsMSFileInfoScanner
 
     Private Sub mMSInfoScanner_ErrorEvent(ByVal Message As String) Handles mMSInfoScanner.ErrorEvent
         ShowErrorMessage(Message)
+    End Sub
+
+    Private Sub mMSInfoScannerMessageEvent(ByVal Message As String) Handles mMSInfoScanner.MessageEvent
+        ShowMessage(Message, eMessageTypeConstants.Normal)
     End Sub
 
     Private Sub mMSFileInfoDataCache_ErrorEvent(ByVal Message As String) Handles mMSFileInfoDataCache.ErrorEvent

@@ -285,6 +285,13 @@ Public Class clsFilterDataArrayMaxCount
                                 mDataValues(intIndex) = mSkipDataPointFlag
                             ElseIf mDataValues(intIndex) < dblBinToSortAbundanceMaximum Then
                                 ' Value is in the bin to sort; add to the BinToSort arrays
+
+                                If intBinToSortDataCount >= sngBinToSortAbundances.Length Then
+                                    ' Need to reserve more space (this is unexpected)
+                                    ReDim Preserve sngBinToSortAbundances(sngBinToSortAbundances.Length * 2 - 1)
+                                    ReDim Preserve intBinToSortDataIndices(sngBinToSortAbundances.Length - 1)
+                                End If
+
                                 sngBinToSortAbundances(intBinToSortDataCount) = mDataValues(intIndex)
                                 intBinToSortDataIndices(intBinToSortDataCount) = mDataIndices(intIndex)
                                 intBinToSortDataCount += 1

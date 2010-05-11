@@ -72,7 +72,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
             strDataFilePathLocal = System.IO.Path.Combine(clsMSFileInfoScanner.GetAppFolderPath, System.IO.Path.GetFileName(strDataFilePath))
 
             If strDataFilePathLocal.ToLower <> strDataFilePath.ToLower Then
-                Console.WriteLine("Copying file " & System.IO.Path.GetFileName(strDataFilePath) & " to the working folder")
+                ShowMessage("Copying file " & System.IO.Path.GetFileName(strDataFilePath) & " to the working folder")
                 System.IO.File.Copy(strDataFilePath, strDataFilePathLocal, True)
                 blnDeleteLocalFile = True
             End If

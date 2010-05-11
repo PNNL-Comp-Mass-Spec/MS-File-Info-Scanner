@@ -12,6 +12,7 @@ Public Interface iMSFileInfoProcessor
         ComputeOverallQualityScores = 1
         CreateDatasetInfoFile = 2
         CreateLCMS2DPlots = 3
+        CopyFileLocalOnReadError = 4
     End Enum
 
     ' ToDo: Update udtFileInfo to include some overall quality scores
@@ -45,5 +46,8 @@ Public Interface iMSFileInfoProcessor
     Sub SetOption(ByVal eOption As ProcessingOptions, ByVal blnValue As Boolean)
 
     Event ErrorEvent(ByVal Message As String)
+
+    Event MessageEvent(ByVal message As String)
+
 End Interface
 

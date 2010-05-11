@@ -18,6 +18,8 @@
     <item key="ReprocessExistingFiles" value="False" />
     <item key="ReprocessIfCachedSizeIsZero" value="False" />
 
+    <item key="CopyFileLocalOnReadError" value="False" />
+
     <item key="SaveTICAndBPIPlots" value="True" />
     <item key="SaveLCMS2DPlots" value="True" />
 
