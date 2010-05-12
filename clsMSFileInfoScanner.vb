@@ -13,7 +13,7 @@ Option Strict On
 Public Class clsMSFileInfoScanner
 
     Public Sub New()
-        mFileDate = "May 10, 2010"
+        mFileDate = "May 11, 2010"
 
         mFileIntegrityChecker = New clsFileIntegrityChecker
         mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -131,6 +131,9 @@ Public Class clsMSFileInfoScanner
 
     Private mLCMS2DPlotOptions As clsLCMSDataPlotter.clsOptions
     Private mLCMS2DOverviewPlotDivisor As Integer
+
+    Private mScanStart As Integer
+    Private mScanEnd As Integer
 
     Protected mLogMessagesToFile As Boolean
     Protected mLogFilePath As String
@@ -519,6 +522,30 @@ Public Class clsMSFileInfoScanner
     End Property
 
     ''' <summary>
+    ''' When ScanStart is > 0, then will start processing at the specified scan number
+    ''' </summary>
+    Public Property ScanStart() As Integer
+        Get
+            Return mScanStart
+        End Get
+        Set(ByVal value As Integer)
+            mScanStart = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' When ScanEnd is > 0, then will stop processing at the specified scan number
+    ''' </summary>
+    Public Property ScanEnd() As Integer
+        Get
+            Return mScanEnd
+        End Get
+        Set(ByVal value As Integer)
+            mScanEnd = value
+        End Set
+    End Property
+
+    ''' <summary>
     ''' If True, then saves/loads data from/to the cache files (DatasetTimeFile.txt and FolderIntegrityInfo.txt)
     ''' If you simply want to create TIC and BPI files, and/or the _DatasetInfo.xml file for a single dataset, then set this to False
     ''' </summary>
@@ -879,6 +906,9 @@ Public Class clsMSFileInfoScanner
         mLCMS2DPlotOptions = New clsLCMSDataPlotter.clsOptions
         mLCMS2DOverviewPlotDivisor = clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
 
+        mScanStart = 0
+        mScanEnd = 0
+
         mComputeOverallQualityScores = False
 
         mCopyFileLocalOnReadError = False
@@ -949,6 +979,9 @@ Public Class clsMSFileInfoScanner
                         Me.LCMS2DPlotMinIntensity = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinIntensity", Me.LCMS2DPlotMinIntensity)
 
                         Me.LCMS2DOverviewPlotDivisor = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DOverviewPlotDivisor", Me.LCMS2DOverviewPlotDivisor)
+
+                        Me.ScanStart = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanStart", Me.ScanStart)
+                        Me.ScanEnd = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanEnd", Me.ScanEnd)
 
                         Me.ComputeOverallQualityScores = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeOverallQualityScores", Me.ComputeOverallQualityScores)
                         Me.CreateDatasetInfoFile = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateDatasetInfoFile", Me.CreateDatasetInfoFile)
@@ -1324,6 +1357,9 @@ Public Class clsMSFileInfoScanner
 
             objMSInfoScanner.LCMS2DPlotOptions = mLCMS2DPlotOptions
             objMSInfoScanner.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor
+
+            objMSInfoScanner.ScanStart = mScanStart
+            objMSInfoScanner.ScanEnd = mScanEnd
 
             ' Process the data file
             blnSuccess = objMSInfoScanner.ProcessDatafile(strInputFileOrFolderPath, udtFileInfo)

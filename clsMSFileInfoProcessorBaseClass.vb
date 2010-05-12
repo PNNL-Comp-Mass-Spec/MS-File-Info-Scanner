@@ -24,6 +24,9 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     Protected mCreateDatasetInfoFile As Boolean
     Protected mLCMS2DOverviewPlotDivisor As Integer
 
+    Protected mScanStart As Integer
+    Protected mScanEnd As Integer
+
     Protected mCopyFileLocalOnReadError As Boolean
 
     Protected WithEvents mTICandBPIPlot As clsTICandBPIPlotter
@@ -54,6 +57,27 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         End Get
         Set(ByVal value As Integer)
             mLCMS2DOverviewPlotDivisor = value
+        End Set
+    End Property
+
+    Public Property ScanStart() As Integer Implements iMSFileInfoProcessor.ScanStart
+        Get
+            Return mScanStart
+        End Get
+        Set(ByVal value As Integer)
+            mScanStart = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' When ScanEnd is > 0, then will stop processing at the specified scan number
+    ''' </summary>
+    Public Property ScanEnd() As Integer Implements iMSFileInfoProcessor.ScanEnd
+        Get
+            Return mScanEnd
+        End Get
+        Set(ByVal value As Integer)
+            mScanEnd = value
         End Set
     End Property
 
@@ -134,6 +158,43 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
     End Function
 
+    ''' <summary>
+    ''' Returns the range of scan numbers to process
+    ''' </summary>
+    ''' <param name="intScanCount">Number of scans in the file</param>
+    ''' <param name="intScanStart">1 if mScanStart is zero; otherwise mScanStart</param>
+    ''' <param name="intScanEnd">intScanCount if mScanEnd is zero; otherwise Min(mScanEnd, intScanCount)</param>
+    ''' <remarks></remarks>
+    Protected Sub GetStartAndEndScans(ByVal intScanCount As Integer, _
+                                      ByRef intScanStart As Integer, ByRef intScanEnd As Integer)
+        GetStartAndEndScans(intScanCount, 1, intScanStart, intScanEnd)
+    End Sub
+
+    ''' <summary>
+    ''' Returns the range of scan numbers to process
+    ''' </summary>
+    ''' <param name="intScanCount">Number of scans in the file</param>
+    ''' <param name="intScanNumFirst">The first scan number in the file</param>
+    ''' <param name="intScanStart">1 if mScanStart is zero; otherwise mScanStart</param>
+    ''' <param name="intScanEnd">intScanCount if mScanEnd is zero; otherwise Min(mScanEnd, intScanCount)</param>
+    ''' <remarks></remarks>
+    Protected Sub GetStartAndEndScans(ByVal intScanCount As Integer, ByVal intScanNumFirst As Integer, _
+                                      ByRef intScanStart As Integer, ByRef intScanEnd As Integer)
+
+        If mScanStart > 0 Then
+            intScanStart = mScanStart
+        Else
+            intScanStart = 1
+        End If
+
+        If mScanEnd > 0 AndAlso mScanEnd < intScanCount Then
+            intScanEnd = mScanEnd
+        Else
+            intScanEnd = intScanCount
+        End If
+
+    End Sub
+
     Protected Sub InitializeLocalVariables()
 
         mTICandBPIPlot = New clsTICandBPIPlotter()
@@ -142,6 +203,9 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         mLCMS2DPlotOverview = New clsLCMSDataPlotter
 
         mLCMS2DOverviewPlotDivisor = DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
+
+        mScanStart = 0
+        mScanEnd = 0
 
         mDatasetStatsSummarizer = New DSSummarizer.clsDatasetStatsSummarizer
 

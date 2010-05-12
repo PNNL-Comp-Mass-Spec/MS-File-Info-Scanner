@@ -3,7 +3,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified February 1, 2010
+' Last modified May 11, 2010
 
 Public Class clsFinniganRawFileInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -29,6 +29,9 @@ Public Class clsFinniganRawFileInfoScanner
         Dim dblOverallAvgIntensitySum As Double
         Dim intOverallAvgCount As Integer
 
+        Dim intScanStart As Integer
+        Dim intScanEnd As Integer
+
         dblOverallAvgIntensitySum = 0
         intOverallAvgCount = 0
 
@@ -40,7 +43,9 @@ Public Class clsFinniganRawFileInfoScanner
         Else
 
             intScanCount = objXcaliburAccessor.GetNumScans
-            For intScanNumber = 1 To intScanCount
+            MyBase.GetStartAndEndScans(intScanCount, intScanStart, intScanEnd)
+
+            For intScanNumber = intScanStart To intScanEnd
                 ' This function returns the number of points in dblIonMZ() and dblIonIntensity()
                 intReturnCode = objXcaliburAccessor.GetScanData(intScanNumber, dblIonMZ, dblIonIntensity, udtScanHeaderInfo)
 
@@ -96,6 +101,9 @@ Public Class clsFinniganRawFileInfoScanner
         Dim udtScanHeaderInfo As FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
         Dim blnSuccess As Boolean
 
+        Dim intScanStart As Integer
+        Dim intScanEnd As Integer
+
         Console.Write("  Loading scan details")
         
         If mSaveTICAndBPI Then
@@ -110,7 +118,9 @@ Public Class clsFinniganRawFileInfoScanner
         dtLastProgressTime = System.DateTime.Now()
 
         intScanCount = objXcaliburAccessor.GetNumScans
-        For intScanNumber = 1 To intScanCount
+        MyBase.GetStartAndEndScans(intScanCount, intScanStart, intScanEnd)
+
+        For intScanNumber = intScanStart To intScanEnd
             Try
 
                 blnSuccess = objXcaliburAccessor.GetScanInfo(intScanNumber, udtScanHeaderInfo)

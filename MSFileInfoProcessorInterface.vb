@@ -42,6 +42,9 @@ Public Interface iMSFileInfoProcessor
     Property LCMS2DPlotOptions() As clsLCMSDataPlotter.clsOptions
     Property LCMS2DOverviewPlotDivisor() As Integer
 
+    Property ScanStart() As Integer
+    Property ScanEnd() As Integer
+
     Function GetOption(ByVal eOption As ProcessingOptions) As Boolean
     Sub SetOption(ByVal eOption As ProcessingOptions, ByVal blnValue As Boolean)
 

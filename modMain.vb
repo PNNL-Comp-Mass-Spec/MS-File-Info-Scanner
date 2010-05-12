@@ -7,7 +7,7 @@ Option Strict On
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "May 10, 2010"
+    Public Const PROGRAM_DATE As String = "May 11, 2010"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -27,6 +27,9 @@ Module modMain
     Private mSaveLCMS2DPlots As Boolean
     Private mLCMS2DMaxPointsToPlot As Integer
     Private mLCMS2DOverviewPlotDivisor As Integer
+
+    Private mScanStart As Integer
+    Private mScanEnd As Integer
 
     Private mComputeOverallQualityScores As Boolean
     Private mCreateDatasetInfoFile As Boolean
@@ -111,6 +114,9 @@ Module modMain
         mLCMS2DMaxPointsToPlot = clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_POINTS_TO_PLOT
         mLCMS2DOverviewPlotDivisor = clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
 
+        mScanStart = 0
+        mScanEnd = 0
+
         mComputeOverallQualityScores = False
         mCreateDatasetInfoFile = False
 
@@ -153,6 +159,9 @@ Module modMain
                     .SaveLCMS2DPlots = mSaveLCMS2DPlots
                     .LCMS2DPlotMaxPointsToPlot = mLCMS2DMaxPointsToPlot
                     .LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor
+
+                    .ScanStart = mScanStart
+                    .ScanEnd = mScanEnd
 
                     .ComputeOverallQualityScores = mComputeOverallQualityScores
                     .CreateDatasetInfoFile = mCreateDatasetInfoFile
@@ -213,7 +222,7 @@ Module modMain
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String = String.Empty
-        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "L", "C", "M", "H", "QZ", "NoTIC", "LC", "LCDiv", "QS", "DI", "CF", "R", "Z"}
+        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "L", "C", "M", "H", "QZ", "NoTIC", "LC", "LCDiv", "QS", "ScanStart", "ScanEnd", "DI", "CF", "R", "Z"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -267,6 +276,18 @@ Module modMain
                         End If
                     End If
 
+                    If .RetrieveValueForParameter("ScanStart", strValue) Then
+                        If Integer.TryParse(strValue, 0) Then
+                            mScanStart = CInt(strValue)
+                        End If
+                    End If
+
+                    If .RetrieveValueForParameter("ScanEnd", strValue) Then
+                        If Integer.TryParse(strValue, 0) Then
+                            mScanEnd = CInt(strValue)
+                        End If
+                    End If
+
                     If .RetrieveValueForParameter("QS", strValue) Then mComputeOverallQualityScores = True
 
                     If .RetrieveValueForParameter("DI", strValue) Then mCreateDatasetInfoFile = True
@@ -296,6 +317,7 @@ Module modMain
             Console.WriteLine(" /I:InputFileNameOrFolderPath [/O:OutputFolderName]")
             Console.WriteLine(" [/P:ParamFilePath] [/S[:MaxLevel]] [IE] [/L:LogFilePath]")
             Console.WriteLine(" [/LC[:MaxPointsToPlot]] [/NoTIC] [/DI] [/QS]")
+            Console.WriteLine(" [/ScanStart:0] [/ScanEnd:0]")
             Console.WriteLine(" [/C] [/M:nnn] [/H] /[QZ]")
             Console.WriteLine(" [/CF] [/R] [/Z]")
             Console.WriteLine()
@@ -313,6 +335,9 @@ Module modMain
             Console.WriteLine("Use /NoTIC to not save TIC and BPI plots.")
             Console.WriteLine("Use /DI to create a dataset info XML file for each dataset.")
             Console.WriteLine("Use /QS to compute an overall quality score for the data in each datasets.")
+            Console.WriteLine()
+
+            Console.WriteLine("Use /ScanStart and /ScanEnd to limit the scan range to process; useful for files where the first few scans are corrupt.  For example, to start processing at scan 10, use /ScanStart:10")
             Console.WriteLine()
 
             Console.WriteLine("Use /C to perform an integrity check on all known file types; this process will open known file types and verify that they contain the expected data.  This option is only used if you specify an Input Folder and use a wildcard; you will typically also want to use /S when using /C.")

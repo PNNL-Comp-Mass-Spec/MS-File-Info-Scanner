@@ -60,6 +60,14 @@ MSFileInfoScanner
  If True, then saves a 2D plot of m/z vs. Intensity (requires reading every data point in the data file, which will slow down the processing)
  </summary>
 	<value></value>
+</member><member name="P:MSFileInfoScanner.clsMSFileInfoScanner.ScanStart">
+	<summary>
+ When ScanStart is &gt; 0, then will start processing at the specified scan number
+ </summary>
+</member><member name="P:MSFileInfoScanner.clsMSFileInfoScanner.ScanEnd">
+	<summary>
+ When ScanEnd is &gt; 0, then will stop processing at the specified scan number
+ </summary>
 </member><member name="P:MSFileInfoScanner.clsMSFileInfoScanner.UseCacheFiles">
 	<summary>
  If True, then saves/loads data from/to the cache files (DatasetTimeFile.txt and FolderIntegrityInfo.txt)
@@ -882,6 +890,27 @@ MSFileInfoScanner
 	<param name="blnNeedToCheckRequiredText">True if we were still checking for items when this code was reached; if True, then indicates that not all of the items were found</param>
 	<param name="blnRequiredTextFound">True if the given item was found</param>
 	<param name="blnErrorLogged">Set to True if any items were missing</param>
+	<remarks></remarks>
+</member><member name="P:MSFileInfoScanner.clsMSFileInfoProcessorBaseClass.ScanEnd">
+	<summary>
+ When ScanEnd is &gt; 0, then will stop processing at the specified scan number
+ </summary>
+</member><member name="M:MSFileInfoScanner.clsMSFileInfoProcessorBaseClass.GetStartAndEndScans(System.Int32,System.Int32@,System.Int32@)">
+	<summary>
+ Returns the range of scan numbers to process
+ </summary>
+	<param name="intScanCount">Number of scans in the file</param>
+	<param name="intScanStart">1 if mScanStart is zero; otherwise mScanStart</param>
+	<param name="intScanEnd">intScanCount if mScanEnd is zero; otherwise Min(mScanEnd, intScanCount)</param>
+	<remarks></remarks>
+</member><member name="M:MSFileInfoScanner.clsMSFileInfoProcessorBaseClass.GetStartAndEndScans(System.Int32,System.Int32,System.Int32@,System.Int32@)">
+	<summary>
+ Returns the range of scan numbers to process
+ </summary>
+	<param name="intScanCount">Number of scans in the file</param>
+	<param name="intScanNumFirst">The first scan number in the file</param>
+	<param name="intScanStart">1 if mScanStart is zero; otherwise mScanStart</param>
+	<param name="intScanEnd">intScanCount if mScanEnd is zero; otherwise Min(mScanEnd, intScanCount)</param>
 	<remarks></remarks>
 </member><member name="M:MSFileInfoScanner.clsMSFileInfoProcessorBaseClass.IntToEngineeringNotation(System.Int32)">
 	<summary>

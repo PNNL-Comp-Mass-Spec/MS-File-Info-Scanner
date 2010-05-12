@@ -28,6 +28,9 @@
     <item key="LCMS2DPlotMinPointsPerSpectrum" value="2" />
     <item key="LCMS2DPlotMinIntensity" value="0" />
     <item key="LCMS2DOverviewPlotDivisor" value="10" />
+
+    <item key="ScanStart" value="0" />
+    <item key="ScanEnd" value="0" />
         
     <item key="ComputeOverallQualityScores" value="True" />
     <item key="CreateDatasetInfoFile" value="True" />
