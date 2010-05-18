@@ -167,6 +167,14 @@ MSFileInfoScanner
 	<param name="blnSkipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for intMSLevelFilter, set blnSkipTrimCachedData to False on the first call and True on subsequent calls)</param>
 	<returns>Zedgraph plot</returns>
 	<remarks></remarks>
+</member><member name="M:MSFileInfoScanner.clsLCMSDataPlotter.IntToEngineeringNotation(System.Int32)">
+	<summary>
+ Converts an integer to engineering notation
+ For example, 50000 will be returned as 50K
+ </summary>
+	<param name="intValue"></param>
+	<returns></returns>
+	<remarks></remarks>
 </member><member name="M:MSFileInfoScanner.clsLCMSDataPlotter.TrimCachedData(System.Int32,System.Int32)">
 	<summary>
  Filters the data stored in mScans to nominally retain the top intTargetDataPointCount data points, sorted by descending intensity

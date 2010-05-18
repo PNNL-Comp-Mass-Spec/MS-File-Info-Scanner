@@ -1,11 +1,15 @@
 MS File Info Scanner Change Log
 
-Version 1.1.3893; May 11, 2010
+Version 1.1.3789; May 17, 2010
+	- Added support for .UIMF files (IMS Data)
+		- Requires UIMFLibrary.dll, sqlite3.dll, and IMSCOMP.dll
+
+Version 1.1.3783; May 11, 2010
 	- Added option ScanStart and ScanEnd
 		- Use /ScanStart:10 and /ScanEnd:100 at the command line to process scans 10 through 100
 		- Alternatively define these options in the XML parameter file
 
-Version 1.1.3892; May 10, 2010
+Version 1.1.3782; May 10, 2010
 	- Added option CopyFileLocalOnReadError, which defaults to False
 		- If True, and if there is a problem reading a .Raw file, then will copy the file to the working directory, then try to re-read the file again
 		- This used to be necessary when reading files from the NWFS Archive, but is no longer necessary

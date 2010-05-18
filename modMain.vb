@@ -7,7 +7,7 @@ Option Strict On
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "May 11, 2010"
+    Public Const PROGRAM_DATE As String = "May 17, 2010"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -310,7 +310,7 @@ Module modMain
 
         Try
             Console.WriteLine("This program will scan a series of MS data files (or data folders) and extract the acquisition start and end times, number of spectra, and the total size of the data, saving the values in the file " & clsMSFileInfoScanner.DefaultAcquisitionTimeFilename & ". " & _
-                              "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar .WIFF files, Masslynx .Raw folders, Bruker 1 folders, and Bruker XMass analysis.baf files")
+                              "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar .WIFF files, Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, and .UIMF files (IMS)")
             Console.WriteLine()
 
             Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location))
@@ -330,7 +330,7 @@ Module modMain
             Console.WriteLine("Use /L to specify the file path for logging messages.")
             Console.WriteLine()
 
-            Console.WriteLine("Use /LC to create 2D LCMS plots (this process could take several minutes for each dataset).  By default, plots the top " & clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_POINTS_TO_PLOT & " points.  To plot the top 20000 points, use /L:20000.")
+            Console.WriteLine("Use /LC to create 2D LCMS plots (this process could take several minutes for each dataset).  By default, plots the top " & clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_POINTS_TO_PLOT & " points.  To plot the top 20000 points, use /LC:20000.")
             Console.WriteLine("Use /LCDiv to specify the divisor to use when creating the overview 2D LCMS plots.  By default, uses /LCDiv:" & clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR & "; use /LCDiv:0 to disable creation of the overview plots.")
             Console.WriteLine("Use /NoTIC to not save TIC and BPI plots.")
             Console.WriteLine("Use /DI to create a dataset info XML file for each dataset.")

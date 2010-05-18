@@ -86,6 +86,7 @@ Public Class clsLCMSDataPlotter
 
         Static intSpectraFoundExceedingMaxIonCount As Integer = 0
         Static intMaxIonCountReported As Integer = 0
+        Static intSortingWarnCount As Integer = 0
 
         Dim objScanData As clsLCMSDataPlotter.clsScanData
 
@@ -112,7 +113,12 @@ Public Class clsLCMSDataPlotter
             For intIndex = 1 To intIonCount - 1
                 If dblIonsMZ(intIndex) < dblIonsMZ(intIndex - 1) Then
                     ' Need to sort
-                    Console.WriteLine("  Sorting m/z data (this typically shouldn't be required)")
+                    intSortingWarnCount += 1
+                    If intSortingWarnCount <= 10 Then
+                        Console.WriteLine("  Sorting m/z data (this typically shouldn't be required for Finnigan data)")
+                    ElseIf intSortingWarnCount Mod 100 = 0 Then
+                        Console.WriteLine("  Sorting m/z data (i = " & intSortingWarnCount & ")")
+                    End If
                     Array.Sort(dblIonsMZ, dblIonsIntensity, 0, intIonCount)
                     Exit For
                 End If
@@ -639,6 +645,16 @@ Public Class clsLCMSDataPlotter
 
         End If
 
+        ' When this is true, then will write a text file of the mass spectrum before before and after it is filtered
+        ' Used for debugging
+        Dim blnWriteDebugData As Boolean
+        Dim srOutFile As System.IO.StreamWriter
+
+        blnWriteDebugData = False
+        If blnWriteDebugData Then
+            srOutFile = New System.IO.StreamWriter(New System.IO.FileStream(strTitle & " - LCMS Top " & IntToEngineeringNotation(mOptions.MaxPointsToPlot) & " points.txt", IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+            srOutFile.WriteLine("scan" & ControlChars.Tab & "m/z" & ControlChars.Tab & "Intensity")
+        End If
 
         ' Populate objPoints and objScanTimePoints with the data
         ' At the same time, determine the range of m/z and intensity values
@@ -676,7 +692,11 @@ Public Class clsLCMSDataPlotter
 
                         objPoints.Add(.ScanNumber, _
                                       .IonsMZ(intIonIndex), _
-                                      sngSortedIntensityList(intSortedIntensityListCount))
+                                      .IonsIntensity(intIonIndex))
+
+                        If blnWriteDebugData Then
+                            srOutFile.WriteLine(.ScanNumber & ControlChars.Tab & .IonsMZ(intIonIndex) & ControlChars.Tab & .IonsIntensity(intIonIndex))
+                        End If
 
                         UpdateMinMax(sngSortedIntensityList(intSortedIntensityListCount), sngColorScaleMinIntensity, sngColorScaleMaxIntensity)
                         UpdateMinMax(.IonsMZ(intIonIndex), dblMinMZ, dblMaxMZ)
@@ -693,6 +713,10 @@ Public Class clsLCMSDataPlotter
             End If
 
         Next intScanIndex
+
+        If blnWriteDebugData Then
+            srOutFile.Close()
+        End If
 
         If objPoints.Count = 0 Then
             ' Nothing to plot
@@ -737,7 +761,17 @@ Public Class clsLCMSDataPlotter
             myCurve.Symbol.Border.IsVisible = False
 
             ' Customize the points
-            myCurve.Symbol.Size = 1
+            If mScans.Count < 250 Then
+                ' Use a point size of 2 when fewer than 250 scans
+                myCurve.Symbol.Size = 3
+            ElseIf mScans.Count < 500 Then
+                ' Use a point size of 2 when 250 to 500 scans
+                myCurve.Symbol.Size = 2
+            Else
+                ' Use a point size of 1 when >= 500 scans
+                myCurve.Symbol.Size = 1
+            End If
+
             myCurve.Symbol.Type = ZedGraph.SymbolType.Circle
 
             ' Set up a red-blue color gradient to be used for the fill
@@ -854,6 +888,27 @@ Public Class clsLCMSDataPlotter
         myPane.AxisChange()
 
         Return myPane
+
+    End Function
+
+    ''' <summary>
+    ''' Converts an integer to engineering notation
+    ''' For example, 50000 will be returned as 50K
+    ''' </summary>
+    ''' <param name="intValue"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Protected Function IntToEngineeringNotation(ByVal intValue As Integer) As String
+        Dim strValue As String
+        strValue = String.Empty
+
+        If intValue < 1000 Then
+            Return intValue.ToString
+        ElseIf intValue < 1000000.0 Then
+            Return CInt(Math.Round(intValue / 1000, 0)).ToString & "K"
+        Else
+            Return CInt(Math.Round(intValue / 1000 / 1000, 0)).ToString & "M"
+        End If
 
     End Function
 

@@ -4,7 +4,7 @@ Option Strict On
 ' number of spectra, and the total size of the data.  Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
 '
 ' Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar .WIFF files, 
-' Masslynx .Raw folders, Bruker 1 folders, and Bruker XMass analysis.baf files
+' Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, and .UIMF files (IMS)
 '
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
@@ -13,7 +13,7 @@ Option Strict On
 Public Class clsMSFileInfoScanner
 
     Public Sub New()
-        mFileDate = "May 11, 2010"
+        mFileDate = "May 17, 2010"
 
         mFileIntegrityChecker = New clsFileIntegrityChecker
         mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -1524,6 +1524,9 @@ Public Class clsMSFileInfoScanner
                             blnKnownMSDataType = True
                         Case clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION
                             mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+                            blnKnownMSDataType = True
+                        Case clsUIMFInfoScanner.UIMF_FILE_EXTENSION
+                            mMSInfoScanner = New clsUIMFInfoScanner
                             blnKnownMSDataType = True
                         Case Else
                             ' Unknown file extension; check for a zipped folder 
