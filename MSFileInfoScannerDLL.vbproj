@@ -101,10 +101,7 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
-    <Reference Include="UIMFLibrary, Version=1.0.3786.40977, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\AnujShah\UIMFLibrary\Source_Code\UIMFLibrary\bin\Debug\UIMFLibrary.dll</HintPath>
-    </Reference>
+    <Reference Include="UIMFLibrary, Version=1.2.3835.13521, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="ZedGraph, Version=5.1.4.31904, Culture=neutral, PublicKeyToken=02a83cbd123fcd60, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>

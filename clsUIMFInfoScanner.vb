@@ -150,9 +150,6 @@ Public Class clsUIMFInfoScanner
         Dim dblBPI() As Double
         Dim intFrameType As Integer
 
-        ''Dim udtScanHeaderInfo As UIMFLibrary.DataReader.udtScanHeaderInfoType
-        ''Dim blnSuccess As Boolean
-
         Dim intFrameStart As Integer
         Dim intFrameEnd As Integer
         Dim intTICIndex As Integer
@@ -217,18 +214,26 @@ Public Class clsUIMFInfoScanner
 
                 objFrameParams = DirectCast(objUIMFReader.GetFrameParameters(intFrameNumber), UIMFLibrary.FrameParameters)
 
-                intNonZeroPointsInFrame = objUIMFReader.GetCountPerFrame(intFrameNumber)
-
-                If objFrameParams.FrameType <= 1 Then
-                    intMSLevel = 1
-                Else
-                    intMSLevel = objFrameParams.FrameType
-                End If
-
-                ' Compute the elution time of this frame
-                dblElutionTime = objFrameParams.StartTime
-
                 If Not objFrameParams Is Nothing Then
+
+                    ' Previously, we were calling method .GetCountPerFrame) like this
+                    '   intNonZeroPointsInFrame = objUIMFReader.GetCountPerFrame(intFrameNumber)
+                    ' However, that method no longer exists
+
+                    ' So, we'll instead use objUIMFReader.GetCountPerSpectrum() which appears to still be quite fast
+                    intNonZeroPointsInFrame = 0
+                    For intScanIndex As Integer = 0 To objFrameParams.Scans - 1
+                        intNonZeroPointsInFrame += objUIMFReader.GetCountPerSpectrum(intFrameNumber, intScanIndex)
+                    Next
+
+                    If objFrameParams.FrameType <= 1 Then
+                        intMSLevel = 1
+                    Else
+                        intMSLevel = objFrameParams.FrameType
+                    End If
+
+                    ' Compute the elution time of this frame
+                    dblElutionTime = objFrameParams.StartTime
 
                     If mSaveTICAndBPI AndAlso intTICIndex < dblTIC.Length Then
                         mTICandBPIPlot.AddData(intFrameNumber, intMSLevel, CSng(dblElutionTime), dblBPI(intTICIndex), dblTIC(intTICIndex))
