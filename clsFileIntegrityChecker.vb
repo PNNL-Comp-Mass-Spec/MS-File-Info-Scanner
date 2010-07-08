@@ -26,6 +26,7 @@ Public Class clsFileIntegrityChecker
     Public Const FILE_EXTENSION_CSV As String = ".CSV"
     Public Const FILE_EXTENSION_XML As String = ".XML"
 
+
     Public Const FINNIGAN_RAW_FILE_EXTENSION As String = ".RAW"
     Public Const AGILENT_TOF_OR_QSTAR_FILE_EXTENSION As String = ".WIFF"
 

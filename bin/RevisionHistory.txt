@@ -1,5 +1,11 @@
 MS File Info Scanner Change Log
 
+Version 1.1.3840; July 7, 2010
+	- New version of ICSharpCode.SharpZipLib.dll
+
+Version 1.1.3790; May 18, 2010
+	- Renamed X-axis to "LC Scan Number" on the various plots
+
 Version 1.1.3789; May 17, 2010
 	- Added support for .UIMF files (IMS Data)
 		- Requires UIMFLibrary.dll, sqlite3.dll, and IMSCOMP.dll

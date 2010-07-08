@@ -744,7 +744,7 @@ Public Class clsLCMSDataPlotter
 
         ' Set the titles and axis labels
         myPane.Title.Text = String.Copy(strTitle)
-        myPane.XAxis.Title.Text = "Scan Number"
+        myPane.XAxis.Title.Text = "LC Scan Number"
         myPane.YAxis.Title.Text = "m/z"
 
         ' Generate a black curve with no symbols
