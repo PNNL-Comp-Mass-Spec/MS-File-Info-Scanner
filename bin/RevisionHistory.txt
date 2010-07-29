@@ -1,5 +1,12 @@
 MS File Info Scanner Change Log
 
+Version 1.1.3861; July 28, 2010
+	- New version of UIMFLibrary.dll
+	- Now using .GetCountPerFrame() to determine the number of data points in all the scans acquired across each IMS frame
+
+Version 1.1.3843; July 10, 2010
+	- New version of ZedGraph.dll
+
 Version 1.1.3840; July 7, 2010
 	- New version of UIMFLibrary.dll
 	- New version of ICSharpCode.SharpZipLib.dll

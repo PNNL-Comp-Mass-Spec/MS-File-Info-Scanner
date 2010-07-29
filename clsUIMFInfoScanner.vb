@@ -216,15 +216,15 @@ Public Class clsUIMFInfoScanner
 
                 If Not objFrameParams Is Nothing Then
 
-                    ' Previously, we were calling method .GetCountPerFrame) like this
-                    '   intNonZeroPointsInFrame = objUIMFReader.GetCountPerFrame(intFrameNumber)
-                    ' However, that method no longer exists
 
-                    ' So, we'll instead use objUIMFReader.GetCountPerSpectrum() which appears to still be quite fast
-                    intNonZeroPointsInFrame = 0
-                    For intScanIndex As Integer = 0 To objFrameParams.Scans - 1
-                        intNonZeroPointsInFrame += objUIMFReader.GetCountPerSpectrum(intFrameNumber, intScanIndex)
-                    Next
+                    ' For-loop based code:
+                    'intNonZeroPointsInFrame = 0
+                    'For intScanIndex As Integer = 0 To objFrameParams.Scans - 1
+                    '    intNonZeroPointsInFrame += objUIMFReader.GetCountPerSpectrum(intFrameNumber, intScanIndex)
+                    'Next
+
+                    ' Single function call-based
+                    intNonZeroPointsInFrame = objUIMFReader.GetCountPerFrame(intFrameNumber)
 
                     If objFrameParams.FrameType <= 1 Then
                         intMSLevel = 1
