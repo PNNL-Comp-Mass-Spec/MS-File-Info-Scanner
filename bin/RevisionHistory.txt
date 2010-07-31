@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.1.3863; July 30, 2010
+	- New version of UIMFLibrary.dll (fixes bug in objUIMFReader.SumScans())
+
 Version 1.1.3861; July 28, 2010
 	- New version of UIMFLibrary.dll
 	- Now using .GetCountPerFrame() to determine the number of data points in all the scans acquired across each IMS frame
