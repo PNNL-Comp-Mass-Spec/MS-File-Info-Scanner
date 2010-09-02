@@ -358,6 +358,7 @@ Public Class clsUIMFInfoScanner
         Dim intDatasetID As Integer
 
         Dim blnReadError As Boolean
+        Dim blnInaccurateStartTime As Boolean
 
         ' Obtain the full path to the file
         ioFileInfo = New System.IO.FileInfo(strDataFilePath)
@@ -391,6 +392,7 @@ Public Class clsUIMFInfoScanner
         mDatasetStatsSummarizer.ClearCachedData()
 
         blnReadError = False
+        blnInaccurateStartTime = False
 
         ' Use the UIMFLibrary to read the .UIMF file
         objUIMFReader = New UIMFLibrary.DataReader
@@ -408,25 +410,65 @@ Public Class clsUIMFInfoScanner
             Try
                 ' First obtain the global parameters
                 objGlobalParams = DirectCast(objUIMFReader.GetGlobalParameters(), UIMFLibrary.GlobalParameters)
-
-                udtFileInfo.AcqTimeStart = objGlobalParams.DateStarted
             Catch ex As System.Exception
                 ' Read error
                 blnReadError = True
             End Try
 
             If Not blnReadError Then
+
                 Try
-                    ' Look up the acquisition time of the last frame
+                    ' Extract the acquisition time information
+                    Dim dblStartTime As Double
+                    Dim dblEndTime As Double
+                    Dim dblRunTime As Double
+
+                    ' First examine objGlobalParams.DateStarted
+                    ' Buggy .UIMF files will report odd dates (like year 410) so we need to check for that
+                    Try
+                        Dim strReportedDateStarted As String
+                        Dim dtReportedDateStarted As DateTime
+                        strReportedDateStarted = objGlobalParams.DateStarted
+
+                        If Not System.DateTime.TryParse(strReportedDateStarted, dtReportedDateStarted) Then
+                            ' Invalid date; log a message
+                            ShowMessage(".UIMF file has an invalid DateStarted value in table Global_Parameters: " & strReportedDateStarted & "; will use the time the datafile was last modified")
+                            blnInaccurateStartTime = True
+                        Else
+                            If dtReportedDateStarted.Year < 2000 Or dtReportedDateStarted.Year > System.DateTime.Now.Year + 1 Then
+                                ' Invalid date; log a message
+                                ShowMessage(".UIMF file has an invalid DateStarted value in table Global_Parameters: " & dtReportedDateStarted.ToString & "; will use the time the datafile was last modified")
+                                blnInaccurateStartTime = True
+                            Else
+                                udtFileInfo.AcqTimeStart = dtReportedDateStarted
+                            End If
+                        End If
+
+                    Catch ex2 As System.Exception
+                        ShowMessage("Exception extracting the DateStarted date from table Global_Parameters in the .UIMF file: " & ex2.Message)
+                    End Try
+
+                    ' Look up the acquisition time of the first frame and the last frame
+                    ' Subtract the two times to determine the run time
                     ' Note that frame numbers range from 1 to objGlobalParams.NumFrames
 
+                    objFrameParams = DirectCast(objUIMFReader.GetFrameParameters(1), UIMFLibrary.FrameParameters)
+                    dblStartTime = objFrameParams.StartTime
+
                     udtFileInfo.ScanCount = objGlobalParams.NumFrames
-
                     objFrameParams = DirectCast(objUIMFReader.GetFrameParameters(udtFileInfo.ScanCount), UIMFLibrary.FrameParameters)
+                    dblEndTime = objFrameParams.StartTime
 
-                    With udtFileInfo
-                        .AcqTimeEnd = .AcqTimeStart.AddMinutes(objFrameParams.StartTime)
-                    End With
+                    dblRunTime = dblEndTime - dblStartTime
+
+                    If dblRunTime > 0 Then
+                        If blnInaccurateStartTime Then
+                            udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd.AddMinutes(-dblRunTime)
+                        Else
+                            udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart.AddMinutes(dblRunTime)
+                        End If
+                    End If
+
                 Catch ex As System.Exception
                     ' Error; use default values
                     With udtFileInfo

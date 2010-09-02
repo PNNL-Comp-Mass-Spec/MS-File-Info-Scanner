@@ -1,5 +1,10 @@
 MS File Info Scanner Change Log
 
+Version 1.1.3896; September 2, 2010
+	- New version of UIMFLibrary.dll (now returns a string for the DateStarted column in the global parameters table)
+	- Now checking for invalid data values for DateStarted
+		- .UIMF files acquired in 2010 have tick count based DateStarted values, which resolve to invalid dates
+
 Version 1.1.3863; July 30, 2010
 	- New version of UIMFLibrary.dll (fixes bug in objUIMFReader.SumScans())
 
