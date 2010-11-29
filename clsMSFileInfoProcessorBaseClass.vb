@@ -3,7 +3,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Copyright 2007, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified December 19, 2007
+' Last modified November 29, 2010
 
 Public MustInherit Class clsMSFileInfoProcessorBaseClass
     Implements iMSFileInfoProcessor
@@ -21,8 +21,11 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     Protected mSaveLCMS2DPlots As Boolean
 
     Protected mComputeOverallQualityScores As Boolean
-    Protected mCreateDatasetInfoFile As Boolean
+    Protected mCreateDatasetInfoFile As Boolean                 ' When True, then creates an XML file with dataset info
     Protected mLCMS2DOverviewPlotDivisor As Integer
+
+    Protected mUpdateDatasetStatsTextFile As Boolean            ' When True, then adds a new row to a tab-delimited text file that has dataset stats
+    Protected mDatasetStatsTextFileName As String
 
     Protected mScanStart As Integer
     Protected mScanEnd As Integer
@@ -41,6 +44,19 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 #End Region
 
 #Region "Properties"
+    Public Property DatasetStatsTextFileName() As String Implements iMSFileInfoProcessor.DatasetStatsTextFileName
+        Get
+            Return mDatasetStatsTextFileName
+        End Get
+        Set(ByVal value As String)
+            If String.IsNullOrEmpty(value) Then
+                ' Do not update mDatasetStatsTextFileName
+            Else
+                mDatasetStatsTextFileName = value
+            End If
+        End Set
+    End Property
+
     Public Property LCMS2DPlotOptions() As clsLCMSDataPlotter.clsOptions Implements iMSFileInfoProcessor.LCMS2DPlotOptions
         Get
             Return mLCMS2DPlot.Options
@@ -95,6 +111,8 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
                 Return mSaveLCMS2DPlots
             Case iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError
                 Return mCopyFileLocalOnReadError
+            Case iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile
+                Return mUpdateDatasetStatsTextFile
         End Select
     End Function
 
@@ -110,6 +128,8 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
                 mSaveLCMS2DPlots = blnValue
             Case iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError
                 mCopyFileLocalOnReadError = blnValue
+            Case iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile
+                mUpdateDatasetStatsTextFile = blnValue
         End Select
 
     End Sub
@@ -137,6 +157,44 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
         Catch ex As System.Exception
             ReportError("Error creating dataset info file: " & ex.Message)
+            blnSuccess = False
+        End Try
+
+        Return blnSuccess
+
+    End Function
+
+    Public Function UpdateDatasetStatsTextFile(ByVal strInputFileName As String, _
+                                               ByVal strOutputFolderPath As String) As Boolean
+
+        Return UpdateDatasetStatsTextFile(strInputFileName, strOutputFolderPath, DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME)
+
+    End Function
+
+    Public Function UpdateDatasetStatsTextFile(ByVal strInputFileName As String, _
+                                               ByVal strOutputFolderPath As String, _
+                                               ByVal strDatasetStatsFilename As String) As Boolean
+
+        Dim blnSuccess As Boolean
+
+        Dim strDatasetName As String
+        Dim strDatasetStatsFilePath As String
+
+        strDatasetStatsFilePath = String.Empty
+
+        Try
+            strDatasetName = GetDatasetNameViaPath(strInputFileName)
+
+            strDatasetStatsFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetStatsFilename)
+
+            blnSuccess = mDatasetStatsSummarizer.UpdateDatasetStatsTextFile(strDatasetName, strDatasetStatsFilePath)
+
+            If Not blnSuccess Then
+                ReportError("Error calling objDatasetStatsSummarizer.UpdateDatasetStatsTextFile: " & mDatasetStatsSummarizer.ErrorMessage)
+            End If
+
+        Catch ex As System.Exception
+            ReportError("Error updating the dataset stats text file: " & ex.Message)
             blnSuccess = False
         End Try
 
@@ -203,6 +261,16 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         mLCMS2DPlotOverview = New clsLCMSDataPlotter
 
         mLCMS2DOverviewPlotDivisor = DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
+
+        mSaveTICAndBPI = False
+        mSaveLCMS2DPlots = False
+
+        mComputeOverallQualityScores = False
+
+        mCreateDatasetInfoFile = False
+
+        mUpdateDatasetStatsTextFile = False
+        mDatasetStatsTextFileName = DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME
 
         mScanStart = 0
         mScanEnd = 0
@@ -368,6 +436,14 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
                     blnSuccessOverall = False
                 End If
                 blnCreateQCPlotHtmlFile = True
+            End If
+
+            If mUpdateDatasetStatsTextFile Then
+                ' Add a new row to the MSFileInfo_DatasetStats.txt file
+                blnSuccess = Me.UpdateDatasetStatsTextFile(strInputFileName, ioFolderInfo.FullName, mDatasetStatsTextFileName)
+                If Not blnSuccess Then
+                    blnSuccessOverall = False
+                End If
             End If
 
             If blnCreateQCPlotHtmlFile Then
@@ -589,4 +665,5 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     Private Sub mLCMS2DPlotOverview_ErrorEvent(ByVal Message As String) Handles mLCMS2DPlotOverview.ErrorEvent
         ReportError("Error in LCMS2DPlotOverview: " & Message)
     End Sub
+
 End Class

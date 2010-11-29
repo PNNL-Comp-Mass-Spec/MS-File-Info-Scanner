@@ -7,6 +7,6 @@ Del SharpZipLib_Source*.zip
 echo;
 
 Copy "F:\My Documents\Projects\DataMining\SharedVBNetRoutines\SharedVBNetRoutines_SourceCode\*.zip" .
-Copy "F:\My Documents\Projects\DataMining\NETCDF.NET\NetCDFReader_SourceCode\*.zip" .
+Copy "F:\My Documents\Projects\_OldProjects\NETCDF.NET\NetCDFReader_SourceCode\*.zip" .
 Copy "F:\My Documents\Projects\DataMining\SharpZipLib.NET\SharpZipLib_SourceCode\*.zip" .
 

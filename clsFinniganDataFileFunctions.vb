@@ -8,7 +8,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified October 15, 2009
+' Last modified November 29, 2010
 
 Namespace FinniganFileIO
 
@@ -153,7 +153,10 @@ Namespace FinniganFileIO
             Return eMRMScanType
         End Function
 
-        Private Sub ExtractMRMMasses(ByVal strFilterText As String, ByVal eMRMScanType As MRMScanTypeConstants, ByRef udtMRMInfo As udtMRMInfoType)
+        Public Shared Sub ExtractMRMMasses(ByVal strFilterText As String, _
+                                           ByVal eMRMScanType As MRMScanTypeConstants, _
+                                           ByRef udtMRMInfo As udtMRMInfoType)
+
             ' Parse out the MRM_QMS or SRM mass info from strFilterText
             ' It should be of the form 
             ' MRM_Q1MS_TEXT:    p NSI Q1MS [179.652-184.582, 505.778-510.708, 994.968-999.898]
@@ -518,11 +521,13 @@ Namespace FinniganFileIO
                     mXRawFile.GetFirstSpectrumNumber(.ScanStart)
                     mXRawFile.GetLastSpectrumNumber(.ScanEnd)
 
-                    ' The following are typically blank, so we're not reading them
-                    'mXRawFile.GetAcquisitionDate(.AcquistionDate)
-                    'mXRawFile.GetAcquisitionFileName(.AcquisitionFilename)
-                    'mXRawFile.GetComment1(.Comment1)
-                    'mXRawFile.GetComment2(.Comment2)
+                    ' Note that the following are typically blank
+                    mXRawFile.GetAcquisitionDate(.AcquisitionDate)
+                    mXRawFile.GetAcquisitionFileName(.AcquisitionFileName)
+                    mXRawFile.GetComment1(.Comment1)
+                    mXRawFile.GetComment2(.Comment2)
+                    mXRawFile.GetSeqRowSampleName(.SampleName)
+                    mXRawFile.GetSeqRowComment(.SampleComment)
 
                     If Not mLoadMSTuneInfo Then
                         ReDim .TuneMethods(-1)
@@ -1181,11 +1186,11 @@ Namespace FinniganFileIO
         ''' <param name="blnZoomScan"></param>
         ''' <returns>True if strFilterText contains a known MS scan type</returns>
         ''' <remarks></remarks>
-        Private Shared Function ValidateMSScan(ByVal strFilterText As String, _
-                                               ByRef intMSLevel As Integer, _
-                                               ByRef blnSIMScan As Boolean, _
-                                               ByRef eMRMScanType As MRMScanTypeConstants, _
-                                               ByRef blnZoomScan As Boolean) As Boolean
+        Public Shared Function ValidateMSScan(ByVal strFilterText As String, _
+                                              ByRef intMSLevel As Integer, _
+                                              ByRef blnSIMScan As Boolean, _
+                                              ByRef eMRMScanType As MRMScanTypeConstants, _
+                                              ByRef blnZoomScan As Boolean) As Boolean
 
             Dim blnValidScan As Boolean
 

@@ -3,7 +3,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified February 1, 2010
+' Last modified November 29, 2010
 
 Public Interface iMSFileInfoProcessor
 
@@ -13,6 +13,7 @@ Public Interface iMSFileInfoProcessor
         CreateDatasetInfoFile = 2
         CreateLCMS2DPlots = 3
         CopyFileLocalOnReadError = 4
+        UpdateDatasetStatsTextFile = 5
     End Enum
 
     ' ToDo: Update udtFileInfo to include some overall quality scores
@@ -41,6 +42,8 @@ Public Interface iMSFileInfoProcessor
 
     Property LCMS2DPlotOptions() As clsLCMSDataPlotter.clsOptions
     Property LCMS2DOverviewPlotDivisor() As Integer
+
+    Property DatasetStatsTextFileName() As String
 
     Property ScanStart() As Integer
     Property ScanEnd() As Integer

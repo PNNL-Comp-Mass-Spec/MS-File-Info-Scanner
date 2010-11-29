@@ -3,7 +3,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified May 11, 2010
+' Last modified November 29, 2010
 
 Public Class clsFinniganRawFileInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -340,6 +340,27 @@ Public Class clsFinniganRawFileInfoScanner
                 End If
             End If
         End If
+
+
+        With mDatasetStatsSummarizer.SampleInfo
+            .SampleName = objXcaliburAccessor.FileInfo.SampleName
+            .Comment1 = objXcaliburAccessor.FileInfo.Comment1
+            .Comment2 = objXcaliburAccessor.FileInfo.Comment2
+
+            If Not String.IsNullOrEmpty(objXcaliburAccessor.FileInfo.SampleComment) Then
+                If String.IsNullOrEmpty(.Comment1) Then
+                    .Comment1 = objXcaliburAccessor.FileInfo.SampleComment
+                Else
+                    If String.IsNullOrEmpty(.Comment2) Then
+                        .Comment2 = objXcaliburAccessor.FileInfo.SampleComment
+                    Else
+                        ' Append the sample comment to comment 2
+                        .Comment2 &= "; " & objXcaliburAccessor.FileInfo.SampleComment
+                    End If
+                End If
+            End If
+
+        End With
 
         ' Close the handle to the data file
         objXcaliburAccessor.CloseRawFile()

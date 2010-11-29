@@ -5,7 +5,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified June 26, 2009
+' Last modified November 29, 2010
 
 Namespace FinniganFileIO
 
@@ -30,10 +30,13 @@ Namespace FinniganFileIO
         End Structure
 
         Public Structure udtFileInfoType
-            'Public AcquisitionDate As String         ' Typically only defined for instruments converted from other formats
-            'Public AcquisitionFilename As String    ' Typically only defined for instruments converted from other formats
-            'Public Comment1 As String               ' Typically only defined for instruments converted from other formats
-            'Public Comment2 As String               ' Typically only defined for instruments converted from other formats
+            Public AcquisitionDate As String        ' Will often be blank
+            Public AcquisitionFilename As String    ' Will often be blank
+            Public Comment1 As String               ' Will often be blank
+            Public Comment2 As String               ' Will often be blank
+            Public SampleName As String             ' Will often be blank
+            Public SampleComment As String          ' Will often be blank
+
             Public CreationDate As DateTime
             Public CreatorID As String              ' Logon name of the user when the file was created
             Public InstFlags As String              ' Values should be one of the constants in InstFlags

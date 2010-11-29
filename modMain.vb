@@ -7,7 +7,7 @@ Option Strict On
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "July 7, 2010"
+    Public Const PROGRAM_DATE As String = "November 29, 2010"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -33,6 +33,9 @@ Module modMain
 
     Private mComputeOverallQualityScores As Boolean
     Private mCreateDatasetInfoFile As Boolean
+
+    Private mUpdateDatasetStatsTextFile As Boolean
+    Private mDatasetStatsTextFileName As String
 
     Private mCheckFileIntegrity As Boolean
     Private mMaximumTextFileLinesToCheck As Integer
@@ -120,6 +123,9 @@ Module modMain
         mComputeOverallQualityScores = False
         mCreateDatasetInfoFile = False
 
+        mUpdateDatasetStatsTextFile = False
+        mDatasetStatsTextFileName = String.Empty
+
         mCheckFileIntegrity = False
         mComputeFileHashes = False
         mZipFileCheckAllData = True
@@ -165,6 +171,9 @@ Module modMain
 
                     .ComputeOverallQualityScores = mComputeOverallQualityScores
                     .CreateDatasetInfoFile = mCreateDatasetInfoFile
+
+                    .UpdateDatasetStatsTextFile = mUpdateDatasetStatsTextFile
+                    .DatasetStatsTextFileName = mDatasetStatsTextFileName
 
                     .CheckFileIntegrity = mCheckFileIntegrity
                     .MaximumTextFileLinesToCheck = mMaximumTextFileLinesToCheck
@@ -222,7 +231,7 @@ Module modMain
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String = String.Empty
-        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "L", "C", "M", "H", "QZ", "NoTIC", "LC", "LCDiv", "QS", "ScanStart", "ScanEnd", "DI", "CF", "R", "Z"}
+        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "L", "C", "M", "H", "QZ", "NoTIC", "LC", "LCDiv", "QS", "ScanStart", "ScanEnd", "DI", "DST", "CF", "R", "Z"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -291,6 +300,13 @@ Module modMain
                     If .RetrieveValueForParameter("QS", strValue) Then mComputeOverallQualityScores = True
 
                     If .RetrieveValueForParameter("DI", strValue) Then mCreateDatasetInfoFile = True
+                    If .RetrieveValueForParameter("DST", strValue) Then
+                        mUpdateDatasetStatsTextFile = True
+                        If Not String.IsNullOrEmpty(strValue) Then
+                            mDatasetStatsTextFileName = strValue
+                        End If
+                    End If
+
 
                     If .RetrieveValueForParameter("CF", strValue) Then mUseCacheFiles = True
                     If .RetrieveValueForParameter("R", strValue) Then mReprocessingExistingFiles = True
@@ -317,6 +333,7 @@ Module modMain
             Console.WriteLine(" /I:InputFileNameOrFolderPath [/O:OutputFolderName]")
             Console.WriteLine(" [/P:ParamFilePath] [/S[:MaxLevel]] [IE] [/L:LogFilePath]")
             Console.WriteLine(" [/LC[:MaxPointsToPlot]] [/NoTIC] [/DI] [/QS]")
+            Console.WriteLine(" [/DST:DatasetStatsFileName]")
             Console.WriteLine(" [/ScanStart:0] [/ScanEnd:0]")
             Console.WriteLine(" [/C] [/M:nnn] [/H] /[QZ]")
             Console.WriteLine(" [/CF] [/R] [/Z]")
@@ -335,6 +352,9 @@ Module modMain
             Console.WriteLine("Use /NoTIC to not save TIC and BPI plots.")
             Console.WriteLine("Use /DI to create a dataset info XML file for each dataset.")
             Console.WriteLine("Use /QS to compute an overall quality score for the data in each datasets.")
+            Console.WriteLine()
+
+            Console.WriteLine("Use /DST to update (or create) a tab-delimited text file with overview stats for the dataset.  If /DI is used, then will include detailed scan counts; otherwise, will just have the dataset name, acquisition date, and (if available) sample name and comment. By default, the file is named " & DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME & "; to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt")
             Console.WriteLine()
 
             Console.WriteLine("Use /ScanStart and /ScanEnd to limit the scan range to process; useful for files where the first few scans are corrupt.  For example, to start processing at scan 10, use /ScanStart:10")

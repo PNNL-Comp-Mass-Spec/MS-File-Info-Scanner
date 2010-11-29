@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.1.3985; November 29, 2010
+	- Added switch /DST, which will create/append a tab-delimited text file with the dataset stats (one line per dataset)
+
 Version 1.1.3896; September 2, 2010
 	- New version of UIMFLibrary.dll (now returns a string for the DateStarted column in the global parameters table)
 	- Now checking for invalid data values for DateStarted

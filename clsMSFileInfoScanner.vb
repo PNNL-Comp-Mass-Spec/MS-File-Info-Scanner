@@ -13,7 +13,7 @@ Option Strict On
 Public Class clsMSFileInfoScanner
 
     Public Sub New()
-        mFileDate = "May 18, 2010"
+        mFileDate = "November 29, 2010"
 
         mFileIntegrityChecker = New clsFileIntegrityChecker
         mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -120,6 +120,9 @@ Public Class clsMSFileInfoScanner
 
     Private mComputeOverallQualityScores As Boolean
     Private mCreateDatasetInfoFile As Boolean
+
+    Private mUpdateDatasetStatsTextFile As Boolean
+    Private mDatasetStatsTextFileName As String
 
     Private mCopyFileLocalOnReadError As Boolean
 
@@ -323,6 +326,20 @@ Public Class clsMSFileInfoScanner
             mCreateDatasetInfoFile = value
         End Set
     End Property
+
+    Public Property DatasetStatsTextFileName() As String
+        Get
+            Return mDatasetStatsTextFileName
+        End Get
+        Set(ByVal value As String)
+            If String.IsNullOrEmpty(value) Then
+                ' Do not update mDatasetStatsTextFileName
+            Else
+                mDatasetStatsTextFileName = value
+            End If
+        End Set
+    End Property
+
 
     Public Property DSInfoConnectionString() As String
         Get
@@ -542,6 +559,15 @@ Public Class clsMSFileInfoScanner
         End Get
         Set(ByVal value As Integer)
             mScanEnd = value
+        End Set
+    End Property
+
+    Public Property UpdateDatasetStatsTextFile() As Boolean
+        Get
+            Return mUpdateDatasetStatsTextFile
+        End Get
+        Set(ByVal value As Boolean)
+            mUpdateDatasetStatsTextFile = value
         End Set
     End Property
 
@@ -900,6 +926,9 @@ Public Class clsMSFileInfoScanner
 
         mCreateDatasetInfoFile = False
 
+        mUpdateDatasetStatsTextFile = False
+        mDatasetStatsTextFileName = DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME
+
         mSaveTICAndBPIPlots = False
         mSaveLCMS2DPlots = False
 
@@ -985,6 +1014,9 @@ Public Class clsMSFileInfoScanner
 
                         Me.ComputeOverallQualityScores = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeOverallQualityScores", Me.ComputeOverallQualityScores)
                         Me.CreateDatasetInfoFile = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateDatasetInfoFile", Me.CreateDatasetInfoFile)
+
+                        Me.UpdateDatasetStatsTextFile = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UpdateDatasetStatsTextFile", Me.UpdateDatasetStatsTextFile)
+                        Me.DatasetStatsTextFileName = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DatasetStatsTextFileName", Me.DatasetStatsTextFileName)
 
                         Me.CheckFileIntegrity = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckFileIntegrity", Me.CheckFileIntegrity)
                         Me.RecheckFileIntegrityForExistingFolders = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "RecheckFileIntegrityForExistingFolders", Me.RecheckFileIntegrityForExistingFolders)
@@ -1354,6 +1386,9 @@ Public Class clsMSFileInfoScanner
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, mComputeOverallQualityScores)
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, mCreateDatasetInfoFile)
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError, mCopyFileLocalOnReadError)
+            objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile, mUpdateDatasetStatsTextFile)
+
+            objMSInfoScanner.DatasetStatsTextFileName = mDatasetStatsTextFileName
 
             objMSInfoScanner.LCMS2DPlotOptions = mLCMS2DPlotOptions
             objMSInfoScanner.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor
