@@ -17,11 +17,119 @@ Public Class clsTICandBPIPlotter
 #End Region
 
 #Region "Member variables"
-    Protected mBPI As clsChromatogramInfo
+    ' Data stored in mTIC will get plotted for all scans, both MS and MS/MS
     Protected mTIC As clsChromatogramInfo
+
+    ' Data stored in mBPI will be plotted separately for MS and MS/MS spectra
+    Protected mBPI As clsChromatogramInfo
+
+    Protected mTICXAxisLabel As String = "LC Scan Number"
+    Protected mTICYAxisLabel As String = "Intensity"
+    Protected mTICYAxisExponentialNotation As Boolean = True
+
+    Protected mBPIXAxisLabel As String = "LC Scan Number"
+    Protected mBPIYAxisLabel As String = "Intensity"
+    Protected mBPIYAxisExponentialNotation As Boolean = True
+
+    Protected mTICPlotAbbrev As String = "TIC"
+    Protected mBPIPlotAbbrev As String = "BPI"
+
+    Protected mBPIAutoMinMaxY As Boolean
+    Protected mTICAutoMinMaxY As Boolean
 
     Protected mRecentFiles As System.Collections.Generic.List(Of udtOutputFileInfoType)
 #End Region
+
+
+    Public Property BPIAutoMinMaxY() As Boolean
+        Get
+            Return mBPIAutoMinMaxY
+        End Get
+        Set(ByVal value As Boolean)
+            mBPIAutoMinMaxY = value
+        End Set
+    End Property
+
+    Public Property BPIPlotAbbrev() As String
+        Get
+            Return mBPIPlotAbbrev
+        End Get
+        Set(ByVal value As String)
+            mBPIPlotAbbrev = value
+        End Set
+    End Property
+
+    Public Property BPIXAxisLabel() As String
+        Get
+            Return mBPIXAxisLabel
+        End Get
+        Set(ByVal value As String)
+            mBPIXAxisLabel = value
+        End Set
+    End Property
+
+    Public Property BPIYAxisLabel() As String
+        Get
+            Return mBPIYAxisLabel
+        End Get
+        Set(ByVal value As String)
+            mBPIYAxisLabel = value
+        End Set
+    End Property
+
+    Public Property BPIYAxisExponentialNotation() As Boolean
+        Get
+            Return mBPIYAxisExponentialNotation
+        End Get
+        Set(ByVal value As Boolean)
+            mBPIYAxisExponentialNotation = value
+        End Set
+    End Property
+
+    Public Property TICAutoMinMaxY() As Boolean
+        Get
+            Return mTICAutoMinMaxY
+        End Get
+        Set(ByVal value As Boolean)
+            mTICAutoMinMaxY = value
+        End Set
+    End Property
+
+    Public Property TICPlotAbbrev() As String
+        Get
+            Return mTICPlotAbbrev
+        End Get
+        Set(ByVal value As String)
+            mTICPlotAbbrev = value
+        End Set
+    End Property
+
+    Public Property TICXAxisLabel() As String
+        Get
+            Return mTICXAxisLabel
+        End Get
+        Set(ByVal value As String)
+            mTICXAxisLabel = value
+        End Set
+    End Property
+
+    Public Property TICYAxisLabel() As String
+        Get
+            Return mTICYAxisLabel
+        End Get
+        Set(ByVal value As String)
+            mTICYAxisLabel = value
+        End Set
+    End Property
+
+    Public Property TICYAxisExponentialNotation() As Boolean
+        Get
+            Return mTICYAxisExponentialNotation
+        End Get
+        Set(ByVal value As Boolean)
+            mTICYAxisExponentialNotation = value
+        End Set
+    End Property
 
     Public Sub New()
         mRecentFiles = New System.Collections.Generic.List(Of udtOutputFileInfoType)
@@ -35,6 +143,24 @@ Public Class clsTICandBPIPlotter
                        ByVal dblTIC As Double)
 
         mBPI.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblBPI)
+        mTIC.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblTIC)
+
+    End Sub
+
+    Public Sub AddDataBPIOnly(ByVal intScanNumber As Integer, _
+                               ByVal intMSLevel As Integer, _
+                               ByVal sngScanTimeMinutes As Single, _
+                               ByVal dblBPI As Double)
+
+        mBPI.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblBPI)
+
+    End Sub
+
+    Public Sub AddDataTICOnly(ByVal intScanNumber As Integer, _
+                                 ByVal intMSLevel As Integer, _
+                                 ByVal sngScanTimeMinutes As Single, _
+                                 ByVal dblTIC As Double)
+
         mTIC.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblTIC)
 
     End Sub
@@ -95,7 +221,11 @@ Public Class clsTICandBPIPlotter
     ''' <remarks></remarks>
     Private Function InitializeGraphPane(ByRef objData As clsChromatogramInfo, _
                                          ByVal strTitle As String, _
-                                         ByVal intMSLevelFilter As Integer) As ZedGraph.GraphPane
+                                         ByVal intMSLevelFilter As Integer, _
+                                         ByVal strXAxisLabel As String, _
+                                         ByVal strYAxisLabel As String, _
+                                         ByVal blnAutoMinMaxY As Boolean, _
+                                         ByVal blnYAxisExponentialNotation As Boolean) As ZedGraph.GraphPane
 
         Const FONT_SIZE_BASE As Integer = 11
 
@@ -156,8 +286,8 @@ Public Class clsTICandBPIPlotter
 
         ' Set the titles and axis labels
         myPane.Title.Text = String.Copy(strTitle)
-        myPane.XAxis.Title.Text = "LC Scan Number"
-        myPane.YAxis.Title.Text = "Intensity"
+        myPane.XAxis.Title.Text = strXAxisLabel
+        myPane.YAxis.Title.Text = strYAxisLabel
 
         ' Generate a black curve with no symbols
         Dim myCurve As ZedGraph.LineItem
@@ -207,11 +337,19 @@ Public Class clsTICandBPIPlotter
         'myPane.YAxis.Scale.MaxGrace = 0.01
 
         ' Override the auto-computed axis range
-        myPane.YAxis.Scale.Min = 0
-        myPane.YAxis.Scale.Max = dblMaxIntensity
+        If blnAutoMinMaxY Then
+            myPane.YAxis.Scale.MinAuto = True
+            myPane.YAxis.Scale.MaxAuto = True
+        Else
+            myPane.YAxis.Scale.Min = 0
+            myPane.YAxis.Scale.Max = dblMaxIntensity
+        End If
+
         myPane.YAxis.Title.IsOmitMag = True
 
-        AddHandler myPane.YAxis.ScaleFormatEvent, AddressOf ZedGraphYScaleFormatter
+        If blnYAxisExponentialNotation Then
+            AddHandler myPane.YAxis.ScaleFormatEvent, AddressOf ZedGraphYScaleFormatter
+        End If
 
         ' Align the Y axis labels so they are flush to the axis
         myPane.YAxis.Scale.Align = ZedGraph.AlignP.Inside
@@ -276,23 +414,23 @@ Public Class clsTICandBPIPlotter
             ValidateMSLevel(mBPI)
             ValidateMSLevel(mTIC)
 
-            myPane = InitializeGraphPane(mBPI, strDatasetName & " - BPI - MS Spectra", 1)
+            myPane = InitializeGraphPane(mBPI, strDatasetName & " - " & mBPIPlotAbbrev & " - MS Spectra", 1, mBPIXAxisLabel, mBPIYAxisLabel, mBPIAutoMinMaxY, mBPIYAxisExponentialNotation)
             If myPane.CurveList.Count > 0 Then
-                strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName & "_BPI_MS.png")
+                strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName & "_" & mBPIPlotAbbrev & "_MS.png")
                 myPane.GetImage(1024, 600, 300, False).Save(strPNGFilePath, System.Drawing.Imaging.ImageFormat.Png)
                 AddRecentFile(strPNGFilePath, eOutputFileTypes.BPIMS)
             End If
 
-            myPane = InitializeGraphPane(mBPI, strDatasetName & " - BPI - MS2 Spectra", 2)
+            myPane = InitializeGraphPane(mBPI, strDatasetName & " - " & mBPIPlotAbbrev & " - MS2 Spectra", 2, mBPIXAxisLabel, mBPIYAxisLabel, mBPIAutoMinMaxY, mBPIYAxisExponentialNotation)
             If myPane.CurveList.Count > 0 Then
-                strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName & "_BPI_MSn.png")
+                strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName & "_" & mBPIPlotAbbrev & "_MSn.png")
                 myPane.GetImage(1024, 600, 300, False).Save(strPNGFilePath, System.Drawing.Imaging.ImageFormat.Png)
                 AddRecentFile(strPNGFilePath, eOutputFileTypes.BPIMSn)
             End If
 
-            myPane = InitializeGraphPane(mTIC, strDatasetName & " - TIC - All Spectra", 0)
+            myPane = InitializeGraphPane(mTIC, strDatasetName & " - " & mTICPlotAbbrev & " - All Spectra", 0, mTICXAxisLabel, mTICYAxisLabel, mTICAutoMinMaxY, mTICYAxisExponentialNotation)
             If myPane.CurveList.Count > 0 Then
-                strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName & "_TIC.png")
+                strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName & "_" & mTICPlotAbbrev & ".png")
                 myPane.GetImage(1024, 600, 300, False).Save(strPNGFilePath, System.Drawing.Imaging.ImageFormat.Png)
                 AddRecentFile(strPNGFilePath, eOutputFileTypes.TIC)
             End If

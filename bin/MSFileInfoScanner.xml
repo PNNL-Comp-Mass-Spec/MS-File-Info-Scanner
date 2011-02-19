@@ -22,7 +22,7 @@ MSFileInfoScanner
 	<param name="strFilePath">File Path (output)</param>
 	<returns>True if a match was found; otherwise returns false</returns>
 	<remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
-</member><member name="M:MSFileInfoScanner.clsTICandBPIPlotter.InitializeGraphPane(MSFileInfoScanner.clsTICandBPIPlotter.clsChromatogramInfo@,System.String,System.Int32)">
+</member><member name="M:MSFileInfoScanner.clsTICandBPIPlotter.InitializeGraphPane(MSFileInfoScanner.clsTICandBPIPlotter.clsChromatogramInfo@,System.String,System.Int32,System.String,System.String,System.Boolean,System.Boolean)">
 	<summary>
  Plots a BPI or TIC chromatogram
  </summary>
@@ -297,6 +297,10 @@ MSFileInfoScanner
 	<return>The function returns the name of the "value" attribute as a Double.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
 </member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.SetIniFilePath(System.String)">
 	<summary>
+ Legacy function name; calls SetXMLFilePath
+ </summary>
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.SetXMLFilePath(System.String)">
+	<summary>
  The function sets the path to the Xml Settings File.
  </summary>
 	<param name="XmlSettingsFilePath">The path to the XML settings file.</param>
@@ -360,71 +364,83 @@ MSFileInfoScanner
 	<summary>
  The function renames a section.
  </summary>
-	<param name="sectionNameOld">The name of the old ini section name.</param>
-	<param name="sectionNameNew">The new name for the ini section.</param>
+	<param name="sectionNameOld">The name of the old XML section name.</param>
+	<param name="sectionNameNew">The new name for the XML section.</param>
 	<return>The function returns a boolean that shows if the change was done.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.#ctor(System.String)">
-	<summary>Initializes a new instance of the IniFileReader.</summary>
-	<param name="IniFileName">The name of the ini file.</param>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.#ctor(System.String,System.Boolean)">
-	<summary>Initializes a new instance of the IniFileReader.</summary>
-	<param name="IniFileName">The name of the ini file.</param>
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.#ctor(System.String)">
+	<summary>Initializes a new instance of the XMLFileReader (non case-sensitive)</summary>
+	<param name="XmlFilename">The name of the XML file.</param>
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.#ctor(System.String,System.Boolean)">
+	<summary>Initializes a new instance of the XMLFileReader.</summary>
+	<param name="XmlFilename">The name of the XML file.</param>
 	<param name="IsCaseSensitive">Case sensitive as boolean.</param>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.InitIniFileReader(System.String,System.Boolean)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.InitXMLFileReader(System.String,System.Boolean)">
 	<summary>
  This routine is called by each of the constructors to make the actual assignments.
  </summary>
-</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.IniFilename">
+</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.IniFilename">
+	<summary>
+ Legacy property; calls XmlFilename
+ </summary>
+</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.XmlFilename">
 	<summary>
  This routine returns the name of the ini file.
  </summary>
 	<return>The function returns the name of ini file.</return>
-</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.Initialized">
+</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.Initialized">
 	<summary>
  This routine returns a boolean showing if the file was initialized or not.
  </summary>
 	<return>The function returns a Boolean.</return>
-</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.CaseSensitive">
+</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.CaseSensitive">
 	<summary>
  This routine returns a boolean showing if the name is case sensitive or not.
  </summary>
 	<return>The function returns a Boolean.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.SetNameCase(System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.SetNameCase(System.String)">
 	<summary>
  This routine sets a name.
  </summary>
 	<param name="aName">The name to be set.</param>
 	<return>The function returns a string.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.GetRoot">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.GetRoot">
 	<summary>
- TBD.
+ Returns the root element of the XML document
  </summary>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.GetLastSection">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.GetLastSection">
 	<summary>
  The function gets the last section.
  </summary>
 	<return>The function returns the last section as System.Xml.XmlElement.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.GetSection(System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.GetSection(System.String)">
 	<summary>
  The function gets a section as System.Xml.XmlElement.
  </summary>
 	<param name="sectionName">The name of a section.</param>
 	<return>The function returns a section as System.Xml.XmlElement.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.GetItem(System.String,System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.GetItem(System.String,System.String)">
 	<summary>
  The function gets an item.
  </summary>
 	<param name="sectionName">The name of the section.</param>
 	<param name="keyName">The name of the key.</param>
 	<return>The function returns a XML element.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.SetIniSection(System.String,System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.SetIniSection(System.String,System.String)">
+	<summary>
+ Legacy function name; calls SetXMLSection
+ </summary>
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.SetXMLSection(System.String,System.String)">
 	<summary>
  The function sets the ini section name.
  </summary>
 	<param name="oldSection">The name of the old ini section name.</param>
 	<param name="newSection">The new name for the ini section.</param>
 	<return>The function returns a boolean that shows if the change was done.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.SetIniValue(System.String,System.String,System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.SetIniValue(System.String,System.String,System.String)">
+	<summary>
+ Legacy function name; calls SetXMLValue
+ </summary>
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.SetXMLValue(System.String,System.String,System.String)">
 	<summary>
  The function sets a new value for the "value" attribute.
  </summary>
@@ -432,20 +448,24 @@ MSFileInfoScanner
 	<param name="keyName">The name of the key.</param>
 	<param name="newValue">The new value for the "value".</param>
 	<return>The function returns a boolean that shows if the change was done.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.DeleteSection(System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.DeleteSection(System.String)">
 	<summary>
  The function deletes a section in the file.
  </summary>
 	<param name="sectionName">The name of the section.</param>
 	<return>The function returns a boolean that shows if the delete was completed.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.DeleteItem(System.String,System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.DeleteItem(System.String,System.String)">
 	<summary>
  The function deletes a item in a specific section.
  </summary>
 	<param name="sectionName">The name of the section.</param>
 	<param name="keyName">The name of the key.</param>
 	<return>The function returns a boolean that shows if the delete was completed.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.SetIniKey(System.String,System.String,System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.SetIniKey(System.String,System.String,System.String)">
+	<summary>
+ Legacy function name; calls SetXmlKey
+ </summary>
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.SetXmlKey(System.String,System.String,System.String)">
 	<summary>
  The function sets a new value for the "key" attribute.
  </summary>
@@ -453,96 +473,116 @@ MSFileInfoScanner
 	<param name="keyName">The name of the key.</param>
 	<param name="newValue">The new value for the "key".</param>
 	<return>The function returns a boolean that shows if the change was done.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.GetIniValue(System.String,System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.GetIniValue(System.String,System.String)">
+	<summary>
+ Legacy function name; calls GetXMLValue
+ </summary>
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.GetXMLValue(System.String,System.String)">
 	<summary>
  The function gets the name of the "value" attribute.
  </summary>
 	<param name="sectionName">The name of the section.</param>
 	<param name="keyName">The name of the key.</param>
 	<return>The function returns the name of the "value" attribute.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.GetIniComments(System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.GetIniComments(System.String)">
+	<summary>
+ Legacy function name; calls GetXmlSectionComments
+ </summary>
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.GetXmlSectionComments(System.String)">
 	<summary>
  The function gets the comments for a section name.
  </summary>
 	<param name="sectionName">The name of the section.</param>
 	<return>The function returns a string collection with comments</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.SetIniComments(System.String,System.Collections.Specialized.StringCollection)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.SetIniComments(System.String,System.Collections.Specialized.StringCollection)">
+	<summary>
+ Legacy function name; calls SetXMLComments
+ </summary>
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.SetXMLComments(System.String,System.Collections.Specialized.StringCollection)">
 	<summary>
  The function sets a the comments for a section name.
  </summary>
 	<param name="sectionName">The name of the section.</param>
 	<param name="comments">A string collection.</param>
 	<return>The function returns a Boolean that shows if the change was done.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.UpdateSections">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.UpdateSections">
 	<summary>
  The subroutine updades the sections.
  </summary>
-</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.AllSections">
+</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.AllSections">
 	<summary>
  The subroutine gets the sections.
  </summary>
 	<return>The subroutine returns a strin collection of sections.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.GetItemsInSection(System.String,MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.IniItemTypeEnum)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.GetItemsInSection(System.String,MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.XMLItemTypeEnum)">
 	<summary>
  The function gets a collection of items for a section name.
  </summary>
 	<param name="sectionName">The name of the section.</param>
 	<param name="itemType">Item type.</param>
 	<return>The function returns a string colection of items in a section.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.AllKeysInSection(System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.AllKeysInSection(System.String)">
 	<summary>The funtions gets a collection of keys in a section.</summary>
 	<param name="sectionName">The name of the section.</param>
 	<return>The function returns a string colection of all the keys in a section.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.AllValuesInSection(System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.AllValuesInSection(System.String)">
 	<summary>The funtions gets a collection of values in a section.</summary>
 	<param name="sectionName">The name of the section.</param>
 	<return>The function returns a string colection of all the values in a section.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.AllItemsInSection(System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.AllItemsInSection(System.String)">
 	<summary>The funtions gets a collection of items in a section.</summary>
 	<param name="sectionName">The name of the section.</param>
 	<return>The function returns a string colection of all the items in a section.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.GetCustomIniAttribute(System.String,System.String,System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.GetCustomIniAttribute(System.String,System.String,System.String)">
 	<summary>The funtions gets a custom attribute name.</summary>
 	<param name="sectionName">The name of the section.</param>
 	<param name="keyName">The name of the key.</param>
 	<param name="attributeName">The name of the attribute.</param>
 	<return>The function returns a string.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.SetCustomIniAttribute(System.String,System.String,System.String,System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.SetCustomIniAttribute(System.String,System.String,System.String,System.String)">
 	<summary>The funtions sets a custom attribute name.</summary>
 	<param name="sectionName">The name of the section.</param>
 	<param name="keyName">The name of the key.</param>
 	<param name="attributeName">The name of the attribute.</param>
 	<param name="attributeValue">The value of the attribute.</param>
 	<return>The function returns a Boolean.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.CreateSection(System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.CreateSection(System.String)">
 	<summary>The funtions creates a section name.</summary>
 	<param name="sectionName">The name of the section to be created.</param>
 	<return>The function returns a Boolean.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.CreateItem(System.String,System.String,System.String)">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.CreateItem(System.String,System.String,System.String)">
 	<summary>The funtions creates a section name.</summary>
 	<param name="sectionName">The name of the section.</param>
 	<param name="keyName">The name of the key.</param>
 	<param name="newValue">The new value to be created.</param>
 	<return>The function returns a Boolean.</return>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.ParseLineXml(System.String,System.Xml.XmlDocument)">
-	<summary>It parses a string and adds atribbutes to the System.Xml.XmlDocument.</summary>
-	<param name="s">The name of the string to be parse.</param>
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.ManualParseXmlOrIniFile(System.String)">
+	<summary>
+ Manually read a XML or .INI settings file line-by-line, extracting out any settings in the expected format
+ </summary>
+	<param name="strFilePath"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.ParseLineManual(System.String,System.Xml.XmlDocument@)">
+	<summary>Manually parses a line to extract the settings information
+ Supports the traditional .Ini file format
+ Also supports the 'key="KeyName" value="Value"' method used in XML settings files
+ If success, then adds attributes to the doc object</summary>
+	<param name="strLine">The name of the string to be parse.</param>
 	<param name="doc">The name of the System.Xml.XmlDocument.</param>
-</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.OutputFilename">
+	<returns>True if success, false if not a recognized line format</returns>
+</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.OutputFilename">
 	<summary>It Sets or Gets the output file name.</summary>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.Save">
+</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.Save">
 	<summary>It saves the data to the Xml output file.</summary>
-</member><member name="M:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.AsIniFile">
-	<summary>It transforms a XML file to an INI file.</summary>
-	<return>The function returns document formatted as a string.</return>
-</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.XmlDoc">
+</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.XmlDoc">
 	<summary>It gets the System.Xml.XmlDocument.</summary>
-</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader.XML">
+</member><member name="P:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader.XML">
 	<summary>Converts an XML document to a string.</summary>
 	<return>It returns the XML document formatted as a string.</return>
-</member><member name="T:MSFileInfoScanner.XmlSettingsFileAccessor.IniFileReader">
+</member><member name="T:MSFileInfoScanner.XmlSettingsFileAccessor.XMLFileReader">
 	<summary>
- Tools to manipulates INI files.
+ Tools to manipulates XML Settings files.
  </summary>
 </member><member name="M:MSFileInfoScanner.FinniganFileIO.XRawFileIO.ValidateMSScan(System.String,System.Int32@,System.Boolean@,MSFileInfoScanner.FinniganFileIO.FinniganFileReaderBaseClass.MRMScanTypeConstants@,System.Boolean@)">
 	<summary>

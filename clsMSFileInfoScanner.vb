@@ -13,7 +13,7 @@ Option Strict On
 Public Class clsMSFileInfoScanner
 
     Public Sub New()
-        mFileDate = "November 29, 2010"
+        mFileDate = "February 18, 2011"
 
         mFileIntegrityChecker = New clsFileIntegrityChecker
         mMSFileInfoDataCache = New clsMSFileInfoDataCache

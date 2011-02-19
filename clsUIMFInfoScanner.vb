@@ -2,7 +2,7 @@ Option Strict On
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 '
-' Last modified May 17, 2010
+' Last modified February 11, 2011
 
 Public Class clsUIMFInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -13,6 +13,7 @@ Public Class clsUIMFInfoScanner
     Private Sub ComputeQualityScores(ByRef objUIMFReader As UIMFLibrary.DataReader, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType)
         ' This function is used to determine one or more overall quality scores
 
+        Dim objFrameParams As UIMFLibrary.FrameParameters
         Dim objGlobalParams As UIMFLibrary.GlobalParameters
 
         Dim intFrameCount As Integer
@@ -73,38 +74,46 @@ Public Class clsUIMFInfoScanner
 
                 ' Process all of the IMS scans in this Frame to compute a summed spectrum representative of the frame
                 ' Do this using DataReader.SumScans()
-                intIonCount = objUIMFReader.SumScans(dblMZList, intIntensityList, intFrameType, intFrameNumber)
+                'intIonCount = objUIMFReader.SumScans(dblMZList, intIntensityList, intFrameType, intFrameNumber)
 
-                If intIonCount > 0 Then
-                    ' The m/z and intensity arrays likely contain numerous entries with m/z values of 0; 
-                    ' need to copy the data in place to get the data in the correct format.
-                    ' In addition, we'll copy the intensity values from intIntensityList() into dblIonsIntensity()
+                objFrameParams = DirectCast(objUIMFReader.GetFrameParameters(intFrameNumber), UIMFLibrary.FrameParameters)
 
-                    intTargetIndex = 0
-                    For intIndex = 0 To intIonCount - 1
-                        If dblMZList(intIndex) > 0 Then
-                            dblMZList(intTargetIndex) = dblMZList(intIndex)
-                            intIntensityList(intTargetIndex) = intIntensityList(intIndex)
-                            intTargetIndex += 1
-                        End If
-                    Next
+                If Not objFrameParams Is Nothing Then
 
-                    intIonCount = intTargetIndex
+                    intIonCount = objUIMFReader.SumScansNonCached(dblMZList, intIntensityList, intFrameType, intFrameNumber, intFrameNumber, 0, objFrameParams.Scans - 1)
 
                     If intIonCount > 0 Then
+                        ' The m/z and intensity arrays likely contain numerous entries with m/z values of 0; 
+                        ' need to copy the data in place to get the data in the correct format.
+                        ' In addition, we'll copy the intensity values from intIntensityList() into dblIonsIntensity()
 
-                        ' ToDo: Analyze dblIonMZ and dblIonIntensity to compute a quality scores
-                        ' Keep track of the quality scores and then store one or more overall quality scores in udtFileInfo.OverallQualityScore
-                        ' For now, this just computes the average intensity for each scan and then computes and overall average intensity value
+                        intTargetIndex = 0
+                        For intIndex = 0 To intIonCount - 1
+                            If dblMZList(intIndex) > 0 Then
+                                dblMZList(intTargetIndex) = dblMZList(intIndex)
+                                intIntensityList(intTargetIndex) = intIntensityList(intIndex)
+                                intTargetIndex += 1
+                            End If
+                        Next
 
-                        dblIntensitySum = 0
-                        For intIonIndex = 0 To intIonCount - 1
-                            dblIntensitySum += intIntensityList(intIonIndex)
-                        Next intIonIndex
+                        intIonCount = intTargetIndex
 
-                        dblOverallAvgIntensitySum += dblIntensitySum / intIonCount
+                        If intIonCount > 0 Then
 
-                        intOverallAvgCount += 1
+                            ' ToDo: Analyze dblIonMZ and dblIonIntensity to compute a quality scores
+                            ' Keep track of the quality scores and then store one or more overall quality scores in udtFileInfo.OverallQualityScore
+                            ' For now, this just computes the average intensity for each scan and then computes and overall average intensity value
+
+                            dblIntensitySum = 0
+                            For intIonIndex = 0 To intIonCount - 1
+                                dblIntensitySum += intIntensityList(intIonIndex)
+                            Next intIonIndex
+
+                            dblOverallAvgIntensitySum += dblIntensitySum / intIonCount
+
+                            intOverallAvgCount += 1
+
+                        End If
 
                     End If
 
@@ -123,7 +132,6 @@ Public Class clsUIMFInfoScanner
         udtFileInfo.OverallQualityScore = sngOverallScore
 
     End Sub
-
 
     Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
         ' The dataset name is simply the file name without .UIMF
@@ -165,11 +173,24 @@ Public Class clsUIMFInfoScanner
         Dim intIntensityList() As Integer
         Dim dblIonsIntensity() As Double
 
+        Dim dblPressure As Double
+
         Console.Write("  Loading scan details")
 
         If mSaveTICAndBPI Then
             ' Initialize the TIC and BPI arrays
             MyBase.InitializeTICAndBPI()
+            mTICandBPIPlot.BPIXAxisLabel = "Frame number"
+            mTICandBPIPlot.TICXAxisLabel = "Frame number"
+
+            mInstrumentSpecificPlots.BPIXAxisLabel = "Frame number"
+            mInstrumentSpecificPlots.TICXAxisLabel = "Frame number"
+
+            mInstrumentSpecificPlots.TICYAxisLabel = "Pressure"
+            mInstrumentSpecificPlots.TICYAxisExponentialNotation = False
+
+            mInstrumentSpecificPlots.TICPlotAbbrev = "Pressure"
+            mInstrumentSpecificPlots.TICAutoMinMaxY = True
         End If
 
         If mSaveLCMS2DPlots Then
@@ -203,7 +224,7 @@ Public Class clsUIMFInfoScanner
         Catch ex As System.Exception
             ReportError("Error obtaining TIC and BPI for overall dataset: " & ex.Message)
         End Try
-      
+
 
         intTICIndex = 0
         For intFrameNumber = intFrameStart To intFrameEnd
@@ -235,8 +256,16 @@ Public Class clsUIMFInfoScanner
                     ' Compute the elution time of this frame
                     dblElutionTime = objFrameParams.StartTime
 
-                    If mSaveTICAndBPI AndAlso intTICIndex < dblTIC.Length Then
-                        mTICandBPIPlot.AddData(intFrameNumber, intMSLevel, CSng(dblElutionTime), dblBPI(intTICIndex), dblTIC(intTICIndex))
+                    If mSaveTICAndBPI Then
+                        If intTICIndex < dblTIC.Length Then
+                            mTICandBPIPlot.AddData(intFrameNumber, intMSLevel, CSng(dblElutionTime), dblBPI(intTICIndex), dblTIC(intTICIndex))
+                        End If
+
+                        dblPressure = objFrameParams.PressureBack
+                        If dblPressure = 0 Then dblPressure = objFrameParams.PressureFront
+                        'If dblPressure = 0 Then dblPressure = objFrameParams.PressureBack1
+
+                        mInstrumentSpecificPlots.AddDataTICOnly(intFrameNumber, intMSLevel, CSng(dblElutionTime), dblPressure)
                     End If
 
 
@@ -272,56 +301,58 @@ Public Class clsUIMFInfoScanner
 
                     mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
 
-                End If
-            Catch ex As System.Exception
-                ReportError("Error loading header info for frame " & intFrameNumber & ": " & ex.Message)
-            End Try
 
-            Try
+                    If mSaveLCMS2DPlots Then
+                        Try
+                            ' Also need to load the raw data
 
-                If mSaveLCMS2DPlots Then
-                    ' Also need to load the raw data
+                            Dim intIonCount As Integer
+                            Dim intIndex As Integer
+                            Dim intTargetIndex As Integer
 
-                    Dim intIonCount As Integer
-                    Dim intIndex As Integer
-                    Dim intTargetIndex As Integer
+                            ' We have to clear the m/z and intensity arrays before calling SumScans
 
-                    ' We have to clear the m/z and intensity arrays before calling SumScans
+                            Array.Clear(dblMZList, 0, dblMZList.Length)
+                            Array.Clear(intIntensityList, 0, intIntensityList.Length)
 
-                    Array.Clear(dblMZList, 0, dblMZList.Length)
-                    Array.Clear(intIntensityList, 0, intIntensityList.Length)
+                            ' Process all of the IMS scans in this Frame to compute a summed spectrum representative of the frame
+                            ' Do this using DataReader.SumScans()
+                            'intIonCount = objUIMFReader.SumScans(dblMZList, intIntensityList, intFrameType, intFrameNumber)
 
-                    ' Process all of the IMS scans in this Frame to compute a summed spectrum representative of the frame
-                    ' Do this using DataReader.SumScans()
-                    intIonCount = objUIMFReader.SumScans(dblMZList, intIntensityList, intFrameType, intFrameNumber)
+                            intIonCount = objUIMFReader.SumScansNonCached(dblMZList, intIntensityList, intFrameType, intFrameNumber, intFrameNumber, 0, objFrameParams.Scans - 1)
 
-                    If intIonCount > 0 Then
-                        ' The m/z and intensity arrays likely contain numerous entries with m/z values of 0; 
-                        ' need to copy the data in place to get the data in the correct format.
-                        ' In addition, we'll copy the intensity values from intIntensityList() into dblIonsIntensity()
+                            If intIonCount > 0 Then
+                                ' The m/z and intensity arrays likely contain numerous entries with m/z values of 0; 
+                                ' need to copy the data in place to get the data in the correct format.
+                                ' In addition, we'll copy the intensity values from intIntensityList() into dblIonsIntensity()
 
-                        intTargetIndex = 0
-                        For intIndex = 0 To intIonCount - 1
-                            If dblMZList(intIndex) > 0 Then
-                                dblMZList(intTargetIndex) = dblMZList(intIndex)
-                                dblIonsIntensity(intTargetIndex) = intIntensityList(intIndex)
-                                intTargetIndex += 1
+                                intTargetIndex = 0
+                                For intIndex = 0 To intIonCount - 1
+                                    If dblMZList(intIndex) > 0 Then
+                                        dblMZList(intTargetIndex) = dblMZList(intIndex)
+                                        dblIonsIntensity(intTargetIndex) = intIntensityList(intIndex)
+                                        intTargetIndex += 1
+                                    End If
+                                Next
+
+                                intIonCount = intTargetIndex
+
+                                If intIonCount > 0 Then
+                                    mLCMS2DPlot.AddScan(intFrameNumber, intMSLevel, CSng(dblElutionTime), _
+                                                        intIonCount, dblMZList, dblIonsIntensity)
+                                End If
+
                             End If
-                        Next
 
-                        intIonCount = intTargetIndex
 
-                        If intIonCount > 0 Then
-                            mLCMS2DPlot.AddScan(intFrameNumber, intMSLevel, CSng(dblElutionTime), _
-                                                intIonCount, dblMZList, dblIonsIntensity)
-                        End If
-
+                        Catch ex As System.Exception
+                            ReportError("Error loading m/z and intensity values for scan " & intFrameNumber & ": " & ex.Message)
+                        End Try
                     End If
 
                 End If
-
             Catch ex As System.Exception
-                ReportError("Error loading m/z and intensity values for scan " & intFrameNumber & ": " & ex.Message)
+                ReportError("Error loading header info for frame " & intFrameNumber & ": " & ex.Message)
             End Try
 
             If intFrameNumber Mod 100 = 0 Then
@@ -342,7 +373,7 @@ Public Class clsUIMFInfoScanner
             intTICIndex += 1
         Next intFrameNumber
 
-    Console.WriteLine()
+        Console.WriteLine()
 
     End Sub
 
@@ -441,6 +472,9 @@ Public Class clsUIMFInfoScanner
                                 blnInaccurateStartTime = True
                             Else
                                 udtFileInfo.AcqTimeStart = dtReportedDateStarted
+
+                                ' Update the end time to match the start time; we'll update it below using the start/end times obtained from the frame parameters
+                                udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart
                             End If
                         End If
 
@@ -459,22 +493,23 @@ Public Class clsUIMFInfoScanner
                     objFrameParams = DirectCast(objUIMFReader.GetFrameParameters(udtFileInfo.ScanCount), UIMFLibrary.FrameParameters)
                     dblEndTime = objFrameParams.StartTime
 
+                    ' Run time should be in minutes
                     dblRunTime = dblEndTime - dblStartTime
 
                     If dblRunTime > 0 Then
-                        If blnInaccurateStartTime Then
-                            udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd.AddMinutes(-dblRunTime)
+                        If dblRunTime > 24000 Then
+                            ShowMessage("Invalid runtime computed using the StartTime value from the first and last frames: " & dblRunTime)
                         Else
-                            udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart.AddMinutes(dblRunTime)
+                            If blnInaccurateStartTime Then
+                                udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd.AddMinutes(-dblRunTime)
+                            Else
+                                udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart.AddMinutes(dblRunTime)
+                            End If
                         End If
                     End If
 
                 Catch ex As System.Exception
-                    ' Error; use default values
-                    With udtFileInfo
-                        .AcqTimeEnd = .AcqTimeStart
-                        .ScanCount = 0
-                    End With
+                    ShowMessage("Exception extracting acquisition time information: " & ex.Message)
                 End Try
 
                 If mSaveTICAndBPI OrElse mCreateDatasetInfoFile OrElse mSaveLCMS2DPlots Then

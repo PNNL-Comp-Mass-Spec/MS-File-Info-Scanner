@@ -33,6 +33,8 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     Protected mCopyFileLocalOnReadError As Boolean
 
     Protected WithEvents mTICandBPIPlot As clsTICandBPIPlotter
+    Protected WithEvents mInstrumentSpecificPlots As clsTICandBPIPlotter
+
     Protected WithEvents mLCMS2DPlot As clsLCMSDataPlotter
     Protected WithEvents mLCMS2DPlotOverview As clsLCMSDataPlotter
 
@@ -256,6 +258,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     Protected Sub InitializeLocalVariables()
 
         mTICandBPIPlot = New clsTICandBPIPlotter()
+        mInstrumentSpecificPlots = New clsTICandBPIPlotter()
 
         mLCMS2DPlot = New clsLCMSDataPlotter()
         mLCMS2DPlotOverview = New clsLCMSDataPlotter
@@ -284,6 +287,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     Protected Sub InitializeTICAndBPI()
         ' Initialize TIC, BPI, and m/z vs. time arrays
         mTICandBPIPlot.Reset()
+        mInstrumentSpecificPlots.Reset()
     End Sub
 
     Protected Sub InitializeLCMS2DPlot()
@@ -403,9 +407,17 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
                 strErrorMessage = String.Empty
                 blnSuccess = mTICandBPIPlot.SaveTICAndBPIPlotFiles(strDatasetName, ioFolderInfo.FullName, strErrorMessage)
                 If Not blnSuccess Then
-                    ReportError("Error calling SaveTICAndBPIPlotFiles: " & strErrorMessage)
+                    ReportError("Error calling mTICandBPIPlot.SaveTICAndBPIPlotFiles: " & strErrorMessage)
                     blnSuccessOverall = False
                 End If
+
+                ' Write out any instrument-specific plots
+                blnSuccess = mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles(strDatasetName, ioFolderInfo.FullName, strErrorMessage)
+                If Not blnSuccess Then
+                    ReportError("Error calling mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles: " & strErrorMessage)
+                    blnSuccessOverall = False
+                End If
+
                 blnCreateQCPlotHtmlFile = True
             End If
 
@@ -470,6 +482,8 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         Dim strHTMLFilePath As String
         Dim strFile1 As String
         Dim strFile2 As String
+        Dim strFile3 As String
+
         Dim strTop As String
 
         Dim strDSInfoFileName As String
@@ -533,6 +547,20 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
                 swOutFile.WriteLine("      <td valign=""middle"">BPI</td>")
                 swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile1, 250) & "</td>")
                 swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile2, 250) & "</td>")
+                swOutFile.WriteLine("    </tr>")
+                swOutFile.WriteLine("")
+            End If
+
+            strFile1 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC)
+            strFile2 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS)
+            strFile3 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn)
+
+            If strFile1.Length > 0 OrElse strFile2.Length > 0 OrElse strFile3.Length > 0 Then
+                swOutFile.WriteLine("    <tr>")
+                swOutFile.WriteLine("      <td valign=""middle"">Addnl Plots</td>")
+                If strFile1.Length > 0 Then swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile1, 250) & "</td>") Else swOutFile.WriteLine("      <td></td>")
+                If strFile2.Length > 0 Then swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile2, 250) & "</td>") Else swOutFile.WriteLine("      <td></td>")
+                If strFile3.Length > 0 Then swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile3, 250) & "</td>") Else swOutFile.WriteLine("      <td></td>")
                 swOutFile.WriteLine("    </tr>")
                 swOutFile.WriteLine("")
             End If

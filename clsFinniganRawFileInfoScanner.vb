@@ -80,7 +80,6 @@ Public Class clsFinniganRawFileInfoScanner
 
     End Sub
 
-
     Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
         ' The dataset name is simply the file name without .Raw
         Try

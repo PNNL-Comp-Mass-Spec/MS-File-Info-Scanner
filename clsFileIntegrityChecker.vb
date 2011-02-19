@@ -1474,7 +1474,7 @@ Public Class clsFileIntegrityChecker
     ''' Overloaded form of XMLFileContainsElements; assumes intMaximumTextFileLinesToCheck = 50
     ''' </summary>
     ''' <returns>True if this file contains the required element text</returns>
-    ''' ''' <remarks></remarks>
+    ''' <remarks></remarks>
     Protected Function XMLFileContainsElements(ByVal strFilePath As String, ByVal strElementsToMatch() As String) As Boolean
         Return XMLFileContainsElements(strFilePath, strElementsToMatch, 50)
     End Function

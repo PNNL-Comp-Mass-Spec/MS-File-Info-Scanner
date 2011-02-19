@@ -1,5 +1,11 @@
 MS File Info Scanner Change Log
 
+Version 1.1.4066; February 18, 2011
+	- New version of UIMFLibrary.dll (from 2011-02-11)
+
+Version 1.1.4059; February 11, 2011
+	- Now saving Back Pressure vs. Frame number plot for .UIMF files
+
 Version 1.1.3985; November 29, 2010
 	- Added switch /DST, which will create/append a tab-delimited text file with the dataset stats (one line per dataset)
 

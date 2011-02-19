@@ -428,7 +428,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:UIMFLibrary, Version=1.2.3897.25154, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:UIMFLibrary, Version=1.2.3987.1806, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_9F9657669CAFA52114D91C850662F8B3"
@@ -570,7 +570,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:System.Data.SQLite, Version=1.0.65.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_E9A9402424950DAA4776ABEF10C82BE9"
@@ -684,14 +684,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:MSFileInfoScanner"
-        "ProductCode" = "8:{C6469E99-08DF-416B-8003-0A5D7490A385}"
-        "PackageCode" = "8:{B74A59B7-89D1-4C3B-8258-CE035C949179}"
+        "ProductCode" = "8:{68CBF15C-B9CC-4622-A566-69CE96280B3E}"
+        "PackageCode" = "8:{5AAB4439-6BF3-4887-9F9A-841557388058}"
         "UpgradeCode" = "8:{5B7DD97A-9979-4302-9840-188A941F61F1}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.1.0"
+        "ProductVersion" = "8:1.1.1"
         "Manufacturer" = "8:PNNL"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
