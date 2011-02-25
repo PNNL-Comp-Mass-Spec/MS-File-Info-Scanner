@@ -191,6 +191,7 @@ Public Class clsUIMFInfoScanner
 
             mInstrumentSpecificPlots.TICPlotAbbrev = "Pressure"
             mInstrumentSpecificPlots.TICAutoMinMaxY = True
+            mInstrumentSpecificPlots.RemoveZeroesFromEnds = True
         End If
 
         If mSaveLCMS2DPlots Then

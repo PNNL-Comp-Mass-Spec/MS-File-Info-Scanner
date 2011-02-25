@@ -36,6 +36,7 @@ Public Class clsTICandBPIPlotter
 
     Protected mBPIAutoMinMaxY As Boolean
     Protected mTICAutoMinMaxY As Boolean
+    Protected mRemoveZeroesFromEnds As Boolean
 
     Protected mRecentFiles As System.Collections.Generic.List(Of udtOutputFileInfoType)
 #End Region
@@ -83,6 +84,15 @@ Public Class clsTICandBPIPlotter
         End Get
         Set(ByVal value As Boolean)
             mBPIYAxisExponentialNotation = value
+        End Set
+    End Property
+
+    Public Property RemoveZeroesFromEnds() As Boolean
+        Get
+            Return mRemoveZeroesFromEnds
+        End Get
+        Set(ByVal value As Boolean)
+            mRemoveZeroesFromEnds = value
         End Set
     End Property
 
@@ -414,6 +424,12 @@ Public Class clsTICandBPIPlotter
             ValidateMSLevel(mBPI)
             ValidateMSLevel(mTIC)
 
+            If mRemoveZeroesFromEnds Then
+                ' Check whether the last few scans have values if 0; if they do, remove them
+                RemoveZeroesAtFrontAndBack(mBPI)
+                RemoveZeroesAtFrontAndBack(mTIC)
+            End If
+
             myPane = InitializeGraphPane(mBPI, strDatasetName & " - " & mBPIPlotAbbrev & " - MS Spectra", 1, mBPIXAxisLabel, mBPIYAxisLabel, mBPIAutoMinMaxY, mBPIYAxisExponentialNotation)
             If myPane.CurveList.Count > 0 Then
                 strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName & "_" & mBPIPlotAbbrev & "_MS.png")
@@ -445,12 +461,60 @@ Public Class clsTICandBPIPlotter
 
     End Function
 
-    Protected Sub ValidateMSLevel(ByVal udtChrom As clsChromatogramInfo)
+    Protected Sub RemoveZeroesAtFrontAndBack(ByRef objChrom As clsChromatogramInfo)
+        Const MAX_POINTS_TO_CHECK As Integer = 100
+        Dim intIndex As Integer
+        Dim intZeroPointCount As Integer
+        Dim intPointsChecked As Integer
+        Dim intIndexNonZeroValue As Integer
+
+        ' See if the last few values are zero, but the data before them is non-zero
+        ' If this is the case, remove the final entries
+
+        intIndexNonZeroValue = -1
+        intZeroPointCount = 0
+        For intIndex = objChrom.ScanCount - 1 To 0 Step -1
+            If objChrom.ScanIntensity(intIndex) = 0 Then
+                intZeroPointCount += 1
+            Else
+                intIndexNonZeroValue = intIndex
+                Exit For
+            End If
+            intPointsChecked += 1
+            If intPointsChecked >= MAX_POINTS_TO_CHECK Then Exit For
+        Next intIndex
+
+        If intZeroPointCount > 0 AndAlso intIndexNonZeroValue >= 0 Then
+            objChrom.RemoveRange(intIndexNonZeroValue + 1, intZeroPointCount)
+        End If
+
+
+        ' Now check the first few values
+        intIndexNonZeroValue = -1
+        intZeroPointCount = 0
+        For intIndex = 0 To objChrom.ScanCount - 1
+            If objChrom.ScanIntensity(intIndex) = 0 Then
+                intZeroPointCount += 1
+            Else
+                intIndexNonZeroValue = intIndex
+                Exit For
+            End If
+            intPointsChecked += 1
+            If intPointsChecked >= MAX_POINTS_TO_CHECK Then Exit For
+        Next intIndex
+
+        If intZeroPointCount > 0 AndAlso intIndexNonZeroValue >= 0 Then
+            objChrom.RemoveRange(0, intIndexNonZeroValue)
+        End If
+
+    End Sub
+
+    Protected Sub ValidateMSLevel(ByRef objChrom As clsChromatogramInfo)
         Dim intIndex As Integer
         Dim blnMSLevelDefined As Boolean
 
-        For intIndex = 0 To udtChrom.ScanCount - 1
-            If udtChrom.ScanMSLevel(intIndex) > 0 Then
+        For intIndex = 0 To objChrom.ScanCount - 1
+            If objChrom.ScanMSLevel(intIndex) > 0 Then
                 blnMSLevelDefined = True
                 Exit For
             End If
@@ -458,8 +522,8 @@ Public Class clsTICandBPIPlotter
 
         If Not blnMSLevelDefined Then
             ' Set the MSLevel to 1 for all scans
-            For intIndex = 0 To udtChrom.ScanCount - 1
-                udtChrom.ScanMSLevel(intIndex) = 1
+            For intIndex = 0 To objChrom.ScanCount - 1
+                objChrom.ScanMSLevel(intIndex) = 1
             Next intIndex
         End If
 
@@ -522,6 +586,42 @@ Public Class clsTICandBPIPlotter
             ReDim Preserve ScanTimeMinutes(ScanCount - 1)
             ReDim Preserve ScanIntensity(ScanCount - 1)
             ReDim Preserve ScanMSLevel(ScanCount - 1)
+        End Sub
+
+        Public Sub RemoveAt(ByVal Index As Integer)
+            RemoveRange(Index, 1)
+        End Sub
+
+        Public Sub RemoveRange(ByVal Index As Integer, ByVal Count As Integer)
+            Dim intSourceIndex As Integer
+            Dim i As Integer
+            Dim intIndexMaxNew As Integer
+
+            If Index >= 0 And Index < ScanCount And Count > 0 Then
+                intSourceIndex = -1
+                intIndexMaxNew = ScanCount - 1
+
+                For i = Index To ScanCount - 1
+                    If i + Count >= ScanCount Then
+                        intIndexMaxNew = i - 1
+                        Exit For
+                    Else
+                        intIndexMaxNew = i
+                    End If
+                    intSourceIndex = i + Count
+
+                    ScanNum(i) = ScanNum(intSourceIndex)
+                    ScanTimeMinutes(i) = ScanTimeMinutes(intSourceIndex)
+                    ScanIntensity(i) = ScanIntensity(intSourceIndex)
+                    ScanMSLevel(i) = ScanMSLevel(intSourceIndex)
+                Next
+
+                If intIndexMaxNew < ScanCount - 1 Then
+                    ScanCount = intIndexMaxNew + 1
+                    TrimArrays()
+                End If
+            End If
+
         End Sub
 
     End Class
