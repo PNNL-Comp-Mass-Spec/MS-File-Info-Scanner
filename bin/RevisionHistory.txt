@@ -1,5 +1,10 @@
 MS File Info Scanner Change Log
 
+Version 1.1.4074; February 26, 2011
+	- Now examining 4 different columns when trying to determine pressure to plot
+		- Columns are checked in the order: PressureBack, PressureFront, RearIonFunnelPressure, IonFunnelTrapPressure
+		- The first non-zero value found is used for the pressure
+
 Version 1.1.4072; February 24, 2011
 	- Now trimming out zeros at the beginning and end of pressures vs. time plots for .UIMF files
 

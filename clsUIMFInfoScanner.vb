@@ -264,7 +264,8 @@ Public Class clsUIMFInfoScanner
 
                         dblPressure = objFrameParams.PressureBack
                         If dblPressure = 0 Then dblPressure = objFrameParams.PressureFront
-                        'If dblPressure = 0 Then dblPressure = objFrameParams.PressureBack1
+                        If dblPressure = 0 Then dblPressure = objFrameParams.RearIonFunnelPressure
+                        If dblPressure = 0 Then dblPressure = objFrameParams.IonFunnelTrapPressure
 
                         mInstrumentSpecificPlots.AddDataTICOnly(intFrameNumber, intMSLevel, CSng(dblElutionTime), dblPressure)
                     End If
