@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.1.4086; March 10, 2011
+	- Now computing correct Elution Time values when processing .UIMF files
+	- New version of UIMFLibrary.dll
+
 Version 1.1.4074; February 26, 2011
 	- Now examining 4 different columns when trying to determine pressure to plot
 		- Columns are checked in the order: PressureBack, PressureFront, RearIonFunnelPressure, IonFunnelTrapPressure

@@ -2,7 +2,7 @@ Option Strict On
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 '
-' Last modified February 11, 2011
+' Last modified March 10, 2011
 
 Public Class clsUIMFInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -164,6 +164,15 @@ Public Class clsUIMFInfoScanner
 
 
         Dim intMSLevel As Integer
+
+        ' The StartTime value for each frame is the number of minutes since 12:00 am
+        ' If acquiring data from 11:59 pm through 12:00 am, then the StartTime will reset to zero
+        Dim dblFrameStartTimeInitial As Double
+        Dim dblFrameStartTimeAddon As Double
+
+        Dim dblFrameStartTimePrevious As Double
+        Dim dblFrameStartTimeCurrent As Double
+
         Dim dblElutionTime As Double
         Dim intNonZeroPointsInFrame As Integer
 
@@ -212,11 +221,16 @@ Public Class clsUIMFInfoScanner
 
         MyBase.GetStartAndEndScans(intFrameCount, intFrameStart, intFrameEnd)
 
-        Try
-            ' Obtain the TIC and BPI for each frame
+        If intFrameCount > 0 Then
             ReDim dblTIC(intFrameCount - 1)
             ReDim dblBPI(intFrameCount - 1)
+        Else
+            ReDim dblTIC(0)
+            ReDim dblBPI(0)
+        End If
 
+        Try
+            ' Obtain the TIC and BPI for each frame
             intFrameType = 0
 
             objUIMFReader.GetTIC(dblTIC, intFrameType, intFrameStart, intFrameEnd, 0, 0)
@@ -226,6 +240,12 @@ Public Class clsUIMFInfoScanner
             ReportError("Error obtaining TIC and BPI for overall dataset: " & ex.Message)
         End Try
 
+        ' Initialize the frame starttime variables
+        dblFrameStartTimeInitial = -1
+        dblFrameStartTimeAddon = 0
+
+        dblFrameStartTimePrevious = -1
+        dblFrameStartTimeCurrent = 0
 
         intTICIndex = 0
         For intFrameNumber = intFrameStart To intFrameEnd
@@ -254,8 +274,23 @@ Public Class clsUIMFInfoScanner
                         intMSLevel = objFrameParams.FrameType
                     End If
 
-                    ' Compute the elution time of this frame
-                    dblElutionTime = objFrameParams.StartTime
+
+                    ' Read the frame StartTime
+                    ' This will be zero in older .UIMF files
+                    ' In newer files, it is the number of minutes since 12:00 am
+                    dblFrameStartTimeCurrent = objFrameParams.StartTime
+                    If intFrameNumber = intFrameStart OrElse dblFrameStartTimeInitial = -1 Then
+                        dblFrameStartTimeInitial = dblFrameStartTimeCurrent
+                    End If
+
+                    If dblFrameStartTimePrevious > 1400 AndAlso dblFrameStartTimePrevious > dblFrameStartTimeCurrent Then
+                        ' We likely rolled over midnight; bump up dblFrameStartTimeAddon by 1440 minutes
+                        dblFrameStartTimeAddon += 60 * 24
+                    End If
+
+                    ' Compute the elution time (in minutes) of this frame                    
+                    dblElutionTime = dblFrameStartTimeCurrent + dblFrameStartTimeAddon - dblFrameStartTimeInitial
+
 
                     If mSaveTICAndBPI Then
                         If intTICIndex < dblTIC.Length Then
@@ -372,6 +407,7 @@ Public Class clsUIMFInfoScanner
 
             End If
 
+            dblFrameStartTimePrevious = dblFrameStartTimeCurrent
             intTICIndex += 1
         Next intFrameNumber
 
