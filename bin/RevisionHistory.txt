@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.1.4129; April 22, 2011
+	- New version of UIMFLibrary.dll (v1.3.4129)
+
 Version 1.1.4086; March 10, 2011
 	- Now computing correct Elution Time values when processing .UIMF files
 	- New version of UIMFLibrary.dll

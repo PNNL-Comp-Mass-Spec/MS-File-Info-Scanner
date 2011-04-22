@@ -2,7 +2,7 @@ Option Strict On
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 '
-' Last modified March 10, 2011
+' Last modified April 22, 2011
 
 Public Class clsUIMFInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -10,15 +10,23 @@ Public Class clsUIMFInfoScanner
     ' Note: The extension must be in all caps
     Public Const UIMF_FILE_EXTENSION As String = ".UIMF"
 
-    Private Sub ComputeQualityScores(ByRef objUIMFReader As UIMFLibrary.DataReader, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType)
+    Private Structure udtFrameInfoType
+        Public FrameType As Integer
+        Public FrameIndex As Integer
+    End Structure
+
+    Private Sub ComputeQualityScores(ByRef objUIMFReader As UIMFLibrary.DataReader, _
+                                     ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, _
+                                     ByRef dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType), _
+                                     ByRef intMasterFrameNumList As Integer())
+
         ' This function is used to determine one or more overall quality scores
 
         Dim objFrameParams As UIMFLibrary.FrameParameters
         Dim objGlobalParams As UIMFLibrary.GlobalParameters
 
+        Dim eFrameType As UIMFLibrary.DataReader.iFrameType
         Dim intFrameCount As Integer
-        Dim intFrameNumber As Integer
-        Dim intFrameType As Integer
 
         Dim intFrameStart As Integer
         Dim intFrameEnd As Integer
@@ -47,71 +55,85 @@ Public Class clsUIMFInfoScanner
             sngOverallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(intMSLevelFilter)
         Else
 
-            objGlobalParams = DirectCast(objUIMFReader.GetGlobalParameters(), UIMFLibrary.GlobalParameters)
+            objGlobalParams = objUIMFReader.GetGlobalParameters()
 
-            intFrameCount = objGlobalParams.NumFrames
             intGlobalMaxBins = objGlobalParams.Bins
+
 
             ReDim dblMZList(intGlobalMaxBins)
             ReDim intIntensityList(intGlobalMaxBins)
             ReDim dblIonsIntensity(intGlobalMaxBins)
 
-            MyBase.GetStartAndEndScans(intFrameCount, intFrameStart, intFrameEnd)
+            ' Call .GetStartAndEndScans to get the start and end Frames
+            MyBase.GetStartAndEndScans(objGlobalParams.NumFrames, intFrameStart, intFrameEnd)
 
-            intFrameType = 0
+            For intMasterFrameNumIndex As Integer = 0 To intMasterFrameNumList.Length - 1
 
-            For intFrameNumber = intFrameStart To intFrameEnd
+                Dim intFrameNumber As Integer
+                intFrameNumber = intMasterFrameNumList(intMasterFrameNumIndex)
 
+                ' Make sure the correct frame type is defined
+                objUIMFReader.set_FrameType(dctMasterFrameList(intFrameNumber).FrameType)
 
-                Dim intIonCount As Integer
-                Dim intIndex As Integer
-                Dim intTargetIndex As Integer
-
-                ' We have to clear the m/z and intensity arrays before calling SumScans
-
-                Array.Clear(dblMZList, 0, dblMZList.Length)
-                Array.Clear(intIntensityList, 0, intIntensityList.Length)
-
-                ' Process all of the IMS scans in this Frame to compute a summed spectrum representative of the frame
-                ' Do this using DataReader.SumScans()
-                'intIonCount = objUIMFReader.SumScans(dblMZList, intIntensityList, intFrameType, intFrameNumber)
-
-                objFrameParams = DirectCast(objUIMFReader.GetFrameParameters(intFrameNumber), UIMFLibrary.FrameParameters)
+                Try
+                    objFrameParams = objUIMFReader.GetFrameParameters(dctMasterFrameList(intFrameNumber).FrameIndex)
+                Catch ex As System.Exception
+                    Console.WriteLine("Exception obtaining frame parameters for frame " & intFrameNumber & "; will skip this frame")
+                    objFrameParams = Nothing
+                End Try
 
                 If Not objFrameParams Is Nothing Then
 
-                    intIonCount = objUIMFReader.SumScansNonCached(dblMZList, intIntensityList, intFrameType, intFrameNumber, intFrameNumber, 0, objFrameParams.Scans - 1)
+                    ' Check whether the frame number is within the desired range
+                    If objFrameParams.FrameNum >= intFrameStart And objFrameParams.FrameNum <= intFrameEnd Then
 
-                    If intIonCount > 0 Then
-                        ' The m/z and intensity arrays likely contain numerous entries with m/z values of 0; 
-                        ' need to copy the data in place to get the data in the correct format.
-                        ' In addition, we'll copy the intensity values from intIntensityList() into dblIonsIntensity()
+                        Dim intIonCount As Integer
+                        Dim intIndex As Integer
+                        Dim intTargetIndex As Integer
 
-                        intTargetIndex = 0
-                        For intIndex = 0 To intIonCount - 1
-                            If dblMZList(intIndex) > 0 Then
-                                dblMZList(intTargetIndex) = dblMZList(intIndex)
-                                intIntensityList(intTargetIndex) = intIntensityList(intIndex)
-                                intTargetIndex += 1
-                            End If
-                        Next
+                        ' We have to clear the m/z and intensity arrays before calling SumScans
 
-                        intIonCount = intTargetIndex
+                        Array.Clear(dblMZList, 0, dblMZList.Length)
+                        Array.Clear(intIntensityList, 0, intIntensityList.Length)
+
+                        ' Process all of the IMS scans in this Frame to compute a summed spectrum representative of the frame
+                        ' Could do this using DataReader.SumScans()
+                        'intIonCount = objUIMFReader.SumScans(dblMZList, intIntensityList, intFrameType, intFrameNumber)
+
+                        intIonCount = objUIMFReader.SumScansNonCached(dblMZList, intIntensityList, dctMasterFrameList(intFrameNumber).FrameType, dctMasterFrameList(intFrameNumber).FrameIndex, dctMasterFrameList(intFrameNumber).FrameIndex, 0, objFrameParams.Scans - 1)
 
                         If intIonCount > 0 Then
+                            ' The m/z and intensity arrays likely contain numerous entries with m/z values of 0; 
+                            ' need to copy the data in place to get the data in the correct format.
+                            ' In addition, we'll copy the intensity values from intIntensityList() into dblIonsIntensity()
 
-                            ' ToDo: Analyze dblIonMZ and dblIonIntensity to compute a quality scores
-                            ' Keep track of the quality scores and then store one or more overall quality scores in udtFileInfo.OverallQualityScore
-                            ' For now, this just computes the average intensity for each scan and then computes and overall average intensity value
+                            intTargetIndex = 0
+                            For intIndex = 0 To intIonCount - 1
+                                If dblMZList(intIndex) > 0 Then
+                                    dblMZList(intTargetIndex) = dblMZList(intIndex)
+                                    intIntensityList(intTargetIndex) = intIntensityList(intIndex)
+                                    intTargetIndex += 1
+                                End If
+                            Next
 
-                            dblIntensitySum = 0
-                            For intIonIndex = 0 To intIonCount - 1
-                                dblIntensitySum += intIntensityList(intIonIndex)
-                            Next intIonIndex
+                            intIonCount = intTargetIndex
 
-                            dblOverallAvgIntensitySum += dblIntensitySum / intIonCount
+                            If intIonCount > 0 Then
 
-                            intOverallAvgCount += 1
+                                ' ToDo: Analyze dblIonMZ and dblIonIntensity to compute a quality scores
+                                ' Keep track of the quality scores and then store one or more overall quality scores in udtFileInfo.OverallQualityScore
+                                ' For now, this just computes the average intensity for each scan and then computes and overall average intensity value
+
+                                dblIntensitySum = 0
+                                For intIonIndex = 0 To intIonCount - 1
+                                    dblIntensitySum += intIntensityList(intIonIndex)
+                                Next intIonIndex
+
+                                dblOverallAvgIntensitySum += dblIntensitySum / intIonCount
+
+                                intOverallAvgCount += 1
+
+                            End If
 
                         End If
 
@@ -119,7 +141,7 @@ Public Class clsUIMFInfoScanner
 
                 End If
 
-            Next intFrameNumber
+            Next
 
             If intOverallAvgCount > 0 Then
                 sngOverallScore = CSng(dblOverallAvgIntensitySum / intOverallAvgCount)
@@ -133,6 +155,73 @@ Public Class clsUIMFInfoScanner
 
     End Sub
 
+    Private Function ConstructMasterFrameList(ByRef objUIMFReader As UIMFLibrary.DataReader) As System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType)
+
+        Dim dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType)
+        dctMasterFrameList = New System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType)
+
+        Dim udtFrameInfo As udtFrameInfoType
+        Dim intFrameCount As Integer
+        Dim intFrameNumbers() As Integer
+
+        For intFrameType As Integer = 0 To 5
+            intFrameCount = objUIMFReader.set_FrameType(intFrameType)
+            If intFrameCount > 0 Then
+                intFrameNumbers = objUIMFReader.GetFrameNumbers()
+
+                For intIndex As Integer = 0 To intFrameNumbers.Length - 1
+                    If Not dctMasterFrameList.ContainsKey(intFrameNumbers(intIndex)) Then
+                        udtFrameInfo.FrameType = intFrameType
+                        udtFrameInfo.FrameIndex = intIndex
+                        dctMasterFrameList.Add(intFrameNumbers(intIndex), udtFrameInfo)
+                    End If
+                Next
+            End If
+        Next
+
+        Return dctMasterFrameList
+
+    End Function
+
+    Private Sub ConstructTICandBPI(ByRef objUIMFReader As UIMFLibrary.DataReader, ByVal intFrameStart As Integer, ByVal intFrameEnd As Integer, _
+                                   ByRef dblTIC As Double(), ByRef dblBPI As Double())
+
+        Try
+            ' Obtain the TIC and BPI for each MS frame
+
+            Dim intMSFrameNumbers() As Integer
+            Dim intMSFrameCount As Integer
+            Dim eFrameType As UIMFLibrary.DataReader.iFrameType
+
+            ' Select the appropriate frame type
+            intMSFrameCount = SelectFirstFrameType(objUIMFReader, eFrameType)
+
+            intMSFrameNumbers = objUIMFReader.GetFrameNumbers()
+
+            Dim intStartFrameIndex As Integer
+            Dim intEndFrameIndex As Integer
+            intStartFrameIndex = 0
+            intEndFrameIndex = intMSFrameNumbers.Length - 1
+
+            ' Update intStartFrameIndex if intFrameStart > 0
+            Do While intStartFrameIndex < intEndFrameIndex AndAlso intMSFrameNumbers(intStartFrameIndex) < intFrameStart
+                intStartFrameIndex += 1
+            Loop
+
+            ' Update intEndFrameIndex if intFrameEnd is < intMSFrameNumbers(intEndFrameIndex)
+            Do While intEndFrameIndex > intStartFrameIndex AndAlso intMSFrameNumbers(intEndFrameIndex) > intFrameEnd
+                intEndFrameIndex -= 1
+            Loop
+
+            objUIMFReader.GetTIC(dblTIC, objUIMFReader.FrameTypeEnumToInt(eFrameType), intStartFrameIndex, intEndFrameIndex, 0, 0)
+            objUIMFReader.GetBPI(dblBPI, objUIMFReader.FrameTypeEnumToInt(eFrameType), intStartFrameIndex, intEndFrameIndex, 0, 0)
+
+        Catch ex As System.Exception
+            ReportError("Error obtaining TIC and BPI for overall dataset: " & ex.Message)
+        End Try
+
+    End Sub
+
     Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
         ' The dataset name is simply the file name without .UIMF
         Try
@@ -142,26 +231,22 @@ Public Class clsUIMFInfoScanner
         End Try
     End Function
 
-    Private Sub LoadScanDetails(ByRef objUIMFReader As UIMFLibrary.DataReader)
+    Private Sub LoadFrameDetails(ByRef objUIMFReader As UIMFLibrary.DataReader, _
+                                 ByRef dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType), _
+                                 ByRef intMasterFrameNumList As Integer())
 
         Dim objGlobalParams As UIMFLibrary.GlobalParameters
         Dim objFrameParams As UIMFLibrary.FrameParameters
-
-        Dim intFrameCount As Integer
-
-        Dim intFrameNumber As Integer
 
         Dim sngProgress As Single
         Dim dtLastProgressTime As System.DateTime
 
         Dim dblTIC() As Double
         Dim dblBPI() As Double
-        Dim intFrameType As Integer
 
         Dim intFrameStart As Integer
         Dim intFrameEnd As Integer
         Dim intTICIndex As Integer
-
 
         Dim intMSLevel As Integer
 
@@ -184,7 +269,7 @@ Public Class clsUIMFInfoScanner
 
         Dim dblPressure As Double
 
-        Console.Write("  Loading scan details")
+        Console.Write("  Loading frame details")
 
         If mSaveTICAndBPI Then
             ' Initialize the TIC and BPI arrays
@@ -209,36 +294,27 @@ Public Class clsUIMFInfoScanner
 
         dtLastProgressTime = System.DateTime.Now()
 
+        objGlobalParams = objUIMFReader.GetGlobalParameters()
 
-        objGlobalParams = DirectCast(objUIMFReader.GetGlobalParameters(), UIMFLibrary.GlobalParameters)
-
-        intFrameCount = objGlobalParams.NumFrames
         intGlobalMaxBins = objGlobalParams.Bins
 
         ReDim dblMZList(intGlobalMaxBins)
         ReDim intIntensityList(intGlobalMaxBins)
         ReDim dblIonsIntensity(intGlobalMaxBins)
 
-        MyBase.GetStartAndEndScans(intFrameCount, intFrameStart, intFrameEnd)
+        ' Call .GetStartAndEndScans to get the start and end Frames
+        MyBase.GetStartAndEndScans(objGlobalParams.NumFrames, intFrameStart, intFrameEnd)
 
-        If intFrameCount > 0 Then
-            ReDim dblTIC(intFrameCount - 1)
-            ReDim dblBPI(intFrameCount - 1)
+        If intMasterFrameNumList.Length > 0 Then
+            ReDim dblTIC(intMasterFrameNumList.Length - 1)
+            ReDim dblBPI(intMasterFrameNumList.Length - 1)
         Else
             ReDim dblTIC(0)
             ReDim dblBPI(0)
         End If
 
-        Try
-            ' Obtain the TIC and BPI for each frame
-            intFrameType = 0
-
-            objUIMFReader.GetTIC(dblTIC, intFrameType, intFrameStart, intFrameEnd, 0, 0)
-            objUIMFReader.GetBPI(dblBPI, intFrameType, intFrameStart, intFrameEnd, 0, 0)
-
-        Catch ex As System.Exception
-            ReportError("Error obtaining TIC and BPI for overall dataset: " & ex.Message)
-        End Try
+        ' Construct the TIC and BPI
+        ConstructTICandBPI(objUIMFReader, intFrameStart, intFrameEnd, dblTIC, dblBPI)
 
         ' Initialize the frame starttime variables
         dblFrameStartTimeInitial = -1
@@ -247,156 +323,160 @@ Public Class clsUIMFInfoScanner
         dblFrameStartTimePrevious = -1
         dblFrameStartTimeCurrent = 0
 
-        intTICIndex = 0
-        For intFrameNumber = intFrameStart To intFrameEnd
 
+        intTICIndex = 0
+        For intMasterFrameNumIndex As Integer = 0 To intMasterFrameNumList.Length - 1
+
+            Dim intFrameNumber As Integer
+            intFrameNumber = intMasterFrameNumList(intMasterFrameNumIndex)
             intMSLevel = 1
+
+            ' Make sure the correct frame type is defined
+            objUIMFReader.set_FrameType(dctMasterFrameList(intFrameNumber).FrameType)
 
             Try
 
-                objFrameParams = DirectCast(objUIMFReader.GetFrameParameters(intFrameNumber), UIMFLibrary.FrameParameters)
+                Try
+                    objFrameParams = objUIMFReader.GetFrameParameters(dctMasterFrameList(intFrameNumber).FrameIndex)
+                Catch ex As System.Exception
+                    Console.WriteLine("Exception obtaining frame parameters for frame " & intFrameNumber & "; will skip this frame")
+                    objFrameParams = Nothing
+                End Try
 
                 If Not objFrameParams Is Nothing Then
 
+                    ' Check whether the frame number is within the desired range
+                    If objFrameParams.FrameNum >= intFrameStart And objFrameParams.FrameNum <= intFrameEnd Then
 
-                    ' For-loop based code:
-                    'intNonZeroPointsInFrame = 0
-                    'For intScanIndex As Integer = 0 To objFrameParams.Scans - 1
-                    '    intNonZeroPointsInFrame += objUIMFReader.GetCountPerSpectrum(intFrameNumber, intScanIndex)
-                    'Next
+                        intNonZeroPointsInFrame = objUIMFReader.GetCountPerFrame(dctMasterFrameList(intFrameNumber).FrameIndex)
 
-                    ' Single function call-based
-                    intNonZeroPointsInFrame = objUIMFReader.GetCountPerFrame(intFrameNumber)
-
-                    If objFrameParams.FrameType <= 1 Then
-                        intMSLevel = 1
-                    Else
-                        intMSLevel = objFrameParams.FrameType
-                    End If
-
-
-                    ' Read the frame StartTime
-                    ' This will be zero in older .UIMF files
-                    ' In newer files, it is the number of minutes since 12:00 am
-                    dblFrameStartTimeCurrent = objFrameParams.StartTime
-                    If intFrameNumber = intFrameStart OrElse dblFrameStartTimeInitial = -1 Then
-                        dblFrameStartTimeInitial = dblFrameStartTimeCurrent
-                    End If
-
-                    If dblFrameStartTimePrevious > 1400 AndAlso dblFrameStartTimePrevious > dblFrameStartTimeCurrent Then
-                        ' We likely rolled over midnight; bump up dblFrameStartTimeAddon by 1440 minutes
-                        dblFrameStartTimeAddon += 60 * 24
-                    End If
-
-                    ' Compute the elution time (in minutes) of this frame                    
-                    dblElutionTime = dblFrameStartTimeCurrent + dblFrameStartTimeAddon - dblFrameStartTimeInitial
-
-
-                    If mSaveTICAndBPI Then
-                        If intTICIndex < dblTIC.Length Then
-                            mTICandBPIPlot.AddData(intFrameNumber, intMSLevel, CSng(dblElutionTime), dblBPI(intTICIndex), dblTIC(intTICIndex))
+                        If objFrameParams.FrameType = 2 Then
+                            intMSLevel = 2
+                        Else
+                            intMSLevel = 1
                         End If
 
-                        dblPressure = objFrameParams.PressureBack
-                        If dblPressure = 0 Then dblPressure = objFrameParams.PressureFront
-                        If dblPressure = 0 Then dblPressure = objFrameParams.RearIonFunnelPressure
-                        If dblPressure = 0 Then dblPressure = objFrameParams.IonFunnelTrapPressure
+                        ' Read the frame StartTime
+                        ' This will be zero in older .UIMF files
+                        ' In newer files, it is the number of minutes since 12:00 am
+                        dblFrameStartTimeCurrent = objFrameParams.StartTime
+                        If intMasterFrameNumIndex = 0 OrElse dblFrameStartTimeInitial = -1 Then
+                            dblFrameStartTimeInitial = dblFrameStartTimeCurrent
+                        End If
 
-                        mInstrumentSpecificPlots.AddDataTICOnly(intFrameNumber, intMSLevel, CSng(dblElutionTime), dblPressure)
-                    End If
+                        If dblFrameStartTimePrevious > 1400 AndAlso dblFrameStartTimePrevious > dblFrameStartTimeCurrent Then
+                            ' We likely rolled over midnight; bump up dblFrameStartTimeAddon by 1440 minutes
+                            dblFrameStartTimeAddon += 60 * 24
+                        End If
 
-
-                    Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
-
-                    objScanStatsEntry.ScanNumber = intFrameNumber
-                    objScanStatsEntry.ScanType = intMSLevel
-
-                    If intMSLevel <= 1 Then
-                        objScanStatsEntry.ScanTypeName = "HMS"
-                    Else
-                        objScanStatsEntry.ScanTypeName = "HMSn"
-                    End If
-
-                    objScanStatsEntry.ScanFilterText = ""
-
-                    objScanStatsEntry.ElutionTime = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblElutionTime, 5)
-                    If intTICIndex < dblTIC.Length Then
-                        objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblTIC(intTICIndex), 5)
-                        objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblBPI(intTICIndex), 5)
-                    Else
-                        objScanStatsEntry.TotalIonIntensity = "0"
-                        objScanStatsEntry.BasePeakIntensity = "0"
-                    End If
-
-                    objScanStatsEntry.BasePeakMZ = "0"
-
-                    ' Base peak signal to noise ratio
-                    objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
-
-                    objScanStatsEntry.IonCount = intNonZeroPointsInFrame
-                    objScanStatsEntry.IonCountRaw = intNonZeroPointsInFrame
-
-                    mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
+                        ' Compute the elution time (in minutes) of this frame                    
+                        dblElutionTime = dblFrameStartTimeCurrent + dblFrameStartTimeAddon - dblFrameStartTimeInitial
 
 
-                    If mSaveLCMS2DPlots Then
-                        Try
-                            ' Also need to load the raw data
-
-                            Dim intIonCount As Integer
-                            Dim intIndex As Integer
-                            Dim intTargetIndex As Integer
-
-                            ' We have to clear the m/z and intensity arrays before calling SumScans
-
-                            Array.Clear(dblMZList, 0, dblMZList.Length)
-                            Array.Clear(intIntensityList, 0, intIntensityList.Length)
-
-                            ' Process all of the IMS scans in this Frame to compute a summed spectrum representative of the frame
-                            ' Do this using DataReader.SumScans()
-                            'intIonCount = objUIMFReader.SumScans(dblMZList, intIntensityList, intFrameType, intFrameNumber)
-
-                            intIonCount = objUIMFReader.SumScansNonCached(dblMZList, intIntensityList, intFrameType, intFrameNumber, intFrameNumber, 0, objFrameParams.Scans - 1)
-
-                            If intIonCount > 0 Then
-                                ' The m/z and intensity arrays likely contain numerous entries with m/z values of 0; 
-                                ' need to copy the data in place to get the data in the correct format.
-                                ' In addition, we'll copy the intensity values from intIntensityList() into dblIonsIntensity()
-
-                                intTargetIndex = 0
-                                For intIndex = 0 To intIonCount - 1
-                                    If dblMZList(intIndex) > 0 Then
-                                        dblMZList(intTargetIndex) = dblMZList(intIndex)
-                                        dblIonsIntensity(intTargetIndex) = intIntensityList(intIndex)
-                                        intTargetIndex += 1
-                                    End If
-                                Next
-
-                                intIonCount = intTargetIndex
-
-                                If intIonCount > 0 Then
-                                    mLCMS2DPlot.AddScan(intFrameNumber, intMSLevel, CSng(dblElutionTime), _
-                                                        intIonCount, dblMZList, dblIonsIntensity)
-                                End If
-
+                        If mSaveTICAndBPI Then
+                            If intTICIndex < dblTIC.Length Then
+                                mTICandBPIPlot.AddData(objFrameParams.FrameNum, intMSLevel, CSng(dblElutionTime), dblBPI(intTICIndex), dblTIC(intTICIndex))
                             End If
 
+                            dblPressure = objFrameParams.PressureBack
+                            If dblPressure = 0 Then dblPressure = objFrameParams.RearIonFunnelPressure
+                            If dblPressure = 0 Then dblPressure = objFrameParams.IonFunnelTrapPressure
+                            If dblPressure = 0 Then dblPressure = objFrameParams.PressureFront
 
-                        Catch ex As System.Exception
-                            ReportError("Error loading m/z and intensity values for scan " & intFrameNumber & ": " & ex.Message)
-                        End Try
+                            mInstrumentSpecificPlots.AddDataTICOnly(objFrameParams.FrameNum, intMSLevel, CSng(dblElutionTime), dblPressure)
+                        End If
+
+
+                        Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
+
+                        objScanStatsEntry.ScanNumber = objFrameParams.FrameNum
+                        objScanStatsEntry.ScanType = intMSLevel
+
+                        If intMSLevel <= 1 Then
+                            objScanStatsEntry.ScanTypeName = "HMS"
+                        Else
+                            objScanStatsEntry.ScanTypeName = "HMSn"
+                        End If
+
+                        objScanStatsEntry.ScanFilterText = ""
+
+                        objScanStatsEntry.ElutionTime = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblElutionTime, 5)
+                        If intTICIndex < dblTIC.Length Then
+                            objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblTIC(intTICIndex), 5)
+                            objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblBPI(intTICIndex), 5)
+                        Else
+                            objScanStatsEntry.TotalIonIntensity = "0"
+                            objScanStatsEntry.BasePeakIntensity = "0"
+                        End If
+
+                        objScanStatsEntry.BasePeakMZ = "0"
+
+                        ' Base peak signal to noise ratio
+                        objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
+
+                        objScanStatsEntry.IonCount = intNonZeroPointsInFrame
+                        objScanStatsEntry.IonCountRaw = intNonZeroPointsInFrame
+
+                        mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
+
+
+                        If mSaveLCMS2DPlots Then
+                            Try
+                                ' Also need to load the raw data
+
+                                Dim intIonCount As Integer
+                                Dim intTargetIndex As Integer
+
+                                ' We have to clear the m/z and intensity arrays before calling SumScans
+
+                                Array.Clear(dblMZList, 0, dblMZList.Length)
+                                Array.Clear(intIntensityList, 0, intIntensityList.Length)
+
+                                ' Process all of the IMS scans in this Frame to compute a summed spectrum representative of the frame
+
+                                intIonCount = objUIMFReader.SumScansNonCached(dblMZList, intIntensityList, dctMasterFrameList(intFrameNumber).FrameType, dctMasterFrameList(intFrameNumber).FrameIndex, dctMasterFrameList(intFrameNumber).FrameIndex, 0, objFrameParams.Scans - 1)
+
+                                If intIonCount > 0 Then
+                                    ' The m/z and intensity arrays likely contain numerous entries with m/z values of 0; 
+                                    ' need to copy the data in place to get the data in the correct format.
+                                    ' In addition, we'll copy the intensity values from intIntensityList() into dblIonsIntensity()
+
+                                    intTargetIndex = 0
+                                    For intIonIndex As Integer = 0 To intIonCount - 1
+                                        If dblMZList(intIonIndex) > 0 Then
+                                            dblMZList(intTargetIndex) = dblMZList(intIonIndex)
+                                            dblIonsIntensity(intTargetIndex) = intIntensityList(intIonIndex)
+                                            intTargetIndex += 1
+                                        End If
+                                    Next
+
+                                    intIonCount = intTargetIndex
+
+                                    If intIonCount > 0 Then
+                                        mLCMS2DPlot.AddScan(objFrameParams.FrameNum, intMSLevel, CSng(dblElutionTime), _
+                                                            intIonCount, dblMZList, dblIonsIntensity)
+                                    End If
+
+                                End If
+
+
+                            Catch ex As System.Exception
+                                ReportError("Error loading m/z and intensity values for frame " & intFrameNumber & ": " & ex.Message)
+                            End Try
+                        End If
+
                     End If
-
                 End If
+
             Catch ex As System.Exception
                 ReportError("Error loading header info for frame " & intFrameNumber & ": " & ex.Message)
             End Try
 
-            If intFrameNumber Mod 100 = 0 Then
+            If intMasterFrameNumIndex Mod 100 = 0 Then
                 Console.Write(".")
 
-                If intFrameCount > 0 Then
-                    sngProgress = CSng(intFrameNumber / intFrameCount * 100)
+                If intMasterFrameNumList.Length > 0 Then
+                    sngProgress = CSng(intMasterFrameNumIndex / intMasterFrameNumList.Length * 100)
 
                     If System.DateTime.Now.Subtract(dtLastProgressTime).TotalSeconds > 30 Then
                         dtLastProgressTime = System.DateTime.Now
@@ -409,7 +489,8 @@ Public Class clsUIMFInfoScanner
 
             dblFrameStartTimePrevious = dblFrameStartTimeCurrent
             intTICIndex += 1
-        Next intFrameNumber
+
+        Next intMasterFrameNumIndex
 
         Console.WriteLine()
 
@@ -428,6 +509,12 @@ Public Class clsUIMFInfoScanner
 
         Dim blnReadError As Boolean
         Dim blnInaccurateStartTime As Boolean
+
+        Dim dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType)
+        Dim intMasterFrameNumList As Integer()
+
+        dctMasterFrameList = New System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType)
+        ReDim intMasterFrameNumList(0)
 
         ' Obtain the full path to the file
         ioFileInfo = New System.IO.FileInfo(strDataFilePath)
@@ -478,7 +565,7 @@ Public Class clsUIMFInfoScanner
 
             Try
                 ' First obtain the global parameters
-                objGlobalParams = DirectCast(objUIMFReader.GetGlobalParameters(), UIMFLibrary.GlobalParameters)
+                objGlobalParams = objUIMFReader.GetGlobalParameters()
             Catch ex As System.Exception
                 ' Read error
                 blnReadError = True
@@ -487,6 +574,19 @@ Public Class clsUIMFInfoScanner
             If Not blnReadError Then
 
                 Try
+
+                    ' Construct a master list of frame numbers, frame types, and frame indices
+                    dctMasterFrameList = ConstructMasterFrameList(objUIMFReader)
+
+                    If dctMasterFrameList.Count > 0 Then
+
+                        ' Copy the frame numbers into an array so that we can assure it's sorted
+                        ReDim intMasterFrameNumList(dctMasterFrameList.Keys.Count - 1)
+                        dctMasterFrameList.Keys.CopyTo(intMasterFrameNumList, 0)
+
+                        Array.Sort(intMasterFrameNumList)
+                    End If
+
                     ' Extract the acquisition time information
                     Dim dblStartTime As Double
                     Dim dblEndTime As Double
@@ -520,19 +620,37 @@ Public Class clsUIMFInfoScanner
                         ShowMessage("Exception extracting the DateStarted date from table Global_Parameters in the .UIMF file: " & ex2.Message)
                     End Try
 
-                    ' Look up the acquisition time of the first frame and the last frame
-                    ' Subtract the two times to determine the run time
-                    ' Note that frame numbers range from 1 to objGlobalParams.NumFrames
-
-                    objFrameParams = DirectCast(objUIMFReader.GetFrameParameters(1), UIMFLibrary.FrameParameters)
-                    dblStartTime = objFrameParams.StartTime
-
+                    ' NumFrames is the total number of frames in the file (for all frame types)
                     udtFileInfo.ScanCount = objGlobalParams.NumFrames
-                    objFrameParams = DirectCast(objUIMFReader.GetFrameParameters(udtFileInfo.ScanCount), UIMFLibrary.FrameParameters)
-                    dblEndTime = objFrameParams.StartTime
+                    If intMasterFrameNumList.Length > udtFileInfo.ScanCount Then
+                        udtFileInfo.ScanCount = intMasterFrameNumList.Length
+                    End If
 
-                    ' Run time should be in minutes
-                    dblRunTime = dblEndTime - dblStartTime
+                    If intMasterFrameNumList.Length > 0 Then
+                        ' Look up the acquisition time of the first frame and the last frame
+                        ' Subtract the two times to determine the run time
+
+                        Dim intFrameNumber As Integer
+
+                        ' Get the start time of the first frame
+                        intFrameNumber = intMasterFrameNumList(0)
+                        objUIMFReader.set_FrameType(dctMasterFrameList(intFrameNumber).FrameType)
+
+                        objFrameParams = objUIMFReader.GetFrameParameters(dctMasterFrameList(intFrameNumber).FrameIndex)
+                        dblStartTime = objFrameParams.StartTime
+
+                        ' Get the start time of the last frame
+                        intFrameNumber = intMasterFrameNumList(intMasterFrameNumList.Length - 1)
+                        objUIMFReader.set_FrameType(dctMasterFrameList(intFrameNumber).FrameType)
+
+                        objFrameParams = objUIMFReader.GetFrameParameters(dctMasterFrameList(intFrameNumber).FrameIndex)
+                        dblEndTime = objFrameParams.StartTime
+
+                        ' Run time should be in minutes
+                        dblRunTime = dblEndTime - dblStartTime
+                    Else
+                        dblRunTime = 0
+                    End If
 
                     If dblRunTime > 0 Then
                         If dblRunTime > 24000 Then
@@ -551,14 +669,14 @@ Public Class clsUIMFInfoScanner
                 End Try
 
                 If mSaveTICAndBPI OrElse mCreateDatasetInfoFile OrElse mSaveLCMS2DPlots Then
-                    ' Load data from each scan
+                    ' Load data from each frame
                     ' This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
-                    LoadScanDetails(objUIMFReader)
+                    LoadFrameDetails(objUIMFReader, dctMasterFrameList, intMasterFrameNumList)
                 End If
 
                 If mComputeOverallQualityScores Then
                     ' Note that this call will also create the TICs and BPIs
-                    ComputeQualityScores(objUIMFReader, udtFileInfo)
+                    ComputeQualityScores(objUIMFReader, udtFileInfo, dctMasterFrameList, intMasterFrameNumList)
                 End If
             End If
         End If
@@ -589,4 +707,21 @@ Public Class clsUIMFInfoScanner
 
     End Function
 
+    Protected Function SelectFirstFrameType(ByRef objUIMFReader As UIMFLibrary.DataReader, _
+                                            ByRef eFrameType As UIMFLibrary.DataReader.iFrameType) As Integer
+
+        Dim intFrameCount As Integer
+
+        ' Select the first frame type that actually has data
+        eFrameType = objUIMFReader.FrameTypeIntToEnum(0)
+        intFrameCount = objUIMFReader.set_FrameType(eFrameType)
+        Do While intFrameCount = 0 And eFrameType < UIMFLibrary.DataReader.iFrameType.Calibration
+            ' Increment frame type
+            eFrameType = objUIMFReader.FrameTypeIntToEnum(objUIMFReader.FrameTypeEnumToInt(eFrameType) + 1)
+            intFrameCount = objUIMFReader.set_FrameType(eFrameType)
+        Loop
+
+        Return intFrameCount
+    End Function
 End Class
+
