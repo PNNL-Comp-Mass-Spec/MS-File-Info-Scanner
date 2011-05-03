@@ -2,7 +2,7 @@ Option Strict On
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 '
-' Last modified April 22, 2011
+' Last modified May 2, 2011
 
 Public Class clsUIMFInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -10,23 +10,15 @@ Public Class clsUIMFInfoScanner
     ' Note: The extension must be in all caps
     Public Const UIMF_FILE_EXTENSION As String = ".UIMF"
 
-    Private Structure udtFrameInfoType
-        Public FrameType As Integer
-        Public FrameIndex As Integer
-    End Structure
-
     Private Sub ComputeQualityScores(ByRef objUIMFReader As UIMFLibrary.DataReader, _
                                      ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, _
-                                     ByRef dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType), _
+                                     ByRef dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, UIMFLibrary.DataReader.udtFrameInfoType), _
                                      ByRef intMasterFrameNumList As Integer())
 
         ' This function is used to determine one or more overall quality scores
 
         Dim objFrameParams As UIMFLibrary.FrameParameters
         Dim objGlobalParams As UIMFLibrary.GlobalParameters
-
-        Dim eFrameType As UIMFLibrary.DataReader.iFrameType
-        Dim intFrameCount As Integer
 
         Dim intFrameStart As Integer
         Dim intFrameEnd As Integer
@@ -155,34 +147,6 @@ Public Class clsUIMFInfoScanner
 
     End Sub
 
-    Private Function ConstructMasterFrameList(ByRef objUIMFReader As UIMFLibrary.DataReader) As System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType)
-
-        Dim dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType)
-        dctMasterFrameList = New System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType)
-
-        Dim udtFrameInfo As udtFrameInfoType
-        Dim intFrameCount As Integer
-        Dim intFrameNumbers() As Integer
-
-        For intFrameType As Integer = 0 To 5
-            intFrameCount = objUIMFReader.set_FrameType(intFrameType)
-            If intFrameCount > 0 Then
-                intFrameNumbers = objUIMFReader.GetFrameNumbers()
-
-                For intIndex As Integer = 0 To intFrameNumbers.Length - 1
-                    If Not dctMasterFrameList.ContainsKey(intFrameNumbers(intIndex)) Then
-                        udtFrameInfo.FrameType = intFrameType
-                        udtFrameInfo.FrameIndex = intIndex
-                        dctMasterFrameList.Add(intFrameNumbers(intIndex), udtFrameInfo)
-                    End If
-                Next
-            End If
-        Next
-
-        Return dctMasterFrameList
-
-    End Function
-
     Private Sub ConstructTICandBPI(ByRef objUIMFReader As UIMFLibrary.DataReader, ByVal intFrameStart As Integer, ByVal intFrameEnd As Integer, _
                                    ByRef dblTIC As Double(), ByRef dblBPI As Double())
 
@@ -232,7 +196,7 @@ Public Class clsUIMFInfoScanner
     End Function
 
     Private Sub LoadFrameDetails(ByRef objUIMFReader As UIMFLibrary.DataReader, _
-                                 ByRef dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType), _
+                                 ByRef dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, UIMFLibrary.DataReader.udtFrameInfoType), _
                                  ByRef intMasterFrameNumList As Integer())
 
         Dim objGlobalParams As UIMFLibrary.GlobalParameters
@@ -510,10 +474,10 @@ Public Class clsUIMFInfoScanner
         Dim blnReadError As Boolean
         Dim blnInaccurateStartTime As Boolean
 
-        Dim dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType)
+        Dim dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, UIMFLibrary.DataReader.udtFrameInfoType)
         Dim intMasterFrameNumList As Integer()
 
-        dctMasterFrameList = New System.Collections.Generic.Dictionary(Of Integer, udtFrameInfoType)
+        dctMasterFrameList = New System.Collections.Generic.Dictionary(Of Integer, UIMFLibrary.DataReader.udtFrameInfoType)
         ReDim intMasterFrameNumList(0)
 
         ' Obtain the full path to the file
@@ -576,7 +540,7 @@ Public Class clsUIMFInfoScanner
                 Try
 
                     ' Construct a master list of frame numbers, frame types, and frame indices
-                    dctMasterFrameList = ConstructMasterFrameList(objUIMFReader)
+                    dctMasterFrameList = objUIMFReader.GetMasterFrameList()
 
                     If dctMasterFrameList.Count > 0 Then
 
@@ -597,23 +561,43 @@ Public Class clsUIMFInfoScanner
                     Try
                         Dim strReportedDateStarted As String
                         Dim dtReportedDateStarted As DateTime
+
+                        Dim blnValidStartTime As Boolean
+
+                        blnValidStartTime = False
                         strReportedDateStarted = objGlobalParams.DateStarted
+
+                        ' Some .UIMF files have DateStarted values represented by huge integers, e.g. 127805472000000000
+                        ' These numbers are the number of ticks since 1 January 1601 (where each tick is 100 ns)
+                        ' This value is returned by function GetSystemTimeAsFileTime (see http://en.wikipedia.org/wiki/System_time)
+
+                        ' When SQLite parses these numbers, it converts them to years around 0410
+                        ' To get the correct year, simply add 1600
 
                         If Not System.DateTime.TryParse(strReportedDateStarted, dtReportedDateStarted) Then
                             ' Invalid date; log a message
                             ShowMessage(".UIMF file has an invalid DateStarted value in table Global_Parameters: " & strReportedDateStarted & "; will use the time the datafile was last modified")
                             blnInaccurateStartTime = True
                         Else
-                            If dtReportedDateStarted.Year < 2000 Or dtReportedDateStarted.Year > System.DateTime.Now.Year + 1 Then
+                            If dtReportedDateStarted.Year < 450 Then
+                                ' Add 1600 to the year
+                                dtReportedDateStarted = dtReportedDateStarted.AddYears(1600)
+                                blnValidStartTime = True
+                            ElseIf dtReportedDateStarted.Year < 2000 Or dtReportedDateStarted.Year > System.DateTime.Now.Year + 1 Then
                                 ' Invalid date; log a message
                                 ShowMessage(".UIMF file has an invalid DateStarted value in table Global_Parameters: " & dtReportedDateStarted.ToString & "; will use the time the datafile was last modified")
                                 blnInaccurateStartTime = True
                             Else
-                                udtFileInfo.AcqTimeStart = dtReportedDateStarted
-
-                                ' Update the end time to match the start time; we'll update it below using the start/end times obtained from the frame parameters
-                                udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart
+                                blnValidStartTime = True
                             End If
+                        End If
+
+
+                        If blnValidStartTime Then
+                            udtFileInfo.AcqTimeStart = dtReportedDateStarted
+
+                            ' Update the end time to match the start time; we'll update it below using the start/end times obtained from the frame parameters
+                            udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart
                         End If
 
                     Catch ex2 As System.Exception
@@ -633,6 +617,8 @@ Public Class clsUIMFInfoScanner
                         Dim intFrameNumber As Integer
 
                         ' Get the start time of the first frame
+                        ' The StartTime value for each frame is the number of minutes since 12:00 am
+                        ' If acquiring data from 11:59 pm through 12:00 am, then the StartTime will reset to zero
                         intFrameNumber = intMasterFrameNumList(0)
                         objUIMFReader.set_FrameType(dctMasterFrameList(intFrameNumber).FrameType)
 
@@ -648,6 +634,48 @@ Public Class clsUIMFInfoScanner
 
                         ' Run time should be in minutes
                         dblRunTime = dblEndTime - dblStartTime
+
+                        If dblStartTime >= 1.0E+17 And dblEndTime > 1.0E+17 Then
+                            ' StartTime and Endtime were stored as the number of ticks (where each tick is 100 ns)
+                            ' Tick start date is either 1 January 1601 or 1 January 0001
+
+                            Dim dtRunTime As System.DateTime
+                            dtRunTime = System.DateTime.MinValue.AddTicks(CLng(dblRunTime))
+
+                            dblRunTime = dtRunTime.Subtract(System.DateTime.MinValue).TotalMinutes
+
+                            ' In some .UIMF files, the DateStarted column in Global_Parameters is simply the date, and not a specific time of day
+                            ' If that's the case, then update udtFileInfo.AcqTimeStart to be based on dblRunTime
+                            If udtFileInfo.AcqTimeStart.Date = udtFileInfo.AcqTimeStart Then
+                                Dim dtReportedDateStarted As DateTime
+                                dtReportedDateStarted = System.DateTime.MinValue.AddTicks(CLng(dblStartTime))
+
+                                If dtReportedDateStarted.Year < 500 Then
+                                    dtReportedDateStarted.AddYears(1600)
+                                End If
+
+                                If dtReportedDateStarted.Year >= 2000 And dtReportedDateStarted.Year <= System.DateTime.Now.Year + 1 Then
+                                    ' Date looks valid
+                                    If blnInaccurateStartTime Then
+                                        udtFileInfo.AcqTimeStart = dtReportedDateStarted
+                                        udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart
+                                    Else
+                                        ' How does it compare to udtFileInfo.AcqTimeStart?
+                                        If dtReportedDateStarted.Subtract(udtFileInfo.AcqTimeStart).TotalHours < 24 Then
+                                            ' Update the date
+                                            udtFileInfo.AcqTimeStart = dtReportedDateStarted
+                                            udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart
+                                        End If
+                                    End If
+                                End If
+                            End If
+                        End If
+
+                        If dblRunTime < 0 Then
+                            ' We likely rolled over midnight
+                            ' Add 1400 minutes to the end time
+                            dblRunTime = dblEndTime + 60 * 24 - dblStartTime
+                        End If
                     Else
                         dblRunTime = 0
                     End If

@@ -722,11 +722,12 @@ Public Class clsMSFileInfoScanner
     End Function
 
     Public Function GetKnownFileExtensions() As String()
-        Dim strExtensionsToParse(2) As String
+        Dim strExtensionsToParse(3) As String
 
         strExtensionsToParse(0) = clsFinniganRawFileInfoScanner.FINNIGAN_RAW_FILE_EXTENSION
         strExtensionsToParse(1) = clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION
         strExtensionsToParse(2) = clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION
+        strExtensionsToParse(3) = clsUIMFInfoScanner.UIMF_FILE_EXTENSION
 
         Return strExtensionsToParse
     End Function

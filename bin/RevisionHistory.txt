@@ -1,5 +1,16 @@
 MS File Info Scanner Change Log
 
+Version 1.1.4139; May 2, 2011
+	- Improved logic for determining AcqStartTime and AcqEndTime for .UIMF files
+		- The DateStarted column in the Global_Parameters table could have:
+			- A text-based date, like "5/2/2011 4:26:59 PM"
+			- A text-based date, like "Thursday, January 13, 2011"
+			- A tick-based date, like 129272890050787740 (number of ticks since January 1, 1601)
+		- Similarly the StartTime column in the Frame_Parameters table could be represented by various numbers
+			- Integer between 0 and 1440 representing number of minutes since midnight
+			- A tick-based date, like 634305349108974800 (number of ticks since January 1, 0001)
+	- Added .UIMF as known extension to process when recursing
+
 Version 1.1.4129; April 22, 2011
 	- New version of UIMFLibrary.dll (v1.3.4129)
 
