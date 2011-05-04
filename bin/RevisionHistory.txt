@@ -1,5 +1,16 @@
 MS File Info Scanner Change Log
 
+Version 1.1.4140; May 3, 2011
+	- Further improved logic for determining AcqStartTime and AcqEndTime for .UIMF files
+        - The DateStarted column in the Global_Parameters table should be represented by one of these values
+        	- A text-based date, like "5/2/2011 4:26:59 PM"; example: Sarc_MS2_26_2Apr11_Cheetah_11-02-18_inverse.uimf
+        	- A text-based date (no time info), like "Thursday, January 13, 2011"; example: QC_Shew_11_01_pt5_c2_030311_earth_4ms_0001
+        	- A tick-based date, like 129272890050787740 (number of ticks since January 1, 1601); example: BATs_TS_01_c4_Eagle_10-02-06_0000
+        - The StartTime column in the Frame_Parameters table should be represented by one of these values
+        	- Integer between 0 and 1440 representing number of minutes since midnight (can loop from 1439.9 to 0); example: Sarc_MS2_26_2Apr11_Cheetah_11-02-18_inverse.uimf
+        	- Integer between 0 and 60 representing number of minutes since past the current hour (can loop from 59.9 to 0); example: BATs_TS_01_c4_Eagle_10-02-06_0000.uimf
+        	- A tick-based date, like 634305349108974800 (number of ticks since January 1, 0001); example: QC_Shew_11_01_pt5_c2_030311_earth_4ms_0001
+
 Version 1.1.4139; May 2, 2011
 	- Improved logic for determining AcqStartTime and AcqEndTime for .UIMF files
 		- The DateStarted column in the Global_Parameters table could have:

@@ -2,7 +2,7 @@ Option Strict On
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 '
-' Last modified May 2, 2011
+' Last modified May 3, 2011
 
 Public Class clsUIMFInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -470,6 +470,7 @@ Public Class clsUIMFInfoScanner
         Dim ioFileInfo As System.IO.FileInfo
 
         Dim intDatasetID As Integer
+        Dim intIndex As Integer
 
         Dim blnReadError As Boolean
         Dim blnInaccurateStartTime As Boolean
@@ -552,12 +553,25 @@ Public Class clsUIMFInfoScanner
                     End If
 
                     ' Extract the acquisition time information
+                    ' The Global_Parameters table records the start time of the entire dataset in field DateStarted
+                    ' The Frame_Parameters table records the start time of reach frame in field StartTime
+
+                    ' The DateStarted column in the Global_Parameters table should be represented by one of these values
+                    '   A text-based date, like "5/2/2011 4:26:59 PM"; example: Sarc_MS2_26_2Apr11_Cheetah_11-02-18_inverse.uimf
+                    '   A text-based date (no time info), like "Thursday, January 13, 2011"; example: QC_Shew_11_01_pt5_c2_030311_earth_4ms_0001
+                    '   A tick-based date, like 129272890050787740 (number of ticks since January 1, 1601); example: BATs_TS_01_c4_Eagle_10-02-06_0000
+
+                    ' The StartTime column in the Frame_Parameters table should be represented by one of these values
+                    '   Integer between 0 and 1440 representing number of minutes since midnight (can loop from 1439.9 to 0); example: Sarc_MS2_26_2Apr11_Cheetah_11-02-18_inverse.uimf
+                    '   Integer between 0 and 60 representing number of minutes since past the current hour (can loop from 59.9 to 0); example: BATs_TS_01_c4_Eagle_10-02-06_0000.uimf
+                    '   A tick-based date, like 634305349108974800 (number of ticks since January 1, 0001); example: QC_Shew_11_01_pt5_c2_030311_earth_4ms_0001
+
                     Dim dblStartTime As Double
                     Dim dblEndTime As Double
                     Dim dblRunTime As Double
+                    Dim intFrameNumber As Integer
 
                     ' First examine objGlobalParams.DateStarted
-                    ' Buggy .UIMF files will report odd dates (like year 410) so we need to check for that
                     Try
                         Dim strReportedDateStarted As String
                         Dim dtReportedDateStarted As DateTime
@@ -567,26 +581,27 @@ Public Class clsUIMFInfoScanner
                         blnValidStartTime = False
                         strReportedDateStarted = objGlobalParams.DateStarted
 
-                        ' Some .UIMF files have DateStarted values represented by huge integers, e.g. 127805472000000000
-                        ' These numbers are the number of ticks since 1 January 1601 (where each tick is 100 ns)
-                        ' This value is returned by function GetSystemTimeAsFileTime (see http://en.wikipedia.org/wiki/System_time)
-
-                        ' When SQLite parses these numbers, it converts them to years around 0410
-                        ' To get the correct year, simply add 1600
-
                         If Not System.DateTime.TryParse(strReportedDateStarted, dtReportedDateStarted) Then
                             ' Invalid date; log a message
                             ShowMessage(".UIMF file has an invalid DateStarted value in table Global_Parameters: " & strReportedDateStarted & "; will use the time the datafile was last modified")
                             blnInaccurateStartTime = True
                         Else
                             If dtReportedDateStarted.Year < 450 Then
-                                ' Add 1600 to the year
+                                ' Some .UIMF files have DateStarted values represented by huge integers, e.g. 127805472000000000 or 129145004045937500; example: BATs_TS_01_c4_Eagle_10-02-06_0000
+                                ' These numbers are the number of ticks since 1 January 1601 (where each tick is 100 ns)
+                                ' This value is returned by function GetSystemTimeAsFileTime (see http://en.wikipedia.org/wiki/System_time)
+
+                                ' When SQLite parses these numbers, it converts them to years around 0410
+                                ' To get the correct year, simply add 1600
+
                                 dtReportedDateStarted = dtReportedDateStarted.AddYears(1600)
                                 blnValidStartTime = True
+
                             ElseIf dtReportedDateStarted.Year < 2000 Or dtReportedDateStarted.Year > System.DateTime.Now.Year + 1 Then
                                 ' Invalid date; log a message
                                 ShowMessage(".UIMF file has an invalid DateStarted value in table Global_Parameters: " & dtReportedDateStarted.ToString & "; will use the time the datafile was last modified")
                                 blnInaccurateStartTime = True
+
                             Else
                                 blnValidStartTime = True
                             End If
@@ -611,10 +626,9 @@ Public Class clsUIMFInfoScanner
                     End If
 
                     If intMasterFrameNumList.Length > 0 Then
-                        ' Look up the acquisition time of the first frame and the last frame
-                        ' Subtract the two times to determine the run time
 
-                        Dim intFrameNumber As Integer
+                        ' Ideally, we would lookup the acquisition time of the first frame and the last frame, then subtract the two times to determine the run time
+                        ' However, given the odd values tah can be present in the StartTime field, we need to construct a full list of start times and then parse it
 
                         ' Get the start time of the first frame
                         ' The StartTime value for each frame is the number of minutes since 12:00 am
@@ -626,21 +640,28 @@ Public Class clsUIMFInfoScanner
                         dblStartTime = objFrameParams.StartTime
 
                         ' Get the start time of the last frame
-                        intFrameNumber = intMasterFrameNumList(intMasterFrameNumList.Length - 1)
-                        objUIMFReader.set_FrameType(dctMasterFrameList(intFrameNumber).FrameType)
+                        ' If the reported start time is zero, then step back up to 10 frames until a non-zero start time is reported
 
-                        objFrameParams = objUIMFReader.GetFrameParameters(dctMasterFrameList(intFrameNumber).FrameIndex)
-                        dblEndTime = objFrameParams.StartTime
+                        intIndex = intMasterFrameNumList.Length - 1
+                        Do
+                            intFrameNumber = intMasterFrameNumList(intIndex)
 
-                        ' Run time should be in minutes
-                        dblRunTime = dblEndTime - dblStartTime
+                            objUIMFReader.set_FrameType(dctMasterFrameList(intFrameNumber).FrameType)
+                            objFrameParams = objUIMFReader.GetFrameParameters(dctMasterFrameList(intFrameNumber).FrameIndex)
+                            dblEndTime = objFrameParams.StartTime
 
+                            If dblEndTime = 0 Then
+                                intIndex -= 1
+                            End If
+                        Loop While dblEndTime = 0 AndAlso intIndex >= 0
+
+                        ' Check whether the StartTime and EndTime values are based on ticks
                         If dblStartTime >= 1.0E+17 And dblEndTime > 1.0E+17 Then
                             ' StartTime and Endtime were stored as the number of ticks (where each tick is 100 ns)
                             ' Tick start date is either 1 January 1601 or 1 January 0001
 
                             Dim dtRunTime As System.DateTime
-                            dtRunTime = System.DateTime.MinValue.AddTicks(CLng(dblRunTime))
+                            dtRunTime = System.DateTime.MinValue.AddTicks(CLng(dblEndTime - dblStartTime))
 
                             dblRunTime = dtRunTime.Subtract(System.DateTime.MinValue).TotalMinutes
 
@@ -669,13 +690,54 @@ Public Class clsUIMFInfoScanner
                                     End If
                                 End If
                             End If
+                        Else
+                            ' Ideally, we'd just compute RunTime like this: dblRunTime = dblEndTime - dblStartTime
+                            ' But, given the idiosyncracies that can occur, we need to construct a full list of start times
+
+                            Dim lstStartTimes As System.Collections.Generic.List(Of Double) = New System.Collections.Generic.List(Of Double)
+                            Dim dblEndTimeAddon As Double = 0
+
+                            For intIndex = 0 To dctMasterFrameList.Count - 1
+
+                                intFrameNumber = intMasterFrameNumList(intIndex)
+                                objUIMFReader.set_FrameType(dctMasterFrameList(intFrameNumber).FrameType)
+                                objFrameParams = objUIMFReader.GetFrameParameters(dctMasterFrameList(intFrameNumber).FrameIndex)
+
+                                lstStartTimes.Add(objFrameParams.StartTime)
+                            Next intIndex
+
+                            ' Some datasets erroneously have zeroes stored in the .UIMF file for the StartTime of the last two frames; example: Sarc_MS2_26_2Apr11_Cheetah_11-02-18_inverse
+                            ' Check for this and remove them
+                            Dim intFrameCountRemoved As Integer = 0
+                            Do While (lstStartTimes(lstStartTimes.Count - 1) = 0)
+                                lstStartTimes.RemoveAt(lstStartTimes.Count - 1)
+                                intFrameCountRemoved += 1
+                                If lstStartTimes.Count = 0 Then Exit Do
+                            Loop
+
+                            If intFrameCountRemoved > 0 Then
+                                If lstStartTimes.Count > 2 Then
+                                    dblEndTimeAddon += intFrameCountRemoved * (lstStartTimes(lstStartTimes.Count - 1) - lstStartTimes(lstStartTimes.Count - 2))
+                                End If
+                            End If
+
+                            For intIndex = 1 To lstStartTimes.Count - 1
+                                If lstStartTimes(intIndex) < lstStartTimes(intIndex - 1) Then
+                                    If lstStartTimes(intIndex - 1) > 1439 Then
+                                        dblEndTimeAddon += 1440
+                                    ElseIf lstStartTimes(intIndex - 1) > 59.7 Then
+                                        dblEndTimeAddon += 60
+                                    End If
+                                End If
+                            Next intIndex
+
+                            If lstStartTimes.Count > 0 Then
+                                dblEndTime = lstStartTimes(lstStartTimes.Count - 1)
+                                dblRunTime = dblEndTime + dblEndTimeAddon - dblStartTime
+                            End If
+
                         End If
 
-                        If dblRunTime < 0 Then
-                            ' We likely rolled over midnight
-                            ' Add 1400 minutes to the end time
-                            dblRunTime = dblEndTime + 60 * 24 - dblStartTime
-                        End If
                     Else
                         dblRunTime = 0
                     End If
