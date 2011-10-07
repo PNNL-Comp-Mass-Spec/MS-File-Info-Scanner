@@ -918,7 +918,7 @@ Public Class clsFileIntegrityChecker
         End If
 
         objSharpZipLibTest = New System.Threading.Thread(AddressOf CheckZipFileWork)
-        dtStartTime = System.DateTime.Now
+        dtStartTime = System.DateTime.UtcNow
 
         objSharpZipLibTest.Start()
         Do
@@ -926,7 +926,7 @@ Public Class clsFileIntegrityChecker
 
             If objSharpZipLibTest.ThreadState = Threading.ThreadState.Aborted Then
                 Exit Do
-            ElseIf System.DateTime.Now.Subtract(dtStartTime).TotalMinutes >= sngMaxExecutionTimeMinutes Then
+            ElseIf System.DateTime.UtcNow.Subtract(dtStartTime).TotalMinutes >= sngMaxExecutionTimeMinutes Then
                 ' Execution took too long; abort
                 objSharpZipLibTest.Abort()
                 objSharpZipLibTest.Join(250)

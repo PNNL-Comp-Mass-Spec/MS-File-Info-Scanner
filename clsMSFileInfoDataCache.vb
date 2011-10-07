@@ -120,14 +120,14 @@ Public Class clsMSFileInfoDataCache
 
         If mCachedResultsAutoSaveIntervalMinutes > 0 Then
             If mMSFileInfoCachedResultsState = eCachedResultsStateConstants.Modified Then
-                If System.DateTime.Now.Subtract(mCachedMSInfoResultsLastSaveTime).TotalMinutes >= mCachedResultsAutoSaveIntervalMinutes Then
+                If System.DateTime.UtcNow.Subtract(mCachedMSInfoResultsLastSaveTime).TotalMinutes >= mCachedResultsAutoSaveIntervalMinutes Then
                     ' Auto save the cached results
                     SaveCachedMSInfoResults(False)
                 End If
             End If
 
             If mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.Modified Then
-                If System.DateTime.Now.Subtract(mCachedFolderIntegrityInfoLastSaveTime).TotalMinutes >= mCachedResultsAutoSaveIntervalMinutes Then
+                If System.DateTime.UtcNow.Subtract(mCachedFolderIntegrityInfoLastSaveTime).TotalMinutes >= mCachedResultsAutoSaveIntervalMinutes Then
                     ' Auto save the cached results
                     SaveCachedFolderIntegrityInfoResults(False)
                 End If
@@ -241,8 +241,8 @@ Public Class clsMSFileInfoDataCache
 
     Public Sub InitializeVariables()
         mCachedResultsAutoSaveIntervalMinutes = 5
-        mCachedMSInfoResultsLastSaveTime = System.DateTime.Now()
-        mCachedFolderIntegrityInfoLastSaveTime = System.DateTime.Now()
+        mCachedMSInfoResultsLastSaveTime = System.DateTime.UtcNow
+        mCachedFolderIntegrityInfoLastSaveTime = System.DateTime.UtcNow
 
         Me.FolderIntegrityInfoFilePath = System.IO.Path.Combine(clsMSFileInfoScanner.GetAppFolderPath(), clsMSFileInfoScanner.DefaultDataFileName(clsMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo))
 
@@ -575,7 +575,7 @@ Public Class clsMSFileInfoDataCache
                     srOutFile.Close()
                 End If
 
-                mCachedFolderIntegrityInfoLastSaveTime = System.DateTime.Now()
+                mCachedFolderIntegrityInfoLastSaveTime = System.DateTime.UtcNow
 
                 If blnClearCachedData Then
                     ' Clear the data table
@@ -636,7 +636,7 @@ Public Class clsMSFileInfoDataCache
                     srOutFile.Close()
                 End If
 
-                mCachedMSInfoResultsLastSaveTime = System.DateTime.Now()
+                mCachedMSInfoResultsLastSaveTime = System.DateTime.UtcNow
 
                 If blnClearCachedData Then
                     ' Clear the data table

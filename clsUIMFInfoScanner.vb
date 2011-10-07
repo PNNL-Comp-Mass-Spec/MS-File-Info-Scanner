@@ -256,7 +256,7 @@ Public Class clsUIMFInfoScanner
             MyBase.InitializeLCMS2DPlot()
         End If
 
-        dtLastProgressTime = System.DateTime.Now()
+        dtLastProgressTime = System.DateTime.UtcNow
 
         objGlobalParams = objUIMFReader.GetGlobalParameters()
 
@@ -442,8 +442,8 @@ Public Class clsUIMFInfoScanner
                 If intMasterFrameNumList.Length > 0 Then
                     sngProgress = CSng(intMasterFrameNumIndex / intMasterFrameNumList.Length * 100)
 
-                    If System.DateTime.Now.Subtract(dtLastProgressTime).TotalSeconds > 30 Then
-                        dtLastProgressTime = System.DateTime.Now
+                    If System.DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 30 Then
+                        dtLastProgressTime = System.DateTime.UtcNow
                         Console.WriteLine()
                         Console.Write(sngProgress.ToString("0.0") & "% ")
                     End If

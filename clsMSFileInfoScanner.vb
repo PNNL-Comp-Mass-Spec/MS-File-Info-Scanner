@@ -628,11 +628,11 @@ Public Class clsMSFileInfoScanner
         Static dtLastCheckTime As DateTime
 
         Try
-            If System.DateTime.Now.Subtract(dtLastCheckTime).TotalSeconds < 15 Then
+            If System.DateTime.UtcNow.Subtract(dtLastCheckTime).TotalSeconds < 15 Then
                 Exit Sub
             End If
 
-            dtLastCheckTime = System.DateTime.Now
+            dtLastCheckTime = System.DateTime.UtcNow
 
             If System.IO.File.Exists(ABORT_PROCESSING_FILENAME) Then
                 mAbortProcessing = True
@@ -2334,9 +2334,9 @@ Public Class clsMSFileInfoScanner
             End With
         Next intIndex
 
-        If System.DateTime.Now.Subtract(dtLastWriteTime).TotalMinutes > 1 Then
+        If System.DateTime.UtcNow.Subtract(dtLastWriteTime).TotalMinutes > 1 Then
             srOutFile.Flush()
-            dtLastWriteTime = System.DateTime.Now
+            dtLastWriteTime = System.DateTime.UtcNow
         End If
 
     End Sub
@@ -2351,9 +2351,9 @@ Public Class clsMSFileInfoScanner
                             strMessage & ControlChars.Tab & _
                             System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
 
-        If System.DateTime.Now.Subtract(dtLastWriteTime).TotalMinutes > 1 Then
+        If System.DateTime.UtcNow.Subtract(dtLastWriteTime).TotalMinutes > 1 Then
             srOutFile.Flush()
-            dtLastWriteTime = System.DateTime.Now
+            dtLastWriteTime = System.DateTime.UtcNow
         End If
 
     End Sub

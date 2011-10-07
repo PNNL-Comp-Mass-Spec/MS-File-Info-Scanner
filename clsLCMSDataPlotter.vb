@@ -998,7 +998,7 @@ Public Class clsLCMSDataPlotter
     '''</remarks>
     Protected Sub TrimCachedData(ByVal intTargetDataPointCount As Integer, ByVal intMinPointsPerSpectrum As Integer)
 
-        Static dtLastGCTime As System.DateTime = System.DateTime.Now
+        Static dtLastGCTime As System.DateTime = System.DateTime.UtcNow
 
         Dim intMasterIonIndex As Integer
         Dim intMasterIonIndexStart As Integer
@@ -1105,9 +1105,9 @@ Public Class clsLCMSDataPlotter
                         ' Shrink the arrays to reduce the memory footprint
                         mScans(intScanIndex).ShrinkArrays()
 
-                        If System.DateTime.Now.Subtract(dtLastGCTime).TotalSeconds > 60 Then
+                        If System.DateTime.UtcNow.Subtract(dtLastGCTime).TotalSeconds > 60 Then
                             ' Perform garbage collection every 60 seconds
-                            dtLastGCTime = System.DateTime.Now
+                            dtLastGCTime = System.DateTime.UtcNow
                             GC.Collect()
                             GC.WaitForPendingFinalizers()
                             System.Threading.Thread.Sleep(1000)

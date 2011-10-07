@@ -114,7 +114,7 @@ Public Class clsFinniganRawFileInfoScanner
             MyBase.InitializeLCMS2DPlot()
         End If
 
-        dtLastProgressTime = System.DateTime.Now()
+        dtLastProgressTime = System.DateTime.UtcNow
 
         intScanCount = objXcaliburAccessor.GetNumScans
         MyBase.GetStartAndEndScans(intScanCount, intScanStart, intScanEnd)
@@ -189,8 +189,8 @@ Public Class clsFinniganRawFileInfoScanner
                 If intScanCount > 0 Then
                     sngProgress = CSng(intScanNumber / intScanCount * 100)
 
-                    If System.DateTime.Now.Subtract(dtLastProgressTime).TotalSeconds > 30 Then
-                        dtLastProgressTime = System.DateTime.Now
+                    If System.DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 30 Then
+                        dtLastProgressTime = System.DateTime.UtcNow
                         Console.WriteLine()
                         Console.Write(sngProgress.ToString("0.0") & "% ")
                     End If
