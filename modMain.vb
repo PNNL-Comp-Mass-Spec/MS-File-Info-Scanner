@@ -7,7 +7,7 @@ Option Strict On
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "May 3, 2011"
+	Public Const PROGRAM_DATE As String = "October 27, 2011"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -32,7 +32,8 @@ Module modMain
     Private mScanEnd As Integer
 
     Private mComputeOverallQualityScores As Boolean
-    Private mCreateDatasetInfoFile As Boolean
+	Private mCreateDatasetInfoFile As Boolean
+	Private mCreateScanStatsFile As Boolean
 
     Private mUpdateDatasetStatsTextFile As Boolean
     Private mDatasetStatsTextFileName As String
@@ -121,7 +122,8 @@ Module modMain
         mScanEnd = 0
 
         mComputeOverallQualityScores = False
-        mCreateDatasetInfoFile = False
+		mCreateDatasetInfoFile = False
+		mCreateScanStatsFile = False
 
         mUpdateDatasetStatsTextFile = False
         mDatasetStatsTextFileName = String.Empty
@@ -170,7 +172,8 @@ Module modMain
                     .ScanEnd = mScanEnd
 
                     .ComputeOverallQualityScores = mComputeOverallQualityScores
-                    .CreateDatasetInfoFile = mCreateDatasetInfoFile
+					.CreateDatasetInfoFile = mCreateDatasetInfoFile
+					.CreateScanStatsFile = mCreateScanStatsFile
 
                     .UpdateDatasetStatsTextFile = mUpdateDatasetStatsTextFile
                     .DatasetStatsTextFileName = mDatasetStatsTextFileName
@@ -231,7 +234,7 @@ Module modMain
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String = String.Empty
-        Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "L", "C", "M", "H", "QZ", "NoTIC", "LC", "LCDiv", "QS", "ScanStart", "ScanEnd", "DI", "DST", "CF", "R", "Z"}
+		Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "L", "C", "M", "H", "QZ", "NoTIC", "LC", "LCDiv", "QS", "ScanStart", "ScanEnd", "DI", "DST", "SS", "CF", "R", "Z"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -299,7 +302,10 @@ Module modMain
 
                     If .RetrieveValueForParameter("QS", strValue) Then mComputeOverallQualityScores = True
 
-                    If .RetrieveValueForParameter("DI", strValue) Then mCreateDatasetInfoFile = True
+					If .RetrieveValueForParameter("DI", strValue) Then mCreateDatasetInfoFile = True
+
+					If .RetrieveValueForParameter("SS", strValue) Then mCreateScanStatsFile = True
+
                     If .RetrieveValueForParameter("DST", strValue) Then
                         mUpdateDatasetStatsTextFile = True
                         If Not String.IsNullOrEmpty(strValue) Then
@@ -332,7 +338,7 @@ Module modMain
             Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location))
             Console.WriteLine(" /I:InputFileNameOrFolderPath [/O:OutputFolderName]")
             Console.WriteLine(" [/P:ParamFilePath] [/S[:MaxLevel]] [IE] [/L:LogFilePath]")
-            Console.WriteLine(" [/LC[:MaxPointsToPlot]] [/NoTIC] [/DI] [/QS]")
+			Console.WriteLine(" [/LC[:MaxPointsToPlot]] [/NoTIC] [/DI] [/SS] [/QS]")
             Console.WriteLine(" [/DST:DatasetStatsFileName]")
             Console.WriteLine(" [/ScanStart:0] [/ScanEnd:0]")
             Console.WriteLine(" [/C] [/M:nnn] [/H] /[QZ]")
@@ -350,7 +356,8 @@ Module modMain
             Console.WriteLine("Use /LC to create 2D LCMS plots (this process could take several minutes for each dataset).  By default, plots the top " & clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_POINTS_TO_PLOT & " points.  To plot the top 20000 points, use /LC:20000.")
             Console.WriteLine("Use /LCDiv to specify the divisor to use when creating the overview 2D LCMS plots.  By default, uses /LCDiv:" & clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR & "; use /LCDiv:0 to disable creation of the overview plots.")
             Console.WriteLine("Use /NoTIC to not save TIC and BPI plots.")
-            Console.WriteLine("Use /DI to create a dataset info XML file for each dataset.")
+			Console.WriteLine("Use /DI to create a dataset info XML file for each dataset.")
+			Console.WriteLine("Use /SS to create a _ScanStats.txt  file for each dataset.")
             Console.WriteLine("Use /QS to compute an overall quality score for the data in each datasets.")
             Console.WriteLine()
 

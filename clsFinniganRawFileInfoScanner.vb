@@ -3,7 +3,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
-' Last modified November 29, 2010
+' Last modified October 27, 2011
 
 Public Class clsFinniganRawFileInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -327,11 +327,11 @@ Public Class clsFinniganRawFileInfoScanner
                     End With
                 End Try
 
-                If mSaveTICAndBPI OrElse mCreateDatasetInfoFile OrElse mSaveLCMS2DPlots Then
-                    ' Load data from each scan
-                    ' This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
-                    LoadScanDetails(objXcaliburAccessor)
-                End If
+				If mSaveTICAndBPI OrElse mCreateDatasetInfoFile OrElse mCreateScanStatsFile OrElse mSaveLCMS2DPlots Then
+					' Load data from each scan
+					' This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
+					LoadScanDetails(objXcaliburAccessor)
+				End If
 
                 If mComputeOverallQualityScores Then
                     ' Note that this call will also create the TICs and BPIs

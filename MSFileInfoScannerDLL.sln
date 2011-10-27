@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "MSFileInfoScannerDLL", "MSFileInfoScannerDLL.vbproj", "{E151DC79-60C0-4F15-9E50-099C8E2617F9}"
 EndProject
 Global

@@ -2,7 +2,7 @@ Option Strict On
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 '
-' Last modified May 3, 2011
+' Last modified October 27, 2011
 
 Public Class clsUIMFInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -758,11 +758,11 @@ Public Class clsUIMFInfoScanner
                     ShowMessage("Exception extracting acquisition time information: " & ex.Message)
                 End Try
 
-                If mSaveTICAndBPI OrElse mCreateDatasetInfoFile OrElse mSaveLCMS2DPlots Then
-                    ' Load data from each frame
-                    ' This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
-                    LoadFrameDetails(objUIMFReader, dctMasterFrameList, intMasterFrameNumList)
-                End If
+				If mSaveTICAndBPI OrElse mCreateDatasetInfoFile OrElse mCreateScanStatsFile OrElse mSaveLCMS2DPlots Then
+					' Load data from each frame
+					' This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
+					LoadFrameDetails(objUIMFReader, dctMasterFrameList, intMasterFrameNumList)
+				End If
 
                 If mComputeOverallQualityScores Then
                     ' Note that this call will also create the TICs and BPIs

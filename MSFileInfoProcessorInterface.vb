@@ -13,7 +13,8 @@ Public Interface iMSFileInfoProcessor
         CreateDatasetInfoFile = 2
         CreateLCMS2DPlots = 3
         CopyFileLocalOnReadError = 4
-        UpdateDatasetStatsTextFile = 5
+		UpdateDatasetStatsTextFile = 5
+		CreateScanStatsFile = 6
     End Enum
 
     ' ToDo: Update udtFileInfo to include some overall quality scores

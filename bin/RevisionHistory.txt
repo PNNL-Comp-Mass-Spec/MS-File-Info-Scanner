@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.1.4317; October 27, 2011
+	- Added option /SS which specifies a _ScanStats.txt file should be created for each dataset processed
+		- Only useful for .Raw files or .UIMF files
+
 Version 1.1.4140; May 3, 2011
 	- Further improved logic for determining AcqStartTime and AcqEndTime for .UIMF files
         - The DateStarted column in the Global_Parameters table should be represented by one of these values

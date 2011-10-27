@@ -38,7 +38,8 @@ Namespace FinniganFileIO
         ' This RegEx matches Full ms2, Full ms3, ..., Full ms10, Full ms11, ...
         ' It also matches p ms2
         ' It also matches SRM ms2
-        Private Const MS2_REGEX As String = "( p|Full|SRM) ms([2-9]|[1-9][0-9]) "
+        ' It also matches CRM ms3
+        Private Const MS2_REGEX As String = "( p|Full|SRM|CRM) ms([2-9]|[1-9][0-9]) "
 
         ' Used with .GetSeqRowSampleType()
         Public Enum SampleTypeConstants
@@ -924,6 +925,7 @@ Namespace FinniganFileIO
             ' + c d Full ms2 1312.95@45.00 [ 350.00-2000.00]                       MSn
             ' + c d Full ms3 1312.95@45.00 873.85@45.00 [ 350.00-2000.00]          MSn
             ' ITMS + c NSI d Full ms10 421.76@35.00                                MSn
+            ' ITMS + p NSI CRM ms3 332.14@cid35.00 288.10@cid35.00 [242.00-248.00, 285.00-291.00]  MS3
 
             ' + p ms2 777.00@cid30.00 [210.00-1200.00]                             CID-MSn
             ' + c NSI SRM ms2 501.560@cid15.00 [507.259-507.261, 635-319-635.32]   CID-SRM

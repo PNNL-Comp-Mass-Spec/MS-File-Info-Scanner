@@ -13,7 +13,7 @@ Option Strict On
 Public Class clsMSFileInfoScanner
 
     Public Sub New()
-        mFileDate = "March 10, 2011"
+		mFileDate = "October 27, 2011"
 
         mFileIntegrityChecker = New clsFileIntegrityChecker
         mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -119,7 +119,8 @@ Public Class clsMSFileInfoScanner
     Private mSaveLCMS2DPlots As Boolean
 
     Private mComputeOverallQualityScores As Boolean
-    Private mCreateDatasetInfoFile As Boolean
+	Private mCreateDatasetInfoFile As Boolean
+	Private mCreateScanStatsFile As Boolean
 
     Private mUpdateDatasetStatsTextFile As Boolean
     Private mDatasetStatsTextFileName As String
@@ -326,6 +327,18 @@ Public Class clsMSFileInfoScanner
             mCreateDatasetInfoFile = value
         End Set
     End Property
+
+	''' <summary>
+	''' If True, then will create the _ScanStats.txt file
+	''' </summary>
+	Public Property CreateScanStatsFile() As Boolean
+		Get
+			Return mCreateScanStatsFile
+		End Get
+		Set(value As Boolean)
+			mCreateScanStatsFile = value
+		End Set
+	End Property
 
     Public Property DatasetStatsTextFileName() As String
         Get
@@ -1014,7 +1027,8 @@ Public Class clsMSFileInfoScanner
                         Me.ScanEnd = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanEnd", Me.ScanEnd)
 
                         Me.ComputeOverallQualityScores = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeOverallQualityScores", Me.ComputeOverallQualityScores)
-                        Me.CreateDatasetInfoFile = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateDatasetInfoFile", Me.CreateDatasetInfoFile)
+						Me.CreateDatasetInfoFile = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateDatasetInfoFile", Me.CreateDatasetInfoFile)
+						Me.CreateScanStatsFile = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateScanStatsFile", Me.CreateScanStatsFile)
 
                         Me.UpdateDatasetStatsTextFile = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UpdateDatasetStatsTextFile", Me.UpdateDatasetStatsTextFile)
                         Me.DatasetStatsTextFileName = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DatasetStatsTextFileName", Me.DatasetStatsTextFileName)
@@ -1385,7 +1399,8 @@ Public Class clsMSFileInfoScanner
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, mSaveTICAndBPIPlots)
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots, mSaveLCMS2DPlots)
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, mComputeOverallQualityScores)
-            objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, mCreateDatasetInfoFile)
+			objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, mCreateDatasetInfoFile)
+			objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile, mCreateScanStatsFile)
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError, mCopyFileLocalOnReadError)
             objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile, mUpdateDatasetStatsTextFile)
 

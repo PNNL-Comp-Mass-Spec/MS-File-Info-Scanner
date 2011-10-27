@@ -51,6 +51,10 @@ MSFileInfoScanner
 	<summary>
  If True, then will create the _DatasetInfo.xml file
  </summary>
+</member><member name="P:MSFileInfoScanner.clsMSFileInfoScanner.CreateScanStatsFile">
+	<summary>
+ If True, then will create the _ScanStats.txt file
+ </summary>
 </member><member name="P:MSFileInfoScanner.clsMSFileInfoScanner.SaveTICAndBPIPlots">
 	<summary>
  If True, then saves TIC and BPI plots as PNG files
@@ -673,6 +677,25 @@ MSFileInfoScanner
 	<param name="udtDatasetFileInfo">Dataset Info</param>
 	<returns>XML (as string)</returns>
 	<remarks></remarks>
+</member><member name="M:MSFileInfoScanner.DSSummarizer.clsDatasetStatsSummarizer.CreateScanStatsFile(System.String,System.String)">
+	<summary>
+ Creates a tab-delimited text file with details on each scan tracked by this class (stored in mDatasetScanStats)
+ </summary>
+	<param name="strDatasetName">Dataset Name</param>
+	<param name="strScanStatsFilePath">File path to write the text file to</param>
+	<returns>True if success; False if failure</returns>
+	<remarks></remarks>
+</member><member name="M:MSFileInfoScanner.DSSummarizer.clsDatasetStatsSummarizer.CreateScanStatsFile(System.String,System.String,System.Collections.Generic.List{MSFileInfoScanner.DSSummarizer.clsScanStatsEntry}@,MSFileInfoScanner.DSSummarizer.clsDatasetStatsSummarizer.udtDatasetFileInfoType@,MSFileInfoScanner.DSSummarizer.clsDatasetStatsSummarizer.udtSampleInfoType@)">
+	<summary>
+ Creates a tab-delimited text file with details on each scan tracked by this class (stored in mDatasetScanStats)
+ </summary>
+	<param name="strDatasetName">Dataset Name</param>
+	<param name="strScanStatsFilePath">File path to write the text file to</param>
+	<param name="objScanStats">Scan stats to parse</param>
+	<param name="udtDatasetFileInfo">Dataset Info</param>
+	<param name="udtSampleInfo">Sample Info</param>
+	<returns>True if success; False if failure</returns>
+	<remarks></remarks>
 </member><member name="M:MSFileInfoScanner.DSSummarizer.clsDatasetStatsSummarizer.UpdateDatasetScanType(System.Int32,System.Int32,System.String)">
 	<summary>
  Updates the scan type information for the specified scan number
@@ -761,6 +784,80 @@ MSFileInfoScanner
  </summary>
 	<returns></returns>
 	<remarks></remarks>
+</member><member name="M:MSFileInfoScanner.clsParseCommandLine.InvalidParametersPresent(System.Collections.Generic.List{System.String})">
+	<summary>
+ Compares the parameter names in objParameterList with the parameters at the command line
+ </summary>
+	<param name="objParameterList">Parameter list</param>
+	<returns>True if any of the parameters are not present in strParameterList()</returns>
+</member><member name="M:MSFileInfoScanner.clsParseCommandLine.InvalidParametersPresent(System.String[])">
+	<summary>
+ Compares the parameter names in strParameterList with the parameters at the command line
+ </summary>
+	<param name="strParameterList">Parameter list</param>
+	<returns>True if any of the parameters are not present in strParameterList()</returns>
+</member><member name="M:MSFileInfoScanner.clsParseCommandLine.InvalidParametersPresent(System.String[],System.Boolean)">
+	<summary>
+ Compares the parameter names in strParameterList with the parameters at the command line
+ </summary>
+	<param name="strParameterList">Parameter list</param>
+	<param name="blnCaseSensitive">True to perform case-sensitive matching of the parameter name</param>
+	<returns>True if any of the parameters are not present in strParameterList()</returns>
+</member><member name="M:MSFileInfoScanner.clsParseCommandLine.IsParameterPresent(System.String)">
+	<summary>
+ Look for parameter on the command line
+ </summary>
+	<param name="strParameterName">Parameter name</param>
+	<returns>True if present, otherwise false</returns>
+</member><member name="M:MSFileInfoScanner.clsParseCommandLine.ParseCommandLine">
+	<summary>
+ Parse the parameters and switches at the command line; uses / for the switch character and : for the switch parameter character
+ </summary>
+	<returns>Returns True if any command line parameters were found; otherwise false</returns>
+	<remarks>If /? or /help is found, then returns False and sets mShowHelp to True</remarks>
+</member><member name="M:MSFileInfoScanner.clsParseCommandLine.ParseCommandLine(System.Char)">
+	<summary>
+ Parse the parameters and switches at the command line; uses : for the switch parameter character
+ </summary>
+	<returns>Returns True if any command line parameters were found; otherwise false</returns>
+	<remarks>If /? or /help is found, then returns False and sets mShowHelp to True</remarks>
+</member><member name="M:MSFileInfoScanner.clsParseCommandLine.ParseCommandLine(System.Char,System.Char)">
+	<summary>
+ Parse the parameters and switches at the command line
+ </summary>
+	<param name="chSwitchStartChar"></param>
+	<param name="chSwitchParameterChar"></param>
+	<returns>Returns True if any command line parameters were found; otherwise false</returns>
+	<remarks>If /? or /help is found, then returns False and sets mShowHelp to True</remarks>
+</member><member name="M:MSFileInfoScanner.clsParseCommandLine.RetrieveNonSwitchParameter(System.Int32)">
+	<summary>
+ Returns the value of the non-switch parameter at the given index
+ </summary>
+	<param name="intParameterIndex">Parameter index</param>
+	<returns>The value of the parameter at the given index; empty string if no value or invalid index</returns>
+</member><member name="M:MSFileInfoScanner.clsParseCommandLine.RetrieveParameter(System.Int32,System.String@,System.String@)">
+	<summary>
+ Returns the parameter at the given index
+ </summary>
+	<param name="intParameterIndex">Parameter index</param>
+	<param name="strKey">Parameter name (output)</param>
+	<param name="strValue">Value associated with the parameter; empty string if no value (output)</param>
+	<returns></returns>
+</member><member name="M:MSFileInfoScanner.clsParseCommandLine.RetrieveValueForParameter(System.String,System.String@)">
+	<summary>
+ Look for parameter on the command line and returns its value in strValue
+ </summary>
+	<param name="strKey">Parameter name</param>
+	<param name="strValue">Value associated with the parameter; empty string if no value (output)</param>
+	<returns>True if present, otherwise false</returns>
+</member><member name="M:MSFileInfoScanner.clsParseCommandLine.RetrieveValueForParameter(System.String,System.String@,System.Boolean)">
+	<summary>
+ Look for parameter on the command line and returns its value in strValue
+ </summary>
+	<param name="strKey">Parameter name</param>
+	<param name="strValue">Value associated with the parameter; empty string if no value (output)</param>
+	<param name="blnCaseSensitive">True to perform case-sensitive matching of the parameter name</param>
+	<returns>True if present, otherwise false</returns>
 </member><member name="P:MSFileInfoScanner.clsFileIntegrityChecker.ComputeFileHashes">
 	<summary>
  When True, then computes an MD5 hash on every file
