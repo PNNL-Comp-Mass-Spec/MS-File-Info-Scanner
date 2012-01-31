@@ -1584,7 +1584,18 @@ Public Class clsMSFileInfoScanner
 					ElseIf objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME.ToLower() Then
 						mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
 						blnKnownMSDataType = True
-					Else
+					ElseIf objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME.ToLower() Then
+						' If the folder also contains file BRUKER_EXTENSION_BAF_FILE_NAME then this is a Bruker XMass folder
+						Dim strPathCheck As String
+
+						strPathCheck = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(objFileSystemInfo.FullName), clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME)
+						If System.IO.File.Exists(strPathCheck) Then
+							mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+							blnKnownMSDataType = True
+						End If
+					End If
+
+					If Not blnKnownMSDataType Then
 
 						' Examine the extension on strInputFileOrFolderPath
 						Select Case objFileSystemInfo.Extension.ToUpper
