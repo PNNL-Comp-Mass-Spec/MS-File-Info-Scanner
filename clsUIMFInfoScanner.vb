@@ -564,7 +564,11 @@ Public Class clsUIMFInfoScanner
                     ' The StartTime column in the Frame_Parameters table should be represented by one of these values
                     '   Integer between 0 and 1440 representing number of minutes since midnight (can loop from 1439.9 to 0); example: Sarc_MS2_26_2Apr11_Cheetah_11-02-18_inverse.uimf
                     '   Integer between 0 and 60 representing number of minutes since past the current hour (can loop from 59.9 to 0); example: BATs_TS_01_c4_Eagle_10-02-06_0000.uimf
-                    '   A tick-based date, like 634305349108974800 (number of ticks since January 1, 0001); example: QC_Shew_11_01_pt5_c2_030311_earth_4ms_0001
+					'   A tick-based date, like 634305349108974800 (number of ticks since January 1, 0001); example: QC_Shew_11_01_pt5_c2_030311_earth_4ms_0001
+					'   A negative number representing number of minutes from the start of the run in UTC time to the start of the current frame, in local time; example: Sarc_P08_G03_0747_7Dec11_Cheetah_11-09-05.uimf
+					'      Examine values: Frame 1 has StartTime = -479.993 and Frame 1177 has StartTime = -417.509
+					'   A positive integer representing number of minutes since the start of the run
+					'      Theoretically, this will be the case for IMS_TOF_4 acquired after 12/14/2011
 
                     Dim dblStartTime As Double
                     Dim dblEndTime As Double
@@ -628,11 +632,10 @@ Public Class clsUIMFInfoScanner
                     If intMasterFrameNumList.Length > 0 Then
 
                         ' Ideally, we would lookup the acquisition time of the first frame and the last frame, then subtract the two times to determine the run time
-                        ' However, given the odd values tah can be present in the StartTime field, we need to construct a full list of start times and then parse it
+						' However, given the odd values that can be present in the StartTime field, we need to construct a full list of start times and then parse it
 
                         ' Get the start time of the first frame
-                        ' The StartTime value for each frame is the number of minutes since 12:00 am
-                        ' If acquiring data from 11:59 pm through 12:00 am, then the StartTime will reset to zero
+						' See above for the various numbers that could be stored in the StartTime column
                         intFrameNumber = intMasterFrameNumList(0)
                         objUIMFReader.set_FrameType(dctMasterFrameList(intFrameNumber).FrameType)
 
@@ -721,6 +724,9 @@ Public Class clsUIMFInfoScanner
                                 End If
                             End If
 
+							' Now check for the StartTime changing to a smaller number from one frame to the next
+							' This could happen if the StartTime changed from 1439 to 0 as the system clock hits midnight
+							' Or if the StartTime changes from 59.9 to 0 as the system clock hits the top of a new hour
                             For intIndex = 1 To lstStartTimes.Count - 1
                                 If lstStartTimes(intIndex) < lstStartTimes(intIndex - 1) Then
                                     If lstStartTimes(intIndex - 1) > 1439 Then
@@ -731,10 +737,12 @@ Public Class clsUIMFInfoScanner
                                 End If
                             Next intIndex
 
-                            If lstStartTimes.Count > 0 Then
-                                dblEndTime = lstStartTimes(lstStartTimes.Count - 1)
-                                dblRunTime = dblEndTime + dblEndTimeAddon - dblStartTime
-                            End If
+							If lstStartTimes.Count > 0 Then
+								' Compute the runtime
+								' Luckily, even if dblStartTime is -479.993 and dblEntTime is -417.509, this works out to a positive, accurate runtime
+								dblEndTime = lstStartTimes(lstStartTimes.Count - 1)
+								dblRunTime = dblEndTime + dblEndTimeAddon - dblStartTime
+							End If
 
                         End If
 

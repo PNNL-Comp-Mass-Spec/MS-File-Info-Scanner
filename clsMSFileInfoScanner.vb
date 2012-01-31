@@ -13,7 +13,7 @@ Option Strict On
 Public Class clsMSFileInfoScanner
 
     Public Sub New()
-		mFileDate = "October 27, 2011"
+		mFileDate = "December 19, 2011"
 
         mFileIntegrityChecker = New clsFileIntegrityChecker
         mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -1501,7 +1501,7 @@ Public Class clsMSFileInfoScanner
         Dim blnIsFolder As Boolean
         Dim blnKnownMSDataType As Boolean
 
-        Dim objFileSystemInfo As System.IO.FileSystemInfo
+		Dim objFileSystemInfo As System.IO.FileSystemInfo = Nothing
 
         Dim objRow As System.Data.DataRow
         Dim lngCachedSizeBytes As Long
@@ -1550,43 +1550,66 @@ Public Class clsMSFileInfoScanner
                         ' Bruker 1 folder
                         mMSInfoScanner = New clsBrukerOneFolderInfoScanner
                         blnKnownMSDataType = True
-                    Else
-                        Select Case System.IO.Path.GetExtension(strInputFileOrFolderPath).ToUpper
-                            Case clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION
-                                ' Agilent .D folder
-                                mMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
-                                blnKnownMSDataType = True
-                            Case clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION
-                                ' Micromass .Raw folder
-                                mMSInfoScanner = New clsMicromassRawFolderInfoScanner
-                                blnKnownMSDataType = True
-                            Case Else
-                                ' Unknown folder extension
-                        End Select
+					Else
+						If strInputFileOrFolderPath.EndsWith("\"c) Then
+							strInputFileOrFolderPath = strInputFileOrFolderPath.TrimEnd("\"c)
+						End If
+
+						Select Case System.IO.Path.GetExtension(strInputFileOrFolderPath).ToUpper
+							Case clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION
+								' Agilent .D folder or Bruker .D folder
+								' Look for file analysis.baf or extension.baf
+
+								If System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 Then
+									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+								ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 Then
+									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+								Else
+									mMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
+								End If
+
+								blnKnownMSDataType = True
+							Case clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION
+								' Micromass .Raw folder
+								mMSInfoScanner = New clsMicromassRawFolderInfoScanner
+								blnKnownMSDataType = True
+							Case Else
+								' Unknown folder extension
+						End Select
                     End If
-                Else
-                    ' Examine the extension on strInputFileOrFolderPath
-                    Select Case objFileSystemInfo.Extension.ToUpper
-                        Case clsFinniganRawFileInfoScanner.FINNIGAN_RAW_FILE_EXTENSION
-                            mMSInfoScanner = New clsFinniganRawFileInfoScanner
-                            blnKnownMSDataType = True
-                        Case clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION
-                            mMSInfoScanner = New clsAgilentTOFOrQStarWiffFileInfoScanner
-                            blnKnownMSDataType = True
-                        Case clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION
-                            mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
-                            blnKnownMSDataType = True
-                        Case clsUIMFInfoScanner.UIMF_FILE_EXTENSION
-                            mMSInfoScanner = New clsUIMFInfoScanner
-                            blnKnownMSDataType = True
-                        Case Else
-                            ' Unknown file extension; check for a zipped folder 
-                            If clsBrukerOneFolderInfoScanner.IsZippedSFolder(objFileSystemInfo.Name) Then
-                                ' Bruker s001.zip file
-                                mMSInfoScanner = New clsBrukerOneFolderInfoScanner
-                                blnKnownMSDataType = True
-                            End If
-                    End Select
+				Else
+					If objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME.ToLower() Then
+						mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+						blnKnownMSDataType = True
+					ElseIf objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME.ToLower() Then
+						mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+						blnKnownMSDataType = True
+					Else
+
+						' Examine the extension on strInputFileOrFolderPath
+						Select Case objFileSystemInfo.Extension.ToUpper
+							Case clsFinniganRawFileInfoScanner.FINNIGAN_RAW_FILE_EXTENSION
+								mMSInfoScanner = New clsFinniganRawFileInfoScanner
+								blnKnownMSDataType = True
+							Case clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION
+								mMSInfoScanner = New clsAgilentTOFOrQStarWiffFileInfoScanner
+								blnKnownMSDataType = True
+							Case clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION
+								mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+								blnKnownMSDataType = True
+							Case clsUIMFInfoScanner.UIMF_FILE_EXTENSION
+								mMSInfoScanner = New clsUIMFInfoScanner
+								blnKnownMSDataType = True
+							Case Else
+								' Unknown file extension; check for a zipped folder 
+								If clsBrukerOneFolderInfoScanner.IsZippedSFolder(objFileSystemInfo.Name) Then
+									' Bruker s001.zip file
+									mMSInfoScanner = New clsBrukerOneFolderInfoScanner
+									blnKnownMSDataType = True
+								End If
+						End Select
+					End If
+
                 End If
 
                 If Not blnKnownMSDataType Then

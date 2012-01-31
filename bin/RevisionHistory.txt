@@ -1,5 +1,12 @@
 MS File Info Scanner Change Log
 
+Version 1.1.4413; January 31, 2012
+	- Added support for Bruker XMass .D folders that have extension.baf instead of analysis.baf
+		- These folders are created by Bruker FT Ion trap instruments
+
+Version 1.1.4370; December 19, 2011
+	- Updated to recognize Bruker XMass .D datasets by looking for file analysis.baf
+
 Version 1.1.4317; October 27, 2011
 	- Added option /SS which specifies a _ScanStats.txt file should be created for each dataset processed
 		- Only useful for .Raw files or .UIMF files

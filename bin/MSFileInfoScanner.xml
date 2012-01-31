@@ -784,6 +784,16 @@ MSFileInfoScanner
  </summary>
 	<returns></returns>
 	<remarks></remarks>
+</member><member name="M:MSFileInfoScanner.clsBrukerXmassFolderInfoScanner.DetermineAcqStartTime(System.IO.DirectoryInfo,MSFileInfoScanner.iMSFileInfoProcessor.udtFileInfoType@)">
+	<summary>
+ Looks for a .m folder then looks for apexAcquisition.method or submethods.xml in that folder
+ Uses the file modification time as the run start time
+ Also looks for the .hdx file in the dataset folder and examines its modification time
+ </summary>
+	<param name="ioDatasetFolder"></param>
+	<param name="udtFileInfo"></param>
+	<returns>True if a valid file is found; otherwise false</returns>
+	<remarks></remarks>
 </member><member name="M:MSFileInfoScanner.clsParseCommandLine.InvalidParametersPresent(System.Collections.Generic.List{System.String})">
 	<summary>
  Compares the parameter names in objParameterList with the parameters at the command line
