@@ -2,7 +2,7 @@
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 '
-' Last modified January 31, 2012
+' Last modified March 7, 2012
 
 Public Class clsBrukerXmassFolderInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -21,7 +21,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 	''' <summary>
 	''' Looks for a .m folder then looks for apexAcquisition.method or submethods.xml in that folder
 	''' Uses the file modification time as the run start time
-	''' Also looks for the .hdx file in the dataset folder and examines its modification time
+	''' Also looks for the .hdx file in the dataset folder and examine its modification time
 	''' </summary>
 	''' <param name="ioDatasetFolder"></param>
 	''' <param name="udtFileInfo"></param>
@@ -30,7 +30,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 	Protected Function DetermineAcqStartTime(ByVal ioDatasetFolder As System.IO.DirectoryInfo, _
 				  ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
-		Dim blnSuccess As Boolean
+		Dim blnSuccess As Boolean = False
 
 		Dim intIndex As Integer
 
@@ -77,7 +77,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 			End If
 
 			' Also look for the .hdx file
-			' It's file modification time typically also matches the run start time
+			' Its file modification time typically also matches the run start time
 
 			For Each ioFile In ioDatasetFolder.GetFiles("*.hdx")
 				If Not blnSuccess OrElse ioFile.LastWriteTime < udtFileInfo.AcqTimeStart Then
@@ -295,7 +295,8 @@ Public Class clsBrukerXmassFolderInfoScanner
 
 			End If
 		Catch ex As System.Exception
-			ReportError("Error finding scan.xml file: " & ex.Message)
+			' Error finding Scan.xml file
+			ReportError("Error finding " & BRUKER_SCANINFO_XML_FILE & "file: " & ex.Message)
 			blnSuccess = False
 		End Try
 
@@ -397,12 +398,19 @@ Public Class clsBrukerXmassFolderInfoScanner
 				udtFileInfo.DatasetName = GetDatasetNameViaPath(ioDatasetFolder.FullName)
 				udtFileInfo.FileExtension = String.Empty
 
-				' Find the submethods.xml file in the XMASS_Method.m subfolder to determine .AcqTimeStart
+				' Find the apexAcquisition.method or submethods.xml file in the XMASS_Method.m subfolder to determine .AcqTimeStart
+				' This function updates udtFileInfo.AcqTimeEnd and udtFileInfo.AcqTimeStart to have the same time
 				blnSuccess = DetermineAcqStartTime(ioDatasetFolder, udtFileInfo)
+
+				' Update the acquisition end time using the write time of the .baf file
+				If ioFileInfo.LastWriteTime > udtFileInfo.AcqTimeEnd Then
+					udtFileInfo.AcqTimeEnd = ioFileInfo.LastWriteTime
+				End If
 
 				' Parse the scan.xml file (if it exists) to determine the number of spectra acquired
 				' We can also obtain TIC and elution time values from this file
 				' However, it does not track whether a scan is MS or MSn
+				' If the scans.xml file contains runtime entries (e.g. <minutes>100.0456</minutes>) then .AcqTimeEnd is updated using .AcqTimeStart + RunTimeMinutes
 				ParseScanXMLFile(ioDatasetFolder, udtFileInfo)
 
 				' Parse the AutoMS.txt file (if it exists) to determine which scans are MS and which are MS/MS

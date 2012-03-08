@@ -1,5 +1,10 @@
 MS File Info Scanner Change Log
 
+Version 1.1.4449; March 7, 2012
+	- Updated processing of Bruker XMass .D folders to use the file modification time of the analysis.baf file as the acquisition end time
+		- This time is overridden if the scans.xml file has runtime values defined
+		- Acquisition start time is determined using the apexAcquisition.method file
+
 Version 1.1.4413; January 31, 2012
 	- Added support for Bruker XMass .D folders that have extension.baf instead of analysis.baf
 		- These folders are created by Bruker FT Ion trap instruments

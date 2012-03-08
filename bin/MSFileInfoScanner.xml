@@ -788,7 +788,7 @@ MSFileInfoScanner
 	<summary>
  Looks for a .m folder then looks for apexAcquisition.method or submethods.xml in that folder
  Uses the file modification time as the run start time
- Also looks for the .hdx file in the dataset folder and examines its modification time
+ Also looks for the .hdx file in the dataset folder and examine its modification time
  </summary>
 	<param name="ioDatasetFolder"></param>
 	<param name="udtFileInfo"></param>
