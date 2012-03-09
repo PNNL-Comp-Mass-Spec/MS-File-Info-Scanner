@@ -62,8 +62,7 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
     End Function
 
     Private Function ParseRunLogFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        Dim srInFile As System.IO.StreamReader
-        Dim strLineIn As String
+		Dim strLineIn As String
         Dim strMostRecentMethodLine As String = String.Empty
 
         Dim intCharLoc As Integer
@@ -75,44 +74,45 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 
         Try
             ' Try to open the Run.Log file
-            srInFile = New System.IO.StreamReader(System.IO.Path.Combine(strFolderPath, AGILENT_RUN_LOG_FILE))
+			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(System.IO.Path.Combine(strFolderPath, AGILENT_RUN_LOG_FILE))
 
-            blnProcessedFirstMethodLine = False
-            blnEndDateFound = False
-            Do While srInFile.Peek() >= 0
-                strLineIn = srInFile.ReadLine()
+				blnProcessedFirstMethodLine = False
+				blnEndDateFound = False
+				Do While srInFile.Peek() >= 0
+					strLineIn = srInFile.ReadLine()
 
-                If Not strLineIn Is Nothing Then
-                    If strLineIn.StartsWith(RUN_LOG_FILE_METHOD_LINE_START) Then
-                        strMostRecentMethodLine = String.Copy(strLineIn)
+					If Not strLineIn Is Nothing Then
+						If strLineIn.StartsWith(RUN_LOG_FILE_METHOD_LINE_START) Then
+							strMostRecentMethodLine = String.Copy(strLineIn)
 
-                        ' Method line found
-                        ' See if the line contains a key phrase
-                        intCharLoc = strLineIn.IndexOf(RUN_LOG_FILE_INSTRUMENT_RUNNING)
-                        If intCharLoc > 0 Then
-                            If ExtractMethodLineDate(strLineIn, dtMethodDate) Then
-                                udtFileInfo.AcqTimeStart = dtMethodDate
-                            End If
-                            blnProcessedFirstMethodLine = True
-                        Else
-                            intCharLoc = strLineIn.IndexOf(RUN_LOG_INSTRUMENT_RUN_COMPLETED)
-                            If intCharLoc > 0 Then
-                                If ExtractMethodLineDate(strLineIn, dtMethodDate) Then
-                                    udtFileInfo.AcqTimeEnd = dtMethodDate
-                                    blnEndDateFound = True
-                                End If
-                            End If
-                        End If
+							' Method line found
+							' See if the line contains a key phrase
+							intCharLoc = strLineIn.IndexOf(RUN_LOG_FILE_INSTRUMENT_RUNNING)
+							If intCharLoc > 0 Then
+								If ExtractMethodLineDate(strLineIn, dtMethodDate) Then
+									udtFileInfo.AcqTimeStart = dtMethodDate
+								End If
+								blnProcessedFirstMethodLine = True
+							Else
+								intCharLoc = strLineIn.IndexOf(RUN_LOG_INSTRUMENT_RUN_COMPLETED)
+								If intCharLoc > 0 Then
+									If ExtractMethodLineDate(strLineIn, dtMethodDate) Then
+										udtFileInfo.AcqTimeEnd = dtMethodDate
+										blnEndDateFound = True
+									End If
+								End If
+							End If
 
-                        ' If this is the first method line, then parse out the date and store in .AcqTimeStart
-                        If Not blnProcessedFirstMethodLine Then
-                            If ExtractMethodLineDate(strLineIn, dtMethodDate) Then
-                                udtFileInfo.AcqTimeStart = dtMethodDate
-                            End If
-                        End If
-                    End If
-                End If
-            Loop
+							' If this is the first method line, then parse out the date and store in .AcqTimeStart
+							If Not blnProcessedFirstMethodLine Then
+								If ExtractMethodLineDate(strLineIn, dtMethodDate) Then
+									udtFileInfo.AcqTimeStart = dtMethodDate
+								End If
+							End If
+						End If
+					End If
+				Loop
+			End Using
 
             If blnProcessedFirstMethodLine And Not blnEndDateFound Then
                 ' Use the last time in the file as the .AcqTimeEnd value
@@ -126,18 +126,14 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
         Catch ex As System.Exception
             ' Run.log file not found
             blnSuccess = False
-        Finally
-            If Not srInFile Is Nothing Then
-                srInFile.Close()
-            End If
-        End Try
+		End Try
 
         Return blnSuccess
 
     End Function
 
     Private Function ParseAnalysisCDFFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        Dim objNETCDFReader As NetCDFReader.clsMSNetCdf
+		Dim objNETCDFReader As NetCDFReader.clsMSNetCdf = Nothing
 
         Dim intScanCount As Integer, intScanNumber As Integer
         Dim dblScanTotalIntensity As Double, dblScanTime As Double

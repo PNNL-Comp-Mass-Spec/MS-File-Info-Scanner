@@ -529,7 +529,6 @@ Public Class clsFileIntegrityChecker
         Dim blnErrorLogged As Boolean = False
 
         Dim ioInStream As System.IO.FileStream
-        Dim srInFile As System.IO.StreamReader
 
         Dim blnFhtProtFile As Boolean = False
 
@@ -558,52 +557,54 @@ Public Class clsFileIntegrityChecker
 
             ' Open the file
             ioInStream = New System.IO.FileStream(strFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read)
-            srInFile = New System.IO.StreamReader(ioInStream)
+			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(ioInStream)
 
-            ' Read each line and examine it
-            Do While srInFile.Peek >= 0 AndAlso intLinesRead < intMaximumTextFileLinesToCheck
-                strLineIn = srInFile.ReadLine
-                intLinesRead += 1
+				' Read each line and examine it
+				Do While srInFile.Peek >= 0 AndAlso intLinesRead < intMaximumTextFileLinesToCheck
+					strLineIn = srInFile.ReadLine
+					intLinesRead += 1
 
-                If blnCharCountSkipsBlankLines AndAlso strLineIn.Trim.Length = 0 Then
-                    blnSuccess = True
-                Else
+					If blnCharCountSkipsBlankLines AndAlso strLineIn.Trim.Length = 0 Then
+						blnSuccess = True
+					Else
 
-                    If intMinimumTabCount > 0 Then
-                        ' Count the number of tabs
-                        blnSuccess = CheckTextFileCountChars(strLineIn, blnBlankLineRead, intLinesRead, intExpectedTabCount, ControlChars.Tab, "Tab", intMinimumTabCount, blnRequireEqualTabsPerLine, strErrorMessage)
+						If intMinimumTabCount > 0 Then
+							' Count the number of tabs
+							blnSuccess = CheckTextFileCountChars(strLineIn, blnBlankLineRead, intLinesRead, intExpectedTabCount, ControlChars.Tab, "Tab", intMinimumTabCount, blnRequireEqualTabsPerLine, strErrorMessage)
 
-                        If Not blnSuccess Then
-                            LogFileIntegrityError(strFilePath, strErrorMessage)
-                            blnErrorLogged = True
-                            Exit Do
-                        End If
+							If Not blnSuccess Then
+								LogFileIntegrityError(strFilePath, strErrorMessage)
+								blnErrorLogged = True
+								Exit Do
+							End If
 
-                    End If
+						End If
 
-                    If intMinimumCommaCount > 0 Then
-                        ' Count the number of commas
-                        blnSuccess = CheckTextFileCountChars(strLineIn, blnBlankLineRead, intLinesRead, intExpectedCommaCount, ","c, "Comma", intMinimumCommaCount, blnRequireEqualCommasPerLine, strErrorMessage)
+						If intMinimumCommaCount > 0 Then
+							' Count the number of commas
+							blnSuccess = CheckTextFileCountChars(strLineIn, blnBlankLineRead, intLinesRead, intExpectedCommaCount, ","c, "Comma", intMinimumCommaCount, blnRequireEqualCommasPerLine, strErrorMessage)
 
-                        If Not blnSuccess Then
-                            LogFileIntegrityError(strFilePath, strErrorMessage)
-                            blnErrorLogged = True
-                            Exit Do
-                        End If
+							If Not blnSuccess Then
+								LogFileIntegrityError(strFilePath, strErrorMessage)
+								blnErrorLogged = True
+								Exit Do
+							End If
 
-                    End If
+						End If
 
 
-                    If blnNeedToCheckLineHeaders Then
-                        FindRequiredTextInLine(strLineIn, blnNeedToCheckLineHeaders, strRequiredTextLineHeaders, blnLineHeaderFound, intLineHeaderMatchCount, blnRequiredTextMatchesLineStart)
-                    ElseIf intMinimumTabCount = 0 AndAlso intMinimumCommaCount = 0 AndAlso intLinesRead > intMinimumLineCount Then
-                        ' All conditions have been met; no need to continue reading the file
-                        Exit Do
-                    End If
+						If blnNeedToCheckLineHeaders Then
+							FindRequiredTextInLine(strLineIn, blnNeedToCheckLineHeaders, strRequiredTextLineHeaders, blnLineHeaderFound, intLineHeaderMatchCount, blnRequiredTextMatchesLineStart)
+						ElseIf intMinimumTabCount = 0 AndAlso intMinimumCommaCount = 0 AndAlso intLinesRead > intMinimumLineCount Then
+							' All conditions have been met; no need to continue reading the file
+							Exit Do
+						End If
 
-                End If
+					End If
 
-            Loop
+				Loop
+
+			End Using
 
             ' Make sure that all of the required line headers were found; log an error if any were missing
             ValidateRequiredTextFound(strFilePath, "line headers", blnCheckLineHeadersForThisFile, blnNeedToCheckLineHeaders, strRequiredTextLineHeaders, blnLineHeaderFound, intRequiredTextMinMatchCount, blnErrorLogged)
@@ -618,11 +619,7 @@ Public Class clsFileIntegrityChecker
             strErrorMessage = "Error checking file: " & strFilePath & "; " & ex.Message
             LogFileIntegrityError(strFilePath, strErrorMessage)
             blnErrorLogged = True
-        Finally
-            If Not srInFile Is Nothing Then
-                srInFile.Close()
-            End If
-        End Try
+		End Try
 
         Return Not blnErrorLogged
 
@@ -733,7 +730,6 @@ Public Class clsFileIntegrityChecker
         Const MAX_LINES_TO_READ As Integer = 50
 
         Dim ioInStream As System.IO.FileStream
-        Dim srInFile As System.IO.StreamReader
 
         Dim intLinesRead As Integer = 0
 
@@ -746,34 +742,34 @@ Public Class clsFileIntegrityChecker
         Try
             ' Open the file
             ioInStream = New System.IO.FileStream(strFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read)
-            srInFile = New System.IO.StreamReader(ioInStream)
+			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(ioInStream)
 
-            ' Read each line in the file and look for the expected parameter lines
-            Do While srInFile.Peek >= 0 AndAlso intLinesRead < MAX_LINES_TO_READ
-                strLineIn = srInFile.ReadLine
-                intLinesRead += 1
+				' Read each line in the file and look for the expected parameter lines
+				Do While srInFile.Peek >= 0 AndAlso intLinesRead < MAX_LINES_TO_READ
+					strLineIn = srInFile.ReadLine
+					intLinesRead += 1
 
-                If strLineIn.StartsWith(MASS_TOLERANCE_LINE) Then
-                    blnMassToleranceFound = True
-                End If
+					If strLineIn.StartsWith(MASS_TOLERANCE_LINE) Then
+						blnMassToleranceFound = True
+					End If
 
-                If strLineIn.StartsWith(FRAGMENT_TOLERANCE_LINE) Then
-                    blnFragmentToleranceFound = True
-                End If
+					If strLineIn.StartsWith(FRAGMENT_TOLERANCE_LINE) Then
+						blnFragmentToleranceFound = True
+					End If
 
-                If blnMassToleranceFound AndAlso blnFragmentToleranceFound Then
-                    blnFileIsValid = True
-                    Exit Do
-                End If
-            Loop
+					If blnMassToleranceFound AndAlso blnFragmentToleranceFound Then
+						blnFileIsValid = True
+						Exit Do
+					End If
+				Loop
+
+			End Using
+
+         
 
         Catch ex As System.Exception
             LogFileIntegrityError(strFilePath, "Error checking Sequest params file: " & strFilePath & "; " & ex.Message)
             blnFileIsValid = False
-        Finally
-            If Not srInFile Is Nothing Then
-                srInFile.Close()
-            End If
         End Try
 
         Return blnFileIsValid
@@ -792,9 +788,7 @@ Public Class clsFileIntegrityChecker
         Const VERSION_LINE_START As String = "VERSION"
 
         Dim ioInStream As System.IO.FileStream
-        Dim srInFile As System.IO.StreamReader
-
-        Dim intLinesRead As Integer = 0
+		Dim intLinesRead As Integer = 0
 
         Dim strLineIn As String
 
@@ -804,48 +798,47 @@ Public Class clsFileIntegrityChecker
         Try
             ' Open the file
             ioInStream = New System.IO.FileStream(strFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read)
-            srInFile = New System.IO.StreamReader(ioInStream)
+			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(ioInStream)
 
-            ' Confirm that the first two lines look like:
-            '  ICR-2LS Data File (GA Anderson & JE Bruce); output from MASIC by Matthew E Monroe
-            '  Version 2.4.2974.38283; February 22, 2008
+		
+				' Confirm that the first two lines look like:
+				'  ICR-2LS Data File (GA Anderson & JE Bruce); output from MASIC by Matthew E Monroe
+				'  Version 2.4.2974.38283; February 22, 2008
 
-            Do While srInFile.Peek >= 0 AndAlso intLinesRead < 2
-                strLineIn = srInFile.ReadLine
-                intLinesRead += 1
+				Do While srInFile.Peek >= 0 AndAlso intLinesRead < 2
+					strLineIn = srInFile.ReadLine
+					intLinesRead += 1
 
-                If intLinesRead = 1 Then
-                    If Not strLineIn.ToUpper.StartsWith(ICR2LS_LINE_START) Then
-                        blnFileIsValid = False
-                        Exit Do
-                    End If
-                ElseIf intLinesRead = 2 Then
-                    If Not strLineIn.ToUpper.StartsWith(VERSION_LINE_START) Then
-                        blnFileIsValid = False
-                        Exit Do
-                    End If
-                Else
-                    ' This code shouldn't be reached
-                    Exit Do
-                End If
+					If intLinesRead = 1 Then
+						If Not strLineIn.ToUpper.StartsWith(ICR2LS_LINE_START) Then
+							blnFileIsValid = False
+							Exit Do
+						End If
+					ElseIf intLinesRead = 2 Then
+						If Not strLineIn.ToUpper.StartsWith(VERSION_LINE_START) Then
+							blnFileIsValid = False
+							Exit Do
+						End If
+					Else
+						' This code shouldn't be reached
+						Exit Do
+					End If
 
-            Loop
+				Loop
 
-        Catch ex As System.Exception
-            LogFileIntegrityError(strFilePath, "Error checking TIC file: " & strFilePath & "; " & ex.Message)
-            blnFileIsValid = False
-        Finally
-            If Not srInFile Is Nothing Then
-                srInFile.Close()
-            End If
-        End Try
+			End Using
+
+		Catch ex As System.Exception
+			LogFileIntegrityError(strFilePath, "Error checking TIC file: " & strFilePath & "; " & ex.Message)
+			blnFileIsValid = False
+		End Try
 
         Return blnFileIsValid
 
     End Function
 
     ''' <summary>
-    ''' Opens the given zip file and uses SharpZipLib's .TestArchive function to validate that it is valid
+	''' Opens the given zip file and uses Ionic Zip's .TestArchive function to validate that it is valid
     ''' </summary>
     ''' <param name="strFilePath">File path to check</param>
     ''' <returns>True if the file passes the integrity check; otherwise False</returns>
@@ -862,114 +855,183 @@ Public Class clsFileIntegrityChecker
         Dim blnZipIsValid As Boolean = False
         Dim strMessage As String
 
-        Dim objSharpZipLibTest As System.Threading.Thread
-        Dim dtStartTime As DateTime
-        Dim sngMaxExecutionTimeMinutes As Single
+		Dim objZipLibTest As System.Threading.Thread
+		Dim dtStartTime As DateTime
+		Dim sngMaxExecutionTimeMinutes As Single
 
-        Dim blnZipFileCheckAllData As Boolean
-        blnZipFileCheckAllData = mZipFileCheckAllData
+		Dim blnZipFileCheckAllData As Boolean
+		blnZipFileCheckAllData = mZipFileCheckAllData
 
-        ' Either run a fast check, or entirely skip this .Zip file if it's too large
-        objFileInfo = New System.IO.FileInfo(strFilePath)
-        dblFileSizeMB = objFileInfo.Length / 1024.0 / 1024.0
+		' Either run a fast check, or entirely skip this .Zip file if it's too large
+		objFileInfo = New System.IO.FileInfo(strFilePath)
+		dblFileSizeMB = objFileInfo.Length / 1024.0 / 1024.0
 
-        If blnZipFileCheckAllData AndAlso mZipFileLargeSizeThresholdMB > 0 Then
-            If dblFileSizeMB > mZipFileLargeSizeThresholdMB Then
-                blnZipFileCheckAllData = False
-            End If
-        End If
+		If blnZipFileCheckAllData AndAlso mZipFileLargeSizeThresholdMB > 0 Then
+			If dblFileSizeMB > mZipFileLargeSizeThresholdMB Then
+				blnZipFileCheckAllData = False
+			End If
+		End If
 
-        If dblFileSizeMB > 2040 Then
-            ' File is too large for SharpZipLib; log an error but return true
-            strMessage = "File is too large for SharpZipLib: " & Math.Round(dblFileSizeMB / 1024.0, 2).ToString & " GB"
-            LogFileIntegrityError(strFilePath, strMessage)
-            Return True
-        End If
+		''If dblFileSizeMB > 2040 Then
+		''	' File is too large for SharpZipLib; log an error but return true
+		''	strMessage = "File is too large for SharpZipLib: " & Math.Round(dblFileSizeMB / 1024.0, 2).ToString & " GB"
+		''	LogFileIntegrityError(strFilePath, strMessage)
+		''	Return True
+		''End If
 
-        If blnZipFileCheckAllData AndAlso mFastZippedSFileCheck Then
-            strFileNameLCase = System.IO.Path.GetFileName(strFilePath).ToLower
-            If strFileNameLCase = "0.ser.zip" Then
-                ' Do not run a full check on 0.ser.zip files
-                blnZipFileCheckAllData = False
+		If blnZipFileCheckAllData AndAlso mFastZippedSFileCheck Then
+			strFileNameLCase = System.IO.Path.GetFileName(strFilePath).ToLower
+			If strFileNameLCase = "0.ser.zip" Then
+				' Do not run a full check on 0.ser.zip files
+				blnZipFileCheckAllData = False
 
-            ElseIf strFileNameLCase.Length > 2 AndAlso strFileNameLCase.StartsWith("s") AndAlso Char.IsNumber(strFileNameLCase.Chars(1)) Then
-                ' Run a full check on s001.zip but not the other s*.zip files
-                If strFileNameLCase <> "s001.zip" Then
-                    blnZipFileCheckAllData = False
-                End If
-            End If
-        End If
+			ElseIf strFileNameLCase.Length > 2 AndAlso strFileNameLCase.StartsWith("s") AndAlso Char.IsNumber(strFileNameLCase.Chars(1)) Then
+				' Run a full check on s001.zip but not the other s*.zip files
+				If strFileNameLCase <> "s001.zip" Then
+					blnZipFileCheckAllData = False
+				End If
+			End If
+		End If
 
-        With mZipFileWorkParams
-            .FilePath = strFilePath
-            .CheckAllData = blnZipFileCheckAllData
-            .ZipIsValid = False
-            If .CheckAllData Then
-                .FailureMessage = "Zip file failed exhaustive CRC check"
-            Else
-                .FailureMessage = "Zip file failed quick check"
-            End If
-        End With
+		With mZipFileWorkParams
+			.FilePath = strFilePath
+			.CheckAllData = blnZipFileCheckAllData
+			.ZipIsValid = False
+			If .CheckAllData Then
+				.FailureMessage = "Zip file failed exhaustive CRC check"
+			Else
+				.FailureMessage = "Zip file failed quick check"
+			End If
+		End With
 
-        If blnZipFileCheckAllData Then
-            sngMaxExecutionTimeMinutes = CSng(dblFileSizeMB * MAX_THREAD_RATE_CHECK_ALL_DATA)
-        Else
-            sngMaxExecutionTimeMinutes = CSng(dblFileSizeMB * MAX_THREAD_RATE_QUICK_CHECK)
-        End If
+		If blnZipFileCheckAllData Then
+			sngMaxExecutionTimeMinutes = CSng(dblFileSizeMB * MAX_THREAD_RATE_CHECK_ALL_DATA)
+		Else
+			sngMaxExecutionTimeMinutes = CSng(dblFileSizeMB * MAX_THREAD_RATE_QUICK_CHECK)
+		End If
 
-        objSharpZipLibTest = New System.Threading.Thread(AddressOf CheckZipFileWork)
-        dtStartTime = System.DateTime.UtcNow
+		objZipLibTest = New System.Threading.Thread(AddressOf CheckZipFileWork)
+		dtStartTime = System.DateTime.UtcNow
 
-        objSharpZipLibTest.Start()
-        Do
-            objSharpZipLibTest.Join(250)
+		objZipLibTest.Start()
+		Do
+			objZipLibTest.Join(250)
 
-            If objSharpZipLibTest.ThreadState = Threading.ThreadState.Aborted Then
-                Exit Do
-            ElseIf System.DateTime.UtcNow.Subtract(dtStartTime).TotalMinutes >= sngMaxExecutionTimeMinutes Then
-                ' Execution took too long; abort
-                objSharpZipLibTest.Abort()
-                objSharpZipLibTest.Join(250)
+			If objZipLibTest.ThreadState = Threading.ThreadState.Aborted Then
+				Exit Do
+			ElseIf System.DateTime.UtcNow.Subtract(dtStartTime).TotalMinutes >= sngMaxExecutionTimeMinutes Then
+				' Execution took too long; abort
+				objZipLibTest.Abort()
+				objZipLibTest.Join(250)
 
-                strMessage = mZipFileWorkParams.FailureMessage & "; over " & sngMaxExecutionTimeMinutes.ToString("0.0") & " minutes have elapsed, which is longer than the expected processing time"
-                LogFileIntegrityError(mZipFileWorkParams.FilePath, strMessage)
+				strMessage = mZipFileWorkParams.FailureMessage & "; over " & sngMaxExecutionTimeMinutes.ToString("0.0") & " minutes have elapsed, which is longer than the expected processing time"
+				LogFileIntegrityError(mZipFileWorkParams.FilePath, strMessage)
 
-                Exit Do
-            End If
-        Loop While objSharpZipLibTest.ThreadState <> Threading.ThreadState.Stopped
+				Exit Do
+			End If
+		Loop While objZipLibTest.ThreadState <> Threading.ThreadState.Stopped
 
         Return mZipFileWorkParams.ZipIsValid
 
     End Function
 
-    Private Sub CheckZipFileWork()
-        Dim objZipFile As ICSharpCode.SharpZipLib.Zip.ZipFile
-        Dim blnZipIsValid As Boolean = False
-        Dim strMessage As String
+	Private Sub CheckZipFileWork()
+		Dim blnThrowExceptionIfInvalid As Boolean = True
+		Dim blnZipIsValid As Boolean
+		Dim strMessage As String
 
-        Try
-            objZipFile = New ICSharpCode.SharpZipLib.Zip.ZipFile(mZipFileWorkParams.FilePath)
+		Try
 
-            blnZipIsValid = objZipFile.TestArchive(mZipFileWorkParams.CheckAllData)
+			blnZipIsValid = CheckZipFileIntegrity(mZipFileWorkParams.FilePath, mZipFileWorkParams.CheckAllData, blnThrowExceptionIfInvalid)
 
-            If Not blnZipIsValid Then
-                If mZipFileWorkParams.CheckAllData Then
-                    strMessage = "Zip file failed exhaustive CRC check"
-                Else
-                    strMessage = "Zip file failed quick check"
-                End If
+			If Not blnZipIsValid Then
+				If mZipFileWorkParams.CheckAllData Then
+					strMessage = "Zip file failed exhaustive CRC check"
+				Else
+					strMessage = "Zip file failed quick check"
+				End If
 
-                LogFileIntegrityError(mZipFileWorkParams.FilePath, strMessage)
-            End If
+				LogFileIntegrityError(mZipFileWorkParams.FilePath, strMessage)
+			End If
 
-        Catch ex As System.Exception
-            ' Error opening .Zip file
-            LogFileIntegrityError(mZipFileWorkParams.FilePath, ex.Message)
-        End Try
+		Catch ex As System.Exception
+			' Error reading .Zip file
+			LogFileIntegrityError(mZipFileWorkParams.FilePath, ex.Message)
+		End Try
 
-        mZipFileWorkParams.ZipIsValid = blnZipIsValid
+		mZipFileWorkParams.ZipIsValid = blnZipIsValid
 
-    End Sub
+	End Sub
+
+	''' <summary>
+	''' Validate every entry in strZipFilePath
+	''' </summary>
+	''' <param name="strZipFilePath">Path to the zip file to validate</param>
+	''' <param name="blnThrowExceptionIfInvalid">If True, then throws exceptions, otherwise simply returns True or False</param>
+	''' <returns>True if the file is Valid; false if an error</returns>
+	''' <remarks>Extracts each file in the zip file to a temporary file.  Will return false if you run out of disk space</remarks>
+	Private Function CheckZipFileIntegrity(ByVal strZipFilePath As String, ByVal blnCheckAllData As Boolean, ByVal blnThrowExceptionIfInvalid As Boolean) As Boolean
+
+		Dim strTempPath As String = String.Empty
+		Dim blnZipIsValid As Boolean = False
+
+		If Not System.IO.File.Exists(strZipFilePath) Then
+			' Zip file not found
+			If blnThrowExceptionIfInvalid Then
+				Throw New System.IO.FileNotFoundException("File not found", strZipFilePath)
+			End If
+			Return False
+		End If
+
+		Try
+			If blnCheckAllData Then
+
+				' Obtain a random file name
+				strTempPath = System.IO.Path.GetTempFileName
+
+				' Open the zip file
+				Using objZipFile As Ionic.Zip.ZipFile = New Ionic.Zip.ZipFile(strZipFilePath)
+
+					' Extract each file to strTempPath
+					For Each objEntry As Ionic.Zip.ZipEntry In objZipFile.Entries
+						objEntry.ZipErrorAction = Ionic.Zip.ZipErrorAction.Throw
+
+						If Not objEntry.IsDirectory Then
+
+							Dim swTestStream As System.IO.FileStream = New System.IO.FileStream(strTempPath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.ReadWrite)
+							objEntry.Extract(swTestStream)
+							swTestStream.Close()
+
+						End If
+					Next
+
+				End Using
+
+				blnZipIsValid = True
+
+			Else
+				blnZipIsValid = Ionic.Zip.ZipFile.CheckZip(strZipFilePath)
+			End If
+
+
+		Catch ex As System.Exception
+			If blnThrowExceptionIfInvalid Then
+				Throw ex
+			End If
+			blnZipIsValid = False
+		Finally
+			Try
+				If Not String.IsNullOrEmpty(strTempPath) AndAlso System.IO.File.Exists(strTempPath) Then
+					System.IO.File.Delete(strTempPath)
+				End If
+			Catch ex As System.Exception
+				' Ignore errors deleting the temp file
+			End Try
+		End Try
+
+		Return blnZipIsValid
+
+	End Function
 
     ''' <summary>
     ''' Checks the integrity of a CSV file
@@ -1102,10 +1164,7 @@ Public Class clsFileIntegrityChecker
                                         ByVal strRequiredElementNames() As String, _
                                         ByVal strRequiredAttributeNames() As String) As Boolean
 
-        Dim srInFile As System.IO.StreamReader
-        Dim objXMLReader As System.Xml.XmlTextReader
-
-        Dim blnCheckElementNamesThisFile As Boolean = False
+		Dim blnCheckElementNamesThisFile As Boolean = False
         Dim blnNeedToCheckElementNames As Boolean = False           ' If blnCheckElementNamesThisFile is True, then this will be set to True.  However, once all of the expected headers are found, this is set to False
         Dim intElementNameMatchCount As Integer = 0
         Dim blnElementNameFound() As Boolean
@@ -1147,70 +1206,65 @@ Public Class clsFileIntegrityChecker
 
             Try
                 ' Initialize the stream reader and the XML Text Reader
-                srInFile = New System.IO.StreamReader(strFilePath)
-                objXMLReader = New System.Xml.XmlTextReader(srInFile)
+				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(strFilePath)
+					Using objXMLReader As System.Xml.XmlTextReader = New System.Xml.XmlTextReader(srInFile)
 
-                ' Read each of the nodes and examine them
-                Do While objXMLReader.Read()
+						' Read each of the nodes and examine them
+						Do While objXMLReader.Read()
 
-                    XMLTextReaderSkipWhitespace(objXMLReader)
-                    If Not objXMLReader.ReadState = Xml.ReadState.Interactive Then Exit Do
+							XMLTextReaderSkipWhitespace(objXMLReader)
+							If Not objXMLReader.ReadState = Xml.ReadState.Interactive Then Exit Do
 
 
-                    If objXMLReader.NodeType = Xml.XmlNodeType.Element Then
-                        ' Note: If needed, read the element's value using XMLTextReaderGetInnerText(objXMLReader)
+							If objXMLReader.NodeType = Xml.XmlNodeType.Element Then
+								' Note: If needed, read the element's value using XMLTextReaderGetInnerText(objXMLReader)
 
-                        If blnNeedToCheckElementNames Then
-                            FindRequiredTextInLine(objXMLReader.Name, blnNeedToCheckElementNames, strRequiredElementNames, blnElementNameFound, intElementNameMatchCount, True)
-                        End If
+								If blnNeedToCheckElementNames Then
+									FindRequiredTextInLine(objXMLReader.Name, blnNeedToCheckElementNames, strRequiredElementNames, blnElementNameFound, intElementNameMatchCount, True)
+								End If
 
-                        If blnNeedToCheckAttributeNames AndAlso objXMLReader.HasAttributes Then
-                            If objXMLReader.MoveToFirstAttribute Then
-                                Do
-                                    FindRequiredTextInLine(objXMLReader.Name, blnNeedToCheckAttributeNames, strRequiredAttributeNames, blnAttributeNameFound, intAttributeNameMatchCount, True)
-                                    If Not blnNeedToCheckAttributeNames Then Exit Do
-                                Loop While objXMLReader.MoveToNextAttribute
+								If blnNeedToCheckAttributeNames AndAlso objXMLReader.HasAttributes Then
+									If objXMLReader.MoveToFirstAttribute Then
+										Do
+											FindRequiredTextInLine(objXMLReader.Name, blnNeedToCheckAttributeNames, strRequiredAttributeNames, blnAttributeNameFound, intAttributeNameMatchCount, True)
+											If Not blnNeedToCheckAttributeNames Then Exit Do
+										Loop While objXMLReader.MoveToNextAttribute
 
-                            End If
-                        End If
+									End If
+								End If
 
-                        intElementsRead += 1
-                        If intMaximumXMLElementNodesToCheck > 0 AndAlso intElementsRead >= MaximumXMLElementNodesToCheck Then
-                            Exit Do
-                        ElseIf Not blnNeedToCheckElementNames AndAlso Not blnNeedToCheckAttributeNames AndAlso intElementsRead > intMinimumElementCount Then
-                            ' All conditions have been met; no need to continue reading the file
-                            Exit Do
-                        End If
+								intElementsRead += 1
+								If intMaximumXMLElementNodesToCheck > 0 AndAlso intElementsRead >= MaximumXMLElementNodesToCheck Then
+									Exit Do
+								ElseIf Not blnNeedToCheckElementNames AndAlso Not blnNeedToCheckAttributeNames AndAlso intElementsRead > intMinimumElementCount Then
+									' All conditions have been met; no need to continue reading the file
+									Exit Do
+								End If
 
-                    End If
+							End If
 
-                Loop
+						Loop
 
-                ' Make sure that all of the required element names were found; log an error if any were missing
-                ValidateRequiredTextFound(strFilePath, "XML elements", blnCheckElementNamesThisFile, blnNeedToCheckElementNames, strRequiredElementNames, blnElementNameFound, strRequiredElementNames.Length, blnErrorLogged)
+					End Using			' objXMLReader
+				End Using			' srInFile
 
-                ' Make sure that all of the required attribute names were found; log an error if any were missing
-                ValidateRequiredTextFound(strFilePath, "XML attributes", blnCheckAttributeNamesThisFile, blnNeedToCheckAttributeNames, strRequiredAttributeNames, blnAttributeNameFound, strRequiredAttributeNames.Length, blnErrorLogged)
+				' Make sure that all of the required element names were found; log an error if any were missing
+				ValidateRequiredTextFound(strFilePath, "XML elements", blnCheckElementNamesThisFile, blnNeedToCheckElementNames, strRequiredElementNames, blnElementNameFound, strRequiredElementNames.Length, blnErrorLogged)
 
-                If Not blnErrorLogged AndAlso intElementsRead < intMinimumElementCount Then
-                    strErrorMessage = "File contains " & intElementsRead.ToString & " XML elements, but the required minimum is " & intMinimumElementCount.ToString
-                    LogFileIntegrityError(strFilePath, strErrorMessage)
-                    blnErrorLogged = True
-                End If
+				' Make sure that all of the required attribute names were found; log an error if any were missing
+				ValidateRequiredTextFound(strFilePath, "XML attributes", blnCheckAttributeNamesThisFile, blnNeedToCheckAttributeNames, strRequiredAttributeNames, blnAttributeNameFound, strRequiredAttributeNames.Length, blnErrorLogged)
 
-            Catch ex As System.Exception
-                ' Error opening file or stepping through file
-                LogFileIntegrityError(strFilePath, ex.Message)
-                blnErrorLogged = True
-            Finally
-                If Not objXMLReader Is Nothing Then
-                    objXMLReader.Close()
-                End If
+				If Not blnErrorLogged AndAlso intElementsRead < intMinimumElementCount Then
+					strErrorMessage = "File contains " & intElementsRead.ToString & " XML elements, but the required minimum is " & intMinimumElementCount.ToString
+					LogFileIntegrityError(strFilePath, strErrorMessage)
+					blnErrorLogged = True
+				End If
 
-                If Not srInFile Is Nothing Then
-                    srInFile.Close()
-                End If
-            End Try
+			Catch ex As System.Exception
+				' Error opening file or stepping through file
+				LogFileIntegrityError(strFilePath, ex.Message)
+				blnErrorLogged = True
+			End Try
 
         Catch ex As System.Exception
             LogErrors("CheckXMLFileWork", "Error opening XML file: " & strFilePath, ex)
@@ -1489,9 +1543,7 @@ Public Class clsFileIntegrityChecker
     Protected Function XMLFileContainsElements(ByVal strFilePath As String, ByVal strElementsToMatch() As String, ByVal intMaximumTextFileLinesToCheck As Integer) As Boolean
 
         Dim ioInStream As System.IO.FileStream
-        Dim srInFile As System.IO.StreamReader
-
-        Dim intLinesRead As Integer = 0
+		Dim intLinesRead As Integer = 0
         Dim intIndex As Integer
 
         Dim strLineIn As String
@@ -1516,41 +1568,39 @@ Public Class clsFileIntegrityChecker
 
             ' Open the file
             ioInStream = New System.IO.FileStream(strFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read)
-            srInFile = New System.IO.StreamReader(ioInStream)
+			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(ioInStream)
 
-            ' Read each line and examine it
-            Do While srInFile.Peek >= 0 AndAlso intLinesRead < intMaximumTextFileLinesToCheck
-                strLineIn = srInFile.ReadLine
-                intLinesRead += 1
+				' Read each line and examine it
+				Do While srInFile.Peek >= 0 AndAlso intLinesRead < intMaximumTextFileLinesToCheck
+					strLineIn = srInFile.ReadLine
+					intLinesRead += 1
 
-                If Not strLineIn Is Nothing Then
-                    strLineIn = strLineIn.Trim.ToLower
+					If Not strLineIn Is Nothing Then
+						strLineIn = strLineIn.Trim.ToLower
 
-                    For intIndex = 0 To blnElementFound.Length - 1
-                        If Not blnElementFound(intIndex) Then
-                            If strLineIn.Trim.StartsWith(strElementsToMatch(intIndex)) Then
-                                blnElementFound(intIndex) = True
-                                intElementMatchCount += 1
+						For intIndex = 0 To blnElementFound.Length - 1
+							If Not blnElementFound(intIndex) Then
+								If strLineIn.Trim.StartsWith(strElementsToMatch(intIndex)) Then
+									blnElementFound(intIndex) = True
+									intElementMatchCount += 1
 
-                                If intElementMatchCount = blnElementFound.Length Then
-                                    blnAllElementsFound = True
-                                    Exit Do
-                                End If
+									If intElementMatchCount = blnElementFound.Length Then
+										blnAllElementsFound = True
+										Exit Do
+									End If
 
-                                Exit For
-                            End If
-                        End If
-                    Next
-                End If
-            Loop
+									Exit For
+								End If
+							End If
+						Next
+					End If
+				Loop
+
+			End Using
 
         Catch ex As System.Exception
             LogErrors("XMLFileContainsElements", "Error checking XML file for desired elements: " & strFilePath, ex)
-        Finally
-            If Not srInFile Is Nothing Then
-                srInFile.Close()
-            End If
-        End Try
+		End Try
 
         Return blnAllElementsFound
 

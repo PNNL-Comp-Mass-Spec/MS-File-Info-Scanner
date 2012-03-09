@@ -990,11 +990,19 @@ MSFileInfoScanner
 	<remarks></remarks>
 </member><member name="M:MSFileInfoScanner.clsFileIntegrityChecker.CheckZIPFile(System.String)">
 	<summary>
- Opens the given zip file and uses SharpZipLib's .TestArchive function to validate that it is valid
+ Opens the given zip file and uses Ionic Zip's .TestArchive function to validate that it is valid
  </summary>
 	<param name="strFilePath">File path to check</param>
 	<returns>True if the file passes the integrity check; otherwise False</returns>
 	<remarks></remarks>
+</member><member name="M:MSFileInfoScanner.clsFileIntegrityChecker.CheckZipFileIntegrity(System.String,System.Boolean,System.Boolean)">
+	<summary>
+ Validate every entry in strZipFilePath
+ </summary>
+	<param name="strZipFilePath">Path to the zip file to validate</param>
+	<param name="blnThrowExceptionIfInvalid">If True, then throws exceptions, otherwise simply returns True or False</param>
+	<returns>True if the file is Valid; false if an error</returns>
+	<remarks>Extracts each file in the zip file to a temporary file.  Will return false if you run out of disk space</remarks>
 </member><member name="M:MSFileInfoScanner.clsFileIntegrityChecker.CheckCSVFile(System.String)">
 	<summary>
  Checks the integrity of a CSV file

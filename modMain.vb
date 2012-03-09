@@ -7,11 +7,11 @@ Option Strict On
 
 Module modMain
 
-	Public Const PROGRAM_DATE As String = "March 7, 2012"
+	Public Const PROGRAM_DATE As String = "March 8, 2012"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
-    Private mParameterFilePath As String            ' Optional
+	Private mParameterFilePath As String			' Optional
     Private mLogFilePath As String
 
     Private mRecurseFolders As Boolean
@@ -244,7 +244,7 @@ Module modMain
                 With objParseCommandLine
                     ' Query objParseCommandLine to see if various parameters are present
                     If .RetrieveValueForParameter("I", strValue) Then
-                        mInputDataFilePath = strValue
+						mInputDataFilePath = strValue
                     ElseIf .NonSwitchParameterCount > 0 Then
                         ' Treat the first non-switch parameter as the input file
                         mInputDataFilePath = .RetrieveNonSwitchParameter(0)

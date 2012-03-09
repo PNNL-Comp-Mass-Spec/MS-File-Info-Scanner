@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.1.4450; March 8, 2012
+	- Updated to use UIMF Library v2.0
+	- Switched from ICSharpCode.SharpZipLib.dll to Ionic.Zip.dll
+
 Version 1.1.4449; March 7, 2012
 	- Updated processing of Bruker XMass .D folders to use the file modification time of the analysis.baf file as the acquisition end time
 		- This time is overridden if the scans.xml file has runtime values defined

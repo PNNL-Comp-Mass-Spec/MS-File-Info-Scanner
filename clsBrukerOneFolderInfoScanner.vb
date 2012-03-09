@@ -94,48 +94,42 @@ Public Class clsBrukerOneFolderInfoScanner
     End Function
 
     Private Function ParseBrukerAcquFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        Dim srInFile As System.IO.StreamReader
-
-        Dim strLineIn As String
+		Dim strLineIn As String
 
         Dim blnSuccess As Boolean
 
         Try
             ' Try to open the acqu file
             blnSuccess = False
-            srInFile = New System.IO.StreamReader(System.IO.Path.Combine(strFolderPath, BRUKER_ACQU_FILE))
-            Do While srInFile.Peek() >= 0
-                strLineIn = srInFile.ReadLine()
+			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(System.IO.Path.Combine(strFolderPath, BRUKER_ACQU_FILE))
+				Do While srInFile.Peek() >= 0
+					strLineIn = srInFile.ReadLine()
 
-                If Not strLineIn Is Nothing Then
-                    If strLineIn.StartsWith(BRUKER_ACQU_FILE_ACQ_LINE_START) Then
-                        ' Date line found
-                        ' It is of the form: ##$AQ_DATE= <Sat Aug 20 07:56:55 2005> 
-                        strLineIn = strLineIn.Substring(BRUKER_ACQU_FILE_ACQ_LINE_START.Length).Trim
-                        strLineIn = strLineIn.TrimEnd(BRUKER_ACQU_FILE_ACQ_LINE_END)
+					If Not strLineIn Is Nothing Then
+						If strLineIn.StartsWith(BRUKER_ACQU_FILE_ACQ_LINE_START) Then
+							' Date line found
+							' It is of the form: ##$AQ_DATE= <Sat Aug 20 07:56:55 2005> 
+							strLineIn = strLineIn.Substring(BRUKER_ACQU_FILE_ACQ_LINE_START.Length).Trim
+							strLineIn = strLineIn.TrimEnd(BRUKER_ACQU_FILE_ACQ_LINE_END)
 
-                        blnSuccess = ParseBrukerDateFromArray(strLineIn, udtFileInfo.AcqTimeEnd)
-                        Exit Do
-                    End If
-                End If
-            Loop
-        Catch ex As System.Exception
-            ' Error opening the acqu file
-            blnSuccess = False
-        Finally
-            If Not srInFile Is Nothing Then
-                srInFile.Close()
-            End If
-        End Try
+							blnSuccess = ParseBrukerDateFromArray(strLineIn, udtFileInfo.AcqTimeEnd)
+							Exit Do
+						End If
+					End If
+				Loop
+			End Using
+
+		Catch ex As System.Exception
+			' Error opening the acqu file
+			blnSuccess = False
+		End Try
 
         Return blnSuccess
 
     End Function
 
     Private Function ParseBrukerLockFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        Dim srInFile As System.IO.StreamReader
-
-        Dim strLineIn As String
+		Dim strLineIn As String
         Dim strSplitLine() As String
 
         Dim blnSuccess As Boolean
@@ -144,24 +138,22 @@ Public Class clsBrukerOneFolderInfoScanner
             ' Try to open the Lock file
             ' The date line is the first (and only) line in the file
             blnSuccess = False
-            srInFile = New System.IO.StreamReader(System.IO.Path.Combine(strFolderPath, BRUKER_LOCK_FILE))
-            If srInFile.Peek() >= 0 Then
-                strLineIn = srInFile.ReadLine()
-                If Not strLineIn Is Nothing Then
-                    ' Date line found
-                    ' It is of the form: wd37119 2208 WD37119\9TOperator Sat Aug 20 06:10:31 2005
-                    strSplitLine = strLineIn.Trim.Split(" "c)
+			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(System.IO.Path.Combine(strFolderPath, BRUKER_LOCK_FILE))
+				If srInFile.Peek() >= 0 Then
+					strLineIn = srInFile.ReadLine()
+					If Not strLineIn Is Nothing Then
+						' Date line found
+						' It is of the form: wd37119 2208 WD37119\9TOperator Sat Aug 20 06:10:31 2005
+						strSplitLine = strLineIn.Trim.Split(" "c)
 
-                    blnSuccess = ParseBrukerDateFromArray(strLineIn, udtFileInfo.AcqTimeStart)
-                End If
-            End If
+						blnSuccess = ParseBrukerDateFromArray(strLineIn, udtFileInfo.AcqTimeStart)
+					End If
+				End If
+			End Using
+           
         Catch ex As System.Exception
             ' Error opening the Lock file
-            blnSuccess = False
-        Finally
-            If Not srInFile Is Nothing Then
-                srInFile.Close()
-            End If
+            blnSuccess = False      
         End Try
 
         Return blnSuccess
@@ -173,30 +165,25 @@ Public Class clsBrukerOneFolderInfoScanner
         ' Updates udtFileInfo.FileSizeBytes with this info, while also updating udtFileInfo.ScanCount with the total number of files found
         ' Returns True if success and also if no matching Zip files were found; returns False if error
 
-        Dim ioFileMatch As System.IO.FileInfo
-        Dim objZipInfo As ICSharpCode.SharpZipLib.Zip.ZipFile
-        Dim zeZipEntry As ICSharpCode.SharpZipLib.Zip.ZipEntry
-
-        Dim blnSuccess As Boolean
+		Dim blnSuccess As Boolean = False
 
         udtFileInfo.FileSizeBytes = 0
         udtFileInfo.ScanCount = 0
 
         Try
-            For Each ioFileMatch In ioFolderInfo.GetFiles("s*.zip")
-                ' Get the info on each zip file
+			For Each ioFileMatch As System.IO.FileInfo In ioFolderInfo.GetFiles("s*.zip")
+				' Get the info on each zip file
 
-                objZipInfo = New ICSharpCode.SharpZipLib.Zip.ZipFile(ioFileMatch.OpenRead)
+				Using objZipFile As Ionic.Zip.ZipFile = New Ionic.Zip.ZipFile(ioFileMatch.FullName)
+					For Each objZipEntry As Ionic.Zip.ZipEntry In objZipFile.Entries
+						udtFileInfo.FileSizeBytes += objZipEntry.UncompressedSize
+						udtFileInfo.ScanCount += 1
+					Next
+				End Using
 
-                For Each zeZipEntry In objZipInfo
-                    udtFileInfo.FileSizeBytes += zeZipEntry.Size
-                    udtFileInfo.ScanCount += 1
-                Next zeZipEntry
-                objZipInfo.Close()
-                objZipInfo = Nothing
+			Next ioFileMatch
+			blnSuccess = True
 
-            Next ioFileMatch
-            blnSuccess = True
         Catch ex As System.Exception
             blnSuccess = False
         End Try
@@ -210,9 +197,7 @@ Public Class clsBrukerOneFolderInfoScanner
         ' Count the number of PEK_FILE_FILENAME_LINE lines
 
         Dim ioFileMatch As System.IO.FileInfo
-        Dim srInFile As System.IO.StreamReader
-
-        Dim strLineIn As String
+		Dim strLineIn As String
 
         Dim intFileListCount As Integer
         Dim blnSuccess As Boolean
@@ -222,26 +207,23 @@ Public Class clsBrukerOneFolderInfoScanner
                 ' Try to open the PEK file
                 blnSuccess = False
                 intFileListCount = 0
-                srInFile = New System.IO.StreamReader(ioFileMatch.OpenRead())
-                Do While srInFile.Peek() >= 0
-                    strLineIn = srInFile.ReadLine()
+				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(ioFileMatch.OpenRead())
+					Do While srInFile.Peek() >= 0
+						strLineIn = srInFile.ReadLine()
 
-                    If Not strLineIn Is Nothing Then
-                        If strLineIn.StartsWith(PEK_FILE_FILENAME_LINE) Then
-                            intFileListCount += 1
-                        End If
-                    End If
-                Loop
-                blnSuccess = True
+						If Not strLineIn Is Nothing Then
+							If strLineIn.StartsWith(PEK_FILE_FILENAME_LINE) Then
+								intFileListCount += 1
+							End If
+						End If
+					Loop
+				End Using
+				blnSuccess = True
 
             Catch ex As System.Exception
                 ' Error opening or parsing the PEK file
                 blnSuccess = False
-            Finally
-                If Not srInFile Is Nothing Then
-                    srInFile.Close()
-                End If
-            End Try
+			End Try
 
             If intFileListCount > udtFileInfo.ScanCount Then
                 udtFileInfo.ScanCount = intFileListCount
@@ -260,9 +242,7 @@ Public Class clsBrukerOneFolderInfoScanner
         ' As a second validation, count the number of lines between TIC_FILE_TIC_FILE_LIST_START and TIC_FILE_TIC_FILE_LIST_END
 
         Dim ioFileMatch As System.IO.FileInfo
-        Dim srInFile As System.IO.StreamReader
-
-        Dim strLineIn As String
+		Dim strLineIn As String
 
         Dim intFileListCount As Integer
         Dim blnParsingTICFileList As Boolean
@@ -273,35 +253,36 @@ Public Class clsBrukerOneFolderInfoScanner
                 ' Try to open the TIC file
                 blnSuccess = False
                 intFileListCount = 0
-                srInFile = New System.IO.StreamReader(ioFileMatch.OpenRead())
-                Do While srInFile.Peek() >= 0
-                    strLineIn = srInFile.ReadLine()
+				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(ioFileMatch.OpenRead())
+					Do While srInFile.Peek() >= 0
+						strLineIn = srInFile.ReadLine()
 
-                    If Not strLineIn Is Nothing Then
-                        If blnParsingTICFileList Then
-                            If strLineIn.StartsWith(TIC_FILE_TIC_FILE_LIST_END) Then
-                                blnParsingTICFileList = False
-                                Exit Do
-                            ElseIf strLineIn = TIC_FILE_COMMENT_SECTION_END Then
-                                ' Found the end of the text section; exit the loop
-                                Exit Do
-                            Else
-                                intFileListCount += 1
-                            End If
-                        Else
-                            If strLineIn.StartsWith(TIC_FILE_NUMBER_OF_FILES_LINE_START) Then
-                                ' Number of files line found
-                                ' Parse out the file count
-                                udtFileInfo.ScanCount = Integer.Parse(strLineIn.Substring(TIC_FILE_NUMBER_OF_FILES_LINE_START.Length).Trim)
-                            ElseIf strLineIn.StartsWith(TIC_FILE_TIC_FILE_LIST_START) Then
-                                blnParsingTICFileList = True
-                            ElseIf strLineIn = TIC_FILE_COMMENT_SECTION_END Then
-                                ' Found the end of the text section; exit the loop
-                                Exit Do
-                            End If
-                        End If
-                    End If
-                Loop
+						If Not strLineIn Is Nothing Then
+							If blnParsingTICFileList Then
+								If strLineIn.StartsWith(TIC_FILE_TIC_FILE_LIST_END) Then
+									blnParsingTICFileList = False
+									Exit Do
+								ElseIf strLineIn = TIC_FILE_COMMENT_SECTION_END Then
+									' Found the end of the text section; exit the loop
+									Exit Do
+								Else
+									intFileListCount += 1
+								End If
+							Else
+								If strLineIn.StartsWith(TIC_FILE_NUMBER_OF_FILES_LINE_START) Then
+									' Number of files line found
+									' Parse out the file count
+									udtFileInfo.ScanCount = Integer.Parse(strLineIn.Substring(TIC_FILE_NUMBER_OF_FILES_LINE_START.Length).Trim)
+								ElseIf strLineIn.StartsWith(TIC_FILE_TIC_FILE_LIST_START) Then
+									blnParsingTICFileList = True
+								ElseIf strLineIn = TIC_FILE_COMMENT_SECTION_END Then
+									' Found the end of the text section; exit the loop
+									Exit Do
+								End If
+							End If
+						End If
+					Loop
+				End Using              
                 blnSuccess = True
 
                 dtTICModificationDate = ioFileMatch.LastWriteTime
@@ -309,11 +290,7 @@ Public Class clsBrukerOneFolderInfoScanner
             Catch ex As System.Exception
                 ' Error opening or parsing the TIC file
                 blnSuccess = False
-            Finally
-                If Not srInFile Is Nothing Then
-                    srInFile.Close()
-                End If
-            End Try
+			End Try
 
             If intFileListCount > udtFileInfo.ScanCount Then
                 udtFileInfo.ScanCount = intFileListCount
