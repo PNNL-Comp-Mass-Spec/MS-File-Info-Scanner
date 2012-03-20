@@ -21,7 +21,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_47A922B86C78E530CA497EFE9FAB0F4D"
+        "MsmKey" = "8:_2A42B67B3EDBFC028251C45364ED2B45"
         "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -29,12 +29,6 @@
         {
         "MsmKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
         "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_50CD6891546FA805AECEE5AEA9D2C82F"
-        "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -63,12 +57,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_95660C80D6358B0B8E94BBB2FCBFE7F9"
-        "OwnerKey" = "8:_47A922B86C78E530CA497EFE9FAB0F4D"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_9FC0A84545B943E98458FD400F1FF87F"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -81,8 +69,8 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_C19FA61E021D56E31C8E4AE451685EC3"
-        "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
+        "MsmKey" = "8:_B99ED7200E51486DB8A29B9DE5AC5E9F"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -118,12 +106,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_47A922B86C78E530CA497EFE9FAB0F4D"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_8AABC67EB7C5802FFAC1090C4557353A"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -154,13 +136,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_50CD6891546FA805AECEE5AEA9D2C82F"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_C19FA61E021D56E31C8E4AE451685EC3"
+        "OwnerKey" = "8:_2A42B67B3EDBFC028251C45364ED2B45"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -240,7 +216,7 @@
                 {
                 "Name" = "8:.NET Framework"
                 "Message" = "8:[VSDNETMSG]"
-                "FrameworkVersion" = "8:.NETFramework,Version=v2.0"
+                "FrameworkVersion" = "8:.NETFramework,Version=v4.0"
                 "AllowLaterVersions" = "11:FALSE"
                 "InstallUrl" = "8:http://go.microsoft.com/fwlink/?LinkId=9832"
                 "SupportedRuntimes" = "8:1.1.4322"
@@ -280,51 +256,20 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_47A922B86C78E530CA497EFE9FAB0F4D"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_2A42B67B3EDBFC028251C45364ED2B45"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Interop.XRAWFILE2Lib, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_47A922B86C78E530CA497EFE9FAB0F4D"
+                    "_2A42B67B3EDBFC028251C45364ED2B45"
                     {
-                    "Name" = "8:Interop.XRAWFILE2Lib.dll"
+                    "Name" = "8:Ionic.Zip.dll"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:Interop.XRAWFILE2Lib.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_4F551CB233C740748796EF290C7B231A"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_50CD6891546FA805AECEE5AEA9D2C82F"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL"
-                "ScatterAssemblies"
-                {
-                    "_50CD6891546FA805AECEE5AEA9D2C82F"
-                    {
-                    "Name" = "8:ICSharpCode.SharpZipLib.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:ICSharpCode.SharpZipLib.dll"
+            "SourcePath" = "8:Ionic.Zip.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_4F551CB233C740748796EF290C7B231A"
@@ -408,7 +353,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:UIMFLibrary, Version=2.0.4450.31612, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:UIMFLibrary, Version=2.0.4454.20142, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_94FB45DA835A15D020E6439CB753EC26"
@@ -432,26 +377,6 @@
             "PackageAs" = "3:1"
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_95660C80D6358B0B8E94BBB2FCBFE7F9"
-            {
-            "SourcePath" = "8:xrawfile2.dll"
-            "TargetName" = "8:XRawfile2.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_4F551CB233C740748796EF290C7B231A"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:4"
-            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -493,37 +418,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_C19FA61E021D56E31C8E4AE451685EC3"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:DeconWrapper, Version=0.0.0.0, Culture=neutral"
-                "ScatterAssemblies"
-                {
-                    "_C19FA61E021D56E31C8E4AE451685EC3"
-                    {
-                    "Name" = "8:DeconWrapper.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:DeconWrapper.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_4F551CB233C740748796EF290C7B231A"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C91CB59DCAF1445CBD0B1C86D1AF222C"
@@ -684,15 +578,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:MSFileInfoScanner"
-        "ProductCode" = "8:{75AAF8AA-57CF-4117-97C5-559909CDD7C3}"
-        "PackageCode" = "8:{12B5DA9A-7A0D-49F9-ADCB-7B75DD01C2D4}"
+        "ProductCode" = "8:{26832802-C616-4913-BB74-D11340678BCA}"
+        "PackageCode" = "8:{46DD10EA-7207-4556-B9FE-CAC8ED3742CD}"
         "UpgradeCode" = "8:{5B7DD97A-9979-4302-9840-188A941F61F1}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.1.3"
+        "ProductVersion" = "8:1.2.0"
         "Manufacturer" = "8:PNNL"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -1215,12 +1109,26 @@
         }
         "MergeModule"
         {
+            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_B99ED7200E51486DB8A29B9DE5AC5E9F"
+            {
+            "UseDynamicProperties" = "11:TRUE"
+            "IsDependency" = "11:FALSE"
+            "SourcePath" = "8:C:\\Program Files (x86)\\Common Files\\Merge Modules\\Thermo_MergeModul32Bit.msm"
+                "Properties"
+                {
+                }
+            "LanguageId" = "3:0"
+            "Exclude" = "11:FALSE"
+            "Folder" = "8:"
+            "Feature" = "8:"
+            "IsolateTo" = "8:"
+            }
         }
         "ProjectOutput"
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
             {
-            "SourcePath" = "8:..\\obj\\x86\\Debug\\MSFileInfoScanner.exe"
+            "SourcePath" = "8:..\\obj\\x86\\Release\\MSFileInfoScanner.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_4F551CB233C740748796EF290C7B231A"

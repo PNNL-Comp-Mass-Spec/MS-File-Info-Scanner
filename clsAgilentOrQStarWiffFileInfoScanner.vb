@@ -22,130 +22,254 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
         MICROMASSRAWDATA
     End Enum
 
-    Protected mDeconTools As DeconWrapperManaged.clsDeconWrapperManaged
+	Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
+		' The dataset name is simply the file name without .wiff
+		Try
+			Return System.IO.Path.GetFileNameWithoutExtension(strDataFilePath)
+		Catch ex As System.Exception
+			Return String.Empty
+		End Try
+	End Function
 
-    Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
-        ' The dataset name is simply the file name without .wiff
-        Try
-            Return System.IO.Path.GetFileNameWithoutExtension(strDataFilePath)
-        Catch ex As System.Exception
-            Return String.Empty
-        End Try
-    End Function
+	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+		' Returns True if success, False if an error
 
-    Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        ' Returns True if success, False if an error
+		Dim ioFileInfo As System.IO.FileInfo
+		Dim blnSuccess As Boolean = False
 
-        Dim ioFileInfo As System.IO.FileInfo
-        Dim strDataFilePathLocal As String
-        Dim blnSuccess As Boolean
-        Dim blnDeleteLocalFile As Boolean
+		Dim dblAcquisitionLengthMinutes As Double = 0
 
-        Dim intScanEnd As Integer
-        Dim dblAcquisitionLengthMinutes As Double
-        Dim intMinutes As Integer
-        Dim intSeconds As Integer
+		Dim intTotalScanCount As Integer = 0
 
-        ' Obtain the full path to the file
-        ioFileInfo = New System.IO.FileInfo(strDataFilePath)
+		' blnSuccess = ProcessDatafileClearCore(strDataFilePath, udtFileInfo)
 
-        With udtFileInfo
-            .FileSystemCreationTime = ioFileInfo.CreationTime
-            .FileSystemModificationTime = ioFileInfo.LastWriteTime
+		If Not blnSuccess Then
+			' Obtain the full path to the file
+			ioFileInfo = New System.IO.FileInfo(strDataFilePath)
 
-            ' The acquisition times will get updated below to more accurate values
-            .AcqTimeStart = .FileSystemModificationTime
-            .AcqTimeEnd = .FileSystemModificationTime
+			With udtFileInfo
+				.FileSystemCreationTime = ioFileInfo.CreationTime
+				.FileSystemModificationTime = ioFileInfo.LastWriteTime
 
-            .DatasetID = 0
-            .DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFileInfo.Name)
-            .FileExtension = ioFileInfo.Extension
-            .FileSizeBytes = ioFileInfo.Length
-        End With
+				' Using the file system modification time as the acquisition end time
+				' Using an arbitrary, fixed length of 2 minutes for each dataset
+				.AcqTimeStart = .FileSystemModificationTime.AddMinutes(-2)
+				.AcqTimeEnd = .FileSystemModificationTime
 
-        ' Use DeconTools to read the .Wiff file
-        ' Unfortunately, we must copy the file to the local drive (placing it in a writable folder);
-        '  otherwise, DeconTools cannot open it
+				.DatasetID = 0
+				.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFileInfo.Name)
+				.FileExtension = ioFileInfo.Extension
+				.FileSizeBytes = ioFileInfo.Length
+			End With
 
-        Try
-            blnDeleteLocalFile = False
-            strDataFilePathLocal = System.IO.Path.Combine(clsMSFileInfoScanner.GetAppFolderPath, System.IO.Path.GetFileName(strDataFilePath))
+			' Copy over the updated filetime info and scan info from udtFileInfo to mDatasetFileInfo
+			With mDatasetStatsSummarizer.DatasetFileInfo
+				.DatasetName = String.Copy(udtFileInfo.DatasetName)
+				.FileExtension = String.Copy(udtFileInfo.FileExtension)
+				.AcqTimeStart = udtFileInfo.AcqTimeStart
+				.AcqTimeEnd = udtFileInfo.AcqTimeEnd
+				.ScanCount = udtFileInfo.ScanCount
+			End With
 
-            If strDataFilePathLocal.ToLower <> strDataFilePath.ToLower Then
-                ShowMessage("Copying file " & System.IO.Path.GetFileName(strDataFilePath) & " to the working folder")
-                System.IO.File.Copy(strDataFilePath, strDataFilePathLocal, True)
-                blnDeleteLocalFile = True
-            End If
-        Catch ex As System.Exception
-            Return False
-        End Try
+			blnSuccess = True
 
-        If mDeconTools Is Nothing Then
-            mDeconTools = New DeconWrapperManaged.clsDeconWrapperManaged
-        End If
+		End If
 
-        ' Open a handle to the data file
-        Try
+		Return blnSuccess
 
-            mDeconTools.LoadFile(strDataFilePathLocal, DeconToolsFileTypeConstants.AGILENT_TOF)
-            blnSuccess = True
-        Catch ex As System.Exception
-            blnSuccess = False
-        End Try
+	End Function
 
-        If blnSuccess Then
-            ' Read the file info
-            udtFileInfo.ScanCount = mDeconTools.NumScans()
 
-            ' We have to use the file modification time as the acquisition end time
-            udtFileInfo.AcqTimeEnd = udtFileInfo.FileSystemModificationTime
+	''' <summary>
+	''' The following was an attempt to read the data using ClearCore2 DLLs
+	''' However, this only works if you have a license key
+	''' </summary>
+	''' <param name="strDataFilePath"></param>
+	''' <param name="udtFileInfo"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Private Function ProcessDatafileClearCore(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+		' Returns True if success, False if an error
 
-            intScanEnd = udtFileInfo.ScanCount
-            dblAcquisitionLengthMinutes = 0
-            blnSuccess = False
-            Do
-                Try
-                    dblAcquisitionLengthMinutes = mDeconTools.GetScanTime(intScanEnd)
-                    blnSuccess = True
-                Catch ex As System.Exception
-                    intScanEnd -= 1
-                    If intScanEnd < 0 Then
-                        blnSuccess = True
-                    End If
-                End Try
-            Loop While Not blnSuccess
+		Dim ioFileInfo As System.IO.FileInfo
+		Dim blnSuccess As Boolean
 
-            If blnSuccess Then
-                intMinutes = CInt(Math.Floor(dblAcquisitionLengthMinutes))
-                intSeconds = CInt(Math.Round((dblAcquisitionLengthMinutes - intMinutes) * 60.0, 0))
+		Dim dblAcquisitionLengthMinutes As Double = 0
 
-                udtFileInfo.AcqTimeEnd = udtFileInfo.FileSystemModificationTime
-                If intMinutes > 0 Or intSeconds > 0 Then
-                    udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd.Subtract(New System.TimeSpan(0, intMinutes, intSeconds))
-                Else
-                    udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd
-                End If
-            Else
-                udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd
-            End If
+		Dim intTotalScanCount As Integer = 0
 
-        End If
+		' Obtain the full path to the file
+		ioFileInfo = New System.IO.FileInfo(strDataFilePath)
 
-        ' Close the handle to the data file
-        mDeconTools.CloseFile()
-        mDeconTools = Nothing
+		With udtFileInfo
+			.FileSystemCreationTime = ioFileInfo.CreationTime
+			.FileSystemModificationTime = ioFileInfo.LastWriteTime
 
-        ' Delete the local copy of the data file
-        If blnDeleteLocalFile Then
-            Try
-                System.IO.File.Delete(strDataFilePathLocal)
-            Catch ex As System.Exception
-                ' Deletion failed
-                ReportError("Deletion failed for: " & System.IO.Path.GetFileName(strDataFilePathLocal))
-            End Try
-        End If
+			' The acquisition times will get updated below to more accurate values
+			.AcqTimeStart = .FileSystemModificationTime
+			.AcqTimeEnd = .FileSystemModificationTime
 
-        Return blnSuccess
-    End Function
+			.DatasetID = 0
+			.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFileInfo.Name)
+			.FileExtension = ioFileInfo.Extension
+			.FileSizeBytes = ioFileInfo.Length
+		End With
+
+		' Use Clearcore2 DLLs to read the .Wiff file
+
+		' Open a handle to the data file
+		'Try
+		'	Dim oProvider As Clearcore2.Data.AnalystDataProvider.AnalystWiffDataProvider
+		'	Dim oBatch As Clearcore2.Data.DataAccess.SampleData.Batch
+
+		'	oProvider = New Clearcore2.Data.AnalystDataProvider.AnalystWiffDataProvider()
+		'	oBatch = Clearcore2.Data.AnalystDataProvider.AnalystDataProviderFactory.CreateBatch(strDataFilePath, oProvider)
+
+		'	blnSuccess = True
+
+		'	If blnSuccess Then
+
+		'		Dim lstSampleNames As New System.Collections.Generic.List(Of String)
+		'		Dim lstExperimentTypes As New System.Collections.Generic.Dictionary(Of Clearcore2.Data.DataAccess.SampleData.ExperimentType, Integer)
+
+		'		lstSampleNames = GetSampleNames(oBatch)
+
+		'		' Process each sample
+		'		Dim intSampleIndex As Integer = 0
+		'		For Each strSampleName As String In lstSampleNames
+
+		'			Dim oSample As Clearcore2.Data.DataAccess.SampleData.Sample
+		'			Dim oMSSample As Clearcore2.Data.DataAccess.SampleData.MassSpectrometerSample
+
+		'			oSample = oBatch.GetSample(intSampleIndex)
+
+		'			' Note that the .AcqTimeEnd values will get updated below using dblRT
+		'			If intSampleIndex = 0 Then
+		'				udtFileInfo.AcqTimeStart = oSample.Details.AcquisitionDateTime
+		'				udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart
+		'			Else
+		'				If oSample.Details.AcquisitionDateTime > System.DateTime.MinValue Then
+		'					If oSample.Details.AcquisitionDateTime < udtFileInfo.AcqTimeStart Then
+		'						udtFileInfo.AcqTimeStart = oSample.Details.AcquisitionDateTime
+		'					End If
+		'					udtFileInfo.AcqTimeEnd = oSample.Details.AcquisitionDateTime
+		'				End If
+		'			End If
+
+
+		'			If oSample.HasMassSpectrometerData Then
+		'				oMSSample = oSample.MassSpectrometerSample()
+
+		'				Dim intExperimentCount As Integer
+		'				intExperimentCount = oMSSample.ExperimentCount
+
+		'				For intExperimentIndex As Integer = 0 To intExperimentCount - 1
+
+		'					Dim oMSExperiment As Clearcore2.Data.DataAccess.SampleData.MSExperiment
+		'					oMSExperiment = oMSSample.GetMSExperiment(intExperimentIndex)
+
+		'					' Update the total scan count
+		'					Dim intScanCount As Integer
+		'					intScanCount = oMSExperiment.Details.NumberOfScans
+		'					intTotalScanCount += intScanCount
+
+		'					' Update the list of experiment types used
+		'					Dim eExperimentType As Clearcore2.Data.DataAccess.SampleData.ExperimentType
+		'					Dim intExperimentTypeUsageCount As Integer = 0
+		'					eExperimentType = oMSExperiment.Details.ExperimentType
+
+		'					If lstExperimentTypes.TryGetValue(eExperimentType, intExperimentTypeUsageCount) Then
+		'						lstExperimentTypes(eExperimentType) = intExperimentTypeUsageCount + 1
+		'					Else
+		'						lstExperimentTypes.Add(eExperimentType, 1)
+		'					End If
+
+		'					If intScanCount > 0 Then
+		'						' Update the total acquisition time
+
+		'						Dim dblRT As Double = 0
+		'						Dim blnScantimeLookupSuccess As Boolean = False
+		'						Dim intScanEnd As Integer = intScanCount				'  ToDo: Possibly use intScanCount-1
+
+		'						Do
+		'							Try
+		'								dblRT = oMSExperiment.GetRTFromExperimentScanIndex(intScanEnd)
+		'								blnScantimeLookupSuccess = True
+		'							Catch ex As System.Exception
+		'								intScanEnd -= 1
+		'								If intScanEnd < 0 Then
+		'									Exit Do
+		'								End If
+		'							End Try
+		'						Loop While Not blnScantimeLookupSuccess
+
+
+		'						If blnScantimeLookupSuccess Then
+
+		'							' ToDo: determine if we should add dblRT to dblAcquisitionLengthMinutes or just keep the maximum
+		'							' To add, we would do this: dblAcquisitionLengthMinutes += dblRT
+
+		'							' For safety, just keeping the maximum
+		'							If dblRT > dblAcquisitionLengthMinutes Then
+		'								dblAcquisitionLengthMinutes = dblRT
+		'							End If
+		'						End If
+
+
+		'					End If
+
+		'				Next
+		'			End If
+
+		'			intSampleIndex += 1
+
+		'		Next
+
+		'		' Possibly update .AcqTimeEnd
+		'		If udtFileInfo.AcqTimeStart.AddMinutes(dblAcquisitionLengthMinutes) > udtFileInfo.AcqTimeEnd Then
+		'			udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart.AddMinutes(dblAcquisitionLengthMinutes)
+		'		End If
+
+		'		' We could use the file modification time as the acquisition end time, but that's not as accurate
+		'		' udtFileInfo.AcqTimeEnd = udtFileInfo.FileSystemModificationTime
+
+		'		udtFileInfo.ScanCount = intTotalScanCount
+
+
+		'	End If
+
+		'Catch ex As System.Exception
+		'	blnSuccess = False
+		'End Try
+
+		Return blnSuccess
+	End Function
+
+	'Private Function GetSampleNames(ByRef oBatch As Clearcore2.Data.DataAccess.SampleData.Batch) As System.Collections.Generic.List(Of String)
+
+	'	Dim lstSampleNames As System.Collections.Generic.List(Of String) = New System.Collections.Generic.List(Of String)()
+	'	Dim dctDuplicateTracker As System.Collections.Generic.Dictionary(Of String, Integer) = New System.Collections.Generic.Dictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
+	'	Dim intCount As Integer
+
+	'	' Obtain the sample names defined in oBatch
+	'	' If duplicate sample names exist, we will append the duplicate number for the 2nd, 3rd, etc. occurrences
+	'	For Each strSampleName As String In oBatch.GetSampleNames()
+
+	'		If dctDuplicateTracker.TryGetValue(strSampleName, intCount) Then
+	'			' Duplicate
+	'			intCount += 1
+	'			dctDuplicateTracker(strSampleName) = intCount
+	'			lstSampleNames.Add(strSampleName & " (" & intCount.ToString() & ")")
+	'		Else
+	'			' Not a duplicate
+	'			dctDuplicateTracker.Add(strSampleName, 1)
+	'			lstSampleNames.Add(strSampleName)
+	'		End If
+
+	'	Next
+
+	'	Return lstSampleNames
+
+	'End Function
 
 End Class

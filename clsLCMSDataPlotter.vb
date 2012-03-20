@@ -111,18 +111,27 @@ Public Class clsLCMSDataPlotter
 
             ' Make sure the data is sorted by m/z
             For intIndex = 1 To intIonCount - 1
-                If dblIonsMZ(intIndex) < dblIonsMZ(intIndex - 1) Then
-                    ' Need to sort
-                    intSortingWarnCount += 1
-                    If intSortingWarnCount <= 10 Then
-                        Console.WriteLine("  Sorting m/z data (this typically shouldn't be required for Finnigan data)")
-                    ElseIf intSortingWarnCount Mod 100 = 0 Then
-                        Console.WriteLine("  Sorting m/z data (i = " & intSortingWarnCount & ")")
-                    End If
-                    Array.Sort(dblIonsMZ, dblIonsIntensity, 0, intIonCount)
-                    Exit For
-                End If
-            Next
+				If dblIonsMZ(intIndex) < dblIonsMZ(intIndex - 1) Then
+					' May need to sort the data
+					' However, if the intensity of both data points is zero, then we can simply swap the data
+					If dblIonsIntensity(intIndex) = 0 AndAlso dblIonsIntensity(intIndex - 1) = 0 Then
+						' Swap the m/z values
+						Dim dblSwapVal As Double = dblIonsIntensity(intIndex)
+						dblIonsIntensity(intIndex) = dblIonsMZ(intIndex - 1)
+						dblIonsMZ(intIndex - 1) = dblSwapVal
+					Else
+						' Need to sort
+						intSortingWarnCount += 1
+						If intSortingWarnCount <= 10 Then
+							Console.WriteLine("  Sorting m/z data (this typically shouldn't be required for Finnigan data, though can occur for high res orbitrap data)")
+						ElseIf intSortingWarnCount Mod 100 = 0 Then
+							Console.WriteLine("  Sorting m/z data (i = " & intSortingWarnCount & ")")
+						End If
+						Array.Sort(dblIonsMZ, dblIonsIntensity, 0, intIonCount)
+						Exit For
+					End If
+				End If
+			Next
 
 
             ReDim dblIonsMZFiltered(intIonCount - 1)

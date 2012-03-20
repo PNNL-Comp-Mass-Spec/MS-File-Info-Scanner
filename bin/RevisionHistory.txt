@@ -1,5 +1,14 @@
 MS File Info Scanner Change Log
 
+Verison 1.2.4461; March 18, 2012
+	- Switched from xrawfile2.dll to MSFileReader.XRawfile2.dll
+		- New version supports Xcalibur v2.2
+	- Updated to .NET Framework 4.0
+
+Verison 1.1.4456; March 14, 2012
+	- Updated processing of Analyst .wiff files to simply cache the file time and not attempt to read any data
+		- Previously was using DeconWrapper.dll to call DeconTools but this only works if Analyst is installed
+
 Version 1.1.4450; March 8, 2012
 	- Updated to use UIMF Library v2.0
 	- Switched from ICSharpCode.SharpZipLib.dll to Ionic.Zip.dll
