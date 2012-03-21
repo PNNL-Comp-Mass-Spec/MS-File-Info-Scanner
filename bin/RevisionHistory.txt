@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.2.4463; March 21, 2012
+	- Added support for Agilent GC-MS .D folders 
+
 Version 1.2.4462; March 20, 2012
 	- Now setting String values to Nothing prior to calling XRawFile functions that return string values via a pbstr variable
 

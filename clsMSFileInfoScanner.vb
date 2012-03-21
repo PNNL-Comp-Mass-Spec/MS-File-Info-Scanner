@@ -1555,27 +1555,31 @@ Public Class clsMSFileInfoScanner
 							strInputFileOrFolderPath = strInputFileOrFolderPath.TrimEnd("\"c)
 						End If
 
-						Select Case System.IO.Path.GetExtension(strInputFileOrFolderPath).ToUpper
-							Case clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION
-								' Agilent .D folder or Bruker .D folder
-								' Look for file analysis.baf or extension.baf
+                        Select Case System.IO.Path.GetExtension(strInputFileOrFolderPath).ToUpper()
+                            Case clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION
+                                ' Agilent .D folder or Bruker .D folder
+                                ' Look for file analysis.baf or extension.baf
 
-								If System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 Then
-									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
-								ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 Then
-									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
-								Else
-									mMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
-								End If
+                                If System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 Then
+                                    mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+                                ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 Then
+                                    mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+                                ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 OrElse _
+                                       System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 OrElse _
+                                       System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0 Then
+                                    mMSInfoScanner = New clsAgilentGCDFolderInfoScanner
+                                Else
+                                    mMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
+                                End If
 
-								blnKnownMSDataType = True
-							Case clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION
-								' Micromass .Raw folder
-								mMSInfoScanner = New clsMicromassRawFolderInfoScanner
-								blnKnownMSDataType = True
-							Case Else
-								' Unknown folder extension
-						End Select
+                                blnKnownMSDataType = True
+                            Case clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION
+                                ' Micromass .Raw folder
+                                mMSInfoScanner = New clsMicromassRawFolderInfoScanner
+                                blnKnownMSDataType = True
+                            Case Else
+                                ' Unknown folder extension
+                        End Select
                     End If
 				Else
 					If objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME.ToLower() Then
