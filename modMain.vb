@@ -7,7 +7,7 @@ Option Strict On
 
 Module modMain
 
-	Public Const PROGRAM_DATE As String = "March 20, 2012"
+	Public Const PROGRAM_DATE As String = "March 21, 2012"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional

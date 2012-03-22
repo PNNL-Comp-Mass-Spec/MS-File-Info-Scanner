@@ -13,7 +13,7 @@ Option Strict On
 Public Class clsMSFileInfoScanner
 
     Public Sub New()
-		mFileDate = "March 20, 2012"
+		mFileDate = "March 21, 2012"
 
         mFileIntegrityChecker = New clsFileIntegrityChecker
         mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -1561,13 +1561,16 @@ Public Class clsMSFileInfoScanner
                                 ' Look for file analysis.baf or extension.baf
 
                                 If System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 Then
-                                    mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+
                                 ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 Then
-                                    mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+
                                 ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 OrElse _
                                        System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 OrElse _
                                        System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0 Then
-                                    mMSInfoScanner = New clsAgilentGCDFolderInfoScanner
+									mMSInfoScanner = New clsAgilentGCDFolderInfoScanner
+
                                 Else
                                     mMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
                                 End If

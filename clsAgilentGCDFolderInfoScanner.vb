@@ -76,6 +76,8 @@ Public Class clsAgilentGCDFolderInfoScanner
                 Return False
             End If
 
+			' Populate a dictionary object with the text strings for finding lines with runtime information
+			' Since "Post Run" occurs twice in the file, we use a clsLineMatchSearchInfo.Matched to track whether or not the text has been matched
             dctRunTimeText = New System.Collections.Generic.Dictionary(Of String, clsLineMatchSearchInfo)
             dctRunTimeText.Add(ACQ_METHOD_FILE_EQUILIBRATION_TIME_LINE, New clsLineMatchSearchInfo(True))
             dctRunTimeText.Add(ACQ_METHOD_FILE_RUN_TIME_LINE, New clsLineMatchSearchInfo(True))
@@ -99,7 +101,8 @@ Public Class clsAgilentGCDFolderInfoScanner
                                     If ExtractRunTime(strLineIn, dblRunTime) Then
                                         dctRunTimeText.Item(strKey).Matched = True
                                         dblTotalRuntime += dblRunTime
-                                        blnRunTimeFound = True
+										blnRunTimeFound = True
+										Exit For
                                     End If
                                 End If
                             End If
@@ -198,39 +201,51 @@ Public Class clsAgilentGCDFolderInfoScanner
 
                 .DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
                 .FileExtension = ioFolderInfo.Extension
+				.FileSizeBytes = 0
 
                 ' Look for the DATA.MS file
                 ' Use its modification time to get an initial estimate for the acquisition end time
                 ' Assign the .MS file's size to .FileSizeBytes
                 ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_MS_DATA_FILE))
                 If ioFileInfo.Exists Then
-                    .FileSizeBytes = ioFileInfo.Length
-                    .AcqTimeStart = ioFileInfo.LastWriteTime
-                    .AcqTimeEnd = ioFileInfo.LastWriteTime
+					.FileSizeBytes = ioFileInfo.Length
+					.AcqTimeStart = ioFileInfo.LastWriteTime
+					.AcqTimeEnd = ioFileInfo.LastWriteTime
+
+					' Read the file info from the file system
+					UpdateDatasetFileStats(ioFileInfo, udtFileInfo.DatasetID)
+
                     blnSuccess = True
-                Else
-                    ' DATA.MS not found; use the timestamp from the acqmeth.txt file or GC.ini file
-                    ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_ACQ_METHOD_FILE))
-                    If Not ioFileInfo.Exists Then
-                        ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_GC_INI_FILE))
-                    End If
+				End If
 
-                    If ioFileInfo.Exists Then
-                        .AcqTimeStart = ioFileInfo.LastWriteTime
-                        .AcqTimeEnd = ioFileInfo.LastWriteTime
-                        blnSuccess = True
+				' The timestamp of the acqmeth.txt file or GC.ini file is more accurate than the GC.ini file, so we'll use that
+				ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_ACQ_METHOD_FILE))
+				If Not ioFileInfo.Exists Then
+					ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_GC_INI_FILE))
+				End If
 
-                        ' Sum up the sizes of all of the files in this folder
-                        .FileSizeBytes = 0
-                        For Each ioFileInfo In ioFolderInfo.GetFiles()
-                            .FileSizeBytes += ioFileInfo.Length
-                        Next ioFileInfo
-                    End If
-                End If
+				If ioFileInfo.Exists Then
+					' Update the AcqTimes only if the LastWriteTime of the acqmeth.txt or GC.ini file is within the next 60 minutes of .AcqTimeEnd
+					If Not blnSuccess OrElse ioFileInfo.LastWriteTime.Subtract(.AcqTimeEnd).TotalMinutes < 60 Then
+						.AcqTimeStart = ioFileInfo.LastWriteTime
+						.AcqTimeEnd = ioFileInfo.LastWriteTime
+						blnSuccess = True
+					End If
 
-                ' FUTURE: Use ProteoWizard to determine the scan counts
-                .ScanCount = 0
-            End With
+					If .FileSizeBytes = 0 Then
+						' File size was not determined from the DATA.MS file
+						' Instead, sum up the sizes of all of the files in this folder
+						For Each ioFileInfo In ioFolderInfo.GetFiles()
+							.FileSizeBytes += ioFileInfo.Length
+						Next ioFileInfo
+
+						mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = udtFileInfo.FileSizeBytes
+					End If
+
+				End If
+
+				.ScanCount = 0
+			End With
 
             If blnSuccess Then
                 Try
@@ -249,6 +264,20 @@ Public Class clsAgilentGCDFolderInfoScanner
 
                 blnSuccess = True
             End If
+
+			If blnSuccess Then
+
+				' Copy over the updated filetime info and scan info from udtFileInfo to mDatasetFileInfo
+				With mDatasetStatsSummarizer.DatasetFileInfo
+					.DatasetName = String.Copy(udtFileInfo.DatasetName)
+					.FileExtension = String.Copy(udtFileInfo.FileExtension)
+
+					.AcqTimeStart = udtFileInfo.AcqTimeStart
+					.AcqTimeEnd = udtFileInfo.AcqTimeEnd
+					.ScanCount = udtFileInfo.ScanCount
+				End With
+			End If
+		
 
         Catch ex As System.Exception
             blnSuccess = False

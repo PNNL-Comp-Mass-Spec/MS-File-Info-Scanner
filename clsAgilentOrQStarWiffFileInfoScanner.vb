@@ -47,6 +47,9 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 			' Obtain the full path to the file
 			ioFileInfo = New System.IO.FileInfo(strDataFilePath)
 
+			' Read the file info from the file system
+			UpdateDatasetFileStats(ioFileInfo, udtFileInfo.DatasetID)
+
 			With udtFileInfo
 				.FileSystemCreationTime = ioFileInfo.CreationTime
 				.FileSystemModificationTime = ioFileInfo.LastWriteTime
@@ -60,12 +63,16 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 				.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFileInfo.Name)
 				.FileExtension = ioFileInfo.Extension
 				.FileSizeBytes = ioFileInfo.Length
+
+				' FUTURE: Use ProteoWizard to determine the scan counts
+
 			End With
 
 			' Copy over the updated filetime info and scan info from udtFileInfo to mDatasetFileInfo
 			With mDatasetStatsSummarizer.DatasetFileInfo
 				.DatasetName = String.Copy(udtFileInfo.DatasetName)
 				.FileExtension = String.Copy(udtFileInfo.FileExtension)
+				.FileSizeBytes = udtFileInfo.FileSizeBytes
 				.AcqTimeStart = udtFileInfo.AcqTimeStart
 				.AcqTimeEnd = udtFileInfo.AcqTimeEnd
 				.ScanCount = udtFileInfo.ScanCount
