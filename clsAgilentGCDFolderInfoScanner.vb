@@ -215,7 +215,7 @@ Public Class clsAgilentGCDFolderInfoScanner
 					' Read the file info from the file system
 					UpdateDatasetFileStats(ioFileInfo, udtFileInfo.DatasetID)
 
-                    blnSuccess = True
+					blnSuccess = True
 				End If
 
 				' The timestamp of the acqmeth.txt file or GC.ini file is more accurate than the GC.ini file, so we'll use that
@@ -243,6 +243,9 @@ Public Class clsAgilentGCDFolderInfoScanner
 					End If
 
 				End If
+
+
+				' FUTURE: Read the ScanCount, TIC, and ScanTimes using a binary reader
 
 				.ScanCount = 0
 			End With

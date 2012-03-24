@@ -87,6 +87,18 @@ Public Class clsTICandBPIPlotter
         End Set
     End Property
 
+	Public ReadOnly Property CountBPI() As Integer
+		Get
+			Return mBPI.ScanCount
+		End Get
+	End Property
+
+	Public ReadOnly Property CountTIC() As Integer
+		Get
+			Return mTIC.ScanCount
+		End Get
+	End Property
+
     Public Property RemoveZeroesFromEnds() As Boolean
         Get
             Return mRemoveZeroesFromEnds

@@ -633,6 +633,7 @@ Public Class clsLCMSDataPlotter
         Dim sngAvgIntensity As Single
         Dim sngMedianIntensity As Single
 
+		Dim intMinScan As Integer
         Dim intMaxScan As Integer
 
         Dim dblMinMZ As Double
@@ -679,6 +680,7 @@ Public Class clsLCMSDataPlotter
         sngColorScaleMinIntensity = Single.MaxValue
         sngColorScaleMaxIntensity = 0
 
+		intMinScan = Integer.MaxValue
         intMaxScan = 0
         dblMinMZ = Single.MaxValue
         dblMaxMZ = 0
@@ -715,6 +717,10 @@ Public Class clsLCMSDataPlotter
 
                     UpdateMinMax(.ScanTimeMinutes, dblScanTimeMin, dblScanTimeMax)
 
+					If .ScanNumber < intMinScan Then
+						intMinScan = .ScanNumber
+					End If
+
                     If .ScanNumber > intMaxScan Then
                         intMaxScan = .ScanNumber
                     End If
@@ -732,7 +738,11 @@ Public Class clsLCMSDataPlotter
             Return myPane
         End If
 
-        ' Round intMaxScan down to the nearest multiple of 10
+		' Round intMinScan down to the nearest multiple of 10
+		intMinScan = CInt(Math.Floor(intMinScan / 10.0) * 10)
+		If intMinScan < 0 Then intMinScan = 0
+
+		' Round intMaxScan up to the nearest multiple of 10
         intMaxScan = CInt(Math.Ceiling(intMaxScan / 10.0) * 10)
 
         ' Round dblMinMZ down to the nearest multiple of 100
@@ -856,49 +866,54 @@ Public Class clsLCMSDataPlotter
         myPane.XAxis.Scale.MagAuto = False
         myPane.XAxis.Scale.MaxGrace = 0
 
-        ' Override the auto-computed axis range
-        myPane.XAxis.Scale.Min = 0
-        myPane.XAxis.Scale.Max = intMaxScan
+		' Override the auto-computed axis range
+		If Me.mOptions.UseObservedMinScan Then
+			myPane.XAxis.Scale.Min = intMinScan
+		Else
+			myPane.XAxis.Scale.Min = 0
+		End If
 
-        ' Set the Y-axis to display unmodified m/z values
-        myPane.YAxis.Scale.Mag = 0
-        myPane.YAxis.Scale.MagAuto = False
-        myPane.YAxis.Scale.MaxGrace = 0
+		myPane.XAxis.Scale.Max = intMaxScan
 
-        ' Override the auto-computed axis range
-        myPane.YAxis.Scale.Min = dblMinMZ
-        myPane.YAxis.Scale.Max = dblMaxMZ
+		' Set the Y-axis to display unmodified m/z values
+		myPane.YAxis.Scale.Mag = 0
+		myPane.YAxis.Scale.MagAuto = False
+		myPane.YAxis.Scale.MaxGrace = 0
 
-        ' Align the Y axis labels so they are flush to the axis
-        myPane.YAxis.Scale.Align = ZedGraph.AlignP.Inside
+		' Override the auto-computed axis range
+		myPane.YAxis.Scale.Min = dblMinMZ
+		myPane.YAxis.Scale.Max = dblMaxMZ
 
-        ' Adjust the font sizes
-        myPane.XAxis.Title.FontSpec.Size = FONT_SIZE_BASE
-        myPane.XAxis.Title.FontSpec.IsBold = False
-        myPane.XAxis.Scale.FontSpec.Size = FONT_SIZE_BASE
+		' Align the Y axis labels so they are flush to the axis
+		myPane.YAxis.Scale.Align = ZedGraph.AlignP.Inside
 
-        myPane.YAxis.Title.FontSpec.Size = FONT_SIZE_BASE
-        myPane.YAxis.Title.FontSpec.IsBold = False
-        myPane.YAxis.Scale.FontSpec.Size = FONT_SIZE_BASE
+		' Adjust the font sizes
+		myPane.XAxis.Title.FontSpec.Size = FONT_SIZE_BASE
+		myPane.XAxis.Title.FontSpec.IsBold = False
+		myPane.XAxis.Scale.FontSpec.Size = FONT_SIZE_BASE
 
-        myPane.Title.FontSpec.Size = FONT_SIZE_BASE + 1
-        myPane.Title.FontSpec.IsBold = True
+		myPane.YAxis.Title.FontSpec.Size = FONT_SIZE_BASE
+		myPane.YAxis.Title.FontSpec.IsBold = False
+		myPane.YAxis.Scale.FontSpec.Size = FONT_SIZE_BASE
 
-        ' Fill the axis background with a gradient
-        myPane.Chart.Fill = New ZedGraph.Fill(System.Drawing.Color.White, System.Drawing.Color.FromArgb(255, 230, 230, 230), 45.0F)
+		myPane.Title.FontSpec.Size = FONT_SIZE_BASE + 1
+		myPane.Title.FontSpec.IsBold = True
 
-        ' Could use the following to simply fill with white
-        'myPane.Chart.Fill = New ZedGraph.Fill(Drawing.Color.White)
+		' Fill the axis background with a gradient
+		myPane.Chart.Fill = New ZedGraph.Fill(System.Drawing.Color.White, System.Drawing.Color.FromArgb(255, 230, 230, 230), 45.0F)
 
-        ' Hide the legend
-        myPane.Legend.IsVisible = False
+		' Could use the following to simply fill with white
+		'myPane.Chart.Fill = New ZedGraph.Fill(Drawing.Color.White)
 
-        ' Force a plot update
-        myPane.AxisChange()
+		' Hide the legend
+		myPane.Legend.IsVisible = False
 
-        Return myPane
+		' Force a plot update
+		myPane.AxisChange()
 
-    End Function
+		Return myPane
+
+	End Function
 
     ''' <summary>
     ''' Converts an integer to engineering notation
@@ -963,7 +978,7 @@ Public Class clsLCMSDataPlotter
             If strFileNameSuffixAddon Is Nothing Then strFileNameSuffixAddon = String.Empty
 
             Do
-                myPane = InitializeGraphPane(strDatasetName & " - MS Spectra", 1, False)
+				myPane = InitializeGraphPane(strDatasetName & " - " & mOptions.MS1PlotTitle, 1, False)
                 If myPane.CurveList.Count > 0 Then
                     If EMBED_FILTER_SETTINGS_IN_NAME Then
                         strPNGFilePath = strDatasetName & "_" & strFileNameSuffixAddon & "LCMS_" & mOptions.MaxPointsToPlot & "_" & mOptions.MinPointsPerSpectrum & "_" & mOptions.MZResolution.ToString("0.00") & ".png"
@@ -976,7 +991,7 @@ Public Class clsLCMSDataPlotter
                 End If
             Loop While False
 
-            myPane = InitializeGraphPane(strDatasetName & " - MS2 Spectra", 2, True)
+			myPane = InitializeGraphPane(strDatasetName & " - " & mOptions.MS2PlotTitle, 2, True)
             If myPane.CurveList.Count > 0 Then
                 strPNGFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName & "_" & strFileNameSuffixAddon & "LCMS_MSn.png")
                 myPane.GetImage(1024, 700, 300, False).Save(strPNGFilePath, System.Drawing.Imaging.ImageFormat.Png)
@@ -1258,11 +1273,19 @@ Public Class clsLCMSDataPlotter
         Public Const DEFAULT_MZ_RESOLUTION As Single = 0.4
         Public Const DEFAULT_MIN_INTENSITY As Single = 0
 
+		Protected Const DEFAULT_MS1_PLOT_TITLE As String = "MS Spectra"
+		Protected Const DEFAULT_MS2_PLOT_TITLE As String = "MS2 Spectra"
+
         Protected mMaxPointsToPlot As Integer
         Protected mMinPointsPerSpectrum As Integer
 
         Protected mMZResolution As Single
         Protected mMinIntensity As Single
+
+		Protected mMS1PlotTitle As String
+		Protected mMS2PlotTitle As String
+
+		Protected mUseObservedMinScan As Boolean
 
         Public Property MaxPointsToPlot() As Integer
             Get
@@ -1284,6 +1307,30 @@ Public Class clsLCMSDataPlotter
             End Set
         End Property
 
+		Public Property MS1PlotTitle() As String
+			Get
+				Return mMS1PlotTitle
+			End Get
+			Set(value As String)
+				If String.IsNullOrEmpty(value) Then
+					value = DEFAULT_MS1_PLOT_TITLE
+				End If
+				mMS1PlotTitle = value
+			End Set
+		End Property
+
+		Public Property MS2PlotTitle() As String
+			Get
+				Return mMS2PlotTitle
+			End Get
+			Set(value As String)
+				If String.IsNullOrEmpty(value) Then
+					value = DEFAULT_MS2_PLOT_TITLE
+				End If
+				mMS2PlotTitle = value
+			End Set
+		End Property
+
         Public Property MZResolution() As Single
             Get
                 Return mMZResolution
@@ -1304,6 +1351,15 @@ Public Class clsLCMSDataPlotter
             End Set
         End Property
 
+		Public Property UseObservedMinScan() As Boolean
+			Get
+				Return mUseObservedMinScan
+			End Get
+			Set(value As Boolean)
+				mUseObservedMinScan = value
+			End Set
+		End Property
+
         Public Function Clone() As clsOptions
             Dim objClone As New clsOptions
 
@@ -1312,7 +1368,12 @@ Public Class clsLCMSDataPlotter
                 .MinPointsPerSpectrum = Me.MinPointsPerSpectrum
 
                 .MZResolution = Me.MZResolution
-                .MinIntensity = Me.MinIntensity
+				.MinIntensity = Me.MinIntensity
+
+				.MS1PlotTitle = Me.MS1PlotTitle
+				.MS2PlotTitle = Me.MS2PlotTitle
+
+				.UseObservedMinScan = Me.UseObservedMinScan
             End With
 
             Return objClone
@@ -1324,7 +1385,12 @@ Public Class clsLCMSDataPlotter
             mMinPointsPerSpectrum = DEFAULT_MIN_POINTS_PER_SPECTRUM
 
             mMZResolution = DEFAULT_MZ_RESOLUTION
-            mMinIntensity = DEFAULT_MIN_INTENSITY
+			mMinIntensity = DEFAULT_MIN_INTENSITY
+
+			mMS1PlotTitle = DEFAULT_MS1_PLOT_TITLE
+			mMS2PlotTitle = DEFAULT_MS2_PLOT_TITLE
+
+			mUseObservedMinScan = False
         End Sub
 
     End Class

@@ -139,15 +139,6 @@ MSFileInfoScanner
 	<param name="intRecurseFoldersMaxLevels">Maximum folder depth to process; Set to 0 to process all folders</param>
 	<returns></returns>
 	<remarks></remarks>
-</member><member name="M:MSFileInfoScanner.clsAgilentTOFOrQStarWiffFileInfoScanner.ProcessDatafileClearCore(System.String,MSFileInfoScanner.iMSFileInfoProcessor.udtFileInfoType@)">
-	<summary>
- The following was an attempt to read the data using ClearCore2 DLLs
- However, this only works if you have a license key
- </summary>
-	<param name="strDataFilePath"></param>
-	<param name="udtFileInfo"></param>
-	<returns></returns>
-	<remarks></remarks>
 </member><member name="M:MSFileInfoScanner.clsLCMSDataPlotter.GetRecentFileInfo(MSFileInfoScanner.clsLCMSDataPlotter.eOutputFileTypes)">
 	<summary>
  Returns the file name of the recently saved file of the given type

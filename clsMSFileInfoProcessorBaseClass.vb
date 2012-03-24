@@ -384,6 +384,8 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 		mLCMS2DPlotOverview.Reset()
 
+		mLCMS2DPlotOverview.Options = mLCMS2DPlot.Options.Clone()
+
 		' Set MaxPointsToPlot in mLCMS2DPlotOverview to be intLCMS2DOverviewPlotDivisor times smaller 
 		' than the MaxPointsToPlot value in mLCMS2DPlot
 		mLCMS2DPlotOverview.Options.MaxPointsToPlot = CInt(Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / intLCMS2DOverviewPlotDivisor, 0))

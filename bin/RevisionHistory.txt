@@ -1,7 +1,12 @@
 MS File Info Scanner Change Log
 
+Version 1.2.4465; March 23, 2012
+	- Now using ProteowizardWrapper.dll to read QTrap .wiff files
+		- Able to extract run time, TIC, and detailed mass/intensity values
+		- Now creating QC plots for QTrap data
+
 Version 1.2.4463; March 21, 2012
-	- Added support for Agilent GC-MS .D folders 
+	- Added basic support for Agilent GC-MS .D folders 
 
 Version 1.2.4462; March 20, 2012
 	- Now setting String values to Nothing prior to calling XRawFile functions that return string values via a pbstr variable

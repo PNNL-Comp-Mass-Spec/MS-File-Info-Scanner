@@ -492,7 +492,6 @@ Public Class clsUIMFInfoScanner
 		' intDatasetID = LookupDatasetID(strDatasetName)
 		intDatasetID = 0
 
-		' Record the file size and Dataset ID
 		With udtFileInfo
 			.FileSystemCreationTime = ioFileInfo.CreationTime
 			.FileSystemModificationTime = ioFileInfo.LastWriteTime

@@ -3,7 +3,7 @@ Option Strict On
 ' Scans a series of MS data files (or data folders) and extracts the acquisition start and end times, 
 ' number of spectra, and the total size of the data.  Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
 '
-' Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar .WIFF files, 
+' Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar/QTrap .WIFF files, 
 ' Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, and .UIMF files (IMS)
 '
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)

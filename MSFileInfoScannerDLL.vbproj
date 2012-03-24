@@ -42,8 +42,7 @@
     <BaseAddress>285212672</BaseAddress>
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants>XRAW_Missing=False</DefineConstants>
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <DebugSymbols>true</DebugSymbols>
@@ -79,6 +78,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\</OutputPath>
+    <DefineConstants>XRAW_Missing=False</DefineConstants>
     <BaseAddress>285212672</BaseAddress>
     <DocumentationFile>MSFileInfoScanner.xml</DocumentationFile>
     <WarningLevel>1</WarningLevel>
@@ -104,6 +104,13 @@
     <Reference Include="NetCDFReader, Version=1.0.1484.41937, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\NetCDFReader.dll</HintPath>
+    </Reference>
+    <Reference Include="ProteowizardWrapper">
+      <HintPath>Lib\ProteowizardWrapper.dll</HintPath>
+    </Reference>
+    <Reference Include="pwiz_bindings_cli, Version=0.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\pwiz_bindings_cli.dll</HintPath>
     </Reference>
     <Reference Include="SharedVBNetRoutines, Version=1.0.3224.30718, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
