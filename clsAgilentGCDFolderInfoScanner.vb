@@ -210,9 +210,9 @@ Public Class clsAgilentGCDFolderInfoScanner
 
 					objScanStatsEntry.ScanNumber = intSpectrumIndex + 1
 					objScanStatsEntry.ScanType = intMSLevel
-					objScanStatsEntry.ScanTypeName = "MS"
+					objScanStatsEntry.ScanTypeName = "GC-MS"
 
-					objScanStatsEntry.ScanFilterText = "GC-MS"
+					objScanStatsEntry.ScanFilterText = ""
 					objScanStatsEntry.ElutionTime = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(oSpectrum.RetentionTimeMinutes, 5)
 					objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(oSpectrum.TIC, 1)
 
