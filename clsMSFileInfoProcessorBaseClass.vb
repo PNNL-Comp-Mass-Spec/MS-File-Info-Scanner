@@ -1,7 +1,7 @@
 Option Strict On
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Copyright 2007, Battelle Memorial Institute.  All Rights Reserved.
+' Started in 2007
 '
 ' Last modified October 27, 2011
 

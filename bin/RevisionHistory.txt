@@ -1,5 +1,10 @@
 MS File Info Scanner Change Log
 
+Version 1.2.4469; March 27, 2012
+	- Now using ChemstationMSFileReader.dll to read Data.MS files in Agilent GC/MS .D folders
+		- Able to extract run time, TIC, and detailed mass/intensity values
+		- Now creating QC plots for Agilent GC/MS data
+
 Version 1.2.4465; March 23, 2012
 	- Now using ProteowizardWrapper.dll to read QTrap .wiff files
 		- Able to extract run time, TIC, and detailed mass/intensity values

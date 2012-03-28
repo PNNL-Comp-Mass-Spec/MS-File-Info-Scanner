@@ -946,7 +946,7 @@ Namespace DSSummarizer
 		Public ScanTypeName As String		   ' Example values: MS, HMS, Zoom, CID-MSn, or PQD-MSn
 
 		' The following are strings to prevent the number formatting from changing
-		Public ElutionTime As String
+		Public ElutionTime As String			' Elution time, in minutes
 		Public TotalIonIntensity As String
 		Public BasePeakIntensity As String
 		Public BasePeakMZ As String

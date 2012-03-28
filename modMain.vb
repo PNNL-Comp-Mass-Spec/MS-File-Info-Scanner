@@ -1,13 +1,12 @@
 Option Strict On
 
 ' Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
-' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 
 ' See clsMSFileInfoScanner for a program description
 
 Module modMain
 
-	Public Const PROGRAM_DATE As String = "March 23, 2012"
+	Public Const PROGRAM_DATE As String = "March 27, 2012"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -44,7 +43,6 @@ Module modMain
     Private mZipFileCheckAllData As Boolean
 
     Private WithEvents mMSFileScanner As clsMSFileInfoScanner
-
 
     ''Private Function TestZipper(ByVal strFolderPath As String, ByVal strFileMatch As String) As Boolean
 

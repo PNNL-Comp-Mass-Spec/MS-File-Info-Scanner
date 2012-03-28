@@ -3,7 +3,6 @@ Option Strict On
 ' Base class for derived classes that can read Finnigan .Raw files (LCQ, LTQ, etc.)
 ' 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
-' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
 ' Last modified November 29, 2010
 

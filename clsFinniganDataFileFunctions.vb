@@ -8,7 +8,6 @@ Option Strict On
 ' Download link: http://sjsupport.thermofinnigan.com/public/detail.asp?id=703
 ' 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
-' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
 ' Switched from XRawFile2.dll to MSFileReader.XRawfile2.dll in March 2012
 

@@ -1,7 +1,7 @@
 Option Strict On
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
+' Started in 2005
 '
 ' Updated in March 2012 to use Proteowizard to read data from QTrap .Wiff files
 ' (cannot read MS data or TIC values from Agilent .Wiff files)

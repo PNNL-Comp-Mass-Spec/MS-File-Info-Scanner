@@ -7,7 +7,6 @@ Option Strict On
 ' Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, and .UIMF files (IMS)
 '
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 ' Started October 11, 2003
 
 Public Class clsMSFileInfoScanner
@@ -1527,63 +1526,71 @@ Public Class clsMSFileInfoScanner
         Try
             If strInputFileOrFolderPath Is Nothing OrElse strInputFileOrFolderPath.Length = 0 Then
                 ShowErrorMessage("Input file name is empty")
-            Else
-                ShowMessage(" Parsing " & System.IO.Path.GetFileName(strInputFileOrFolderPath))
+			Else
+				Try
+					If System.IO.Path.GetFileName(strInputFileOrFolderPath).Length = 0 Then
+						ShowMessage(" Parsing " & System.IO.Path.GetDirectoryName(strInputFileOrFolderPath))
+					Else
+						ShowMessage(" Parsing " & System.IO.Path.GetFileName(strInputFileOrFolderPath))
+					End If
+				Catch ex As Exception
+					ShowMessage(" Parsing " & strInputFileOrFolderPath)
+				End Try
 
-                ' Determine whether strInputFileOrFolderPath points to a file or a folder
+				' Determine whether strInputFileOrFolderPath points to a file or a folder
 
-                If Not GetFileOrFolderInfo(strInputFileOrFolderPath, blnIsFolder, objFileSystemInfo) Then
-                    ShowErrorMessage("File or folder not found: " & strInputFileOrFolderPath)
-                    If SKIP_FILES_IN_ERROR Then
-                        Return True
-                    Else
-                        SetErrorCode(eMSFileScannerErrorCodes.FilePathError)
-                        Return False
-                    End If
-                End If
+				If Not GetFileOrFolderInfo(strInputFileOrFolderPath, blnIsFolder, objFileSystemInfo) Then
+					ShowErrorMessage("File or folder not found: " & strInputFileOrFolderPath)
+					If SKIP_FILES_IN_ERROR Then
+						Return True
+					Else
+						SetErrorCode(eMSFileScannerErrorCodes.FilePathError)
+						Return False
+					End If
+				End If
 
-                blnKnownMSDataType = False
+				blnKnownMSDataType = False
 
-                ' Only continue if it's a known type
-                If blnIsFolder Then
-                    If objFileSystemInfo.Name = clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME Then
-                        ' Bruker 1 folder
-                        mMSInfoScanner = New clsBrukerOneFolderInfoScanner
-                        blnKnownMSDataType = True
+				' Only continue if it's a known type
+				If blnIsFolder Then
+					If objFileSystemInfo.Name = clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME Then
+						' Bruker 1 folder
+						mMSInfoScanner = New clsBrukerOneFolderInfoScanner
+						blnKnownMSDataType = True
 					Else
 						If strInputFileOrFolderPath.EndsWith("\"c) Then
 							strInputFileOrFolderPath = strInputFileOrFolderPath.TrimEnd("\"c)
 						End If
 
-                        Select Case System.IO.Path.GetExtension(strInputFileOrFolderPath).ToUpper()
-                            Case clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION
-                                ' Agilent .D folder or Bruker .D folder
-                                ' Look for file analysis.baf or extension.baf
+						Select Case System.IO.Path.GetExtension(strInputFileOrFolderPath).ToUpper()
+							Case clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION
+								' Agilent .D folder or Bruker .D folder
+								' Look for file analysis.baf or extension.baf
 
-                                If System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 Then
+								If System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 Then
 									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
 
-                                ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 Then
+								ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 Then
 									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
 
-                                ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 OrElse _
-                                       System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 OrElse _
-                                       System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0 Then
+								ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 OrElse _
+									System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 OrElse _
+									System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0 Then
 									mMSInfoScanner = New clsAgilentGCDFolderInfoScanner
 
-                                Else
-                                    mMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
-                                End If
+								Else
+									mMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
+								End If
 
-                                blnKnownMSDataType = True
-                            Case clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION
-                                ' Micromass .Raw folder
-                                mMSInfoScanner = New clsMicromassRawFolderInfoScanner
-                                blnKnownMSDataType = True
-                            Case Else
-                                ' Unknown folder extension
-                        End Select
-                    End If
+								blnKnownMSDataType = True
+							Case clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION
+								' Micromass .Raw folder
+								mMSInfoScanner = New clsMicromassRawFolderInfoScanner
+								blnKnownMSDataType = True
+							Case Else
+								' Unknown folder extension
+						End Select
+					End If
 				Else
 					If objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME.ToLower() Then
 						mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
@@ -1628,51 +1635,51 @@ Public Class clsMSFileInfoScanner
 						End Select
 					End If
 
-                End If
+				End If
 
-                If Not blnKnownMSDataType Then
-                    ShowErrorMessage("Unknown file type: " & System.IO.Path.GetFileName(strInputFileOrFolderPath))
-                    SetErrorCode(eMSFileScannerErrorCodes.UnknownFileExtension)
-                    Return False
-                End If
+				If Not blnKnownMSDataType Then
+					ShowErrorMessage("Unknown file type: " & System.IO.Path.GetFileName(strInputFileOrFolderPath))
+					SetErrorCode(eMSFileScannerErrorCodes.UnknownFileExtension)
+					Return False
+				End If
 
-                Dim strDatasetName As String
-                strDatasetName = mMSInfoScanner.GetDatasetNameViaPath(objFileSystemInfo.FullName)
+				Dim strDatasetName As String
+				strDatasetName = mMSInfoScanner.GetDatasetNameViaPath(objFileSystemInfo.FullName)
 
-                If mUseCacheFiles AndAlso Not mReprocessExistingFiles Then
-                    ' See if the strDatasetName in strInputFileOrFolderPath is already present in mCachedResults
-                    ' If it is present, then don't process it (unless mReprocessIfCachedSizeIsZero = True and it's size is 0)
+				If mUseCacheFiles AndAlso Not mReprocessExistingFiles Then
+					' See if the strDatasetName in strInputFileOrFolderPath is already present in mCachedResults
+					' If it is present, then don't process it (unless mReprocessIfCachedSizeIsZero = True and it's size is 0)
 
-                    If strDatasetName.Length > 0 AndAlso mMSFileInfoDataCache.CachedMSInfoContainsDataset(strDatasetName, objRow) Then
-                        If mReprocessIfCachedSizeIsZero Then
-                            Try
-                                lngCachedSizeBytes = CLng(objRow.Item(clsMSFileInfoDataCache.COL_NAME_FILE_SIZE_BYTES))
-                            Catch ex2 As System.Exception
-                                lngCachedSizeBytes = 1
-                            End Try
+					If strDatasetName.Length > 0 AndAlso mMSFileInfoDataCache.CachedMSInfoContainsDataset(strDatasetName, objRow) Then
+						If mReprocessIfCachedSizeIsZero Then
+							Try
+								lngCachedSizeBytes = CLng(objRow.Item(clsMSFileInfoDataCache.COL_NAME_FILE_SIZE_BYTES))
+							Catch ex2 As System.Exception
+								lngCachedSizeBytes = 1
+							End Try
 
-                            If lngCachedSizeBytes > 0 Then
-                                ' File is present in mCachedResults, and its size is > 0, so we won't re-process it
-                                ShowMessage("  Skipping " & System.IO.Path.GetFileName(strInputFileOrFolderPath) & " since already in cached results")
-                                eMSFileProcessingState = eMSFileProcessingStateConstants.SkippedSinceFoundInCache
-                                Return True
-                            End If
-                        Else
-                            ' File is present in mCachedResults, and mReprocessIfCachedSizeIsZero=False, so we won't re-process it
-                            ShowMessage("  Skipping " & System.IO.Path.GetFileName(strInputFileOrFolderPath) & " since already in cached results")
-                            eMSFileProcessingState = eMSFileProcessingStateConstants.SkippedSinceFoundInCache
-                            Return True
-                        End If
-                    End If
-                End If
+							If lngCachedSizeBytes > 0 Then
+								' File is present in mCachedResults, and its size is > 0, so we won't re-process it
+								ShowMessage("  Skipping " & System.IO.Path.GetFileName(strInputFileOrFolderPath) & " since already in cached results")
+								eMSFileProcessingState = eMSFileProcessingStateConstants.SkippedSinceFoundInCache
+								Return True
+							End If
+						Else
+							' File is present in mCachedResults, and mReprocessIfCachedSizeIsZero=False, so we won't re-process it
+							ShowMessage("  Skipping " & System.IO.Path.GetFileName(strInputFileOrFolderPath) & " since already in cached results")
+							eMSFileProcessingState = eMSFileProcessingStateConstants.SkippedSinceFoundInCache
+							Return True
+						End If
+					End If
+				End If
 
-                ' Process the data file or folder
-                blnSuccess = ProcessMSDataset(strInputFileOrFolderPath, mMSInfoScanner, strDatasetName, strOutputFolderPath)
-                If blnSuccess Then
-                    eMSFileProcessingState = eMSFileProcessingStateConstants.ProcessedSuccessfully
-                Else
-                    eMSFileProcessingState = eMSFileProcessingStateConstants.FailedProcessing
-                End If
+				' Process the data file or folder
+				blnSuccess = ProcessMSDataset(strInputFileOrFolderPath, mMSInfoScanner, strDatasetName, strOutputFolderPath)
+				If blnSuccess Then
+					eMSFileProcessingState = eMSFileProcessingStateConstants.ProcessedSuccessfully
+				Else
+					eMSFileProcessingState = eMSFileProcessingStateConstants.FailedProcessing
+				End If
 
             End If
 

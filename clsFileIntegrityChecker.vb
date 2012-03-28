@@ -3,7 +3,6 @@
 ' This class will check the integrity of files in a given folder
 '
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Copyright 2008, Battelle Memorial Institute.  All Rights Reserved.
 ' Started May 16, 2008
 
 Public Class clsFileIntegrityChecker

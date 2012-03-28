@@ -3,7 +3,6 @@ Option Strict On
 ' This class can be used to read or write settings in an Xml settings file
 ' Based on a class from the DMS Analysis Manager software written by Dave Clark and Gary Kiebel (PNNL, Richland, WA)
 ' Additional features added by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in October 2003
-' Copyright 2005, Battelle Memorial Institute
 '
 ' Updated in October 2004 to truly be case-insensitive if IsCaseSensitive = False when calling LoadSettings()
 ' Updated in August 2007 to remove the PRISM.Logging functionality and to include class XMLFileReader inside class XmlSettingsFileAccessor
