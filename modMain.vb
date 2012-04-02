@@ -6,7 +6,7 @@ Option Strict On
 
 Module modMain
 
-	Public Const PROGRAM_DATE As String = "March 27, 2012"
+	Public Const PROGRAM_DATE As String = "April 2, 2012"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -218,7 +218,7 @@ Module modMain
             intReturnCode = -1
         End Try
 
-        Return intReturnCode
+		Return intReturnCode
 
     End Function
 

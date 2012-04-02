@@ -1291,8 +1291,8 @@ Public Class clsFileIntegrityChecker
 												  ByRef udtFileStats() As udtFileStatsType, _
 												  ByRef strFileIgnoreList() As String) As Boolean
 
-		Dim objMSInfoScanner As MSFileInfoScanner.iMSFileInfoProcessor
-		Dim udtFileInfo As MSFileInfoScanner.iMSFileInfoProcessor.udtFileInfoType
+		Dim objMSInfoScanner As iMSFileInfoProcessor
+		Dim udtFileInfo As iMSFileInfoProcessor.udtFileInfoType
 
 		Dim ioFolderInfo As System.IO.DirectoryInfo
 		Dim ioFile As System.IO.FileInfo

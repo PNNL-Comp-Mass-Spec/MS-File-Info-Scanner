@@ -145,7 +145,7 @@ Public Class clsUIMFInfoScanner
 	End Sub
 
 	Private Sub ConstructTICandBPI(ByRef objUIMFReader As UIMFLibrary.DataReader, ByVal intFrameStart As Integer, ByVal intFrameEnd As Integer, _
-								   ByRef dblTIC As Double(), ByRef dblBPI As Double())
+		ByRef dblTIC As Double(), ByRef dblBPI As Double())
 
 		Try
 			' Obtain the TIC and BPI for each MS frame

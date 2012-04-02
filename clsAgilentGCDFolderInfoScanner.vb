@@ -55,132 +55,132 @@ Public Class clsAgilentGCDFolderInfoScanner
 
     End Function
 
-    Private Function ParseAcqMethodFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        Dim strFilePath As String = String.Empty
-        Dim strLineIn As String
+	Private Function ParseAcqMethodFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+		Dim strFilePath As String = String.Empty
+		Dim strLineIn As String
 
-        Dim dctRunTimeText As System.Collections.Generic.Dictionary(Of String, clsLineMatchSearchInfo)
-        Dim dblTotalRuntime As Double = 0
-        Dim dblRunTime As Double = 0
+		Dim dctRunTimeText As System.Collections.Generic.Dictionary(Of String, clsLineMatchSearchInfo)
+		Dim dblTotalRuntime As Double = 0
+		Dim dblRunTime As Double = 0
 
-        Dim blnRunTimeFound As Boolean
-        Dim blnSuccess As Boolean
-        Dim blnMatchSuccess As Boolean
+		Dim blnRunTimeFound As Boolean
+		Dim blnSuccess As Boolean
+		Dim blnMatchSuccess As Boolean
 
-        Try
-            ' Open the acqmeth.txt file
-            strFilePath = System.IO.Path.Combine(strFolderPath, AGILENT_ACQ_METHOD_FILE)
-            If Not System.IO.File.Exists(strFilePath) Then
-                Return False
-            End If
+		Try
+			' Open the acqmeth.txt file
+			strFilePath = System.IO.Path.Combine(strFolderPath, AGILENT_ACQ_METHOD_FILE)
+			If Not System.IO.File.Exists(strFilePath) Then
+				Return False
+			End If
 
 			' Populate a dictionary object with the text strings for finding lines with runtime information
 			' Note that "Post Run" occurs twice in the file, so we use clsLineMatchSearchInfo.Matched to track whether or not the text has been matched
 			dctRunTimeText = New System.Collections.Generic.Dictionary(Of String, clsLineMatchSearchInfo)
-            dctRunTimeText.Add(ACQ_METHOD_FILE_EQUILIBRATION_TIME_LINE, New clsLineMatchSearchInfo(True))
-            dctRunTimeText.Add(ACQ_METHOD_FILE_RUN_TIME_LINE, New clsLineMatchSearchInfo(True))
+			dctRunTimeText.Add(ACQ_METHOD_FILE_EQUILIBRATION_TIME_LINE, New clsLineMatchSearchInfo(True))
+			dctRunTimeText.Add(ACQ_METHOD_FILE_RUN_TIME_LINE, New clsLineMatchSearchInfo(True))
 
 			' We could also add in the "Post Run" time for determining total acquisition time, but we don't do this, to stay consistent with run times reported by the Data.MS file
 			' dctRunTimeText.Add(ACQ_METHOD_FILE_POST_RUN_LINE, New clsLineMatchSearchInfo(False))
 
-            Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(strFilePath)
+			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(strFilePath)
 
-                Do While srInFile.Peek() >= 0
-                    strLineIn = srInFile.ReadLine()
+				Do While srInFile.Peek() >= 0
+					strLineIn = srInFile.ReadLine()
 
-                    If Not String.IsNullOrWhiteSpace(strLineIn) Then
-                        For Each strKey As String In dctRunTimeText.Keys
-                            If Not dctRunTimeText.Item(strKey).Matched Then
-                                If dctRunTimeText.Item(strKey).MatchLineStart Then
-                                    blnMatchSuccess = strLineIn.StartsWith(strKey)
-                                Else
-                                    blnMatchSuccess = strLineIn.Contains(strKey)
-                                End If
+					If Not String.IsNullOrWhiteSpace(strLineIn) Then
+						For Each strKey As String In dctRunTimeText.Keys
+							If Not dctRunTimeText.Item(strKey).Matched Then
+								If dctRunTimeText.Item(strKey).MatchLineStart Then
+									blnMatchSuccess = strLineIn.StartsWith(strKey)
+								Else
+									blnMatchSuccess = strLineIn.Contains(strKey)
+								End If
 
-                                If blnMatchSuccess Then
-                                    If ExtractRunTime(strLineIn, dblRunTime) Then
-                                        dctRunTimeText.Item(strKey).Matched = True
-                                        dblTotalRuntime += dblRunTime
+								If blnMatchSuccess Then
+									If ExtractRunTime(strLineIn, dblRunTime) Then
+										dctRunTimeText.Item(strKey).Matched = True
+										dblTotalRuntime += dblRunTime
 										blnRunTimeFound = True
 										Exit For
-                                    End If
-                                End If
-                            End If
-                        Next
+									End If
+								End If
+							End If
+						Next
 
-                    End If
+					End If
 
-                Loop
-            End Using
+				Loop
+			End Using
 
-            blnSuccess = blnRunTimeFound
+			blnSuccess = blnRunTimeFound
 
-        Catch ex As System.Exception
+		Catch ex As System.Exception
 			' Exception reading file
 			ReportError("Exception reading " & AGILENT_ACQ_METHOD_FILE & ": " & ex.Message)
 			blnSuccess = False
-        End Try
+		End Try
 
-        If blnSuccess Then
-            ' Update the acquisition start time
-            udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd.AddMinutes(-dblTotalRuntime)
-        End If
+		If blnSuccess Then
+			' Update the acquisition start time
+			udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd.AddMinutes(-dblTotalRuntime)
+		End If
 
-        Return blnSuccess
+		Return blnSuccess
 
-    End Function
+	End Function
 
-    Private Function ParseGCIniFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        Dim strFilePath As String = String.Empty
-        Dim strLineIn As String
-        Dim strSplitLine() As String
+	Private Function ParseGCIniFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+		Dim strFilePath As String = String.Empty
+		Dim strLineIn As String
+		Dim strSplitLine() As String
 
-        Dim dblTotalRuntime As Double = 0
+		Dim dblTotalRuntime As Double = 0
 
-        Dim blnSuccess As Boolean
+		Dim blnSuccess As Boolean
 
-        Try
-            ' Open the GC.ini file
-            strFilePath = System.IO.Path.Combine(strFolderPath, AGILENT_GC_INI_FILE)
-            If Not System.IO.File.Exists(strFilePath) Then
-                Return False
-            End If
+		Try
+			' Open the GC.ini file
+			strFilePath = System.IO.Path.Combine(strFolderPath, AGILENT_GC_INI_FILE)
+			If Not System.IO.File.Exists(strFilePath) Then
+				Return False
+			End If
 
-            Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(strFilePath)
+			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(strFilePath)
 
-                Do While srInFile.Peek() >= 0
-                    strLineIn = srInFile.ReadLine()
+				Do While srInFile.Peek() >= 0
+					strLineIn = srInFile.ReadLine()
 
-                    If Not String.IsNullOrWhiteSpace(strLineIn) Then
-                        If strLineIn.StartsWith("gc.runlength") Then
-                            ' Runtime is the value after the equals sign
-                            strSplitLine = strLineIn.Split("="c)
-                            If strSplitLine.Length > 1 Then
-                                If Double.TryParse(strSplitLine(1), dblTotalRuntime) Then
-                                    blnSuccess = True
-                                End If
-                            End If
-                        End If
+					If Not String.IsNullOrWhiteSpace(strLineIn) Then
+						If strLineIn.StartsWith("gc.runlength") Then
+							' Runtime is the value after the equals sign
+							strSplitLine = strLineIn.Split("="c)
+							If strSplitLine.Length > 1 Then
+								If Double.TryParse(strSplitLine(1), dblTotalRuntime) Then
+									blnSuccess = True
+								End If
+							End If
+						End If
 
-                    End If
+					End If
 
-                Loop
-            End Using
+				Loop
+			End Using
 
-        Catch ex As System.Exception
+		Catch ex As System.Exception
 			' Exception reading file
 			ReportError("Exception reading " & AGILENT_GC_INI_FILE & ": " & ex.Message)
-            blnSuccess = False
-        End Try
+			blnSuccess = False
+		End Try
 
-        If blnSuccess Then
-            ' Update the acquisition start time
-            udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd.AddMinutes(-dblTotalRuntime)
-        End If
+		If blnSuccess Then
+			' Update the acquisition start time
+			udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd.AddMinutes(-dblTotalRuntime)
+		End If
 
-        Return blnSuccess
+		Return blnSuccess
 
-    End Function
+	End Function
 
 	Protected Function ProcessChemstationMSDataFile(ByVal strDatafilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
@@ -263,38 +263,38 @@ Public Class clsAgilentGCDFolderInfoScanner
 
 	End Function
 
-    Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        ' Returns True if success, False if an error
+	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+		' Returns True if success, False if an error
 
 		Dim blnSuccess As Boolean
 		Dim blnAcqTimeDetermined As Boolean
 
-        Dim ioFolderInfo As System.IO.DirectoryInfo
-        Dim ioFileInfo As System.IO.FileInfo
+		Dim ioFolderInfo As System.IO.DirectoryInfo
+		Dim ioFileInfo As System.IO.FileInfo
 		Dim strMSDataFilePath As String
 
-        Try
-            blnSuccess = False
-            ioFolderInfo = New System.IO.DirectoryInfo(strDataFilePath)
+		Try
+			blnSuccess = False
+			ioFolderInfo = New System.IO.DirectoryInfo(strDataFilePath)
 			strMSDataFilePath = System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_MS_DATA_FILE)
 
-            With udtFileInfo
-                .FileSystemCreationTime = ioFolderInfo.CreationTime
-                .FileSystemModificationTime = ioFolderInfo.LastWriteTime
+			With udtFileInfo
+				.FileSystemCreationTime = ioFolderInfo.CreationTime
+				.FileSystemModificationTime = ioFolderInfo.LastWriteTime
 
-                ' The acquisition times will get updated below to more accurate values
-                .AcqTimeStart = .FileSystemModificationTime
-                .AcqTimeEnd = .FileSystemModificationTime
+				' The acquisition times will get updated below to more accurate values
+				.AcqTimeStart = .FileSystemModificationTime
+				.AcqTimeEnd = .FileSystemModificationTime
 
-                .DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
-                .FileExtension = ioFolderInfo.Extension
+				.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
+				.FileExtension = ioFolderInfo.Extension
 				.FileSizeBytes = 0
 
-                ' Look for the DATA.MS file
-                ' Use its modification time to get an initial estimate for the acquisition end time
-                ' Assign the .MS file's size to .FileSizeBytes
+				' Look for the DATA.MS file
+				' Use its modification time to get an initial estimate for the acquisition end time
+				' Assign the .MS file's size to .FileSizeBytes
 				ioFileInfo = New System.IO.FileInfo(strMSDataFilePath)
-                If ioFileInfo.Exists Then
+				If ioFileInfo.Exists Then
 					.FileSizeBytes = ioFileInfo.Length
 					.AcqTimeStart = ioFileInfo.LastWriteTime
 					.AcqTimeEnd = ioFileInfo.LastWriteTime
@@ -390,7 +390,7 @@ Public Class clsAgilentGCDFolderInfoScanner
 			blnSuccess = False
 		End Try
 
-        Return blnSuccess
-    End Function
+		Return blnSuccess
+	End Function
 
 End Class

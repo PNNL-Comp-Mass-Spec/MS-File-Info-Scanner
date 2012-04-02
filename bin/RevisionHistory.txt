@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.2.4475; April 2, 2012
+	- clsMSFileInfoScanner now implements interface iMSFileInfoScanner, which is defined in MSFileInfoScannerInterfaces.dll
+	- Updated to ProteowizardWrapper v1.0.4475
+
 Version 1.2.4469; March 27, 2012
 	- Now using ChemstationMSFileReader.dll to read Data.MS files in Agilent GC/MS .D folders
 		- Able to extract run time, TIC, and detailed mass/intensity values

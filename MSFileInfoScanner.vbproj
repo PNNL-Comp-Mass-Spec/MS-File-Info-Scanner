@@ -105,11 +105,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\Ionic.Zip.dll</HintPath>
     </Reference>
+    <Reference Include="MSFileInfoScannerInterfaces">
+      <HintPath>MSFileInfoScannerInterfaces\bin\MSFileInfoScannerInterfaces.dll</HintPath>
+    </Reference>
     <Reference Include="NetCDFReader, Version=1.0.1484.41937, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\NetCDFReader.dll</HintPath>
     </Reference>
-    <Reference Include="ProteowizardWrapper">
+    <Reference Include="ProteowizardWrapper, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\ProteowizardWrapper.dll</HintPath>
     </Reference>
     <Reference Include="pwiz_bindings_cli, Version=0.0.0.0, Culture=neutral, processorArchitecture=x86">
@@ -202,9 +206,7 @@
     <Compile Include="modMain.vb">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MSFileInfoProcessorInterface.vb">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="MSFileInfoProcessorInterface.vb" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="My Project\" />

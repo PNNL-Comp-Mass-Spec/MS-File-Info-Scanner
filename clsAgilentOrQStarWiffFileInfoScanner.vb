@@ -69,7 +69,6 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 			Dim objPWiz As pwiz.ProteowizardWrapper.MSDataFileReader
 			objPWiz = New pwiz.ProteowizardWrapper.MSDataFileReader(ioFileInfo.FullName)
 
-
 			Try
 				Dim dtRunStartTime As System.DateTime = udtFileInfo.AcqTimeStart
 				dtRunStartTime = CDate(objPWiz.RunStartTime())
@@ -148,7 +147,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 		Static reGetQ1MZ As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex(Q_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
 
 		Return ExtractQMZ(reGetQ1MZ, strChromID, dblMZ)
-	
+
 	End Function
 
 	Private Function ExtractQ3MZ(ByVal strChromID As String, ByRef dblMZ As Double) As Boolean
@@ -357,7 +356,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 	End Sub
 
 	Private Sub StoreChromatogramInfo(ByRef objPWiz As pwiz.ProteowizardWrapper.MSDataFileReader, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, _
-   ByRef blnTICStored As Boolean, ByRef blnSRMDataCached As Boolean, ByRef dblRuntimeMinutes As Double)
+	  ByRef blnTICStored As Boolean, ByRef blnSRMDataCached As Boolean, ByRef dblRuntimeMinutes As Double)
 
 		Dim strChromID As String = String.Empty
 		Dim sngTimes() As Single

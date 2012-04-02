@@ -28,7 +28,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 	''' <returns>True if a valid file is found; otherwise false</returns>
 	''' <remarks></remarks>
 	Protected Function DetermineAcqStartTime(ByVal ioDatasetFolder As System.IO.DirectoryInfo, _
-				  ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	  ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
 		Dim blnSuccess As Boolean = False
 
@@ -101,7 +101,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 	End Function
 
 	Protected Function ParseAutoMSFile(ByVal ioDatasetFolder As System.IO.DirectoryInfo, _
-			   ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	  ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
 		Dim strAutoMSFilePath As String
 

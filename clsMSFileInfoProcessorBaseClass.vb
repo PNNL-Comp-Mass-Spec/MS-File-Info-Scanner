@@ -3,7 +3,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Started in 2007
 '
-' Last modified October 27, 2011
+' Last modified April 2, 2012
 
 Public MustInherit Class clsMSFileInfoProcessorBaseClass
 	Implements iMSFileInfoProcessor

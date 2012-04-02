@@ -41,123 +41,123 @@ Public Class clsMicromassRawFolderInfoScanner
 
     End Function
 
-    Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        ' Returns True if success, False if an error
+	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+		' Returns True if success, False if an error
 
-        Dim blnSuccess As Boolean
-        Dim ioFolderInfo As System.IO.DirectoryInfo
-        Dim ioFileInfo As System.IO.FileInfo
+		Dim blnSuccess As Boolean
+		Dim ioFolderInfo As System.IO.DirectoryInfo
+		Dim ioFileInfo As System.IO.FileInfo
 
-        Dim intFileCount As Integer
+		Dim intFileCount As Integer
 
-        Dim objNativeFileIO As clsMassLynxNativeIO
-        Dim udtHeaderInfo As clsMassLynxNativeIO.udtMSHeaderInfoType
-        Dim udtFunctionInfo As clsMassLynxNativeIO.udtMSFunctionInfoType
+		Dim objNativeFileIO As clsMassLynxNativeIO
+		Dim udtHeaderInfo As clsMassLynxNativeIO.udtMSHeaderInfoType
+		Dim udtFunctionInfo As clsMassLynxNativeIO.udtMSFunctionInfoType
 
-        Dim intFunctionCount As Integer
-        Dim intFunctionNumber As Integer
-        Dim sngEndRT As Single
+		Dim intFunctionCount As Integer
+		Dim intFunctionNumber As Integer
+		Dim sngEndRT As Single
 
-        Dim dtNewStartDate As DateTime
+		Dim dtNewStartDate As DateTime
 
-        Try
-            ioFolderInfo = New System.IO.DirectoryInfo(strDataFilePath)
-            With udtFileInfo
-                .FileSystemCreationTime = ioFolderInfo.CreationTime
-                .FileSystemModificationTime = ioFolderInfo.LastWriteTime
+		Try
+			ioFolderInfo = New System.IO.DirectoryInfo(strDataFilePath)
+			With udtFileInfo
+				.FileSystemCreationTime = ioFolderInfo.CreationTime
+				.FileSystemModificationTime = ioFolderInfo.LastWriteTime
 
-                ' The acquisition times will get updated below to more accurate values
-                .AcqTimeStart = .FileSystemModificationTime
-                .AcqTimeEnd = .FileSystemModificationTime
+				' The acquisition times will get updated below to more accurate values
+				.AcqTimeStart = .FileSystemModificationTime
+				.AcqTimeEnd = .FileSystemModificationTime
 
-                .DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
-                .FileExtension = ioFolderInfo.Extension
+				.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
+				.FileExtension = ioFolderInfo.Extension
 
-                ' Sum up the sizes of all of the files in this folder
-                .FileSizeBytes = 0
-                intFileCount = 0
-                For Each ioFileInfo In ioFolderInfo.GetFiles()
-                    .FileSizeBytes += ioFileInfo.Length
+				' Sum up the sizes of all of the files in this folder
+				.FileSizeBytes = 0
+				intFileCount = 0
+				For Each ioFileInfo In ioFolderInfo.GetFiles()
+					.FileSizeBytes += ioFileInfo.Length
 
-                    If intFileCount = 0 Then
-                        ' Assign the first file's modification time to .AcqTimeStart and .AcqTimeEnd
-                        ' Necessary in case _header.txt is missing
-                        .AcqTimeStart = ioFileInfo.LastWriteTime
-                        .AcqTimeEnd = ioFileInfo.LastWriteTime
-                    End If
+					If intFileCount = 0 Then
+						' Assign the first file's modification time to .AcqTimeStart and .AcqTimeEnd
+						' Necessary in case _header.txt is missing
+						.AcqTimeStart = ioFileInfo.LastWriteTime
+						.AcqTimeEnd = ioFileInfo.LastWriteTime
+					End If
 
-                    If ioFileInfo.Name.ToLower = "_header.txt" Then
-                        ' Assign the file's modification time to .AcqTimeStart and .AcqTimeEnd
-                        ' These will get updated below to more precise values
-                        .AcqTimeStart = ioFileInfo.LastWriteTime
-                        .AcqTimeEnd = ioFileInfo.LastWriteTime
-                    End If
+					If ioFileInfo.Name.ToLower = "_header.txt" Then
+						' Assign the file's modification time to .AcqTimeStart and .AcqTimeEnd
+						' These will get updated below to more precise values
+						.AcqTimeStart = ioFileInfo.LastWriteTime
+						.AcqTimeEnd = ioFileInfo.LastWriteTime
+					End If
 
-                    intFileCount += 1
-                Next ioFileInfo
+					intFileCount += 1
+				Next ioFileInfo
 
-                .ScanCount = 0
-            End With
+				.ScanCount = 0
+			End With
 
-            blnSuccess = True
+			blnSuccess = True
 
-            objNativeFileIO = New clsMassLynxNativeIO
-            If objNativeFileIO.GetFileInfo(ioFolderInfo.FullName, udtHeaderInfo) Then
+			objNativeFileIO = New clsMassLynxNativeIO
+			If objNativeFileIO.GetFileInfo(ioFolderInfo.FullName, udtHeaderInfo) Then
 
-                dtNewStartDate = Date.Parse(udtHeaderInfo.AcquDate & " " & udtHeaderInfo.AcquTime)
+				dtNewStartDate = Date.Parse(udtHeaderInfo.AcquDate & " " & udtHeaderInfo.AcquTime)
 
-                intFunctionCount = objNativeFileIO.GetFunctionCount(ioFolderInfo.FullName)
-                If intFunctionCount > 0 Then
+				intFunctionCount = objNativeFileIO.GetFunctionCount(ioFolderInfo.FullName)
+				If intFunctionCount > 0 Then
 
-                    ' Sum up the scan count of all of the functions
-                    ' Additionally, find the largest EndRT value in all of the functions
-                    sngEndRT = 0
-                    For intFunctionNumber = 1 To intFunctionCount
-                        If objNativeFileIO.GetFunctionInfo(ioFolderInfo.FullName, 1, udtFunctionInfo) Then
-                            udtFileInfo.ScanCount += udtFunctionInfo.ScanCount
-                            If udtFunctionInfo.EndRT > sngEndRT Then
-                                sngEndRT = udtFunctionInfo.EndRT
-                            End If
-                        End If
-                    Next intFunctionNumber
+					' Sum up the scan count of all of the functions
+					' Additionally, find the largest EndRT value in all of the functions
+					sngEndRT = 0
+					For intFunctionNumber = 1 To intFunctionCount
+						If objNativeFileIO.GetFunctionInfo(ioFolderInfo.FullName, 1, udtFunctionInfo) Then
+							udtFileInfo.ScanCount += udtFunctionInfo.ScanCount
+							If udtFunctionInfo.EndRT > sngEndRT Then
+								sngEndRT = udtFunctionInfo.EndRT
+							End If
+						End If
+					Next intFunctionNumber
 
-                    With udtFileInfo
-                        If dtNewStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME Then
-                            udtFileInfo.AcqTimeStart = dtNewStartDate
+					With udtFileInfo
+						If dtNewStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME Then
+							udtFileInfo.AcqTimeStart = dtNewStartDate
 
-                            If sngEndRT > 0 Then
-                                .AcqTimeEnd = .AcqTimeStart.Add(MinutesToTimeSpan(sngEndRT))
-                            Else
-                                .AcqTimeEnd = .AcqTimeStart
-                            End If
-                        Else
-                            ' Keep .AcqTimeEnd as the file modification date
-                            ' Set .AcqTimeStart based on .AcqEndTime
-                            If sngEndRT > 0 Then
-                                .AcqTimeStart = .AcqTimeEnd.Subtract(MinutesToTimeSpan(sngEndRT))
-                            Else
-                                .AcqTimeEnd = .AcqTimeStart
-                            End If
-                        End If
-                    End With
-                Else
-                    If dtNewStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME Then
-                        udtFileInfo.AcqTimeStart = dtNewStartDate
-                    End If
-                End If
+							If sngEndRT > 0 Then
+								.AcqTimeEnd = .AcqTimeStart.Add(MinutesToTimeSpan(sngEndRT))
+							Else
+								.AcqTimeEnd = .AcqTimeStart
+							End If
+						Else
+							' Keep .AcqTimeEnd as the file modification date
+							' Set .AcqTimeStart based on .AcqEndTime
+							If sngEndRT > 0 Then
+								.AcqTimeStart = .AcqTimeEnd.Subtract(MinutesToTimeSpan(sngEndRT))
+							Else
+								.AcqTimeEnd = .AcqTimeStart
+							End If
+						End If
+					End With
+				Else
+					If dtNewStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME Then
+						udtFileInfo.AcqTimeStart = dtNewStartDate
+					End If
+				End If
 
-            Else
-                ' Error getting the header info using clsMassLynxNativeIO
-                ' Continue anyway since we've populated some of the values
-            End If
+			Else
+				' Error getting the header info using clsMassLynxNativeIO
+				' Continue anyway since we've populated some of the values
+			End If
 
-            blnSuccess = True
+			blnSuccess = True
 
-        Catch ex As System.Exception
-            blnSuccess = False
-        End Try
+		Catch ex As System.Exception
+			blnSuccess = False
+		End Try
 
-        Return blnSuccess
-    End Function
+		Return blnSuccess
+	End Function
 
 End Class

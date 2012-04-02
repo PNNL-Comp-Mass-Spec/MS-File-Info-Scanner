@@ -61,19 +61,19 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 
     End Function
 
-    Private Function ParseRunLogFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Private Function ParseRunLogFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		Dim strLineIn As String
-        Dim strMostRecentMethodLine As String = String.Empty
+		Dim strMostRecentMethodLine As String = String.Empty
 
-        Dim intCharLoc As Integer
-        Dim dtMethodDate As DateTime
+		Dim intCharLoc As Integer
+		Dim dtMethodDate As DateTime
 
-        Dim blnProcessedFirstMethodLine As Boolean
-        Dim blnEndDateFound As Boolean
-        Dim blnSuccess As Boolean
+		Dim blnProcessedFirstMethodLine As Boolean
+		Dim blnEndDateFound As Boolean
+		Dim blnSuccess As Boolean
 
-        Try
-            ' Try to open the Run.Log file
+		Try
+			' Try to open the Run.Log file
 			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(System.IO.Path.Combine(strFolderPath, AGILENT_RUN_LOG_FILE))
 
 				blnProcessedFirstMethodLine = False
@@ -114,134 +114,134 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 				Loop
 			End Using
 
-            If blnProcessedFirstMethodLine And Not blnEndDateFound Then
-                ' Use the last time in the file as the .AcqTimeEnd value
-                If ExtractMethodLineDate(strMostRecentMethodLine, dtMethodDate) Then
-                    udtFileInfo.AcqTimeEnd = dtMethodDate
-                End If
-            End If
+			If blnProcessedFirstMethodLine And Not blnEndDateFound Then
+				' Use the last time in the file as the .AcqTimeEnd value
+				If ExtractMethodLineDate(strMostRecentMethodLine, dtMethodDate) Then
+					udtFileInfo.AcqTimeEnd = dtMethodDate
+				End If
+			End If
 
-            blnSuccess = blnProcessedFirstMethodLine
+			blnSuccess = blnProcessedFirstMethodLine
 
-        Catch ex As System.Exception
-            ' Run.log file not found
-            blnSuccess = False
+		Catch ex As System.Exception
+			' Run.log file not found
+			blnSuccess = False
 		End Try
 
-        Return blnSuccess
+		Return blnSuccess
 
-    End Function
+	End Function
 
-    Private Function ParseAnalysisCDFFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Private Function ParseAnalysisCDFFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		Dim objNETCDFReader As NetCDFReader.clsMSNetCdf = Nothing
 
-        Dim intScanCount As Integer, intScanNumber As Integer
-        Dim dblScanTotalIntensity As Double, dblScanTime As Double
-        Dim dblMassMin As Double, dblMassMax As Double
+		Dim intScanCount As Integer, intScanNumber As Integer
+		Dim dblScanTotalIntensity As Double, dblScanTime As Double
+		Dim dblMassMin As Double, dblMassMax As Double
 
-        Dim blnSuccess As Boolean
+		Dim blnSuccess As Boolean
 
-        Try
-            objNETCDFReader = New NetCDFReader.clsMSNetCdf
-            blnSuccess = objNETCDFReader.OpenMSCdfFile(System.IO.Path.Combine(strFolderPath, AGILENT_ANALYSIS_CDF_FILE))
-            If blnSuccess Then
-                intScanCount = objNETCDFReader.GetScanCount()
+		Try
+			objNETCDFReader = New NetCDFReader.clsMSNetCdf
+			blnSuccess = objNETCDFReader.OpenMSCdfFile(System.IO.Path.Combine(strFolderPath, AGILENT_ANALYSIS_CDF_FILE))
+			If blnSuccess Then
+				intScanCount = objNETCDFReader.GetScanCount()
 
-                If intScanCount > 0 Then
-                    ' Lookup the scan time of the final scan
-                    If objNETCDFReader.GetScanInfo(intScanCount - 1, intScanNumber, dblScanTotalIntensity, dblScanTime, dblMassMin, dblMassMax) Then
-                        With udtFileInfo
-                            ' Add 1 to intScanNumber since the scan number is off by one in the CDF file
-                            .ScanCount = intScanNumber + 1
-                            .AcqTimeEnd = udtFileInfo.AcqTimeStart.Add(SecondsToTimeSpan(dblScanTime))
-                        End With
-                    End If
-                Else
-                    udtFileInfo.ScanCount = 0
-                End If
-            End If
-        Catch ex As System.Exception
-            blnSuccess = False
-        Finally
-            If Not objNETCDFReader Is Nothing Then
-                objNETCDFReader.CloseMSCdfFile()
-            End If
-        End Try
+				If intScanCount > 0 Then
+					' Lookup the scan time of the final scan
+					If objNETCDFReader.GetScanInfo(intScanCount - 1, intScanNumber, dblScanTotalIntensity, dblScanTime, dblMassMin, dblMassMax) Then
+						With udtFileInfo
+							' Add 1 to intScanNumber since the scan number is off by one in the CDF file
+							.ScanCount = intScanNumber + 1
+							.AcqTimeEnd = udtFileInfo.AcqTimeStart.Add(SecondsToTimeSpan(dblScanTime))
+						End With
+					End If
+				Else
+					udtFileInfo.ScanCount = 0
+				End If
+			End If
+		Catch ex As System.Exception
+			blnSuccess = False
+		Finally
+			If Not objNETCDFReader Is Nothing Then
+				objNETCDFReader.CloseMSCdfFile()
+			End If
+		End Try
 
-        Return blnSuccess
+		Return blnSuccess
 
-    End Function
+	End Function
 
-    Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        ' Returns True if success, False if an error
+	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+		' Returns True if success, False if an error
 
-        Dim blnSuccess As Boolean
-        Dim ioFolderInfo As System.IO.DirectoryInfo
-        Dim ioFileInfo As System.IO.FileInfo
+		Dim blnSuccess As Boolean
+		Dim ioFolderInfo As System.IO.DirectoryInfo
+		Dim ioFileInfo As System.IO.FileInfo
 
-        Try
-            blnSuccess = False
-            ioFolderInfo = New System.IO.DirectoryInfo(strDataFilePath)
+		Try
+			blnSuccess = False
+			ioFolderInfo = New System.IO.DirectoryInfo(strDataFilePath)
 
-            With udtFileInfo
-                .FileSystemCreationTime = ioFolderInfo.CreationTime
-                .FileSystemModificationTime = ioFolderInfo.LastWriteTime
+			With udtFileInfo
+				.FileSystemCreationTime = ioFolderInfo.CreationTime
+				.FileSystemModificationTime = ioFolderInfo.LastWriteTime
 
-                ' The acquisition times will get updated below to more accurate values
-                .AcqTimeStart = .FileSystemModificationTime
-                .AcqTimeEnd = .FileSystemModificationTime
+				' The acquisition times will get updated below to more accurate values
+				.AcqTimeStart = .FileSystemModificationTime
+				.AcqTimeEnd = .FileSystemModificationTime
 
-                .DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
-                .FileExtension = ioFolderInfo.Extension
+				.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
+				.FileExtension = ioFolderInfo.Extension
 
-                ' Look for the Analysis.yep file
-                ' Use its modification time to get an initial estimate for the acquisition time
-                ' Assign the .Yep file's size to .FileSizeBytes
-                ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_YEP_FILE))
-                If ioFileInfo.Exists Then
-                    .FileSizeBytes = ioFileInfo.Length
-                    .AcqTimeStart = ioFileInfo.LastWriteTime
-                    .AcqTimeEnd = ioFileInfo.LastWriteTime
-                    blnSuccess = True
-                Else
-                    ' Analysis.yep not found; look for Run.log
-                    ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_RUN_LOG_FILE))
-                    If ioFileInfo.Exists Then
-                        .AcqTimeStart = ioFileInfo.LastWriteTime
-                        .AcqTimeEnd = ioFileInfo.LastWriteTime
-                        blnSuccess = True
+				' Look for the Analysis.yep file
+				' Use its modification time to get an initial estimate for the acquisition time
+				' Assign the .Yep file's size to .FileSizeBytes
+				ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_YEP_FILE))
+				If ioFileInfo.Exists Then
+					.FileSizeBytes = ioFileInfo.Length
+					.AcqTimeStart = ioFileInfo.LastWriteTime
+					.AcqTimeEnd = ioFileInfo.LastWriteTime
+					blnSuccess = True
+				Else
+					' Analysis.yep not found; look for Run.log
+					ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_RUN_LOG_FILE))
+					If ioFileInfo.Exists Then
+						.AcqTimeStart = ioFileInfo.LastWriteTime
+						.AcqTimeEnd = ioFileInfo.LastWriteTime
+						blnSuccess = True
 
-                        ' Sum up the sizes of all of the files in this folder
-                        .FileSizeBytes = 0
-                        For Each ioFileInfo In ioFolderInfo.GetFiles()
-                            .FileSizeBytes += ioFileInfo.Length
-                        Next ioFileInfo
-                    End If
-                End If
+						' Sum up the sizes of all of the files in this folder
+						.FileSizeBytes = 0
+						For Each ioFileInfo In ioFolderInfo.GetFiles()
+							.FileSizeBytes += ioFileInfo.Length
+						Next ioFileInfo
+					End If
+				End If
 
-                .ScanCount = 0
-            End With
+				.ScanCount = 0
+			End With
 
-            If blnSuccess Then
-                Try
-                    ' Parse the Run Log file to determine the actual values for .AcqTimeStart and .AcqTimeEnd
-                    blnSuccess = ParseRunLogFile(strDataFilePath, udtFileInfo)
+			If blnSuccess Then
+				Try
+					' Parse the Run Log file to determine the actual values for .AcqTimeStart and .AcqTimeEnd
+					blnSuccess = ParseRunLogFile(strDataFilePath, udtFileInfo)
 
-                    ' Parse the Analysis.cdf file to determine the scan count and to further refine .AcqTimeStart
-                    blnSuccess = ParseAnalysisCDFFile(strDataFilePath, udtFileInfo)
-                Catch ex As System.Exception
-                    ' Error parsing the Run Log file or the Analysis.cdf file; do not abort
+					' Parse the Analysis.cdf file to determine the scan count and to further refine .AcqTimeStart
+					blnSuccess = ParseAnalysisCDFFile(strDataFilePath, udtFileInfo)
+				Catch ex As System.Exception
+					' Error parsing the Run Log file or the Analysis.cdf file; do not abort
 
-                End Try
+				End Try
 
-                blnSuccess = True
-            End If
+				blnSuccess = True
+			End If
 
-        Catch ex As System.Exception
-            blnSuccess = False
-        End Try
+		Catch ex As System.Exception
+			blnSuccess = False
+		End Try
 
-        Return blnSuccess
-    End Function
+		Return blnSuccess
+	End Function
 
 End Class

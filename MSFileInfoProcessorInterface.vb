@@ -3,7 +3,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Started in 2005
 '
-' Last modified November 29, 2010
+' Last modified April 2, 2012
 
 Public Interface iMSFileInfoProcessor
 
@@ -52,7 +52,7 @@ Public Interface iMSFileInfoProcessor
     Function GetOption(ByVal eOption As ProcessingOptions) As Boolean
     Sub SetOption(ByVal eOption As ProcessingOptions, ByVal blnValue As Boolean)
 
-    Event ErrorEvent(ByVal Message As String)
+	Event ErrorEvent(ByVal Message As String)
 
     Event MessageEvent(ByVal message As String)
 
