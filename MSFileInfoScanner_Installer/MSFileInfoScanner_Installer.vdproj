@@ -27,6 +27,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_393DEB46B7504A279B7E77FEAC1754CC"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -232,11 +238,6 @@
             "AssemblyAsmDisplayName" = "8:NetCDFReader, Version=1.0.1484.41937, Culture=neutral"
                 "ScatterAssemblies"
                 {
-                    "_0FC6AE17FCD6B0FB3D1F5E50D315819B"
-                    {
-                    "Name" = "8:NetCDFReader.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:NetCDFReader.dll"
             "TargetName" = "8:"
@@ -263,11 +264,6 @@
             "AssemblyAsmDisplayName" = "8:Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_2A42B67B3EDBFC028251C45364ED2B45"
-                    {
-                    "Name" = "8:Ionic.Zip.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:Ionic.Zip.dll"
             "TargetName" = "8:"
@@ -287,6 +283,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_393DEB46B7504A279B7E77FEAC1754CC"
+            {
+            "SourcePath" = "8:..\\bin\\Readme.txt"
+            "TargetName" = "8:Readme.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_4F551CB233C740748796EF290C7B231A"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_8840B2953BC917FF99B020F2D1F9A7B8"
             {
             "AssemblyRegister" = "3:1"
@@ -294,11 +310,6 @@
             "AssemblyAsmDisplayName" = "8:System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
-                    "_8840B2953BC917FF99B020F2D1F9A7B8"
-                    {
-                    "Name" = "8:System.Data.SQLite.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:System.Data.SQLite.dll"
             "TargetName" = "8:"
@@ -325,11 +336,6 @@
             "AssemblyAsmDisplayName" = "8:ZedGraph, Version=5.1.5.28844, Culture=neutral, PublicKeyToken=02a83cbd123fcd60, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_8AABC67EB7C5802FFAC1090C4557353A"
-                    {
-                    "Name" = "8:ZedGraph.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:ZedGraph.dll"
             "TargetName" = "8:"
@@ -356,11 +362,6 @@
             "AssemblyAsmDisplayName" = "8:UIMFLibrary, Version=2.0.4454.20142, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
-                    "_94FB45DA835A15D020E6439CB753EC26"
-                    {
-                    "Name" = "8:UIMFLibrary.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:UIMFLibrary.dll"
             "TargetName" = "8:"
@@ -447,11 +448,6 @@
             "AssemblyAsmDisplayName" = "8:SharedVBNetRoutines, Version=1.0.3224.30718, Culture=neutral"
                 "ScatterAssemblies"
                 {
-                    "_D762A06A23250B03B5882A7B12D38FB6"
-                    {
-                    "Name" = "8:SharedVBNetRoutines.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:SharedVBNetRoutines.dll"
             "TargetName" = "8:"
@@ -578,15 +574,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:MSFileInfoScanner"
-        "ProductCode" = "8:{26832802-C616-4913-BB74-D11340678BCA}"
-        "PackageCode" = "8:{46DD10EA-7207-4556-B9FE-CAC8ED3742CD}"
+        "ProductCode" = "8:{15CDE727-EF99-4EB7-B426-01BB62986D87}"
+        "PackageCode" = "8:{B170F019-383B-4CD3-96B2-7DDDCEF5BA0B}"
         "UpgradeCode" = "8:{5B7DD97A-9979-4302-9840-188A941F61F1}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.2.0"
+        "ProductVersion" = "8:1.2.1"
         "Manufacturer" = "8:PNNL"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -1128,7 +1124,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
             {
-            "SourcePath" = "8:..\\obj\\x86\\Release\\MSFileInfoScanner.exe"
+            "SourcePath" = "8:..\\obj\\x86\\Debug\\MSFileInfoScanner.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_4F551CB233C740748796EF290C7B231A"

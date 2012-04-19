@@ -8,11 +8,13 @@ Option Strict On
 ' Download link: http://sjsupport.thermofinnigan.com/public/detail.asp?id=703
 ' 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in November 2004
+' Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 '
 ' Switched from XRawFile2.dll to MSFileReader.XRawfile2.dll in March 2012
 
-Namespace FinniganFileIO
+' Last modified April 19, 2012
 
+Namespace FinniganFileIO
 
 	Public Class XRawFileIO
 		Inherits FinniganFileReaderBaseClass
@@ -137,7 +139,7 @@ Namespace FinniganFileIO
 
 		End Sub
 
-		Protected Shared Function DetermineMRMScanType(ByVal strFilterText As String) As MRMScanTypeConstants
+		Public Shared Function DetermineMRMScanType(ByVal strFilterText As String) As MRMScanTypeConstants
 			Dim eMRMScanType As MRMScanTypeConstants
 
 			eMRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.NotMRM
@@ -155,9 +157,47 @@ Namespace FinniganFileIO
 			Return eMRMScanType
 		End Function
 
+		Public Shared Function DetermineIonizationMode(ByVal strFiltertext As String) As IonModeConstants
+
+			' Determine the ion mode by simply looking for the first + or - sign
+
+			Const IONMODE_REGEX As String = "[+-]"
+
+			Static reIonMode As System.Text.RegularExpressions.Regex
+
+			Dim eIonMode As IonModeConstants
+			Dim reMatch As System.Text.RegularExpressions.Match
+
+			If reIonMode Is Nothing Then
+				reIonMode = New System.Text.RegularExpressions.Regex(IONMODE_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
+			End If
+
+			eIonMode = IonModeConstants.Unknown
+
+			If Not String.IsNullOrWhiteSpace(strFiltertext) Then
+				' Parse out the text between the square brackets
+				reMatch = reIonMode.Match(strFiltertext)
+
+				If Not reMatch Is Nothing AndAlso reMatch.Success Then
+					Select Case reMatch.Value
+						Case "+"
+							eIonMode = IonModeConstants.Positive
+						Case "-"
+							eIonMode = IonModeConstants.Negative
+						Case Else
+							eIonMode = IonModeConstants.Unknown
+					End Select
+				End If
+
+			End If
+
+			Return eIonMode
+
+		End Function
+
 		Public Shared Sub ExtractMRMMasses(ByVal strFilterText As String, _
-										   ByVal eMRMScanType As MRMScanTypeConstants, _
-										   ByRef udtMRMInfo As udtMRMInfoType)
+				   ByVal eMRMScanType As MRMScanTypeConstants, _
+				   ByRef udtMRMInfo As udtMRMInfoType)
 
 			' Parse out the MRM_QMS or SRM mass info from strFilterText
 			' It should be of the form 
@@ -251,7 +291,7 @@ Namespace FinniganFileIO
 
 		End Sub
 
-		Private Shared Function ExtractParentIonMZFromFilterText(ByVal strFilterText As String, ByRef dblParentIonMZ As Double, ByRef intMSLevel As Integer, ByRef strCollisionMode As String) As Boolean
+		Public Shared Function ExtractParentIonMZFromFilterText(ByVal strFilterText As String, ByRef dblParentIonMZ As Double, ByRef intMSLevel As Integer, ByRef strCollisionMode As String) As Boolean
 
 			' Parse out the parent ion and collision energy from strFilterText
 			' It should be of the form "+ c d Full ms2 1312.95@45.00 [ 350.00-2000.00]"
@@ -416,7 +456,7 @@ Namespace FinniganFileIO
 
 		End Function
 
-		Protected Shared Function ExtractMSLevel(ByVal strFilterText As String, ByRef intMSLevel As Integer, ByRef strMZText As String) As Boolean
+		Public Shared Function ExtractMSLevel(ByVal strFilterText As String, ByRef intMSLevel As Integer, ByRef strMZText As String) As Boolean
 			' Looks for "Full ms2" or "Full ms3" or " p ms2" or "SRM ms2" in strFilterText
 			' Returns True if found and False if no match
 
@@ -550,7 +590,7 @@ Namespace FinniganFileIO
 
 					' Note that the following are typically blank
 					mXRawFile.GetAcquisitionDate(.AcquisitionDate)
-					mXRawFile.GetAcquisitionFileName(.AcquisitionFileName)
+					mXRawFile.GetAcquisitionFileName(.AcquisitionFilename)
 					mXRawFile.GetComment1(.Comment1)
 					mXRawFile.GetComment2(.Comment2)
 					mXRawFile.GetSeqRowSampleName(.SampleName)
@@ -746,6 +786,7 @@ Namespace FinniganFileIO
 					.ZoomScan = False
 					.CollisionMode = String.Empty
 					.FilterText = String.Empty
+					.IonMode = IonModeConstants.Unknown
 
 					mXRawFile.GetScanHeaderInfoForScanNum(Scan, .NumPeaks, .RetentionTime, .LowMass, .HighMass, .TotalIonCurrent, .BasePeakMZ, .BasePeakIntensity, .NumChannels, intBooleanVal, .Frequency)
 					mXRawFile.IsError(intResult)		' Unfortunately, .IsError() always returns 0, even if an error occurred
@@ -827,9 +868,10 @@ Namespace FinniganFileIO
 						End If
 
 						If .EventNumber > 1 Then
+							' MS/MS data
 							udtScanHeaderInfo.MSLevel = 2
 
-							If .FilterText = String.Empty Then
+							If String.IsNullOrWhiteSpace(.FilterText) Then
 								' FilterText is empty; this indicates a problem with the .Raw file
 								' This is rare, but does happen (see scans 2 and 3 in QC_Shew_08_03_pt5_1_MAXPRO_27Oct08_Raptor_08-01-01.raw)
 								' We'll set the Parent Ion to 0 m/z and the collision mode to CID
@@ -862,6 +904,7 @@ Namespace FinniganFileIO
 								End If
 							End If
 						Else
+							' MS data
 							' Make sure .FilterText contains one of the following:
 							'   FULL_MS_TEXT = "Full ms "
 							'   FULL_PR_TEXT = "Full pr "
@@ -888,6 +931,7 @@ Namespace FinniganFileIO
 
 						End If
 
+						.IonMode = DetermineIonizationMode(.FilterText)
 
 						If Not .MRMScanType = FinniganFileReaderBaseClass.MRMScanTypeConstants.NotMRM Then
 							' Parse out the MRM_QMS or SRM information for this scan
@@ -1218,10 +1262,10 @@ Namespace FinniganFileIO
 		''' <returns>True if strFilterText contains a known MS scan type</returns>
 		''' <remarks></remarks>
 		Public Shared Function ValidateMSScan(ByVal strFilterText As String, _
-											  ByRef intMSLevel As Integer, _
-											  ByRef blnSIMScan As Boolean, _
-											  ByRef eMRMScanType As MRMScanTypeConstants, _
-											  ByRef blnZoomScan As Boolean) As Boolean
+				   ByRef intMSLevel As Integer, _
+				   ByRef blnSIMScan As Boolean, _
+				   ByRef eMRMScanType As MRMScanTypeConstants, _
+				   ByRef blnZoomScan As Boolean) As Boolean
 
 			Dim blnValidScan As Boolean
 
@@ -1230,9 +1274,9 @@ Namespace FinniganFileIO
 			blnZoomScan = False
 
 			If strFilterText.ToLower.IndexOf(FULL_MS_TEXT.ToLower) > 0 OrElse _
-				strFilterText.ToLower.IndexOf(MS_ONLY_C_TEXT.ToLower) > 0 OrElse _
-				strFilterText.ToLower.IndexOf(MS_ONLY_P_TEXT.ToLower) > 0 OrElse _
-				strFilterText.ToLower.IndexOf(FULL_PR_TEXT.ToLower) > 0 Then
+			 strFilterText.ToLower.IndexOf(MS_ONLY_C_TEXT.ToLower) > 0 OrElse _
+			 strFilterText.ToLower.IndexOf(MS_ONLY_P_TEXT.ToLower) > 0 OrElse _
+			 strFilterText.ToLower.IndexOf(FULL_PR_TEXT.ToLower) > 0 Then
 				' This is really a Full MS scan
 				intMSLevel = 1
 				blnSIMScan = False
@@ -1244,8 +1288,8 @@ Namespace FinniganFileIO
 					blnSIMScan = True
 					blnValidScan = True
 				ElseIf strFilterText.ToLower.IndexOf(MS_ONLY_Z_TEXT.ToLower) > 0 OrElse _
-					   strFilterText.ToLower.IndexOf(MS_ONLY_PZ_TEXT.ToLower) > 0 OrElse _
-					   strFilterText.ToLower.IndexOf(MS_ONLY_DZ_TEXT.ToLower) > 0 Then
+					strFilterText.ToLower.IndexOf(MS_ONLY_PZ_TEXT.ToLower) > 0 OrElse _
+					strFilterText.ToLower.IndexOf(MS_ONLY_DZ_TEXT.ToLower) > 0 Then
 					intMSLevel = 1
 					blnZoomScan = True
 					blnValidScan = True
@@ -1292,8 +1336,8 @@ Namespace FinniganFileIO
 			Dim intCentroidResult As Integer
 			Dim dblCentroidPeakWidth As Double
 
-			Dim MassIntensityPairsList As Object
-			Dim PeakList As Object
+			Dim MassIntensityPairsList As Object = Nothing
+			Dim PeakList As Object = Nothing
 
 			Dim dblData(,) As Double
 
@@ -1326,8 +1370,8 @@ Namespace FinniganFileIO
 				intCentroidResult = 0			' Set to 1 to indicate that peaks should be centroided (only appropriate for profile data)
 
 				mXRawFile.GetMassListFromScanNum(Scan, strFilter, IntensityCutoffTypeConstants.None, _
-						 intIntensityCutoffValue, intMaxNumberOfPeaks, intCentroidResult, dblCentroidPeakWidth, _
-						 MassIntensityPairsList, PeakList, intDataCount)
+				   intIntensityCutoffValue, intMaxNumberOfPeaks, intCentroidResult, dblCentroidPeakWidth, _
+				   MassIntensityPairsList, PeakList, intDataCount)
 
 				If intDataCount > 0 Then
 					dblData = CType(MassIntensityPairsList, Double(,))

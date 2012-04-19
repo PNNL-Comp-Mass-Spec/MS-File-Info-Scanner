@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.2.4492; April 19, 2012
+	- Now determining ion mode (positive or negative) for thermo scans
+
 Version 1.2.4475; April 2, 2012
 	- clsMSFileInfoScanner now implements interface iMSFileInfoScanner, which is defined in MSFileInfoScannerInterfaces.dll
 	- Updated to ProteowizardWrapper v1.0.4475
