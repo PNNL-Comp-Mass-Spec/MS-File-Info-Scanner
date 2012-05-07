@@ -137,6 +137,10 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
+    <Reference Include="ThermoRawFileReaderDLL, Version=1.1.4510.22896, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\ThermoRawFileReaderDLL.dll</HintPath>
+    </Reference>
     <Reference Include="UIMFLibrary, Version=1.2.4084.31407, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\UIMFLibrary.dll</HintPath>
@@ -172,12 +176,6 @@
     <Compile Include="clsExecuteDatabaseSP.vb" />
     <Compile Include="clsFileIntegrityChecker.vb" />
     <Compile Include="clsFilterDataArrayMaxCount.vb" />
-    <Compile Include="clsFinniganDataFileFunctions.vb">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="clsFinniganDataFileFunctionsBaseClass.vb">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="clsFinniganRawFileInfoScanner.vb">
       <SubType>Code</SubType>
     </Compile>
