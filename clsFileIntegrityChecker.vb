@@ -524,7 +524,7 @@ Public Class clsFileIntegrityChecker
 		Dim intExpectedTabCount As Integer = 0
 		Dim intExpectedCommaCount As Integer = 0
 
-		Dim strErrorMessage As String
+		Dim strErrorMessage As String = String.Empty
 		Dim blnErrorLogged As Boolean = False
 
 		Dim ioInStream As System.IO.FileStream
@@ -535,6 +535,8 @@ Public Class clsFileIntegrityChecker
 			blnCheckLineHeadersForThisFile = True
 			blnNeedToCheckLineHeaders = True
 			ReDim blnLineHeaderFound(strRequiredTextLineHeaders.Length - 1)
+		Else
+			ReDim blnLineHeaderFound(0)
 		End If
 
 		If mMaximumTextFileLinesToCheck <= 0 Then
@@ -1184,12 +1186,16 @@ Public Class clsFileIntegrityChecker
 				blnCheckElementNamesThisFile = True
 				blnNeedToCheckElementNames = True
 				ReDim blnElementNameFound(strRequiredElementNames.Length - 1)
+			Else
+				ReDim blnElementNameFound(0)
 			End If
 
 			If Not strRequiredAttributeNames Is Nothing AndAlso strRequiredAttributeNames.Length > 0 Then
 				blnCheckAttributeNamesThisFile = True
 				blnNeedToCheckAttributeNames = True
 				ReDim blnAttributeNameFound(strRequiredAttributeNames.Length - 1)
+			Else
+				ReDim blnAttributeNameFound(0)
 			End If
 
 			If mMaximumXMLElementNodesToCheck <= 0 Then
@@ -1292,7 +1298,7 @@ Public Class clsFileIntegrityChecker
 												  ByRef strFileIgnoreList() As String) As Boolean
 
 		Dim objMSInfoScanner As iMSFileInfoProcessor
-		Dim udtFileInfo As iMSFileInfoProcessor.udtFileInfoType
+		Dim udtFileInfo As iMSFileInfoProcessor.udtFileInfoType = New iMSFileInfoProcessor.udtFileInfoType
 
 		Dim ioFolderInfo As System.IO.DirectoryInfo
 		Dim ioFile As System.IO.FileInfo
@@ -1714,39 +1720,39 @@ Public Class clsFileIntegrityChecker
     ''' <param name="blnRequiredTextFound">True if the given item was found</param>
     ''' <param name="blnErrorLogged">Set to True if any items were missing</param>
     ''' <remarks></remarks>
-    Protected Sub ValidateRequiredTextFound(ByVal strFilePath As String, _
-                                            ByVal strItemDescription As String, _
-                                            ByVal blnCheckRequiredTextThisFile As Boolean, _
-                                            ByVal blnNeedToCheckRequiredText As Boolean, _
-                                            ByRef strRequiredText() As String, _
-                                            ByRef blnRequiredTextFound() As Boolean, _
-                                            ByVal intRequiredTextMinMatchCount As Integer, _
-                                            ByRef blnErrorLogged As Boolean)
+	Protected Sub ValidateRequiredTextFound(ByVal strFilePath As String, _
+											ByVal strItemDescription As String, _
+											ByVal blnCheckRequiredTextThisFile As Boolean, _
+											ByVal blnNeedToCheckRequiredText As Boolean, _
+											ByRef strRequiredText() As String, _
+											ByRef blnRequiredTextFound() As Boolean, _
+											ByVal intRequiredTextMinMatchCount As Integer, _
+											ByRef blnErrorLogged As Boolean)
 
-        Dim strErrorMessage As String
-        Dim intIndex As Integer
-        Dim intMatchCount As Integer = 0
+		Dim strErrorMessage As String
+		Dim intIndex As Integer
+		Dim intMatchCount As Integer = 0
 
-        If Not blnErrorLogged AndAlso blnCheckRequiredTextThisFile Then
-            If blnNeedToCheckRequiredText Then
-                strErrorMessage = "File did not contain all of the expected " & strItemDescription
-                For intIndex = 0 To blnRequiredTextFound.Length - 1
-                    If blnRequiredTextFound(intIndex) Then
-                        intMatchCount += 1
-                    Else
-                        strErrorMessage &= "; missing '" & strRequiredText(intIndex) & "'"
-                    End If
-                Next intIndex
+		If Not blnErrorLogged AndAlso blnCheckRequiredTextThisFile Then
+			If blnNeedToCheckRequiredText Then
+				strErrorMessage = "File did not contain all of the expected " & strItemDescription
+				For intIndex = 0 To blnRequiredTextFound.Length - 1
+					If blnRequiredTextFound(intIndex) Then
+						intMatchCount += 1
+					Else
+						strErrorMessage &= "; missing '" & strRequiredText(intIndex) & "'"
+					End If
+				Next intIndex
 
-                If intRequiredTextMinMatchCount > 0 AndAlso intMatchCount >= intRequiredTextMinMatchCount Then
-                    ' Not all of the items in strRequiredText() were matched, but at least intRequiredTextMinMatchCount were, so all is fine
-                Else
-                    LogFileIntegrityError(strFilePath, strErrorMessage)
-                    blnErrorLogged = True
-                End If
-            End If
-        End If
-    End Sub
+				If intRequiredTextMinMatchCount > 0 AndAlso intMatchCount >= intRequiredTextMinMatchCount Then
+					' Not all of the items in strRequiredText() were matched, but at least intRequiredTextMinMatchCount were, so all is fine
+				Else
+					LogFileIntegrityError(strFilePath, strErrorMessage)
+					blnErrorLogged = True
+				End If
+			End If
+		End If
+	End Sub
 
     Private Function XMLTextReaderGetInnerText(ByRef objXMLReader As System.Xml.XmlTextReader) As String
         Dim strValue As String = String.Empty

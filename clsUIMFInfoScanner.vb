@@ -362,7 +362,7 @@ Public Class clsUIMFInfoScanner
 
 						objScanStatsEntry.ScanFilterText = ""
 
-						objScanStatsEntry.ElutionTime = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblElutionTime, 5)
+						objScanStatsEntry.ElutionTime = dblElutionTime.ToString("0.0000")
 						If intTICIndex < dblTIC.Length Then
 							objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblTIC(intTICIndex), 5)
 							objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblBPI(intTICIndex), 5)

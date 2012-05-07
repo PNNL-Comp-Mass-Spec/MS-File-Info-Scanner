@@ -457,7 +457,7 @@ Public Class clsLCMSDataPlotter
 		' When this is true, then will write a text file of the mass spectrum before before and after it is filtered
 		' Used for debugging
 		Dim blnWriteDebugData As Boolean
-		Dim srOutFile As System.IO.StreamWriter
+		Dim srOutFile As System.IO.StreamWriter = Nothing
 
 		Try
 			If dblMZIgnoreRangeStart <> 0 Or dblMZIgnoreRangeEnd <> 0 Then
@@ -658,7 +658,7 @@ Public Class clsLCMSDataPlotter
 		' When this is true, then will write a text file of the mass spectrum before before and after it is filtered
 		' Used for debugging
 		Dim blnWriteDebugData As Boolean
-		Dim srOutFile As System.IO.StreamWriter
+		Dim srOutFile As System.IO.StreamWriter = Nothing
 
 		blnWriteDebugData = False
 		If blnWriteDebugData Then

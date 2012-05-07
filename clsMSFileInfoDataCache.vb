@@ -667,7 +667,7 @@ Public Class clsMSFileInfoDataCache
 	Public Function UpdateCachedMSFileInfo(ByVal udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		' Update the entry for this dataset in mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE)
 
-		Dim objRow As System.Data.DataRow
+		Dim objRow As System.Data.DataRow = Nothing
 
 		Dim blnSuccess As Boolean
 
@@ -702,7 +702,7 @@ Public Class clsMSFileInfoDataCache
     Public Function UpdateCachedFolderIntegrityInfo(ByVal udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType, ByRef intFolderID As Integer) As Boolean
         ' Update the entry for this dataset in mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE)
 
-        Dim objRow As System.Data.DataRow
+		Dim objRow As System.Data.DataRow = Nothing
 
         Dim blnSuccess As Boolean
 

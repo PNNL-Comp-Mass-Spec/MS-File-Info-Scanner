@@ -973,7 +973,7 @@ NativeIOGetNumFunctionsErrorHandler:
     Private Function NativeIOGetFunctionInfo(ByRef DataDirPath As String, ByRef udtMSFunctionInfo As udtMSFunctionInfoType) As Boolean
         ' Returns True if success, False if failure
 
-        Dim udtNativeFunctionInfo As udtRawFunctionDescriptorRecordType
+		Dim udtNativeFunctionInfo As udtRawFunctionDescriptorRecordType = New udtRawFunctionDescriptorRecordType
         InitializeNativeFunctionInfo(udtNativeFunctionInfo)
 
         Dim strFunctnsFile As String
@@ -1189,7 +1189,7 @@ NativeIOGetScanCountErrorHandler:
 
         Dim lngNumberOfScansInFunction As Integer
 
-        Dim brInFile As System.IO.BinaryReader
+		Dim brInFile As System.IO.BinaryReader = Nothing
         Dim blnSuccess As Boolean
 
         On Error GoTo NativeIOGetScanInfoErrorHandler

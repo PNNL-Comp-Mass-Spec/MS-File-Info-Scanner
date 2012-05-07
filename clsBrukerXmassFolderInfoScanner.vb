@@ -258,7 +258,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 								objScanStatsEntry.ScanTypeName = "HMS"
 								objScanStatsEntry.ScanFilterText = ""
 
-								objScanStatsEntry.ElutionTime = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(sngElutionTime, 4)
+								objScanStatsEntry.ElutionTime = sngElutionTime.ToString("0.0000")
 								objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblTIC, 5)
 								objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblBPI, 5)
 								objScanStatsEntry.BasePeakMZ = "0"

@@ -51,8 +51,8 @@ Public Class clsMicromassRawFolderInfoScanner
 		Dim intFileCount As Integer
 
 		Dim objNativeFileIO As clsMassLynxNativeIO
-		Dim udtHeaderInfo As clsMassLynxNativeIO.udtMSHeaderInfoType
-		Dim udtFunctionInfo As clsMassLynxNativeIO.udtMSFunctionInfoType
+		Dim udtHeaderInfo As clsMassLynxNativeIO.udtMSHeaderInfoType = New clsMassLynxNativeIO.udtMSHeaderInfoType
+		Dim udtFunctionInfo As clsMassLynxNativeIO.udtMSFunctionInfoType = New clsMassLynxNativeIO.udtMSFunctionInfoType
 
 		Dim intFunctionCount As Integer
 		Dim intFunctionNumber As Integer

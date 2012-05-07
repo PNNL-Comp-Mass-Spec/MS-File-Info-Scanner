@@ -309,7 +309,7 @@ Public Class clsBrukerOneFolderInfoScanner
 		' If a Bruker 1 folder, then it must contain file acqu and typically contains file LOCK
 
 		Dim ioFileInfo As System.IO.FileInfo
-		Dim ioZippedSFilesFolderInfo As System.IO.DirectoryInfo
+		Dim ioZippedSFilesFolderInfo As System.IO.DirectoryInfo = Nothing
 		Dim ioSubFolder As System.IO.DirectoryInfo
 
 		Dim intScanCountSaved As Integer

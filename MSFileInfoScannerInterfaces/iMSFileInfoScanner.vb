@@ -1,4 +1,5 @@
-﻿Public Interface iMSFileInfoScanner
+﻿<Assembly: CLSCompliant(True)> 
+Public Interface iMSFileInfoScanner
 
 #Region "Constants and Enums"
 

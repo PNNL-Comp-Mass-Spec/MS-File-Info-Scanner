@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.2.4510; May 7, 2012
+	- Now creating the _ScanStatsEx.txt file in addition to the _ScanStats.txt file when /SS is used
+	- Now using ThermoRawFileReaderDLL.dll
+
 Version 1.2.4492; April 19, 2012
 	- Now determining ion mode (positive or negative) for thermo scans
 

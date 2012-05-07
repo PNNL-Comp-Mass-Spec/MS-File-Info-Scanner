@@ -126,7 +126,7 @@ Namespace DSSummarizer
 #End Region
 
 		Public Sub New()
-			mFileDate = "November 29, 2010"
+			mFileDate = "May 7, 2012"
 			InitializeLocalVariables()
 		End Sub
 
@@ -457,7 +457,7 @@ Namespace DSSummarizer
 											 ByRef objScanStats As System.Collections.Generic.List(Of clsScanStatsEntry), _
 											 ByRef udtDatasetFileInfo As udtDatasetFileInfoType) As String
 
-			Dim udtSampleInfo As udtSampleInfoType
+			Dim udtSampleInfo As udtSampleInfoType = New udtSampleInfoType
 			udtSampleInfo.Clear()
 
 			Return CreateDatasetInfoXML(strDatasetName, objScanStats, udtDatasetFileInfo, udtSampleInfo)
@@ -639,14 +639,13 @@ Namespace DSSummarizer
 		''' <param name="strScanStatsFilePath">File path to write the text file to</param>
 		''' <returns>True if success; False if failure</returns>
 		''' <remarks></remarks>
-		Public Function CreateScanStatsFile(ByVal strDatasetName As String, _
-		  ByVal strScanStatsFilePath As String) As Boolean
-
+		Public Function CreateScanStatsFile(ByVal strDatasetName As String, ByVal strScanStatsFilePath As String) As Boolean
 			Return CreateScanStatsFile(strDatasetName, strScanStatsFilePath, mDatasetScanStats, Me.DatasetFileInfo, Me.SampleInfo)
 		End Function
 
 		''' <summary>
-		''' Creates a tab-delimited text file with details on each scan tracked by this class (stored in mDatasetScanStats)
+		''' Creates a tab-delimited text file (_ScanStats.txt) with details on each scan tracked by this class (stored in mDatasetScanStats)
+		''' Will also create a _ScanStatsEx.txt file is extended scan stats data is present in mDatasetScanStats
 		''' </summary>
 		''' <param name="strDatasetName">Dataset Name</param>
 		''' <param name="strScanStatsFilePath">File path to write the text file to</param>
@@ -661,10 +660,14 @@ Namespace DSSummarizer
 		  ByRef udtDatasetFileInfo As udtDatasetFileInfoType, _
 		  ByRef udtSampleInfo As udtSampleInfoType) As Boolean
 
+			Dim ioScanStatsFile As System.IO.FileInfo
+			Dim strScanStatsExFilePath As String
 
 			Dim swOutFile As System.IO.StreamWriter
+			Dim swScanStatsExFile As System.IO.StreamWriter
+
 			Dim intDatasetNumber As Integer = 0
-			Dim strLineOut As String
+			Dim sbLineOut As System.Text.StringBuilder = New System.Text.StringBuilder
 
 			Dim blnSuccess As Boolean
 
@@ -676,35 +679,77 @@ Namespace DSSummarizer
 					mErrorMessage = ""
 				End If
 
-				swOutFile = New System.IO.StreamWriter(New System.IO.FileStream(strScanStatsFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+				' Define the path to the extended scan stats file
+				ioScanStatsFile = New System.IO.FileInfo(strScanStatsFilePath)
+				strScanStatsExFilePath = System.IO.Path.Combine(ioScanStatsFile.DirectoryName, System.IO.Path.GetFileNameWithoutExtension(ioScanStatsFile.Name) & "Ex.txt")
 
-				swOutFile.WriteLine("Dataset" & ControlChars.Tab & "ScanNumber" & ControlChars.Tab & "ScanTime" & ControlChars.Tab & _
-				 "ScanType" & ControlChars.Tab & "TotalIonIntensity" & ControlChars.Tab & "BasePeakIntensity" & ControlChars.Tab & _
-				 "BasePeakMZ" & ControlChars.Tab & "BasePeakSignalToNoiseRatio" & ControlChars.Tab & _
-				 "IonCount" & ControlChars.Tab & "IonCountRaw" & ControlChars.Tab & "ScanTypeName")
+				' Open the output files
+				swOutFile = New System.IO.StreamWriter(New System.IO.FileStream(ioScanStatsFile.FullName, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+				swScanStatsExFile = New System.IO.StreamWriter(New System.IO.FileStream(strScanStatsExFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
 
+				' Write the headers
+				sbLineOut.Clear()
+				sbLineOut.Append("Dataset" & ControlChars.Tab & "ScanNumber" & ControlChars.Tab & "ScanTime" & ControlChars.Tab & _
+				  "ScanType" & ControlChars.Tab & "TotalIonIntensity" & ControlChars.Tab & "BasePeakIntensity" & ControlChars.Tab & _
+				  "BasePeakMZ" & ControlChars.Tab & "BasePeakSignalToNoiseRatio" & ControlChars.Tab & _
+				  "IonCount" & ControlChars.Tab & "IonCountRaw" & ControlChars.Tab & "ScanTypeName")
 
+				swOutFile.WriteLine(sbLineOut.ToString())
+
+				sbLineOut.Clear()
+				sbLineOut.Append("Dataset" & ControlChars.Tab & "ScanNumber" & ControlChars.Tab & _
+				  clsScanStatsEntry.SCANSTATS_COL_ION_INJECTION_TIME & ControlChars.Tab & _
+				  clsScanStatsEntry.SCANSTATS_COL_SCAN_SEGMENT & ControlChars.Tab & _
+				  clsScanStatsEntry.SCANSTATS_COL_SCAN_EVENT & ControlChars.Tab & _
+				  clsScanStatsEntry.SCANSTATS_COL_CHARGE_STATE & ControlChars.Tab & _
+				  clsScanStatsEntry.SCANSTATS_COL_MONOISOTOPIC_MZ & ControlChars.Tab & _
+				  clsScanStatsEntry.SCANSTATS_COL_COLLISION_MODE & ControlChars.Tab & _
+				  clsScanStatsEntry.SCANSTATS_COL_SCAN_FILTER_TEXT)
+
+				swScanStatsExFile.WriteLine(sbLineOut.ToString())
+
+				' Write out the data for each scan
 				For Each objScanStatsEntry As clsScanStatsEntry In objScanStats
 
-					strLineOut = String.Empty
-					strLineOut &= intDatasetNumber.ToString & ControlChars.Tab						' Dataset number
-					strLineOut &= objScanStatsEntry.ScanNumber.ToString & ControlChars.Tab			' Scan number
-					strLineOut &= objScanStatsEntry.ElutionTime & ControlChars.Tab					' Scan time (minutes)
-					strLineOut &= objScanStatsEntry.ScanType.ToString & ControlChars.Tab			' Scan type (1 for MS, 2 for MS2, etc.)
-					strLineOut &= objScanStatsEntry.TotalIonIntensity & ControlChars.Tab			' Total ion intensity
-					strLineOut &= objScanStatsEntry.BasePeakIntensity & ControlChars.Tab			' Base peak ion intensity
-					strLineOut &= objScanStatsEntry.BasePeakMZ & ControlChars.Tab					' Base peak ion m/z
-					strLineOut &= objScanStatsEntry.BasePeakSignalToNoiseRatio & ControlChars.Tab	' Base peak signal to noise ratio
-					strLineOut &= objScanStatsEntry.IonCount.ToString & ControlChars.Tab			' Number of peaks (aka ions) in the spectrum
-					strLineOut &= objScanStatsEntry.IonCountRaw.ToString & ControlChars.Tab		' Number of peaks (aka ions) in the spectrum prior to any filtering
-					strLineOut &= objScanStatsEntry.ScanTypeName								' Scan type name
+					sbLineOut.Clear()
+					sbLineOut.Append(intDatasetNumber.ToString & ControlChars.Tab)						' Dataset number
+					sbLineOut.Append(objScanStatsEntry.ScanNumber.ToString & ControlChars.Tab)			' Scan number
+					sbLineOut.Append(objScanStatsEntry.ElutionTime & ControlChars.Tab)					' Scan time (minutes)
+					sbLineOut.Append(objScanStatsEntry.ScanType.ToString & ControlChars.Tab)			' Scan type (1 for MS, 2 for MS2, etc.)
+					sbLineOut.Append(objScanStatsEntry.TotalIonIntensity & ControlChars.Tab)			' Total ion intensity
+					sbLineOut.Append(objScanStatsEntry.BasePeakIntensity & ControlChars.Tab)			' Base peak ion intensity
+					sbLineOut.Append(objScanStatsEntry.BasePeakMZ & ControlChars.Tab)					' Base peak ion m/z
+					sbLineOut.Append(objScanStatsEntry.BasePeakSignalToNoiseRatio & ControlChars.Tab)	' Base peak signal to noise ratio
+					sbLineOut.Append(objScanStatsEntry.IonCount.ToString & ControlChars.Tab)			' Number of peaks (aka ions) in the spectrum
+					sbLineOut.Append(objScanStatsEntry.IonCountRaw.ToString & ControlChars.Tab)			' Number of peaks (aka ions) in the spectrum prior to any filtering
+					sbLineOut.Append(objScanStatsEntry.ScanTypeName)									' Scan type name
 
-					swOutFile.WriteLine(strLineOut)
+					swOutFile.WriteLine(sbLineOut.ToString())
+
+					' Write the next entry to swScanStatsExFile
+					' Note that this file format is compatible with that created by MASIC
+					' However, only a limited number of columns are written out, since StoreExtendedScanInfo only stores a certain set of parameters
+
+					sbLineOut.Clear()
+					sbLineOut.Append(intDatasetNumber.ToString & ControlChars.Tab)						' Dataset number
+					sbLineOut.Append(objScanStatsEntry.ScanNumber.ToString & ControlChars.Tab)			' Scan number
+
+					With objScanStatsEntry.ExtendedScanInfo
+						sbLineOut.Append(.IonInjectionTime & ControlChars.Tab)
+						sbLineOut.Append(.ScanSegment & ControlChars.Tab)
+						sbLineOut.Append(.ScanEvent & ControlChars.Tab)
+						sbLineOut.Append(.ChargeState & ControlChars.Tab)
+						sbLineOut.Append(.MonoisotopicMZ & ControlChars.Tab)
+						sbLineOut.Append(.CollisionMode & ControlChars.Tab)
+						sbLineOut.Append(.ScanFilterText)
+					End With
+
+					swScanStatsExFile.WriteLine(sbLineOut.ToString())
 
 				Next
-
 				
 				swOutFile.Close()
+				swScanStatsExFile.Close()
 
 				blnSuccess = True
 
@@ -939,6 +984,34 @@ Namespace DSSummarizer
 	End Class
 
 	Public Class clsScanStatsEntry
+
+		Public Const SCANSTATS_COL_ION_INJECTION_TIME As String = "Ion Injection Time (ms)"
+		Public Const SCANSTATS_COL_SCAN_SEGMENT As String = "Scan Segment"
+		Public Const SCANSTATS_COL_SCAN_EVENT As String = "Scan Event"
+		Public Const SCANSTATS_COL_CHARGE_STATE As String = "Charge State"
+		Public Const SCANSTATS_COL_MONOISOTOPIC_MZ As String = "Monoisotopic M/Z"
+		Public Const SCANSTATS_COL_COLLISION_MODE As String = "Collision Mode"
+		Public Const SCANSTATS_COL_SCAN_FILTER_TEXT As String = "Scan Filter Text"
+
+		Public Structure udtExtendedStatsInfoType
+			Public IonInjectionTime As String
+			Public ScanSegment As String
+			Public ScanEvent As String
+			Public ChargeState As String			' Only defined for LTQ-Orbitrap datasets and only for fragmentation spectra where the instrument could determine the charge and m/z
+			Public MonoisotopicMZ As String			' Only defined for LTQ-Orbitrap datasets and only for fragmentation spectra where the instrument could determine the charge and m/z
+			Public CollisionMode As String
+			Public ScanFilterText As String
+			Public Sub Clear()
+				IonInjectionTime = String.Empty
+				ScanSegment = String.Empty
+				ScanEvent = String.Empty
+				ChargeState = String.Empty
+				MonoisotopicMZ = String.Empty
+				CollisionMode = String.Empty
+				ScanFilterText = String.Empty
+			End Sub
+		End Structure
+
 		Public ScanNumber As Integer
 		Public ScanType As Integer				' 1 for MS, 2 for MS2, 3 for MS3
 
@@ -955,6 +1028,9 @@ Namespace DSSummarizer
 		Public IonCount As Integer
 		Public IonCountRaw As Integer
 
+		' Only used for Thermo data
+		Public ExtendedScanInfo As udtExtendedStatsInfoType
+
 		Public Sub Clear()
 			ScanNumber = 0
 			ScanType = 0
@@ -970,6 +1046,8 @@ Namespace DSSummarizer
 
 			IonCount = 0
 			IonCountRaw = 0
+
+			ExtendedScanInfo.Clear()
 		End Sub
 
 		Public Sub New()

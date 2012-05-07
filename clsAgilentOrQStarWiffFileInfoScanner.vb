@@ -254,7 +254,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 			objScanStatsEntry.ScanTypeName = "SRM"
 			objScanStatsEntry.ScanFilterText = StripExtraFromChromID(strChromID)
 
-			objScanStatsEntry.ElutionTime = sngTimes(intIndex).ToString("0.000")
+			objScanStatsEntry.ElutionTime = sngTimes(intIndex).ToString("0.0000")
 			objScanStatsEntry.TotalIonIntensity = sngIntensities(intIndex).ToString("0.0")
 			objScanStatsEntry.BasePeakIntensity = sngIntensities(intIndex).ToString("0.0")
 
@@ -566,7 +566,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 					objScanStatsEntry.ScanTypeName = "MS"
 
 					objScanStatsEntry.ScanFilterText = oSpectrum.id
-					objScanStatsEntry.ElutionTime = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblScanTimes(intScanIndex), 5)
+					objScanStatsEntry.ElutionTime = dblScanTimes(intScanIndex).ToString("0.0000")
 
 					If TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, param) Then
 						dblTIC = param.value

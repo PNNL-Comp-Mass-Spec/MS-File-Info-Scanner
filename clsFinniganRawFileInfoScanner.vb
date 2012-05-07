@@ -5,13 +5,16 @@ Option Strict On
 '
 ' Last modified October 27, 2011
 
+Imports MSFileInfoScanner.DSSummarizer.clsScanStatsEntry
+Imports ThermoRawFileReaderDLL.FinniganFileIO
+
 Public Class clsFinniganRawFileInfoScanner
-    Inherits clsMSFileInfoProcessorBaseClass
+	Inherits clsMSFileInfoProcessorBaseClass
 
-    ' Note: The extension must be in all caps
-    Public Const FINNIGAN_RAW_FILE_EXTENSION As String = ".RAW"
+	' Note: The extension must be in all caps
+	Public Const FINNIGAN_RAW_FILE_EXTENSION As String = ".RAW"
 
-	Protected Sub ComputeQualityScores(ByRef objXcaliburAccessor As FinniganFileIO.FinniganFileReaderBaseClass, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType)
+	Protected Sub ComputeQualityScores(ByRef objXcaliburAccessor As FinniganFileReaderBaseClass, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType)
 		' This function is used to determine one or more overall quality scores
 
 		Dim intScanCount As Integer
@@ -21,9 +24,9 @@ Public Class clsFinniganRawFileInfoScanner
 
 		Dim sngOverallScore As Single
 
-		Dim udtScanHeaderInfo As FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
-		Dim dblIonMZ() As Double
-		Dim dblIonIntensity() As Double
+		Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
+		Dim dblIonMZ() As Double = Nothing
+		Dim dblIonIntensity() As Double = Nothing
 
 		Dim dblIntensitySum As Double
 		Dim dblOverallAvgIntensitySum As Double
@@ -89,7 +92,7 @@ Public Class clsFinniganRawFileInfoScanner
 		End Try
 	End Function
 
-	Protected Sub LoadScanDetails(ByRef objXcaliburAccessor As FinniganFileIO.FinniganFileReaderBaseClass)
+	Protected Sub LoadScanDetails(ByRef objXcaliburAccessor As FinniganFileReaderBaseClass)
 
 		Dim intScanCount As Integer
 		Dim intScanNumber As Integer
@@ -97,7 +100,7 @@ Public Class clsFinniganRawFileInfoScanner
 		Dim sngProgress As Single
 		Dim dtLastProgressTime As System.DateTime
 
-		Dim udtScanHeaderInfo As FinniganFileIO.FinniganFileReaderBaseClass.udtScanHeaderInfoType
+		Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
 		Dim blnSuccess As Boolean
 
 		Dim intScanStart As Integer
@@ -138,10 +141,10 @@ Public Class clsFinniganRawFileInfoScanner
 						objScanStatsEntry.ScanNumber = intScanNumber
 						objScanStatsEntry.ScanType = .MSLevel
 
-						objScanStatsEntry.ScanTypeName = FinniganFileIO.XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(.FilterText)
-						objScanStatsEntry.ScanFilterText = FinniganFileIO.XRawFileIO.MakeGenericFinniganScanFilter(.FilterText)
+						objScanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(.FilterText)
+						objScanStatsEntry.ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(.FilterText)
 
-						objScanStatsEntry.ElutionTime = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(.RetentionTime, 5)
+						objScanStatsEntry.ElutionTime = .RetentionTime.ToString("0.0000")
 						objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(.TotalIonCurrent, 5)
 						objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(.BasePeakIntensity, 5)
 						objScanStatsEntry.BasePeakMZ = Math.Round(.BasePeakMZ, 4).ToString
@@ -151,6 +154,14 @@ Public Class clsFinniganRawFileInfoScanner
 
 						objScanStatsEntry.IonCount = .NumPeaks
 						objScanStatsEntry.IonCountRaw = .NumPeaks
+
+						' Store the ScanEvent values in .ExtendedScanInfo
+						StoreExtendedScanInfo(objScanStatsEntry.ExtendedScanInfo, udtScanHeaderInfo.ScanEventNames, udtScanHeaderInfo.ScanEventValues)
+
+						' Store the collision mode and the scan filter text
+						objScanStatsEntry.ExtendedScanInfo.CollisionMode = udtScanHeaderInfo.CollisionMode
+						objScanStatsEntry.ExtendedScanInfo.ScanFilterText = udtScanHeaderInfo.FilterText
+
 					End With
 					mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
 
@@ -165,8 +176,8 @@ Public Class clsFinniganRawFileInfoScanner
 					' Also need to load the raw data
 
 					Dim intIonCount As Integer
-					Dim dblMZList() As Double
-					Dim dblIntensityList() As Double
+					Dim dblMZList() As Double = Nothing
+					Dim dblIntensityList() As Double = Nothing
 
 					' Load the ions for this scan
 
@@ -174,7 +185,7 @@ Public Class clsFinniganRawFileInfoScanner
 
 					If intIonCount > 0 Then
 						mLCMS2DPlot.AddScan(intScanNumber, udtScanHeaderInfo.MSLevel, CSng(udtScanHeaderInfo.RetentionTime), _
-							 intIonCount, dblMZList, dblIntensityList)
+						  intIonCount, dblMZList, dblIntensityList)
 					End If
 
 				End If
@@ -207,9 +218,9 @@ Public Class clsFinniganRawFileInfoScanner
 	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		' Returns True if success, False if an error
 
-		Dim objXcaliburAccessor As FinniganFileIO.FinniganFileReaderBaseClass
+		Dim objXcaliburAccessor As FinniganFileReaderBaseClass
 		Dim ioFileInfo As System.IO.FileInfo
-		Dim udtScanHeaderInfo As MSFileInfoScanner.FinniganFileIO.XRawFileIO.udtScanHeaderInfoType
+		Dim udtScanHeaderInfo As XRawFileIO.udtScanHeaderInfoType = New XRawFileIO.udtScanHeaderInfoType
 
 		Dim intDatasetID As Integer
 		Dim intScanEnd As Integer
@@ -256,7 +267,7 @@ Public Class clsFinniganRawFileInfoScanner
 		' Use Xraw to read the .Raw file
 		' If reading from a SAMBA-mounted network share, and if the current user has 
 		'  Read privileges but not Read&Execute privileges, then we will need to copy the file locally
-		objXcaliburAccessor = New FinniganFileIO.XRawFileIO
+		objXcaliburAccessor = New XRawFileIO
 
 		' Open a handle to the data file
 		If Not objXcaliburAccessor.OpenRawFile(ioFileInfo.FullName) Then
@@ -396,5 +407,71 @@ Public Class clsFinniganRawFileInfoScanner
 		Return Not blnReadError
 
 	End Function
+
+	Protected Sub StoreExtendedScanInfo(ByRef udtExtendedScanInfo As udtExtendedStatsInfoType, ByVal strEntryName As String, ByVal strEntryValue As String)
+
+		If strEntryValue Is Nothing Then
+			strEntryValue = String.Empty
+		End If
+
+		''Dim strEntryNames(0) As String
+		''Dim strEntryValues(0) As String
+
+		''strEntryNames(0) = String.Copy(strEntryName)
+		''strEntryValues(0) = String.Copy(strEntryValue)
+
+		''StoreExtendedScanInfo(htExtendedScanInfo, strEntryNames, strEntryValues)
+
+		' This command is equivalent to the above series of commands
+		' It converts strEntryName to an array and strEntryValue to a separate array and passes those arrays to StoreExtendedScanInfo()
+		StoreExtendedScanInfo(udtExtendedScanInfo, New String() {strEntryName}, New String() {strEntryValue})
+
+	End Sub
+
+	Protected Sub StoreExtendedScanInfo(ByRef udtExtendedScanInfo As udtExtendedStatsInfoType, ByRef strEntryNames() As String, ByRef strEntryValues() As String)
+
+		Dim cTrimChars() As Char = New Char() {":"c, " "c}
+		Dim intIndex As Integer
+
+		Try
+			If Not (strEntryNames Is Nothing OrElse strEntryValues Is Nothing) Then
+
+				For intIndex = 0 To strEntryNames.Length - 1
+					If strEntryNames(intIndex) Is Nothing OrElse strEntryNames(intIndex).Trim.Length = 0 Then
+						' Empty entry name; do not add
+					Else
+						' We're only storing certain entries from strEntryNames
+						Select Case strEntryNames(intIndex).ToLower.TrimEnd(cTrimChars)
+							Case SCANSTATS_COL_ION_INJECTION_TIME.ToLower
+								udtExtendedScanInfo.IonInjectionTime = strEntryValues(intIndex)
+
+							Case SCANSTATS_COL_SCAN_SEGMENT.ToLower
+								udtExtendedScanInfo.ScanSegment = strEntryValues(intIndex)
+
+							Case SCANSTATS_COL_SCAN_EVENT.ToLower
+								udtExtendedScanInfo.ScanEvent = strEntryValues(intIndex)
+
+							Case SCANSTATS_COL_CHARGE_STATE.ToLower
+								udtExtendedScanInfo.ChargeState = strEntryValues(intIndex)
+
+							Case SCANSTATS_COL_MONOISOTOPIC_MZ.ToLower
+								udtExtendedScanInfo.MonoisotopicMZ = strEntryValues(intIndex)
+
+							Case SCANSTATS_COL_COLLISION_MODE.ToLower
+								udtExtendedScanInfo.CollisionMode = strEntryValues(intIndex)
+
+							Case SCANSTATS_COL_SCAN_FILTER_TEXT.ToLower
+								udtExtendedScanInfo.ScanFilterText = strEntryValues(intIndex)
+
+						End Select
+
+					End If
+				Next intIndex
+			End If
+		Catch ex As Exception
+			' Ignore any errors here
+		End Try
+
+	End Sub
 
 End Class

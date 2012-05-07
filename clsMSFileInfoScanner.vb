@@ -670,7 +670,7 @@ Public Class clsMSFileInfoScanner
 		Dim ioFolderInfo As System.IO.DirectoryInfo
 		Dim intFileCount As Integer
 
-		Dim objRow As System.Data.DataRow
+		Dim objRow As System.Data.DataRow = Nothing
 
 		Dim intFolderID As Integer
 		Dim intCachedFileCount As Integer
@@ -1110,7 +1110,7 @@ Public Class clsMSFileInfoScanner
 
 	Protected Sub OpenFileIntegrityOutputFile(ByVal eDataFileType As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants, ByRef strFilePath As String, ByRef objStreamWriter As System.IO.StreamWriter)
 		Dim blnOpenedExistingFile As Boolean
-		Dim fsFileStream As System.IO.FileStream
+		Dim fsFileStream As System.IO.FileStream = Nothing
 		Dim strDefaultFileName As String
 
 		strDefaultFileName = DefaultDataFileName(eDataFileType)
@@ -1385,7 +1385,7 @@ Public Class clsMSFileInfoScanner
 	  ByVal strDatasetName As String, _
 	  ByVal strOutputFolderPath As String) As Boolean
 
-		Dim udtFileInfo As iMSFileInfoProcessor.udtFileInfoType
+		Dim udtFileInfo As iMSFileInfoProcessor.udtFileInfoType = New iMSFileInfoProcessor.udtFileInfoType
 		Dim intRetryCount As Integer
 
 		Dim blnSuccess As Boolean
@@ -1501,7 +1501,7 @@ Public Class clsMSFileInfoScanner
 
 		Dim objFileSystemInfo As System.IO.FileSystemInfo = Nothing
 
-		Dim objRow As System.Data.DataRow
+		Dim objRow As System.Data.DataRow = Nothing
 		Dim lngCachedSizeBytes As Long
 
 		If blnResetErrorCode Then
@@ -1934,8 +1934,8 @@ Public Class clsMSFileInfoScanner
 
 		' If intRecurseFoldersMaxLevels is <=0 then we recurse infinitely
 
-		Dim ioInputFolderInfo As System.IO.DirectoryInfo
-		Dim ioSubFolderInfo As System.IO.DirectoryInfo
+		Dim diInputFolder As System.IO.DirectoryInfo = Nothing
+		Dim diSubfolder As System.IO.DirectoryInfo
 
 		Dim ioFileMatch As System.IO.FileInfo
 
@@ -1964,7 +1964,7 @@ Public Class clsMSFileInfoScanner
 		intRetryCount = 0
 		Do
 			Try
-				ioInputFolderInfo = New System.IO.DirectoryInfo(strInputFolderPath)
+				diInputFolder = New System.IO.DirectoryInfo(strInputFolderPath)
 				Exit Do
 			Catch ex As System.Exception
 				' Input folder path error
@@ -2003,7 +2003,7 @@ Public Class clsMSFileInfoScanner
 			' Process any matching files in this folder
 			blnSuccess = True
 			blnProcessedZippedSFolder = False
-			For Each ioFileMatch In ioInputFolderInfo.GetFiles(strFileNameMatch)
+			For Each ioFileMatch In diInputFolder.GetFiles(strFileNameMatch)
 
 				intRetryCount = 0
 				Do
@@ -2029,7 +2029,7 @@ Public Class clsMSFileInfoScanner
 							' Check for other valid files
 							If clsBrukerOneFolderInfoScanner.IsZippedSFolder(ioFileMatch.Name) Then
 								' Only process this file if there is not a subfolder named "1" present"
-								If ioInputFolderInfo.GetDirectories(clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME).Length < 1 Then
+								If diInputFolder.GetDirectories(clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME).Length < 1 Then
 									blnFileProcessed = True
 									blnProcessedZippedSFolder = True
 									blnSuccess = ProcessMSFileOrFolder(ioFileMatch.FullName, strOutputFolderPath, True, eMSFileProcessingState)
@@ -2077,7 +2077,7 @@ Public Class clsMSFileInfoScanner
 
 			If mCheckFileIntegrity And Not mAbortProcessing Then
 				ReDim Preserve strProcessedFileList(intProcessedFileListCount - 1)
-				CheckIntegrityOfFilesInFolder(ioInputFolderInfo.FullName, mRecheckFileIntegrityForExistingFolders, strProcessedFileList)
+				CheckIntegrityOfFilesInFolder(diInputFolder.FullName, mRecheckFileIntegrityForExistingFolders, strProcessedFileList)
 			End If
 
 		Catch ex As System.Exception
@@ -2092,14 +2092,14 @@ Public Class clsMSFileInfoScanner
 
 				intSubFoldersProcessed = 0
 				htSubFoldersProcessed = New Hashtable
-				For Each ioSubFolderInfo In ioInputFolderInfo.GetDirectories(strFileNameMatch)
+				For Each diSubfolder In diInputFolder.GetDirectories(strFileNameMatch)
 
 					intRetryCount = 0
 					Do
 						Try
 							' Check whether the folder name is BRUKER_ONE_FOLDER = "1"
-							If ioSubFolderInfo.Name = clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME Then
-								blnSuccess = ProcessMSFileOrFolder(ioSubFolderInfo.FullName, strOutputFolderPath, True, eMSFileProcessingState)
+							If diSubfolder.Name = clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME Then
+								blnSuccess = ProcessMSFileOrFolder(diSubfolder.FullName, strOutputFolderPath, True, eMSFileProcessingState)
 								If Not blnSuccess Then
 									intFileProcessFailCount += 1
 									blnSuccess = True
@@ -2107,13 +2107,13 @@ Public Class clsMSFileInfoScanner
 									intFileProcessCount += 1
 								End If
 								intSubFoldersProcessed += 1
-								htSubFoldersProcessed.Add(ioSubFolderInfo.Name, 1)
+								htSubFoldersProcessed.Add(diSubfolder.Name, 1)
 							Else
 								' See if the subfolder has an extension matching strFolderExtensionsToParse()
 								' If it does, process it using ProcessMSFileOrFolder and do not recurse into it
 								For intExtensionIndex = 0 To strFolderExtensionsToParse.Length - 1
-									If ioSubFolderInfo.Extension.ToUpper = strFolderExtensionsToParse(intExtensionIndex) Then
-										blnSuccess = ProcessMSFileOrFolder(ioSubFolderInfo.FullName, strOutputFolderPath, True, eMSFileProcessingState)
+									If diSubfolder.Extension.ToUpper = strFolderExtensionsToParse(intExtensionIndex) Then
+										blnSuccess = ProcessMSFileOrFolder(diSubfolder.FullName, strOutputFolderPath, True, eMSFileProcessingState)
 										If Not blnSuccess Then
 											intFileProcessFailCount += 1
 											blnSuccess = True
@@ -2121,7 +2121,7 @@ Public Class clsMSFileInfoScanner
 											intFileProcessCount += 1
 										End If
 										intSubFoldersProcessed += 1
-										htSubFoldersProcessed.Add(ioSubFolderInfo.Name, 1)
+										htSubFoldersProcessed.Add(diSubfolder.Name, 1)
 										Exit For
 									End If
 								Next intExtensionIndex
@@ -2151,20 +2151,20 @@ Public Class clsMSFileInfoScanner
 
 					If mAbortProcessing Then Exit For
 
-				Next ioSubFolderInfo
+				Next diSubfolder
 
 				' If intRecurseFoldersMaxLevels is <=0 then we recurse infinitely
 				'  otherwise, compare intRecursionLevel to intRecurseFoldersMaxLevels
 				If intRecurseFoldersMaxLevels <= 0 OrElse intRecursionLevel <= intRecurseFoldersMaxLevels Then
 					' Call this function for each of the subfolders of ioInputFolderInfo
 					' However, do not step into folders listed in htSubFoldersProcessed
-					For Each ioSubFolderInfo In ioInputFolderInfo.GetDirectories()
+					For Each diSubfolder In diInputFolder.GetDirectories()
 
 						intRetryCount = 0
 						Do
 							Try
-								If intSubFoldersProcessed = 0 OrElse Not htSubFoldersProcessed.Contains(ioSubFolderInfo.Name) Then
-									blnSuccess = RecurseFoldersWork(ioSubFolderInfo.FullName, strFileNameMatch, strOutputFolderPath, intFileProcessCount, intFileProcessFailCount, intRecursionLevel + 1, intRecurseFoldersMaxLevels)
+								If intSubFoldersProcessed = 0 OrElse Not htSubFoldersProcessed.Contains(diSubfolder.Name) Then
+									blnSuccess = RecurseFoldersWork(diSubfolder.FullName, strFileNameMatch, strOutputFolderPath, intFileProcessCount, intFileProcessFailCount, intRecursionLevel + 1, intRecurseFoldersMaxLevels)
 								End If
 								If Not blnSuccess And Not mIgnoreErrorsWhenRecursing Then
 									Exit For
@@ -2194,7 +2194,7 @@ Public Class clsMSFileInfoScanner
 						Loop While intRetryCount < MAX_ACCESS_ATTEMPTS
 
 						If mAbortProcessing Then Exit For
-					Next ioSubFolderInfo
+					Next diSubfolder
 				End If
 
 
