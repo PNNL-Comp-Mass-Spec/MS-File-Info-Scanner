@@ -1,5 +1,11 @@
 MS File Info Scanner Change Log
 
+Version 1.2.4553; June 19, 2012
+	- New version of ChemstationMSFileReader.dll
+
+Version 1.2.4512; May 9, 2012
+	- Now posting error messages to the error stream
+
 Version 1.2.4510; May 7, 2012
 	- Now creating the _ScanStatsEx.txt file in addition to the _ScanStats.txt file when /SS is used
 	- Now using ThermoRawFileReaderDLL.dll

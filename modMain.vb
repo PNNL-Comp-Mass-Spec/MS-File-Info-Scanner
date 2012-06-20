@@ -6,7 +6,7 @@ Option Strict On
 
 Module modMain
 
-	Public Const PROGRAM_DATE As String = "May 7, 2012"
+	Public Const PROGRAM_DATE As String = "June 19, 2012"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -205,7 +205,7 @@ Module modMain
                     Else
                         intReturnCode = mMSFileScanner.ErrorCode
                         If intReturnCode <> 0 Then
-                            Console.WriteLine("Error while processing: " & mMSFileScanner.GetErrorMessage())
+							ShowErrorMessage("Error while processing: " & mMSFileScanner.GetErrorMessage())
                         End If
                     End If
                 End If
@@ -214,194 +214,215 @@ Module modMain
             End If
 
         Catch ex As System.Exception
-            Console.WriteLine("Error occurred in modMain->Main: " & ControlChars.NewLine & ex.Message)
-            intReturnCode = -1
-        End Try
+			ShowErrorMessage("Error occurred in modMain->Main: " & System.Environment.NewLine & ex.Message)
+			intReturnCode = -1
+		End Try
 
 		Return intReturnCode
 
-    End Function
+	End Function
 
-    Private Function GetAppVersion() As String
-        'Return System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")"
+	Private Function GetAppVersion() As String
+		Return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() & " (" & PROGRAM_DATE & ")"
+	End Function
 
-        Return System.Reflection.Assembly.GetExecutingAssembly.GetName.Version.ToString & " (" & PROGRAM_DATE & ")"
-    End Function
+	Private Function SetOptionsUsingCommandLineParameters(ByVal objParseCommandLine As clsParseCommandLine) As Boolean
+		' Returns True if no problems; otherwise, returns false
 
-    Private Function SetOptionsUsingCommandLineParameters(ByVal objParseCommandLine As clsParseCommandLine) As Boolean
-        ' Returns True if no problems; otherwise, returns false
-
-        Dim strValue As String = String.Empty
+		Dim strValue As String = String.Empty
 		Dim strValidParameters() As String = New String() {"I", "O", "P", "S", "IE", "L", "C", "M", "H", "QZ", "NoTIC", "LC", "LCDiv", "QS", "ScanStart", "ScanEnd", "DI", "DST", "SS", "CF", "R", "Z"}
 
-        Try
-            ' Make sure no invalid parameters are present
-            If objParseCommandLine.InvalidParametersPresent(strValidParameters) Then
-                Return False
-            Else
-                With objParseCommandLine
-                    ' Query objParseCommandLine to see if various parameters are present
-                    If .RetrieveValueForParameter("I", strValue) Then
+		Try
+			' Make sure no invalid parameters are present
+			If objParseCommandLine.InvalidParametersPresent(strValidParameters) Then
+				Return False
+			Else
+				With objParseCommandLine
+					' Query objParseCommandLine to see if various parameters are present
+					If .RetrieveValueForParameter("I", strValue) Then
 						mInputDataFilePath = strValue
-                    ElseIf .NonSwitchParameterCount > 0 Then
-                        ' Treat the first non-switch parameter as the input file
-                        mInputDataFilePath = .RetrieveNonSwitchParameter(0)
-                    End If
+					ElseIf .NonSwitchParameterCount > 0 Then
+						' Treat the first non-switch parameter as the input file
+						mInputDataFilePath = .RetrieveNonSwitchParameter(0)
+					End If
 
-                    If .RetrieveValueForParameter("O", strValue) Then mOutputFolderName = strValue
-                    If .RetrieveValueForParameter("P", strValue) Then mParameterFilePath = strValue
+					If .RetrieveValueForParameter("O", strValue) Then mOutputFolderName = strValue
+					If .RetrieveValueForParameter("P", strValue) Then mParameterFilePath = strValue
 
-                    If .RetrieveValueForParameter("S", strValue) Then
-                        mRecurseFolders = True
-                        If Integer.TryParse(strValue, 0) Then
-                            mRecurseFoldersMaxLevels = CInt(strValue)
-                        End If
-                    End If
-                    If .RetrieveValueForParameter("IE", strValue) Then mIgnoreErrorsWhenRecursing = True
+					If .RetrieveValueForParameter("S", strValue) Then
+						mRecurseFolders = True
+						If Integer.TryParse(strValue, 0) Then
+							mRecurseFoldersMaxLevels = CInt(strValue)
+						End If
+					End If
+					If .RetrieveValueForParameter("IE", strValue) Then mIgnoreErrorsWhenRecursing = True
 
-                    If .RetrieveValueForParameter("L", strValue) Then mLogFilePath = strValue
+					If .RetrieveValueForParameter("L", strValue) Then mLogFilePath = strValue
 
-                    If .RetrieveValueForParameter("C", strValue) Then mCheckFileIntegrity = True
-                    If .RetrieveValueForParameter("M", strValue) Then
-                        If Integer.TryParse(strValue, 0) Then
-                            mMaximumTextFileLinesToCheck = CInt(strValue)
-                        End If
-                    End If
+					If .RetrieveValueForParameter("C", strValue) Then mCheckFileIntegrity = True
+					If .RetrieveValueForParameter("M", strValue) Then
+						If Integer.TryParse(strValue, 0) Then
+							mMaximumTextFileLinesToCheck = CInt(strValue)
+						End If
+					End If
 
-                    If .RetrieveValueForParameter("H", strValue) Then mComputeFileHashes = True
-                    If .RetrieveValueForParameter("QZ", strValue) Then mZipFileCheckAllData = False
+					If .RetrieveValueForParameter("H", strValue) Then mComputeFileHashes = True
+					If .RetrieveValueForParameter("QZ", strValue) Then mZipFileCheckAllData = False
 
-                    If .RetrieveValueForParameter("NoTIC", strValue) Then mSaveTICandBPIPlots = False
+					If .RetrieveValueForParameter("NoTIC", strValue) Then mSaveTICandBPIPlots = False
 
-                    If .RetrieveValueForParameter("LC", strValue) Then
-                        mSaveLCMS2DPlots = True
-                        If Integer.TryParse(strValue, 0) Then
-                            mLCMS2DMaxPointsToPlot = CInt(strValue)
-                        End If
-                    End If
+					If .RetrieveValueForParameter("LC", strValue) Then
+						mSaveLCMS2DPlots = True
+						If Integer.TryParse(strValue, 0) Then
+							mLCMS2DMaxPointsToPlot = CInt(strValue)
+						End If
+					End If
 
-                    If .RetrieveValueForParameter("LCDiv", strValue) Then
-                        If Integer.TryParse(strValue, 0) Then
-                            mLCMS2DOverviewPlotDivisor = CInt(strValue)
-                        End If
-                    End If
+					If .RetrieveValueForParameter("LCDiv", strValue) Then
+						If Integer.TryParse(strValue, 0) Then
+							mLCMS2DOverviewPlotDivisor = CInt(strValue)
+						End If
+					End If
 
-                    If .RetrieveValueForParameter("ScanStart", strValue) Then
-                        If Integer.TryParse(strValue, 0) Then
-                            mScanStart = CInt(strValue)
-                        End If
-                    End If
+					If .RetrieveValueForParameter("ScanStart", strValue) Then
+						If Integer.TryParse(strValue, 0) Then
+							mScanStart = CInt(strValue)
+						End If
+					End If
 
-                    If .RetrieveValueForParameter("ScanEnd", strValue) Then
-                        If Integer.TryParse(strValue, 0) Then
-                            mScanEnd = CInt(strValue)
-                        End If
-                    End If
+					If .RetrieveValueForParameter("ScanEnd", strValue) Then
+						If Integer.TryParse(strValue, 0) Then
+							mScanEnd = CInt(strValue)
+						End If
+					End If
 
-                    If .RetrieveValueForParameter("QS", strValue) Then mComputeOverallQualityScores = True
+					If .RetrieveValueForParameter("QS", strValue) Then mComputeOverallQualityScores = True
 
 					If .RetrieveValueForParameter("DI", strValue) Then mCreateDatasetInfoFile = True
 
 					If .RetrieveValueForParameter("SS", strValue) Then mCreateScanStatsFile = True
 
-                    If .RetrieveValueForParameter("DST", strValue) Then
-                        mUpdateDatasetStatsTextFile = True
-                        If Not String.IsNullOrEmpty(strValue) Then
-                            mDatasetStatsTextFileName = strValue
-                        End If
-                    End If
+					If .RetrieveValueForParameter("DST", strValue) Then
+						mUpdateDatasetStatsTextFile = True
+						If Not String.IsNullOrEmpty(strValue) Then
+							mDatasetStatsTextFileName = strValue
+						End If
+					End If
 
 
-                    If .RetrieveValueForParameter("CF", strValue) Then mUseCacheFiles = True
-                    If .RetrieveValueForParameter("R", strValue) Then mReprocessingExistingFiles = True
-                    If .RetrieveValueForParameter("Z", strValue) Then mReprocessIfCachedSizeIsZero = True
-                End With
+					If .RetrieveValueForParameter("CF", strValue) Then mUseCacheFiles = True
+					If .RetrieveValueForParameter("R", strValue) Then mReprocessingExistingFiles = True
+					If .RetrieveValueForParameter("Z", strValue) Then mReprocessIfCachedSizeIsZero = True
+				End With
 
-                Return True
-            End If
+				Return True
+			End If
 
-        Catch ex As System.Exception
-            Console.WriteLine("Error parsing the command line parameters: " & ControlChars.NewLine & ex.Message)
-        End Try
+		Catch ex As System.Exception
+			ShowErrorMessage("Error parsing the command line parameters: " & System.Environment.NewLine & ex.Message)
+		End Try
 
-    End Function
+	End Function
 
-    Private Sub ShowProgramHelp()
+	Private Sub ShowErrorMessage(ByVal strMessage As String)
+		Dim strSeparator As String = "------------------------------------------------------------------------------"
 
-        Try
+		Console.WriteLine()
+		Console.WriteLine(strSeparator)
+		Console.WriteLine(strMessage)
+		Console.WriteLine(strSeparator)
+		Console.WriteLine()
+
+		WriteToErrorStream(strMessage)
+	End Sub
+
+	Private Sub ShowProgramHelp()
+
+		Try
 			Console.WriteLine("This program will scan a series of MS data files (or data folders) and extract the acquisition start and end times, number of spectra, and the total size of the data, saving the values in the file " & clsMSFileInfoScanner.DefaultAcquisitionTimeFilename & ". " & _
-				  "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar/QTrap .WIFF files, Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, and .UIMF files (IMS)")
-            Console.WriteLine()
+			   "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar/QTrap .WIFF files, Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, and .UIMF files (IMS)")
+			Console.WriteLine()
 
-            Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location))
-            Console.WriteLine(" /I:InputFileNameOrFolderPath [/O:OutputFolderName]")
-            Console.WriteLine(" [/P:ParamFilePath] [/S[:MaxLevel]] [IE] [/L:LogFilePath]")
+			Console.WriteLine("Program syntax:" & System.Environment.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location))
+			Console.WriteLine(" /I:InputFileNameOrFolderPath [/O:OutputFolderName]")
+			Console.WriteLine(" [/P:ParamFilePath] [/S[:MaxLevel]] [IE] [/L:LogFilePath]")
 			Console.WriteLine(" [/LC[:MaxPointsToPlot]] [/NoTIC] [/DI] [/SS] [/QS]")
-            Console.WriteLine(" [/DST:DatasetStatsFileName]")
-            Console.WriteLine(" [/ScanStart:0] [/ScanEnd:0]")
-            Console.WriteLine(" [/C] [/M:nnn] [/H] /[QZ]")
-            Console.WriteLine(" [/CF] [/R] [/Z]")
-            Console.WriteLine()
-            Console.WriteLine("Use /I to specify the name of a file or folder to scan; the path can contain the wildcard character *")
-            Console.WriteLine("The output folder name is optional.  If omitted, the output files will be created in the program directory.")
-            Console.WriteLine()
+			Console.WriteLine(" [/DST:DatasetStatsFileName]")
+			Console.WriteLine(" [/ScanStart:0] [/ScanEnd:0]")
+			Console.WriteLine(" [/C] [/M:nnn] [/H] /[QZ]")
+			Console.WriteLine(" [/CF] [/R] [/Z]")
+			Console.WriteLine()
+			Console.WriteLine("Use /I to specify the name of a file or folder to scan; the path can contain the wildcard character *")
+			Console.WriteLine("The output folder name is optional.  If omitted, the output files will be created in the program directory.")
+			Console.WriteLine()
 
-            Console.WriteLine("The param file switch is optional.  If supplied, it should point to a valid XML parameter file.  If omitted, defaults are used.")
-            Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine. Use /IE to ignore errors when recursing.")
-            Console.WriteLine("Use /L to specify the file path for logging messages.")
-            Console.WriteLine()
+			Console.WriteLine("The param file switch is optional.  If supplied, it should point to a valid XML parameter file.  If omitted, defaults are used.")
+			Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine. Use /IE to ignore errors when recursing.")
+			Console.WriteLine("Use /L to specify the file path for logging messages.")
+			Console.WriteLine()
 
-            Console.WriteLine("Use /LC to create 2D LCMS plots (this process could take several minutes for each dataset).  By default, plots the top " & clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_POINTS_TO_PLOT & " points.  To plot the top 20000 points, use /LC:20000.")
-            Console.WriteLine("Use /LCDiv to specify the divisor to use when creating the overview 2D LCMS plots.  By default, uses /LCDiv:" & clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR & "; use /LCDiv:0 to disable creation of the overview plots.")
-            Console.WriteLine("Use /NoTIC to not save TIC and BPI plots.")
+			Console.WriteLine("Use /LC to create 2D LCMS plots (this process could take several minutes for each dataset).  By default, plots the top " & clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_POINTS_TO_PLOT & " points.  To plot the top 20000 points, use /LC:20000.")
+			Console.WriteLine("Use /LCDiv to specify the divisor to use when creating the overview 2D LCMS plots.  By default, uses /LCDiv:" & clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR & "; use /LCDiv:0 to disable creation of the overview plots.")
+			Console.WriteLine("Use /NoTIC to not save TIC and BPI plots.")
 			Console.WriteLine("Use /DI to create a dataset info XML file for each dataset.")
 			Console.WriteLine("Use /SS to create a _ScanStats.txt  file for each dataset.")
-            Console.WriteLine("Use /QS to compute an overall quality score for the data in each datasets.")
-            Console.WriteLine()
+			Console.WriteLine("Use /QS to compute an overall quality score for the data in each datasets.")
+			Console.WriteLine()
 
-            Console.WriteLine("Use /DST to update (or create) a tab-delimited text file with overview stats for the dataset.  If /DI is used, then will include detailed scan counts; otherwise, will just have the dataset name, acquisition date, and (if available) sample name and comment. By default, the file is named " & DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME & "; to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt")
-            Console.WriteLine()
+			Console.WriteLine("Use /DST to update (or create) a tab-delimited text file with overview stats for the dataset.  If /DI is used, then will include detailed scan counts; otherwise, will just have the dataset name, acquisition date, and (if available) sample name and comment. By default, the file is named " & DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME & "; to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt")
+			Console.WriteLine()
 
-            Console.WriteLine("Use /ScanStart and /ScanEnd to limit the scan range to process; useful for files where the first few scans are corrupt.  For example, to start processing at scan 10, use /ScanStart:10")
-            Console.WriteLine()
+			Console.WriteLine("Use /ScanStart and /ScanEnd to limit the scan range to process; useful for files where the first few scans are corrupt.  For example, to start processing at scan 10, use /ScanStart:10")
+			Console.WriteLine()
 
-            Console.WriteLine("Use /C to perform an integrity check on all known file types; this process will open known file types and verify that they contain the expected data.  This option is only used if you specify an Input Folder and use a wildcard; you will typically also want to use /S when using /C.")
-            Console.WriteLine("Use /M to define the maximum number of lines to process when checking text or csv files; default is /M:" & clsFileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK.ToString)
-            Console.WriteLine()
+			Console.WriteLine("Use /C to perform an integrity check on all known file types; this process will open known file types and verify that they contain the expected data.  This option is only used if you specify an Input Folder and use a wildcard; you will typically also want to use /S when using /C.")
+			Console.WriteLine("Use /M to define the maximum number of lines to process when checking text or csv files; default is /M:" & clsFileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK.ToString)
+			Console.WriteLine()
 
-            Console.WriteLine("Use /H to compute Sha-1 file hashes when verifying file integrity.")
-            Console.WriteLine("Use /QZ to run a quick zip-file validation test when verifying file integrity (the test does not check all data in the .Zip file).")
-            Console.WriteLine()
+			Console.WriteLine("Use /H to compute Sha-1 file hashes when verifying file integrity.")
+			Console.WriteLine("Use /QZ to run a quick zip-file validation test when verifying file integrity (the test does not check all data in the .Zip file).")
+			Console.WriteLine()
 
-            Console.WriteLine("Use /CF to save/load information from the acquisition time file (cache file).  This option is auto-enabled if you use /C.")
-            Console.WriteLine("Use /R to reprocess files that are already defined in the acquisition time file.")
-            Console.WriteLine("Use /Z to reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes.")
-            Console.WriteLine()
+			Console.WriteLine("Use /CF to save/load information from the acquisition time file (cache file).  This option is auto-enabled if you use /C.")
+			Console.WriteLine("Use /R to reprocess files that are already defined in the acquisition time file.")
+			Console.WriteLine("Use /Z to reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes.")
+			Console.WriteLine()
 
-            Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005")
-            Console.WriteLine("Version: " & GetAppVersion())
-            Console.WriteLine()
+			Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005")
+			Console.WriteLine("Version: " & GetAppVersion())
+			Console.WriteLine()
 
-            Console.WriteLine("E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com")
-            Console.WriteLine("Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/")
+			Console.WriteLine("E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com")
+			Console.WriteLine("Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/")
 
-            ' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
-            System.Threading.Thread.Sleep(750)
+			' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
+			System.Threading.Thread.Sleep(750)
 
-        Catch ex As System.Exception
-            Console.WriteLine("Error displaying the program syntax: " & ex.Message)
-        End Try
+		Catch ex As System.Exception
+			ShowErrorMessage("Error displaying the program syntax: " & ex.Message)
+		End Try
 
-    End Sub
+	End Sub
 
+	Private Sub WriteToErrorStream(strErrorMessage As String)
+		Try
+			Using swErrorStream As System.IO.StreamWriter = New System.IO.StreamWriter(Console.OpenStandardError())
+				swErrorStream.WriteLine(strErrorMessage)
+			End Using
+		Catch ex As Exception
+			' Ignore errors here
+		End Try
+	End Sub
 
     Private Sub mMSFileScanner_ErrorEvent(ByVal Message As String) Handles mMSFileScanner.ErrorEvent
-        ' We could any error messages here
-        ' However, mMSFileScanner already will have written out to the console, so there is no need to do so again
+		' We could display any error messages here
+		' However, mMSFileScanner already will have written out to the console, so there is no need to do so again
+
+		WriteToErrorStream(Message)
     End Sub
 
     Private Sub mMSFileScanner_MessageEvent(ByVal Message As String) Handles mMSFileScanner.MessageEvent
-        ' We could any status messages here
+		' We could display any status messages here
         ' However, mMSFileScanner already will have written out to the console, so there is no need to do so again
     End Sub
 

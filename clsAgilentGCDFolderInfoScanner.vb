@@ -2,7 +2,7 @@ Option Strict On
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
 '
-' Last modified March 27, 2012
+' Last modified June 19, 2012
 
 Public Class clsAgilentGCDFolderInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -184,7 +184,9 @@ Public Class clsAgilentGCDFolderInfoScanner
 
 	Protected Function ProcessChemstationMSDataFile(ByVal strDatafilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
+		Dim blnValidSpectrum As Boolean
 		Dim blnSuccess As Boolean
+		Dim intCurrentIndex As Integer = 0
 
 		Try
 			Using oReader As ChemstationMSFileReader.clsChemstationDataMSFileReader = New ChemstationMSFileReader.clsChemstationDataMSFileReader(strDatafilePath)
@@ -195,56 +197,66 @@ Public Class clsAgilentGCDFolderInfoScanner
 				udtFileInfo.ScanCount = oReader.Header.SpectraCount
 
 				For intSpectrumIndex As Integer = 0 To udtFileInfo.ScanCount - 1
+					intCurrentIndex = intSpectrumIndex
 
 					Dim oSpectrum As ChemstationMSFileReader.clsSpectralRecord = Nothing
-					Dim lstMZs As System.Collections.Generic.List(Of Single)
-					Dim lstIntensities As System.Collections.Generic.List(Of Int32)
+					Dim lstMZs As System.Collections.Generic.List(Of Single) = Nothing
+					Dim lstIntensities As System.Collections.Generic.List(Of Int32) = Nothing
 					Dim intMSLevel As Integer = 1
 
-					oReader.GetSpectrum(intSpectrumIndex, oSpectrum)
-					lstMZs = oSpectrum.Mzs
-					lstIntensities = oSpectrum.Intensities
+					Try
+						oReader.GetSpectrum(intSpectrumIndex, oSpectrum)
+						lstMZs = oSpectrum.Mzs
+						lstIntensities = oSpectrum.Intensities
+						blnValidSpectrum = True
+					Catch ex As Exception
+						ReportError("Exception obtaining data from the Data.MS file for spectrum index " & intCurrentIndex & ": " & ex.Message)
+						blnValidSpectrum = False
+					End Try
 
 
-					Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
+					If blnValidSpectrum Then
 
-					objScanStatsEntry.ScanNumber = intSpectrumIndex + 1
-					objScanStatsEntry.ScanType = intMSLevel
-					objScanStatsEntry.ScanTypeName = "GC-MS"
+						Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
 
-					objScanStatsEntry.ScanFilterText = ""
-					objScanStatsEntry.ElutionTime = oSpectrum.RetentionTimeMinutes.ToString("0.0000")
-					objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(oSpectrum.TIC, 1)
+						objScanStatsEntry.ScanNumber = intSpectrumIndex + 1
+						objScanStatsEntry.ScanType = intMSLevel
+						objScanStatsEntry.ScanTypeName = "GC-MS"
 
-					objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(oSpectrum.BasePeakAbundance, 1)
-					objScanStatsEntry.BasePeakMZ = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(oSpectrum.BasePeakMZ, 5)
+						objScanStatsEntry.ScanFilterText = ""
+						objScanStatsEntry.ElutionTime = oSpectrum.RetentionTimeMinutes.ToString("0.0000")
+						objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(oSpectrum.TIC, 1)
 
-					' Base peak signal to noise ratio
-					objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
+						objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(oSpectrum.BasePeakAbundance, 1)
+						objScanStatsEntry.BasePeakMZ = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(oSpectrum.BasePeakMZ, 5)
 
-					objScanStatsEntry.IonCount = lstMZs.Count
-					objScanStatsEntry.IonCountRaw = objScanStatsEntry.IonCount
+						' Base peak signal to noise ratio
+						objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
 
-					mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
+						objScanStatsEntry.IonCount = lstMZs.Count
+						objScanStatsEntry.IonCountRaw = objScanStatsEntry.IonCount
+
+						mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
 
 
-					If mSaveTICAndBPI Then
-						mTICandBPIPlot.AddData(objScanStatsEntry.ScanNumber, intMSLevel, oSpectrum.RetentionTimeMinutes, oSpectrum.BasePeakAbundance, oSpectrum.TIC)
+						If mSaveTICAndBPI Then
+							mTICandBPIPlot.AddData(objScanStatsEntry.ScanNumber, intMSLevel, oSpectrum.RetentionTimeMinutes, oSpectrum.BasePeakAbundance, oSpectrum.TIC)
 
-						If lstMZs.Count > 0 Then
-							Dim dblIonsMZ() As Double
-							Dim dblIonsIntensity() As Double
-							ReDim dblIonsMZ(lstMZs.Count - 1)
-							ReDim dblIonsIntensity(lstMZs.Count - 1)
+							If lstMZs.Count > 0 Then
+								Dim dblIonsMZ() As Double
+								Dim dblIonsIntensity() As Double
+								ReDim dblIonsMZ(lstMZs.Count - 1)
+								ReDim dblIonsIntensity(lstMZs.Count - 1)
 
-							For intIndex As Integer = 0 To lstMZs.Count - 1
-								dblIonsMZ(intIndex) = lstMZs(intIndex)
-								dblIonsIntensity(intIndex) = lstIntensities(intIndex)
-							Next
+								For intIndex As Integer = 0 To lstMZs.Count - 1
+									dblIonsMZ(intIndex) = lstMZs(intIndex)
+									dblIonsIntensity(intIndex) = lstIntensities(intIndex)
+								Next
 
-							mLCMS2DPlot.AddScan(objScanStatsEntry.ScanNumber, intMSLevel, oSpectrum.RetentionTimeMinutes, dblIonsMZ.Length, dblIonsMZ, dblIonsIntensity)
+								mLCMS2DPlot.AddScan(objScanStatsEntry.ScanNumber, intMSLevel, oSpectrum.RetentionTimeMinutes, dblIonsMZ.Length, dblIonsMZ, dblIonsIntensity)
+							End If
+
 						End If
-
 					End If
 
 				Next
@@ -255,7 +267,7 @@ Public Class clsAgilentGCDFolderInfoScanner
 
 		Catch ex As System.Exception
 			' Exception reading file
-			ReportError("Exception reading Chemstation Data.MS file: " & ex.Message)
+			ReportError("Exception reading data from the Data.MS file at spectrum index " & intCurrentIndex & ": " & ex.Message)
 			blnSuccess = False
 		End Try
 
