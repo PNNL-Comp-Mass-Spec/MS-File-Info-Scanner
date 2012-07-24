@@ -6,7 +6,7 @@ Option Strict On
 
 Module modMain
 
-	Public Const PROGRAM_DATE As String = "June 19, 2012"
+	Public Const PROGRAM_DATE As String = "July 23, 2012"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -340,7 +340,7 @@ Module modMain
 
 		Try
 			Console.WriteLine("This program will scan a series of MS data files (or data folders) and extract the acquisition start and end times, number of spectra, and the total size of the data, saving the values in the file " & clsMSFileInfoScanner.DefaultAcquisitionTimeFilename & ". " & _
-			   "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar/QTrap .WIFF files, Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, and .UIMF files (IMS)")
+			   "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar/QTrap .WIFF files, Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, .UIMF files (IMS), and zipped Bruker imaging datasets (with 0_R*.zip files)")
 			Console.WriteLine()
 
 			Console.WriteLine("Program syntax:" & System.Environment.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location))

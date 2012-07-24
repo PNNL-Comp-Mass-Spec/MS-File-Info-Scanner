@@ -7,12 +7,12 @@
 Public Class clsBrukerXmassFolderInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
 
-	' Note: The extension must be in all caps
 	Public Const BRUKER_BAF_FILE_NAME As String = "analysis.baf"
 	Public Const BRUKER_EXTENSION_BAF_FILE_NAME As String = "extension.baf"
 	Public Const BRUKER_ANALYSIS_YEP_FILE_NAME As String = "analysis.yep"
 
-    Public Const BRUKER_BAF_FILE_EXTENSION As String = ".BAF"
+	' Note: The extension must be in all caps
+	Public Const BRUKER_BAF_FILE_EXTENSION As String = ".BAF"
 
     Private Const BRUKER_SCANINFO_XML_FILE As String = "scan.xml"
     Private Const BRUKER_XMASS_LOG_FILE As String = "log.txt"

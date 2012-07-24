@@ -197,6 +197,7 @@
     <Compile Include="clsXmlSettingsFileAccessor.vb">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="clsZippedImagingFilesScanner.vb" />
     <Compile Include="MSFileInfoProcessorInterface.vb" />
   </ItemGroup>
   <ItemGroup>

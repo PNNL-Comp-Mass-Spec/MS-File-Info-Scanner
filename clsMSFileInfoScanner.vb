@@ -13,7 +13,7 @@ Public Class clsMSFileInfoScanner
 	Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner
 
 	Public Sub New()
-		mFileDate = "June 19, 2012"
+		mFileDate = "July 23, 2012"
 
 		mFileIntegrityChecker = New clsFileIntegrityChecker
 		mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -1587,7 +1587,12 @@ Public Class clsMSFileInfoScanner
 								mMSInfoScanner = New clsMicromassRawFolderInfoScanner
 								blnKnownMSDataType = True
 							Case Else
-								' Unknown folder extension
+								' Unknown folder extension (or no extension)
+								' See if the folder contains 1 or more 0_R*.zip files
+								If System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsZippedImagingFilesScanner.ZIPPED_IMAGING_FILE_SEARCH_SPEC).Length > 0 Then
+									mMSInfoScanner = New clsZippedImagingFilesScanner
+									blnKnownMSDataType = True
+								End If
 						End Select
 					End If
 				Else

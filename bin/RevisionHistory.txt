@@ -1,5 +1,10 @@
 MS File Info Scanner Change Log
 
+Version 1.2.4587; July 23, 2012
+	- Added support for zipped Bruker imaging datasets
+		- Dataset folder contains 0_R*.zip files
+		- The zip files have subfolders with analysis.baf files and .m folders
+
 Version 1.2.4553; June 19, 2012
 	- New version of ChemstationMSFileReader.dll
 
