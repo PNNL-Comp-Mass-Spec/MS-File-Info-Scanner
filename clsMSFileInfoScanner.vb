@@ -13,7 +13,7 @@ Public Class clsMSFileInfoScanner
 	Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner
 
 	Public Sub New()
-		mFileDate = "July 23, 2012"
+		mFileDate = "September 10, 2012"
 
 		mFileIntegrityChecker = New clsFileIntegrityChecker
 		mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -1577,6 +1577,9 @@ Public Class clsMSFileInfoScanner
 								 System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0 Then
 									mMSInfoScanner = New clsAgilentGCDFolderInfoScanner
 
+								ElseIf System.IO.Directory.GetDirectories(strInputFileOrFolderPath, clsAgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Length > 0 Then
+									mMSInfoScanner = New clsAgilentTOFDFolderInfoScanner
+
 								Else
 									mMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
 								End If
@@ -1634,6 +1637,9 @@ Public Class clsMSFileInfoScanner
 								If clsBrukerOneFolderInfoScanner.IsZippedSFolder(objFileSystemInfo.Name) Then
 									' Bruker s001.zip file
 									mMSInfoScanner = New clsBrukerOneFolderInfoScanner
+									blnKnownMSDataType = True
+								ElseIf clsZippedImagingFilesScanner.IsZippedImagingFile(objFileSystemInfo.Name) Then
+									mMSInfoScanner = New clsZippedImagingFilesScanner
 									blnKnownMSDataType = True
 								End If
 						End Select

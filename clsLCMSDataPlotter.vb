@@ -195,7 +195,9 @@ Public Class clsLCMSDataPlotter
 			mPointCountCached += objScanData.IonCount
 
 			If mPointCountCached > mOptions.MaxPointsToPlot * 5 Then
-				' Only repeat the trim if the number of cached data points has increased by 10%
+				' Too many data points are being tracked; trim out the low abundance ones
+
+				' However, only repeat the trim if the number of cached data points has increased by 10%
 				' This helps speed up program execution by avoiding trimming data after every new scan is added
 				If mPointCountCached > mPointCountCachedAfterLastTrim * 1.1 Then
 
@@ -233,7 +235,9 @@ Public Class clsLCMSDataPlotter
 			mPointCountCached += objScanData.IonCount
 
 			If mPointCountCached > mOptions.MaxPointsToPlot * 5 Then
-				' Only repeat the trim if the number of cached data points has increased by 10%
+				' Too many data points are being tracked; trim out the low abundance ones
+
+				' However, only repeat the trim if the number of cached data points has increased by 10%
 				' This helps speed up program execution by avoiding trimming data after every new scan is added
 				If mPointCountCached > mPointCountCachedAfterLastTrim * 1.1 Then
 
@@ -835,7 +839,16 @@ Public Class clsLCMSDataPlotter
 		' Possibly add a label showing the maximum elution time
 		If dblScanTimeMax > 0 Then
 
-			Dim objScanTimeMaxText As New ZedGraph.TextObj(Math.Round(dblScanTimeMax, 0).ToString("0") & " minutes", 1, 1, ZedGraph.CoordType.PaneFraction)
+			Dim strCaption As String
+			If dblScanTimeMax < 2 Then
+				strCaption = Math.Round(dblScanTimeMax, 2).ToString("0.00") & " minutes"
+			ElseIf dblScanTimeMax < 10 Then
+				strCaption = Math.Round(dblScanTimeMax, 1).ToString("0.0") & " minutes"
+			Else
+				strCaption = Math.Round(dblScanTimeMax, 0).ToString("0") & " minutes"
+			End If
+
+			Dim objScanTimeMaxText As New ZedGraph.TextObj(strCaption, 1, 1, ZedGraph.CoordType.PaneFraction)
 
 			With objScanTimeMaxText
 				.FontSpec.Angle = 0
@@ -851,67 +864,67 @@ Public Class clsLCMSDataPlotter
 
 		End If
 
-		' Hide the x and y axis grids
-		myPane.XAxis.MajorGrid.IsVisible = False
-		myPane.YAxis.MajorGrid.IsVisible = False
+			' Hide the x and y axis grids
+			myPane.XAxis.MajorGrid.IsVisible = False
+			myPane.YAxis.MajorGrid.IsVisible = False
 
-		myPane.XAxis.MajorTic.IsOpposite = False
-		myPane.XAxis.MinorTic.IsOpposite = False
+			myPane.XAxis.MajorTic.IsOpposite = False
+			myPane.XAxis.MinorTic.IsOpposite = False
 
-		myPane.YAxis.MajorTic.IsOpposite = False
-		myPane.YAxis.MinorTic.IsOpposite = False
+			myPane.YAxis.MajorTic.IsOpposite = False
+			myPane.YAxis.MinorTic.IsOpposite = False
 
-		' Set the X-axis to display unmodified scan numbers (by default, ZedGraph scales them to a range between 0 and 10)
-		myPane.XAxis.Scale.Mag = 0
-		myPane.XAxis.Scale.MagAuto = False
-		myPane.XAxis.Scale.MaxGrace = 0
+			' Set the X-axis to display unmodified scan numbers (by default, ZedGraph scales them to a range between 0 and 10)
+			myPane.XAxis.Scale.Mag = 0
+			myPane.XAxis.Scale.MagAuto = False
+			myPane.XAxis.Scale.MaxGrace = 0
 
-		' Override the auto-computed axis range
-		If Me.mOptions.UseObservedMinScan Then
-			myPane.XAxis.Scale.Min = intMinScan
-		Else
-			myPane.XAxis.Scale.Min = 0
-		End If
+			' Override the auto-computed axis range
+			If Me.mOptions.UseObservedMinScan Then
+				myPane.XAxis.Scale.Min = intMinScan
+			Else
+				myPane.XAxis.Scale.Min = 0
+			End If
 
-		myPane.XAxis.Scale.Max = intMaxScan
+			myPane.XAxis.Scale.Max = intMaxScan
 
-		' Set the Y-axis to display unmodified m/z values
-		myPane.YAxis.Scale.Mag = 0
-		myPane.YAxis.Scale.MagAuto = False
-		myPane.YAxis.Scale.MaxGrace = 0
+			' Set the Y-axis to display unmodified m/z values
+			myPane.YAxis.Scale.Mag = 0
+			myPane.YAxis.Scale.MagAuto = False
+			myPane.YAxis.Scale.MaxGrace = 0
 
-		' Override the auto-computed axis range
-		myPane.YAxis.Scale.Min = dblMinMZ
-		myPane.YAxis.Scale.Max = dblMaxMZ
+			' Override the auto-computed axis range
+			myPane.YAxis.Scale.Min = dblMinMZ
+			myPane.YAxis.Scale.Max = dblMaxMZ
 
-		' Align the Y axis labels so they are flush to the axis
-		myPane.YAxis.Scale.Align = ZedGraph.AlignP.Inside
+			' Align the Y axis labels so they are flush to the axis
+			myPane.YAxis.Scale.Align = ZedGraph.AlignP.Inside
 
-		' Adjust the font sizes
-		myPane.XAxis.Title.FontSpec.Size = FONT_SIZE_BASE
-		myPane.XAxis.Title.FontSpec.IsBold = False
-		myPane.XAxis.Scale.FontSpec.Size = FONT_SIZE_BASE
+			' Adjust the font sizes
+			myPane.XAxis.Title.FontSpec.Size = FONT_SIZE_BASE
+			myPane.XAxis.Title.FontSpec.IsBold = False
+			myPane.XAxis.Scale.FontSpec.Size = FONT_SIZE_BASE
 
-		myPane.YAxis.Title.FontSpec.Size = FONT_SIZE_BASE
-		myPane.YAxis.Title.FontSpec.IsBold = False
-		myPane.YAxis.Scale.FontSpec.Size = FONT_SIZE_BASE
+			myPane.YAxis.Title.FontSpec.Size = FONT_SIZE_BASE
+			myPane.YAxis.Title.FontSpec.IsBold = False
+			myPane.YAxis.Scale.FontSpec.Size = FONT_SIZE_BASE
 
-		myPane.Title.FontSpec.Size = FONT_SIZE_BASE + 1
-		myPane.Title.FontSpec.IsBold = True
+			myPane.Title.FontSpec.Size = FONT_SIZE_BASE + 1
+			myPane.Title.FontSpec.IsBold = True
 
-		' Fill the axis background with a gradient
-		myPane.Chart.Fill = New ZedGraph.Fill(System.Drawing.Color.White, System.Drawing.Color.FromArgb(255, 230, 230, 230), 45.0F)
+			' Fill the axis background with a gradient
+			myPane.Chart.Fill = New ZedGraph.Fill(System.Drawing.Color.White, System.Drawing.Color.FromArgb(255, 230, 230, 230), 45.0F)
 
-		' Could use the following to simply fill with white
-		'myPane.Chart.Fill = New ZedGraph.Fill(Drawing.Color.White)
+			' Could use the following to simply fill with white
+			'myPane.Chart.Fill = New ZedGraph.Fill(Drawing.Color.White)
 
-		' Hide the legend
-		myPane.Legend.IsVisible = False
+			' Hide the legend
+			myPane.Legend.IsVisible = False
 
-		' Force a plot update
-		myPane.AxisChange()
+			' Force a plot update
+			myPane.AxisChange()
 
-		Return myPane
+			Return myPane
 
 	End Function
 

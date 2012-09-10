@@ -1,5 +1,14 @@
 MS File Info Scanner Change Log
 
+Version 1.2.4636; September 10, 2012
+	- Added support for Bruker Maxis .D folders
+		- The .D folder contains an analysis.baf file, plus a Methods subfolder (.m) with files microTOFQMaxAcquisition.method and submethods.xml
+		- Note that proteowizard uses CompassXtract when processing these .baf files
+
+Version 1.2.4617; August 22, 2012
+	- Added support for Agilent QTOF .D folders
+		- The .D folder contains an AcqData subfolder, and in that folder are MSScan.bin, MSProfile.bin, etc.
+
 Version 1.2.4587; July 23, 2012
 	- Added support for zipped Bruker imaging datasets
 		- Dataset folder contains 0_R*.zip files

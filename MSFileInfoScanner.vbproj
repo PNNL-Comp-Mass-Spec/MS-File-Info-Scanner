@@ -171,6 +171,7 @@
     <Compile Include="clsAgilentOrQStarWiffFileInfoScanner.vb">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="clsAgilentTOFDFolderInfoScanner.vb" />
     <Compile Include="clsBrukerOneFolderInfoScanner.vb">
       <SubType>Code</SubType>
     </Compile>
@@ -195,6 +196,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="clsParseCommandLine.vb" />
+    <Compile Include="clsProteowizardDataParser.vb" />
     <Compile Include="clsTICandBPIPlotter.vb" />
     <Compile Include="clsUIMFInfoScanner.vb" />
     <Compile Include="clsXmlSettingsFileAccessor.vb">

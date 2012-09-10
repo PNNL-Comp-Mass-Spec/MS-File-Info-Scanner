@@ -2,10 +2,11 @@
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 '
-' Last modified March 7, 2012
+' Last modified September 10, 2012
 
+<CLSCompliant(False)>
 Public Class clsBrukerXmassFolderInfoScanner
-    Inherits clsMSFileInfoProcessorBaseClass
+	Inherits clsMSFileInfoProcessorBaseClass
 
 	Public Const BRUKER_BAF_FILE_NAME As String = "analysis.baf"
 	Public Const BRUKER_EXTENSION_BAF_FILE_NAME As String = "extension.baf"
@@ -14,9 +15,11 @@ Public Class clsBrukerXmassFolderInfoScanner
 	' Note: The extension must be in all caps
 	Public Const BRUKER_BAF_FILE_EXTENSION As String = ".BAF"
 
-    Private Const BRUKER_SCANINFO_XML_FILE As String = "scan.xml"
-    Private Const BRUKER_XMASS_LOG_FILE As String = "log.txt"
-    Private Const BRUKER_AUTOMS_FILE As String = "AutoMS.txt"
+	Private Const BRUKER_SCANINFO_XML_FILE As String = "scan.xml"
+	Private Const BRUKER_XMASS_LOG_FILE As String = "log.txt"
+	Private Const BRUKER_AUTOMS_FILE As String = "AutoMS.txt"
+
+	Protected WithEvents mPWizParser As clsProteowizardDataParser
 
 	''' <summary>
 	''' Looks for a .m folder then looks for apexAcquisition.method or submethods.xml in that folder
@@ -51,7 +54,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 			If ioSubFolders.Length > 0 Then
 				' Look for the apexAcquisition.method in each matching subfolder
 				' Assume the file modification time is the acquisition start time
-				' Note that the submethods.xml file sometimes gets modified after the run starts, so it can't be used to determine run start time
+				' Note that the submethods.xml file sometimes gets modified after the run starts, so it should not be used to determine run start time
 
 				For intIndex = 0 To ioSubFolders.Length - 1
 					For Each ioFile In ioSubFolders(intIndex).GetFiles("apexAcquisition.method")
@@ -166,6 +169,82 @@ Public Class clsBrukerXmassFolderInfoScanner
 		Return blnSuccess
 	End Function
 
+	Protected Function ParseBAFFile(ByVal ioBAFFileInfo As System.IO.FileInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+
+		Dim blnSuccess As Boolean = False
+
+		Dim blnTICStored As Boolean = False
+		Dim blnSRMDataCached As Boolean = False
+
+		' Override strDataFilePath here, if needed
+		Dim blnOverride As Boolean = False
+		If blnOverride Then
+			Dim strNewDataFilePath As String = "c:\temp\analysis.baf"
+			ioBAFFileInfo = New System.IO.FileInfo(strNewDataFilePath)
+		End If
+
+		mDatasetStatsSummarizer.ClearCachedData()
+		mLCMS2DPlot.Options.UseObservedMinScan = False
+
+		Try
+			' Open the analysis.baf (or extension.baf) file using the ProteoWizardWrapper
+			ShowMessage("Determining acquisition info using Proteowizard (this could take a while)")
+
+			Dim objPWiz As pwiz.ProteowizardWrapper.MSDataFileReader
+			objPWiz = New pwiz.ProteowizardWrapper.MSDataFileReader(ioBAFFileInfo.FullName)
+
+			Try
+				Dim dtRunStartTime As System.DateTime = udtFileInfo.AcqTimeStart
+				dtRunStartTime = CDate(objPWiz.RunStartTime())
+
+				' Update AcqTimeEnd if possible
+				' Found out by trial and error that we need to use .ToUniversalTime() to adjust the time reported by ProteoWizard
+				dtRunStartTime = dtRunStartTime.ToUniversalTime()
+				If dtRunStartTime < udtFileInfo.AcqTimeEnd Then
+					If udtFileInfo.AcqTimeEnd.Subtract(dtRunStartTime).TotalDays < 1 Then
+						udtFileInfo.AcqTimeStart = dtRunStartTime
+					End If
+				End If
+
+			Catch ex As Exception
+				udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd
+			End Try
+
+			' Instantiate the Proteowizard Data Parser class
+			mPWizParser = New clsProteowizardDataParser(objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot, mSaveLCMS2DPlots, mSaveTICAndBPI)
+			mPWizParser.HighResMS1 = True
+			mPWizParser.HighResMS2 = True
+
+			Dim dblRuntimeMinutes As Double = 0
+
+			' Note that SRM .Wiff files will only have chromatograms, and no spectra
+			If objPWiz.ChromatogramCount > 0 Then
+
+				' Process the chromatograms
+				mPWizParser.StoreChromatogramInfo(udtFileInfo, blnTICStored, blnSRMDataCached, dblRuntimeMinutes)
+				mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
+
+				udtFileInfo.ScanCount = objPWiz.ChromatogramCount
+			End If
+
+
+			If objPWiz.SpectrumCount > 0 And Not blnSRMDataCached Then
+				' Process the spectral data (though only if we did not process SRM data)
+				mPWizParser.StoreMSSpectraInfo(udtFileInfo, blnTICStored, dblRuntimeMinutes)
+				mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
+
+				udtFileInfo.ScanCount = objPWiz.SpectrumCount
+			End If
+
+			blnSuccess = True
+		Catch ex As Exception
+			ReportError("Error using ProteoWizard reader: " & ex.Message)
+			blnSuccess = False
+		End Try
+
+		Return blnSuccess
+
+	End Function
 
 	Protected Function ParseScanXMLFile(ByVal ioDatasetFolder As System.IO.DirectoryInfo, _
 	   ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
@@ -175,7 +254,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 		Dim ioFileInfo As System.IO.FileInfo
 		Dim srReader As System.Xml.XmlTextReader
 
-		Dim blnSuccess As Boolean
+		Dim blnSuccess As Boolean = False
 		Dim blnInScanNode As Boolean
 		Dim blnSkipRead As Boolean
 
@@ -397,6 +476,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 				' Update the dataset name and file extension
 				udtFileInfo.DatasetName = GetDatasetNameViaPath(ioDatasetFolder.FullName)
 				udtFileInfo.FileExtension = String.Empty
+				udtFileInfo.FileSizeBytes = ioFileInfo.Length
 
 				' Find the apexAcquisition.method or submethods.xml file in the XMASS_Method.m subfolder to determine .AcqTimeStart
 				' This function updates udtFileInfo.AcqTimeEnd and udtFileInfo.AcqTimeStart to have the same time
@@ -411,7 +491,12 @@ Public Class clsBrukerXmassFolderInfoScanner
 				' We can also obtain TIC and elution time values from this file
 				' However, it does not track whether a scan is MS or MSn
 				' If the scans.xml file contains runtime entries (e.g. <minutes>100.0456</minutes>) then .AcqTimeEnd is updated using .AcqTimeStart + RunTimeMinutes
-				ParseScanXMLFile(ioDatasetFolder, udtFileInfo)
+				blnSuccess = ParseScanXMLFile(ioDatasetFolder, udtFileInfo)
+
+				If Not blnSuccess Then
+					' Use ProteoWizard to extract the scan counts and acquisition time information
+					blnSuccess = ParseBAFFile(ioFileInfo, udtFileInfo)
+				End If
 
 				' Parse the AutoMS.txt file (if it exists) to determine which scans are MS and which are MS/MS
 				ParseAutoMSFile(ioDatasetFolder, udtFileInfo)
@@ -420,6 +505,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 				With mDatasetStatsSummarizer.DatasetFileInfo
 					.DatasetName = String.Copy(udtFileInfo.DatasetName)
 					.FileExtension = String.Copy(udtFileInfo.FileExtension)
+					.FileSizeBytes = udtFileInfo.FileSizeBytes
 					.AcqTimeStart = udtFileInfo.AcqTimeStart
 					.AcqTimeEnd = udtFileInfo.AcqTimeEnd
 					.ScanCount = udtFileInfo.ScanCount
@@ -435,5 +521,14 @@ Public Class clsBrukerXmassFolderInfoScanner
 		Return blnSuccess
 
 	End Function
+
+
+	Private Sub mPWizParser_ErrorEvent(Message As String) Handles mPWizParser.ErrorEvent
+		ReportError(Message)
+	End Sub
+
+	Private Sub mPWizParser_MessageEvent(Message As String) Handles mPWizParser.MessageEvent
+		ShowMessage(Message)
+	End Sub
 
 End Class

@@ -338,8 +338,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 		RaiseEvent MessageEvent(strMessage)
 	End Sub
 
-	Protected Function UpdateDatasetFileStats(ByRef ioFileInfo As System.IO.FileInfo, _
-	   ByVal intDatasetID As Integer) As Boolean
+	Protected Function UpdateDatasetFileStats(ByRef ioFileInfo As System.IO.FileInfo, ByVal intDatasetID As Integer) As Boolean
 
 		Try
 			If Not ioFileInfo.Exists Then Return False
@@ -357,6 +356,38 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 				.FileExtension = ioFileInfo.Extension
 				.FileSizeBytes = ioFileInfo.Length
 
+				.ScanCount = 0
+			End With
+
+		Catch ex As System.Exception
+			Return False
+		End Try
+
+		Return True
+
+	End Function
+
+	Protected Function UpdateDatasetFileStats(ByRef ioFolderInfo As System.IO.DirectoryInfo, ByVal intDatasetID As Integer) As Boolean
+
+		Try
+			If Not ioFolderInfo.Exists Then Return False
+
+			' Record the file size and Dataset ID
+			With mDatasetStatsSummarizer.DatasetFileInfo
+				.FileSystemCreationTime = ioFolderInfo.CreationTime
+				.FileSystemModificationTime = ioFolderInfo.LastWriteTime
+
+				.AcqTimeStart = .FileSystemModificationTime
+				.AcqTimeEnd = .FileSystemModificationTime
+
+				.DatasetID = intDatasetID
+				.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
+				.FileExtension = ioFolderInfo.Extension
+
+				For Each ioFileInfo As System.IO.FileInfo In ioFolderInfo.GetFiles("*", IO.SearchOption.AllDirectories)
+					.FileSizeBytes += ioFileInfo.Length
+				Next ioFileInfo
+			
 				.ScanCount = 0
 			End With
 

@@ -324,7 +324,16 @@ Public Class clsTICandBPIPlotter
         ' Possibly add a label showing the maximum elution time
         If dblScanTimeMax > 0 Then
 
-            Dim objScanTimeMaxText As New ZedGraph.TextObj(dblScanTimeMax.ToString("0") & " minutes", 1, 1, ZedGraph.CoordType.PaneFraction)
+			Dim strCaption As String
+			If dblScanTimeMax < 2 Then
+				strCaption = Math.Round(dblScanTimeMax, 2).ToString("0.00") & " minutes"
+			ElseIf dblScanTimeMax < 10 Then
+				strCaption = Math.Round(dblScanTimeMax, 1).ToString("0.0") & " minutes"
+			Else
+				strCaption = Math.Round(dblScanTimeMax, 0).ToString("0") & " minutes"
+			End If
+
+			Dim objScanTimeMaxText As New ZedGraph.TextObj(strCaption, 1, 1, ZedGraph.CoordType.PaneFraction)
 
             With objScanTimeMaxText
                 .FontSpec.Angle = 0

@@ -553,7 +553,7 @@ Public Class XmlSettingsFileAccessor
                     ' Section and Key are present; update them
                     Return m_XMLFileAccessor.SetXMLValue(sectionNameInFile, keyNameInFile, newValue)
                 Else
-                    ' Section is present, but the Key isn't; add teh key
+					' Section is present, but the Key isn't; add the key
                     Return m_XMLFileAccessor.SetXMLValue(sectionNameInFile, keyName, newValue)
                 End If
             End If
