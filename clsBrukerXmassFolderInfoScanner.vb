@@ -388,10 +388,9 @@ Public Class clsBrukerXmassFolderInfoScanner
 
 			If Not ioFileInfo.Exists Then
 				' Storage.mcf_idx not found
-				Console.WriteLine("Warning, " & BRUKER_SQLITE_INDEX_FILE_NAME & " file does not exist")
+				ShowMessage("Note: " & BRUKER_SQLITE_INDEX_FILE_NAME & " file does not exist")
 				Return False
 			Else
-
 
 				strConnectionString = "Data Source = " + ioFileInfo.FullName + "; Version=3; DateTimeFormat=Ticks;"
 
@@ -428,7 +427,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 
 				If fiFiles.Length = 0 Then
 					' Storage.mcf_idx not found
-					ReportError(BRUKER_SQLITE_INDEX_FILE_NAME & " file was found but _1.mcf_idx file was not found")
+					ShowMessage("Note: " & BRUKER_SQLITE_INDEX_FILE_NAME & " file was found but _1.mcf_idx file does not exist")
 					Return False
 				Else
 

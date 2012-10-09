@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.2.4665; October 9, 2012
+	- Now showing a message instead of an error if the Storage.mcf_idx file exists but a _1.mcf_idx file does not exist
+
 Version 1.2.4664; October 8, 2012
 	- Added support for obtaining BPI, TIC, and elution time info from SqLite index files in Bruker .D folders
 
