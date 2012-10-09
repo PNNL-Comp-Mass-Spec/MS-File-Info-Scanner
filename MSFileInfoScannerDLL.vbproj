@@ -112,6 +112,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\NetCDFReader.dll</HintPath>
     </Reference>
+    <Reference Include="PRISM">
+      <HintPath>Lib\PRISM.dll</HintPath>
+    </Reference>
     <Reference Include="ProteowizardWrapper">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\ProteowizardWrapper.dll</HintPath>
@@ -129,6 +132,10 @@
     </Reference>
     <Reference Include="System.Data">
       <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Data.SQLite, Version=1.0.51.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms">
@@ -174,7 +181,6 @@
     </Compile>
     <Compile Include="clsBrukerXmassFolderInfoScanner.vb" />
     <Compile Include="clsDatasetStatsSummarizer.vb" />
-    <Compile Include="clsExecuteDatabaseSP.vb" />
     <Compile Include="clsFileIntegrityChecker.vb" />
     <Compile Include="clsFilterDataArrayMaxCount.vb" />
     <Compile Include="clsFinniganRawFileInfoScanner.vb">

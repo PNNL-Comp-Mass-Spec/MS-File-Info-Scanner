@@ -13,7 +13,7 @@ Public Class clsMSFileInfoScanner
 	Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner
 
 	Public Sub New()
-		mFileDate = "September 10, 2012"
+		mFileDate = "September 17, 2012"
 
 		mFileIntegrityChecker = New clsFileIntegrityChecker
 		mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -157,7 +157,7 @@ Public Class clsMSFileInfoScanner
 
 	Private WithEvents mMSFileInfoDataCache As clsMSFileInfoDataCache
 
-	Private WithEvents mExecuteSP As clsExecuteDatabaseSP
+	Private WithEvents mExecuteSP As PRISM.DataBase.clsExecuteDatabaseSP
 
 	Public Event MessageEvent(ByVal Message As String) Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.MessageEvent
 	Public Event ErrorEvent(ByVal Message As String) Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ErrorEvent
@@ -735,24 +735,35 @@ Public Class clsMSFileInfoScanner
 	End Function
 
 	Public Function GetKnownFileExtensions() As String() Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.GetKnownFileExtensions
-		Dim strExtensionsToParse(3) As String
+		Return GetKnownFileExtensionsList.ToArray()
+	End Function
 
-		strExtensionsToParse(0) = clsFinniganRawFileInfoScanner.FINNIGAN_RAW_FILE_EXTENSION
-		strExtensionsToParse(1) = clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION
-		strExtensionsToParse(2) = clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION
-		strExtensionsToParse(3) = clsUIMFInfoScanner.UIMF_FILE_EXTENSION
+	Public Function GetKnownFileExtensionsList() As Generic.List(Of String)
+		Dim lstExtensionsToParse As Generic.List(Of String) = New Generic.List(Of String)
 
-		Return strExtensionsToParse
+		lstExtensionsToParse.Add(clsFinniganRawFileInfoScanner.FINNIGAN_RAW_FILE_EXTENSION)
+		lstExtensionsToParse.Add(clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION)
+		lstExtensionsToParse.Add(clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION)
+		lstExtensionsToParse.Add(clsBrukerXmassFolderInfoScanner.BRUKER_MCF_FILE_EXTENSION)
+		lstExtensionsToParse.Add(clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_EXTENSION)
+		lstExtensionsToParse.Add(clsUIMFInfoScanner.UIMF_FILE_EXTENSION)
+
+		Return lstExtensionsToParse
 	End Function
 
 	Public Function GetKnownFolderExtensions() As String() Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.GetKnownFolderExtensions
-		Dim strExtensionsToParse(1) As String
-
-		strExtensionsToParse(0) = clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION
-		strExtensionsToParse(1) = clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION
-
-		Return strExtensionsToParse
+		Return GetKnownFolderExtensionsList.ToArray()
 	End Function
+
+	Public Function GetKnownFolderExtensionsList() As Generic.List(Of String)
+		Dim lstExtensionsToParse As Generic.List(Of String) = New Generic.List(Of String)
+
+		lstExtensionsToParse.Add(clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION)
+		lstExtensionsToParse.Add(clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION)
+
+		Return lstExtensionsToParse
+	End Function
+
 
 	Public Function GetErrorMessage() As String Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.GetErrorMessage
 		' Returns String.Empty if no error
@@ -1241,11 +1252,11 @@ Public Class clsMSFileInfoScanner
 				.Parameters.Item("@DatasetInfoXML").Value = strDSInfoXMLClean
 			End With
 
-			mExecuteSP = New clsExecuteDatabaseSP(strConnectionString)
+			mExecuteSP = New PRISM.DataBase.clsExecuteDatabaseSP(strConnectionString)
 
 			intResult = mExecuteSP.ExecuteSP(objCommand, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES)
 
-			If intResult = clsExecuteDatabaseSP.RET_VAL_OK Then
+			If intResult = PRISM.DataBase.clsExecuteDatabaseSP.RET_VAL_OK Then
 				' No errors
 				blnSuccess = True
 			Else
@@ -1355,11 +1366,11 @@ Public Class clsMSFileInfoScanner
 				.Parameters.Item("@DatasetInfoXML").Value = strDSInfoXMLClean
 			End With
 
-			mExecuteSP = New clsExecuteDatabaseSP(strConnectionString)
+			mExecuteSP = New PRISM.DataBase.clsExecuteDatabaseSP(strConnectionString)
 
 			intResult = mExecuteSP.ExecuteSP(objCommand, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES)
 
-			If intResult = clsExecuteDatabaseSP.RET_VAL_OK Then
+			If intResult = PRISM.DataBase.clsExecuteDatabaseSP.RET_VAL_OK Then
 				' No errors
 				blnSuccess = True
 			Else
@@ -1572,6 +1583,9 @@ Public Class clsMSFileInfoScanner
 								ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 Then
 									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
 
+								ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME).Length > 0 Then
+									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+
 								ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 OrElse _
 								 System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 OrElse _
 								 System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0 Then
@@ -1581,6 +1595,7 @@ Public Class clsMSFileInfoScanner
 									mMSInfoScanner = New clsAgilentTOFDFolderInfoScanner
 
 								Else
+
 									mMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
 								End If
 
@@ -1602,9 +1617,15 @@ Public Class clsMSFileInfoScanner
 					If objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME.ToLower() Then
 						mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
 						blnKnownMSDataType = True
+
 					ElseIf objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME.ToLower() Then
 						mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
 						blnKnownMSDataType = True
+
+					ElseIf objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME.ToLower() Then
+						mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+						blnKnownMSDataType = True
+
 					ElseIf objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME.ToLower() Then
 						' If the folder also contains file BRUKER_EXTENSION_BAF_FILE_NAME then this is a Bruker XMass folder
 						Dim strPathCheck As String
@@ -1619,16 +1640,27 @@ Public Class clsMSFileInfoScanner
 					If Not blnKnownMSDataType Then
 
 						' Examine the extension on strInputFileOrFolderPath
-						Select Case objFileSystemInfo.Extension.ToUpper
+						Select Case objFileSystemInfo.Extension.ToUpper()
 							Case clsFinniganRawFileInfoScanner.FINNIGAN_RAW_FILE_EXTENSION
 								mMSInfoScanner = New clsFinniganRawFileInfoScanner
 								blnKnownMSDataType = True
+
 							Case clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION
 								mMSInfoScanner = New clsAgilentTOFOrQStarWiffFileInfoScanner
 								blnKnownMSDataType = True
+
 							Case clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION
 								mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
 								blnKnownMSDataType = True
+
+							Case clsBrukerXmassFolderInfoScanner.BRUKER_MCF_FILE_EXTENSION
+								mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+								blnKnownMSDataType = True
+
+							Case clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_EXTENSION
+								mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+								blnKnownMSDataType = True
+
 							Case clsUIMFInfoScanner.UIMF_FILE_EXTENSION
 								mMSInfoScanner = New clsUIMFInfoScanner
 								blnKnownMSDataType = True

@@ -6,7 +6,7 @@ Option Strict On
 
 Module modMain
 
-	Public Const PROGRAM_DATE As String = "September 10, 2012"
+	Public Const PROGRAM_DATE As String = "October 8, 2012"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -324,6 +324,39 @@ Module modMain
 
 	End Function
 
+	Private Function CollapseList(ByVal lstList As Generic.List(Of String)) As String
+		Dim strCollapsed As String = String.Empty
+
+		If lstList Is Nothing Then
+			Return String.Empty
+		Else
+			strCollapsed = String.Copy(lstList.Item(0))
+		End If
+
+		For intIndex As Integer = 1 To lstList.Count - 1
+			strCollapsed &= ", " & lstList.Item(intIndex)
+		Next
+
+		Return strCollapsed
+
+	End Function
+
+	Private Function CollapseList(ByVal strList() As String) As String
+		Dim strCollapsed As String = String.Empty
+
+		If strList Is Nothing Then
+			Return String.Empty
+		Else
+			strCollapsed = String.Copy(strList(0))
+		End If
+
+		For intIndex As Integer = 1 To strList.Length - 1
+			strCollapsed &= ", " & strList(intIndex)
+		Next
+
+		Return strCollapsed
+	End Function
+
 	Private Sub ShowErrorMessage(ByVal strMessage As String)
 		Dim strSeparator As String = "------------------------------------------------------------------------------"
 
@@ -339,6 +372,8 @@ Module modMain
 	Private Sub ShowProgramHelp()
 
 		Try
+			mMSFileScanner = New clsMSFileInfoScanner
+
 			Console.WriteLine("This program will scan a series of MS data files (or data folders) and extract the acquisition start and end times, number of spectra, and the total size of the data, saving the values in the file " & clsMSFileInfoScanner.DefaultAcquisitionTimeFilename & ". " & _
 			   "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar/QTrap .WIFF files, Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, .UIMF files (IMS), and zipped Bruker imaging datasets (with 0_R*.zip files)")
 			Console.WriteLine()
@@ -388,12 +423,16 @@ Module modMain
 			Console.WriteLine("Use /Z to reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes.")
 			Console.WriteLine()
 
+			Console.WriteLine("Known file extensions: " & CollapseList(mMSFileScanner.GetKnownFileExtensionsList()))
+			Console.WriteLine("Known folder extensions: " & CollapseList(mMSFileScanner.GetKnownFolderExtensionsList()))
+			Console.WriteLine()
+
 			Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005")
 			Console.WriteLine("Version: " & GetAppVersion())
 			Console.WriteLine()
 
-			Console.WriteLine("E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com")
-			Console.WriteLine("Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/")
+			Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com")
+			Console.WriteLine("Website: http://panomics.pnnl.gov/ or http://www.sysbio.org/resources/staff/")
 
 			' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
 			System.Threading.Thread.Sleep(750)

@@ -112,6 +112,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\NetCDFReader.dll</HintPath>
     </Reference>
+    <Reference Include="PRISM, Version=2.1.4643.27023, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\PRISM.dll</HintPath>
+    </Reference>
     <Reference Include="ProteowizardWrapper, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\ProteowizardWrapper.dll</HintPath>
@@ -177,7 +181,6 @@
     </Compile>
     <Compile Include="clsBrukerXmassFolderInfoScanner.vb" />
     <Compile Include="clsDatasetStatsSummarizer.vb" />
-    <Compile Include="clsExecuteDatabaseSP.vb" />
     <Compile Include="clsFileIntegrityChecker.vb" />
     <Compile Include="clsFilterDataArrayMaxCount.vb" />
     <Compile Include="clsFinniganRawFileInfoScanner.vb">

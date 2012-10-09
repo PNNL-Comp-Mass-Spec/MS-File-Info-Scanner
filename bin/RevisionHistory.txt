@@ -1,5 +1,11 @@
 MS File Info Scanner Change Log
 
+Version 1.2.4664; October 8, 2012
+	- Added support for obtaining BPI, TIC, and elution time info from SqLite index files in Bruker .D folders
+
+Version 1.2.4643; September 17, 2012
+	- Moved clsExecuteDatabaseSP into PRISM.dll
+
 Version 1.2.4636; September 10, 2012
 	- Added support for Bruker Maxis .D folders
 		- The .D folder contains an analysis.baf file, plus a Methods subfolder (.m) with files microTOFQMaxAcquisition.method and submethods.xml

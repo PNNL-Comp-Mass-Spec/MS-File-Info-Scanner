@@ -2,7 +2,7 @@
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 '
-' Last modified September 10, 2012
+' Last modified October 8, 2012
 
 <CLSCompliant(False)>
 Public Class clsBrukerXmassFolderInfoScanner
@@ -11,15 +11,73 @@ Public Class clsBrukerXmassFolderInfoScanner
 	Public Const BRUKER_BAF_FILE_NAME As String = "analysis.baf"
 	Public Const BRUKER_EXTENSION_BAF_FILE_NAME As String = "extension.baf"
 	Public Const BRUKER_ANALYSIS_YEP_FILE_NAME As String = "analysis.yep"
+	Public Const BRUKER_SQLITE_INDEX_FILE_NAME As String = "Storage.mcf_idx"
 
 	' Note: The extension must be in all caps
 	Public Const BRUKER_BAF_FILE_EXTENSION As String = ".BAF"
+	Public Const BRUKER_MCF_FILE_EXTENSION As String = ".MCF"
+	Public Const BRUKER_SQLITE_INDEX_EXTENSION As String = ".MCF_IDX"
 
 	Private Const BRUKER_SCANINFO_XML_FILE As String = "scan.xml"
 	Private Const BRUKER_XMASS_LOG_FILE As String = "log.txt"
 	Private Const BRUKER_AUTOMS_FILE As String = "AutoMS.txt"
 
 	Protected WithEvents mPWizParser As clsProteowizardDataParser
+
+	Protected Structure udtMCFScanInfoType
+		Public ScanMode As Double
+		Public MSLevel As Integer
+		Public RT As Double
+		Public BPI As Double
+		Public TIC As Double
+		Public AcqTime As System.DateTime
+		Public SpotNumber As String		 ' Only used with MALDI imaging
+	End Structure
+
+	Protected Enum eMcfMetadataFields
+		ScanMode = 0
+		MSLevel = 1
+		RT = 2
+		BPI = 3
+		TIC = 4
+		AcqTime = 5
+		SpotNumber = 6
+	End Enum
+
+	Protected Sub AddDatasetScan(ByVal intScanNumber As Integer, ByVal intMSLevel As Integer, ByVal sngElutionTime As Single, ByVal dblBPI As Double, ByVal dblTIC As Double, ByVal strScanTypeName As String, ByRef dblMaxRunTimeMinutes As Double)
+
+		If mSaveTICAndBPI AndAlso intScanNumber > 0 Then
+			mTICandBPIPlot.AddData(intScanNumber, intMSLevel, sngElutionTime, dblBPI, dblTIC)
+		End If
+
+		Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
+		objScanStatsEntry.ScanNumber = intScanNumber
+		objScanStatsEntry.ScanType = intMSLevel
+
+		objScanStatsEntry.ScanTypeName = strScanTypeName
+		objScanStatsEntry.ScanFilterText = ""
+
+		objScanStatsEntry.ElutionTime = sngElutionTime.ToString("0.0000")
+		objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblTIC, 5)
+		objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblBPI, 5)
+		objScanStatsEntry.BasePeakMZ = "0"
+
+		' Base peak signal to noise ratio
+		objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
+
+		objScanStatsEntry.IonCount = 0
+		objScanStatsEntry.IonCountRaw = 0
+
+		Dim dblElutionTime As Double
+		If Double.TryParse(objScanStatsEntry.ElutionTime, dblElutionTime) Then
+			If dblElutionTime > dblMaxRunTimeMinutes Then
+				dblMaxRunTimeMinutes = dblElutionTime
+			End If
+		End If
+
+		mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
+
+	End Sub
 
 	''' <summary>
 	''' Looks for a .m folder then looks for apexAcquisition.method or submethods.xml in that folder
@@ -101,6 +159,47 @@ Public Class clsBrukerXmassFolderInfoScanner
 
 		Return blnSuccess
 
+	End Function
+
+	Protected Function GetMetaDataFieldAndTable(ByVal eMcfMetadataField As eMcfMetadataFields, ByRef strField As String, ByRef strTable As String) As Boolean
+
+		Select Case eMcfMetadataField
+			Case eMcfMetadataFields.ScanMode
+				strField = "pScanMode"
+				strTable = "MetaDataInt"
+
+			Case eMcfMetadataFields.MSLevel
+				strField = "pMSLevel"
+				strTable = "MetaDataInt"
+
+			Case eMcfMetadataFields.RT
+				strField = "pRT"
+				strTable = "MetaDataDouble"
+
+			Case eMcfMetadataFields.BPI
+				strField = "pIntMax"
+				strTable = "MetaDataDouble"
+
+			Case eMcfMetadataFields.TIC
+				strField = "pTic"
+				strTable = "MetaDataDouble"
+
+			Case eMcfMetadataFields.AcqTime
+				strField = "pDateTime"
+				strTable = "MetaDataString"
+
+			Case eMcfMetadataFields.SpotNumber
+				strField = "pSpotNo"
+				strTable = "MetaDataString"
+
+			Case Else
+				' Unknown field
+				strField = String.Empty
+				strTable = String.Empty
+				Return False
+		End Select
+
+		Return True
 	End Function
 
 	Protected Function ParseAutoMSFile(ByVal ioDatasetFolder As System.IO.DirectoryInfo, _
@@ -246,8 +345,185 @@ Public Class clsBrukerXmassFolderInfoScanner
 
 	End Function
 
-	Protected Function ParseScanXMLFile(ByVal ioDatasetFolder As System.IO.DirectoryInfo, _
-	   ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Protected Function ParseMcfIndexFiles(ByVal ioDatasetFolder As System.IO.DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+
+		Dim strMetadataFile As String
+		Dim strConnectionString As String
+
+		Dim ioFileInfo As System.IO.FileInfo
+
+		Dim blnSuccess As Boolean = False
+		Dim intMetadataId As Integer
+		Dim strMetadataName As String
+		Dim strMetadataDescription As String
+
+		Dim lstMetadataNameToID As Generic.Dictionary(Of String, Integer)
+		Dim lstMetadataNameToDescription As Generic.Dictionary(Of String, String)
+
+		Dim lstScanData As Generic.Dictionary(Of String, udtMCFScanInfoType)
+
+		Dim intScanCount As Integer = 0
+		Dim intScanNumber As Integer
+		Dim sngElutionTime As Single
+		Dim strScanTypeName As String
+
+		Dim dblMaxRunTimeMinutes As Double = 0
+
+		Dim dtAcqTimeStart As System.DateTime = System.DateTime.MaxValue
+		Dim dtAcqTimeEnd As System.DateTime = System.DateTime.MinValue
+
+		Try
+
+			lstMetadataNameToID = New Generic.Dictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
+			lstMetadataNameToDescription = New Generic.Dictionary(Of String, String)
+			lstScanData = New Generic.Dictionary(Of String, udtMCFScanInfoType)
+
+			If mSaveTICAndBPI Then
+				' Initialize the TIC and BPI arrays
+				MyBase.InitializeTICAndBPI()
+			End If
+
+			strMetadataFile = System.IO.Path.Combine(ioDatasetFolder.FullName, BRUKER_SQLITE_INDEX_FILE_NAME)
+			ioFileInfo = New System.IO.FileInfo(strMetadataFile)
+
+			If Not ioFileInfo.Exists Then
+				' Storage.mcf_idx not found
+				Console.WriteLine("Warning, " & BRUKER_SQLITE_INDEX_FILE_NAME & " file does not exist")
+				Return False
+			Else
+
+
+				strConnectionString = "Data Source = " + ioFileInfo.FullName + "; Version=3; DateTimeFormat=Ticks;"
+
+				' Open the Storage.mcf_idx file to lookup the metadata name to ID mapping
+				Using cnDB As System.Data.SQLite.SQLiteConnection = New System.Data.SQLite.SQLiteConnection(strConnectionString)
+					cnDB.Open()
+
+					Dim cmd As System.Data.SQLite.SQLiteCommand
+
+					cmd = New System.Data.SQLite.SQLiteCommand(cnDB)
+
+					cmd.CommandText = "SELECT metadataId, permanentName, displayName FROM MetadataId"
+
+					Using drReader As System.Data.SQLite.SQLiteDataReader = cmd.ExecuteReader()
+						While drReader.Read()
+
+							intMetadataId = ReadDbInt(drReader, "metadataId")
+							strMetadataName = ReadDbString(drReader, "permanentName")
+							strMetadataDescription = ReadDbString(drReader, "displayName")
+
+							If intMetadataId > 0 Then
+								lstMetadataNameToID.Add(strMetadataName, intMetadataId)
+								lstMetadataNameToDescription.Add(strMetadataName, strMetadataDescription)
+							End If
+						End While
+					End Using
+
+					cnDB.Close()
+				End Using
+
+				Dim fiFiles() As System.IO.FileInfo
+
+				fiFiles = ioDatasetFolder.GetFiles("*_1.mcf_idx")
+
+				If fiFiles.Length = 0 Then
+					' Storage.mcf_idx not found
+					ReportError(BRUKER_SQLITE_INDEX_FILE_NAME & " file was found but _1.mcf_idx file was not found")
+					Return False
+				Else
+
+					strConnectionString = "Data Source = " + fiFiles(0).FullName + "; Version=3; DateTimeFormat=Ticks;"
+
+					' Open the .mcf file to read the scan info
+					Using cnDB As System.Data.SQLite.SQLiteConnection = New System.Data.SQLite.SQLiteConnection(strConnectionString)
+						cnDB.Open()
+
+						ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.AcqTime)
+						ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.ScanMode)
+						ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.MSLevel)
+						ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.RT)
+						ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.BPI)
+						ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.TIC)
+						ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.SpotNumber)
+
+						cnDB.Close()
+					End Using
+
+
+					' Parse each entry in lstScanData
+					' Copy the values to a generic list so that we can sort them
+					Dim oScanDataSorted() As udtMCFScanInfoType
+					ReDim oScanDataSorted(lstScanData.Count - 1)
+					lstScanData.Values.CopyTo(oScanDataSorted, 0)
+
+					Dim oScanDataSortComparer As New clsScanDataSortComparer
+					Array.Sort(oScanDataSorted, oScanDataSortComparer)
+
+					intScanCount = 0
+					For intIndex As Integer = 0 To oScanDataSorted.Length - 1
+						intScanCount += 1
+						intScanNumber = intScanCount
+
+						If oScanDataSorted(intIndex).AcqTime < dtAcqTimeStart Then
+							If oScanDataSorted(intIndex).AcqTime > System.DateTime.MinValue Then
+								dtAcqTimeStart = oScanDataSorted(intIndex).AcqTime
+							End If
+						End If
+
+						If oScanDataSorted(intIndex).AcqTime > dtAcqTimeEnd Then
+							If oScanDataSorted(intIndex).AcqTime < System.DateTime.MaxValue Then
+								dtAcqTimeEnd = oScanDataSorted(intIndex).AcqTime
+							End If
+						End If
+
+						If oScanDataSorted(intIndex).MSLevel = 0 Then oScanDataSorted(intIndex).MSLevel = 1
+						sngElutionTime = CSng(oScanDataSorted(intIndex).RT / 60.0)
+
+						With oScanDataSorted(intIndex)
+							If String.IsNullOrEmpty(.SpotNumber) Then
+								strScanTypeName = "HMS"
+							Else
+								strScanTypeName = "MALDI-HMS"
+							End If
+
+							AddDatasetScan(intScanNumber, .MSLevel, sngElutionTime, .BPI, .TIC, strScanTypeName, dblMaxRunTimeMinutes)
+						End With
+
+					Next
+
+					If intScanCount > 0 Then
+						udtFileInfo.ScanCount = intScanCount
+
+						If dblMaxRunTimeMinutes > 0 Then
+							udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart.AddMinutes(dblMaxRunTimeMinutes)
+						End If
+
+						If dtAcqTimeStart > System.DateTime.MinValue AndAlso dtAcqTimeEnd < System.DateTime.MaxValue Then
+							' Update the acquisition times if they are within 7 days of udtFileInfo.AcqTimeEnd
+							If Math.Abs(udtFileInfo.AcqTimeEnd.Subtract(dtAcqTimeEnd).TotalDays) <= 7 Then
+								udtFileInfo.AcqTimeStart = dtAcqTimeStart
+								udtFileInfo.AcqTimeEnd = dtAcqTimeEnd
+							End If
+							
+						End If
+
+						blnSuccess = True
+					End If
+
+				End If
+
+			End If
+		Catch ex As System.Exception
+			' Error finding Scan.xml file
+			ReportError("Error parsing " & BRUKER_SQLITE_INDEX_FILE_NAME & "file: " & ex.Message)
+			blnSuccess = False
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
+	Protected Function ParseScanXMLFile(ByVal ioDatasetFolder As System.IO.DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
 		Dim strScanXMLFilePath As String
 
@@ -324,38 +600,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 							If srReader.Name = "scan" Then
 								blnInScanNode = False
 
-								If mSaveTICAndBPI AndAlso intScanNumber > 0 Then
-									mTICandBPIPlot.AddData(intScanNumber, intMSLevel, sngElutionTime, dblBPI, dblTIC)
-								End If
-
-								Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
-
-
-								objScanStatsEntry.ScanNumber = intScanNumber
-								objScanStatsEntry.ScanType = intMSLevel
-
-								objScanStatsEntry.ScanTypeName = "HMS"
-								objScanStatsEntry.ScanFilterText = ""
-
-								objScanStatsEntry.ElutionTime = sngElutionTime.ToString("0.0000")
-								objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblTIC, 5)
-								objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblBPI, 5)
-								objScanStatsEntry.BasePeakMZ = "0"
-
-								' Base peak signal to noise ratio
-								objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
-
-								objScanStatsEntry.IonCount = 0
-								objScanStatsEntry.IonCountRaw = 0
-
-								Dim dblElutionTime As Double
-								If Double.TryParse(objScanStatsEntry.ElutionTime, dblElutionTime) Then
-									If dblElutionTime > dblMaxRunTimeMinutes Then
-										dblMaxRunTimeMinutes = dblElutionTime
-									End If
-								End If
-
-								mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
+								AddDatasetScan(intScanNumber, intMSLevel, sngElutionTime, dblBPI, dblTIC, "HMS", dblMaxRunTimeMinutes)
 
 							End If
 					End Select
@@ -364,22 +609,27 @@ Public Class clsBrukerXmassFolderInfoScanner
 
 				srReader.Close()
 
-				udtFileInfo.ScanCount = intScanCount
+				If intScanCount > 0 Then
+					udtFileInfo.ScanCount = intScanCount
 
-				If dblMaxRunTimeMinutes > 0 Then
-					udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart.AddMinutes(dblMaxRunTimeMinutes)
+					If dblMaxRunTimeMinutes > 0 Then
+						udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart.AddMinutes(dblMaxRunTimeMinutes)
+					End If
+
+					blnSuccess = True
+
+
 				End If
-
-				blnSuccess = True
 
 			End If
 		Catch ex As System.Exception
 			' Error finding Scan.xml file
-			ReportError("Error finding " & BRUKER_SCANINFO_XML_FILE & "file: " & ex.Message)
+			ReportError("Error parsing " & BRUKER_SCANINFO_XML_FILE & "file: " & ex.Message)
 			blnSuccess = False
 		End Try
 
 		Return blnSuccess
+
 	End Function
 
 	Protected Function GetDatasetFolder(ByVal strDataFilePath As String) As System.IO.DirectoryInfo
@@ -442,7 +692,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 
 			' Validate that we have selected a valid folder
 			If Not ioDatasetFolder.Exists Then
-				MyBase.ReportError("File/folder not found: " & strDataFilePath)
+				ReportError("File/folder not found: " & strDataFilePath)
 				Return False
 			End If
 
@@ -464,7 +714,34 @@ Public Class clsBrukerXmassFolderInfoScanner
 			End If
 
 			If ioFiles Is Nothing OrElse ioFiles.Length = 0 Then
-				MyBase.ReportError(BRUKER_BAF_FILE_EXTENSION & " or " & BRUKER_EXTENSION_BAF_FILE_NAME & " file not found in " & ioDatasetFolder.FullName)
+				'.baf files not found; look for any .mcf files
+				ioFiles = ioDatasetFolder.GetFiles("*" & BRUKER_MCF_FILE_EXTENSION)
+
+				If ioFiles.Length > 0 Then
+					' Find the largest .mcf file (not .mcf_idx file)
+					Dim ioLargestMCF As System.IO.FileInfo = Nothing
+
+					For Each ioMCFFile As System.IO.FileInfo In ioFiles
+						If ioMCFFile.Extension.ToUpper() = BRUKER_MCF_FILE_EXTENSION Then
+							If ioLargestMCF Is Nothing Then
+								ioLargestMCF = ioMCFFile
+							ElseIf ioMCFFile.Length > ioLargestMCF.Length Then
+								ioLargestMCF = ioMCFFile
+							End If
+						End If
+					Next
+
+					If ioLargestMCF Is Nothing Then
+						' Didn't actually find a .MCF file; clear ioFiles
+						ReDim ioFiles(-1)
+					Else
+						ioFiles(0) = ioLargestMCF
+					End If
+				End If
+			End If
+
+			If ioFiles Is Nothing OrElse ioFiles.Length = 0 Then
+				ReportError(BRUKER_BAF_FILE_EXTENSION & " or " & BRUKER_EXTENSION_BAF_FILE_NAME & " or " & BRUKER_MCF_FILE_EXTENSION & " or " & BRUKER_SQLITE_INDEX_EXTENSION & " file not found in " & ioDatasetFolder.FullName)
 				blnSuccess = False
 			Else
 				ioFileInfo = ioFiles(0)
@@ -487,15 +764,22 @@ Public Class clsBrukerXmassFolderInfoScanner
 					udtFileInfo.AcqTimeEnd = ioFileInfo.LastWriteTime
 				End If
 
-				' Parse the scan.xml file (if it exists) to determine the number of spectra acquired
-				' We can also obtain TIC and elution time values from this file
-				' However, it does not track whether a scan is MS or MSn
-				' If the scans.xml file contains runtime entries (e.g. <minutes>100.0456</minutes>) then .AcqTimeEnd is updated using .AcqTimeStart + RunTimeMinutes
-				blnSuccess = ParseScanXMLFile(ioDatasetFolder, udtFileInfo)
+				' Look for the Storage.mcf_idx file and the corresponding .mcf_idx file
+				' If they exist, then we can extract information from them using SqLite
+				blnSuccess = ParseMcfIndexFiles(ioDatasetFolder, udtFileInfo)
 
 				If Not blnSuccess Then
-					' Use ProteoWizard to extract the scan counts and acquisition time information
-					blnSuccess = ParseBAFFile(ioFileInfo, udtFileInfo)
+					' Parse the scan.xml file (if it exists) to determine the number of spectra acquired
+					' We can also obtain TIC and elution time values from this file
+					' However, it does not track whether a scan is MS or MSn
+					' If the scans.xml file contains runtime entries (e.g. <minutes>100.0456</minutes>) then .AcqTimeEnd is updated using .AcqTimeStart + RunTimeMinutes
+					blnSuccess = ParseScanXMLFile(ioDatasetFolder, udtFileInfo)
+
+					If Not blnSuccess Then
+						' Use ProteoWizard to extract the scan counts and acquisition time information
+						blnSuccess = ParseBAFFile(ioFileInfo, udtFileInfo)
+					End If
+
 				End If
 
 				' Parse the AutoMS.txt file (if it exists) to determine which scans are MS and which are MS/MS
@@ -522,6 +806,146 @@ Public Class clsBrukerXmassFolderInfoScanner
 
 	End Function
 
+	Protected Function ReadAndStoreMcfIndexData(ByVal cnDB As System.Data.SQLite.SQLiteConnection, _
+	  ByVal lstMetadataNameToID As Generic.Dictionary(Of String, Integer), _
+	  ByRef lstScanData As Generic.Dictionary(Of String, udtMCFScanInfoType), _
+	  ByVal eMcfMetadataField As eMcfMetadataFields) As Boolean
+
+		Dim cmd As System.Data.SQLite.SQLiteCommand
+		cmd = New System.Data.SQLite.SQLiteCommand(cnDB)
+
+		Dim strTable As String = String.Empty
+		Dim strField As String = String.Empty
+
+		Dim intMetadataId As Integer
+		Dim strValue As String
+		Dim strGuid As String
+
+		Dim blnNewEntry As Boolean
+
+		If Not GetMetaDataFieldAndTable(eMcfMetadataField, strField, strTable) Then
+			Return False
+		End If
+
+		If lstMetadataNameToID.TryGetValue(strField, intMetadataId) Then
+
+			cmd.CommandText = "SELECT GuidA, MetaDataId, Value FROM " & strTable & " WHERE MetaDataId = " & intMetadataId
+
+			Using drReader As System.Data.SQLite.SQLiteDataReader = cmd.ExecuteReader()
+				While drReader.Read()
+
+					strGuid = ReadDbString(drReader, "GuidA")
+					strValue = ReadDbString(drReader, "Value")
+
+					Dim udtScanInfo As udtMCFScanInfoType = Nothing
+					If lstScanData.TryGetValue(strGuid, udtScanInfo) Then
+						blnNewEntry = False
+					Else
+						udtScanInfo = New udtMCFScanInfoType
+						blnNewEntry = True
+					End If
+
+					UpdateScanInfo(eMcfMetadataField, strValue, udtScanInfo)
+
+					If blnNewEntry Then
+						lstScanData.Add(strGuid, udtScanInfo)
+					Else
+						lstScanData(strGuid) = udtScanInfo
+					End If
+
+				End While
+			End Using
+
+		End If
+
+		Return True
+
+	End Function
+
+	Protected Function ReadDbString(ByVal drReader As System.Data.SQLite.SQLiteDataReader, ByVal strColumnName As String) As String
+		Return ReadDbString(drReader, strColumnName, strValueIfNotFound:=String.Empty)
+	End Function
+
+	Protected Function ReadDbString(ByVal drReader As System.Data.SQLite.SQLiteDataReader, ByVal strColumnName As String, ByVal strValueIfNotFound As String) As String
+		Dim strValue As String
+
+		Try
+			strValue = drReader(strColumnName).ToString()
+			If strValue Is Nothing Then
+				strValue = strValueIfNotFound
+			End If
+
+		Catch ex As Exception
+			strValue = strValueIfNotFound
+		End Try
+
+		Return strValue
+	End Function
+
+	Protected Function ReadDbInt(ByVal drReader As System.Data.SQLite.SQLiteDataReader, ByVal strColumnName As String) As Integer
+		Dim intValue As Integer
+		Dim strValue As String
+
+		Try
+			strValue = drReader(strColumnName).ToString()
+			If Not String.IsNullOrEmpty(strValue) Then
+				If Integer.TryParse(strValue, intValue) Then
+					Return intValue
+				End If
+			End If
+
+		Catch ex As Exception
+			' Ignore errors here
+		End Try
+
+		Return 0
+
+	End Function
+
+	Private Sub UpdateScanInfo(ByVal eMcfMetadataField As eMcfMetadataFields, ByVal strValue As String, ByRef udtScanInfo As udtMCFScanInfoType)
+
+		Dim intValue As Integer
+		Dim dblValue As Double
+		Dim dtValue As System.DateTime
+
+		Select Case eMcfMetadataField
+			Case eMcfMetadataFields.ScanMode
+				If Integer.TryParse(strValue, intValue) Then
+					udtScanInfo.ScanMode = intValue
+				End If
+
+			Case eMcfMetadataFields.MSLevel
+				If Integer.TryParse(strValue, intValue) Then
+					udtScanInfo.MSLevel = intValue
+				End If
+
+			Case eMcfMetadataFields.RT
+				If Double.TryParse(strValue, dblValue) Then
+					udtScanInfo.RT = dblValue
+				End If
+
+			Case eMcfMetadataFields.BPI
+				If Double.TryParse(strValue, dblValue) Then
+					udtScanInfo.BPI = dblValue
+				End If
+
+			Case eMcfMetadataFields.TIC
+				If Double.TryParse(strValue, dblValue) Then
+					udtScanInfo.TIC = dblValue
+				End If
+
+			Case eMcfMetadataFields.AcqTime
+				If DateTime.TryParse(strValue, dtValue) Then
+					udtScanInfo.AcqTime = dtValue
+				End If
+
+			Case eMcfMetadataFields.SpotNumber
+				udtScanInfo.SpotNumber = strValue
+			Case Else
+				' Unknown field
+		End Select
+
+	End Sub
 
 	Private Sub mPWizParser_ErrorEvent(Message As String) Handles mPWizParser.ErrorEvent
 		ReportError(Message)
@@ -531,4 +955,38 @@ Public Class clsBrukerXmassFolderInfoScanner
 		ShowMessage(Message)
 	End Sub
 
+	Protected Class clsScanDataSortComparer
+		Implements System.Collections.Generic.IComparer(Of udtMCFScanInfoType)
+
+		Public Function Compare(x As udtMCFScanInfoType, y As udtMCFScanInfoType) As Integer Implements System.Collections.Generic.IComparer(Of udtMCFScanInfoType).Compare
+
+			If x.RT < y.RT Then
+				Return -1
+			ElseIf x.RT > y.RT Then
+				Return 1
+			Else
+				If x.AcqTime < y.AcqTime Then
+					Return -1
+				ElseIf x.AcqTime > y.AcqTime Then
+					Return 1
+				Else
+					If String.IsNullOrEmpty(x.SpotNumber) OrElse String.IsNullOrEmpty(y.SpotNumber) Then
+						Return 0
+					Else
+						If x.SpotNumber < y.SpotNumber Then
+							Return -1
+						ElseIf x.SpotNumber > y.SpotNumber Then
+							Return 1
+						Else
+							Return 0
+						End If
+					End If
+
+				End If
+			End If
+
+		End Function
+	End Class
+
 End Class
+
