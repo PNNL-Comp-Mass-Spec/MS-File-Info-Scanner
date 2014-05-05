@@ -50,10 +50,12 @@ Public Interface iMSFileInfoScanner
 	Function GetDataFileFilename(ByVal eDataFileType As eDataFileTypeConstants) As String
 	Sub SetDataFileFilename(ByVal strFilePath As String, ByVal eDataFileType As eDataFileTypeConstants)
 
+	Property CheckCentroidingStatus() As Boolean
 	Property ComputeFileHashes() As Boolean
 	Property CopyFileLocalOnReadError() As Boolean
 	Property CreateDatasetInfoFile() As Boolean
 	Property CreateScanStatsFile() As Boolean
+	Property DatasetIDOverride() As Integer
 	Property DatasetStatsTextFileName() As String
 	Property DSInfoConnectionString() As String
 	Property DSInfoDBPostingEnabled() As Boolean
@@ -77,6 +79,7 @@ Public Interface iMSFileInfoScanner
 	Property SaveLCMS2DPlots() As Boolean
 	Property ScanStart() As Integer
 	Property ScanEnd() As Integer
+	Property ShowDebugInfo() As Boolean
 	Property UpdateDatasetStatsTextFile() As Boolean
 	Property UseCacheFiles() As Boolean
 	Property ZipFileCheckAllData() As Boolean

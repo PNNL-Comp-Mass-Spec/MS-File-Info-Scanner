@@ -18,16 +18,16 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 	Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
 		' The dataset name is simply the file name without .wiff
 		Try
-			Return System.IO.Path.GetFileNameWithoutExtension(strDataFilePath)
-		Catch ex As System.Exception
+			Return Path.GetFileNameWithoutExtension(strDataFilePath)
+		Catch ex As Exception
 			Return String.Empty
 		End Try
 	End Function
 
-	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		' Returns True if success, False if an error
 
-		Dim ioFileInfo As System.IO.FileInfo
+		Dim ioFileInfo As FileInfo
 		Dim blnSuccess As Boolean = False
 
 		Dim blnTICStored As Boolean = False
@@ -37,7 +37,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 		strDataFilePath = strDataFilePath
 
 		' Obtain the full path to the file
-		ioFileInfo = New System.IO.FileInfo(strDataFilePath)
+		ioFileInfo = New FileInfo(strDataFilePath)
 
 
 		Dim blnTest As Boolean
@@ -56,7 +56,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 			.AcqTimeEnd = .FileSystemModificationTime
 
 			.DatasetID = 0
-			.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFileInfo.Name)
+			.DatasetName = GetDatasetNameViaPath(ioFileInfo.Name)
 			.FileExtension = ioFileInfo.Extension
 			.FileSizeBytes = ioFileInfo.Length
 
@@ -73,7 +73,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 			objPWiz = New pwiz.ProteowizardWrapper.MSDataFileReader(ioFileInfo.FullName)
 
 			Try
-				Dim dtRunStartTime As System.DateTime = udtFileInfo.AcqTimeStart
+				Dim dtRunStartTime As DateTime = udtFileInfo.AcqTimeStart
 				dtRunStartTime = CDate(objPWiz.RunStartTime())
 
 				' Update AcqTimeEnd if possible
@@ -90,7 +90,10 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 			End Try
 
 			' Instantiate the Proteowizard Data Parser class
-			mPWizParser = New clsProteowizardDataParser(objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot, mSaveLCMS2DPlots, mSaveTICAndBPI)
+			mPWizParser = New clsProteowizardDataParser(
+			  objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot,
+			  mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus)
+
 			mPWizParser.HighResMS1 = True
 			mPWizParser.HighResMS2 = True
 
@@ -192,8 +195,8 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 
 							Dim dblTIC1 As Double = 0
 							Dim dblTIC2 As Double = 0
-							Dim dtStartTime As System.DateTime
-							Dim dtEndTime As System.DateTime
+							Dim dtStartTime As DateTime
+							Dim dtEndTime As DateTime
 							Dim dtRunTimeSeconds1 As Double
 							Dim dtRunTimeSeconds2 As Double
 							Const LOOP_ITERATIONS As Integer = 2000
@@ -201,25 +204,25 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 							' Note from Matt Chambers (matt.chambers42@gmail.com) 
 							' Repeatedly accessing items directly via oMZs.data() can be very slow
 							' With 700 points and 2000 iterations, it takes anywhere from 0.6 to 1.1 seconds to run from dtStartTime to dtEndTime
-							dtStartTime = System.DateTime.Now()
+							dtStartTime = DateTime.Now()
 							For j As Integer = 1 To LOOP_ITERATIONS
 								For intIndex As Integer = 0 To oMZs.data.Count - 1
 									dblTIC1 += oMZs.data(intIndex)
 								Next
 							Next j
-							dtEndTime = System.DateTime.Now()
+							dtEndTime = DateTime.Now()
 							dtRunTimeSeconds1 = dtEndTime.Subtract(dtStartTime).TotalSeconds
 
 							' The preferred method is to copy the data from .data to a locally-stored mzArray object
 							' With 700 points and 2000 iterations, it takes 0.016 seconds to run from dtStartTime to dtEndTime
-							dtStartTime = System.DateTime.Now()
+							dtStartTime = DateTime.Now()
 							For j As Integer = 1 To LOOP_ITERATIONS
 								Dim oMzArray As pwiz.CLI.msdata.BinaryData = oMZs.data
 								For intIndex As Integer = 0 To oMzArray.Count - 1
 									dblTIC2 += oMzArray(intIndex)
 								Next
 							Next j
-							dtEndTime = System.DateTime.Now()
+							dtEndTime = DateTime.Now()
 							dtRunTimeSeconds2 = dtEndTime.Subtract(dtStartTime).TotalSeconds
 
 							Console.WriteLine("  " & oMZs.data.Count & " points with " & LOOP_ITERATIONS & " iterations gives Runtime1=" & dtRunTimeSeconds1.ToString("0.000") & " sec. vs. Runtime2=" & dtRunTimeSeconds2.ToString("0.000") & " sec.")

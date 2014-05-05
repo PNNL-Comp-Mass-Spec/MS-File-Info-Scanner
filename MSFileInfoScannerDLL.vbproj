@@ -36,48 +36,11 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>bin\</OutputPath>
-    <DocumentationFile>MSFileInfoScanner.xml</DocumentationFile>
-    <BaseAddress>285212672</BaseAddress>
-    <ConfigurationOverrideFile>
-    </ConfigurationOverrideFile>
-    <DefineConstants>XRAW_Missing=False</DefineConstants>
-    <DefineDebug>true</DefineDebug>
-    <DefineTrace>true</DefineTrace>
-    <DebugSymbols>true</DebugSymbols>
-    <Optimize>false</Optimize>
-    <RegisterForComInterop>false</RegisterForComInterop>
-    <RemoveIntegerChecks>false</RemoveIntegerChecks>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <WarningLevel>1</WarningLevel>
-    <NoWarn>42016,42017,42018,42019,42032,42353,42354,42355</NoWarn>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>bin\</OutputPath>
-    <DocumentationFile>MSFileInfoScanner.xml</DocumentationFile>
-    <BaseAddress>285212672</BaseAddress>
-    <ConfigurationOverrideFile>
-    </ConfigurationOverrideFile>
-    <DefineConstants>XRAW_Missing=False</DefineConstants>
-    <DefineDebug>false</DefineDebug>
-    <DefineTrace>true</DefineTrace>
-    <DebugSymbols>false</DebugSymbols>
-    <Optimize>true</Optimize>
-    <RegisterForComInterop>false</RegisterForComInterop>
-    <RemoveIntegerChecks>false</RemoveIntegerChecks>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <WarningLevel>1</WarningLevel>
-    <NoWarn>42016,42017,42018,42019,42032,42353,42354,42355</NoWarn>
-    <DebugType>none</DebugType>
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
-    <OutputPath>bin\</OutputPath>
+    <OutputPath>bin\Dll\</OutputPath>
     <DefineConstants>XRAW_Missing=False</DefineConstants>
     <BaseAddress>285212672</BaseAddress>
     <DocumentationFile>MSFileInfoScanner.xml</DocumentationFile>
@@ -88,7 +51,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DefineTrace>true</DefineTrace>
-    <OutputPath>bin\</OutputPath>
+    <OutputPath>bin\DLL\</OutputPath>
     <DefineConstants>XRAW_Missing=False</DefineConstants>
     <BaseAddress>285212672</BaseAddress>
     <DocumentationFile>MSFileInfoScanner.xml</DocumentationFile>
@@ -96,6 +59,9 @@
     <WarningLevel>1</WarningLevel>
     <NoWarn>42016,42017,42018,42019,42032,42353,42354,42355</NoWarn>
     <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ChemstationMSFileReader, Version=1.0.4469.30221, Culture=neutral, processorArchitecture=x86">
@@ -111,6 +77,9 @@
     <Reference Include="NetCDFReader, Version=1.0.1484.41937, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\NetCDFReader.dll</HintPath>
+    </Reference>
+    <Reference Include="PNNLOmics">
+      <HintPath>Lib\PNNLOmics.dll</HintPath>
     </Reference>
     <Reference Include="PRISM">
       <HintPath>Lib\PRISM.dll</HintPath>
@@ -133,7 +102,7 @@
     <Reference Include="System.Data">
       <Name>System.Data</Name>
     </Reference>
-    <Reference Include="System.Data.SQLite, Version=1.0.51.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
+    <Reference Include="System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\System.Data.SQLite.dll</HintPath>
     </Reference>
@@ -144,8 +113,7 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
-    <Reference Include="ThermoRawFileReaderDLL, Version=1.1.4510.22896, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="ThermoRawFileReaderDLL">
       <HintPath>Lib\ThermoRawFileReaderDLL.dll</HintPath>
     </Reference>
     <Reference Include="UIMFLibrary, Version=1.2.4084.31407, Culture=neutral, processorArchitecture=x86">
@@ -161,8 +129,11 @@
     <Import Include="Microsoft.VisualBasic" />
     <Import Include="System" />
     <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
     <Import Include="System.Data" />
     <Import Include="System.Diagnostics" />
+    <Import Include="System.IO" />
+    <Import Include="System.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.vb">
@@ -181,6 +152,7 @@
     </Compile>
     <Compile Include="clsBrukerXmassFolderInfoScanner.vb" />
     <Compile Include="clsDatasetStatsSummarizer.vb" />
+    <Compile Include="clsDeconToolsIsosInfoScanner.vb" />
     <Compile Include="clsFileIntegrityChecker.vb" />
     <Compile Include="clsFilterDataArrayMaxCount.vb" />
     <Compile Include="clsFinniganRawFileInfoScanner.vb">
@@ -221,6 +193,12 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="SpectraTypeClassifier\SpectraTypeClassifier.vbproj">
+      <Project>{6A61E034-6960-4AA4-B9AC-B1674588CC62}</Project>
+      <Name>SpectraTypeClassifier</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
   <PropertyGroup>

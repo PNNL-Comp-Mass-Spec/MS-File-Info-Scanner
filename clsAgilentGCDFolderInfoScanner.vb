@@ -2,7 +2,10 @@ Option Strict On
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
 '
-' Last modified June 19, 2012
+' Last modified January 17, 2013
+
+Imports PNNLOmics.Utilities
+Imports System.Text.RegularExpressions
 
 Public Class clsAgilentGCDFolderInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -31,35 +34,35 @@ Public Class clsAgilentGCDFolderInfoScanner
     Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
         ' The dataset name is simply the folder name without .D
         Try
-            Return System.IO.Path.GetFileNameWithoutExtension(strDataFilePath)
-        Catch ex As System.Exception
-            Return String.Empty
-        End Try
-    End Function
+			Return Path.GetFileNameWithoutExtension(strDataFilePath)
+		Catch ex As Exception
+			Return String.Empty
+		End Try
+	End Function
 
-    Private Function ExtractRunTime(ByVal strText As String, ByRef dblRunTimeMinutes As Double) As Boolean
+	Private Function ExtractRunTime(ByVal strText As String, ByRef dblRunTimeMinutes As Double) As Boolean
 
-        Static reExtractTime As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("([0-9.]+) min", Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
+		Static reExtractTime As Regex = New Regex("([0-9.]+) min", Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
 
-        Dim reMatch As System.Text.RegularExpressions.Match
+		Dim reMatch As Match
 
-        reMatch = reExtractTime.Match(strText)
+		reMatch = reExtractTime.Match(strText)
 
-        If Not reMatch Is Nothing AndAlso reMatch.Success Then
-            If Double.TryParse(reMatch.Groups(1).Value, dblRunTimeMinutes) Then
-                Return True
-            End If
-        End If
+		If Not reMatch Is Nothing AndAlso reMatch.Success Then
+			If Double.TryParse(reMatch.Groups(1).Value, dblRunTimeMinutes) Then
+				Return True
+			End If
+		End If
 
-        Return False
+		Return False
 
-    End Function
+	End Function
 
 	Private Function ParseAcqMethodFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		Dim strFilePath As String = String.Empty
 		Dim strLineIn As String
 
-		Dim dctRunTimeText As System.Collections.Generic.Dictionary(Of String, clsLineMatchSearchInfo)
+		Dim dctRunTimeText As Dictionary(Of String, clsLineMatchSearchInfo)
 		Dim dblTotalRuntime As Double = 0
 		Dim dblRunTime As Double = 0
 
@@ -69,21 +72,21 @@ Public Class clsAgilentGCDFolderInfoScanner
 
 		Try
 			' Open the acqmeth.txt file
-			strFilePath = System.IO.Path.Combine(strFolderPath, AGILENT_ACQ_METHOD_FILE)
-			If Not System.IO.File.Exists(strFilePath) Then
+			strFilePath = Path.Combine(strFolderPath, AGILENT_ACQ_METHOD_FILE)
+			If Not File.Exists(strFilePath) Then
 				Return False
 			End If
 
 			' Populate a dictionary object with the text strings for finding lines with runtime information
 			' Note that "Post Run" occurs twice in the file, so we use clsLineMatchSearchInfo.Matched to track whether or not the text has been matched
-			dctRunTimeText = New System.Collections.Generic.Dictionary(Of String, clsLineMatchSearchInfo)
+			dctRunTimeText = New Dictionary(Of String, clsLineMatchSearchInfo)
 			dctRunTimeText.Add(ACQ_METHOD_FILE_EQUILIBRATION_TIME_LINE, New clsLineMatchSearchInfo(True))
 			dctRunTimeText.Add(ACQ_METHOD_FILE_RUN_TIME_LINE, New clsLineMatchSearchInfo(True))
 
 			' We could also add in the "Post Run" time for determining total acquisition time, but we don't do this, to stay consistent with run times reported by the Data.MS file
 			' dctRunTimeText.Add(ACQ_METHOD_FILE_POST_RUN_LINE, New clsLineMatchSearchInfo(False))
 
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(strFilePath)
+			Using srInFile As StreamReader = New StreamReader(strFilePath)
 
 				Do While srInFile.Peek() >= 0
 					strLineIn = srInFile.ReadLine()
@@ -115,7 +118,7 @@ Public Class clsAgilentGCDFolderInfoScanner
 
 			blnSuccess = blnRunTimeFound
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			' Exception reading file
 			ReportError("Exception reading " & AGILENT_ACQ_METHOD_FILE & ": " & ex.Message)
 			blnSuccess = False
@@ -141,12 +144,12 @@ Public Class clsAgilentGCDFolderInfoScanner
 
 		Try
 			' Open the GC.ini file
-			strFilePath = System.IO.Path.Combine(strFolderPath, AGILENT_GC_INI_FILE)
-			If Not System.IO.File.Exists(strFilePath) Then
+			strFilePath = Path.Combine(strFolderPath, AGILENT_GC_INI_FILE)
+			If Not File.Exists(strFilePath) Then
 				Return False
 			End If
 
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(strFilePath)
+			Using srInFile As StreamReader = New StreamReader(strFilePath)
 
 				Do While srInFile.Peek() >= 0
 					strLineIn = srInFile.ReadLine()
@@ -167,7 +170,7 @@ Public Class clsAgilentGCDFolderInfoScanner
 				Loop
 			End Using
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			' Exception reading file
 			ReportError("Exception reading " & AGILENT_GC_INI_FILE & ": " & ex.Message)
 			blnSuccess = False
@@ -200,9 +203,9 @@ Public Class clsAgilentGCDFolderInfoScanner
 					intCurrentIndex = intSpectrumIndex
 
 					Dim oSpectrum As ChemstationMSFileReader.clsSpectralRecord = Nothing
-					Dim lstMZs As System.Collections.Generic.List(Of Single) = Nothing
-					Dim lstIntensities As System.Collections.Generic.List(Of Int32) = Nothing
-					Dim intMSLevel As Integer = 1
+					Dim lstMZs As List(Of Single) = Nothing
+					Dim lstIntensities As List(Of Int32) = Nothing
+					Const intMSLevel As Integer = 1
 
 					Try
 						oReader.GetSpectrum(intSpectrumIndex, oSpectrum)
@@ -225,10 +228,10 @@ Public Class clsAgilentGCDFolderInfoScanner
 
 						objScanStatsEntry.ScanFilterText = ""
 						objScanStatsEntry.ElutionTime = oSpectrum.RetentionTimeMinutes.ToString("0.0000")
-						objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(oSpectrum.TIC, 1)
+						objScanStatsEntry.TotalIonIntensity = MathUtilities.ValueToString(oSpectrum.TIC, 1)
 
-						objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(oSpectrum.BasePeakAbundance, 1)
-						objScanStatsEntry.BasePeakMZ = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(oSpectrum.BasePeakMZ, 5)
+						objScanStatsEntry.BasePeakIntensity = MathUtilities.ValueToString(oSpectrum.BasePeakAbundance, 1)
+						objScanStatsEntry.BasePeakMZ = MathUtilities.ValueToString(oSpectrum.BasePeakMZ, 5)
 
 						' Base peak signal to noise ratio
 						objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
@@ -257,6 +260,13 @@ Public Class clsAgilentGCDFolderInfoScanner
 							End If
 
 						End If
+
+						If mCheckCentroidingStatus Then
+							Dim lstMzDoubles = New List(Of Double)(lstMZs.Count)
+							lstMzDoubles.AddRange(lstMZs.Select(Function(ion) CType(ion, Double)))
+							mDatasetStatsSummarizer.ClassifySpectrum(lstMzDoubles, intMSLevel)
+						End If
+
 					End If
 
 				Next
@@ -265,7 +275,7 @@ Public Class clsAgilentGCDFolderInfoScanner
 
 			blnSuccess = True
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			' Exception reading file
 			ReportError("Exception reading data from the Data.MS file at spectrum index " & intCurrentIndex & ": " & ex.Message)
 			blnSuccess = False
@@ -275,20 +285,20 @@ Public Class clsAgilentGCDFolderInfoScanner
 
 	End Function
 
-	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		' Returns True if success, False if an error
 
 		Dim blnSuccess As Boolean
 		Dim blnAcqTimeDetermined As Boolean
 
-		Dim ioFolderInfo As System.IO.DirectoryInfo
-		Dim ioFileInfo As System.IO.FileInfo
+		Dim ioFolderInfo As DirectoryInfo
+		Dim ioFileInfo As FileInfo
 		Dim strMSDataFilePath As String
 
 		Try
 			blnSuccess = False
-			ioFolderInfo = New System.IO.DirectoryInfo(strDataFilePath)
-			strMSDataFilePath = System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_MS_DATA_FILE)
+			ioFolderInfo = New DirectoryInfo(strDataFilePath)
+			strMSDataFilePath = Path.Combine(ioFolderInfo.FullName, AGILENT_MS_DATA_FILE)
 
 			With udtFileInfo
 				.FileSystemCreationTime = ioFolderInfo.CreationTime
@@ -298,14 +308,14 @@ Public Class clsAgilentGCDFolderInfoScanner
 				.AcqTimeStart = .FileSystemModificationTime
 				.AcqTimeEnd = .FileSystemModificationTime
 
-				.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
+				.DatasetName = GetDatasetNameViaPath(ioFolderInfo.Name)
 				.FileExtension = ioFolderInfo.Extension
 				.FileSizeBytes = 0
 
 				' Look for the DATA.MS file
 				' Use its modification time to get an initial estimate for the acquisition end time
 				' Assign the .MS file's size to .FileSizeBytes
-				ioFileInfo = New System.IO.FileInfo(strMSDataFilePath)
+				ioFileInfo = New FileInfo(strMSDataFilePath)
 				If ioFileInfo.Exists Then
 					.FileSizeBytes = ioFileInfo.Length
 					.AcqTimeStart = ioFileInfo.LastWriteTime
@@ -334,9 +344,9 @@ Public Class clsAgilentGCDFolderInfoScanner
 				' Data.MS file not found (or problems parsing); use acqmeth.txt and/or GC.ini
 
 				' The timestamp of the acqmeth.txt file or GC.ini file is more accurate than the GC.ini file, so we'll use that
-				ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_ACQ_METHOD_FILE))
+				ioFileInfo = New FileInfo(Path.Combine(ioFolderInfo.FullName, AGILENT_ACQ_METHOD_FILE))
 				If Not ioFileInfo.Exists Then
-					ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_GC_INI_FILE))
+					ioFileInfo = New FileInfo(Path.Combine(ioFolderInfo.FullName, AGILENT_GC_INI_FILE))
 				End If
 
 
@@ -375,7 +385,7 @@ Public Class clsAgilentGCDFolderInfoScanner
 						blnSuccess = ParseGCIniFile(strDataFilePath, udtFileInfo)
 					End If
 
-				Catch ex As System.Exception
+				Catch ex As Exception
 					' Error parsing the acqmeth.txt file or GC.in file; do not abort
 				End Try
 
@@ -397,7 +407,7 @@ Public Class clsAgilentGCDFolderInfoScanner
 			End If
 
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			ReportError("Exception parsing GC .D folder: " & ex.Message)
 			blnSuccess = False
 		End Try

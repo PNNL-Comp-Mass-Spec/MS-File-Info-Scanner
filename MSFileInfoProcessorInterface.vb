@@ -3,7 +3,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Started in 2005
 '
-' Last modified April 2, 2012
+' Last modified January 31, 2013
 
 Public Interface iMSFileInfoProcessor
 
@@ -15,6 +15,7 @@ Public Interface iMSFileInfoProcessor
         CopyFileLocalOnReadError = 4
 		UpdateDatasetStatsTextFile = 5
 		CreateScanStatsFile = 6
+		CheckCentroidingStatus = 7
     End Enum
 
     ' ToDo: Update udtFileInfo to include some overall quality scores
@@ -32,7 +33,7 @@ Public Interface iMSFileInfoProcessor
         Public OverallQualityScore As Single
     End Structure
 
-    Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As udtFileInfoType) As Boolean
+	Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As udtFileInfoType) As Boolean
     Function CreateOutputFiles(ByVal strInputFileName As String, ByVal strOutputFolderPath As String) As Boolean
 
     Function GetDatasetInfoXML() As String
@@ -45,9 +46,11 @@ Public Interface iMSFileInfoProcessor
     Property LCMS2DOverviewPlotDivisor() As Integer
 
     Property DatasetStatsTextFileName() As String
+	Property DatasetID As Integer
 
     Property ScanStart() As Integer
     Property ScanEnd() As Integer
+	Property ShowDebugInfo() As Boolean
 
     Function GetOption(ByVal eOption As ProcessingOptions) As Boolean
     Sub SetOption(ByVal eOption As ProcessingOptions, ByVal blnValue As Boolean)

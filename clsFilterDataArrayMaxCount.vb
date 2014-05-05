@@ -194,7 +194,7 @@ Public Class clsFilterDataArrayMaxCount
                 Next intIndex
 
                 ' Round sngMaxAbundance up to the next highest integer
-                sngMaxAbundance = CLng(Math.Ceiling(sngMaxAbundance))
+				sngMaxAbundance = CSng(Math.Ceiling(sngMaxAbundance))
 
                 ' Now determine the histogram bin size
                 dblBinSize = sngMaxAbundance / HISTOGRAM_BIN_COUNT
@@ -360,13 +360,13 @@ Public Class clsFilterDataArrayMaxCount
 
             Exit Sub
 
-        Catch ex As System.Exception
-            Throw New System.Exception("Error in FilterDataByMaxDataCountToKeep: " & ex.Message, ex)
+		Catch ex As Exception
+			Throw New Exception("Error in FilterDataByMaxDataCountToKeep: " & ex.Message, ex)
         End Try
 
     End Sub
 
-    ' This is sub uses a full sort to filter the data
+	' This sub uses a full sort to filter the data
     ' This will be slow for large arrays and you should therefore use FilterDataByMaxDataCountToKeep if possible
     Private Sub SortAndMarkPointsToSkip(ByRef sngAbundances() As Single, ByRef intDataIndices() As Integer, ByVal intDataCount As Integer, ByVal intMaximumDataCountInArraysToLoad As Integer, ByVal intSubtaskStepCount As Integer)
 

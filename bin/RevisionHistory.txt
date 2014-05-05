@@ -1,6 +1,51 @@
 MS File Info Scanner Change Log
 
+Version 1.2.5221; April 18, 2014
+	- Now tracking the number of centroided and profile MS1 and MS2 spectra
+
+Version 1.2.5206; April 3, 2014
+	- New version of MSFileInfoScannerInterfaces.dll that has property DatasetIDOverride
+	- Added switch /DatasetID to MSFileInfoScanner.exe
+
+Version 1.2.5155; February 11, 2014
+	- Added support for Bruker folders with a ser file but not analysis.baf file
+
+Version 1.2.5093; December 11, 2013
+	- Fixed bug that included an ampersand in the LCMS_MSn png plot file
+
+Version 1.2.5084; December 2, 2013
+	- Now ignoring the "info" field in _isos.csv files if it contains only an integer
+
+Version 1.2.5077; November 25, 2013
+	- Added support for IMS-based _isos.csv files, which have frame_num instead of scan_num
+	- Fixed bug defining the maximum m/z value for 2D plots
+
+Version 1.2.5074; November 22, 2013
+	- Now creating plots with a max of 4000 m/z for each DeconTools _isos.csv file
+		- Still also creating plots with a maximum of 12,000 m/z
+
+Version 1.2.5073; November 21, 2013
+	- Added support for DeconTools _isos.csv files
+		- Plots monoisotopic mass vs. elution time when the _scans.csv file is present
+		- Plots monoisotopic mass vs. scan number when the _scans.csv file is missing
+
+Version 1.2.4987; August 27, 2013
+	- Fixed bug in clsUIMFInfoScanner that sent an invalid endScan value to UIMFReader.GetSpectrum
+
+Version 1.2.4818; March 11, 2013
+	- New version of SharedVBNetRoutines.dll
+	- Updated versions of ProteoWizard DLLs
+
+Version 1.2.4779; January 31, 2013
+	- Now using MathUtilities.ValueToString() in PNNLOmics.dll to format numbers
+	- Added switch /Debug
+		- Sets .ShowDebugInfo to True
+
+Version 1.2.4694; November 7, 2012
+	- Fix overflow bug when using CLng(Math.Ceiling(Value))
+
 Version 1.2.4665; October 9, 2012
+	- Added support for UIMF files with MS2 frames
 	- Now showing a message instead of an error if the Storage.mcf_idx file exists but a _1.mcf_idx file does not exist
 
 Version 1.2.4664; October 8, 2012

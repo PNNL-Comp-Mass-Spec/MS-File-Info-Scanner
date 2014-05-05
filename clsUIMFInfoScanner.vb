@@ -2,7 +2,9 @@ Option Strict On
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 '
-' Last modified October 27, 2011
+' Last modified August 27, 2013
+
+Imports PNNLOmics.Utilities
 
 Public Class clsUIMFInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -12,7 +14,7 @@ Public Class clsUIMFInfoScanner
 
 	Private Sub ComputeQualityScores(ByRef objUIMFReader As UIMFLibrary.DataReader, _
 	   ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, _
-	   ByRef dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, UIMFLibrary.DataReader.FrameType), _
+	   ByRef dctMasterFrameList As Dictionary(Of Integer, UIMFLibrary.DataReader.FrameType), _
 	   ByRef intMasterFrameNumList() As Integer)
 
 		' This function is used to determine one or more overall quality scores
@@ -64,7 +66,7 @@ Public Class clsUIMFInfoScanner
 
 				Try
 					objFrameParams = objUIMFReader.GetFrameParameters(intFrameNumber)
-				Catch ex As System.Exception
+				Catch ex As Exception
 					Console.WriteLine("Exception obtaining frame parameters for frame " & intFrameNumber & "; will skip this frame")
 					objFrameParams = Nothing
 				End Try
@@ -145,41 +147,18 @@ Public Class clsUIMFInfoScanner
 	End Sub
 
 	Private Sub ConstructTICandBPI(ByRef objUIMFReader As UIMFLibrary.DataReader, ByVal intFrameStart As Integer, ByVal intFrameEnd As Integer, _
-		ByRef dblTIC As Double(), ByRef dblBPI As Double())
+	 ByRef dctTIC As Generic.Dictionary(Of Integer, Double), ByRef dctBPI As Generic.Dictionary(Of Integer, Double))
 
 		Try
 			' Obtain the TIC and BPI for each MS frame
 
-			Dim intMSFrameNumbers() As Integer
-			Dim intMSFrameCount As Integer
-
-			' Determine the number of MS1 frames
-			intMSFrameCount = objUIMFReader.GetNumberOfFrames(UIMFLibrary.DataReader.FrameType.MS1)
-
-			intMSFrameNumbers = objUIMFReader.GetFrameNumbers(UIMFLibrary.DataReader.FrameType.MS1)
-
-			Dim intStartFrameIndex As Integer
-			Dim intEndFrameIndex As Integer
-			intStartFrameIndex = 0
-			intEndFrameIndex = intMSFrameNumbers.Length - 1
-
-			' Update intStartFrameIndex if intFrameStart > 0
-			Do While intStartFrameIndex < intEndFrameIndex AndAlso intMSFrameNumbers(intStartFrameIndex) < intFrameStart
-				intStartFrameIndex += 1
-			Loop
-
-			' Update intEndFrameIndex if intFrameEnd is < intMSFrameNumbers(intEndFrameIndex)
-			Do While intEndFrameIndex > intStartFrameIndex AndAlso intMSFrameNumbers(intEndFrameIndex) > intFrameEnd
-				intEndFrameIndex -= 1
-			Loop
-
 			Console.WriteLine("  Loading TIC values")
-			dblTIC = objUIMFReader.GetTIC(UIMFLibrary.DataReader.FrameType.MS1, intMSFrameNumbers(intStartFrameIndex), intMSFrameNumbers(intEndFrameIndex), 0, 0)
+			dctTIC = objUIMFReader.GetTICByFrame(intFrameStart, intFrameEnd, 0, 0)
 
 			Console.WriteLine("  Loading BPI values")
-			dblBPI = objUIMFReader.GetBPI(UIMFLibrary.DataReader.FrameType.MS1, intMSFrameNumbers(intStartFrameIndex), intMSFrameNumbers(intEndFrameIndex), 0, 0)
+			dctBPI = objUIMFReader.GetBPIByFrame(intFrameStart, intFrameEnd, 0, 0)
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			ReportError("Error obtaining TIC and BPI for overall dataset: " & ex.Message)
 		End Try
 
@@ -188,28 +167,29 @@ Public Class clsUIMFInfoScanner
 	Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
 		' The dataset name is simply the file name without .UIMF
 		Try
-			Return System.IO.Path.GetFileNameWithoutExtension(strDataFilePath)
-		Catch ex As System.Exception
+			Return Path.GetFileNameWithoutExtension(strDataFilePath)
+		Catch ex As Exception
 			Return String.Empty
 		End Try
 	End Function
 
 	Private Sub LoadFrameDetails(ByRef objUIMFReader As UIMFLibrary.DataReader, _
-	 ByRef dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, UIMFLibrary.DataReader.FrameType), _
+	 ByRef dctMasterFrameList As Dictionary(Of Integer, UIMFLibrary.DataReader.FrameType), _
 	 ByRef intMasterFrameNumList As Integer())
+
+		Const BAD_TIC_OR_BPI As Integer = Integer.MinValue
 
 		Dim objGlobalParams As UIMFLibrary.GlobalParameters
 		Dim objFrameParams As UIMFLibrary.FrameParameters
 
 		Dim sngProgress As Single
-		Dim dtLastProgressTime As System.DateTime
+		Dim dtLastProgressTime As DateTime
 
-		Dim dblTIC() As Double
-		Dim dblBPI() As Double
+		Dim dctTIC As Generic.Dictionary(Of Integer, Double) = New Generic.Dictionary(Of Integer, Double)()
+		Dim dctBPI As Generic.Dictionary(Of Integer, Double) = New Generic.Dictionary(Of Integer, Double)()
 
 		Dim intFrameStart As Integer
 		Dim intFrameEnd As Integer
-		Dim intTICIndex As Integer
 
 		Dim intMSLevel As Integer
 
@@ -253,7 +233,7 @@ Public Class clsUIMFInfoScanner
 			MyBase.InitializeLCMS2DPlot()
 		End If
 
-		dtLastProgressTime = System.DateTime.UtcNow
+		dtLastProgressTime = DateTime.UtcNow
 
 		objGlobalParams = objUIMFReader.GetGlobalParameters()
 
@@ -266,16 +246,8 @@ Public Class clsUIMFInfoScanner
 		' Call .GetStartAndEndScans to get the start and end Frames
 		MyBase.GetStartAndEndScans(objGlobalParams.NumFrames, intFrameStart, intFrameEnd)
 
-		If intMasterFrameNumList.Length > 0 Then
-			ReDim dblTIC(intMasterFrameNumList.Length - 1)
-			ReDim dblBPI(intMasterFrameNumList.Length - 1)
-		Else
-			ReDim dblTIC(0)
-			ReDim dblBPI(0)
-		End If
-
-		' Construct the TIC and BPI
-		ConstructTICandBPI(objUIMFReader, intFrameStart, intFrameEnd, dblTIC, dblBPI)
+		' Construct the TIC and BPI (of all frames)
+		ConstructTICandBPI(objUIMFReader, intFrameStart, intFrameEnd, dctTIC, dctBPI)
 
 		Console.Write("  Loading frame details")
 
@@ -286,8 +258,6 @@ Public Class clsUIMFInfoScanner
 		dblFrameStartTimePrevious = -1
 		dblFrameStartTimeCurrent = 0
 
-
-		intTICIndex = 0
 		For intMasterFrameNumIndex As Integer = 0 To intMasterFrameNumList.Length - 1
 
 			Dim intFrameNumber As Integer
@@ -300,12 +270,12 @@ Public Class clsUIMFInfoScanner
 
 				Try
 					objFrameParams = objUIMFReader.GetFrameParameters(intFrameNumber)
-				Catch ex As System.Exception
+				Catch ex As Exception
 					Console.WriteLine("Exception obtaining frame parameters for frame " & intFrameNumber & "; will skip this frame")
 					objFrameParams = Nothing
 				End Try
 
-				If Not objFrameParams Is Nothing Then
+				If Not objFrameParams Is Nothing AndAlso eFrameType <> UIMFLibrary.DataReader.FrameType.Calibration Then
 
 					' Check whether the frame number is within the desired range
 					If objFrameParams.FrameNum >= intFrameStart And objFrameParams.FrameNum <= intFrameEnd Then
@@ -322,7 +292,7 @@ Public Class clsUIMFInfoScanner
 						' This will be zero in older .UIMF files
 						' In newer files, it is the number of minutes since 12:00 am
 						dblFrameStartTimeCurrent = objFrameParams.StartTime
-						If intMasterFrameNumIndex = 0 OrElse dblFrameStartTimeInitial = -1 Then
+						If intMasterFrameNumIndex = 0 OrElse dblFrameStartTimeInitial < -0.9 Then
 							dblFrameStartTimeInitial = dblFrameStartTimeCurrent
 						End If
 
@@ -334,16 +304,27 @@ Public Class clsUIMFInfoScanner
 						' Compute the elution time (in minutes) of this frame                    
 						dblElutionTime = dblFrameStartTimeCurrent + dblFrameStartTimeAddon - dblFrameStartTimeInitial
 
+						Dim dblTIC As Double
+						Dim dblBPI As Double
+
+						If Not dctBPI.TryGetValue(objFrameParams.FrameNum, dblBPI) Then
+							dblBPI = BAD_TIC_OR_BPI
+						End If
+
+						If Not dctTIC.TryGetValue(objFrameParams.FrameNum, dblTIC) Then
+							dblTIC = BAD_TIC_OR_BPI
+						End If
 
 						If mSaveTICAndBPI Then
-							If intTICIndex < dblTIC.Length Then
-								mTICandBPIPlot.AddData(objFrameParams.FrameNum, intMSLevel, CSng(dblElutionTime), dblBPI(intTICIndex), dblTIC(intTICIndex))
+
+							If dblTIC > BAD_TIC_OR_BPI AndAlso dblTIC > BAD_TIC_OR_BPI Then
+								mTICandBPIPlot.AddData(objFrameParams.FrameNum, intMSLevel, CSng(dblElutionTime), dblBPI, dblTIC)
 							End If
 
 							dblPressure = objFrameParams.PressureBack
-							If dblPressure = 0 Then dblPressure = objFrameParams.RearIonFunnelPressure
-							If dblPressure = 0 Then dblPressure = objFrameParams.IonFunnelTrapPressure
-							If dblPressure = 0 Then dblPressure = objFrameParams.PressureFront
+							If Math.Abs(dblPressure) < Single.Epsilon Then dblPressure = objFrameParams.RearIonFunnelPressure
+							If Math.Abs(dblPressure) < Single.Epsilon Then dblPressure = objFrameParams.IonFunnelTrapPressure
+							If Math.Abs(dblPressure) < Single.Epsilon Then dblPressure = objFrameParams.PressureFront
 
 							mInstrumentSpecificPlots.AddDataTICOnly(objFrameParams.FrameNum, intMSLevel, CSng(dblElutionTime), dblPressure)
 						End If
@@ -363,11 +344,15 @@ Public Class clsUIMFInfoScanner
 						objScanStatsEntry.ScanFilterText = ""
 
 						objScanStatsEntry.ElutionTime = dblElutionTime.ToString("0.0000")
-						If intTICIndex < dblTIC.Length Then
-							objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblTIC(intTICIndex), 5)
-							objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblBPI(intTICIndex), 5)
+						If dblTIC > BAD_TIC_OR_BPI Then
+							objScanStatsEntry.TotalIonIntensity = MathUtilities.ValueToString(dblTIC, 5)
 						Else
 							objScanStatsEntry.TotalIonIntensity = "0"
+						End If
+
+						If dblBPI > BAD_TIC_OR_BPI Then
+							objScanStatsEntry.BasePeakIntensity = MathUtilities.ValueToString(dblBPI, 5)
+						Else
 							objScanStatsEntry.BasePeakIntensity = "0"
 						End If
 
@@ -382,7 +367,7 @@ Public Class clsUIMFInfoScanner
 						mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
 
 
-						If mSaveLCMS2DPlots Then
+						If mSaveLCMS2DPlots Or mCheckCentroidingStatus Then
 							Try
 								' Also need to load the raw data
 
@@ -395,8 +380,8 @@ Public Class clsUIMFInfoScanner
 								Array.Clear(intIntensityList, 0, intIntensityList.Length)
 
 								' Process all of the IMS scans in this Frame to compute a summed spectrum representative of the frame
-								' Scans likely range from 0 to objFrameParams.Scans-1, but we'll use objFrameParams.Scans just to be safe
-								intIonCount = objUIMFReader.GetSpectrum(intFrameNumber, intFrameNumber, eFrameType, 0, objFrameParams.Scans, dblMZList, intIntensityList)
+								' Scans should range from 0 to objFrameParams.Scans - 1
+								intIonCount = objUIMFReader.GetSpectrum(intFrameNumber, intFrameNumber, eFrameType, 0, objFrameParams.Scans - 1, dblMZList, intIntensityList)
 
 								If intIonCount > 0 Then
 									' The m/z and intensity arrays might contain entries with m/z values of 0; 
@@ -419,14 +404,17 @@ Public Class clsUIMFInfoScanner
 									intIonCount = intTargetIndex
 
 									If intIonCount > 0 Then
-										mLCMS2DPlot.AddScan(objFrameParams.FrameNum, intMSLevel, CSng(dblElutionTime), _
-										  intIonCount, dblMZList, dblIonsIntensity)
-									End If
+										If mSaveLCMS2DPlots Then
+											mLCMS2DPlot.AddScan(objFrameParams.FrameNum, intMSLevel, CSng(dblElutionTime), intIonCount, dblMZList, dblIonsIntensity)
+										End If
 
+										If mCheckCentroidingStatus Then
+											mDatasetStatsSummarizer.ClassifySpectrum(intIonCount, dblMZList, intMSLevel)
+										End If
+									End If
 								End If
 
-
-							Catch ex As System.Exception
+							Catch ex As Exception
 								ReportError("Error loading m/z and intensity values for frame " & intFrameNumber & ": " & ex.Message)
 							End Try
 						End If
@@ -434,7 +422,7 @@ Public Class clsUIMFInfoScanner
 					End If
 				End If
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				ReportError("Error loading header info for frame " & intFrameNumber & ": " & ex.Message)
 			End Try
 
@@ -444,8 +432,8 @@ Public Class clsUIMFInfoScanner
 				If intMasterFrameNumList.Length > 0 Then
 					sngProgress = CSng(intMasterFrameNumIndex / intMasterFrameNumList.Length * 100)
 
-					If System.DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 30 Then
-						dtLastProgressTime = System.DateTime.UtcNow
+					If DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 30 Then
+						dtLastProgressTime = DateTime.UtcNow
 						Console.WriteLine()
 						Console.Write("  " & sngProgress.ToString("0.0") & "% ")
 					End If
@@ -454,7 +442,6 @@ Public Class clsUIMFInfoScanner
 			End If
 
 			dblFrameStartTimePrevious = dblFrameStartTimeCurrent
-			intTICIndex += 1
 
 		Next intMasterFrameNumIndex
 
@@ -462,14 +449,12 @@ Public Class clsUIMFInfoScanner
 
 	End Sub
 
-	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		' Returns True if success, False if an error
 
 		Dim objUIMFReader As UIMFLibrary.DataReader = Nothing
 		Dim objGlobalParams As UIMFLibrary.GlobalParameters = Nothing
 		Dim objFrameParams As UIMFLibrary.FrameParameters
-
-		Dim ioFileInfo As System.IO.FileInfo
 
 		Dim intDatasetID As Integer
 		Dim intIndex As Integer
@@ -481,9 +466,9 @@ Public Class clsUIMFInfoScanner
 		ReDim intMasterFrameNumList(0)
 
 		' Obtain the full path to the file
-		ioFileInfo = New System.IO.FileInfo(strDataFilePath)
+		Dim fiFileInfo = New FileInfo(strDataFilePath)
 
-		If Not ioFileInfo.Exists Then
+		If Not fiFileInfo.Exists Then
 			Return False
 		End If
 
@@ -493,17 +478,17 @@ Public Class clsUIMFInfoScanner
 		intDatasetID = 0
 
 		With udtFileInfo
-			.FileSystemCreationTime = ioFileInfo.CreationTime
-			.FileSystemModificationTime = ioFileInfo.LastWriteTime
+			.FileSystemCreationTime = fiFileInfo.CreationTime
+			.FileSystemModificationTime = fiFileInfo.LastWriteTime
 
 			' The acquisition times will get updated below to more accurate values
 			.AcqTimeStart = .FileSystemModificationTime
 			.AcqTimeEnd = .FileSystemModificationTime
 
 			.DatasetID = intDatasetID
-			.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFileInfo.Name)
-			.FileExtension = ioFileInfo.Extension
-			.FileSizeBytes = ioFileInfo.Length
+			.DatasetName = GetDatasetNameViaPath(fiFileInfo.Name)
+			.FileExtension = fiFileInfo.Extension
+			.FileSizeBytes = fiFileInfo.Length
 
 			.ScanCount = 0
 		End With
@@ -515,10 +500,10 @@ Public Class clsUIMFInfoScanner
 
 		Try
 			' Use the UIMFLibrary to read the .UIMF file
-			objUIMFReader = New UIMFLibrary.DataReader(ioFileInfo.FullName)
-		Catch ex As System.Exception
+			objUIMFReader = New UIMFLibrary.DataReader(fiFileInfo.FullName)
+		Catch ex As Exception
 			' File open failed
-			ReportError("Call to .OpenUIMF failed for " & ioFileInfo.Name & ": " & ex.Message)
+			ReportError("Call to .OpenUIMF failed for " & fiFileInfo.Name & ": " & ex.Message)
 			blnReadError = True
 		End Try
 
@@ -526,7 +511,7 @@ Public Class clsUIMFInfoScanner
 			Try
 				' First obtain the global parameters
 				objGlobalParams = objUIMFReader.GetGlobalParameters()
-			Catch ex As System.Exception
+			Catch ex As Exception
 				' Read error
 				blnReadError = True
 			End Try
@@ -535,8 +520,8 @@ Public Class clsUIMFInfoScanner
 		If Not blnReadError Then
 			' Read the file info
 
-			Dim dctMasterFrameList As System.Collections.Generic.Dictionary(Of Integer, UIMFLibrary.DataReader.FrameType)
-			dctMasterFrameList = New System.Collections.Generic.Dictionary(Of Integer, UIMFLibrary.DataReader.FrameType)
+			Dim dctMasterFrameList As Dictionary(Of Integer, UIMFLibrary.DataReader.FrameType)
+			dctMasterFrameList = New Dictionary(Of Integer, UIMFLibrary.DataReader.FrameType)
 
 			Try
 
@@ -584,7 +569,7 @@ Public Class clsUIMFInfoScanner
 					blnValidStartTime = False
 					strReportedDateStarted = objGlobalParams.DateStarted
 
-					If Not System.DateTime.TryParse(strReportedDateStarted, dtReportedDateStarted) Then
+					If Not DateTime.TryParse(strReportedDateStarted, dtReportedDateStarted) Then
 						' Invalid date; log a message
 						ShowMessage(".UIMF file has an invalid DateStarted value in table Global_Parameters: " & strReportedDateStarted & "; will use the time the datafile was last modified")
 						blnInaccurateStartTime = True
@@ -600,7 +585,7 @@ Public Class clsUIMFInfoScanner
 							dtReportedDateStarted = dtReportedDateStarted.AddYears(1600)
 							blnValidStartTime = True
 
-						ElseIf dtReportedDateStarted.Year < 2000 Or dtReportedDateStarted.Year > System.DateTime.Now.Year + 1 Then
+						ElseIf dtReportedDateStarted.Year < 2000 Or dtReportedDateStarted.Year > DateTime.Now.Year + 1 Then
 							' Invalid date; log a message
 							ShowMessage(".UIMF file has an invalid DateStarted value in table Global_Parameters: " & dtReportedDateStarted.ToString & "; will use the time the datafile was last modified")
 							blnInaccurateStartTime = True
@@ -618,7 +603,7 @@ Public Class clsUIMFInfoScanner
 						udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart
 					End If
 
-				Catch ex2 As System.Exception
+				Catch ex2 As Exception
 					ShowMessage("Exception extracting the DateStarted date from table Global_Parameters in the .UIMF file: " & ex2.Message)
 				End Try
 
@@ -656,8 +641,8 @@ Public Class clsUIMFInfoScanner
 						' StartTime and Endtime were stored as the number of ticks (where each tick is 100 ns)
 						' Tick start date is either 1 January 1601 or 1 January 0001
 
-						Dim dtRunTime As System.DateTime
-						dtRunTime = System.DateTime.MinValue.AddTicks(CLng(dblEndTime - dblStartTime))
+						Dim dtRunTime As DateTime
+						dtRunTime = DateTime.MinValue.AddTicks(CLng(dblEndTime - dblStartTime))
 
 						dblRunTime = dtRunTime.Subtract(System.DateTime.MinValue).TotalMinutes
 
@@ -665,13 +650,13 @@ Public Class clsUIMFInfoScanner
 						' If that's the case, then update udtFileInfo.AcqTimeStart to be based on dblRunTime
 						If udtFileInfo.AcqTimeStart.Date = udtFileInfo.AcqTimeStart Then
 							Dim dtReportedDateStarted As DateTime
-							dtReportedDateStarted = System.DateTime.MinValue.AddTicks(CLng(dblStartTime))
+							dtReportedDateStarted = DateTime.MinValue.AddTicks(CLng(dblStartTime))
 
 							If dtReportedDateStarted.Year < 500 Then
 								dtReportedDateStarted.AddYears(1600)
 							End If
 
-							If dtReportedDateStarted.Year >= 2000 And dtReportedDateStarted.Year <= System.DateTime.Now.Year + 1 Then
+							If dtReportedDateStarted.Year >= 2000 And dtReportedDateStarted.Year <= DateTime.Now.Year + 1 Then
 								' Date looks valid
 								If blnInaccurateStartTime Then
 									udtFileInfo.AcqTimeStart = dtReportedDateStarted
@@ -690,7 +675,7 @@ Public Class clsUIMFInfoScanner
 						' Ideally, we'd just compute RunTime like this: dblRunTime = dblEndTime - dblStartTime
 						' But, given the idiosyncracies that can occur, we need to construct a full list of start times
 
-						Dim lstStartTimes As System.Collections.Generic.List(Of Double) = New System.Collections.Generic.List(Of Double)
+						Dim lstStartTimes As List(Of Double) = New List(Of Double)
 						Dim dblEndTimeAddon As Double = 0
 
 						For intIndex = 0 To intMasterFrameNumList.Length - 1
@@ -753,7 +738,7 @@ Public Class clsUIMFInfoScanner
 					End If
 				End If
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				ShowMessage("Exception extracting acquisition time information: " & ex.Message)
 			End Try
 
@@ -778,7 +763,7 @@ Public Class clsUIMFInfoScanner
 
 		' Read the file info from the file system
 		' (much of this is already in udtFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
-		UpdateDatasetFileStats(ioFileInfo, intDatasetID)
+		UpdateDatasetFileStats(fiFileInfo, intDatasetID)
 
 		' Copy over the updated filetime info from udtFileInfo to mDatasetFileInfo
 		With mDatasetStatsSummarizer.DatasetFileInfo

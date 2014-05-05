@@ -5,6 +5,8 @@ Option Strict On
 '
 ' Last modified September 17, 2005
 
+Imports System.Text.RegularExpressions
+
 Public Class clsBrukerOneFolderInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
 
@@ -26,72 +28,72 @@ Public Class clsBrukerOneFolderInfoScanner
     Private Const MINIMUM_ACCEPTABLE_ACQ_START_TIME As DateTime = #1/1/1975#
 
     Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
-        Dim ioFolderInfo As System.IO.DirectoryInfo
-        Dim strDatasetName As String = String.Empty
+		Dim ioFolderInfo As DirectoryInfo
+		Dim strDatasetName As String = String.Empty
 
-        Try
-            ' The dataset name for a Bruker 1 folder or zipped S folder is the name of the parent directory
-            ioFolderInfo = New System.IO.DirectoryInfo(strDataFilePath)
-            strDatasetName = ioFolderInfo.Parent.Name
-        Catch ex As System.Exception
-            ' Ignore errors
-        End Try
+		Try
+			' The dataset name for a Bruker 1 folder or zipped S folder is the name of the parent directory
+			ioFolderInfo = New DirectoryInfo(strDataFilePath)
+			strDatasetName = ioFolderInfo.Parent.Name
+		Catch ex As Exception
+			' Ignore errors
+		End Try
 
-        If strDatasetName Is Nothing Then strDatasetName = String.Empty
-        Return strDatasetName
+		If strDatasetName Is Nothing Then strDatasetName = String.Empty
+		Return strDatasetName
 
-    End Function
+	End Function
 
-    Public Shared Function IsZippedSFolder(ByVal strFilePath As String) As Boolean
+	Public Shared Function IsZippedSFolder(ByVal strFilePath As String) As Boolean
 
-        Static reCheckFile As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("s[0-9]+\.zip", Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
+		Static reCheckFile As Regex = New Regex("s[0-9]+\.zip", Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
 
-        Return reCheckFile.Match(strFilePath).Success
+		Return reCheckFile.Match(strFilePath).Success
 
-    End Function
+	End Function
 
-    Private Function ParseBrukerDateFromArray(ByRef strLineIn As String, ByRef dtDate As DateTime) As Boolean
-        Dim strDate As String
-        Dim blnSuccess As Boolean
+	Private Function ParseBrukerDateFromArray(ByRef strLineIn As String, ByRef dtDate As DateTime) As Boolean
+		Dim strDate As String
+		Dim blnSuccess As Boolean
 
-        Dim intStartIndex As Integer
-        Dim intIndexCheck As Integer
-        Dim intIndexCompare As Integer
+		Dim intStartIndex As Integer
+		Dim intIndexCheck As Integer
+		Dim intIndexCompare As Integer
 
-        Dim strSplitLine() As String
+		Dim strSplitLine() As String
 
-        Try
-            strSplitLine = strLineIn.Split(" "c)
+		Try
+			strSplitLine = strLineIn.Split(" "c)
 
-            ' Remove any entries from strSplitLine() that are blank
-            intIndexCheck = intStartIndex
-            Do While intIndexCheck < strSplitLine.Length AndAlso strSplitLine.Length > 0
-                If strSplitLine(intIndexCheck).Length = 0 Then
-                    For intIndexCompare = intIndexCheck To strSplitLine.Length - 2
-                        strSplitLine(intIndexCompare) = strSplitLine(intIndexCompare + 1)
-                    Next intIndexCompare
-                    ReDim Preserve strSplitLine(strSplitLine.Length - 2)
-                Else
-                    intIndexCheck += 1
-                End If
-            Loop
+			' Remove any entries from strSplitLine() that are blank
+			intIndexCheck = intStartIndex
+			Do While intIndexCheck < strSplitLine.Length AndAlso strSplitLine.Length > 0
+				If strSplitLine(intIndexCheck).Length = 0 Then
+					For intIndexCompare = intIndexCheck To strSplitLine.Length - 2
+						strSplitLine(intIndexCompare) = strSplitLine(intIndexCompare + 1)
+					Next intIndexCompare
+					ReDim Preserve strSplitLine(strSplitLine.Length - 2)
+				Else
+					intIndexCheck += 1
+				End If
+			Loop
 
-            If strSplitLine.Length >= 5 Then
-                intStartIndex = strSplitLine.Length - 5
-                strDate = strSplitLine(4 + intStartIndex) & "-" & strSplitLine(1 + intStartIndex) & "-" & strSplitLine(2 + intStartIndex) & " " & strSplitLine(3 + intStartIndex)
-                dtDate = DateTime.Parse(strDate)
-                blnSuccess = True
-            Else
-                blnSuccess = False
-            End If
-        Catch ex As System.Exception
-            ' Date parse failed
-            blnSuccess = False
-        End Try
+			If strSplitLine.Length >= 5 Then
+				intStartIndex = strSplitLine.Length - 5
+				strDate = strSplitLine(4 + intStartIndex) & "-" & strSplitLine(1 + intStartIndex) & "-" & strSplitLine(2 + intStartIndex) & " " & strSplitLine(3 + intStartIndex)
+				dtDate = DateTime.Parse(strDate)
+				blnSuccess = True
+			Else
+				blnSuccess = False
+			End If
+		Catch ex As Exception
+			' Date parse failed
+			blnSuccess = False
+		End Try
 
-        Return blnSuccess
+		Return blnSuccess
 
-    End Function
+	End Function
 
 	Private Function ParseBrukerAcquFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		Dim strLineIn As String
@@ -101,7 +103,7 @@ Public Class clsBrukerOneFolderInfoScanner
 		Try
 			' Try to open the acqu file
 			blnSuccess = False
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(System.IO.Path.Combine(strFolderPath, BRUKER_ACQU_FILE))
+			Using srInFile As StreamReader = New StreamReader(Path.Combine(strFolderPath, BRUKER_ACQU_FILE))
 				Do While srInFile.Peek() >= 0
 					strLineIn = srInFile.ReadLine()
 
@@ -119,7 +121,7 @@ Public Class clsBrukerOneFolderInfoScanner
 				Loop
 			End Using
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			' Error opening the acqu file
 			blnSuccess = False
 		End Try
@@ -138,7 +140,7 @@ Public Class clsBrukerOneFolderInfoScanner
 			' Try to open the Lock file
 			' The date line is the first (and only) line in the file
 			blnSuccess = False
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(System.IO.Path.Combine(strFolderPath, BRUKER_LOCK_FILE))
+			Using srInFile As StreamReader = New StreamReader(Path.Combine(strFolderPath, BRUKER_LOCK_FILE))
 				If srInFile.Peek() >= 0 Then
 					strLineIn = srInFile.ReadLine()
 					If Not strLineIn Is Nothing Then
@@ -151,7 +153,7 @@ Public Class clsBrukerOneFolderInfoScanner
 				End If
 			End Using
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			' Error opening the Lock file
 			blnSuccess = False
 		End Try
@@ -160,7 +162,7 @@ Public Class clsBrukerOneFolderInfoScanner
 
 	End Function
 
-	Private Function ParseBrukerZippedSFolders(ByRef ioFolderInfo As System.IO.DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Private Function ParseBrukerZippedSFolders(ByRef ioFolderInfo As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		' Looks through the s*.zip files to determine the total file size (uncompressed) of all files in all the matching .Zip files
 		' Updates udtFileInfo.FileSizeBytes with this info, while also updating udtFileInfo.ScanCount with the total number of files found
 		' Returns True if success and also if no matching Zip files were found; returns False if error
@@ -171,7 +173,7 @@ Public Class clsBrukerOneFolderInfoScanner
 		udtFileInfo.ScanCount = 0
 
 		Try
-			For Each ioFileMatch As System.IO.FileInfo In ioFolderInfo.GetFiles("s*.zip")
+			For Each ioFileMatch As FileInfo In ioFolderInfo.GetFiles("s*.zip")
 				' Get the info on each zip file
 
 				Using objZipFile As Ionic.Zip.ZipFile = New Ionic.Zip.ZipFile(ioFileMatch.FullName)
@@ -184,7 +186,7 @@ Public Class clsBrukerOneFolderInfoScanner
 			Next ioFileMatch
 			blnSuccess = True
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			blnSuccess = False
 		End Try
 
@@ -192,11 +194,11 @@ Public Class clsBrukerOneFolderInfoScanner
 
 	End Function
 
-	Private Function ParseICRFolder(ByRef ioFolderInfo As System.IO.DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Private Function ParseICRFolder(ByRef ioFolderInfo As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		' Look for and open the .Pek file in ioFolderInfo
 		' Count the number of PEK_FILE_FILENAME_LINE lines
 
-		Dim ioFileMatch As System.IO.FileInfo
+		Dim ioFileMatch As FileInfo
 		Dim strLineIn As String
 
 		Dim intFileListCount As Integer
@@ -207,7 +209,7 @@ Public Class clsBrukerOneFolderInfoScanner
 				' Try to open the PEK file
 				blnSuccess = False
 				intFileListCount = 0
-				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(ioFileMatch.OpenRead())
+				Using srInFile As StreamReader = New StreamReader(ioFileMatch.OpenRead())
 					Do While srInFile.Peek() >= 0
 						strLineIn = srInFile.ReadLine()
 
@@ -220,7 +222,7 @@ Public Class clsBrukerOneFolderInfoScanner
 				End Using
 				blnSuccess = True
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				' Error opening or parsing the PEK file
 				blnSuccess = False
 			End Try
@@ -237,11 +239,11 @@ Public Class clsBrukerOneFolderInfoScanner
 
 	End Function
 
-	Private Function ParseTICFolder(ByRef ioFolderInfo As System.IO.DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, ByRef dtTICModificationDate As DateTime) As Boolean
+	Private Function ParseTICFolder(ByRef ioFolderInfo As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, ByRef dtTICModificationDate As DateTime) As Boolean
 		' Look for and open the .Tic file in ioFolderInfo and look for the line listing the number of files
 		' As a second validation, count the number of lines between TIC_FILE_TIC_FILE_LIST_START and TIC_FILE_TIC_FILE_LIST_END
 
-		Dim ioFileMatch As System.IO.FileInfo
+		Dim ioFileMatch As FileInfo
 		Dim strLineIn As String
 
 		Dim intFileListCount As Integer
@@ -253,7 +255,7 @@ Public Class clsBrukerOneFolderInfoScanner
 				' Try to open the TIC file
 				blnSuccess = False
 				intFileListCount = 0
-				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(ioFileMatch.OpenRead())
+				Using srInFile As StreamReader = New StreamReader(ioFileMatch.OpenRead())
 					Do While srInFile.Peek() >= 0
 						strLineIn = srInFile.ReadLine()
 
@@ -287,7 +289,7 @@ Public Class clsBrukerOneFolderInfoScanner
 
 				dtTICModificationDate = ioFileMatch.LastWriteTime
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				' Error opening or parsing the TIC file
 				blnSuccess = False
 			End Try
@@ -304,13 +306,13 @@ Public Class clsBrukerOneFolderInfoScanner
 
 	End Function
 
-	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		' Process a Bruker 1 folder or Bruker s001.zip file, specified by strDataFilePath
 		' If a Bruker 1 folder, then it must contain file acqu and typically contains file LOCK
 
-		Dim ioFileInfo As System.IO.FileInfo
-		Dim ioZippedSFilesFolderInfo As System.IO.DirectoryInfo = Nothing
-		Dim ioSubFolder As System.IO.DirectoryInfo
+		Dim ioFileInfo As FileInfo
+		Dim ioZippedSFilesFolderInfo As DirectoryInfo = Nothing
+		Dim ioSubFolder As DirectoryInfo
 
 		Dim intScanCountSaved As Integer
 		Dim dtTICModificationDate As DateTime
@@ -321,7 +323,7 @@ Public Class clsBrukerOneFolderInfoScanner
 		Try
 			' Determine whether strDataFilePath points to a file or a folder
 			' See if strFileOrFolderPath points to a valid file
-			ioFileInfo = New System.IO.FileInfo(strDataFilePath)
+			ioFileInfo = New FileInfo(strDataFilePath)
 
 			If ioFileInfo.Exists() Then
 				' Parsing a zipped S folder
@@ -342,7 +344,7 @@ Public Class clsBrukerOneFolderInfoScanner
 				' Assuming it's a "1" folder
 				blnParsingBrukerOneFolder = True
 
-				ioZippedSFilesFolderInfo = New System.IO.DirectoryInfo(strDataFilePath)
+				ioZippedSFilesFolderInfo = New DirectoryInfo(strDataFilePath)
 				If ioZippedSFilesFolderInfo.Exists Then
 					' Determine the dataset name by looking up the name of the parent folder of strDataFilePath
 					ioZippedSFilesFolderInfo = ioZippedSFilesFolderInfo.Parent
@@ -367,7 +369,7 @@ Public Class clsBrukerOneFolderInfoScanner
 					.ScanCount = 0
 				End With
 			End If
-		Catch ex As System.Exception
+		Catch ex As Exception
 			blnSuccess = False
 		End Try
 
@@ -392,7 +394,7 @@ Public Class clsBrukerOneFolderInfoScanner
 			Try
 				blnSuccess = ParseBrukerZippedSFolders(ioZippedSFilesFolderInfo, udtFileInfo)
 				intScanCountSaved = udtFileInfo.ScanCount
-			Catch ex As System.Exception
+			Catch ex As Exception
 				' Error parsing zipped S Folders; do not abort
 			End Try
 
@@ -448,7 +450,7 @@ Public Class clsBrukerOneFolderInfoScanner
 					blnSuccess = True
 				End If
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				' Error parsing the TIC* or ICR* folders; do not abort
 			End Try
 
@@ -464,7 +466,7 @@ Public Class clsBrukerOneFolderInfoScanner
 						''Dim dtDateCompare As DateTime
 						''If .ScanCount > 0 Then
 						''    ' Make sure the start time is greater than the end time minus the scan count times 30 seconds per scan
-						''    dtDateCompare = .AcqTimeEnd.Subtract(New System.TimeSpan(0, 0, .ScanCount * 30))
+						''    dtDateCompare = .AcqTimeEnd.Subtract(New TimeSpan(0, 0, .ScanCount * 30))
 						''Else
 						''    dtDateCompare = .AcqTimeEnd - 
 						''End If

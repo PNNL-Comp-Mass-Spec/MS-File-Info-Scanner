@@ -16,30 +16,30 @@ Public Class clsZippedImagingFilesScanner
 	''' Determines the oldest and newest modified analysis.baf files (or apexAcquisition.method file if analysis.baf files are not found)
 	''' Presumes this is the AcqStartTime and AcqEndTime
 	''' </summary>
-	''' <param name="ioZipFile"></param>
+	''' <param name="fiZipFile"></param>
 	''' <param name="udtFileInfo"></param>
 	''' <returns>True if at least one valid file is found; otherwise false</returns>
 	''' <remarks></remarks>
-	Protected Function DetermineAcqStartEndTime(ByVal ioZipFile As System.IO.FileInfo, _
-	   ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Protected Function DetermineAcqStartEndTime(ByVal fiZipFile As FileInfo, _
+	  ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
 		Dim blnSuccess As Boolean = False
 
-		Dim lstFileNamesToFind As System.Collections.Generic.List(Of String)
+		Dim lstFileNamesToFind As List(Of String)
 		Dim strNameParts() As String
 
 		Try
 			' Bump up the file size
-			udtFileInfo.FileSizeBytes += ioZipFile.Length
+			udtFileInfo.FileSizeBytes += fiZipFile.Length
 
-			lstFileNamesToFind = New System.Collections.Generic.List(Of String)
+			lstFileNamesToFind = New List(Of String)
 			lstFileNamesToFind.Add("analysis.baf")
 			lstFileNamesToFind.Add("apexAcquisition.method")
 			lstFileNamesToFind.Add("submethods.xml")
 
 			Dim oZipFile As Ionic.Zip.ZipFile
-			Dim oZipEntry As System.Collections.Generic.IEnumerator(Of Ionic.Zip.ZipEntry)
-			oZipFile = New Ionic.Zip.ZipFile(ioZipFile.FullName)
+			Dim oZipEntry As IEnumerator(Of Ionic.Zip.ZipEntry)
+			oZipFile = New Ionic.Zip.ZipFile(fiZipFile.FullName)
 
 			For Each strFileNameToFind As String In lstFileNamesToFind
 				oZipEntry = oZipFile.GetEnumerator()
@@ -99,7 +99,7 @@ Public Class clsZippedImagingFilesScanner
 				If blnSuccess Then Exit For
 			Next
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			ReportError("Error finding XMass method folder: " & ex.Message)
 			blnSuccess = False
 		End Try
@@ -108,41 +108,35 @@ Public Class clsZippedImagingFilesScanner
 
 	End Function
 
-	Protected Function GetDatasetFolder(ByVal strDataFilePath As String) As System.IO.DirectoryInfo
-
-		Dim ioDatasetFolder As System.IO.DirectoryInfo
-		Dim ioFileInfo As System.IO.FileInfo
+	Protected Function GetDatasetFolder(ByVal strDataFilePath As String) As DirectoryInfo
 
 		' First see if strFileOrFolderPath points to a valid file
-		ioFileInfo = New System.IO.FileInfo(strDataFilePath)
+		Dim fiFileInfo = New FileInfo(strDataFilePath)
 
-		If ioFileInfo.Exists() Then
+		If fiFileInfo.Exists() Then
 			' User specified a file; assume the parent folder of this file is the dataset folder
-			ioDatasetFolder = ioFileInfo.Directory
+			Return fiFileInfo.Directory
 		Else
 			' Assume this is the path to the dataset folder
-			ioDatasetFolder = New System.IO.DirectoryInfo(strDataFilePath)
+			Return New DirectoryInfo(strDataFilePath)
 		End If
-
-		Return ioDatasetFolder
 
 	End Function
 
 	Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
-		Dim ioDatasetFolder As System.IO.DirectoryInfo
 		Dim strDatasetName As String = String.Empty
 
 		Try
 			' The dataset name for a dataset with zipped imaging files is the name of the parent directory
 			' However, strDataFilePath could be a file or a folder path, so use GetDatasetFolder to get the dataset folder
-			ioDatasetFolder = GetDatasetFolder(strDataFilePath)
-			strDatasetName = ioDatasetFolder.Name
+			Dim diDatasetFolder = GetDatasetFolder(strDataFilePath)
+			strDatasetName = diDatasetFolder.Name
 
 			If strDatasetName.ToLower().EndsWith(".d") Then
 				strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - 2)
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			' Ignore errors
 		End Try
 
@@ -153,13 +147,13 @@ Public Class clsZippedImagingFilesScanner
 
 	Public Shared Function IsZippedImagingFile(ByVal strFileName As String) As Boolean
 
-		Dim ioFileInfo As System.IO.FileInfo = New System.IO.FileInfo(strFileName)
+		Dim fiFileInfo = New FileInfo(strFileName)
 
 		If String.IsNullOrWhiteSpace(strFileName) Then
 			Return False
 		End If
 
-		If ioFileInfo.Name.ToLower().StartsWith(ZIPPED_IMAGING_FILE_NAME_PREFIX.ToLower()) AndAlso ioFileInfo.Extension.ToLower() = ".zip" Then
+		If fiFileInfo.Name.ToLower().StartsWith(ZIPPED_IMAGING_FILE_NAME_PREFIX.ToLower()) AndAlso fiFileInfo.Extension.ToLower() = ".zip" Then
 			Return True
 		Else
 			Return False
@@ -167,79 +161,77 @@ Public Class clsZippedImagingFilesScanner
 
 	End Function
 
-	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		' Process a Bruker Xmass folder, specified by strDataFilePath (which can either point to the dataset folder containing the XMass files, or any of the Zip files in the dataset folder)
-
-		Dim ioDatasetFolder As System.IO.DirectoryInfo
-
-		Dim ioFiles() As System.IO.FileInfo
 
 		Dim blnSuccess As Boolean
 
 		Try
 			' Determine whether strDataFilePath points to a file or a folder
 
-			ioDatasetFolder = GetDatasetFolder(strDataFilePath)
+			Dim diDatasetFolder = GetDatasetFolder(strDataFilePath)
 
 			' Validate that we have selected a valid folder
-			If Not ioDatasetFolder.Exists Then
+			If Not diDatasetFolder.Exists Then
 				MyBase.ReportError("File/folder not found: " & strDataFilePath)
 				Return False
 			End If
 
 			' In case we cannot find any .Zip files, update the .AcqTime values to the folder creation date
 			With udtFileInfo
-				.AcqTimeStart = ioDatasetFolder.CreationTime
-				.AcqTimeEnd = ioDatasetFolder.CreationTime
+				.AcqTimeStart = diDatasetFolder.CreationTime
+				.AcqTimeEnd = diDatasetFolder.CreationTime
 			End With
 
 			' Look for the 0_R*.zip files
 			' If we cannot find any zip files, return false
 
-			ioFiles = ioDatasetFolder.GetFiles(ZIPPED_IMAGING_FILE_SEARCH_SPEC)
-			If ioFiles Is Nothing OrElse ioFiles.Length = 0 Then
+			Dim lstFiles = diDatasetFolder.GetFiles(ZIPPED_IMAGING_FILE_SEARCH_SPEC).ToList()
+			If lstFiles Is Nothing OrElse lstFiles.Count = 0 Then
 				' 0_R*.zip files not found
-				MyBase.ReportError(ZIPPED_IMAGING_FILE_SEARCH_SPEC & "files not found in " & ioDatasetFolder.FullName)
+				MyBase.ReportError(ZIPPED_IMAGING_FILE_SEARCH_SPEC & "files not found in " & diDatasetFolder.FullName)
 				blnSuccess = False
 			Else
 
+				Dim fiFirstImagingFile = lstFiles.First
+
 				' Initialize the .DatasetFileInfo
 				With mDatasetStatsSummarizer.DatasetFileInfo
-					.FileSystemCreationTime = ioFiles(0).CreationTime
-					.FileSystemModificationTime = ioFiles(0).LastWriteTime
+					.FileSystemCreationTime = fiFirstImagingFile.CreationTime
+					.FileSystemModificationTime = fiFirstImagingFile.LastWriteTime
 
 					.AcqTimeStart = .FileSystemModificationTime
 					.AcqTimeEnd = .FileSystemModificationTime
 
 					.DatasetID = udtFileInfo.DatasetID
-					.DatasetName = ioDatasetFolder.Name
-					.FileExtension = ioFiles(0).Extension
+					.DatasetName = diDatasetFolder.Name
+					.FileExtension = fiFirstImagingFile.Extension
 					.FileSizeBytes = 0
 					.ScanCount = 0
 				End With
 
 
 				' Update the dataset name and file extension
-				udtFileInfo.DatasetName = GetDatasetNameViaPath(ioDatasetFolder.FullName)
+				udtFileInfo.DatasetName = GetDatasetNameViaPath(diDatasetFolder.FullName)
 				udtFileInfo.FileExtension = String.Empty
 
-				udtFileInfo.AcqTimeEnd = System.DateTime.MinValue
-				udtFileInfo.AcqTimeStart = System.DateTime.MaxValue
+				udtFileInfo.AcqTimeEnd = DateTime.MinValue
+				udtFileInfo.AcqTimeStart = DateTime.MaxValue
 				udtFileInfo.ScanCount = 0
 
 				' Process each zip file
-				For Each ioFileInfo As System.IO.FileInfo In ioFiles
+				For Each fiFileInfo As FileInfo In lstFiles
 
 					' Examine all of the apexAcquisition.method files in this zip file
-					blnSuccess = DetermineAcqStartEndTime(ioFileInfo, udtFileInfo)
+					blnSuccess = DetermineAcqStartEndTime(fiFileInfo, udtFileInfo)
 
 				Next
 
-				If udtFileInfo.AcqTimeEnd = System.DateTime.MinValue OrElse udtFileInfo.AcqTimeStart = System.DateTime.MaxValue Then
+				If udtFileInfo.AcqTimeEnd = DateTime.MinValue OrElse udtFileInfo.AcqTimeStart = DateTime.MaxValue Then
 					' Did not find any apexAcquisition.method files or submethods.xml files
 					' Use the file modification date of the first zip file
-					udtFileInfo.AcqTimeStart = ioFiles(0).LastWriteTime
-					udtFileInfo.AcqTimeEnd = ioFiles(0).LastWriteTime
+					udtFileInfo.AcqTimeStart = fiFirstImagingFile.LastWriteTime
+					udtFileInfo.AcqTimeEnd = fiFirstImagingFile.LastWriteTime
 				End If
 
 
@@ -255,7 +247,7 @@ Public Class clsZippedImagingFilesScanner
 
 				blnSuccess = True
 			End If
-		Catch ex As System.Exception
+		Catch ex As Exception
 			ReportError("Exception processing Zipped Imaging Files: " & ex.Message)
 			blnSuccess = False
 		End Try

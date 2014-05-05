@@ -3,7 +3,9 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Started in 2007
 '
-' Last modified April 2, 2012
+' Last modified April 18, 2014
+
+Imports System.IO
 
 Public MustInherit Class clsMSFileInfoProcessorBaseClass
 	Implements iMSFileInfoProcessor
@@ -19,6 +21,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 #Region "Member variables"
 	Protected mSaveTICAndBPI As Boolean
 	Protected mSaveLCMS2DPlots As Boolean
+	Protected mCheckCentroidingStatus As Boolean
 
 	Protected mComputeOverallQualityScores As Boolean
 	Protected mCreateDatasetInfoFile As Boolean					' When True, then creates an XML file with dataset info
@@ -30,6 +33,9 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 	Protected mScanStart As Integer
 	Protected mScanEnd As Integer
+	Protected mShowDebugInfo As Boolean
+
+	Protected mDatasetID As Integer
 
 	Protected mCopyFileLocalOnReadError As Boolean
 
@@ -39,7 +45,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 	Protected WithEvents mLCMS2DPlot As clsLCMSDataPlotter
 	Protected WithEvents mLCMS2DPlotOverview As clsLCMSDataPlotter
 
-	Protected mDatasetStatsSummarizer As DSSummarizer.clsDatasetStatsSummarizer
+	Protected WithEvents mDatasetStatsSummarizer As DSSummarizer.clsDatasetStatsSummarizer
 
 	Public Event ErrorEvent(ByVal Message As String) Implements iMSFileInfoProcessor.ErrorEvent
 	Public Event MessageEvent(ByVal Message As String) Implements iMSFileInfoProcessor.MessageEvent
@@ -47,6 +53,19 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 #End Region
 
 #Region "Properties"
+
+	''' <summary>
+	''' This property allows the parent class to define the DatasetID value
+	''' </summary>
+	Public Property DatasetID As Integer Implements iMSFileInfoProcessor.DatasetID
+		Get
+			Return mDatasetID
+		End Get
+		Set(value As Integer)
+			mDatasetID = value
+		End Set
+	End Property
+
 	Public Property DatasetStatsTextFileName() As String Implements iMSFileInfoProcessor.DatasetStatsTextFileName
 		Get
 			Return mDatasetStatsTextFileName
@@ -88,6 +107,15 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 		End Set
 	End Property
 
+	Public Property ShowDebugInfo As Boolean Implements iMSFileInfoProcessor.ShowDebugInfo
+		Get
+			Return mShowDebugInfo
+		End Get
+		Set(value As Boolean)
+			mShowDebugInfo = value
+		End Set
+	End Property
+
 	''' <summary>
 	''' When ScanEnd is > 0, then will stop processing at the specified scan number
 	''' </summary>
@@ -118,7 +146,11 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 				Return mUpdateDatasetStatsTextFile
 			Case iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile
 				Return mCreateScanStatsFile
+			Case iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus
+				Return mCheckCentroidingStatus
 		End Select
+
+		Throw New Exception("Unrecognized option, " & eOption.ToString)
 	End Function
 
 	Public Sub SetOption(ByVal eOption As iMSFileInfoProcessor.ProcessingOptions, ByVal blnValue As Boolean) Implements iMSFileInfoProcessor.SetOption
@@ -137,6 +169,10 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 				mUpdateDatasetStatsTextFile = blnValue
 			Case iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile
 				mCreateScanStatsFile = blnValue
+			Case iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus
+				mCheckCentroidingStatus = blnValue
+			Case Else
+				Throw New Exception("Unrecognized option, " & eOption.ToString)
 		End Select
 
 	End Sub
@@ -145,15 +181,14 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 		Dim blnSuccess As Boolean
 
-		Dim strDatasetName As String
-		Dim strDatasetInfoFilePath As String
-
-		strDatasetInfoFilePath = String.Empty
-
 		Try
-			strDatasetName = GetDatasetNameViaPath(strInputFileName)
-			strDatasetInfoFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName)
+			Dim strDatasetName = GetDatasetNameViaPath(strInputFileName)
+			Dim strDatasetInfoFilePath = Path.Combine(strOutputFolderPath, strDatasetName)
 			strDatasetInfoFilePath &= DSSummarizer.clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX
+
+			If mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = 0 AndAlso mDatasetID > 0 Then
+				mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID
+			End If
 
 			blnSuccess = mDatasetStatsSummarizer.CreateDatasetInfoFile(strDatasetName, strDatasetInfoFilePath)
 
@@ -161,7 +196,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 				ReportError("Error calling objDatasetStatsSummarizer.CreateDatasetInfoFile: " & mDatasetStatsSummarizer.ErrorMessage)
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			ReportError("Error creating dataset info file: " & ex.Message)
 			blnSuccess = False
 		End Try
@@ -181,8 +216,12 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 		Try
 			strDatasetName = GetDatasetNameViaPath(strInputFileName)
-			strScanStatsFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetName)
+			strScanStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetName)
 			strScanStatsFilePath &= "_ScanStats.txt"
+
+			If mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = 0 AndAlso mDatasetID > 0 Then
+				mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID
+			End If
 
 			blnSuccess = mDatasetStatsSummarizer.CreateScanStatsFile(strDatasetName, strScanStatsFilePath)
 
@@ -190,7 +229,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 				ReportError("Error calling objDatasetStatsSummarizer.CreateScanStatsFile: " & mDatasetStatsSummarizer.ErrorMessage)
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			ReportError("Error creating dataset ScanStats file: " & ex.Message)
 			blnSuccess = False
 		End Try
@@ -220,7 +259,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 		Try
 			strDatasetName = GetDatasetNameViaPath(strInputFileName)
 
-			strDatasetStatsFilePath = System.IO.Path.Combine(strOutputFolderPath, strDatasetStatsFilename)
+			strDatasetStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetStatsFilename)
 
 			blnSuccess = mDatasetStatsSummarizer.UpdateDatasetStatsTextFile(strDatasetName, strDatasetStatsFilePath)
 
@@ -228,7 +267,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 				ReportError("Error calling objDatasetStatsSummarizer.UpdateDatasetStatsTextFile: " & mDatasetStatsSummarizer.ErrorMessage)
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			ReportError("Error updating the dataset stats text file: " & ex.Message)
 			blnSuccess = False
 		End Try
@@ -240,10 +279,13 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 	Public Function GetDatasetInfoXML() As String Implements iMSFileInfoProcessor.GetDatasetInfoXML
 
 		Try
+			If mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = 0 AndAlso mDatasetID > 0 Then
+				mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID
+			End If
 
 			Return mDatasetStatsSummarizer.CreateDatasetInfoXML()
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			ReportError("Error getting dataset info XML: " & ex.Message)
 		End Try
 
@@ -300,6 +342,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 		mSaveTICAndBPI = False
 		mSaveLCMS2DPlots = False
+		mCheckCentroidingStatus = False
 
 		mComputeOverallQualityScores = False
 
@@ -311,6 +354,9 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 		mScanStart = 0
 		mScanEnd = 0
+		mShowDebugInfo = False
+
+		mDatasetID = 0
 
 		mDatasetStatsSummarizer = New DSSummarizer.clsDatasetStatsSummarizer
 
@@ -338,28 +384,28 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 		RaiseEvent MessageEvent(strMessage)
 	End Sub
 
-	Protected Function UpdateDatasetFileStats(ByRef ioFileInfo As System.IO.FileInfo, ByVal intDatasetID As Integer) As Boolean
+	Protected Function UpdateDatasetFileStats(ByRef fiFileInfo As FileInfo, ByVal intDatasetID As Integer) As Boolean
 
 		Try
-			If Not ioFileInfo.Exists Then Return False
+			If Not fiFileInfo.Exists Then Return False
 
 			' Record the file size and Dataset ID
 			With mDatasetStatsSummarizer.DatasetFileInfo
-				.FileSystemCreationTime = ioFileInfo.CreationTime
-				.FileSystemModificationTime = ioFileInfo.LastWriteTime
+				.FileSystemCreationTime = fiFileInfo.CreationTime
+				.FileSystemModificationTime = fiFileInfo.LastWriteTime
 
 				.AcqTimeStart = .FileSystemModificationTime
 				.AcqTimeEnd = .FileSystemModificationTime
 
 				.DatasetID = intDatasetID
-				.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFileInfo.Name)
-				.FileExtension = ioFileInfo.Extension
-				.FileSizeBytes = ioFileInfo.Length
+				.DatasetName = Path.GetFileNameWithoutExtension(fiFileInfo.Name)
+				.FileExtension = fiFileInfo.Extension
+				.FileSizeBytes = fiFileInfo.Length
 
 				.ScanCount = 0
 			End With
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			Return False
 		End Try
 
@@ -367,31 +413,31 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 	End Function
 
-	Protected Function UpdateDatasetFileStats(ByRef ioFolderInfo As System.IO.DirectoryInfo, ByVal intDatasetID As Integer) As Boolean
+	Protected Function UpdateDatasetFileStats(ByRef diFolderInfo As DirectoryInfo, ByVal intDatasetID As Integer) As Boolean
 
 		Try
-			If Not ioFolderInfo.Exists Then Return False
+			If Not diFolderInfo.Exists Then Return False
 
 			' Record the file size and Dataset ID
 			With mDatasetStatsSummarizer.DatasetFileInfo
-				.FileSystemCreationTime = ioFolderInfo.CreationTime
-				.FileSystemModificationTime = ioFolderInfo.LastWriteTime
+				.FileSystemCreationTime = diFolderInfo.CreationTime
+				.FileSystemModificationTime = diFolderInfo.LastWriteTime
 
 				.AcqTimeStart = .FileSystemModificationTime
 				.AcqTimeEnd = .FileSystemModificationTime
 
 				.DatasetID = intDatasetID
-				.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
-				.FileExtension = ioFolderInfo.Extension
+				.DatasetName = Path.GetFileNameWithoutExtension(diFolderInfo.Name)
+				.FileExtension = diFolderInfo.Extension
 
-				For Each ioFileInfo As System.IO.FileInfo In ioFolderInfo.GetFiles("*", IO.SearchOption.AllDirectories)
-					.FileSizeBytes += ioFileInfo.Length
-				Next ioFileInfo
-			
+				For Each fiFileInfo In diFolderInfo.GetFiles("*", SearchOption.AllDirectories)
+					.FileSizeBytes += fiFileInfo.Length
+				Next
+
 				.ScanCount = 0
 			End With
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			Return False
 		End Try
 
@@ -399,9 +445,20 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 	End Function
 
-	Protected Function CreateOverview2DPlots(ByVal strDatasetName As String, _
-	  ByVal strOutputFolderPath As String, _
-	  ByVal intLCMS2DOverviewPlotDivisor As Integer) As Boolean
+	Protected Function CreateOverview2DPlots(
+	 ByVal strDatasetName As String,
+	 ByVal strOutputFolderPath As String,
+	 ByVal intLCMS2DOverviewPlotDivisor As Integer) As Boolean
+
+		Return CreateOverview2DPlots(strDatasetName, strOutputFolderPath, intLCMS2DOverviewPlotDivisor, String.Empty)
+
+	End Function
+
+	Protected Function CreateOverview2DPlots(
+	  ByVal strDatasetName As String,
+	  ByVal strOutputFolderPath As String,
+	  ByVal intLCMS2DOverviewPlotDivisor As Integer,
+	  ByVal strScanModeSuffixAddon As String) As Boolean
 
 		Dim objScan As clsLCMSDataPlotter.clsScanData
 
@@ -431,7 +488,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 		' Write out the Overview 2D plot of m/z vs. intensity
 		' Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-		blnSuccess = mLCMS2DPlotOverview.Save2DPlots(strDatasetName, strOutputFolderPath, "HighAbu_")
+		blnSuccess = mLCMS2DPlotOverview.Save2DPlots(strDatasetName, strOutputFolderPath, "HighAbu_", strScanModeSuffixAddon)
 
 		Return blnSuccess
 
@@ -448,7 +505,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 		Dim blnCreateQCPlotHtmlFile As Boolean
 
-		Dim ioFolderInfo As System.IO.DirectoryInfo
+		Dim diFolderInfo As DirectoryInfo
 
 		Try
 
@@ -460,26 +517,26 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 			If strOutputFolderPath.Length > 0 Then
 				' Make sure the output folder exists
-				ioFolderInfo = New System.IO.DirectoryInfo(strOutputFolderPath)
+				diFolderInfo = New DirectoryInfo(strOutputFolderPath)
 
-				If Not ioFolderInfo.Exists Then
-					ioFolderInfo.Create()
+				If Not diFolderInfo.Exists Then
+					diFolderInfo.Create()
 				End If
 			Else
-				ioFolderInfo = New System.IO.DirectoryInfo(".")
+				diFolderInfo = New DirectoryInfo(".")
 			End If
 
 			If mSaveTICAndBPI Then
 				' Write out the TIC and BPI plots
 				strErrorMessage = String.Empty
-				blnSuccess = mTICandBPIPlot.SaveTICAndBPIPlotFiles(strDatasetName, ioFolderInfo.FullName, strErrorMessage)
+				blnSuccess = mTICandBPIPlot.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, strErrorMessage)
 				If Not blnSuccess Then
 					ReportError("Error calling mTICandBPIPlot.SaveTICAndBPIPlotFiles: " & strErrorMessage)
 					blnSuccessOverall = False
 				End If
 
 				' Write out any instrument-specific plots
-				blnSuccess = mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles(strDatasetName, ioFolderInfo.FullName, strErrorMessage)
+				blnSuccess = mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, strErrorMessage)
 				If Not blnSuccess Then
 					ReportError("Error calling mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles: " & strErrorMessage)
 					blnSuccessOverall = False
@@ -491,12 +548,13 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 			If mSaveLCMS2DPlots Then
 				' Write out the 2D plot of m/z vs. intensity
 				' Plots will be named Dataset_LCMS.png and Dataset_LCMSn.png
-				blnSuccess = mLCMS2DPlot.Save2DPlots(strDatasetName, ioFolderInfo.FullName)
+				blnSuccess = mLCMS2DPlot.Save2DPlots(strDatasetName, diFolderInfo.FullName)
 				If Not blnSuccess Then
 					blnSuccessOverall = False
 				Else
 					If mLCMS2DOverviewPlotDivisor > 0 Then
 						' Also save the Overview 2D Plots
+						' Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
 						blnSuccess = CreateOverview2DPlots(strDatasetName, strOutputFolderPath, mLCMS2DOverviewPlotDivisor)
 						If Not blnSuccess Then
 							blnSuccessOverall = False
@@ -504,13 +562,24 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 					Else
 						mLCMS2DPlotOverview.ClearRecentFileInfo()
 					End If
+
+					If blnSuccessOverall AndAlso mLCMS2DPlot.Options.PlottingDeisotopedData Then
+						' Create two more plots 2D plots, but this with a smaller maximum m/z
+						mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT
+						mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT
+
+						mLCMS2DPlot.Save2DPlots(strDatasetName, diFolderInfo.FullName, "", "_zoom")
+						If mLCMS2DOverviewPlotDivisor > 0 Then
+							CreateOverview2DPlots(strDatasetName, strOutputFolderPath, mLCMS2DOverviewPlotDivisor, "_zoom")
+						End If
+					End If
 				End If
 				blnCreateQCPlotHtmlFile = True
 			End If
 
 			If mCreateDatasetInfoFile Then
 				' Create the _DatasetInfo.xml file
-				blnSuccess = Me.CreateDatasetInfoFile(strInputFileName, ioFolderInfo.FullName)
+				blnSuccess = Me.CreateDatasetInfoFile(strInputFileName, diFolderInfo.FullName)
 				If Not blnSuccess Then
 					blnSuccessOverall = False
 				End If
@@ -519,7 +588,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 			If mCreateScanStatsFile Then
 				' Create the _ScanStats.txt file
-				blnSuccess = Me.CreateDatasetScanStatsFile(strInputFileName, ioFolderInfo.FullName)
+				blnSuccess = Me.CreateDatasetScanStatsFile(strInputFileName, diFolderInfo.FullName)
 				If Not blnSuccess Then
 					blnSuccessOverall = False
 				End If
@@ -527,20 +596,20 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 			If mUpdateDatasetStatsTextFile Then
 				' Add a new row to the MSFileInfo_DatasetStats.txt file
-				blnSuccess = Me.UpdateDatasetStatsTextFile(strInputFileName, ioFolderInfo.FullName, mDatasetStatsTextFileName)
+				blnSuccess = Me.UpdateDatasetStatsTextFile(strInputFileName, diFolderInfo.FullName, mDatasetStatsTextFileName)
 				If Not blnSuccess Then
 					blnSuccessOverall = False
 				End If
 			End If
 
 			If blnCreateQCPlotHtmlFile Then
-				blnSuccess = CreateQCPlotHTMLFile(strDatasetName, ioFolderInfo.FullName)
+				blnSuccess = CreateQCPlotHTMLFile(strDatasetName, diFolderInfo.FullName)
 				If Not blnSuccess Then
 					blnSuccessOverall = False
 				End If
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			ReportError("Error creating output files: " & ex.Message)
 			blnSuccessOverall = False
 		End Try
@@ -552,7 +621,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 	Protected Function CreateQCPlotHTMLFile(ByVal strDatasetName As String, _
 	 ByVal strOutputFolderPath As String) As Boolean
 
-		Dim swOutFile As System.IO.StreamWriter
+		Dim swOutFile As StreamWriter
 
 		Dim strHTMLFilePath As String
 		Dim strFile1 As String
@@ -574,9 +643,9 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 			' Obtain the dataset summary stats (they will be auto-computed if not up to date)
 			objSummaryStats = mDatasetStatsSummarizer.GetDatasetSummaryStats
 
-			strHTMLFilePath = System.IO.Path.Combine(strOutputFolderPath, "index.html")
+			strHTMLFilePath = Path.Combine(strOutputFolderPath, "index.html")
 
-			swOutFile = New System.IO.StreamWriter(New System.IO.FileStream(strHTMLFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+			swOutFile = New StreamWriter(New FileStream(strHTMLFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
 			swOutFile.WriteLine("<!DOCTYPE html PUBLIC ""-//W3C//DTD HTML 3.2//EN"">")
 			swOutFile.WriteLine("<html>")
@@ -589,8 +658,15 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 			swOutFile.WriteLine("")
 			swOutFile.WriteLine("  <table>")
 
+			' First the plots with the top 50,000 points
 			strFile1 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS)
-			strFile2 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn)
+
+			If mLCMS2DPlotOverview.Options.PlottingDeisotopedData Then
+				strFile2 = strFile1.Replace("_zoom.png", ".png")
+			Else
+				strFile2 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn)
+			End If
+
 			strTop = IntToEngineeringNotation(mLCMS2DPlotOverview.Options.MaxPointsToPlot)
 
 			If strFile1.Length > 0 OrElse strFile2.Length > 0 Then
@@ -602,8 +678,15 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 				swOutFile.WriteLine("")
 			End If
 
+			' Now the plots with the top 500,000 points
 			strFile1 = mLCMS2DPlot.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS)
-			strFile2 = mLCMS2DPlot.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn)
+
+			If mLCMS2DPlotOverview.Options.PlottingDeisotopedData Then
+				strFile2 = strFile1.Replace("_zoom.png", ".png")
+			Else
+				strFile2 = mLCMS2DPlot.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn)
+			End If
+
 			strTop = IntToEngineeringNotation(mLCMS2DPlot.Options.MaxPointsToPlot)
 
 			If strFile1.Length > 0 OrElse strFile2.Length > 0 Then
@@ -655,7 +738,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 			swOutFile.WriteLine("      <td align=""center"">DMS <a href=""http://dms2.pnl.gov/dataset/show/" & strDatasetName & """>Dataset Detail Report</a></td>")
 
 			strDSInfoFileName = strDatasetName & DSSummarizer.clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX
-			If mCreateDatasetInfoFile OrElse System.IO.File.Exists(System.IO.Path.Combine(strOutputFolderPath, strDSInfoFileName)) Then
+			If mCreateDatasetInfoFile OrElse File.Exists(Path.Combine(strOutputFolderPath, strDSInfoFileName)) Then
 				swOutFile.WriteLine("      <td align=""center""><a href=""" & strDSInfoFileName & """>Dataset Info XML file</a></td>")
 			Else
 				swOutFile.WriteLine("      <td>&nbsp;</td>")
@@ -673,7 +756,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 			swOutFile.Close()
 
 			blnSuccess = True
-		Catch ex As System.Exception
+		Catch ex As Exception
 			ReportError("Error creating QC plot HTML file: " & ex.Message)
 			blnSuccess = False
 		End Try
@@ -692,11 +775,11 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 	End Function
 
-	Private Sub GenerateQCScanTypeSummaryHTML(ByRef swOutFile As System.IO.StreamWriter, _
+	Private Sub GenerateQCScanTypeSummaryHTML(ByRef swOutFile As StreamWriter, _
 	   ByRef objDatasetSummaryStats As DSSummarizer.clsDatasetSummaryStats, _
 	   ByVal strIndent As String)
 
-		Dim objEnum As System.Collections.Generic.Dictionary(Of String, Integer).Enumerator
+		Dim objEnum As Dictionary(Of String, Integer).Enumerator
 		Dim strScanType As String
 		Dim intIndexMatch As Integer
 
@@ -745,8 +828,6 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Protected Function IntToEngineeringNotation(ByVal intValue As Integer) As String
-		Dim strValue As String
-		strValue = String.Empty
 
 		If intValue < 1000 Then
 			Return intValue.ToString
@@ -758,7 +839,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 	End Function
 
-	Public MustOverride Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean Implements iMSFileInfoProcessor.ProcessDatafile
+	Public MustOverride Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean Implements iMSFileInfoProcessor.ProcessDataFile
 	Public MustOverride Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String Implements iMSFileInfoProcessor.GetDatasetNameViaPath
 
 	Private Sub mLCMS2DPlot_ErrorEvent(ByVal Message As String) Handles mLCMS2DPlot.ErrorEvent
@@ -769,4 +850,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 		ReportError("Error in LCMS2DPlotOverview: " & Message)
 	End Sub
 
+	Private Sub mDatasetStatsSummarizer_ErrorEvent(errorMessage As String) Handles mDatasetStatsSummarizer.ErrorEvent
+		ReportError(errorMessage)
+	End Sub
 End Class

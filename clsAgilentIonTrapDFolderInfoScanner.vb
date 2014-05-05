@@ -31,35 +31,35 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
                 dtDate = Date.Parse(strSplitLine(strSplitLine.Length - 1) & " " & strSplitLine(strSplitLine.Length - 2))
                 blnSuccess = True
             End If
-        Catch ex As System.Exception
-            ' Ignore errors
-        End Try
+		Catch ex As Exception
+			' Ignore errors
+		End Try
 
-        Return blnSuccess
-    End Function
+		Return blnSuccess
+	End Function
 
-    Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
-        ' The dataset name is simply the folder name without .D
-        Try
-            Return System.IO.Path.GetFileNameWithoutExtension(strDataFilePath)
-        Catch ex As System.Exception
-            Return String.Empty
-        End Try
-    End Function
+	Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
+		' The dataset name is simply the folder name without .D
+		Try
+			Return Path.GetFileNameWithoutExtension(strDataFilePath)
+		Catch ex As Exception
+			Return String.Empty
+		End Try
+	End Function
 
-    Private Function SecondsToTimeSpan(ByVal dblSeconds As Double) As System.TimeSpan
+	Private Function SecondsToTimeSpan(ByVal dblSeconds As Double) As TimeSpan
 
-        Dim dtTimeSpan As System.TimeSpan
+		Dim dtTimeSpan As TimeSpan
 
-        Try
-            dtTimeSpan = New System.TimeSpan(0, 0, CInt(dblSeconds))
-        Catch ex As System.Exception
-            dtTimeSpan = New System.TimeSpan(0, 0, 0)
-        End Try
+		Try
+			dtTimeSpan = New TimeSpan(0, 0, CInt(dblSeconds))
+		Catch ex As Exception
+			dtTimeSpan = New TimeSpan(0, 0, 0)
+		End Try
 
-        Return dtTimeSpan
+		Return dtTimeSpan
 
-    End Function
+	End Function
 
 	Private Function ParseRunLogFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		Dim strLineIn As String
@@ -74,7 +74,7 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 
 		Try
 			' Try to open the Run.Log file
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(System.IO.Path.Combine(strFolderPath, AGILENT_RUN_LOG_FILE))
+			Using srInFile As StreamReader = New StreamReader(Path.Combine(strFolderPath, AGILENT_RUN_LOG_FILE))
 
 				blnProcessedFirstMethodLine = False
 				blnEndDateFound = False
@@ -123,7 +123,7 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 
 			blnSuccess = blnProcessedFirstMethodLine
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			' Run.log file not found
 			blnSuccess = False
 		End Try
@@ -143,7 +143,7 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 
 		Try
 			objNETCDFReader = New NetCDFReader.clsMSNetCdf
-			blnSuccess = objNETCDFReader.OpenMSCdfFile(System.IO.Path.Combine(strFolderPath, AGILENT_ANALYSIS_CDF_FILE))
+			blnSuccess = objNETCDFReader.OpenMSCdfFile(Path.Combine(strFolderPath, AGILENT_ANALYSIS_CDF_FILE))
 			If blnSuccess Then
 				intScanCount = objNETCDFReader.GetScanCount()
 
@@ -160,7 +160,7 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 					udtFileInfo.ScanCount = 0
 				End If
 			End If
-		Catch ex As System.Exception
+		Catch ex As Exception
 			blnSuccess = False
 		Finally
 			If Not objNETCDFReader Is Nothing Then
@@ -172,16 +172,16 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 
 	End Function
 
-	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		' Returns True if success, False if an error
 
 		Dim blnSuccess As Boolean
-		Dim ioFolderInfo As System.IO.DirectoryInfo
-		Dim ioFileInfo As System.IO.FileInfo
+		Dim ioFolderInfo As DirectoryInfo
+		Dim ioFileInfo As FileInfo
 
 		Try
 			blnSuccess = False
-			ioFolderInfo = New System.IO.DirectoryInfo(strDataFilePath)
+			ioFolderInfo = New DirectoryInfo(strDataFilePath)
 
 			With udtFileInfo
 				.FileSystemCreationTime = ioFolderInfo.CreationTime
@@ -191,13 +191,13 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 				.AcqTimeStart = .FileSystemModificationTime
 				.AcqTimeEnd = .FileSystemModificationTime
 
-				.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
+				.DatasetName = GetDatasetNameViaPath(ioFolderInfo.Name)
 				.FileExtension = ioFolderInfo.Extension
 
 				' Look for the Analysis.yep file
 				' Use its modification time to get an initial estimate for the acquisition time
 				' Assign the .Yep file's size to .FileSizeBytes
-				ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_YEP_FILE))
+				ioFileInfo = New FileInfo(Path.Combine(ioFolderInfo.FullName, AGILENT_YEP_FILE))
 				If ioFileInfo.Exists Then
 					.FileSizeBytes = ioFileInfo.Length
 					.AcqTimeStart = ioFileInfo.LastWriteTime
@@ -205,7 +205,7 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 					blnSuccess = True
 				Else
 					' Analysis.yep not found; look for Run.log
-					ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioFolderInfo.FullName, AGILENT_RUN_LOG_FILE))
+					ioFileInfo = New FileInfo(Path.Combine(ioFolderInfo.FullName, AGILENT_RUN_LOG_FILE))
 					If ioFileInfo.Exists Then
 						.AcqTimeStart = ioFileInfo.LastWriteTime
 						.AcqTimeEnd = ioFileInfo.LastWriteTime
@@ -229,7 +229,7 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 
 					' Parse the Analysis.cdf file to determine the scan count and to further refine .AcqTimeStart
 					blnSuccess = ParseAnalysisCDFFile(strDataFilePath, udtFileInfo)
-				Catch ex As System.Exception
+				Catch ex As Exception
 					' Error parsing the Run Log file or the Analysis.cdf file; do not abort
 
 				End Try
@@ -237,7 +237,7 @@ Public Class clsAgilentIonTrapDFolderInfoScanner
 				blnSuccess = True
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			blnSuccess = False
 		End Try
 

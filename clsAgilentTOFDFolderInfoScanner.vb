@@ -20,8 +20,8 @@
 	Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
 		' The dataset name is simply the folder name without .D
 		Try
-			Return System.IO.Path.GetFileNameWithoutExtension(strDataFilePath)
-		Catch ex As System.Exception
+			Return Path.GetFileNameWithoutExtension(strDataFilePath)
+		Catch ex As Exception
 			Return String.Empty
 		End Try
 	End Function
@@ -41,9 +41,9 @@
 			blnSuccess = False
 
 			' Open the Contents.xml file
-			strFilePath = System.IO.Path.Combine(strFolderPath, AGILENT_XML_CONTENTS_FILE)
+			strFilePath = Path.Combine(strFolderPath, AGILENT_XML_CONTENTS_FILE)
 
-			Using srReader As System.Xml.XmlTextReader = New System.Xml.XmlTextReader(New System.IO.FileStream(strFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+			Using srReader As Xml.XmlTextReader = New Xml.XmlTextReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
 				Do While Not srReader.EOF
 					srReader.Read()
@@ -53,7 +53,7 @@
 							Select Case srReader.Name
 								Case "AcquiredTime"
 									Try
-										Dim dtAcquisitionStartTime As System.DateTime
+										Dim dtAcquisitionStartTime As DateTime
 										dtAcquisitionStartTime = srReader.ReadElementContentAsDateTime
 										' Convert from Universal time to Local time
 										udtFileInfo.AcqTimeStart = dtAcquisitionStartTime.ToLocalTime
@@ -73,7 +73,7 @@
 			End Using
 
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			' Exception reading file
 			ReportError("Exception reading " & AGILENT_XML_CONTENTS_FILE & ": " & ex.Message)
 			blnSuccess = False
@@ -104,9 +104,9 @@
 			dblTotalAcqTimeMinutes = 0
 
 			' Open the Contents.xml file
-			strFilePath = System.IO.Path.Combine(strFolderPath, AGILENT_TIME_SEGMENT_FILE)
+			strFilePath = Path.Combine(strFolderPath, AGILENT_TIME_SEGMENT_FILE)
 
-			Using srReader As System.Xml.XmlTextReader = New System.Xml.XmlTextReader(New System.IO.FileStream(strFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+			Using srReader As Xml.XmlTextReader = New Xml.XmlTextReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
 				Do While Not srReader.EOF
 					srReader.Read()
@@ -149,7 +149,7 @@
 
 			End Using
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			' Exception reading file
 			ReportError("Exception reading " & AGILENT_TIME_SEGMENT_FILE & ": " & ex.Message)
 			blnSuccess = False
@@ -159,7 +159,7 @@
 
 	End Function
 
-	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		' Returns True if success, False if an error
 
 		Dim dblAcquisitionLengthMinutes As Double = 0
@@ -168,15 +168,15 @@
 		Dim blnValidMSTS As Boolean
 		Dim blnSuccess As Boolean
 
-		Dim ioRootFolderInfo As System.IO.DirectoryInfo
-		Dim ioAcqDataFolderInfo As System.IO.DirectoryInfo
+		Dim ioRootFolderInfo As DirectoryInfo
+		Dim ioAcqDataFolderInfo As DirectoryInfo
 
-		Dim ioFileInfo As System.IO.FileInfo
+		Dim ioFileInfo As FileInfo
 
 		Try
 			blnSuccess = False
-			ioRootFolderInfo = New System.IO.DirectoryInfo(strDataFilePath)
-			ioAcqDataFolderInfo = New System.IO.DirectoryInfo(System.IO.Path.Combine(ioRootFolderInfo.FullName, AGILENT_ACQDATA_FOLDER_NAME))
+			ioRootFolderInfo = New DirectoryInfo(strDataFilePath)
+			ioAcqDataFolderInfo = New DirectoryInfo(Path.Combine(ioRootFolderInfo.FullName, AGILENT_ACQDATA_FOLDER_NAME))
 
 			With udtFileInfo
 				.FileSystemCreationTime = ioAcqDataFolderInfo.CreationTime
@@ -186,20 +186,20 @@
 				.AcqTimeStart = .FileSystemModificationTime
 				.AcqTimeEnd = .FileSystemModificationTime
 
-				.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioRootFolderInfo.Name)
+				.DatasetName = GetDatasetNameViaPath(ioRootFolderInfo.Name)
 				.FileExtension = ioRootFolderInfo.Extension
 				.FileSizeBytes = 0
 				.ScanCount = 0
 
 				If ioAcqDataFolderInfo.Exists Then
 					' Sum up the sizes of all of the files in the AcqData folder
-					For Each ioFileInfo In ioAcqDataFolderInfo.GetFiles("*", IO.SearchOption.AllDirectories)
+					For Each ioFileInfo In ioAcqDataFolderInfo.GetFiles("*", SearchOption.AllDirectories)
 						.FileSizeBytes += ioFileInfo.Length
 					Next ioFileInfo
 
 					' Look for the MSScan.bin file
 					' Use its modification time to get an initial estimate for the acquisition end time
-					ioFileInfo = New System.IO.FileInfo(System.IO.Path.Combine(ioAcqDataFolderInfo.FullName, AGILENT_MS_SCAN_FILE))
+					ioFileInfo = New FileInfo(Path.Combine(ioAcqDataFolderInfo.FullName, AGILENT_MS_SCAN_FILE))
 
 					If ioFileInfo.Exists Then
 						.AcqTimeStart = ioFileInfo.LastWriteTime
@@ -259,7 +259,7 @@
 			End If
 
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			ReportError("Exception parsing Agilent TOF .D folder: " & ex.Message)
 			blnSuccess = False
 		End Try
@@ -282,7 +282,7 @@
 
 
 			Try
-				Dim dtRunStartTime As System.DateTime = udtFileInfo.AcqTimeStart
+				Dim dtRunStartTime As DateTime = udtFileInfo.AcqTimeStart
 				dtRunStartTime = CDate(objPWiz.RunStartTime())
 
 				' Update AcqTimeEnd if possible
@@ -298,7 +298,10 @@
 
 
 			' Instantiate the Proteowizard Data Parser class
-			mPWizParser = New clsProteowizardDataParser(objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot, mSaveLCMS2DPlots, mSaveTICAndBPI)
+			mPWizParser = New clsProteowizardDataParser(
+			  objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot,
+			  mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus)
+
 			mPWizParser.HighResMS1 = True
 			mPWizParser.HighResMS2 = True
 

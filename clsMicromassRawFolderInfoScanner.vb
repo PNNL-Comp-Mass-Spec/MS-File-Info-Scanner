@@ -16,37 +16,37 @@ Public Class clsMicromassRawFolderInfoScanner
     Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
         ' The dataset name is simply the folder name without .Raw
         Try
-            Return System.IO.Path.GetFileNameWithoutExtension(strDataFilePath)
-        Catch ex As System.Exception
-            Return String.Empty
-        End Try
-    End Function
+			Return Path.GetFileNameWithoutExtension(strDataFilePath)
+		Catch ex As Exception
+			Return String.Empty
+		End Try
+	End Function
 
-    Private Function MinutesToTimeSpan(ByVal dblMinutes As Double) As System.TimeSpan
+	Private Function MinutesToTimeSpan(ByVal dblMinutes As Double) As TimeSpan
 
-        Dim intMinutes As Integer
-        Dim intSeconds As Integer
-        Dim dtTimeSpan As System.TimeSpan
+		Dim intMinutes As Integer
+		Dim intSeconds As Integer
+		Dim dtTimeSpan As TimeSpan
 
-        Try
-            intMinutes = CInt(Math.Floor(dblMinutes))
-            intSeconds = CInt(Math.Round((dblMinutes - intMinutes) * 60, 0))
+		Try
+			intMinutes = CInt(Math.Floor(dblMinutes))
+			intSeconds = CInt(Math.Round((dblMinutes - intMinutes) * 60, 0))
 
-            dtTimeSpan = New System.TimeSpan(0, intMinutes, intSeconds)
-        Catch ex As System.Exception
-            dtTimeSpan = New System.TimeSpan(0, 0, 0)
-        End Try
+			dtTimeSpan = New TimeSpan(0, intMinutes, intSeconds)
+		Catch ex As Exception
+			dtTimeSpan = New TimeSpan(0, 0, 0)
+		End Try
 
-        Return dtTimeSpan
+		Return dtTimeSpan
 
-    End Function
+	End Function
 
-	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+	Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 		' Returns True if success, False if an error
 
 		Dim blnSuccess As Boolean
-		Dim ioFolderInfo As System.IO.DirectoryInfo
-		Dim ioFileInfo As System.IO.FileInfo
+		Dim ioFolderInfo As DirectoryInfo
+		Dim ioFileInfo As FileInfo
 
 		Dim intFileCount As Integer
 
@@ -61,7 +61,7 @@ Public Class clsMicromassRawFolderInfoScanner
 		Dim dtNewStartDate As DateTime
 
 		Try
-			ioFolderInfo = New System.IO.DirectoryInfo(strDataFilePath)
+			ioFolderInfo = New DirectoryInfo(strDataFilePath)
 			With udtFileInfo
 				.FileSystemCreationTime = ioFolderInfo.CreationTime
 				.FileSystemModificationTime = ioFolderInfo.LastWriteTime
@@ -70,7 +70,7 @@ Public Class clsMicromassRawFolderInfoScanner
 				.AcqTimeStart = .FileSystemModificationTime
 				.AcqTimeEnd = .FileSystemModificationTime
 
-				.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFolderInfo.Name)
+				.DatasetName = GetDatasetNameViaPath(ioFolderInfo.Name)
 				.FileExtension = ioFolderInfo.Extension
 
 				' Sum up the sizes of all of the files in this folder
@@ -153,7 +153,7 @@ Public Class clsMicromassRawFolderInfoScanner
 
 			blnSuccess = True
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			blnSuccess = False
 		End Try
 

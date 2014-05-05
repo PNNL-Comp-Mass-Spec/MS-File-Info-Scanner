@@ -8,12 +8,13 @@ Option Strict On
 '
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Started October 11, 2003
+Imports MSFileInfoScannerInterfaces
 
 Public Class clsMSFileInfoScanner
-	Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner
+	Implements iMSFileInfoScanner
 
 	Public Sub New()
-		mFileDate = "September 17, 2012"
+		mFileDate = "April 3, 2014"
 
 		mFileIntegrityChecker = New clsFileIntegrityChecker
 		mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -42,7 +43,7 @@ Public Class clsMSFileInfoScanner
 	Public Const USE_XML_OUTPUT_FILE As Boolean = False
 	Private Const SKIP_FILES_IN_ERROR As Boolean = True
 
-	'Public Enum MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes
+	'Public Enum iMSFileInfoScanner.eMSFileScannerErrorCodes
 	'	NoError = 0
 	'	InvalidInputFilePath = 1
 	'	InvalidOutputFolderPath = 2
@@ -61,7 +62,7 @@ Public Class clsMSFileInfoScanner
 	'	UnspecifiedError = -1
 	'End Enum
 
-	'Public Enum MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants
+	'Public Enum iMSFileInfoScanner.eMSFileProcessingStateConstants
 	'	NotProcessed = 0
 	'	SkippedSinceFoundInCache = 1
 	'	FailedProcessing = 2
@@ -98,7 +99,7 @@ Public Class clsMSFileInfoScanner
 #Region "Classwide Variables"
 
 	Private mFileDate As String
-	Private mErrorCode As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes
+	Private mErrorCode As iMSFileInfoScanner.eMSFileScannerErrorCodes
 
 	Private mAbortProcessing As Boolean
 
@@ -117,6 +118,7 @@ Public Class clsMSFileInfoScanner
 
 	Private mSaveTICAndBPIPlots As Boolean
 	Private mSaveLCMS2DPlots As Boolean
+	Private mCheckCentroidingStatus As Boolean
 
 	Private mComputeOverallQualityScores As Boolean
 	Private mCreateDatasetInfoFile As Boolean
@@ -132,16 +134,18 @@ Public Class clsMSFileInfoScanner
 	Private mDSInfoConnectionString As String
 	Private mDSInfoDBPostingEnabled As Boolean
 	Private mDSInfoStoredProcedure As String
+	Private mDSInfoDatasetIDOverride As Integer
 
 	Private mLCMS2DPlotOptions As clsLCMSDataPlotter.clsOptions
 	Private mLCMS2DOverviewPlotDivisor As Integer
 
 	Private mScanStart As Integer
 	Private mScanEnd As Integer
+	Private mShowDebugInfo As Boolean
 
 	Protected mLogMessagesToFile As Boolean
 	Protected mLogFilePath As String
-	Protected mLogFile As System.IO.StreamWriter
+	Protected mLogFile As StreamWriter
 
 	' This variable is updated in ProcessMSFileOrFolder
 	Protected mOutputFolderPath As String
@@ -150,8 +154,8 @@ Public Class clsMSFileInfoScanner
 	Protected mDatasetInfoXML As String = ""
 
 	Private WithEvents mFileIntegrityChecker As clsFileIntegrityChecker
-	Private mFileIntegrityDetailsWriter As System.IO.StreamWriter
-	Private mFileIntegrityErrorsWriter As System.IO.StreamWriter
+	Private mFileIntegrityDetailsWriter As StreamWriter
+	Private mFileIntegrityErrorsWriter As StreamWriter
 
 	Private WithEvents mMSInfoScanner As iMSFileInfoProcessor
 
@@ -159,14 +163,14 @@ Public Class clsMSFileInfoScanner
 
 	Private WithEvents mExecuteSP As PRISM.DataBase.clsExecuteDatabaseSP
 
-	Public Event MessageEvent(ByVal Message As String) Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.MessageEvent
-	Public Event ErrorEvent(ByVal Message As String) Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ErrorEvent
+	Public Event MessageEvent(ByVal Message As String) Implements iMSFileInfoScanner.MessageEvent
+	Public Event ErrorEvent(ByVal Message As String) Implements iMSFileInfoScanner.ErrorEvent
 
 #End Region
 
 #Region "Processing Options and Interface Functions"
 
-	Public Property AbortProcessing() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.AbortProcessing
+	Public Property AbortProcessing() As Boolean Implements iMSFileInfoScanner.AbortProcessing
 		Get
 			Return mAbortProcessing
 		End Get
@@ -175,19 +179,28 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property AcquisitionTimeFilename() As String Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.AcquisitionTimeFilename
+	Public Property AcquisitionTimeFilename() As String Implements iMSFileInfoScanner.AcquisitionTimeFilename
 		Get
-			Return GetDataFileFilename(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo)
+			Return GetDataFileFilename(iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo)
 		End Get
 		Set(ByVal value As String)
-			SetDataFileFilename(value, MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo)
+			SetDataFileFilename(value, iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo)
+		End Set
+	End Property
+
+	Public Property CheckCentroidingStatus As Boolean Implements iMSFileInfoScanner.CheckCentroidingStatus
+		Get
+			Return mCheckCentroidingStatus
+		End Get
+		Set(value As Boolean)
+			mCheckCentroidingStatus = value
 		End Set
 	End Property
 
 	''' <summary>
 	''' When true, then checks the integrity of every file in every folder processed
 	''' </summary>
-	Public Property CheckFileIntegrity() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.CheckFileIntegrity
+	Public Property CheckFileIntegrity() As Boolean Implements iMSFileInfoScanner.CheckFileIntegrity
 		Get
 			Return mCheckFileIntegrity
 		End Get
@@ -200,7 +213,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property ComputeOverallQualityScores() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ComputeOverallQualityScores
+	Public Property ComputeOverallQualityScores() As Boolean Implements iMSFileInfoScanner.ComputeOverallQualityScores
 		Get
 			Return mComputeOverallQualityScores
 		End Get
@@ -212,36 +225,36 @@ Public Class clsMSFileInfoScanner
 	''' <summary>
 	''' Returns the dataset info, formatted as XML
 	''' </summary>
-	Public ReadOnly Property DatasetInfoXML() As String Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.DatasetInfoXML
+	Public ReadOnly Property DatasetInfoXML() As String Implements iMSFileInfoScanner.DatasetInfoXML
 		Get
 			Return mDatasetInfoXML
 		End Get
 	End Property
 
-	Public Function GetDataFileFilename(ByVal eDataFileType As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants) As String Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.GetDataFileFilename
+	Public Function GetDataFileFilename(ByVal eDataFileType As iMSFileInfoScanner.eDataFileTypeConstants) As String Implements iMSFileInfoScanner.GetDataFileFilename
 		Select Case eDataFileType
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo
+			Case iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo
 				Return mMSFileInfoDataCache.AcquisitionTimeFilePath
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo
+			Case iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo
 				Return mMSFileInfoDataCache.FolderIntegrityInfoFilePath
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails
+			Case iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails
 				Return mFileIntegrityDetailsFilePath
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors
+			Case iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors
 				Return mFileIntegrityErrorsFilePath
 			Case Else
 				Return String.Empty
 		End Select
 	End Function
 
-	Public Sub SetDataFileFilename(ByVal strFilePath As String, ByVal eDataFileType As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants) Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.SetDataFileFilename
+	Public Sub SetDataFileFilename(ByVal strFilePath As String, ByVal eDataFileType As iMSFileInfoScanner.eDataFileTypeConstants) Implements iMSFileInfoScanner.SetDataFileFilename
 		Select Case eDataFileType
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo
+			Case iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo
 				mMSFileInfoDataCache.AcquisitionTimeFilePath = strFilePath
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo
+			Case iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo
 				mMSFileInfoDataCache.FolderIntegrityInfoFilePath = strFilePath
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails
+			Case iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails
 				mFileIntegrityDetailsFilePath = strFilePath
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors
+			Case iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors
 				mFileIntegrityErrorsFilePath = strFilePath
 			Case Else
 				' Unknown file type
@@ -250,34 +263,34 @@ Public Class clsMSFileInfoScanner
 
 	Public Shared ReadOnly Property DefaultAcquisitionTimeFilename() As String
 		Get
-			Return DefaultDataFileName(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo)
+			Return DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo)
 		End Get
 	End Property
 
-	Public Shared ReadOnly Property DefaultDataFileName(ByVal eDataFileType As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants) As String
+	Public Shared ReadOnly Property DefaultDataFileName(ByVal eDataFileType As iMSFileInfoScanner.eDataFileTypeConstants) As String
 		Get
 			If USE_XML_OUTPUT_FILE Then
 				Select Case eDataFileType
-					Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo
+					Case iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo
 						Return DEFAULT_ACQUISITION_TIME_FILENAME_XML
-					Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo
+					Case iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo
 						Return DEFAULT_FOLDER_INTEGRITY_INFO_FILENAME_XML
-					Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails
+					Case iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails
 						Return DEFAULT_FILE_INTEGRITY_DETAILS_FILENAME_XML
-					Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors
+					Case iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors
 						Return DEFAULT_FILE_INTEGRITY_ERRORS_FILENAME_XML
 					Case Else
 						Return "UnknownFileType.xml"
 				End Select
 			Else
 				Select Case eDataFileType
-					Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo
+					Case iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo
 						Return DEFAULT_ACQUISITION_TIME_FILENAME_TXT
-					Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo
+					Case iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo
 						Return DEFAULT_FOLDER_INTEGRITY_INFO_FILENAME_TXT
-					Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails
+					Case iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails
 						Return DEFAULT_FILE_INTEGRITY_DETAILS_FILENAME_TXT
-					Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors
+					Case iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors
 						Return DEFAULT_FILE_INTEGRITY_ERRORS_FILENAME_TXT
 					Case Else
 						Return "UnknownFileType.txt"
@@ -289,7 +302,7 @@ Public Class clsMSFileInfoScanner
 	''' <summary>
 	''' When True, then computes an Sha1 hash on every file
 	''' </summary>
-	Public Property ComputeFileHashes() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ComputeFileHashes
+	Public Property ComputeFileHashes() As Boolean Implements iMSFileInfoScanner.ComputeFileHashes
 		Get
 			If Not mFileIntegrityChecker Is Nothing Then
 				Return mFileIntegrityChecker.ComputeFileHashes
@@ -307,7 +320,7 @@ Public Class clsMSFileInfoScanner
 	''' <summary>
 	''' If True, then copies .Raw files to the local drive if unable to read the file over the network
 	''' </summary>
-	Public Property CopyFileLocalOnReadError() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.CopyFileLocalOnReadError
+	Public Property CopyFileLocalOnReadError() As Boolean Implements iMSFileInfoScanner.CopyFileLocalOnReadError
 		Get
 			Return mCopyFileLocalOnReadError
 		End Get
@@ -319,7 +332,7 @@ Public Class clsMSFileInfoScanner
 	''' <summary>
 	''' If True, then will create the _DatasetInfo.xml file
 	''' </summary>   
-	Public Property CreateDatasetInfoFile() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.CreateDatasetInfoFile
+	Public Property CreateDatasetInfoFile() As Boolean Implements iMSFileInfoScanner.CreateDatasetInfoFile
 		Get
 			Return mCreateDatasetInfoFile
 		End Get
@@ -331,7 +344,7 @@ Public Class clsMSFileInfoScanner
 	''' <summary>
 	''' If True, then will create the _ScanStats.txt file
 	''' </summary>
-	Public Property CreateScanStatsFile() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.CreateScanStatsFile
+	Public Property CreateScanStatsFile() As Boolean Implements iMSFileInfoScanner.CreateScanStatsFile
 		Get
 			Return mCreateScanStatsFile
 		End Get
@@ -340,7 +353,19 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property DatasetStatsTextFileName() As String Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.DatasetStatsTextFileName
+	''' <summary>
+	''' DatasetID value to use instead of trying to lookup the value in DMS (and instead of using 0)
+	''' </summary>
+	Public Property DatasetIDOverride() As Integer Implements iMSFileInfoScanner.DatasetIDOverride
+		Get
+			Return mDSInfoDatasetIDOverride
+		End Get
+		Set(value As Integer)
+			mDSInfoDatasetIDOverride = value
+		End Set
+	End Property
+
+	Public Property DatasetStatsTextFileName() As String Implements iMSFileInfoScanner.DatasetStatsTextFileName
 		Get
 			Return mDatasetStatsTextFileName
 		End Get
@@ -353,8 +378,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-
-	Public Property DSInfoConnectionString() As String Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.DSInfoConnectionString
+	Public Property DSInfoConnectionString() As String Implements iMSFileInfoScanner.DSInfoConnectionString
 		Get
 			Return mDSInfoConnectionString
 		End Get
@@ -363,7 +387,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property DSInfoDBPostingEnabled() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.DSInfoDBPostingEnabled
+	Public Property DSInfoDBPostingEnabled() As Boolean Implements iMSFileInfoScanner.DSInfoDBPostingEnabled
 		Get
 			Return mDSInfoDBPostingEnabled
 		End Get
@@ -372,7 +396,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property DSInfoStoredProcedure() As String Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.DSInfoStoredProcedure
+	Public Property DSInfoStoredProcedure() As String Implements iMSFileInfoScanner.DSInfoStoredProcedure
 		Get
 			Return mDSInfoStoredProcedure
 		End Get
@@ -381,13 +405,13 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public ReadOnly Property ErrorCode() As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ErrorCode
+	Public ReadOnly Property ErrorCode() As iMSFileInfoScanner.eMSFileScannerErrorCodes Implements iMSFileInfoScanner.ErrorCode
 		Get
 			Return mErrorCode
 		End Get
 	End Property
 
-	Public Property IgnoreErrorsWhenRecursing() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.IgnoreErrorsWhenRecursing
+	Public Property IgnoreErrorsWhenRecursing() As Boolean Implements iMSFileInfoScanner.IgnoreErrorsWhenRecursing
 		Get
 			Return mIgnoreErrorsWhenRecursing
 		End Get
@@ -396,7 +420,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property LCMS2DPlotMZResolution() As Single Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.LCMS2DPlotMZResolution
+	Public Property LCMS2DPlotMZResolution() As Single Implements iMSFileInfoScanner.LCMS2DPlotMZResolution
 		Get
 			Return mLCMS2DPlotOptions.MZResolution
 		End Get
@@ -405,7 +429,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property LCMS2DPlotMaxPointsToPlot() As Integer Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.LCMS2DPlotMaxPointsToPlot
+	Public Property LCMS2DPlotMaxPointsToPlot() As Integer Implements iMSFileInfoScanner.LCMS2DPlotMaxPointsToPlot
 		Get
 			Return mLCMS2DPlotOptions.MaxPointsToPlot
 		End Get
@@ -414,7 +438,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property LCMS2DOverviewPlotDivisor() As Integer Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.LCMS2DOverviewPlotDivisor
+	Public Property LCMS2DOverviewPlotDivisor() As Integer Implements iMSFileInfoScanner.LCMS2DOverviewPlotDivisor
 		Get
 			Return mLCMS2DOverviewPlotDivisor
 		End Get
@@ -423,7 +447,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property LCMS2DPlotMinPointsPerSpectrum() As Integer Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.LCMS2DPlotMinPointsPerSpectrum
+	Public Property LCMS2DPlotMinPointsPerSpectrum() As Integer Implements iMSFileInfoScanner.LCMS2DPlotMinPointsPerSpectrum
 		Get
 			Return mLCMS2DPlotOptions.MinPointsPerSpectrum
 		End Get
@@ -432,7 +456,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property LCMS2DPlotMinIntensity() As Single Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.LCMS2DPlotMinIntensity
+	Public Property LCMS2DPlotMinIntensity() As Single Implements iMSFileInfoScanner.LCMS2DPlotMinIntensity
 		Get
 			Return mLCMS2DPlotOptions.MinIntensity
 		End Get
@@ -442,7 +466,7 @@ Public Class clsMSFileInfoScanner
 	End Property
 
 
-	Public Property LogMessagesToFile() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.LogMessagesToFile
+	Public Property LogMessagesToFile() As Boolean Implements iMSFileInfoScanner.LogMessagesToFile
 		Get
 			Return mLogMessagesToFile
 		End Get
@@ -451,7 +475,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property LogFilePath() As String Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.LogFilePath
+	Public Property LogFilePath() As String Implements iMSFileInfoScanner.LogFilePath
 		Get
 			Return mLogFilePath
 		End Get
@@ -460,7 +484,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property LogFolderPath() As String Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.LogFolderPath
+	Public Property LogFolderPath() As String Implements iMSFileInfoScanner.LogFolderPath
 		Get
 			Return mLogFolderPath
 		End Get
@@ -469,7 +493,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property MaximumTextFileLinesToCheck() As Integer Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.MaximumTextFileLinesToCheck
+	Public Property MaximumTextFileLinesToCheck() As Integer Implements iMSFileInfoScanner.MaximumTextFileLinesToCheck
 		Get
 			If Not mFileIntegrityChecker Is Nothing Then
 				Return mFileIntegrityChecker.MaximumTextFileLinesToCheck
@@ -484,7 +508,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property MaximumXMLElementNodesToCheck() As Integer Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.MaximumXMLElementNodesToCheck
+	Public Property MaximumXMLElementNodesToCheck() As Integer Implements iMSFileInfoScanner.MaximumXMLElementNodesToCheck
 		Get
 			If Not mFileIntegrityChecker Is Nothing Then
 				Return mFileIntegrityChecker.MaximumTextFileLinesToCheck
@@ -499,7 +523,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property RecheckFileIntegrityForExistingFolders() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.RecheckFileIntegrityForExistingFolders
+	Public Property RecheckFileIntegrityForExistingFolders() As Boolean Implements iMSFileInfoScanner.RecheckFileIntegrityForExistingFolders
 		Get
 			Return mRecheckFileIntegrityForExistingFolders
 		End Get
@@ -508,7 +532,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property ReprocessExistingFiles() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ReprocessExistingFiles
+	Public Property ReprocessExistingFiles() As Boolean Implements iMSFileInfoScanner.ReprocessExistingFiles
 		Get
 			Return mReprocessExistingFiles
 		End Get
@@ -517,7 +541,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property ReprocessIfCachedSizeIsZero() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ReprocessIfCachedSizeIsZero
+	Public Property ReprocessIfCachedSizeIsZero() As Boolean Implements iMSFileInfoScanner.ReprocessIfCachedSizeIsZero
 		Get
 			Return mReprocessIfCachedSizeIsZero
 		End Get
@@ -529,7 +553,7 @@ Public Class clsMSFileInfoScanner
 	''' <summary>
 	''' If True, then saves TIC and BPI plots as PNG files
 	''' </summary>
-	Public Property SaveTICAndBPIPlots() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.SaveTICAndBPIPlots
+	Public Property SaveTICAndBPIPlots() As Boolean Implements iMSFileInfoScanner.SaveTICAndBPIPlots
 		Get
 			Return mSaveTICAndBPIPlots
 		End Get
@@ -538,11 +562,20 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
+	Public Property ShowDebugInfo As Boolean Implements iMSFileInfoScanner.ShowDebugInfo
+		Get
+			Return mShowDebugInfo
+		End Get
+		Set(value As Boolean)
+			mShowDebugInfo = value
+		End Set
+	End Property
+
 	''' <summary>
 	''' If True, then saves a 2D plot of m/z vs. Intensity (requires reading every data point in the data file, which will slow down the processing)
 	''' </summary>
 	''' <value></value>
-	Public Property SaveLCMS2DPlots() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.SaveLCMS2DPlots
+	Public Property SaveLCMS2DPlots() As Boolean Implements iMSFileInfoScanner.SaveLCMS2DPlots
 		Get
 			Return mSaveLCMS2DPlots
 		End Get
@@ -554,7 +587,7 @@ Public Class clsMSFileInfoScanner
 	''' <summary>
 	''' When ScanStart is > 0, then will start processing at the specified scan number
 	''' </summary>
-	Public Property ScanStart() As Integer Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ScanStart
+	Public Property ScanStart() As Integer Implements iMSFileInfoScanner.ScanStart
 		Get
 			Return mScanStart
 		End Get
@@ -566,7 +599,7 @@ Public Class clsMSFileInfoScanner
 	''' <summary>
 	''' When ScanEnd is > 0, then will stop processing at the specified scan number
 	''' </summary>
-	Public Property ScanEnd() As Integer Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ScanEnd
+	Public Property ScanEnd() As Integer Implements iMSFileInfoScanner.ScanEnd
 		Get
 			Return mScanEnd
 		End Get
@@ -575,7 +608,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property UpdateDatasetStatsTextFile() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.UpdateDatasetStatsTextFile
+	Public Property UpdateDatasetStatsTextFile() As Boolean Implements iMSFileInfoScanner.UpdateDatasetStatsTextFile
 		Get
 			Return mUpdateDatasetStatsTextFile
 		End Get
@@ -588,7 +621,7 @@ Public Class clsMSFileInfoScanner
 	''' If True, then saves/loads data from/to the cache files (DatasetTimeFile.txt and FolderIntegrityInfo.txt)
 	''' If you simply want to create TIC and BPI files, and/or the _DatasetInfo.xml file for a single dataset, then set this to False
 	''' </summary>
-	Public Property UseCacheFiles() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.UseCacheFiles
+	Public Property UseCacheFiles() As Boolean Implements iMSFileInfoScanner.UseCacheFiles
 		Get
 			Return mUseCacheFiles
 		End Get
@@ -597,7 +630,7 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
-	Public Property ZipFileCheckAllData() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ZipFileCheckAllData
+	Public Property ZipFileCheckAllData() As Boolean Implements iMSFileInfoScanner.ZipFileCheckAllData
 		Get
 			If Not mFileIntegrityChecker Is Nothing Then
 				Return mFileIntegrityChecker.ZipFileCheckAllData
@@ -641,24 +674,24 @@ Public Class clsMSFileInfoScanner
 		Static dtLastCheckTime As DateTime
 
 		Try
-			If System.DateTime.UtcNow.Subtract(dtLastCheckTime).TotalSeconds < 15 Then
+			If DateTime.UtcNow.Subtract(dtLastCheckTime).TotalSeconds < 15 Then
 				Exit Sub
 			End If
 
-			dtLastCheckTime = System.DateTime.UtcNow
+			dtLastCheckTime = DateTime.UtcNow
 
-			If System.IO.File.Exists(ABORT_PROCESSING_FILENAME) Then
+			If File.Exists(ABORT_PROCESSING_FILENAME) Then
 				mAbortProcessing = True
 				Try
-					If System.IO.File.Exists(ABORT_PROCESSING_FILENAME & ".done") Then
-						System.IO.File.Delete(ABORT_PROCESSING_FILENAME & ".done")
+					If File.Exists(ABORT_PROCESSING_FILENAME & ".done") Then
+						File.Delete(ABORT_PROCESSING_FILENAME & ".done")
 					End If
-					System.IO.File.Move(ABORT_PROCESSING_FILENAME, ABORT_PROCESSING_FILENAME & ".done")
-				Catch ex As System.Exception
+					File.Move(ABORT_PROCESSING_FILENAME, ABORT_PROCESSING_FILENAME & ".done")
+				Catch ex As Exception
 					' Ignore errors here
 				End Try
 			End If
-		Catch ex As System.Exception
+		Catch ex As Exception
 			' Ignore errors here
 		End Try
 	End Sub
@@ -667,10 +700,9 @@ Public Class clsMSFileInfoScanner
 	   ByVal blnForceRecheck As Boolean, _
 	   ByRef strProcessedFileList() As String)
 
-		Dim ioFolderInfo As System.IO.DirectoryInfo
 		Dim intFileCount As Integer
 
-		Dim objRow As System.Data.DataRow = Nothing
+		Dim objRow As DataRow = Nothing
 
 		Dim intFolderID As Integer
 		Dim intCachedFileCount As Integer
@@ -688,13 +720,13 @@ Public Class clsMSFileInfoScanner
 				OpenFileIntegrityDetailsFile()
 			End If
 
-			ioFolderInfo = New System.IO.DirectoryInfo(strFolderPath)
-			intFileCount = ioFolderInfo.GetFiles.Length
+			Dim diFolderInfo = New DirectoryInfo(strFolderPath)
+			intFileCount = diFolderInfo.GetFiles.Length
 
 			If intFileCount > 0 Then
 				blnCheckFolder = True
 				If mUseCacheFiles AndAlso Not blnForceRecheck Then
-					If mMSFileInfoDataCache.CachedFolderIntegrityInfoContainsFolder(ioFolderInfo.FullName, intFolderID, objRow) Then
+					If mMSFileInfoDataCache.CachedFolderIntegrityInfoContainsFolder(diFolderInfo.FullName, intFolderID, objRow) Then
 						intCachedFileCount = CInt(objRow(clsMSFileInfoDataCache.COL_NAME_FILE_COUNT))
 						intCachedCountFailIntegrity = CInt(objRow(clsMSFileInfoDataCache.COL_NAME_COUNT_FAIL_INTEGRITY))
 
@@ -707,7 +739,7 @@ Public Class clsMSFileInfoScanner
 				End If
 
 				If blnCheckFolder Then
-					udtFolderStats = clsFileIntegrityChecker.GetNewFolderStats(ioFolderInfo.FullName)
+					udtFolderStats = clsFileIntegrityChecker.GetNewFolderStats(diFolderInfo.FullName)
 					ReDim udtFileStats(intFileCount - 1)
 
 					blnAllFilesAreValid = mFileIntegrityChecker.CheckIntegrityOfFilesInFolder(strFolderPath, udtFolderStats, udtFileStats, strProcessedFileList)
@@ -723,7 +755,7 @@ Public Class clsMSFileInfoScanner
 				End If
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			HandleException("Error calling mFileIntegrityChecker", ex)
 		End Try
 
@@ -731,10 +763,10 @@ Public Class clsMSFileInfoScanner
 
 	Public Shared Function GetAppFolderPath() As String
 		' Could use Application.StartupPath, but .GetExecutingAssembly is better
-		Return System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
+		Return Path.GetDirectoryName(Reflection.Assembly.GetExecutingAssembly().Location)
 	End Function
 
-	Public Function GetKnownFileExtensions() As String() Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.GetKnownFileExtensions
+	Public Function GetKnownFileExtensions() As String() Implements iMSFileInfoScanner.GetKnownFileExtensions
 		Return GetKnownFileExtensionsList.ToArray()
 	End Function
 
@@ -747,11 +779,12 @@ Public Class clsMSFileInfoScanner
 		lstExtensionsToParse.Add(clsBrukerXmassFolderInfoScanner.BRUKER_MCF_FILE_EXTENSION)
 		lstExtensionsToParse.Add(clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_EXTENSION)
 		lstExtensionsToParse.Add(clsUIMFInfoScanner.UIMF_FILE_EXTENSION)
+		lstExtensionsToParse.Add(clsDeconToolsIsosInfoScanner.DECONTOOLS_CSV_FILE_EXTENSION)
 
 		Return lstExtensionsToParse
 	End Function
 
-	Public Function GetKnownFolderExtensions() As String() Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.GetKnownFolderExtensions
+	Public Function GetKnownFolderExtensions() As String() Implements iMSFileInfoScanner.GetKnownFolderExtensions
 		Return GetKnownFolderExtensionsList.ToArray()
 	End Function
 
@@ -765,39 +798,39 @@ Public Class clsMSFileInfoScanner
 	End Function
 
 
-	Public Function GetErrorMessage() As String Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.GetErrorMessage
+	Public Function GetErrorMessage() As String Implements iMSFileInfoScanner.GetErrorMessage
 		' Returns String.Empty if no error
 
 		Dim strErrorMessage As String
 
 		Select Case mErrorCode
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError
+			Case iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError
 				strErrorMessage = String.Empty
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.InvalidInputFilePath
+			Case iMSFileInfoScanner.eMSFileScannerErrorCodes.InvalidInputFilePath
 				strErrorMessage = "Invalid input file path"
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.InvalidOutputFolderPath
+			Case iMSFileInfoScanner.eMSFileScannerErrorCodes.InvalidOutputFolderPath
 				strErrorMessage = "Invalid output folder path"
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.ParameterFileNotFound
+			Case iMSFileInfoScanner.eMSFileScannerErrorCodes.ParameterFileNotFound
 				strErrorMessage = "Parameter file not found"
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.FilePathError
+			Case iMSFileInfoScanner.eMSFileScannerErrorCodes.FilePathError
 				strErrorMessage = "General file path error"
 
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.ParameterFileReadError
+			Case iMSFileInfoScanner.eMSFileScannerErrorCodes.ParameterFileReadError
 				strErrorMessage = "Parameter file read error"
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.UnknownFileExtension
+			Case iMSFileInfoScanner.eMSFileScannerErrorCodes.UnknownFileExtension
 				strErrorMessage = "Unknown file extension"
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.InputFileReadError
+			Case iMSFileInfoScanner.eMSFileScannerErrorCodes.InputFileReadError
 				strErrorMessage = "Input file read error"
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.InputFileAccessError
+			Case iMSFileInfoScanner.eMSFileScannerErrorCodes.InputFileAccessError
 				strErrorMessage = "Input file access error"
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.OutputFileWriteError
+			Case iMSFileInfoScanner.eMSFileScannerErrorCodes.OutputFileWriteError
 				strErrorMessage = "Error writing output file"
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.FileIntegrityCheckError
+			Case iMSFileInfoScanner.eMSFileScannerErrorCodes.FileIntegrityCheckError
 				strErrorMessage = "Error checking file integrity"
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError
+			Case iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError
 				strErrorMessage = "Database posting error"
 
-			Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.UnspecifiedError
+			Case iMSFileInfoScanner.eMSFileScannerErrorCodes.UnspecifiedError
 				strErrorMessage = "Unspecified localized error"
 
 			Case Else
@@ -809,25 +842,22 @@ Public Class clsMSFileInfoScanner
 
 	End Function
 
-	Private Function GetFileOrFolderInfo(ByVal strFileOrFolderPath As String, ByRef blnIsFolder As Boolean, ByRef objFileSystemInfo As System.IO.FileSystemInfo) As Boolean
+	Private Function GetFileOrFolderInfo(ByVal strFileOrFolderPath As String, ByRef blnIsFolder As Boolean, ByRef objFileSystemInfo As FileSystemInfo) As Boolean
 
-		Dim ioFileInfo As System.IO.FileInfo
-		Dim ioFolderInfo As System.IO.DirectoryInfo
 		Dim blnExists As Boolean
 
 		' See if strFileOrFolderPath points to a valid file
-		ioFileInfo = New System.IO.FileInfo(strFileOrFolderPath)
+		Dim fiFileInfo = New FileInfo(strFileOrFolderPath)
 
-		If ioFileInfo.Exists() Then
-			objFileSystemInfo = ioFileInfo
+		If fiFileInfo.Exists() Then
+			objFileSystemInfo = fiFileInfo
 			blnExists = True
 			blnIsFolder = False
 		Else
 			' See if strFileOrFolderPath points to a folder
-			ioFileInfo = Nothing
-			ioFolderInfo = New System.IO.DirectoryInfo(strFileOrFolderPath)
-			If ioFolderInfo.Exists Then
-				objFileSystemInfo = ioFolderInfo
+			Dim diFolderInfo = New DirectoryInfo(strFileOrFolderPath)
+			If diFolderInfo.Exists Then
+				objFileSystemInfo = diFolderInfo
 				blnExists = True
 				blnIsFolder = True
 			Else
@@ -839,7 +869,7 @@ Public Class clsMSFileInfoScanner
 
 	End Function
 
-	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As System.Exception)
+	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As Exception)
 		If strBaseMessage Is Nothing OrElse strBaseMessage.Length = 0 Then
 			strBaseMessage = "Error"
 		End If
@@ -869,8 +899,8 @@ Public Class clsMSFileInfoScanner
 			Try
 				If mLogFilePath Is Nothing OrElse mLogFilePath.Length = 0 Then
 					' Auto-name the log file
-					mLogFilePath = System.IO.Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetExecutingAssembly().Location)
-					mLogFilePath &= "_log_" & System.DateTime.Now.ToString("yyyy-MM-dd") & ".txt"
+					mLogFilePath = Path.GetFileNameWithoutExtension(Reflection.Assembly.GetExecutingAssembly().Location)
+					mLogFilePath &= "_log_" & DateTime.Now.ToString("yyyy-MM-dd") & ".txt"
 				End If
 
 				Try
@@ -885,21 +915,21 @@ Public Class clsMSFileInfoScanner
 
 					If mLogFolderPath.Length > 0 Then
 						' Create the log folder if it doesn't exist
-						If Not System.IO.Directory.Exists(mLogFolderPath) Then
-							System.IO.Directory.CreateDirectory(mLogFolderPath)
+						If Not Directory.Exists(mLogFolderPath) Then
+							Directory.CreateDirectory(mLogFolderPath)
 						End If
 					End If
-				Catch ex As System.Exception
+				Catch ex As Exception
 					mLogFolderPath = String.Empty
 				End Try
 
 				If mLogFolderPath.Length > 0 Then
-					mLogFilePath = System.IO.Path.Combine(mLogFolderPath, mLogFilePath)
+					mLogFilePath = Path.Combine(mLogFolderPath, mLogFilePath)
 				End If
 
-				blnOpeningExistingFile = System.IO.File.Exists(mLogFilePath)
+				blnOpeningExistingFile = File.Exists(mLogFilePath)
 
-				mLogFile = New System.IO.StreamWriter(New System.IO.FileStream(mLogFilePath, IO.FileMode.Append, IO.FileAccess.Write, IO.FileShare.Read))
+				mLogFile = New StreamWriter(New FileStream(mLogFilePath, FileMode.Append, FileAccess.Write, FileShare.Read))
 				mLogFile.AutoFlush = True
 
 				If Not blnOpeningExistingFile Then
@@ -908,7 +938,7 @@ Public Class clsMSFileInfoScanner
 					 "Message")
 				End If
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				' Error creating the log file; set mLogMessagesToFile to false so we don't repeatedly try to create it
 				mLogMessagesToFile = False
 			End Try
@@ -927,7 +957,7 @@ Public Class clsMSFileInfoScanner
 					strMessageType = "Unknown"
 			End Select
 
-			mLogFile.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab & _
+			mLogFile.WriteLine(DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab & _
 			 strMessageType & ControlChars.Tab & _
 			 strMessage)
 		End If
@@ -935,7 +965,7 @@ Public Class clsMSFileInfoScanner
 	End Sub
 
 	Private Sub InitializeLocalVariables()
-		mErrorCode = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError
+		mErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError
 
 		mIgnoreErrorsWhenRecursing = False
 
@@ -956,12 +986,14 @@ Public Class clsMSFileInfoScanner
 
 		mSaveTICAndBPIPlots = False
 		mSaveLCMS2DPlots = False
+		mCheckCentroidingStatus = False
 
 		mLCMS2DPlotOptions = New clsLCMSDataPlotter.clsOptions
 		mLCMS2DOverviewPlotDivisor = clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
 
 		mScanStart = 0
 		mScanEnd = 0
+		mShowDebugInfo = False
 
 		mComputeOverallQualityScores = False
 
@@ -972,15 +1004,16 @@ Public Class clsMSFileInfoScanner
 		mDSInfoConnectionString = "Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;"
 		mDSInfoDBPostingEnabled = False
 		mDSInfoStoredProcedure = "UpdateDatasetFileInfoXML"
+		mDSInfoDatasetIDOverride = 0
 
-		mFileIntegrityDetailsFilePath = System.IO.Path.Combine(GetAppFolderPath(), clsMSFileInfoScanner.DefaultDataFileName(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails))
-		mFileIntegrityErrorsFilePath = System.IO.Path.Combine(GetAppFolderPath(), clsMSFileInfoScanner.DefaultDataFileName(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors))
+		mFileIntegrityDetailsFilePath = Path.Combine(GetAppFolderPath(), clsMSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails))
+		mFileIntegrityErrorsFilePath = Path.Combine(GetAppFolderPath(), clsMSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors))
 
 		mMSFileInfoDataCache.InitializeVariables()
 
 	End Sub
 
-	Public Function LoadParameterFileSettings(ByVal strParameterFilePath As String) As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.LoadParameterFileSettings
+	Public Function LoadParameterFileSettings(ByVal strParameterFilePath As String) As Boolean Implements iMSFileInfoScanner.LoadParameterFileSettings
 
 		Dim objSettingsFile As New XmlSettingsFileAccessor
 
@@ -991,12 +1024,12 @@ Public Class clsMSFileInfoScanner
 				Return True
 			End If
 
-			If Not System.IO.File.Exists(strParameterFilePath) Then
+			If Not File.Exists(strParameterFilePath) Then
 				' See if strParameterFilePath points to a file in the same directory as the application
-				strParameterFilePath = System.IO.Path.Combine(GetAppFolderPath(), System.IO.Path.GetFileName(strParameterFilePath))
-				If Not System.IO.File.Exists(strParameterFilePath) Then
+				strParameterFilePath = Path.Combine(GetAppFolderPath(), Path.GetFileName(strParameterFilePath))
+				If Not File.Exists(strParameterFilePath) Then
 					ShowErrorMessage("Parameter file not found: " & strParameterFilePath)
-					SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.ParameterFileNotFound)
+					SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.ParameterFileNotFound)
 					Return False
 				End If
 			End If
@@ -1025,6 +1058,7 @@ Public Class clsMSFileInfoScanner
 
 						Me.SaveTICAndBPIPlots = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveTICAndBPIPlots", Me.SaveTICAndBPIPlots)
 						Me.SaveLCMS2DPlots = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveLCMS2DPlots", Me.SaveLCMS2DPlots)
+						Me.CheckCentroidingStatus = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckCentroidingStatus", Me.CheckCentroidingStatus)
 
 						Me.LCMS2DPlotMZResolution = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMZResolution", Me.LCMS2DPlotMZResolution)
 						Me.LCMS2DPlotMinPointsPerSpectrum = .GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinPointsPerSpectrum", Me.LCMS2DPlotMinPointsPerSpectrum)
@@ -1062,7 +1096,7 @@ Public Class clsMSFileInfoScanner
 				Return False
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			HandleException("Error in LoadParameterFileSettings", ex)
 			Return False
 		End Try
@@ -1071,16 +1105,16 @@ Public Class clsMSFileInfoScanner
 
 	End Function
 
-	'Private Sub LogErrors(ByVal strSource As String, ByVal strMessage As String, ByVal ex As System.Exception, Optional ByVal blnAllowInformUser As Boolean = True, Optional ByVal blnAllowThrowingException As Boolean = True, Optional ByVal blnLogLocalOnly As Boolean = True, Optional ByVal eNewErrorCode As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError)
+	'Private Sub LogErrors(ByVal strSource As String, ByVal strMessage As String, ByVal ex As Exception, Optional ByVal blnAllowInformUser As Boolean = True, Optional ByVal blnAllowThrowingException As Boolean = True, Optional ByVal blnLogLocalOnly As Boolean = True, Optional ByVal eNewErrorCode As iMSFileInfoScanner.eMSFileScannerErrorCodes = iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError)
 	'    Dim strMessageWithoutCRLF As String
-	'    Dim fsErrorLogFile As System.IO.StreamWriter
+	'    Dim fsErrorLogFile As StreamWriter
 
 	'    mStatusMessage = String.Copy(strMessage)
 
 	'    strMessageWithoutCRLF = mStatusMessage.Replace(ControlChars.NewLine, "; ")
 
 	'    If ex Is Nothing Then
-	'        ex = New System.Exception("Error")
+	'        ex = New Exception("Error")
 	'    Else
 	'        If Not ex.Message Is Nothing AndAlso ex.Message.Length > 0 Then
 	'            strMessageWithoutCRLF &= "; " & ex.Message
@@ -1090,9 +1124,9 @@ Public Class clsMSFileInfoScanner
 	'    ShowErrorMessage(strSource & ": " & strMessageWithoutCRLF)
 
 	'    Try
-	'        fsErrorLogFile = New System.IO.StreamWriter("MSFileInfoScanner_Errors.txt", True)
-	'        fsErrorLogFile.WriteLine(System.DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab & strSource & ControlChars.Tab & strMessageWithoutCRLF)
-	'    Catch ex2 As System.Exception
+	'        fsErrorLogFile = New StreamWriter("MSFileInfoScanner_Errors.txt", True)
+	'        fsErrorLogFile.WriteLine(DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab & strSource & ControlChars.Tab & strMessageWithoutCRLF)
+	'    Catch ex2 As Exception
 	'        ' Ignore errors here
 	'    Finally
 	'        If Not fsErrorLogFile Is Nothing Then
@@ -1100,62 +1134,62 @@ Public Class clsMSFileInfoScanner
 	'        End If
 	'    End Try
 
-	'    If Not eNewErrorCode = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError Then
+	'    If Not eNewErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError Then
 	'        SetErrorCode(eNewErrorCode, True)
 	'    End If
 
 	'    If Me.ShowMessages AndAlso blnAllowInformUser Then
-	'        System.Windows.Forms.MessageBox.Show(mStatusMessage & ControlChars.NewLine & ex.Message, "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
+	'        Windows.Forms.MessageBox.Show(mStatusMessage & ControlChars.NewLine & ex.Message, "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
 	'    ElseIf blnAllowThrowingException Then
-	'        Throw New System.Exception(mStatusMessage, ex)
+	'        Throw New Exception(mStatusMessage, ex)
 	'    End If
 	'End Sub
 
 	Protected Sub OpenFileIntegrityDetailsFile()
-		OpenFileIntegrityOutputFile(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails, mFileIntegrityDetailsFilePath, mFileIntegrityDetailsWriter)
+		OpenFileIntegrityOutputFile(iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails, mFileIntegrityDetailsFilePath, mFileIntegrityDetailsWriter)
 	End Sub
 
 	Protected Sub OpenFileIntegrityErrorsFile()
-		OpenFileIntegrityOutputFile(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors, mFileIntegrityErrorsFilePath, mFileIntegrityErrorsWriter)
+		OpenFileIntegrityOutputFile(iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors, mFileIntegrityErrorsFilePath, mFileIntegrityErrorsWriter)
 	End Sub
 
-	Protected Sub OpenFileIntegrityOutputFile(ByVal eDataFileType As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants, ByRef strFilePath As String, ByRef objStreamWriter As System.IO.StreamWriter)
+	Protected Sub OpenFileIntegrityOutputFile(ByVal eDataFileType As iMSFileInfoScanner.eDataFileTypeConstants, ByRef strFilePath As String, ByRef objStreamWriter As StreamWriter)
 		Dim blnOpenedExistingFile As Boolean
-		Dim fsFileStream As System.IO.FileStream = Nothing
+		Dim fsFileStream As FileStream = Nothing
 		Dim strDefaultFileName As String
 
 		strDefaultFileName = DefaultDataFileName(eDataFileType)
 		ValidateDataFilePath(strFilePath, eDataFileType)
 
 		Try
-			If System.IO.File.Exists(strFilePath) Then
+			If File.Exists(strFilePath) Then
 				blnOpenedExistingFile = True
 			End If
-			fsFileStream = New System.IO.FileStream(strFilePath, IO.FileMode.Append, IO.FileAccess.Write, IO.FileShare.Read)
+			fsFileStream = New FileStream(strFilePath, FileMode.Append, FileAccess.Write, FileShare.Read)
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			HandleException("Error opening/creating " & strFilePath & "; will try " & strDefaultFileName, ex)
 
 			Try
-				If System.IO.File.Exists(strDefaultFileName) Then
+				If File.Exists(strDefaultFileName) Then
 					blnOpenedExistingFile = True
 				End If
 
-				fsFileStream = New System.IO.FileStream(strDefaultFileName, IO.FileMode.Append, IO.FileAccess.Write, IO.FileShare.Read)
-			Catch ex2 As System.Exception
+				fsFileStream = New FileStream(strDefaultFileName, FileMode.Append, FileAccess.Write, FileShare.Read)
+			Catch ex2 As Exception
 				HandleException("Error opening/creating " & strDefaultFileName, ex2)
 			End Try
 		End Try
 
 		Try
 			If Not fsFileStream Is Nothing Then
-				objStreamWriter = New System.IO.StreamWriter(fsFileStream)
+				objStreamWriter = New StreamWriter(fsFileStream)
 
 				If Not blnOpenedExistingFile Then
 					objStreamWriter.WriteLine(mMSFileInfoDataCache.ConstructHeaderLine(eDataFileType))
 				End If
 			End If
-		Catch ex As System.Exception
+		Catch ex As Exception
 			HandleException("Error opening/creating the StreamWriter for " & fsFileStream.Name, ex)
 		End Try
 
@@ -1165,7 +1199,7 @@ Public Class clsMSFileInfoScanner
 	''' Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
 	''' </summary>
 	''' <returns>True if success; false if failure</returns>
-	Public Function PostDatasetInfoToDB() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.PostDatasetInfoToDB
+	Public Function PostDatasetInfoToDB() As Boolean Implements iMSFileInfoScanner.PostDatasetInfoToDB
 		Return PostDatasetInfoToDB(mDatasetInfoXML, mDSInfoConnectionString, mDSInfoStoredProcedure)
 	End Function
 
@@ -1174,7 +1208,7 @@ Public Class clsMSFileInfoScanner
 	''' </summary>
 	''' <param name="strDatasetInfoXML">Database info XML</param>
 	''' <returns>True if success; false if failure</returns>
-	Public Function PostDatasetInfoToDB(ByVal strDatasetInfoXML As String) As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.PostDatasetInfoToDB
+	Public Function PostDatasetInfoToDB(ByVal strDatasetInfoXML As String) As Boolean Implements iMSFileInfoScanner.PostDatasetInfoToDB
 		Return PostDatasetInfoToDB(strDatasetInfoXML, mDSInfoConnectionString, mDSInfoStoredProcedure)
 	End Function
 
@@ -1184,8 +1218,7 @@ Public Class clsMSFileInfoScanner
 	''' <param name="strConnectionString">Database connection string</param>
 	''' <param name="strStoredProcedure">Stored procedure</param>
 	''' <returns>True if success; false if failure</returns>
-	Public Function PostDatasetInfoToDB(ByVal strConnectionString As String, ByVal strStoredProcedure As String) As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.PostDatasetInfoToDB
-
+	Public Function PostDatasetInfoToDB(ByVal strConnectionString As String, ByVal strStoredProcedure As String) As Boolean Implements iMSFileInfoScanner.PostDatasetInfoToDB
 		Return PostDatasetInfoToDB(Me.DatasetInfoXML, strConnectionString, strStoredProcedure)
 	End Function
 
@@ -1198,7 +1231,7 @@ Public Class clsMSFileInfoScanner
 	''' <returns>True if success; false if failure</returns>
 	Public Function PostDatasetInfoToDB(ByVal strDatasetInfoXML As String, _
 	 ByVal strConnectionString As String, _
-	 ByVal strStoredProcedure As String) As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.PostDatasetInfoToDB
+	 ByVal strStoredProcedure As String) As Boolean Implements iMSFileInfoScanner.PostDatasetInfoToDB
 
 		Const MAX_RETRY_COUNT As Integer = 3
 		Const SEC_BETWEEN_RETRIES As Integer = 20
@@ -1208,7 +1241,7 @@ Public Class clsMSFileInfoScanner
 
 		Dim strDSInfoXMLClean As String
 
-		Dim objCommand As System.Data.SqlClient.SqlCommand
+		Dim objCommand As SqlClient.SqlCommand
 
 		Dim blnSuccess As Boolean
 
@@ -1230,7 +1263,7 @@ Public Class clsMSFileInfoScanner
 
 			If strConnectionString Is Nothing OrElse strConnectionString.Length = 0 Then
 				ShowErrorMessage("Connection string not defined; unable to post the dataset info to the database")
-				SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
+				SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
 				Return False
 			End If
 
@@ -1238,7 +1271,7 @@ Public Class clsMSFileInfoScanner
 				strStoredProcedure = "UpdateDatasetFileInfoXML"
 			End If
 
-			objCommand = New System.Data.SqlClient.SqlCommand()
+			objCommand = New SqlClient.SqlCommand()
 
 			With objCommand
 				.CommandType = CommandType.StoredProcedure
@@ -1261,7 +1294,7 @@ Public Class clsMSFileInfoScanner
 				blnSuccess = True
 			Else
 				ShowErrorMessage("Error calling stored procedure, return code = " & intResult)
-				SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
+				SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
 				blnSuccess = False
 			End If
 
@@ -1269,9 +1302,9 @@ Public Class clsMSFileInfoScanner
 			' Note that dataset Shew119-01_17july02_earth_0402-10_4-20 is DatasetID 6787
 			' PostDatasetInfoToDB(32, strDatasetInfoXML, "Data Source=gigasax;Initial Catalog=DMS_Capture_T3;Integrated Security=SSPI;", "CacheDatasetInfoXML")
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			HandleException("Error calling stored procedure", ex)
-			SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
+			SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
 			blnSuccess = False
 		Finally
 			mExecuteSP = Nothing
@@ -1290,7 +1323,7 @@ Public Class clsMSFileInfoScanner
 	''' <returns>True if success; false if failure</returns>
 	Public Function PostDatasetInfoUseDatasetID(ByVal intDatasetID As Integer, _
 	  ByVal strConnectionString As String, _
-	  ByVal strStoredProcedure As String) As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.PostDatasetInfoUseDatasetID
+	  ByVal strStoredProcedure As String) As Boolean Implements iMSFileInfoScanner.PostDatasetInfoUseDatasetID
 
 		Return PostDatasetInfoUseDatasetID(intDatasetID, Me.DatasetInfoXML, strConnectionString, strStoredProcedure)
 	End Function
@@ -1308,7 +1341,7 @@ Public Class clsMSFileInfoScanner
 	Public Function PostDatasetInfoUseDatasetID(ByVal intDatasetID As Integer, _
 	  ByVal strDatasetInfoXML As String, _
 	  ByVal strConnectionString As String, _
-	  ByVal strStoredProcedure As String) As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.PostDatasetInfoUseDatasetID
+	  ByVal strStoredProcedure As String) As Boolean Implements iMSFileInfoScanner.PostDatasetInfoUseDatasetID
 
 		Const MAX_RETRY_COUNT As Integer = 3
 		Const SEC_BETWEEN_RETRIES As Integer = 20
@@ -1318,11 +1351,15 @@ Public Class clsMSFileInfoScanner
 
 		Dim strDSInfoXMLClean As String
 
-		Dim objCommand As System.Data.SqlClient.SqlCommand
+		Dim objCommand As SqlClient.SqlCommand
 
 		Dim blnSuccess As Boolean
 
 		Try
+			If intDatasetID = 0 AndAlso mDSInfoDatasetIDOverride > 0 Then
+				intDatasetID = mDSInfoDatasetIDOverride
+			End If
+
 			ShowMessage("  Posting DatasetInfo XML to the database (using Dataset ID " & intDatasetID.ToString & ")")
 
 			' We need to remove the encoding line from strDatasetInfoXML before posting to the DB
@@ -1340,7 +1377,7 @@ Public Class clsMSFileInfoScanner
 
 			If strConnectionString Is Nothing OrElse strConnectionString.Length = 0 Then
 				ShowErrorMessage("Connection string not defined; unable to post the dataset info to the database")
-				SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
+				SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
 				Return False
 			End If
 
@@ -1348,7 +1385,7 @@ Public Class clsMSFileInfoScanner
 				strStoredProcedure = "CacheDatasetInfoXML"
 			End If
 
-			objCommand = New System.Data.SqlClient.SqlCommand()
+			objCommand = New SqlClient.SqlCommand()
 
 			With objCommand
 				.CommandType = CommandType.StoredProcedure
@@ -1375,13 +1412,13 @@ Public Class clsMSFileInfoScanner
 				blnSuccess = True
 			Else
 				ShowErrorMessage("Error calling stored procedure, return code = " & intResult)
-				SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
+				SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
 				blnSuccess = False
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			HandleException("Error calling stored procedure", ex)
-			SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
+			SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
 			blnSuccess = False
 		Finally
 			mExecuteSP = Nothing
@@ -1408,6 +1445,7 @@ Public Class clsMSFileInfoScanner
 			' Set the processing options
 			objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, mSaveTICAndBPIPlots)
 			objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots, mSaveLCMS2DPlots)
+			objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus, mCheckCentroidingStatus)
 			objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, mComputeOverallQualityScores)
 			objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, mCreateDatasetInfoFile)
 			objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile, mCreateScanStatsFile)
@@ -1421,20 +1459,23 @@ Public Class clsMSFileInfoScanner
 
 			objMSInfoScanner.ScanStart = mScanStart
 			objMSInfoScanner.ScanEnd = mScanEnd
+			objMSInfoScanner.ShowDebugInfo = mShowDebugInfo
+
+			objMSInfoScanner.DatasetID = mDSInfoDatasetIDOverride
 
 			' Process the data file
-			blnSuccess = objMSInfoScanner.ProcessDatafile(strInputFileOrFolderPath, udtFileInfo)
+			blnSuccess = objMSInfoScanner.ProcessDataFile(strInputFileOrFolderPath, udtFileInfo)
 
 			If Not blnSuccess Then
 				intRetryCount += 1
 
 				If intRetryCount < MAX_FILE_READ_ACCESS_ATTEMPTS Then
 					' Retry if the file modification or creation time is within FILE_MODIFICATION_WINDOW_MINUTES minutes of the current time
-					If System.DateTime.Now.Subtract(udtFileInfo.FileSystemCreationTime).TotalMinutes < FILE_MODIFICATION_WINDOW_MINUTES OrElse _
-					   System.DateTime.Now.Subtract(udtFileInfo.FileSystemModificationTime).TotalMinutes < FILE_MODIFICATION_WINDOW_MINUTES Then
+					If DateTime.Now.Subtract(udtFileInfo.FileSystemCreationTime).TotalMinutes < FILE_MODIFICATION_WINDOW_MINUTES OrElse _
+					   DateTime.Now.Subtract(udtFileInfo.FileSystemModificationTime).TotalMinutes < FILE_MODIFICATION_WINDOW_MINUTES Then
 
 						' Sleep for 10 seconds then try again
-						System.Threading.Thread.Sleep(10000)
+						Threading.Thread.Sleep(10000)
 					Else
 						intRetryCount = MAX_FILE_READ_ACCESS_ATTEMPTS
 					End If
@@ -1453,7 +1494,7 @@ Public Class clsMSFileInfoScanner
 
 			blnSuccess = objMSInfoScanner.CreateOutputFiles(strInputFileOrFolderPath, strOutputFolderPath)
 			If Not blnSuccess Then
-				SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.OutputFileWriteError)
+				SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.OutputFileWriteError)
 			End If
 
 			' Cache the Dataset Info XML
@@ -1470,7 +1511,7 @@ Public Class clsMSFileInfoScanner
 			If mDSInfoDBPostingEnabled Then
 				blnSuccess = PostDatasetInfoToDB(mDatasetInfoXML)
 				If Not blnSuccess Then
-					SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
+					SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
 				End If
 			Else
 				blnSuccess = True
@@ -1487,9 +1528,9 @@ Public Class clsMSFileInfoScanner
 	End Function
 
 	' Main processing function
-	Public Function ProcessMSFileOrFolder(ByVal strInputFileOrFolderPath As String, ByVal strOutputFolderPath As String) As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ProcessMSFileOrFolder
+	Public Function ProcessMSFileOrFolder(ByVal strInputFileOrFolderPath As String, ByVal strOutputFolderPath As String) As Boolean Implements iMSFileInfoScanner.ProcessMSFileOrFolder
 
-		Dim eMSFileProcessingState As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants
+		Dim eMSFileProcessingState As iMSFileInfoScanner.eMSFileProcessingStateConstants
 
 		Return ProcessMSFileOrFolder(strInputFileOrFolderPath, strOutputFolderPath, True, eMSFileProcessingState)
 	End Function
@@ -1497,7 +1538,7 @@ Public Class clsMSFileInfoScanner
 	Public Function ProcessMSFileOrFolder(ByVal strInputFileOrFolderPath As String,
 	  ByVal strOutputFolderPath As String, _
 	  ByVal blnResetErrorCode As Boolean, _
-	  ByRef eMSFileProcessingState As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants) As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ProcessMSFileOrFolder
+	  ByRef eMSFileProcessingState As iMSFileInfoScanner.eMSFileProcessingStateConstants) As Boolean Implements iMSFileInfoScanner.ProcessMSFileOrFolder
 
 		' Note: strInputFileOrFolderPath must be a known MS data file or MS data folder
 		' See function ProcessMSFilesAndRecurseFolders for more details
@@ -1510,16 +1551,16 @@ Public Class clsMSFileInfoScanner
 		Dim blnIsFolder As Boolean
 		Dim blnKnownMSDataType As Boolean
 
-		Dim objFileSystemInfo As System.IO.FileSystemInfo = Nothing
+		Dim objFileSystemInfo As FileSystemInfo = Nothing
 
-		Dim objRow As System.Data.DataRow = Nothing
+		Dim objRow As DataRow = Nothing
 		Dim lngCachedSizeBytes As Long
 
 		If blnResetErrorCode Then
-			SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError)
+			SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError)
 		End If
 
-		eMSFileProcessingState = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants.NotProcessed
+		eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.NotProcessed
 
 		If strOutputFolderPath Is Nothing OrElse strOutputFolderPath.Length = 0 Then
 			' Define strOutputFolderPath based on the program file path
@@ -1538,10 +1579,10 @@ Public Class clsMSFileInfoScanner
 				ShowErrorMessage("Input file name is empty")
 			Else
 				Try
-					If System.IO.Path.GetFileName(strInputFileOrFolderPath).Length = 0 Then
-						ShowMessage(" Parsing " & System.IO.Path.GetDirectoryName(strInputFileOrFolderPath))
+					If Path.GetFileName(strInputFileOrFolderPath).Length = 0 Then
+						ShowMessage(" Parsing " & Path.GetDirectoryName(strInputFileOrFolderPath))
 					Else
-						ShowMessage(" Parsing " & System.IO.Path.GetFileName(strInputFileOrFolderPath))
+						ShowMessage(" Parsing " & Path.GetFileName(strInputFileOrFolderPath))
 					End If
 				Catch ex As Exception
 					ShowMessage(" Parsing " & strInputFileOrFolderPath)
@@ -1554,7 +1595,7 @@ Public Class clsMSFileInfoScanner
 					If SKIP_FILES_IN_ERROR Then
 						Return True
 					Else
-						SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.FilePathError)
+						SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.FilePathError)
 						Return False
 					End If
 				End If
@@ -1572,30 +1613,26 @@ Public Class clsMSFileInfoScanner
 							strInputFileOrFolderPath = strInputFileOrFolderPath.TrimEnd("\"c)
 						End If
 
-						Select Case System.IO.Path.GetExtension(strInputFileOrFolderPath).ToUpper()
+						Select Case Path.GetExtension(strInputFileOrFolderPath).ToUpper()
 							Case clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION
 								' Agilent .D folder or Bruker .D folder
-								' Look for file analysis.baf or extension.baf
 
-								If System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 Then
+								If Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 OrElse
+								   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_SER_FILE_NAME).Length > 0 OrElse
+								   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_FID_FILE_NAME).Length > 0 OrElse
+								   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 OrElse
+								   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME).Length > 0 Then
 									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
 
-								ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 Then
-									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
-
-								ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME).Length > 0 Then
-									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
-
-								ElseIf System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 OrElse _
-								 System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 OrElse _
-								 System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0 Then
+								ElseIf Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 OrElse
+								  Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 OrElse
+								  Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0 Then
 									mMSInfoScanner = New clsAgilentGCDFolderInfoScanner
 
-								ElseIf System.IO.Directory.GetDirectories(strInputFileOrFolderPath, clsAgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Length > 0 Then
+								ElseIf Directory.GetDirectories(strInputFileOrFolderPath, clsAgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Length > 0 Then
 									mMSInfoScanner = New clsAgilentTOFDFolderInfoScanner
 
 								Else
-
 									mMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
 								End If
 
@@ -1607,7 +1644,7 @@ Public Class clsMSFileInfoScanner
 							Case Else
 								' Unknown folder extension (or no extension)
 								' See if the folder contains 1 or more 0_R*.zip files
-								If System.IO.Directory.GetFiles(strInputFileOrFolderPath, clsZippedImagingFilesScanner.ZIPPED_IMAGING_FILE_SEARCH_SPEC).Length > 0 Then
+								If Directory.GetFiles(strInputFileOrFolderPath, clsZippedImagingFilesScanner.ZIPPED_IMAGING_FILE_SEARCH_SPEC).Length > 0 Then
 									mMSInfoScanner = New clsZippedImagingFilesScanner
 									blnKnownMSDataType = True
 								End If
@@ -1630,8 +1667,8 @@ Public Class clsMSFileInfoScanner
 						' If the folder also contains file BRUKER_EXTENSION_BAF_FILE_NAME then this is a Bruker XMass folder
 						Dim strPathCheck As String
 
-						strPathCheck = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(objFileSystemInfo.FullName), clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME)
-						If System.IO.File.Exists(strPathCheck) Then
+						strPathCheck = Path.Combine(Path.GetDirectoryName(objFileSystemInfo.FullName), clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME)
+						If File.Exists(strPathCheck) Then
 							mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
 							blnKnownMSDataType = True
 						End If
@@ -1664,6 +1701,14 @@ Public Class clsMSFileInfoScanner
 							Case clsUIMFInfoScanner.UIMF_FILE_EXTENSION
 								mMSInfoScanner = New clsUIMFInfoScanner
 								blnKnownMSDataType = True
+
+							Case clsDeconToolsIsosInfoScanner.DECONTOOLS_CSV_FILE_EXTENSION
+
+								If objFileSystemInfo.FullName.ToUpper().EndsWith(clsDeconToolsIsosInfoScanner.DECONTOOLS_ISOS_FILE_SUFFIX) Then
+									mMSInfoScanner = New clsDeconToolsIsosInfoScanner
+									blnKnownMSDataType = True
+								End If
+
 							Case Else
 								' Unknown file extension; check for a zipped folder 
 								If clsBrukerOneFolderInfoScanner.IsZippedSFolder(objFileSystemInfo.Name) Then
@@ -1680,8 +1725,8 @@ Public Class clsMSFileInfoScanner
 				End If
 
 				If Not blnKnownMSDataType Then
-					ShowErrorMessage("Unknown file type: " & System.IO.Path.GetFileName(strInputFileOrFolderPath))
-					SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.UnknownFileExtension)
+					ShowErrorMessage("Unknown file type: " & Path.GetFileName(strInputFileOrFolderPath))
+					SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.UnknownFileExtension)
 					Return False
 				End If
 
@@ -1696,20 +1741,20 @@ Public Class clsMSFileInfoScanner
 						If mReprocessIfCachedSizeIsZero Then
 							Try
 								lngCachedSizeBytes = CLng(objRow.Item(clsMSFileInfoDataCache.COL_NAME_FILE_SIZE_BYTES))
-							Catch ex2 As System.Exception
+							Catch ex2 As Exception
 								lngCachedSizeBytes = 1
 							End Try
 
 							If lngCachedSizeBytes > 0 Then
 								' File is present in mCachedResults, and its size is > 0, so we won't re-process it
-								ShowMessage("  Skipping " & System.IO.Path.GetFileName(strInputFileOrFolderPath) & " since already in cached results")
-								eMSFileProcessingState = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants.SkippedSinceFoundInCache
+								ShowMessage("  Skipping " & Path.GetFileName(strInputFileOrFolderPath) & " since already in cached results")
+								eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.SkippedSinceFoundInCache
 								Return True
 							End If
 						Else
 							' File is present in mCachedResults, and mReprocessIfCachedSizeIsZero=False, so we won't re-process it
-							ShowMessage("  Skipping " & System.IO.Path.GetFileName(strInputFileOrFolderPath) & " since already in cached results")
-							eMSFileProcessingState = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants.SkippedSinceFoundInCache
+							ShowMessage("  Skipping " & Path.GetFileName(strInputFileOrFolderPath) & " since already in cached results")
+							eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.SkippedSinceFoundInCache
 							Return True
 						End If
 					End If
@@ -1718,14 +1763,14 @@ Public Class clsMSFileInfoScanner
 				' Process the data file or folder
 				blnSuccess = ProcessMSDataset(strInputFileOrFolderPath, mMSInfoScanner, strDatasetName, strOutputFolderPath)
 				If blnSuccess Then
-					eMSFileProcessingState = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully
+					eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully
 				Else
-					eMSFileProcessingState = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing
+					eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing
 				End If
 
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			HandleException("Error in ProcessMSFileOrFolder", ex)
 			blnSuccess = False
 		Finally
@@ -1736,7 +1781,7 @@ Public Class clsMSFileInfoScanner
 
 	End Function
 
-	Public Function ProcessMSFileOrFolderWildcard(ByVal strInputFileOrFolderPath As String, ByVal strOutputFolderPath As String, ByVal blnResetErrorCode As Boolean) As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ProcessMSFileOrFolderWildcard
+	Public Function ProcessMSFileOrFolderWildcard(ByVal strInputFileOrFolderPath As String, ByVal strOutputFolderPath As String, ByVal blnResetErrorCode As Boolean) As Boolean Implements iMSFileInfoScanner.ProcessMSFileOrFolderWildcard
 		' Returns True if success, False if failure
 
 		Dim blnSuccess As Boolean
@@ -1745,13 +1790,7 @@ Public Class clsMSFileInfoScanner
 		Dim strCleanPath As String
 		Dim strInputFolderPath As String
 
-		Dim ioFileMatch As System.IO.FileInfo
-		Dim ioFolderMatch As System.IO.DirectoryInfo
-
-		Dim ioFileInfo As System.IO.FileInfo
-		Dim ioFolderInfo As System.IO.DirectoryInfo
-
-		Dim eMSFileProcessingState As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants
+		Dim eMSFileProcessingState As iMSFileInfoScanner.eMSFileProcessingStateConstants
 
 		Dim intProcessedFileListCount As Integer
 		Dim strProcessedFileList As String()
@@ -1764,7 +1803,7 @@ Public Class clsMSFileInfoScanner
 		Try
 			' Possibly reset the error code
 			If blnResetErrorCode Then
-				SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError)
+				SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError)
 			End If
 
 			' See if strInputFilePath contains a wildcard
@@ -1775,27 +1814,27 @@ Public Class clsMSFileInfoScanner
 				strCleanPath = strInputFileOrFolderPath.Replace("*", "_")
 				strCleanPath = strCleanPath.Replace("?", "_")
 
-				ioFileInfo = New System.IO.FileInfo(strCleanPath)
-				If ioFileInfo.Directory.Exists Then
-					strInputFolderPath = ioFileInfo.DirectoryName
+				Dim fiFileInfo = New FileInfo(strCleanPath)
+				If fiFileInfo.Directory.Exists Then
+					strInputFolderPath = fiFileInfo.DirectoryName
 				Else
 					' Use the current working directory
-					strInputFolderPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
+					strInputFolderPath = Path.GetDirectoryName(Reflection.Assembly.GetExecutingAssembly().Location)
 				End If
 
-				ioFolderInfo = New System.IO.DirectoryInfo(strInputFolderPath)
+				Dim diFolderInfo = New DirectoryInfo(strInputFolderPath)
 
 				' Remove any directory information from strInputFileOrFolderPath
-				strInputFileOrFolderPath = System.IO.Path.GetFileName(strInputFileOrFolderPath)
+				strInputFileOrFolderPath = Path.GetFileName(strInputFileOrFolderPath)
 
 				intMatchCount = 0
-				For Each ioFileMatch In ioFolderInfo.GetFiles(strInputFileOrFolderPath)
+				For Each fiFileMatch In diFolderInfo.GetFiles(strInputFileOrFolderPath)
 
-					blnSuccess = ProcessMSFileOrFolder(ioFileMatch.FullName, strOutputFolderPath, blnResetErrorCode, eMSFileProcessingState)
+					blnSuccess = ProcessMSFileOrFolder(fiFileMatch.FullName, strOutputFolderPath, blnResetErrorCode, eMSFileProcessingState)
 
-					If eMSFileProcessingState = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully OrElse _
-					   eMSFileProcessingState = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing Then
-						AddToStringList(strProcessedFileList, ioFileMatch.FullName, intProcessedFileListCount)
+					If eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully OrElse _
+					   eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing Then
+						AddToStringList(strProcessedFileList, fiFileMatch.FullName, intProcessedFileListCount)
 					End If
 
 					CheckForAbortProcessingFile()
@@ -1806,16 +1845,17 @@ Public Class clsMSFileInfoScanner
 					intMatchCount += 1
 
 					If intMatchCount Mod 100 = 0 Then Console.Write(".")
-				Next ioFileMatch
+				Next
+
 				If mAbortProcessing Then Return False
 
-				For Each ioFolderMatch In ioFolderInfo.GetDirectories(strInputFileOrFolderPath)
+				For Each diFolderMatch In diFolderInfo.GetDirectories(strInputFileOrFolderPath)
 
-					blnSuccess = ProcessMSFileOrFolder(ioFolderMatch.FullName, strOutputFolderPath, blnResetErrorCode, eMSFileProcessingState)
+					blnSuccess = ProcessMSFileOrFolder(diFolderMatch.FullName, strOutputFolderPath, blnResetErrorCode, eMSFileProcessingState)
 
-					If eMSFileProcessingState = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully OrElse _
-					   eMSFileProcessingState = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing Then
-						AddToStringList(strProcessedFileList, ioFolderMatch.FullName, intProcessedFileListCount)
+					If eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully OrElse _
+					   eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing Then
+						AddToStringList(strProcessedFileList, diFolderMatch.FullName, intProcessedFileListCount)
 					End If
 
 					CheckForAbortProcessingFile()
@@ -1825,16 +1865,17 @@ Public Class clsMSFileInfoScanner
 					intMatchCount += 1
 
 					If intMatchCount Mod 100 = 0 Then Console.Write(".")
-				Next ioFolderMatch
+				Next
+
 				If mAbortProcessing Then Return False
 
 				If mCheckFileIntegrity Then
 					ReDim Preserve strProcessedFileList(intProcessedFileListCount - 1)
-					CheckIntegrityOfFilesInFolder(ioFolderInfo.FullName, mRecheckFileIntegrityForExistingFolders, strProcessedFileList)
+					CheckIntegrityOfFilesInFolder(diFolderInfo.FullName, mRecheckFileIntegrityForExistingFolders, strProcessedFileList)
 				End If
 
 				If intMatchCount = 0 Then
-					If mErrorCode = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError Then
+					If mErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError Then
 						ShowMessage("No match was found for the input file path:" & strInputFileOrFolderPath, eMessageTypeConstants.Warning)
 					End If
 				Else
@@ -1844,7 +1885,7 @@ Public Class clsMSFileInfoScanner
 				blnSuccess = ProcessMSFileOrFolder(strInputFileOrFolderPath, strOutputFolderPath, blnResetErrorCode, eMSFileProcessingState)
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			HandleException("Error in ProcessMSFileOrFolderWildcard", ex)
 			blnSuccess = False
 		Finally
@@ -1878,13 +1919,10 @@ Public Class clsMSFileInfoScanner
 	''' <remarks></remarks>
 	Public Function ProcessMSFilesAndRecurseFolders(ByVal strInputFilePathOrFolder As String, _
 	  ByVal strOutputFolderPath As String, _
-	  ByVal intRecurseFoldersMaxLevels As Integer) As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.ProcessMSFilesAndRecurseFolders
+	  ByVal intRecurseFoldersMaxLevels As Integer) As Boolean Implements iMSFileInfoScanner.ProcessMSFilesAndRecurseFolders
 
 		Dim strCleanPath As String
 		Dim strInputFolderPath As String
-
-		Dim ioFileInfo As System.IO.FileInfo
-		Dim ioFolderInfo As System.IO.DirectoryInfo
 
 		Dim blnSuccess As Boolean
 		Dim intFileProcessCount, intFileProcessFailCount As Integer
@@ -1897,34 +1935,34 @@ Public Class clsMSFileInfoScanner
 				strCleanPath = strInputFilePathOrFolder.Replace("*", "_")
 				strCleanPath = strCleanPath.Replace("?", "_")
 
-				ioFileInfo = New System.IO.FileInfo(strCleanPath)
-				If System.IO.Path.IsPathRooted(strCleanPath) Then
-					If Not ioFileInfo.Directory.Exists Then
-						ShowErrorMessage("Folder not found: " & ioFileInfo.DirectoryName)
-						SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.InvalidInputFilePath)
+				Dim fiFileInfo = New FileInfo(strCleanPath)
+				If Path.IsPathRooted(strCleanPath) Then
+					If Not fiFileInfo.Directory.Exists Then
+						ShowErrorMessage("Folder not found: " & fiFileInfo.DirectoryName)
+						SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.InvalidInputFilePath)
 						Return False
 					End If
 				End If
 
-				If ioFileInfo.Directory.Exists Then
-					strInputFolderPath = ioFileInfo.DirectoryName
+				If fiFileInfo.Directory.Exists Then
+					strInputFolderPath = fiFileInfo.DirectoryName
 				Else
 					' Folder not found; use the current working directory
-					strInputFolderPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
+					strInputFolderPath = Path.GetDirectoryName(Reflection.Assembly.GetExecutingAssembly().Location)
 				End If
 
 				' Remove any directory information from strInputFilePath
-				strInputFilePathOrFolder = System.IO.Path.GetFileName(strInputFilePathOrFolder)
+				strInputFilePathOrFolder = Path.GetFileName(strInputFilePathOrFolder)
 
 			Else
-				ioFolderInfo = New System.IO.DirectoryInfo(strInputFilePathOrFolder)
-				If ioFolderInfo.Exists Then
-					strInputFolderPath = ioFolderInfo.FullName
+				Dim diFolderInfo = New DirectoryInfo(strInputFilePathOrFolder)
+				If diFolderInfo.Exists Then
+					strInputFolderPath = diFolderInfo.FullName
 					strInputFilePathOrFolder = "*"
 				Else
-					If ioFolderInfo.Parent.Exists Then
-						strInputFolderPath = ioFolderInfo.Parent.FullName
-						strInputFilePathOrFolder = System.IO.Path.GetFileName(strInputFilePathOrFolder)
+					If diFolderInfo.Parent.Exists Then
+						strInputFolderPath = diFolderInfo.Parent.FullName
+						strInputFilePathOrFolder = Path.GetFileName(strInputFilePathOrFolder)
 					Else
 						' Unable to determine the input folder path
 						strInputFolderPath = String.Empty
@@ -1945,11 +1983,11 @@ Public Class clsMSFileInfoScanner
 				blnSuccess = RecurseFoldersWork(strInputFolderPath, strInputFilePathOrFolder, strOutputFolderPath, intFileProcessCount, intFileProcessFailCount, 1, intRecurseFoldersMaxLevels)
 
 			Else
-				SetErrorCode(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.InvalidInputFilePath)
+				SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.InvalidInputFilePath)
 				Return False
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			HandleException("Error in ProcessMSFilesAndRecurseFolders", ex)
 			blnSuccess = False
 		Finally
@@ -1977,10 +2015,8 @@ Public Class clsMSFileInfoScanner
 
 		' If intRecurseFoldersMaxLevels is <=0 then we recurse infinitely
 
-		Dim diInputFolder As System.IO.DirectoryInfo = Nothing
-		Dim diSubfolder As System.IO.DirectoryInfo
-
-		Dim ioFileMatch As System.IO.FileInfo
+		Dim diInputFolder As DirectoryInfo = Nothing
+		Dim diSubfolder As DirectoryInfo
 
 		Dim strFileExtensionsToParse() As String
 		Dim strFolderExtensionsToParse() As String
@@ -1996,7 +2032,7 @@ Public Class clsMSFileInfoScanner
 		Dim intSubFoldersProcessed As Integer
 		Dim htSubFoldersProcessed As Hashtable
 
-		Dim eMSFileProcessingState As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants
+		Dim eMSFileProcessingState As iMSFileInfoScanner.eMSFileProcessingStateConstants
 
 		Dim intProcessedFileListCount As Integer
 		Dim strProcessedFileList() As String
@@ -2007,11 +2043,11 @@ Public Class clsMSFileInfoScanner
 		intRetryCount = 0
 		Do
 			Try
-				diInputFolder = New System.IO.DirectoryInfo(strInputFolderPath)
+				diInputFolder = New DirectoryInfo(strInputFolderPath)
 				Exit Do
-			Catch ex As System.Exception
+			Catch ex As Exception
 				' Input folder path error
-				HandleException("Error populating ioInputFolderInfo for " & strInputFolderPath, ex)
+				HandleException("Error populating diInputFolderInfo for " & strInputFolderPath, ex)
 				If Not ex.Message.Contains("no longer available") Then
 					Return False
 				End If
@@ -2022,7 +2058,7 @@ Public Class clsMSFileInfoScanner
 				Return False
 			Else
 				' Wait 1 second, then try again
-				System.Threading.Thread.Sleep(1000)
+				Threading.Thread.Sleep(1000)
 			End If
 
 		Loop While intRetryCount < MAX_ACCESS_ATTEMPTS
@@ -2035,7 +2071,7 @@ Public Class clsMSFileInfoScanner
 
 			blnProcessAllFileExtensions = ValidateExtensions(strFileExtensionsToParse)
 			ValidateExtensions(strFolderExtensionsToParse)
-		Catch ex As System.Exception
+		Catch ex As Exception
 			HandleException("Error in RecurseFoldersWork", ex)
 			Return False
 		End Try
@@ -2046,7 +2082,7 @@ Public Class clsMSFileInfoScanner
 			' Process any matching files in this folder
 			blnSuccess = True
 			blnProcessedZippedSFolder = False
-			For Each ioFileMatch In diInputFolder.GetFiles(strFileNameMatch)
+			For Each fiFileMatch In diInputFolder.GetFiles(strFileNameMatch)
 
 				intRetryCount = 0
 				Do
@@ -2054,13 +2090,13 @@ Public Class clsMSFileInfoScanner
 
 						blnFileProcessed = False
 						For intExtensionIndex = 0 To strFileExtensionsToParse.Length - 1
-							If blnProcessAllFileExtensions OrElse ioFileMatch.Extension.ToUpper = strFileExtensionsToParse(intExtensionIndex) Then
+							If blnProcessAllFileExtensions OrElse fiFileMatch.Extension.ToUpper = strFileExtensionsToParse(intExtensionIndex) Then
 								blnFileProcessed = True
-								blnSuccess = ProcessMSFileOrFolder(ioFileMatch.FullName, strOutputFolderPath, True, eMSFileProcessingState)
+								blnSuccess = ProcessMSFileOrFolder(fiFileMatch.FullName, strOutputFolderPath, True, eMSFileProcessingState)
 
-								If eMSFileProcessingState = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully OrElse _
-								   eMSFileProcessingState = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing Then
-									AddToStringList(strProcessedFileList, ioFileMatch.FullName, intProcessedFileListCount)
+								If eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully OrElse _
+								   eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing Then
+									AddToStringList(strProcessedFileList, fiFileMatch.FullName, intProcessedFileListCount)
 								End If
 
 								Exit For
@@ -2070,16 +2106,16 @@ Public Class clsMSFileInfoScanner
 
 						If Not blnFileProcessed AndAlso Not blnProcessedZippedSFolder Then
 							' Check for other valid files
-							If clsBrukerOneFolderInfoScanner.IsZippedSFolder(ioFileMatch.Name) Then
+							If clsBrukerOneFolderInfoScanner.IsZippedSFolder(fiFileMatch.Name) Then
 								' Only process this file if there is not a subfolder named "1" present"
 								If diInputFolder.GetDirectories(clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME).Length < 1 Then
 									blnFileProcessed = True
 									blnProcessedZippedSFolder = True
-									blnSuccess = ProcessMSFileOrFolder(ioFileMatch.FullName, strOutputFolderPath, True, eMSFileProcessingState)
+									blnSuccess = ProcessMSFileOrFolder(fiFileMatch.FullName, strOutputFolderPath, True, eMSFileProcessingState)
 
-									If eMSFileProcessingState = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully OrElse _
-									   eMSFileProcessingState = MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing Then
-										AddToStringList(strProcessedFileList, ioFileMatch.FullName, intProcessedFileListCount)
+									If eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully OrElse _
+									   eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing Then
+										AddToStringList(strProcessedFileList, fiFileMatch.FullName, intProcessedFileListCount)
 									End If
 
 								End If
@@ -2087,7 +2123,7 @@ Public Class clsMSFileInfoScanner
 						End If
 						Exit Do
 
-					Catch ex As System.Exception
+					Catch ex As Exception
 						' Error parsing file
 						HandleException("Error in RecurseFoldersWork at For Each ioFileMatch in " & strInputFolderPath, ex)
 						If Not ex.Message.Contains("no longer available") Then
@@ -2100,7 +2136,7 @@ Public Class clsMSFileInfoScanner
 						Return False
 					Else
 						' Wait 1 second, then try again
-						System.Threading.Thread.Sleep(1000)
+						Threading.Thread.Sleep(1000)
 					End If
 
 				Loop While intRetryCount < MAX_ACCESS_ATTEMPTS
@@ -2116,14 +2152,14 @@ Public Class clsMSFileInfoScanner
 
 				CheckForAbortProcessingFile()
 				If mAbortProcessing Then Exit For
-			Next ioFileMatch
+			Next
 
 			If mCheckFileIntegrity And Not mAbortProcessing Then
 				ReDim Preserve strProcessedFileList(intProcessedFileListCount - 1)
 				CheckIntegrityOfFilesInFolder(diInputFolder.FullName, mRecheckFileIntegrityForExistingFolders, strProcessedFileList)
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			HandleException("Error in RecurseFoldersWork Examining files in " & strInputFolderPath, ex)
 			Return False
 		End Try
@@ -2174,9 +2210,9 @@ Public Class clsMSFileInfoScanner
 
 							Exit Do
 
-						Catch ex As System.Exception
+						Catch ex As Exception
 							' Error parsing folder
-							HandleException("Error in RecurseFoldersWork at For Each ioSubFolderInfo(A) in " & strInputFolderPath, ex)
+							HandleException("Error in RecurseFoldersWork at For Each diSubfolder(A) in " & strInputFolderPath, ex)
 							If Not ex.Message.Contains("no longer available") Then
 								Return False
 							End If
@@ -2187,7 +2223,7 @@ Public Class clsMSFileInfoScanner
 							Return False
 						Else
 							' Wait 1 second, then try again
-							System.Threading.Thread.Sleep(1000)
+							Threading.Thread.Sleep(1000)
 						End If
 
 					Loop While intRetryCount < MAX_ACCESS_ATTEMPTS
@@ -2199,7 +2235,7 @@ Public Class clsMSFileInfoScanner
 				' If intRecurseFoldersMaxLevels is <=0 then we recurse infinitely
 				'  otherwise, compare intRecursionLevel to intRecurseFoldersMaxLevels
 				If intRecurseFoldersMaxLevels <= 0 OrElse intRecursionLevel <= intRecurseFoldersMaxLevels Then
-					' Call this function for each of the subfolders of ioInputFolderInfo
+					' Call this function for each of the subfolders of diInputFolder
 					' However, do not step into folders listed in htSubFoldersProcessed
 					For Each diSubfolder In diInputFolder.GetDirectories()
 
@@ -2218,9 +2254,9 @@ Public Class clsMSFileInfoScanner
 
 								Exit Do
 
-							Catch ex As System.Exception
+							Catch ex As Exception
 								' Error parsing file
-								HandleException("Error in RecurseFoldersWork at For Each ioSubFolderInfo(B) in " & strInputFolderPath, ex)
+								HandleException("Error in RecurseFoldersWork at For Each diSubfolder(B) in " & strInputFolderPath, ex)
 								If Not ex.Message.Contains("no longer available") Then
 									Return False
 								End If
@@ -2231,7 +2267,7 @@ Public Class clsMSFileInfoScanner
 								Return False
 							Else
 								' Wait 1 second, then try again
-								System.Threading.Thread.Sleep(1000)
+								Threading.Thread.Sleep(1000)
 							End If
 
 						Loop While intRetryCount < MAX_ACCESS_ATTEMPTS
@@ -2241,7 +2277,7 @@ Public Class clsMSFileInfoScanner
 				End If
 
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				HandleException("Error in RecurseFoldersWork examining subfolders in " & strInputFolderPath, ex)
 				Return False
 			End Try
@@ -2252,11 +2288,11 @@ Public Class clsMSFileInfoScanner
 
 	End Function
 
-	Public Function SaveCachedResults() As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.SaveCachedResults
+	Public Function SaveCachedResults() As Boolean Implements iMSFileInfoScanner.SaveCachedResults
 		Return Me.SaveCachedResults(True)
 	End Function
 
-	Public Function SaveCachedResults(ByVal blnClearCachedData As Boolean) As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.SaveCachedResults
+	Public Function SaveCachedResults(ByVal blnClearCachedData As Boolean) As Boolean Implements iMSFileInfoScanner.SaveCachedResults
 		If mUseCacheFiles Then
 			Return mMSFileInfoDataCache.SaveCachedResults(blnClearCachedData)
 		Else
@@ -2264,7 +2300,7 @@ Public Class clsMSFileInfoScanner
 		End If
 	End Function
 
-	Public Function SaveParameterFileSettings(ByVal strParameterFilePath As String) As Boolean Implements MSFileInfoScannerInterfaces.iMSFileInfoScanner.SaveParameterFileSettings
+	Public Function SaveParameterFileSettings(ByVal strParameterFilePath As String) As Boolean Implements iMSFileInfoScanner.SaveParameterFileSettings
 
 		Dim objSettingsFile As New XmlSettingsFileAccessor
 
@@ -2287,7 +2323,7 @@ Public Class clsMSFileInfoScanner
 
 			End If
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			HandleException("Error in SaveParameterFileSettings", ex)
 			Return False
 		Finally
@@ -2298,13 +2334,13 @@ Public Class clsMSFileInfoScanner
 
 	End Function
 
-	Private Sub SetErrorCode(ByVal eNewErrorCode As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes)
+	Private Sub SetErrorCode(ByVal eNewErrorCode As iMSFileInfoScanner.eMSFileScannerErrorCodes)
 		SetErrorCode(eNewErrorCode, False)
 	End Sub
 
-	Private Sub SetErrorCode(ByVal eNewErrorCode As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes, ByVal blnLeaveExistingErrorCodeUnchanged As Boolean)
+	Private Sub SetErrorCode(ByVal eNewErrorCode As iMSFileInfoScanner.eMSFileScannerErrorCodes, ByVal blnLeaveExistingErrorCodeUnchanged As Boolean)
 
-		If blnLeaveExistingErrorCodeUnchanged AndAlso mErrorCode <> MSFileInfoScannerInterfaces.iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError Then
+		If blnLeaveExistingErrorCodeUnchanged AndAlso mErrorCode <> iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError Then
 			' An error code is already defined; do not change it
 		Else
 			mErrorCode = eNewErrorCode
@@ -2360,31 +2396,31 @@ Public Class clsMSFileInfoScanner
 
 	End Sub
 
-	Public Shared Function ValidateDataFilePath(ByRef strFilePath As String, ByVal eDataFileType As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants) As Boolean
+	Public Shared Function ValidateDataFilePath(ByRef strFilePath As String, ByVal eDataFileType As iMSFileInfoScanner.eDataFileTypeConstants) As Boolean
 		If strFilePath Is Nothing OrElse strFilePath.Length = 0 Then
-			strFilePath = System.IO.Path.Combine(GetAppFolderPath(), DefaultDataFileName(eDataFileType))
+			strFilePath = Path.Combine(GetAppFolderPath(), DefaultDataFileName(eDataFileType))
 		End If
 
-		ValidateDataFilePathCheckDir(strFilePath)
+		Return ValidateDataFilePathCheckDir(strFilePath)
+
 	End Function
 
 	Private Shared Function ValidateDataFilePathCheckDir(ByVal strFilePath As String) As Boolean
 
-		Dim ioFileInfo As System.IO.FileInfo
 		Dim blnValidFile As Boolean
 
 		Try
-			ioFileInfo = New System.IO.FileInfo(strFilePath)
+			Dim fiFileInfo = New FileInfo(strFilePath)
 
-			If Not ioFileInfo.Exists Then
+			If Not fiFileInfo.Exists Then
 				' Make sure the folder exists
-				If Not ioFileInfo.Directory.Exists Then
-					ioFileInfo.Directory.Create()
+				If Not fiFileInfo.Directory.Exists Then
+					fiFileInfo.Directory.Create()
 				End If
 			End If
 			blnValidFile = True
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			' Ignore errors, but set blnValidFile to false
 			blnValidFile = False
 		End Try
@@ -2418,11 +2454,11 @@ Public Class clsMSFileInfoScanner
 		Return blnProcessAllExtensions
 	End Function
 
-	Private Sub WriteFileIntegrityDetails(ByRef srOutFile As System.IO.StreamWriter, ByVal intFolderID As Integer, ByVal udtFileStats() As clsFileIntegrityChecker.udtFileStatsType)
+	Private Sub WriteFileIntegrityDetails(ByRef srOutFile As StreamWriter, ByVal intFolderID As Integer, ByVal udtFileStats() As clsFileIntegrityChecker.udtFileStatsType)
 		Static dtLastWriteTime As DateTime
 
 		Dim intIndex As Integer
-		Dim dtTimeStamp As DateTime = System.DateTime.Now
+		Dim dtTimeStamp As DateTime = DateTime.Now
 
 		If srOutFile Is Nothing Then Exit Sub
 
@@ -2439,14 +2475,14 @@ Public Class clsMSFileInfoScanner
 			End With
 		Next intIndex
 
-		If System.DateTime.UtcNow.Subtract(dtLastWriteTime).TotalMinutes > 1 Then
+		If DateTime.UtcNow.Subtract(dtLastWriteTime).TotalMinutes > 1 Then
 			srOutFile.Flush()
-			dtLastWriteTime = System.DateTime.UtcNow
+			dtLastWriteTime = DateTime.UtcNow
 		End If
 
 	End Sub
 
-	Private Sub WriteFileIntegrityFailure(ByRef srOutFile As System.IO.StreamWriter, ByVal strFilePath As String, ByVal strMessage As String)
+	Private Sub WriteFileIntegrityFailure(ByRef srOutFile As StreamWriter, ByVal strFilePath As String, ByVal strMessage As String)
 		Static dtLastWriteTime As DateTime
 
 		If srOutFile Is Nothing Then Exit Sub
@@ -2454,11 +2490,11 @@ Public Class clsMSFileInfoScanner
 		' Note: HH:mm:ss corresponds to time in 24 hour format
 		srOutFile.WriteLine(strFilePath & ControlChars.Tab & _
 		  strMessage & ControlChars.Tab & _
-		  System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
+		  DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
 
-		If System.DateTime.UtcNow.Subtract(dtLastWriteTime).TotalMinutes > 1 Then
+		If DateTime.UtcNow.Subtract(dtLastWriteTime).TotalMinutes > 1 Then
 			srOutFile.Flush()
-			dtLastWriteTime = System.DateTime.UtcNow
+			dtLastWriteTime = DateTime.UtcNow
 		End If
 
 	End Sub
@@ -2476,7 +2512,7 @@ Public Class clsMSFileInfoScanner
 	''        Dim objXRawAccess As New FinniganFileIO.XRawFileIO
 
 	''        blnValidationSaved = objXRawAccess.CheckFunctionality()
-	''    Catch ex as System.Exception
+	''    Catch ex as Exception
 	''        blnValidationSaved = False
 	''    End Try
 

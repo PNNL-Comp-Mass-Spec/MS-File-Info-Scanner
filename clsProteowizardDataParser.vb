@@ -1,6 +1,10 @@
 ﻿Option Strict On
 
+Imports PNNLOmics.Utilities
+Imports System.Text.RegularExpressions
+
 <CLSCompliant(False)> Public Class clsProteowizardDataParser
+
 
 	Public Event ErrorEvent(ByVal Message As String)
 	Public Event MessageEvent(ByVal Message As String)
@@ -13,6 +17,8 @@
 
 	Protected mSaveLCMS2DPlots As Boolean
 	Protected mSaveTICAndBPI As Boolean
+	Protected mCheckCentroidingStatus As Boolean
+
 	Protected mHighResMS1 As Boolean
 	Protected mHighResMS2 As Boolean
 
@@ -34,12 +40,14 @@
 		End Set
 	End Property
 
-	Public Sub New(ByRef objPWiz As pwiz.ProteowizardWrapper.MSDataFileReader, _
-	   ByRef objDatasetStatsSummarizer As DSSummarizer.clsDatasetStatsSummarizer, _
-	   ByRef objTICandBPIPlot As clsTICandBPIPlotter, _
-	   ByRef objLCMS2DPlot As clsLCMSDataPlotter, _
-	   ByVal blnSaveLCMS2DPlots As Boolean, _
-	   ByVal blnSaveTICandBPI As Boolean)
+	Public Sub New(
+	  ByRef objPWiz As pwiz.ProteowizardWrapper.MSDataFileReader,
+	  ByRef objDatasetStatsSummarizer As DSSummarizer.clsDatasetStatsSummarizer,
+	  ByRef objTICandBPIPlot As clsTICandBPIPlotter,
+	  ByRef objLCMS2DPlot As clsLCMSDataPlotter,
+	  ByVal blnSaveLCMS2DPlots As Boolean,
+	  ByVal blnSaveTICandBPI As Boolean,
+	  ByVal blnCheckCentroidingStatus As Boolean)
 
 		mPWiz = objPWiz
 		mDatasetStatsSummarizer = objDatasetStatsSummarizer
@@ -48,13 +56,13 @@
 
 		mSaveLCMS2DPlots = blnSaveLCMS2DPlots
 		mSaveTICAndBPI = blnSaveTICandBPI
-
+		mCheckCentroidingStatus = blnCheckCentroidingStatus
 	End Sub
 
 	Private Function ExtractQ1MZ(ByVal strChromID As String, ByRef dblMZ As Double) As Boolean
 
 		Const Q_REGEX As String = "Q[0-9]=([0-9.]+)"
-		Static reGetQ1MZ As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex(Q_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
+		Static reGetQ1MZ As Regex = New Regex(Q_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
 
 		Return ExtractQMZ(reGetQ1MZ, strChromID, dblMZ)
 
@@ -63,14 +71,14 @@
 	Private Function ExtractQ3MZ(ByVal strChromID As String, ByRef dblMZ As Double) As Boolean
 
 		Const Q1_Q3_REGEX As String = "Q1=[0-9.]+ Q3=([0-9.]+)"
-		Static reGetQ3MZ As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex(Q1_Q3_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
+		Static reGetQ3MZ As Regex = New Regex(Q1_Q3_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
 
 		Return ExtractQMZ(reGetQ3MZ, strChromID, dblMZ)
 
 	End Function
 
-	Private Function ExtractQMZ(ByRef reGetMZ As System.Text.RegularExpressions.Regex, ByVal strChromID As String, ByRef dblMZ As Double) As Boolean
-		Dim reMatch As System.Text.RegularExpressions.Match
+	Private Function ExtractQMZ(ByRef reGetMZ As Regex, ByVal strChromID As String, ByRef dblMZ As Double) As Boolean
+		Dim reMatch As Match
 
 		reMatch = reGetMZ.Match(strChromID)
 		If reMatch.Success Then
@@ -82,7 +90,7 @@
 		Return False
 	End Function
 
-	Private Function FindNearestInList(ByRef lstItems As System.Collections.Generic.List(Of Single), ByVal sngValToFind As Single) As Integer
+	Private Function FindNearestInList(ByRef lstItems As List(Of Single), ByVal sngValToFind As Single) As Integer
 
 		Dim intIndexMatch As Integer
 
@@ -124,7 +132,7 @@
 	Public Sub PossiblyUpdateAcqTimeStart(ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, ByVal dblRuntimeMinutes As Double)
 
 		If dblRuntimeMinutes > 0 Then
-			Dim dtAcqTimeStartAlt As System.DateTime
+			Dim dtAcqTimeStartAlt As DateTime
 			dtAcqTimeStartAlt = udtFileInfo.AcqTimeEnd.AddMinutes(-dblRuntimeMinutes)
 
 			If dtAcqTimeStartAlt < udtFileInfo.AcqTimeStart AndAlso udtFileInfo.AcqTimeStart.Subtract(dtAcqTimeStartAlt).TotalDays < 1 Then
@@ -137,12 +145,12 @@
 	Private Sub ProcessSRM(ByVal strChromID As String, _
 	 ByRef sngTimes() As Single, _
 	 ByRef sngIntensities() As Single, _
-	 ByRef lstTICScanTimes As System.Collections.Generic.List(Of Single), _
-	 ByRef lstTICScanNumbers As System.Collections.Generic.List(Of Integer), _
+	 ByRef lstTICScanTimes As List(Of Single), _
+	 ByRef lstTICScanNumbers As List(Of Integer), _
 	 ByRef dblRuntimeMinutes As Double, _
-	 ByRef dct2DDataParent As System.Collections.Generic.Dictionary(Of Integer, System.Collections.Generic.Dictionary(Of Double, Double)), _
-	 ByRef dct2DDataProduct As System.Collections.Generic.Dictionary(Of Integer, System.Collections.Generic.Dictionary(Of Double, Double)), _
-	 ByRef dct2DDataScanTimes As System.Collections.Generic.Dictionary(Of Integer, Single))
+	 ByRef dct2DDataParent As Dictionary(Of Integer, Dictionary(Of Double, Double)), _
+	 ByRef dct2DDataProduct As Dictionary(Of Integer, Dictionary(Of Double, Double)), _
+	 ByRef dct2DDataScanTimes As Dictionary(Of Integer, Single))
 
 		Dim intScanNumber As Integer = 0
 		Dim intIndexMatch As Integer
@@ -223,8 +231,8 @@
 	Private Sub ProcessTIC(ByVal strChromID As String, _
 	 ByRef sngTimes() As Single, _
 	 ByRef sngIntensities() As Single, _
-	 ByRef lstTICScanTimes As System.Collections.Generic.List(Of Single), _
-	 ByRef lstTICScanNumbers As System.Collections.Generic.List(Of Integer), _
+	 ByRef lstTICScanTimes As List(Of Single), _
+	 ByRef lstTICScanNumbers As List(Of Integer), _
 	 ByRef dblRuntimeMinutes As Double, _
 	 ByVal blnStoreInTICandBPIPlot As Boolean)
 
@@ -295,21 +303,21 @@
 		ReDim sngTimes(0)
 		ReDim sngIntensities(0)
 
-		Dim lstTICScanTimes As System.Collections.Generic.List(Of Single) = New System.Collections.Generic.List(Of Single)
-		Dim lstTICScanNumbers As System.Collections.Generic.List(Of Integer) = New System.Collections.Generic.List(Of Integer)
+		Dim lstTICScanTimes As List(Of Single) = New List(Of Single)
+		Dim lstTICScanNumbers As List(Of Integer) = New List(Of Integer)
 
 		' This dictionary tracks the m/z and intensity values for parent (Q1) ions of each scan
 		' Key is ScanNumber; Value is a dictionary holding m/z and intensity values for that scan
-		Dim dct2DDataParent As System.Collections.Generic.Dictionary(Of Integer, System.Collections.Generic.Dictionary(Of Double, Double))
-		dct2DDataParent = New System.Collections.Generic.Dictionary(Of Integer, System.Collections.Generic.Dictionary(Of Double, Double))
+		Dim dct2DDataParent As Dictionary(Of Integer, Dictionary(Of Double, Double))
+		dct2DDataParent = New Dictionary(Of Integer, Dictionary(Of Double, Double))
 
 		' This dictionary tracks the m/z and intensity values for product (Q3) ions of each scan
-		Dim dct2DDataProduct As System.Collections.Generic.Dictionary(Of Integer, System.Collections.Generic.Dictionary(Of Double, Double))
-		dct2DDataProduct = New System.Collections.Generic.Dictionary(Of Integer, System.Collections.Generic.Dictionary(Of Double, Double))
+		Dim dct2DDataProduct As Dictionary(Of Integer, Dictionary(Of Double, Double))
+		dct2DDataProduct = New Dictionary(Of Integer, Dictionary(Of Double, Double))
 
 		' This dictionary tracks the scan times for each scan number tracked by dct2DDataParent and/or dct2DDataProduct
-		Dim dct2DDataScanTimes As System.Collections.Generic.Dictionary(Of Integer, Single)
-		dct2DDataScanTimes = New System.Collections.Generic.Dictionary(Of Integer, Single)
+		Dim dct2DDataScanTimes As Dictionary(Of Integer, Single)
+		dct2DDataScanTimes = New Dictionary(Of Integer, Single)
 
 		' Note that even for a small .Wiff file (1.5 MB), obtaining the first chromatogram will take some time (20 to 60 seconds)
 		' The chromatogram at index 0 should be the TIC
@@ -389,7 +397,7 @@
 			Dim dblTIC As Double = 0
 			Dim dblBPI As Double = 0
 
-			Dim dtLastProgressTime As System.DateTime
+			Dim dtLastProgressTime As DateTime
 
 			ReportMessage("Obtaining scan times and MSLevels (this could take several minutes)")
 
@@ -402,7 +410,7 @@
 			Next
 
 			ReportMessage("Reading spectra")
-			dtLastProgressTime = System.DateTime.UtcNow
+			dtLastProgressTime = DateTime.UtcNow
 
 			For intScanIndex As Integer = 0 To dblScanTimes.Length - 1
 
@@ -414,7 +422,6 @@
 					' Obtain the raw mass spectrum
 					Dim oMSDataSpectrum As pwiz.ProteowizardWrapper.MsDataSpectrum
 					oMSDataSpectrum = mPWiz.GetSpectrum(intScanIndex)
-
 
 					Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
 
@@ -453,16 +460,16 @@
 
 					If TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, param) Then
 						dblTIC = param.value
-						objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblTIC, 5)
+						objScanStatsEntry.TotalIonIntensity = MathUtilities.ValueToString(dblTIC, 5)
 						blnComputeTIC = False
 					End If
 
 					If TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, param) Then
 						dblBPI = param.value
-						objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblBPI, 5)
+						objScanStatsEntry.BasePeakIntensity = MathUtilities.ValueToString(dblBPI, 5)
 
 						If TryGetCVParam(oSpectrum.scanList.scans(0).cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, param) Then
-							objScanStatsEntry.BasePeakMZ = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(param.value, 5)
+							objScanStatsEntry.BasePeakMZ = MathUtilities.ValueToString(param.value, 5)
 							blnComputeBPI = False
 						End If
 					End If
@@ -472,7 +479,6 @@
 
 					objScanStatsEntry.IonCount = oMSDataSpectrum.Mzs.Length
 					objScanStatsEntry.IonCountRaw = objScanStatsEntry.IonCount
-
 
 					If blnComputeBPI Or blnComputeTIC Then
 						' Step through the raw data to compute the BPI and TIC
@@ -493,51 +499,52 @@
 							End If
 						Next
 
-						objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblTIC, 5)
-						objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblBPI, 5)
-						objScanStatsEntry.BasePeakMZ = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(dblBasePeakMZ, 5)
+						objScanStatsEntry.TotalIonIntensity = MathUtilities.ValueToString(dblTIC, 5)
+						objScanStatsEntry.BasePeakIntensity = MathUtilities.ValueToString(dblBPI, 5)
+						objScanStatsEntry.BasePeakMZ = MathUtilities.ValueToString(dblBasePeakMZ, 5)
 
 					End If
 
 					mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
 
-
 					If mSaveTICAndBPI And Not blnTICStored Then
 						mTICandBPIPlot.AddData(intScanIndex + 1, intMSLevels(intScanIndex), CSng(dblScanTimes(intScanIndex)), dblBPI, dblTIC)
 					End If
-
 
 					If mSaveLCMS2DPlots Then
 						mLCMS2DPlot.AddScan(intScanIndex + 1, intMSLevels(intScanIndex), CSng(dblScanTimes(intScanIndex)), oMSDataSpectrum.Mzs.Length, oMSDataSpectrum.Mzs, oMSDataSpectrum.Intensities)
 					End If
 
-				Catch ex As System.Exception
+					If mCheckCentroidingStatus Then
+						mDatasetStatsSummarizer.ClassifySpectrum(oMSDataSpectrum.Mzs, intMSLevels(intScanIndex))
+					End If
+
+				Catch ex As Exception
 					ReportError("Error loading header info for scan " & intScanIndex + 1 & ": " & ex.Message)
 				End Try
 
-				If System.DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 60 Then
+				If DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 60 Then
 					ReportMessage(" ... " & ((intScanIndex + 1) / CDbl(dblScanTimes.Length) * 100).ToString("0.0") & "% complete")
-					dtLastProgressTime = System.DateTime.UtcNow
+					dtLastProgressTime = DateTime.UtcNow
 				End If
 
 			Next intScanIndex
 
-		Catch ex As System.Exception
+		Catch ex As Exception
 			ReportError("Error obtaining scan times and MSLevels using GetScanTimesAndMsLevels: " & ex.Message)
 		End Try
 
 	End Sub
 
-	Private Sub Store2DPlotData(ByRef dct2DDataScanTimes As System.Collections.Generic.Dictionary(Of Integer, Single), _
-	  ByRef dct2DDataParent As System.Collections.Generic.Dictionary(Of Integer, System.Collections.Generic.Dictionary(Of Double, Double)), _
-	  ByRef dct2DDataProduct As System.Collections.Generic.Dictionary(Of Integer, System.Collections.Generic.Dictionary(Of Double, Double)))
+	Private Sub Store2DPlotData(ByRef dct2DDataScanTimes As Dictionary(Of Integer, Single), _
+	  ByRef dct2DDataParent As Dictionary(Of Integer, Dictionary(Of Double, Double)), _
+	  ByRef dct2DDataProduct As Dictionary(Of Integer, Dictionary(Of Double, Double)))
 
 		' This variable keeps track of the length of the largest Dictionary(Of Double, Double) object in dct2DData
 		Dim intMax2DDataCount As Integer = 1
 
 		Dim int2DScanNumMin As Integer = Integer.MaxValue
 		Dim int2DScanNumMax As Integer = 0
-
 
 		' Determine the min/max scan numbers in dct2DDataParent
 		' Also determine intMax2DDataCount
@@ -551,9 +558,9 @@
 
 	End Sub
 
-	Private Sub Store2DPlotDataPoint(ByRef dct2DData As System.Collections.Generic.Dictionary(Of Integer, System.Collections.Generic.Dictionary(Of Double, Double)), ByVal intScanNumber As Integer, ByVal dblMZ As Double, ByVal dblIntensity As Double)
+	Private Sub Store2DPlotDataPoint(ByRef dct2DData As Dictionary(Of Integer, Dictionary(Of Double, Double)), ByVal intScanNumber As Integer, ByVal dblMZ As Double, ByVal dblIntensity As Double)
 
-		Dim obj2DMzAndIntensity As System.Collections.Generic.Dictionary(Of Double, Double) = Nothing
+		Dim obj2DMzAndIntensity As Dictionary(Of Double, Double) = Nothing
 
 		If dct2DData.TryGetValue(intScanNumber, obj2DMzAndIntensity) Then
 			Dim dblCurrentIntensity As Double
@@ -564,7 +571,7 @@
 				obj2DMzAndIntensity.Add(dblMZ, dblIntensity)
 			End If
 		Else
-			obj2DMzAndIntensity = New System.Collections.Generic.Dictionary(Of Double, Double)
+			obj2DMzAndIntensity = New Dictionary(Of Double, Double)
 			obj2DMzAndIntensity.Add(dblMZ, dblIntensity)
 		End If
 
@@ -573,8 +580,8 @@
 
 	End Sub
 
-	Private Sub Store2DPlotDataWork(ByRef dct2DData As System.Collections.Generic.Dictionary(Of Integer, System.Collections.Generic.Dictionary(Of Double, Double)), _
-	  ByRef dct2DDataScanTimes As System.Collections.Generic.Dictionary(Of Integer, Single), _
+	Private Sub Store2DPlotDataWork(ByRef dct2DData As Dictionary(Of Integer, Dictionary(Of Double, Double)), _
+	  ByRef dct2DDataScanTimes As Dictionary(Of Integer, Single), _
 	  ByVal intMSLevel As Integer, ByVal intMax2DDataCount As Integer, ByVal int2DScanNumMin As Integer, ByVal int2DScanNumMax As Integer)
 
 		Dim dblMZList() As Double
@@ -582,13 +589,13 @@
 		ReDim dblMZList(intMax2DDataCount - 1)
 		ReDim dblIntensityList(intMax2DDataCount - 1)
 
-		Dim dct2DEnum As System.Collections.Generic.Dictionary(Of Integer, System.Collections.Generic.Dictionary(Of Double, Double)).Enumerator
+		Dim dct2DEnum As Dictionary(Of Integer, Dictionary(Of Double, Double)).Enumerator
 		dct2DEnum = dct2DData.GetEnumerator()
 		Do While dct2DEnum.MoveNext()
 			Dim int2DPlotScanNum As Integer
 			int2DPlotScanNum = dct2DEnum.Current.Key
 
-			Dim obj2DMzAndIntensity As System.Collections.Generic.Dictionary(Of Double, Double)
+			Dim obj2DMzAndIntensity As Dictionary(Of Double, Double)
 			obj2DMzAndIntensity = dct2DEnum.Current.Value
 
 			obj2DMzAndIntensity.Keys.CopyTo(dblMZList, 0)
@@ -642,10 +649,10 @@
 		Return False
 	End Function
 
-	Private Sub UpdateDataRanges(ByRef dct2DData As System.Collections.Generic.Dictionary(Of Integer, System.Collections.Generic.Dictionary(Of Double, Double)), _
+	Private Sub UpdateDataRanges(ByRef dct2DData As Dictionary(Of Integer, Dictionary(Of Double, Double)), _
 	  ByRef intMax2DDataCount As Integer, ByRef int2DScanNumMin As Integer, ByRef int2DScanNumMax As Integer)
 
-		Dim dct2DEnum As System.Collections.Generic.Dictionary(Of Integer, System.Collections.Generic.Dictionary(Of Double, Double)).Enumerator
+		Dim dct2DEnum As Dictionary(Of Integer, Dictionary(Of Double, Double)).Enumerator
 		Dim int2DPlotScanNum As Integer
 
 		dct2DEnum = dct2DData.GetEnumerator()

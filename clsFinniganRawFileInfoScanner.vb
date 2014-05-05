@@ -3,9 +3,11 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Started in 2005
 '
-' Last modified October 27, 2011
+' Last modified April 18, 2014
 
 Imports MSFileInfoScanner.DSSummarizer.clsScanStatsEntry
+Imports PNNLOmics.Utilities
+Imports System.IO
 Imports ThermoRawFileReaderDLL.FinniganFileIO
 
 Public Class clsFinniganRawFileInfoScanner
@@ -14,8 +16,13 @@ Public Class clsFinniganRawFileInfoScanner
 	' Note: The extension must be in all caps
 	Public Const FINNIGAN_RAW_FILE_EXTENSION As String = ".RAW"
 
-	Protected Sub ComputeQualityScores(ByRef objXcaliburAccessor As FinniganFileReaderBaseClass, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType)
-		' This function is used to determine one or more overall quality scores
+	''' <summary>
+	''' This function is used to determine one or more overall quality scores
+	''' </summary>
+	''' <param name="objXcaliburAccessor"></param>
+	''' <param name="udtFileInfo"></param>
+	''' <remarks></remarks>
+	Protected Sub ComputeQualityScores(ByRef objXcaliburAccessor As XRawFileIO, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType)
 
 		Dim intScanCount As Integer
 		Dim intScanNumber As Integer
@@ -41,7 +48,7 @@ Public Class clsFinniganRawFileInfoScanner
 		If mLCMS2DPlot.ScanCountCached > 0 Then
 			' Obtain the overall average intensity value using the data cached in mLCMS2DPlot
 			' This avoids having to reload all of the data using objXcaliburAccessor
-			Dim intMSLevelFilter As Integer = 1
+			Const intMSLevelFilter As Integer = 1
 			sngOverallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(intMSLevelFilter)
 		Else
 
@@ -83,22 +90,28 @@ Public Class clsFinniganRawFileInfoScanner
 
 	End Sub
 
+	''' <summary>
+	''' Returns the dataset name for the given file
+	''' </summary>
+	''' <param name="strDataFilePath"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
-		' The dataset name is simply the file name without .Raw
 		Try
-			Return System.IO.Path.GetFileNameWithoutExtension(strDataFilePath)
-		Catch ex As System.Exception
+			' The dataset name is simply the file name without .Raw
+			Return Path.GetFileNameWithoutExtension(strDataFilePath)
+		Catch ex As Exception
 			Return String.Empty
 		End Try
 	End Function
 
-	Protected Sub LoadScanDetails(ByRef objXcaliburAccessor As FinniganFileReaderBaseClass)
+	Protected Sub LoadScanDetails(ByRef objXcaliburAccessor As XRawFileIO)
 
 		Dim intScanCount As Integer
 		Dim intScanNumber As Integer
 
 		Dim sngProgress As Single
-		Dim dtLastProgressTime As System.DateTime
+		Dim dtLastProgressTime As DateTime
 
 		Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
 		Dim blnSuccess As Boolean
@@ -117,13 +130,17 @@ Public Class clsFinniganRawFileInfoScanner
 			MyBase.InitializeLCMS2DPlot()
 		End If
 
-		dtLastProgressTime = System.DateTime.UtcNow
+		dtLastProgressTime = DateTime.UtcNow
 
 		intScanCount = objXcaliburAccessor.GetNumScans
 		MyBase.GetStartAndEndScans(intScanCount, intScanStart, intScanEnd)
 
 		For intScanNumber = intScanStart To intScanEnd
 			Try
+
+				If mShowDebugInfo Then
+					Console.WriteLine(" ... scan " & intScanNumber)
+				End If
 
 				blnSuccess = objXcaliburAccessor.GetScanInfo(intScanNumber, udtScanHeaderInfo)
 
@@ -145,8 +162,8 @@ Public Class clsFinniganRawFileInfoScanner
 						objScanStatsEntry.ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(.FilterText)
 
 						objScanStatsEntry.ElutionTime = .RetentionTime.ToString("0.0000")
-						objScanStatsEntry.TotalIonIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(.TotalIonCurrent, 5)
-						objScanStatsEntry.BasePeakIntensity = DSSummarizer.clsDatasetStatsSummarizer.ValueToString(.BasePeakIntensity, 5)
+						objScanStatsEntry.TotalIonIntensity = MathUtilities.ValueToString(.TotalIonCurrent, 5)
+						objScanStatsEntry.BasePeakIntensity = MathUtilities.ValueToString(.BasePeakIntensity, 5)
 						objScanStatsEntry.BasePeakMZ = Math.Round(.BasePeakMZ, 4).ToString
 
 						' Base peak signal to noise ratio
@@ -166,44 +183,63 @@ Public Class clsFinniganRawFileInfoScanner
 					mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
 
 				End If
-			Catch ex As System.Exception
+			Catch ex As Exception
 				ReportError("Error loading header info for scan " & intScanNumber & ": " & ex.Message)
 			End Try
 
 			Try
 
-				If mSaveLCMS2DPlots Then
+				If mSaveLCMS2DPlots Or mCheckCentroidingStatus Then
 					' Also need to load the raw data
 
 					Dim intIonCount As Integer
-					Dim dblMZList() As Double = Nothing
-					Dim dblIntensityList() As Double = Nothing
+					Dim dblMassIntensityPairs(,) As Double = Nothing
 
 					' Load the ions for this scan
-
-					intIonCount = objXcaliburAccessor.GetScanData(intScanNumber, dblMZList, dblIntensityList, udtScanHeaderInfo)
+					intIonCount = objXcaliburAccessor.GetScanData2D(intScanNumber, dblMassIntensityPairs, udtScanHeaderInfo, intMaxNumberOfPeaks:=-1)
 
 					If intIonCount > 0 Then
-						mLCMS2DPlot.AddScan(intScanNumber, udtScanHeaderInfo.MSLevel, CSng(udtScanHeaderInfo.RetentionTime), _
-						  intIonCount, dblMZList, dblIntensityList)
+						If mSaveLCMS2DPlots Then
+							mLCMS2DPlot.AddScan2D(intScanNumber, udtScanHeaderInfo.MSLevel, CSng(udtScanHeaderInfo.RetentionTime), intIonCount, dblMassIntensityPairs)
+						End If
+
+						If mCheckCentroidingStatus Then
+							Dim mzCount As Integer = dblMassIntensityPairs.GetLength(1)
+
+							Dim lstMZs = New List(Of Double)(mzCount)
+
+							For i As Integer = 0 To mzCount - 1
+								lstMZs.Add(dblMassIntensityPairs(0, i))
+							Next
+
+							mDatasetStatsSummarizer.ClassifySpectrum(lstMZs, udtScanHeaderInfo.MSLevel)
+						End If
 					End If
 
 				End If
 
-			Catch ex As System.Exception
+			Catch ex As Exception
 				ReportError("Error loading m/z and intensity values for scan " & intScanNumber & ": " & ex.Message)
 			End Try
 
 			If intScanNumber Mod 100 = 0 Then
-				Console.Write(".")
+				If Not mShowDebugInfo Then
+					Console.Write(".")
+				End If
 
 				If intScanCount > 0 Then
 					sngProgress = CSng(intScanNumber / intScanCount * 100)
 
-					If System.DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 30 Then
-						dtLastProgressTime = System.DateTime.UtcNow
-						Console.WriteLine()
-						Console.Write(sngProgress.ToString("0.0") & "% ")
+					If DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 30 Then
+						dtLastProgressTime = DateTime.UtcNow
+						Dim strPercentComplete As String = sngProgress.ToString("0.0") & "% "
+
+						If mShowDebugInfo Then
+							Console.WriteLine(strPercentComplete)
+						Else
+							Console.WriteLine()
+							Console.Write(strPercentComplete)
+						End If
 					End If
 				End If
 
@@ -215,14 +251,18 @@ Public Class clsFinniganRawFileInfoScanner
 
 	End Sub
 
-	Public Overrides Function ProcessDatafile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-		' Returns True if success, False if an error
+	''' <summary>
+	''' Process the dataset
+	''' </summary>
+	''' <param name="strDataFilePath"></param>
+	''' <param name="udtFileInfo"></param>
+	''' <returns>True if success, False if an error</returns>
+	''' <remarks></remarks>
+	Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
-		Dim objXcaliburAccessor As FinniganFileReaderBaseClass
-		Dim ioFileInfo As System.IO.FileInfo
+		Dim objXcaliburAccessor As XRawFileIO
 		Dim udtScanHeaderInfo As XRawFileIO.udtScanHeaderInfoType = New XRawFileIO.udtScanHeaderInfoType
 
-		Dim intDatasetID As Integer
 		Dim intScanEnd As Integer
 
 		Dim strDataFilePathLocal As String = String.Empty
@@ -231,30 +271,31 @@ Public Class clsFinniganRawFileInfoScanner
 		Dim blnDeleteLocalFile As Boolean
 
 		' Obtain the full path to the file
-		ioFileInfo = New System.IO.FileInfo(strDataFilePath)
+		Dim fiRawFile = New FileInfo(strDataFilePath)
 
-		If Not ioFileInfo.Exists Then
+		If Not fiRawFile.Exists Then
+			ShowMessage(".Raw file not found: " + strDataFilePath)
 			Return False
 		End If
 
 		' Future, optional: Determine the DatasetID
 		' Unfortunately, this is not present in metadata.txt
 		' intDatasetID = LookupDatasetID(strDatasetName)
-		intDatasetID = 0
+		Dim intDatasetID As Integer = MyBase.DatasetID
 
 		' Record the file size and Dataset ID
 		With udtFileInfo
-			.FileSystemCreationTime = ioFileInfo.CreationTime
-			.FileSystemModificationTime = ioFileInfo.LastWriteTime
+			.FileSystemCreationTime = fiRawFile.CreationTime
+			.FileSystemModificationTime = fiRawFile.LastWriteTime
 
 			' The acquisition times will get updated below to more accurate values
 			.AcqTimeStart = .FileSystemModificationTime
 			.AcqTimeEnd = .FileSystemModificationTime
 
 			.DatasetID = intDatasetID
-			.DatasetName = System.IO.Path.GetFileNameWithoutExtension(ioFileInfo.Name)
-			.FileExtension = ioFileInfo.Extension
-			.FileSizeBytes = ioFileInfo.Length
+			.DatasetName = GetDatasetNameViaPath(fiRawFile.Name)
+			.FileExtension = fiRawFile.Extension
+			.FileSizeBytes = fiRawFile.Length
 
 			.ScanCount = 0
 		End With
@@ -270,39 +311,39 @@ Public Class clsFinniganRawFileInfoScanner
 		objXcaliburAccessor = New XRawFileIO
 
 		' Open a handle to the data file
-		If Not objXcaliburAccessor.OpenRawFile(ioFileInfo.FullName) Then
+		If Not objXcaliburAccessor.OpenRawFile(fiRawFile.FullName) Then
 			' File open failed
-			ReportError("Call to .OpenRawFile failed for: " & ioFileInfo.FullName)
+			ReportError("Call to .OpenRawFile failed for: " & fiRawFile.FullName)
 			blnReadError = True
 
-			If clsMSFileInfoScanner.GetAppFolderPath.Substring(0, 2).ToLower <> ioFileInfo.FullName.Substring(0, 2).ToLower Then
+			If clsMSFileInfoScanner.GetAppFolderPath.Substring(0, 2).ToLower <> fiRawFile.FullName.Substring(0, 2).ToLower Then
 
 				If mCopyFileLocalOnReadError Then
 					' Copy the file locally and try again
 
 					Try
-						strDataFilePathLocal = System.IO.Path.Combine(clsMSFileInfoScanner.GetAppFolderPath, System.IO.Path.GetFileName(strDataFilePath))
+						strDataFilePathLocal = Path.Combine(clsMSFileInfoScanner.GetAppFolderPath, Path.GetFileName(strDataFilePath))
 
 						If strDataFilePathLocal.ToLower <> strDataFilePath.ToLower Then
 
-							ShowMessage("Copying file " & System.IO.Path.GetFileName(strDataFilePath) & " to the working folder")
-							System.IO.File.Copy(strDataFilePath, strDataFilePathLocal, True)
+							ShowMessage("Copying file " & Path.GetFileName(strDataFilePath) & " to the working folder")
+							File.Copy(strDataFilePath, strDataFilePathLocal, True)
 
 							strDataFilePath = String.Copy(strDataFilePathLocal)
 							blnDeleteLocalFile = True
 
-							' Update ioFileInfo then try to re-open
-							ioFileInfo = New System.IO.FileInfo(strDataFilePath)
+							' Update fiRawFile then try to re-open
+							fiRawFile = New FileInfo(strDataFilePath)
 
-							If Not objXcaliburAccessor.OpenRawFile(ioFileInfo.FullName) Then
+							If Not objXcaliburAccessor.OpenRawFile(fiRawFile.FullName) Then
 								' File open failed
-								ReportError("Call to .OpenRawFile failed for: " & ioFileInfo.FullName)
+								ReportError("Call to .OpenRawFile failed for: " & fiRawFile.FullName)
 								blnReadError = True
 							Else
 								blnReadError = False
 							End If
 						End If
-					Catch ex As System.Exception
+					Catch ex As Exception
 						blnReadError = True
 					End Try
 				End If
@@ -315,7 +356,7 @@ Public Class clsFinniganRawFileInfoScanner
 			' Read the file info
 			Try
 				udtFileInfo.AcqTimeStart = objXcaliburAccessor.FileInfo.CreationDate
-			Catch ex As System.Exception
+			Catch ex As Exception
 				' Read error
 				blnReadError = True
 			End Try
@@ -330,7 +371,7 @@ Public Class clsFinniganRawFileInfoScanner
 						.AcqTimeEnd = .AcqTimeStart.AddMinutes(udtScanHeaderInfo.RetentionTime)
 						.ScanCount = objXcaliburAccessor.GetNumScans()
 					End With
-				Catch ex As System.Exception
+				Catch ex As Exception
 					' Error; use default values
 					With udtFileInfo
 						.AcqTimeEnd = .AcqTimeStart
@@ -338,7 +379,7 @@ Public Class clsFinniganRawFileInfoScanner
 					End With
 				End Try
 
-				If mSaveTICAndBPI OrElse mCreateDatasetInfoFile OrElse mCreateScanStatsFile OrElse mSaveLCMS2DPlots Then
+				If mSaveTICAndBPI OrElse mCreateDatasetInfoFile OrElse mCreateScanStatsFile OrElse mSaveLCMS2DPlots OrElse mCheckCentroidingStatus Then
 					' Load data from each scan
 					' This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
 					LoadScanDetails(objXcaliburAccessor)
@@ -374,12 +415,10 @@ Public Class clsFinniganRawFileInfoScanner
 
 		' Close the handle to the data file
 		objXcaliburAccessor.CloseRawFile()
-		objXcaliburAccessor = Nothing
-
 
 		' Read the file info from the file system
 		' (much of this is already in udtFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
-		UpdateDatasetFileStats(ioFileInfo, intDatasetID)
+		UpdateDatasetFileStats(fiRawFile, intDatasetID)
 
 		' Copy over the updated filetime info from udtFileInfo to mDatasetFileInfo
 		With mDatasetStatsSummarizer.DatasetFileInfo
@@ -397,10 +436,10 @@ Public Class clsFinniganRawFileInfoScanner
 		' Delete the local copy of the data file
 		If blnDeleteLocalFile Then
 			Try
-				System.IO.File.Delete(strDataFilePathLocal)
-			Catch ex As System.Exception
+				File.Delete(strDataFilePathLocal)
+			Catch ex As Exception
 				' Deletion failed
-				ReportError("Deletion failed for: " & System.IO.Path.GetFileName(strDataFilePathLocal))
+				ReportError("Deletion failed for: " & Path.GetFileName(strDataFilePathLocal))
 			End Try
 		End If
 
