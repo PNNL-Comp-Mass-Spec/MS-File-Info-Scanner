@@ -14,7 +14,7 @@ Public Class clsMSFileInfoScanner
 	Implements iMSFileInfoScanner
 
 	Public Sub New()
-		mFileDate = "April 3, 2014"
+		mFileDate = "May 8, 2014"
 
 		mFileIntegrityChecker = New clsFileIntegrityChecker
 		mMSFileInfoDataCache = New clsMSFileInfoDataCache

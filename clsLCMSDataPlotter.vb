@@ -119,10 +119,10 @@ Public Class clsLCMSDataPlotter
 				If dblMassIntensityPairs(0, intIndex) < dblMassIntensityPairs(0, intIndex - 1) Then
 					' May need to sort the data
 					' However, if the intensity of both data points is zero, then we can simply swap the data
-					If Math.Abs(dblMassIntensityPairs(1, intIndex) - 0) < Double.Epsilon AndAlso Math.Abs(dblMassIntensityPairs(1, intIndex - 1) - 0) < Double.Epsilon Then
+					If Math.Abs(dblMassIntensityPairs(1, intIndex)) < Double.Epsilon AndAlso Math.Abs(dblMassIntensityPairs(1, intIndex - 1)) < Double.Epsilon Then
 						' Swap the m/z values
-						Dim dblSwapVal As Double = dblMassIntensityPairs(1, intIndex)
-						dblMassIntensityPairs(1, intIndex) = dblMassIntensityPairs(0, intIndex - 1)
+						Dim dblSwapVal As Double = dblMassIntensityPairs(0, intIndex)
+						dblMassIntensityPairs(0, intIndex) = dblMassIntensityPairs(0, intIndex - 1)
 						dblMassIntensityPairs(0, intIndex - 1) = dblSwapVal
 					Else
 						' Need to sort
@@ -318,6 +318,7 @@ Public Class clsLCMSDataPlotter
 		For intIndex = 0 To intIonCount - 2
 			If dblIonsMZFiltered(intIndex + 1) - dblIonsMZFiltered(intIndex) < mOptions.MZResolution Then
 				blnCentroidRequired = True
+				Exit For
 			End If
 		Next
 

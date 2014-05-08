@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.2.5241; May 8, 2014
+	- Fixed bug in the LCMSDataPlotter swapping m/z vlaues for adjacent zero-intensity data
+
 Version 1.2.5221; April 18, 2014
 	- Now tracking the number of centroided and profile MS1 and MS2 spectra
 
