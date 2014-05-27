@@ -25,7 +25,7 @@ Option Strict On
 ' this computer software.
 
 '
-' Last modified June 28, 2013
+' Last modified May 22, 2014
 
 Imports System.Collections.Generic
 
@@ -36,8 +36,8 @@ Public Class clsParseCommandLine
 
 	Public Const DEFAULT_SWITCH_PARAM_CHAR As Char = ":"c
 
-	Protected mSwitches As New Dictionary(Of String, String)
-	Protected mNonSwitchParameters As New List(Of String)
+	Protected ReadOnly mSwitches As New Dictionary(Of String, String)
+	Protected ReadOnly mNonSwitchParameters As New List(Of String)
 
 	Protected mShowHelp As Boolean = False
 	Protected mDebugMode As Boolean = False
@@ -191,14 +191,6 @@ Public Class clsParseCommandLine
 		' If /? or /help is found, then returns False and sets mShowHelp to True
 
 		Dim strCmdLine As String = String.Empty
-		Dim strKey As String, strValue As String
-
-		Dim intCharLoc As Integer
-
-		Dim intIndex As Integer
-		Dim strParameters() As String
-
-		Dim blnSwitchParam As Boolean
 
 		mSwitches.Clear()
 		mNonSwitchParameters.Clear()
@@ -253,7 +245,7 @@ Public Class clsParseCommandLine
 				Console.WriteLine()
 			End If
 
-			strParameters = SplitCommandLineParams(strCmdLine)
+			Dim strParameters = SplitCommandLineParams(strCmdLine)
 
 			If mDebugMode Then
 				Console.WriteLine()
@@ -261,7 +253,7 @@ Public Class clsParseCommandLine
 
 			If String.IsNullOrWhiteSpace(strCmdLine) Then
 				Return False
-			ElseIf strCmdLine.IndexOf(chSwitchStartChar & "?") > 0 Or strCmdLine.ToLower().IndexOf(chSwitchStartChar & "help") > 0 Then
+			ElseIf strCmdLine.IndexOf(chSwitchStartChar & "?", StringComparison.Ordinal) > 0 OrElse strCmdLine.ToLower().IndexOf(chSwitchStartChar & "help", StringComparison.Ordinal) > 0 Then
 				mShowHelp = True
 				Return False
 			End If
@@ -271,8 +263,9 @@ Public Class clsParseCommandLine
 			For intIndex = 1 To strParameters.Length - 1
 
 				If strParameters(intIndex).Length > 0 Then
-					strKey = strParameters(intIndex).TrimStart(" "c)
-					strValue = String.Empty
+					Dim strKey = strParameters(intIndex).TrimStart(" "c)
+					Dim strValue = String.Empty
+					Dim blnSwitchParam As Boolean
 
 					If strKey.StartsWith(chSwitchStartChar) Then
 						blnSwitchParam = True
@@ -285,16 +278,16 @@ Public Class clsParseCommandLine
 
 					If blnSwitchParam Then
 						' Look for strSwitchParameterChar in strParameters(intIndex)
-						intCharLoc = strParameters(intIndex).IndexOf(chSwitchParameterChar)
+						Dim intCharIndex = strParameters(intIndex).IndexOf(chSwitchParameterChar)
 
-						If intCharLoc >= 0 Then
+						If intCharIndex >= 0 Then
 							' Parameter is of the form /I:MyParam or /I:"My Parameter" or -I:"My Parameter" or /MyParam:Setting
-							strValue = strKey.Substring(intCharLoc + 1).Trim
+							strValue = strKey.Substring(intCharIndex + 1).Trim
 
 							' Remove any starting and ending quotation marks
 							strValue = strValue.Trim(""""c)
 
-							strKey = strKey.Substring(0, intCharLoc)
+							strKey = strKey.Substring(0, intCharIndex)
 						Else
 							' Parameter is of the form /S or -S
 						End If
@@ -486,6 +479,11 @@ Public Class clsParseCommandLine
 
 		Try
 			If Not String.IsNullOrEmpty(strCmdLine) Then
+
+				' Make sure the command line doesn't have any carriage return or linefeed characters
+				strCmdLine = strCmdLine.Replace(ControlChars.CrLf, " ")
+				strCmdLine = strCmdLine.Replace(ControlChars.Cr, " ")
+				strCmdLine = strCmdLine.Replace(ControlChars.Lf, " ")
 
 				blnInsideDoubleQuotes = False
 
