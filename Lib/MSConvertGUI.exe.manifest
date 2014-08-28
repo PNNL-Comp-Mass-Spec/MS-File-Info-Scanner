@@ -1,39 +1,39 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2" xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <assemblyIdentity name="MSConvertGUI.exe" version="3.0.4140.0" processorArchitecture="x86" type="win32" />
+  <assemblyIdentity name="MSConvertGUI.exe" version="3.0.5084.0" processorArchitecture="x86" type="win32" />
   <dependency>
-    <dependentAssembly asmv2:dependencyType="install" asmv2:codebase="Interop.EDAL.SxS.manifest" asmv2:size="3756">
+    <dependentAssembly asmv2:dependencyType="install" asmv2:codebase="Interop.EDAL.SxS.manifest" asmv2:size="4279">
       <assemblyIdentity name="Interop.EDAL.SxS" version="1.0.0.0" type="win32" />
       <hash xmlns="urn:schemas-microsoft-com:asm.v2">
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>aCI5128iUImDrVztlqn1EvDQea4=</dsig:DigestValue>
+        <dsig:DigestValue>AfmpSBAjAcvbggVElAU8pdOdv6c=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly asmv2:dependencyType="install" asmv2:codebase="Interop.HSREADWRITELib.SxS.manifest" asmv2:size="3597">
+    <dependentAssembly asmv2:dependencyType="install" asmv2:codebase="Interop.HSREADWRITELib.SxS.manifest" asmv2:size="3802">
       <assemblyIdentity name="Interop.HSREADWRITELib.SxS" version="1.0.0.0" type="win32" />
       <hash xmlns="urn:schemas-microsoft-com:asm.v2">
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>R6nPFrMD+cIYz9XTbb3519MBoWA=</dsig:DigestValue>
+        <dsig:DigestValue>qKhBI9gCYjZvDS9YT9Tb7lPCSV4=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
     <dependentAssembly asmv2:dependencyType="install" asmv2:codebase="MSFileReader.XRawfile2.SxS.manifest" asmv2:size="3231">
-      <assemblyIdentity name="MSFileReader.XRawfile2.SxS" version="2.2.61.0" type="win32" />
+      <assemblyIdentity name="MSFileReader.XRawfile2.SxS" version="3.0.23.0" type="win32" />
       <hash xmlns="urn:schemas-microsoft-com:asm.v2">
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>GdH7TRh4NjwIVlb/fDhYZo5P0FM=</dsig:DigestValue>
+        <dsig:DigestValue>EfijEznVft49jWW0PJycccnTwLc=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

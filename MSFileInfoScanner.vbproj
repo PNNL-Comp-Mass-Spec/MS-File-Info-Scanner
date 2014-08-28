@@ -88,6 +88,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\ProteowizardWrapper.dll</HintPath>
     </Reference>
+    <Reference Include="pwiz.CommonUtil, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\pwiz.CommonUtil.dll</HintPath>
+    </Reference>
     <Reference Include="pwiz_bindings_cli, Version=0.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\pwiz_bindings_cli.dll</HintPath>

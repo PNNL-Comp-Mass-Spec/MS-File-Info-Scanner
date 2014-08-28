@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.2.5353; August 28, 2014
+	- Updated Proteowizard DLLs
+
 Version 1.2.5332; August 7, 2014
 	- New version of ChemstationMSFileReader.dll that correctly extracts packed intensity values
 
