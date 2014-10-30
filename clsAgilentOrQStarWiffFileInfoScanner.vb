@@ -115,6 +115,9 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
 				mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
 			End If
 
+            objPWiz.Dispose()
+            PRISM.Processes.clsProgRunner.GarbageCollectNow()
+
 		Catch ex As Exception
 			ReportError("Error using ProteoWizard reader: " & ex.Message)
 		End Try

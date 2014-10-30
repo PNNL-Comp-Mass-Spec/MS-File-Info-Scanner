@@ -259,6 +259,15 @@ Public Class clsSpectrumTypeClassifier
 			ionCount = dblMZs.Count
 		End If
 
+        ' Possibly sort dblMZs
+        For i As Integer = 1 To ionCount - 1
+            If dblMZs(i) < dblMZs(i - 1) Then
+                ' Sort required
+                Array.Sort(dblMZs)
+                Exit For
+            End If
+        Next
+
 		Dim lstPpmDiffs = New List(Of Double)(ionCount)
 
 		For i As Integer = 1 To ionCount - 1

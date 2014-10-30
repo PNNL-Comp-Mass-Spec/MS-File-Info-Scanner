@@ -15,10 +15,10 @@ Public Class clsLCMSDataPlotter
 #Region "Constants, Enums, Structures"
 	Private Const MAX_ALLOWABLE_ION_COUNT As Integer = 50000		' Absolute maximum number of ions that will be tracked for a mass spectrum
 
-	Public Enum eOutputFileTypes
-		LCMS = 0
-		LCMSMSn = 1
-	End Enum
+    Public Enum eOutputFileTypes
+        LCMS = 0
+        LCMSMSn = 1
+    End Enum
 
 	Protected Structure udtOutputFileInfoType
 		Public FileType As eOutputFileTypes
@@ -201,17 +201,37 @@ Public Class clsLCMSDataPlotter
 	  ByVal dblIonsMZ() As Double,
 	  ByVal dblIonsIntensity() As Double) As Boolean
 
-		Dim lstIons = New List(Of udtMSIonType)(intIonCount - 1)
+        Dim lstIons As List(Of udtMSIonType)
 
-		For intIndex As Integer = 0 To intIonCount - 1
-			Dim udtIon = New udtMSIonType
+        If intIonCount > MAX_ALLOWABLE_ION_COUNT Then
+            Array.Sort(dblIonsIntensity, dblIonsMZ)
 
-			udtIon.MZ = dblIonsMZ(intIndex)
-			udtIon.Intensity = dblIonsIntensity(intIndex)
+            Dim lstHighIntensityIons = New List(Of udtMSIonType)(MAX_ALLOWABLE_ION_COUNT)
 
-			lstIons.Add(udtIon)
-		Next
+            For intIndex As Integer = intIonCount - MAX_ALLOWABLE_ION_COUNT To intIonCount - 1
+                Dim udtIon = New udtMSIonType
 
+                udtIon.MZ = dblIonsMZ(intIndex)
+                udtIon.Intensity = dblIonsIntensity(intIndex)
+
+                lstHighIntensityIons.Add(udtIon)
+            Next
+
+            lstIons = (From item In lstHighIntensityIons Select item Order By item.MZ).ToList
+
+        Else
+            lstIons = New List(Of udtMSIonType)(intIonCount - 1)
+
+            For intIndex As Integer = 0 To intIonCount - 1
+                Dim udtIon = New udtMSIonType
+
+                udtIon.MZ = dblIonsMZ(intIndex)
+                udtIon.Intensity = dblIonsIntensity(intIndex)
+
+                lstIons.Add(udtIon)
+            Next
+        End If
+		
 		Return AddScan(intScanNumber, intMSLevel, sngScanTimeMinutes, lstIons)
 
 	End Function

@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.2.5415; October 29, 2014
+	- Now using parseViaFramework=true when instantiating a new SQLiteConnection instance
+	- Updated ThermoRawFileReaderDLL.dll and ProteowizardWrapper.dll
+
 Version 1.2.5353; August 28, 2014
 	- Updated Proteowizard DLLs
 

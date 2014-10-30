@@ -6,7 +6,7 @@ Option Strict On
 
 Module modMain
 
-	Public Const PROGRAM_DATE As String = "August 7, 2014"
+    Public Const PROGRAM_DATE As String = "October 29, 2014"
 
 	Private mInputDataFilePath As String			' This path can contain wildcard characters, e.g. C:\*.raw
 	Private mOutputFolderName As String				' Optional
@@ -415,7 +415,7 @@ Module modMain
 			Console.WriteLine("Use /Debug to display debug information at the console, including showing the scan number prior to reading each scan's data")
 			Console.WriteLine()
 
-			Console.WriteLine("Use /C to perform an integrity check on all known file types; this process will open known file types and verify that they contain the expected data.  This option is only used if you specify an Input Folder and use a wildcard; you will typically also want to use /S when using /C.")
+            Console.WriteLine("Use /C to perform an integrity check on all known file types; this process will open known file types and verify that they contain the expected   This option is only used if you specify an Input Folder and use a wildcard; you will typically also want to use /S when using /C.")
 			Console.WriteLine("Use /M to define the maximum number of lines to process when checking text or csv files; default is /M:" & clsFileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK.ToString)
 			Console.WriteLine()
 

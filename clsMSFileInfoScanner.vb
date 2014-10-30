@@ -1,7 +1,7 @@
 Option Strict On
 
 ' Scans a series of MS data files (or data folders) and extracts the acquisition start and end times, 
-' number of spectra, and the total size of the data.  Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
+' number of spectra, and the total size of the   Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
 '
 ' Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar/QTrap .WIFF files, 
 ' Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, and .UIMF files (IMS)
@@ -770,32 +770,32 @@ Public Class clsMSFileInfoScanner
 		Return GetKnownFileExtensionsList.ToArray()
 	End Function
 
-	Public Function GetKnownFileExtensionsList() As Generic.List(Of String)
-		Dim lstExtensionsToParse As Generic.List(Of String) = New Generic.List(Of String)
+    Public Function GetKnownFileExtensionsList() As List(Of String)
+        Dim lstExtensionsToParse As List(Of String) = New List(Of String)
 
-		lstExtensionsToParse.Add(clsFinniganRawFileInfoScanner.FINNIGAN_RAW_FILE_EXTENSION)
-		lstExtensionsToParse.Add(clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION)
-		lstExtensionsToParse.Add(clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION)
-		lstExtensionsToParse.Add(clsBrukerXmassFolderInfoScanner.BRUKER_MCF_FILE_EXTENSION)
-		lstExtensionsToParse.Add(clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_EXTENSION)
-		lstExtensionsToParse.Add(clsUIMFInfoScanner.UIMF_FILE_EXTENSION)
-		lstExtensionsToParse.Add(clsDeconToolsIsosInfoScanner.DECONTOOLS_CSV_FILE_EXTENSION)
+        lstExtensionsToParse.Add(clsFinniganRawFileInfoScanner.FINNIGAN_RAW_FILE_EXTENSION)
+        lstExtensionsToParse.Add(clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION)
+        lstExtensionsToParse.Add(clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION)
+        lstExtensionsToParse.Add(clsBrukerXmassFolderInfoScanner.BRUKER_MCF_FILE_EXTENSION)
+        lstExtensionsToParse.Add(clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_EXTENSION)
+        lstExtensionsToParse.Add(clsUIMFInfoScanner.UIMF_FILE_EXTENSION)
+        lstExtensionsToParse.Add(clsDeconToolsIsosInfoScanner.DECONTOOLS_CSV_FILE_EXTENSION)
 
-		Return lstExtensionsToParse
-	End Function
+        Return lstExtensionsToParse
+    End Function
 
-	Public Function GetKnownFolderExtensions() As String() Implements iMSFileInfoScanner.GetKnownFolderExtensions
-		Return GetKnownFolderExtensionsList.ToArray()
-	End Function
+    Public Function GetKnownFolderExtensions() As String() Implements iMSFileInfoScanner.GetKnownFolderExtensions
+        Return GetKnownFolderExtensionsList.ToArray()
+    End Function
 
-	Public Function GetKnownFolderExtensionsList() As Generic.List(Of String)
-		Dim lstExtensionsToParse As Generic.List(Of String) = New Generic.List(Of String)
+    Public Function GetKnownFolderExtensionsList() As List(Of String)
+        Dim lstExtensionsToParse As List(Of String) = New List(Of String)
 
-		lstExtensionsToParse.Add(clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION)
-		lstExtensionsToParse.Add(clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION)
+        lstExtensionsToParse.Add(clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION)
+        lstExtensionsToParse.Add(clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION)
 
-		Return lstExtensionsToParse
-	End Function
+        Return lstExtensionsToParse
+    End Function
 
 
 	Public Function GetErrorMessage() As String Implements iMSFileInfoScanner.GetErrorMessage

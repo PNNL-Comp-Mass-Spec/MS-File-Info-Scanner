@@ -214,7 +214,7 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>xcopy "$(ProjectDir)Lib\x86\SQLite.Interop.dll" "$(TargetDir)" /D
-    </PostBuildEvent>
+    <PostBuildEvent>xcopy "$(ProjectDir)Lib\x86\SQLite.Interop.dll" "$(TargetDir)" /D /Y
+xcopy "$(ProjectDir)Lib\*.manifest" "$(TargetDir)" /D /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>

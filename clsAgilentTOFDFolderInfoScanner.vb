@@ -321,6 +321,9 @@
 				mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
 			End If
 
+            objPWiz.Dispose()
+            PRISM.Processes.clsProgRunner.GarbageCollectNow()
+
 			blnSuccess = True
 
 		Catch ex As Exception

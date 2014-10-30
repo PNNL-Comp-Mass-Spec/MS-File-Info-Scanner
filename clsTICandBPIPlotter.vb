@@ -315,11 +315,23 @@ Public Class clsTICandBPIPlotter
 		Dim myCurve As ZedGraph.LineItem
 		myPane.CurveList.Clear()
 
-		If objPoints.Count > 0 Then
-			myCurve = myPane.AddCurve(strTitle, objPoints, Drawing.Color.Black, ZedGraph.SymbolType.None)
+        If objPoints.Count > 0 Then
+            Dim eSymbolType = ZedGraph.SymbolType.None
+            If objPoints.Count = 1 Then
+                eSymbolType = ZedGraph.SymbolType.Circle
+            End If
 
-			myCurve.Line.Width = 1
-		End If
+            myCurve = myPane.AddCurve(strTitle, objPoints, Drawing.Color.Black, eSymbolType)
+
+            myCurve.Line.Width = 1
+
+            If objPoints.Count = 1 Then
+                myCurve.Symbol.Size = 8
+                myCurve.Symbol.Fill.Type = ZedGraph.FillType.Solid
+                myCurve.Symbol.Fill.Color = Drawing.Color.DarkRed
+            End If
+
+        End If
 
 		' Possibly add a label showing the maximum elution time
 		If dblScanTimeMax > 0 Then
