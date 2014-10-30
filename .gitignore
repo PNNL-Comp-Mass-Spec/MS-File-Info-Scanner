@@ -1,3 +1,10 @@
 .hg/
 MSFileInfoScanner_SourceCode/
 SVN_Path.txt
+lib/BDal*
+lib/CustomData*
+lib/DigitalRune*
+lib/Compressor_*
+lib/Clearcore2*
+lib/boost*
+
