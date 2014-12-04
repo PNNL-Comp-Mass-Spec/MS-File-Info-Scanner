@@ -577,14 +577,14 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 				blnCreateQCPlotHtmlFile = True
 			End If
 
-			If mCreateDatasetInfoFile Then
-				' Create the _DatasetInfo.xml file
-				blnSuccess = Me.CreateDatasetInfoFile(strInputFileName, diFolderInfo.FullName)
-				If Not blnSuccess Then
-					blnSuccessOverall = False
-				End If
-				blnCreateQCPlotHtmlFile = True
-			End If
+            If mCreateDatasetInfoFile Then
+                ' Create the _DatasetInfo.xml file
+                blnSuccess = Me.CreateDatasetInfoFile(strInputFileName, diFolderInfo.FullName)
+                If Not blnSuccess Then
+                    blnSuccessOverall = False
+                End If
+                blnCreateQCPlotHtmlFile = True
+            End If
 
 			If mCreateScanStatsFile Then
 				' Create the _ScanStats.txt file

@@ -392,6 +392,10 @@ Public Class clsUIMFInfoScanner
                                         intIonCount = dblMZList.Length
                                     End If
 
+                                    If dblIonsIntensity.Length < intIonCount Then
+                                        ReDim Preserve dblIonsIntensity(intIonCount - 1)
+                                    End If
+
                                     intTargetIndex = 0
                                     For intIonIndex As Integer = 0 To intIonCount - 1
                                         If dblMZList(intIonIndex) > 0 Then
@@ -404,6 +408,10 @@ Public Class clsUIMFInfoScanner
                                     intIonCount = intTargetIndex
 
                                     If intIonCount > 0 Then
+                                        If dblIonsIntensity.Length > intIonCount Then
+                                            ReDim Preserve dblIonsIntensity(intIonCount - 1)
+                                        End If
+
                                         If mSaveLCMS2DPlots Then
                                             mLCMS2DPlot.AddScan(objFrameParams.FrameNum, intMSLevel, CSng(dblElutionTime), intIonCount, dblMZList, dblIonsIntensity)
                                         End If
