@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.2.5500; January 22, 2015
+	- New version of ThermoRawFileReaderDLL that handles exceptions thrown by corrupt spectra
+
 Version 1.2.5450; December 3, 2014
 	- Updated UIMFLibrary that supports Agilent IMS data where the scan range is 1-based instead of 0-based
 
