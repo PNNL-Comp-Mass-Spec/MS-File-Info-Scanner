@@ -6,7 +6,7 @@ Option Strict On
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "January 22, 2015"
+    Public Const PROGRAM_DATE As String = "February 23, 2015"
 
 	Private mInputDataFilePath As String			' This path can contain wildcard characters, e.g. C:\*.raw
 	Private mOutputFolderName As String				' Optional
@@ -451,9 +451,9 @@ Module modMain
 
 	Private Sub WriteToErrorStream(strErrorMessage As String)
 		Try
-			Using swErrorStream As StreamWriter = New StreamWriter(Console.OpenStandardError())
-				swErrorStream.WriteLine(strErrorMessage)
-			End Using
+            Using swErrorStream = New StreamWriter(Console.OpenStandardError())
+                swErrorStream.WriteLine(strErrorMessage)
+            End Using
 		Catch ex As Exception
 			' Ignore errors here
 		End Try

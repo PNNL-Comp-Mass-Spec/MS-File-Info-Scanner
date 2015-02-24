@@ -1292,19 +1292,19 @@ Public Class XmlSettingsFileAccessor
 					'     <item key="Setting1" value="ValueA" />
 					'   </section>
 
-					Using srInFile As StreamReader = New StreamReader(New FileStream(fi.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    Using srInFile = New StreamReader(New FileStream(fi.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-						Do While srInFile.Peek() > -1
-							s = srInFile.ReadLine()
+                        Do While srInFile.Peek() > -1
+                            s = srInFile.ReadLine()
 
-							' Try to manually parse this line
-							ParseLineManual(s, m_XmlDoc)
-						Loop
+                            ' Try to manually parse this line
+                            ParseLineManual(s, m_XmlDoc)
+                        Loop
 
-						m_XmlFilename = strFilePath
-						m_initialized = True
+                        m_XmlFilename = strFilePath
+                        m_initialized = True
 
-					End Using
+                    End Using
 
 				Else
 					' File doesn't exist; create a new, blank .XML file

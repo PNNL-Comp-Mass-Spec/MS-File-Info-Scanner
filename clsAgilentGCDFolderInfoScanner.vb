@@ -86,7 +86,7 @@ Public Class clsAgilentGCDFolderInfoScanner
             ' We could also add in the "Post Run" time for determining total acquisition time, but we don't do this, to stay consistent with run times reported by the MS file
             ' dctRunTimeText.Add(ACQ_METHOD_FILE_POST_RUN_LINE, New clsLineMatchSearchInfo(False))
 
-            Using srInFile As StreamReader = New StreamReader(strFilePath)
+            Using srInFile = New StreamReader(strFilePath)
 
                 Do While srInFile.Peek() >= 0
                     strLineIn = srInFile.ReadLine()
@@ -149,7 +149,7 @@ Public Class clsAgilentGCDFolderInfoScanner
                 Return False
             End If
 
-            Using srInFile As StreamReader = New StreamReader(strFilePath)
+            Using srInFile = New StreamReader(strFilePath)
 
                 Do While srInFile.Peek() >= 0
                     strLineIn = srInFile.ReadLine()

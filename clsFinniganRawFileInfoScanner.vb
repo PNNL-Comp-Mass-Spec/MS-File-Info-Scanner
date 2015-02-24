@@ -31,9 +31,7 @@ Public Class clsFinniganRawFileInfoScanner
 
 		Dim sngOverallScore As Single
 
-		Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
-		Dim dblIonMZ() As Double = Nothing
-		Dim dblIonIntensity() As Double = Nothing
+        Dim dblMassIntensityPairs(,) As Double = Nothing
 
 		Dim dblIntensitySum As Double
 		Dim dblOverallAvgIntensitySum As Double
@@ -56,25 +54,24 @@ Public Class clsFinniganRawFileInfoScanner
 			MyBase.GetStartAndEndScans(intScanCount, intScanStart, intScanEnd)
 
 			For intScanNumber = intScanStart To intScanEnd
-				' This function returns the number of points in dblIonMZ() and dblIonIntensity()
-				intReturnCode = objXcaliburAccessor.GetScanData(intScanNumber, dblIonMZ, dblIonIntensity, udtScanHeaderInfo)
+                ' This function returns the number of points in dblMassIntensityPairs()
+                intReturnCode = objXcaliburAccessor.GetScanData2D(intScanNumber, dblMassIntensityPairs)
 
 				If intReturnCode > 0 Then
 
-					If Not dblIonIntensity Is Nothing AndAlso dblIonIntensity.Length > 0 Then
-						' ToDo: Analyze dblIonMZ and dblIonIntensity to compute a quality scores
-						' Keep track of the quality scores and then store one or more overall quality scores in udtFileInfo.OverallQualityScore
-						' For now, this just computes the average intensity for each scan and then computes and overall average intensity value
+                    If Not dblMassIntensityPairs Is Nothing AndAlso dblMassIntensityPairs.GetLength(1) > 0 Then
+                        ' Keep track of the quality scores and then store one or more overall quality scores in udtFileInfo.OverallQualityScore
+                        ' For now, this just computes the average intensity for each scan and then computes and overall average intensity value
 
-						dblIntensitySum = 0
-						For intIonIndex = 0 To dblIonIntensity.Length - 1
-							dblIntensitySum += dblIonIntensity(intIonIndex)
-						Next intIonIndex
+                        dblIntensitySum = 0
+                        For intIonIndex = 0 To dblMassIntensityPairs.GetUpperBound(1)
+                            dblIntensitySum += dblMassIntensityPairs(1, intIonIndex)
+                        Next intIonIndex
 
-						dblOverallAvgIntensitySum += dblIntensitySum / dblIonIntensity.Length
+                        dblOverallAvgIntensitySum += dblIntensitySum / dblMassIntensityPairs.GetLength(1)
 
-						intOverallAvgCount += 1
-					End If
+                        intOverallAvgCount += 1
+                    End If
 				End If
 			Next intScanNumber
 
@@ -110,10 +107,7 @@ Public Class clsFinniganRawFileInfoScanner
 		Dim intScanCount As Integer
 		Dim intScanNumber As Integer
 
-		Dim sngProgress As Single
-		Dim dtLastProgressTime As DateTime
-
-		Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
+        Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
 		Dim blnSuccess As Boolean
 
 		Dim intScanStart As Integer
@@ -130,7 +124,7 @@ Public Class clsFinniganRawFileInfoScanner
 			MyBase.InitializeLCMS2DPlot()
 		End If
 
-		dtLastProgressTime = DateTime.UtcNow
+        Dim dtLastProgressTime = DateTime.UtcNow
 
 		intScanCount = objXcaliburAccessor.GetNumScans
 		MyBase.GetStartAndEndScans(intScanCount, intScanStart, intScanEnd)
@@ -150,7 +144,6 @@ Public Class clsFinniganRawFileInfoScanner
 							mTICandBPIPlot.AddData(intScanNumber, .MSLevel, CSng(.RetentionTime), .BasePeakIntensity, .TotalIonCurrent)
 						End With
 					End If
-
 
 					Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
 
@@ -196,7 +189,7 @@ Public Class clsFinniganRawFileInfoScanner
 					Dim dblMassIntensityPairs(,) As Double = Nothing
 
 					' Load the ions for this scan
-					intIonCount = objXcaliburAccessor.GetScanData2D(intScanNumber, dblMassIntensityPairs, udtScanHeaderInfo, intMaxNumberOfPeaks:=-1)
+					intIonCount = objXcaliburAccessor.GetScanData2D(intScanNumber, dblMassIntensityPairs)
 
 					If intIonCount > 0 Then
 						If mSaveLCMS2DPlots Then
@@ -222,28 +215,7 @@ Public Class clsFinniganRawFileInfoScanner
 				ReportError("Error loading m/z and intensity values for scan " & intScanNumber & ": " & ex.Message)
 			End Try
 
-			If intScanNumber Mod 100 = 0 Then
-				If Not mShowDebugInfo Then
-					Console.Write(".")
-				End If
-
-				If intScanCount > 0 Then
-					sngProgress = CSng(intScanNumber / intScanCount * 100)
-
-					If DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 30 Then
-						dtLastProgressTime = DateTime.UtcNow
-						Dim strPercentComplete As String = sngProgress.ToString("0.0") & "% "
-
-						If mShowDebugInfo Then
-							Console.WriteLine(strPercentComplete)
-						Else
-							Console.WriteLine()
-							Console.Write(strPercentComplete)
-						End If
-					End If
-				End If
-
-			End If
+            ShowProgress(intScanNumber, intScanCount, dtLastProgressTime)
 
 		Next intScanNumber
 

@@ -591,6 +591,10 @@ Public Class clsTICandBPIPlotter
                             ByVal sngScanTimeMinutes As Single, _
                             ByVal dblIntensity As Double)
 
+            If ScanNum.Contains(intScanNumber) Then
+                Throw New Exception("Scan " & intScanNumber & " has already been added to the TIC or BPI; programming error")
+            End If
+
             If Me.ScanCount >= Me.ScanNum.Length Then
                 ReDim Preserve Me.ScanNum(Me.ScanNum.Length * 2 - 1)
                 ReDim Preserve Me.ScanTimeMinutes(Me.ScanNum.Length - 1)

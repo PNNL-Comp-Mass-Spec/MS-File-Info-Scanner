@@ -553,1045 +553,1039 @@ Public Class clsFileIntegrityChecker
 			''End If
 
 			' Open the file
-			Dim fsInStream = New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)
-			Using srInFile As StreamReader = New StreamReader(fsInStream)
-
-				' Read each line and examine it
-				Do While srInFile.Peek >= 0 AndAlso intLinesRead < intMaximumTextFileLinesToCheck
-					strLineIn = srInFile.ReadLine
-					intLinesRead += 1
-
-					If blnCharCountSkipsBlankLines AndAlso strLineIn.Trim.Length = 0 Then
-						blnSuccess = True
-					Else
-
-						If intMinimumTabCount > 0 Then
-							' Count the number of tabs
-							blnSuccess = CheckTextFileCountChars(strLineIn, blnBlankLineRead, intLinesRead, intExpectedTabCount, ControlChars.Tab, "Tab", intMinimumTabCount, blnRequireEqualTabsPerLine, strErrorMessage)
-
-							If Not blnSuccess Then
-								LogFileIntegrityError(strFilePath, strErrorMessage)
-								blnErrorLogged = True
-								Exit Do
-							End If
-
-						End If
-
-						If intMinimumCommaCount > 0 Then
-							' Count the number of commas
-							blnSuccess = CheckTextFileCountChars(strLineIn, blnBlankLineRead, intLinesRead, intExpectedCommaCount, ","c, "Comma", intMinimumCommaCount, blnRequireEqualCommasPerLine, strErrorMessage)
-
-							If Not blnSuccess Then
-								LogFileIntegrityError(strFilePath, strErrorMessage)
-								blnErrorLogged = True
-								Exit Do
-							End If
-
-						End If
-
-
-						If blnNeedToCheckLineHeaders Then
-							FindRequiredTextInLine(strLineIn, blnNeedToCheckLineHeaders, strRequiredTextLineHeaders, blnLineHeaderFound, intLineHeaderMatchCount, blnRequiredTextMatchesLineStart)
-						ElseIf intMinimumTabCount = 0 AndAlso intMinimumCommaCount = 0 AndAlso intLinesRead > intMinimumLineCount Then
-							' All conditions have been met; no need to continue reading the file
-							Exit Do
-						End If
-
-					End If
-
-				Loop
-
-			End Using
-
-			' Make sure that all of the required line headers were found; log an error if any were missing
-			ValidateRequiredTextFound(strFilePath, "line headers", blnCheckLineHeadersForThisFile, blnNeedToCheckLineHeaders, strRequiredTextLineHeaders, blnLineHeaderFound, intRequiredTextMinMatchCount, blnErrorLogged)
-
-			If Not blnErrorLogged AndAlso intLinesRead < intMinimumLineCount Then
-				strErrorMessage = "File contains " & intLinesRead.ToString & " lines of text, but the required minimum is " & intMinimumLineCount.ToString
-				LogFileIntegrityError(strFilePath, strErrorMessage)
-				blnErrorLogged = True
-			End If
-
-		Catch ex As Exception
-			strErrorMessage = "Error checking file: " & strFilePath & "; " & ex.Message
-			LogFileIntegrityError(strFilePath, strErrorMessage)
-			blnErrorLogged = True
-		End Try
-
-		Return Not blnErrorLogged
-
-	End Function
-
-	''' <summary>
-	''' Counts the number of occurrences of a given character in strLineIn
-	''' </summary>
-	''' <param name="strLineIn">Line to check</param>
-	''' <param name="blnBlankLineRead">Set to true if a blank line is read; however, if already true, and a non-blank line with an insufficient number of characters is read, then this function will return an error</param>
-	''' <param name="intLinesRead">Number of lines that have been read; when first calling this function for a new file, set this to 1 so that intExpectedCharCount will be initialized </param>
-	''' <param name="intExpectedCharCount">The number of occurrences of the given character in the previous line; used when blnRequireEqualCharsPerLine is True</param>
-	''' <param name="chCharToCount">The character to look for</param>
-	''' <param name="strCharDescription">A description of the character (used to populate strMessage when an error occurs)</param>
-	''' <param name="intMinimumCharCount">Minimum character count</param>
-	''' <param name="blnRequireEqualCharsPerLine">If True, then each line must contain an equal occurrence count of the given character (based on the first line in the file)</param>
-	''' <param name="strErrorMessage">Error message</param>
-	''' <returns>True if the line is valid; otherwise False; when False, then updates strErrorMessage</returns>
-	''' <remarks></remarks>
-	Protected Function CheckTextFileCountChars(ByRef strLineIn As String, _
-	 ByRef blnBlankLineRead As Boolean, _
-	 ByVal intLinesRead As Integer, _
-	 ByRef intExpectedCharCount As Integer, _
-	 ByVal chCharToCount As Char, _
-	 ByVal strCharDescription As String, _
-	 ByVal intMinimumCharCount As Integer, _
-	 ByVal blnRequireEqualCharsPerLine As Boolean, _
-	 ByRef strErrorMessage As String) As Boolean
-
-		Dim intCharCount As Integer
-
-		Dim blnLineIsValid As Boolean = True
-
-		' Count the number of chCharToCount characters
-		intCharCount = CountChars(strLineIn, chCharToCount)
-
-		If strLineIn.EndsWith(chCharToCount) AndAlso intCharCount > 1 AndAlso intCharCount > intMinimumCharCount Then
-			' Decrement the char count by one since the line ends in the character we're counting
-			intCharCount -= 1
-		End If
-
-		If intCharCount < intMinimumCharCount Then
-			' Character not found the minimum number of times
-
-			If strLineIn.Length = 0 AndAlso Not blnBlankLineRead Then
-				blnBlankLineRead = True
-			ElseIf blnBlankLineRead AndAlso Not strLineIn.Length = 0 Then
-				' Previously read a blank line; now found a line that's not blank
-				strErrorMessage = "Line " & intLinesRead.ToString & " has " & intCharCount.ToString & " " & strCharDescription & "s, but the required minimum is " & intMinimumCharCount.ToString
-				blnLineIsValid = False
-			Else
-				strErrorMessage = "Line " & intLinesRead.ToString & " has " & intCharCount.ToString & " " & strCharDescription & "s, but the required minimum is " & intMinimumCharCount.ToString
-				blnLineIsValid = False
-			End If
-		End If
-
-		If blnLineIsValid AndAlso blnRequireEqualCharsPerLine Then
-			If intLinesRead <= 1 Then
-				intExpectedCharCount = intCharCount
-			Else
-				If intCharCount <> intExpectedCharCount Then
-					If strLineIn.Length > 0 Then
-						strErrorMessage = "Line " & intLinesRead.ToString & " has " & intCharCount.ToString & " " & strCharDescription & "s, but previous line has " & intExpectedCharCount.ToString & " tabs"
-						blnLineIsValid = False
-					End If
-				End If
-			End If
-		End If
-
-		Return blnLineIsValid
-
-	End Function
-
-	''' <summary>
-	''' Checks the integrity of files without an extension
-	''' </summary>
-	''' <param name="strFilePath"></param>
-	''' <returns>True if the file passes the integrity check; otherwise False</returns>
-	''' <remarks></remarks>
-	Protected Function CheckExtensionFreeFile(ByVal strFilePath As String) As Boolean
-		Dim blnLineIsValid As Boolean = True
-
-		Select Case Path.GetFileNameWithoutExtension(strFilePath).ToLower
-			Case "acqu", "acqus"
-				blnLineIsValid = CheckTextFileWork(strFilePath, 50, New String() {"##TITLE", "##DATA"}, True)
-
-			Case "lock"
-				blnLineIsValid = CheckTextFileWork(strFilePath, 1, New String() {"ftms"}, True)
-
-			Case "sptype"
-				' Skip this file
-				blnLineIsValid = True
-		End Select
-
-		Return blnLineIsValid
-	End Function
-
-	''' <summary>
-	''' Checks the integrity of a Sequest Params file
-	''' </summary>
-	''' <param name="strFilePath"></param>
-	''' <returns>True if the file passes the integrity check; otherwise False</returns>
-	''' <remarks></remarks>
-	Protected Function CheckParamsFile(ByVal strFilePath As String) As Boolean
-
-		Const MASS_TOLERANCE_LINE As String = "peptide_mass_tolerance"
-		Const FRAGMENT_TOLERANCE_LINE As String = "fragment_ion_tolerance"
-		Const MAX_LINES_TO_READ As Integer = 50
-
-		Dim ioInStream As FileStream
-
-		Dim intLinesRead As Integer = 0
-
-		Dim strLineIn As String
-
-		Dim blnMassToleranceFound As Boolean = False
-		Dim blnFragmentToleranceFound As Boolean = False
-		Dim blnFileIsValid As Boolean = False
-
-		Try
-			' Open the file
-			ioInStream = New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)
-			Using srInFile As StreamReader = New StreamReader(ioInStream)
-
-				' Read each line in the file and look for the expected parameter lines
-				Do While srInFile.Peek >= 0 AndAlso intLinesRead < MAX_LINES_TO_READ
-					strLineIn = srInFile.ReadLine
-					intLinesRead += 1
-
-					If strLineIn.StartsWith(MASS_TOLERANCE_LINE) Then
-						blnMassToleranceFound = True
-					End If
-
-					If strLineIn.StartsWith(FRAGMENT_TOLERANCE_LINE) Then
-						blnFragmentToleranceFound = True
-					End If
-
-					If blnMassToleranceFound AndAlso blnFragmentToleranceFound Then
-						blnFileIsValid = True
-						Exit Do
-					End If
-				Loop
-
-			End Using
-
-
-
-		Catch ex As Exception
-			LogFileIntegrityError(strFilePath, "Error checking Sequest params file: " & strFilePath & "; " & ex.Message)
-			blnFileIsValid = False
-		End Try
-
-		Return blnFileIsValid
-
-	End Function
-
-	''' <summary>
-	''' Checks the integrity of an ICR-2LS TIC file
-	''' </summary>
-	''' <param name="strFilePath"></param>
-	''' <returns>True if the file passes the integrity check; otherwise False</returns>
-	''' <remarks></remarks>
-	Protected Function CheckTICFile(ByVal strFilePath As String) As Boolean
-
-		Const ICR2LS_LINE_START As String = "ICR-2LS"
-		Const VERSION_LINE_START As String = "VERSION"
-
-		Dim intLinesRead As Integer = 0
-
-		Dim strLineIn As String
-
-		' Assume True for now
-		Dim blnFileIsValid As Boolean = True
-
-		Try
-			' Open the file
-			Dim fsInStream = New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)
-			Using srInFile As StreamReader = New StreamReader(fsInStream)
-
-
-				' Confirm that the first two lines look like:
-				'  ICR-2LS Data File (GA Anderson & JE Bruce); output from MASIC by Matthew E Monroe
-				'  Version 2.4.2974.38283; February 22, 2008
-
-				Do While srInFile.Peek >= 0 AndAlso intLinesRead < 2
-					strLineIn = srInFile.ReadLine
-					intLinesRead += 1
-
-					If intLinesRead = 1 Then
-						If Not strLineIn.ToUpper.StartsWith(ICR2LS_LINE_START) Then
-							blnFileIsValid = False
-							Exit Do
-						End If
-					ElseIf intLinesRead = 2 Then
-						If Not strLineIn.ToUpper.StartsWith(VERSION_LINE_START) Then
-							blnFileIsValid = False
-							Exit Do
-						End If
-					Else
-						' This code shouldn't be reached
-						Exit Do
-					End If
-
-				Loop
-
-			End Using
-
-		Catch ex As Exception
-			LogFileIntegrityError(strFilePath, "Error checking TIC file: " & strFilePath & "; " & ex.Message)
-			blnFileIsValid = False
-		End Try
-
-		Return blnFileIsValid
-
-	End Function
-
-	''' <summary>
-	''' Opens the given zip file and uses Ionic Zip's .TestArchive function to validate that it is valid
-	''' </summary>
-	''' <param name="strFilePath">File path to check</param>
-	''' <returns>True if the file passes the integrity check; otherwise False</returns>
-	''' <remarks></remarks>
-	Protected Function CheckZIPFile(ByVal strFilePath As String) As Boolean
-
-		Const MAX_THREAD_RATE_CHECK_ALL_DATA As Single = 0.25  ' minutes/MB
-		Const MAX_THREAD_RATE_QUICK_CHECK As Single = 0.125	   ' minutes/MB
-
-		Dim strFileNameLCase As String
-		Dim objFileInfo As FileInfo
-		Dim dblFileSizeMB As Double
-
-		Dim blnZipIsValid As Boolean = False
-		Dim strMessage As String
-
-		Dim objZipLibTest As Threading.Thread
-		Dim dtStartTime As DateTime
-		Dim sngMaxExecutionTimeMinutes As Single
-
-		Dim blnZipFileCheckAllData As Boolean
-		blnZipFileCheckAllData = mZipFileCheckAllData
-
-		' Either run a fast check, or entirely skip this .Zip file if it's too large
-		objFileInfo = New FileInfo(strFilePath)
-		dblFileSizeMB = objFileInfo.Length / 1024.0 / 1024.0
-
-		If blnZipFileCheckAllData AndAlso mZipFileLargeSizeThresholdMB > 0 Then
-			If dblFileSizeMB > mZipFileLargeSizeThresholdMB Then
-				blnZipFileCheckAllData = False
-			End If
-		End If
-
-		If blnZipFileCheckAllData AndAlso mFastZippedSFileCheck Then
-			strFileNameLCase = Path.GetFileName(strFilePath).ToLower
-			If strFileNameLCase = "0.ser.zip" Then
-				' Do not run a full check on 0.ser.zip files
-				blnZipFileCheckAllData = False
-
-			ElseIf strFileNameLCase.Length > 2 AndAlso strFileNameLCase.StartsWith("s") AndAlso Char.IsNumber(strFileNameLCase.Chars(1)) Then
-				' Run a full check on s001.zip but not the other s*.zip files
-				If strFileNameLCase <> "s001.zip" Then
-					blnZipFileCheckAllData = False
-				End If
-			End If
-		End If
-
-		With mZipFileWorkParams
-			.FilePath = strFilePath
-			.CheckAllData = blnZipFileCheckAllData
-			.ZipIsValid = False
-			If .CheckAllData Then
-				.FailureMessage = "Zip file failed exhaustive CRC check"
-			Else
-				.FailureMessage = "Zip file failed quick check"
-			End If
-		End With
-
-		If blnZipFileCheckAllData Then
-			sngMaxExecutionTimeMinutes = CSng(dblFileSizeMB * MAX_THREAD_RATE_CHECK_ALL_DATA)
-		Else
-			sngMaxExecutionTimeMinutes = CSng(dblFileSizeMB * MAX_THREAD_RATE_QUICK_CHECK)
-		End If
-
-		objZipLibTest = New Threading.Thread(AddressOf CheckZipFileWork)
-		dtStartTime = DateTime.UtcNow
-
-		objZipLibTest.Start()
-		Do
-			objZipLibTest.Join(250)
-
-			If objZipLibTest.ThreadState = Threading.ThreadState.Aborted Then
-				Exit Do
-			ElseIf DateTime.UtcNow.Subtract(dtStartTime).TotalMinutes >= sngMaxExecutionTimeMinutes Then
-				' Execution took too long; abort
-				objZipLibTest.Abort()
-				objZipLibTest.Join(250)
-
-				strMessage = mZipFileWorkParams.FailureMessage & "; over " & sngMaxExecutionTimeMinutes.ToString("0.0") & " minutes have elapsed, which is longer than the expected processing time"
-				LogFileIntegrityError(mZipFileWorkParams.FilePath, strMessage)
-
-				Exit Do
-			End If
-		Loop While objZipLibTest.ThreadState <> Threading.ThreadState.Stopped
-
-		Return mZipFileWorkParams.ZipIsValid
-
-	End Function
-
-	Private Sub CheckZipFileWork()
-		Dim blnThrowExceptionIfInvalid As Boolean = True
-		Dim blnZipIsValid As Boolean
-		Dim strMessage As String
-
-		Try
-
-			blnZipIsValid = CheckZipFileIntegrity(mZipFileWorkParams.FilePath, mZipFileWorkParams.CheckAllData, blnThrowExceptionIfInvalid)
-
-			If Not blnZipIsValid Then
-				If mZipFileWorkParams.CheckAllData Then
-					strMessage = "Zip file failed exhaustive CRC check"
-				Else
-					strMessage = "Zip file failed quick check"
-				End If
-
-				LogFileIntegrityError(mZipFileWorkParams.FilePath, strMessage)
-			End If
-
-		Catch ex As Exception
-			' Error reading .Zip file
-			LogFileIntegrityError(mZipFileWorkParams.FilePath, ex.Message)
-		End Try
-
-		mZipFileWorkParams.ZipIsValid = blnZipIsValid
-
-	End Sub
-
-	''' <summary>
-	''' Validate every entry in strZipFilePath
-	''' </summary>
-	''' <param name="strZipFilePath">Path to the zip file to validate</param>
-	''' <param name="blnThrowExceptionIfInvalid">If True, then throws exceptions, otherwise simply returns True or False</param>
-	''' <returns>True if the file is Valid; false if an error</returns>
-	''' <remarks>Extracts each file in the zip file to a temporary file.  Will return false if you run out of disk space</remarks>
-	Private Function CheckZipFileIntegrity(ByVal strZipFilePath As String, ByVal blnCheckAllData As Boolean, ByVal blnThrowExceptionIfInvalid As Boolean) As Boolean
-
-		Dim strTempPath As String = String.Empty
-		Dim blnZipIsValid As Boolean = False
-
-		If Not File.Exists(strZipFilePath) Then
-			' Zip file not found
-			If blnThrowExceptionIfInvalid Then
-				Throw New FileNotFoundException("File not found", strZipFilePath)
-			End If
-			Return False
-		End If
-
-		Try
-			If blnCheckAllData Then
-
-				' Obtain a random file name
-				strTempPath = Path.GetTempFileName
-
-				' Open the zip file
-				Using objZipFile As Ionic.Zip.ZipFile = New Ionic.Zip.ZipFile(strZipFilePath)
-
-					' Extract each file to strTempPath
-					For Each objEntry As Ionic.Zip.ZipEntry In objZipFile.Entries
-						objEntry.ZipErrorAction = Ionic.Zip.ZipErrorAction.Throw
-
-						If Not objEntry.IsDirectory Then
-
-							Dim swTestStream As FileStream = New FileStream(strTempPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)
-							objEntry.Extract(swTestStream)
-							swTestStream.Close()
-
-						End If
-					Next
-
-				End Using
-
-				blnZipIsValid = True
-
-			Else
-				blnZipIsValid = Ionic.Zip.ZipFile.CheckZip(strZipFilePath)
-			End If
-
-
-		Catch ex As Exception
-			If blnThrowExceptionIfInvalid Then
-				Throw ex
-			End If
-			blnZipIsValid = False
-		Finally
-			Try
-				If Not String.IsNullOrEmpty(strTempPath) AndAlso File.Exists(strTempPath) Then
-					File.Delete(strTempPath)
-				End If
-			Catch ex As Exception
-				' Ignore errors deleting the temp file
-			End Try
-		End Try
-
-		Return blnZipIsValid
-
-	End Function
-
-	''' <summary>
-	''' Checks the integrity of a CSV file
-	''' </summary>
-	''' <param name="strFilePath"></param>
-	''' <returns>True if the file passes the integrity check; otherwise False</returns>
-	''' <remarks></remarks>
-	Protected Function CheckCSVFile(ByVal strFilePath As String) As Boolean
-		Dim intMinimumCommaCount As Integer
-		Dim strHeaderRequired As String = String.Empty
-
-		Dim strFileNameLower As String
-
-		strFileNameLower = Path.GetFileName(strFilePath).ToLower
-
-		If strFileNameLower.EndsWith("_isos.csv") Then
-			' scan_num,charge,abundance,mz,fit,average_mw,monoisotopic_mw,mostabundant_mw,fwhm,signal_noise,mono_abundance,mono_plus2_abundance
-			strHeaderRequired = "scan_num"
-			intMinimumCommaCount = 10
-
-		ElseIf strFileNameLower.EndsWith("_scans.csv") Then
-			' scan_num,scan_time,type,bpi,bpi_mz,tic,num_peaks,num_deisotoped
-			strHeaderRequired = "scan_num"
-			intMinimumCommaCount = 7
-		Else
-			' Unknown CSV file; do not check it
-			intMinimumCommaCount = 0
-		End If
-
-		If intMinimumCommaCount > 0 Then
-			Return CheckTextFileWork(strFilePath, 1, 0, intMinimumCommaCount, False, True, New String() {strHeaderRequired}, True, False, 0)
-		Else
-			Return True
-		End If
-
-	End Function
-
-	''' <summary>
-	''' Validates the given XML file; tries to determine the expected element names based on the file name and its parent folder
-	''' </summary>
-	''' <param name="strFilePath">File Path</param>
-	''' <returns>True if the file passes the integrity check; otherwise False</returns>
-	Protected Function CheckXMLFile(ByVal strFilePath As String) As Boolean
-		' Examine the parent folder name to determine the type of XML file strFilePath most likely is
-
-		Dim strFileNameLCase As String
-		Dim strParentFolderName As String
-
-		Dim blnXMLIsValid As Boolean = True
-
-		Dim fiFile = New FileInfo(strFilePath)
-
-		strFileNameLCase = fiFile.Name.ToLower
-		strParentFolderName = fiFile.Directory.Name
-
-		Select Case strParentFolderName.Substring(0, 3).ToUpper
-			Case "SIC", "DLS"
-				' MASIC or Decon2LS folder
-				If FileIsXMLSettingsFile(fiFile.FullName) Then
-					blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, New String() {"section", "item"}, New String() {"key", "value"})
-				ElseIf FileIsDecon2LSXMLSettingsFile(fiFile.FullName) Then
-					blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, New String() {"parameters", "PeakParameters"}, New String() {})
-				Else
-					' Unknown XML file; just check for one element
-					blnXMLIsValid = CheckXMLFileWork(strFilePath, 1)
-				End If
-
-			Case "SEQ"
-				' Sequest folder
-				If strFileNameLCase = "finnigandefsettings.xml" OrElse FileIsXMLSettingsFile(fiFile.FullName) Then
-					blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, New String() {"section", "item"}, New String() {"key", "value"})
-				Else
-					' Unknown XML file; just check for one element
-					blnXMLIsValid = CheckXMLFileWork(strFilePath, 1)
-				End If
-
-			Case "XTM"
-				' Xtandem folder
-				Select Case strFileNameLCase
-					Case "default_input.xml"
-						blnXMLIsValid = CheckXMLFileWork(strFilePath, 10, New String() {"bioml", "note"}, New String() {"type", "label"})
-
-					Case "input.xml"
-						blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, New String() {"bioml", "note"}, New String() {"type", "label"})
-
-					Case "taxonomy.xml"
-						blnXMLIsValid = CheckXMLFileWork(strFilePath, 3, New String() {"bioml", "taxon"}, New String() {"label", "format"})
-
-					Case Else
-						If strFileNameLCase = "iontrapdefsettings.xml" OrElse FileIsXMLSettingsFile(fiFile.FullName) Then
-							blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, New String() {"section", "item"}, New String() {"key", "value"})
-						ElseIf strFileNameLCase.StartsWith("xtandem_") Then
-							blnXMLIsValid = CheckXMLFileWork(strFilePath, 2, New String() {"bioml", "note"}, New String() {})
-						Else
-							' Unknown XML file; just check for one element
-							blnXMLIsValid = CheckXMLFileWork(strFilePath, 1)
-						End If
-				End Select
-
-			Case Else
-				' Unknown XML file; just check for one element
-				blnXMLIsValid = CheckXMLFileWork(strFilePath, 1)
-		End Select
-
-		Return blnXMLIsValid
-
-	End Function
-
-	''' <summary>
-	''' Overloaded version of CheckXMLFileWork; takes filename and minimum element count
-	''' </summary>
-	''' <returns>True if the file passes the integrity check; otherwise False</returns>
-	Protected Function CheckXMLFileWork(ByVal strFilePath As String, ByVal intMinimumElementCount As Integer) As Boolean
-		Return CheckXMLFileWork(strFilePath, intMinimumElementCount, New String() {}, New String() {})
-	End Function
-
-	''' <summary>
-	''' Validates the contents of the given XML file
-	''' </summary>
-	''' <param name="strFilePath">File Path</param>
-	''' <param name="intMinimumElementCount">Minimum number of XML elements that must be in the file; maximum number of elements is defined by mMaximumXMLElementNodesToCheck</param>
-	''' <param name="strRequiredElementNames">Optional list of element names that must be found (within the first mMaximumXMLElementNodesToCheck elements); the names are case-sensitive</param>
-	''' <param name="strRequiredAttributeNames">Optional list of attribute names that must be found  (within the first mMaximumXMLElementNodesToCheck elements); the names are case-sensitive</param>
-	''' <returns>True if the file passes the integrity check; otherwise False</returns>
-	''' <remarks></remarks>
-	Protected Function CheckXMLFileWork(ByVal strFilePath As String, _
-	   ByVal intMinimumElementCount As Integer, _
-	   ByVal strRequiredElementNames() As String, _
-	   ByVal strRequiredAttributeNames() As String) As Boolean
-
-		Dim blnCheckElementNamesThisFile As Boolean = False
-		Dim blnNeedToCheckElementNames As Boolean = False			' If blnCheckElementNamesThisFile is True, then this will be set to True.  However, once all of the expected headers are found, this is set to False
-		Dim intElementNameMatchCount As Integer = 0
-		Dim blnElementNameFound() As Boolean
-
-		Dim blnCheckAttributeNamesThisFile As Boolean = False
-		Dim blnNeedToCheckAttributeNames As Boolean = False			' If blnCheckAttributeNamesThisFile is True, then this will be set to True.  However, once all of the expected headers are found, this is set to False
-		Dim intAttributeNameMatchCount As Integer = 0
-		Dim blnAttributeNameFound() As Boolean
-
-		Dim intMaximumXMLElementNodesToCheck As Integer
-		Dim intElementsRead As Integer = 0
-
-		Dim blnErrorLogged As Boolean = False
-		Dim strErrorMessage As String
-
-		Try
-			If Not strRequiredElementNames Is Nothing AndAlso strRequiredElementNames.Length > 0 Then
-				blnCheckElementNamesThisFile = True
-				blnNeedToCheckElementNames = True
-				ReDim blnElementNameFound(strRequiredElementNames.Length - 1)
-			Else
-				ReDim blnElementNameFound(0)
-			End If
-
-			If Not strRequiredAttributeNames Is Nothing AndAlso strRequiredAttributeNames.Length > 0 Then
-				blnCheckAttributeNamesThisFile = True
-				blnNeedToCheckAttributeNames = True
-				ReDim blnAttributeNameFound(strRequiredAttributeNames.Length - 1)
-			Else
-				ReDim blnAttributeNameFound(0)
-			End If
-
-			If mMaximumXMLElementNodesToCheck <= 0 Then
-				intMaximumXMLElementNodesToCheck = Integer.MaxValue
-			Else
-				intMaximumXMLElementNodesToCheck = mMaximumXMLElementNodesToCheck
-			End If
-
-			If intMaximumXMLElementNodesToCheck < 1 Then intMaximumXMLElementNodesToCheck = 1
-			If intMaximumXMLElementNodesToCheck < intMinimumElementCount Then
-				intMaximumXMLElementNodesToCheck = intMinimumElementCount
-			End If
-
-			Try
-				' Initialize the stream reader and the XML Text Reader
-				Using srInFile As StreamReader = New StreamReader(strFilePath)
-					Using objXMLReader As Xml.XmlTextReader = New Xml.XmlTextReader(srInFile)
-
-						' Read each of the nodes and examine them
-						Do While objXMLReader.Read()
-
-							XMLTextReaderSkipWhitespace(objXMLReader)
-							If Not objXMLReader.ReadState = Xml.ReadState.Interactive Then Exit Do
-
-
-							If objXMLReader.NodeType = Xml.XmlNodeType.Element Then
-								' Note: If needed, read the element's value using XMLTextReaderGetInnerText(objXMLReader)
-
-								If blnNeedToCheckElementNames Then
-									FindRequiredTextInLine(objXMLReader.Name, blnNeedToCheckElementNames, strRequiredElementNames, blnElementNameFound, intElementNameMatchCount, True)
-								End If
-
-								If blnNeedToCheckAttributeNames AndAlso objXMLReader.HasAttributes Then
-									If objXMLReader.MoveToFirstAttribute Then
-										Do
-											FindRequiredTextInLine(objXMLReader.Name, blnNeedToCheckAttributeNames, strRequiredAttributeNames, blnAttributeNameFound, intAttributeNameMatchCount, True)
-											If Not blnNeedToCheckAttributeNames Then Exit Do
-										Loop While objXMLReader.MoveToNextAttribute
-
-									End If
-								End If
-
-								intElementsRead += 1
-								If intMaximumXMLElementNodesToCheck > 0 AndAlso intElementsRead >= MaximumXMLElementNodesToCheck Then
-									Exit Do
-								ElseIf Not blnNeedToCheckElementNames AndAlso Not blnNeedToCheckAttributeNames AndAlso intElementsRead > intMinimumElementCount Then
-									' All conditions have been met; no need to continue reading the file
-									Exit Do
-								End If
-
-							End If
-
-						Loop
-
-					End Using			' objXMLReader
-				End Using			' srInFile
-
-				' Make sure that all of the required element names were found; log an error if any were missing
-				ValidateRequiredTextFound(strFilePath, "XML elements", blnCheckElementNamesThisFile, blnNeedToCheckElementNames, strRequiredElementNames, blnElementNameFound, strRequiredElementNames.Length, blnErrorLogged)
-
-				' Make sure that all of the required attribute names were found; log an error if any were missing
-				ValidateRequiredTextFound(strFilePath, "XML attributes", blnCheckAttributeNamesThisFile, blnNeedToCheckAttributeNames, strRequiredAttributeNames, blnAttributeNameFound, strRequiredAttributeNames.Length, blnErrorLogged)
-
-				If Not blnErrorLogged AndAlso intElementsRead < intMinimumElementCount Then
-					strErrorMessage = "File contains " & intElementsRead.ToString & " XML elements, but the required minimum is " & intMinimumElementCount.ToString
-					LogFileIntegrityError(strFilePath, strErrorMessage)
-					blnErrorLogged = True
-				End If
-
-			Catch ex As Exception
-				' Error opening file or stepping through file
-				LogFileIntegrityError(strFilePath, ex.Message)
-				blnErrorLogged = True
-			End Try
-
-		Catch ex As Exception
-			LogErrors("CheckXMLFileWork", "Error opening XML file: " & strFilePath, ex)
-			blnErrorLogged = True
-		End Try
-
-		Return Not blnErrorLogged
-
-	End Function
-
-
-	''' <summary>
-	''' Checks the integrity of each file in the given folder (provided the extension is recognized)
-	''' Will populate udtFolderStats with stats on the files in this folder
-	''' Will populate udtFileDetails with the name of each file parsed, plus details on the files
-	''' </summary>
-	''' <param name="strFolderPath">Folder to examine</param>
-	''' <param name="udtFolderStats">Stats on the folder, including number of files and number of files that failed the integrity check</param>
-	''' <param name="udtFileStats">Details on each file checked; use udtFolderStatsType.FileCount to determine the number of entries in udtFileStats </param>
-	''' <param name="strFileIgnoreList">List of files to skip; can be file names or full file paths</param>
-	''' <returns>Returns True if all files pass the integrity checks; otherwise, returns False</returns>
-	''' <remarks>Note that udtFileStats will never be shrunk in size; only increased as needed</remarks>
-	Public Function CheckIntegrityOfFilesInFolder(ByVal strFolderPath As String, _
-	 ByRef udtFolderStats As udtFolderStatsType, _
-	 ByRef udtFileStats() As udtFileStatsType, _
-	 ByRef strFileIgnoreList() As String) As Boolean
-
-		Dim objMSInfoScanner As iMSFileInfoProcessor
-		Dim udtFileInfo As iMSFileInfoProcessor.udtFileInfoType = New iMSFileInfoProcessor.udtFileInfoType
-
-		Dim intIndex As Integer
-		Dim blnPassedIntegrityCheck As Boolean
-
-		Dim blnUseIgnoreList As Boolean = False
-		Dim blnSkipFile As Boolean
-
-		Try
-			If udtFileStats Is Nothing Then
-				ReDim udtFileStats(9)
-			End If
-
-			For intIndex = 0 To udtFileStats.Length - 1
-				udtFileStats(intIndex).Initialize()
-			Next
-
-			If Not strFileIgnoreList Is Nothing AndAlso strFileIgnoreList.Length > 0 Then
-				' Assure strFileIgnoreList is sorted and that the entries are lowercase
-				blnUseIgnoreList = True
-				Array.Sort(strFileIgnoreList)
-
-				For intIndex = 0 To strFileIgnoreList.Length - 1
-					If strFileIgnoreList.Length > 0 Then
-						strFileIgnoreList(intIndex) = strFileIgnoreList(intIndex).ToLower
-					End If
-				Next
-			End If
-
-			Dim diFolderInfo = New DirectoryInfo(strFolderPath)
-
-			udtFolderStats = GetNewFolderStats(diFolderInfo.FullName)
-
-			For Each fiFile In diFolderInfo.GetFiles()
-
-				Try
-
-					' Assume True for now
-					blnPassedIntegrityCheck = True
-					blnSkipFile = False
-
-					If blnUseIgnoreList Then
-						If Array.BinarySearch(strFileIgnoreList, fiFile.FullName.ToLower) >= 0 Then
-							blnSkipFile = True
-						ElseIf Array.BinarySearch(strFileIgnoreList, fiFile.Name.ToLower) >= 0 Then
-							blnSkipFile = True
-						End If
-					End If
-
-					If Not blnSkipFile = True Then
-
-						Select Case fiFile.Extension.ToUpper
-							Case FILE_EXTENSION_TXT, FILE_EXTENSION_LOG
-								blnPassedIntegrityCheck = CheckTextFile(fiFile.FullName)
-
-
-							Case FILE_EXTENSION_PARAMS
-								blnPassedIntegrityCheck = CheckParamsFile(fiFile.FullName)
-
-							Case FILE_EXTENSION_DAT
-								' ToDo: Possibly check these files (Decon2LS DAT files)
-
-							Case FILE_EXTENSION_TIC
-								blnPassedIntegrityCheck = CheckTICFile(fiFile.FullName)
-
-							Case FILE_EXTENSION_ZIP
-								blnPassedIntegrityCheck = CheckZIPFile(fiFile.FullName)
-
-							Case FILE_EXTENSION_CSV
-								blnPassedIntegrityCheck = CheckCSVFile(fiFile.FullName)
-
-							Case FILE_EXTENSION_XML
-								blnPassedIntegrityCheck = CheckXMLFile(fiFile.FullName)
-
-							Case FINNIGAN_RAW_FILE_EXTENSION
-								' File was not in strFileIgnoreList
-								' Re-check using clsFinniganRawFileInfoScanner
-
-								objMSInfoScanner = New clsFinniganRawFileInfoScanner
-								objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, False)
-								objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, False)
-								objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, False)
-
-								blnPassedIntegrityCheck = objMSInfoScanner.ProcessDataFile(fiFile.FullName, udtFileInfo)
-
-							Case AGILENT_TOF_OR_QTRAP_FILE_EXTENSION
-								' File was not in strFileIgnoreList
-								' Re-check using clsAgilentTOFOrQTRAPWiffFileInfoScanner
-
-								objMSInfoScanner = New clsAgilentTOFOrQStarWiffFileInfoScanner
-								objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, False)
-								objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, False)
-								objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, False)
-
-								blnPassedIntegrityCheck = objMSInfoScanner.ProcessDataFile(fiFile.FullName, udtFileInfo)
-
-							Case "."
-								' No extension
-								blnPassedIntegrityCheck = CheckExtensionFreeFile(fiFile.FullName)
-
-							Case Else
-								' Do not check this file (but add it to udtFileStats anyway)
-
-						End Select
-					End If
-
-					If udtFolderStats.FileCount >= udtFileStats.Length Then
-						' Reserve more space in udtFileStats
-						ReDim Preserve udtFileStats(udtFileStats.Length * 2 - 1)
-					End If
-
-					With udtFileStats(udtFolderStats.FileCount)
-						.FileName = fiFile.FullName
-						.ModificationDate = fiFile.LastWriteTime
-						.SizeBytes = fiFile.Length
-						.FailIntegrity = Not blnPassedIntegrityCheck
-
-						If mComputeFileHashes Then
-							'.FileHash = MD5CalcFile(fiFile.FullName)
-							.FileHash = Sha1CalcFile(fiFile.FullName)
-						End If
-					End With
-
-					udtFolderStats.FileCount += 1
-					If Not blnPassedIntegrityCheck Then
-						udtFolderStats.FileCountFailIntegrity += 1
-					End If
-
-				Catch ex As Exception
-					LogErrors("CheckIntegrityOfFilesInFolder", "Error checking file " & fiFile.FullName, ex)
-				End Try
-
-			Next
-
-		Catch ex As Exception
-			LogErrors("CheckIntegrityOfFilesInFolder", "Error in CheckIntegrityOfFilesInFolder", ex)
-		End Try
-
-		If udtFolderStats.FileCountFailIntegrity = 0 Then
-			Return True
-		Else
-			Return False
-		End If
-
-	End Function
-
-	Protected Function CountChars(ByVal strText As String, ByVal chSearchChar As Char) As Integer
-		Dim intCharCount As Integer = 0
-		Dim intMatchIndex As Integer = -1
-
-		Do
-			intMatchIndex = strText.IndexOf(chSearchChar, intMatchIndex + 1)
-			If intMatchIndex >= 0 Then
-				intCharCount += 1
-			Else
-				Exit Do
-			End If
-		Loop
-
-		Return intCharCount
-	End Function
-
-	''' <summary>
-	''' Searches strLineToSearch for each of the items in strRequiredText; if blnMatchStart = True, then only checks the start of the line
-	''' </summary>
-	''' <param name="strLineToSearch">Text to search</param>
-	''' <param name="blnNeedToCheckRequiredText">True until all items in strRequiredText() have been found</param>
-	''' <param name="strRequiredText">List of items to look for</param>
-	''' <param name="blnRequiredTextFound">Set to True when each item is found</param>
-	''' <param name="intRequiredTextMatchCount">Total number of items that have been matched; equivalent to the number of True entries in blnRequiredTextFound</param>
-	''' <param name="blnMatchStart"></param>
-	''' <remarks></remarks>
-	Protected Sub FindRequiredTextInLine(ByRef strLineToSearch As String, _
-	 ByRef blnNeedToCheckRequiredText As Boolean, _
-	 ByRef strRequiredText() As String, _
-	 ByRef blnRequiredTextFound() As Boolean, _
-	 ByRef intRequiredTextMatchCount As Integer, _
-	 ByVal blnMatchStart As Boolean)
-
-		Dim intIndex As Integer
-
-		If strRequiredText.Length > 0 Then
-			For intIndex = 0 To blnRequiredTextFound.Length - 1
-				If Not blnRequiredTextFound(intIndex) Then
-					If blnMatchStart Then
-						If strLineToSearch.StartsWith(strRequiredText(intIndex)) Then
-							blnRequiredTextFound(intIndex) = True
-							intRequiredTextMatchCount += 1
-							Exit For
-						End If
-					Else
-						If strLineToSearch.Contains(strRequiredText(intIndex)) Then
-							blnRequiredTextFound(intIndex) = True
-							intRequiredTextMatchCount += 1
-							Exit For
-						End If
-					End If
-				End If
-			Next intIndex
-
-			If intRequiredTextMatchCount >= blnRequiredTextFound.Length Then
-				' All required headers have been matched
-				' Do not need to check for line headers any more
-				blnNeedToCheckRequiredText = False
-			End If
-		End If
-
-	End Sub
-
-	''' <summary>
-	''' Opens the file using a text reader and looks for XML elements parameters and PeakParameters
-	''' </summary>
-	''' <returns>True if this file contains the XML elements that indicate this is an Decon2LS XML settings file</returns>
-	''' <remarks></remarks>
-	Protected Function FileIsDecon2LSXMLSettingsFile(ByVal strFilePath As String) As Boolean
-		Return XMLFileContainsElements(strFilePath, New String() {"<parameters>", "<peakparameters>"})
-	End Function
-
-	''' <summary>
-	''' Opens the file using a text reader and looks for XML elements "sections" and "section"
-	''' </summary>
-	''' <param name="strFilePath">File to examine</param>
-	''' <returns>True if this file contains the XML elements that indicate this is an XML settings file</returns>
-	''' <remarks></remarks>
-	Protected Function FileIsXMLSettingsFile(ByVal strFilePath As String) As Boolean
-		Return XMLFileContainsElements(strFilePath, New String() {"<sections>", "<section", "<item"})
-	End Function
-
-	''' <summary>
-	''' Overloaded form of XMLFileContainsElements; assumes intMaximumTextFileLinesToCheck = 50
-	''' </summary>
-	''' <returns>True if this file contains the required element text</returns>
-	''' <remarks></remarks>
-	Protected Function XMLFileContainsElements(ByVal strFilePath As String, ByVal strElementsToMatch() As String) As Boolean
-		Return XMLFileContainsElements(strFilePath, strElementsToMatch, 50)
-	End Function
-
-	''' <summary>
-	''' Opens the file using a text reader and looks for XML elements specified in strElementsToMatch()
-	''' </summary>
-	''' <param name="strFilePath">File to examine</param>
-	''' <param name="strElementsToMatch">Element text to match; item text must include the desired element Less Than Signs to match; items must be all lower-case</param>
-	''' <returns>True if this file contains the required element text</returns>
-	''' <remarks></remarks>
-	Protected Function XMLFileContainsElements(ByVal strFilePath As String, ByVal strElementsToMatch() As String, ByVal intMaximumTextFileLinesToCheck As Integer) As Boolean
-
-		Dim intLinesRead As Integer = 0
-		Dim intIndex As Integer
-
-		Dim strLineIn As String
-
-		Dim intElementMatchCount As Integer
-		Dim blnElementFound() As Boolean
-
-		Dim blnAllElementsFound As Boolean = False
-
-		Try
-			If strElementsToMatch Is Nothing OrElse strElementsToMatch.Length = 0 Then
-				Return False
-			End If
-
-			intElementMatchCount = 0
-			ReDim blnElementFound(strElementsToMatch.Length - 1)
-
-			' Read, at most, the first intMaximumTextFileLinesToCheck lines to determine if this is an XML settings file
-			If intMaximumTextFileLinesToCheck < 10 Then
-				intMaximumTextFileLinesToCheck = 50
-			End If
-
-			' Open the file
-			Dim fsInStream = New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)
-			Using srInFile As StreamReader = New StreamReader(fsInStream)
-
-				' Read each line and examine it
-				Do While srInFile.Peek >= 0 AndAlso intLinesRead < intMaximumTextFileLinesToCheck
-					strLineIn = srInFile.ReadLine
-					intLinesRead += 1
-
-					If Not strLineIn Is Nothing Then
-						strLineIn = strLineIn.Trim.ToLower
-
-						For intIndex = 0 To blnElementFound.Length - 1
-							If Not blnElementFound(intIndex) Then
-								If strLineIn.Trim.StartsWith(strElementsToMatch(intIndex)) Then
-									blnElementFound(intIndex) = True
-									intElementMatchCount += 1
-
-									If intElementMatchCount = blnElementFound.Length Then
-										blnAllElementsFound = True
-										Exit Do
-									End If
-
-									Exit For
-								End If
-							End If
-						Next
-					End If
-				Loop
-
-			End Using
-
-		Catch ex As Exception
-			LogErrors("XMLFileContainsElements", "Error checking XML file for desired elements: " & strFilePath, ex)
-		End Try
-
-		Return blnAllElementsFound
-
-	End Function
+            Using srInFile = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+
+                ' Read each line and examine it
+                Do While srInFile.Peek >= 0 AndAlso intLinesRead < intMaximumTextFileLinesToCheck
+                    strLineIn = srInFile.ReadLine
+                    intLinesRead += 1
+
+                    If blnCharCountSkipsBlankLines AndAlso strLineIn.Trim.Length = 0 Then
+                        blnSuccess = True
+                    Else
+
+                        If intMinimumTabCount > 0 Then
+                            ' Count the number of tabs
+                            blnSuccess = CheckTextFileCountChars(strLineIn, blnBlankLineRead, intLinesRead, intExpectedTabCount, ControlChars.Tab, "Tab", intMinimumTabCount, blnRequireEqualTabsPerLine, strErrorMessage)
+
+                            If Not blnSuccess Then
+                                LogFileIntegrityError(strFilePath, strErrorMessage)
+                                blnErrorLogged = True
+                                Exit Do
+                            End If
+
+                        End If
+
+                        If intMinimumCommaCount > 0 Then
+                            ' Count the number of commas
+                            blnSuccess = CheckTextFileCountChars(strLineIn, blnBlankLineRead, intLinesRead, intExpectedCommaCount, ","c, "Comma", intMinimumCommaCount, blnRequireEqualCommasPerLine, strErrorMessage)
+
+                            If Not blnSuccess Then
+                                LogFileIntegrityError(strFilePath, strErrorMessage)
+                                blnErrorLogged = True
+                                Exit Do
+                            End If
+
+                        End If
+
+
+                        If blnNeedToCheckLineHeaders Then
+                            FindRequiredTextInLine(strLineIn, blnNeedToCheckLineHeaders, strRequiredTextLineHeaders, blnLineHeaderFound, intLineHeaderMatchCount, blnRequiredTextMatchesLineStart)
+                        ElseIf intMinimumTabCount = 0 AndAlso intMinimumCommaCount = 0 AndAlso intLinesRead > intMinimumLineCount Then
+                            ' All conditions have been met; no need to continue reading the file
+                            Exit Do
+                        End If
+
+                    End If
+
+                Loop
+
+            End Using
+
+            ' Make sure that all of the required line headers were found; log an error if any were missing
+            ValidateRequiredTextFound(strFilePath, "line headers", blnCheckLineHeadersForThisFile, blnNeedToCheckLineHeaders, strRequiredTextLineHeaders, blnLineHeaderFound, intRequiredTextMinMatchCount, blnErrorLogged)
+
+            If Not blnErrorLogged AndAlso intLinesRead < intMinimumLineCount Then
+                strErrorMessage = "File contains " & intLinesRead.ToString & " lines of text, but the required minimum is " & intMinimumLineCount.ToString
+                LogFileIntegrityError(strFilePath, strErrorMessage)
+                blnErrorLogged = True
+            End If
+
+        Catch ex As Exception
+            strErrorMessage = "Error checking file: " & strFilePath & "; " & ex.Message
+            LogFileIntegrityError(strFilePath, strErrorMessage)
+            blnErrorLogged = True
+        End Try
+
+        Return Not blnErrorLogged
+
+    End Function
+
+    ''' <summary>
+    ''' Counts the number of occurrences of a given character in strLineIn
+    ''' </summary>
+    ''' <param name="strLineIn">Line to check</param>
+    ''' <param name="blnBlankLineRead">Set to true if a blank line is read; however, if already true, and a non-blank line with an insufficient number of characters is read, then this function will return an error</param>
+    ''' <param name="intLinesRead">Number of lines that have been read; when first calling this function for a new file, set this to 1 so that intExpectedCharCount will be initialized </param>
+    ''' <param name="intExpectedCharCount">The number of occurrences of the given character in the previous line; used when blnRequireEqualCharsPerLine is True</param>
+    ''' <param name="chCharToCount">The character to look for</param>
+    ''' <param name="strCharDescription">A description of the character (used to populate strMessage when an error occurs)</param>
+    ''' <param name="intMinimumCharCount">Minimum character count</param>
+    ''' <param name="blnRequireEqualCharsPerLine">If True, then each line must contain an equal occurrence count of the given character (based on the first line in the file)</param>
+    ''' <param name="strErrorMessage">Error message</param>
+    ''' <returns>True if the line is valid; otherwise False; when False, then updates strErrorMessage</returns>
+    ''' <remarks></remarks>
+    Protected Function CheckTextFileCountChars(ByRef strLineIn As String, _
+     ByRef blnBlankLineRead As Boolean, _
+     ByVal intLinesRead As Integer, _
+     ByRef intExpectedCharCount As Integer, _
+     ByVal chCharToCount As Char, _
+     ByVal strCharDescription As String, _
+     ByVal intMinimumCharCount As Integer, _
+     ByVal blnRequireEqualCharsPerLine As Boolean, _
+     ByRef strErrorMessage As String) As Boolean
+
+        Dim intCharCount As Integer
+
+        Dim blnLineIsValid As Boolean = True
+
+        ' Count the number of chCharToCount characters
+        intCharCount = CountChars(strLineIn, chCharToCount)
+
+        If strLineIn.EndsWith(chCharToCount) AndAlso intCharCount > 1 AndAlso intCharCount > intMinimumCharCount Then
+            ' Decrement the char count by one since the line ends in the character we're counting
+            intCharCount -= 1
+        End If
+
+        If intCharCount < intMinimumCharCount Then
+            ' Character not found the minimum number of times
+
+            If strLineIn.Length = 0 AndAlso Not blnBlankLineRead Then
+                blnBlankLineRead = True
+            ElseIf blnBlankLineRead AndAlso Not strLineIn.Length = 0 Then
+                ' Previously read a blank line; now found a line that's not blank
+                strErrorMessage = "Line " & intLinesRead.ToString & " has " & intCharCount.ToString & " " & strCharDescription & "s, but the required minimum is " & intMinimumCharCount.ToString
+                blnLineIsValid = False
+            Else
+                strErrorMessage = "Line " & intLinesRead.ToString & " has " & intCharCount.ToString & " " & strCharDescription & "s, but the required minimum is " & intMinimumCharCount.ToString
+                blnLineIsValid = False
+            End If
+        End If
+
+        If blnLineIsValid AndAlso blnRequireEqualCharsPerLine Then
+            If intLinesRead <= 1 Then
+                intExpectedCharCount = intCharCount
+            Else
+                If intCharCount <> intExpectedCharCount Then
+                    If strLineIn.Length > 0 Then
+                        strErrorMessage = "Line " & intLinesRead.ToString & " has " & intCharCount.ToString & " " & strCharDescription & "s, but previous line has " & intExpectedCharCount.ToString & " tabs"
+                        blnLineIsValid = False
+                    End If
+                End If
+            End If
+        End If
+
+        Return blnLineIsValid
+
+    End Function
+
+    ''' <summary>
+    ''' Checks the integrity of files without an extension
+    ''' </summary>
+    ''' <param name="strFilePath"></param>
+    ''' <returns>True if the file passes the integrity check; otherwise False</returns>
+    ''' <remarks></remarks>
+    Protected Function CheckExtensionFreeFile(ByVal strFilePath As String) As Boolean
+        Dim blnLineIsValid As Boolean = True
+
+        Select Case Path.GetFileNameWithoutExtension(strFilePath).ToLower
+            Case "acqu", "acqus"
+                blnLineIsValid = CheckTextFileWork(strFilePath, 50, New String() {"##TITLE", "##DATA"}, True)
+
+            Case "lock"
+                blnLineIsValid = CheckTextFileWork(strFilePath, 1, New String() {"ftms"}, True)
+
+            Case "sptype"
+                ' Skip this file
+                blnLineIsValid = True
+        End Select
+
+        Return blnLineIsValid
+    End Function
+
+    ''' <summary>
+    ''' Checks the integrity of a Sequest Params file
+    ''' </summary>
+    ''' <param name="strFilePath"></param>
+    ''' <returns>True if the file passes the integrity check; otherwise False</returns>
+    ''' <remarks></remarks>
+    Protected Function CheckParamsFile(ByVal strFilePath As String) As Boolean
+
+        Const MASS_TOLERANCE_LINE As String = "peptide_mass_tolerance"
+        Const FRAGMENT_TOLERANCE_LINE As String = "fragment_ion_tolerance"
+        Const MAX_LINES_TO_READ As Integer = 50
+
+        Dim intLinesRead As Integer = 0
+
+        Dim strLineIn As String
+
+        Dim blnMassToleranceFound As Boolean = False
+        Dim blnFragmentToleranceFound As Boolean = False
+        Dim blnFileIsValid As Boolean = False
+
+        Try
+            ' Open the file
+            Using srInFile = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+
+                ' Read each line in the file and look for the expected parameter lines
+                Do While srInFile.Peek >= 0 AndAlso intLinesRead < MAX_LINES_TO_READ
+                    strLineIn = srInFile.ReadLine
+                    intLinesRead += 1
+
+                    If strLineIn.StartsWith(MASS_TOLERANCE_LINE) Then
+                        blnMassToleranceFound = True
+                    End If
+
+                    If strLineIn.StartsWith(FRAGMENT_TOLERANCE_LINE) Then
+                        blnFragmentToleranceFound = True
+                    End If
+
+                    If blnMassToleranceFound AndAlso blnFragmentToleranceFound Then
+                        blnFileIsValid = True
+                        Exit Do
+                    End If
+                Loop
+
+            End Using
+
+
+
+        Catch ex As Exception
+            LogFileIntegrityError(strFilePath, "Error checking Sequest params file: " & strFilePath & "; " & ex.Message)
+            blnFileIsValid = False
+        End Try
+
+        Return blnFileIsValid
+
+    End Function
+
+    ''' <summary>
+    ''' Checks the integrity of an ICR-2LS TIC file
+    ''' </summary>
+    ''' <param name="strFilePath"></param>
+    ''' <returns>True if the file passes the integrity check; otherwise False</returns>
+    ''' <remarks></remarks>
+    Protected Function CheckTICFile(ByVal strFilePath As String) As Boolean
+
+        Const ICR2LS_LINE_START As String = "ICR-2LS"
+        Const VERSION_LINE_START As String = "VERSION"
+
+        Dim intLinesRead As Integer = 0
+
+        Dim strLineIn As String
+
+        ' Assume True for now
+        Dim blnFileIsValid As Boolean = True
+
+        Try
+            ' Open the file
+            Using srInFile = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+
+
+                ' Confirm that the first two lines look like:
+                '  ICR-2LS Data File (GA Anderson & JE Bruce); output from MASIC by Matthew E Monroe
+                '  Version 2.4.2974.38283; February 22, 2008
+
+                Do While srInFile.Peek >= 0 AndAlso intLinesRead < 2
+                    strLineIn = srInFile.ReadLine
+                    intLinesRead += 1
+
+                    If intLinesRead = 1 Then
+                        If Not strLineIn.ToUpper.StartsWith(ICR2LS_LINE_START) Then
+                            blnFileIsValid = False
+                            Exit Do
+                        End If
+                    ElseIf intLinesRead = 2 Then
+                        If Not strLineIn.ToUpper.StartsWith(VERSION_LINE_START) Then
+                            blnFileIsValid = False
+                            Exit Do
+                        End If
+                    Else
+                        ' This code shouldn't be reached
+                        Exit Do
+                    End If
+
+                Loop
+
+            End Using
+
+        Catch ex As Exception
+            LogFileIntegrityError(strFilePath, "Error checking TIC file: " & strFilePath & "; " & ex.Message)
+            blnFileIsValid = False
+        End Try
+
+        Return blnFileIsValid
+
+    End Function
+
+    ''' <summary>
+    ''' Opens the given zip file and uses Ionic Zip's .TestArchive function to validate that it is valid
+    ''' </summary>
+    ''' <param name="strFilePath">File path to check</param>
+    ''' <returns>True if the file passes the integrity check; otherwise False</returns>
+    ''' <remarks></remarks>
+    Protected Function CheckZIPFile(ByVal strFilePath As String) As Boolean
+
+        Const MAX_THREAD_RATE_CHECK_ALL_DATA As Single = 0.25  ' minutes/MB
+        Const MAX_THREAD_RATE_QUICK_CHECK As Single = 0.125    ' minutes/MB
+
+        Dim strFileNameLCase As String
+        Dim objFileInfo As FileInfo
+        Dim dblFileSizeMB As Double
+
+        Dim blnZipIsValid As Boolean = False
+        Dim strMessage As String
+
+        Dim objZipLibTest As Threading.Thread
+        Dim dtStartTime As DateTime
+        Dim sngMaxExecutionTimeMinutes As Single
+
+        Dim blnZipFileCheckAllData As Boolean
+        blnZipFileCheckAllData = mZipFileCheckAllData
+
+        ' Either run a fast check, or entirely skip this .Zip file if it's too large
+        objFileInfo = New FileInfo(strFilePath)
+        dblFileSizeMB = objFileInfo.Length / 1024.0 / 1024.0
+
+        If blnZipFileCheckAllData AndAlso mZipFileLargeSizeThresholdMB > 0 Then
+            If dblFileSizeMB > mZipFileLargeSizeThresholdMB Then
+                blnZipFileCheckAllData = False
+            End If
+        End If
+
+        If blnZipFileCheckAllData AndAlso mFastZippedSFileCheck Then
+            strFileNameLCase = Path.GetFileName(strFilePath).ToLower
+            If strFileNameLCase = "0.ser.zip" Then
+                ' Do not run a full check on 0.ser.zip files
+                blnZipFileCheckAllData = False
+
+            ElseIf strFileNameLCase.Length > 2 AndAlso strFileNameLCase.StartsWith("s") AndAlso Char.IsNumber(strFileNameLCase.Chars(1)) Then
+                ' Run a full check on s001.zip but not the other s*.zip files
+                If strFileNameLCase <> "s001.zip" Then
+                    blnZipFileCheckAllData = False
+                End If
+            End If
+        End If
+
+        With mZipFileWorkParams
+            .FilePath = strFilePath
+            .CheckAllData = blnZipFileCheckAllData
+            .ZipIsValid = False
+            If .CheckAllData Then
+                .FailureMessage = "Zip file failed exhaustive CRC check"
+            Else
+                .FailureMessage = "Zip file failed quick check"
+            End If
+        End With
+
+        If blnZipFileCheckAllData Then
+            sngMaxExecutionTimeMinutes = CSng(dblFileSizeMB * MAX_THREAD_RATE_CHECK_ALL_DATA)
+        Else
+            sngMaxExecutionTimeMinutes = CSng(dblFileSizeMB * MAX_THREAD_RATE_QUICK_CHECK)
+        End If
+
+        objZipLibTest = New Threading.Thread(AddressOf CheckZipFileWork)
+        dtStartTime = DateTime.UtcNow
+
+        objZipLibTest.Start()
+        Do
+            objZipLibTest.Join(250)
+
+            If objZipLibTest.ThreadState = Threading.ThreadState.Aborted Then
+                Exit Do
+            ElseIf DateTime.UtcNow.Subtract(dtStartTime).TotalMinutes >= sngMaxExecutionTimeMinutes Then
+                ' Execution took too long; abort
+                objZipLibTest.Abort()
+                objZipLibTest.Join(250)
+
+                strMessage = mZipFileWorkParams.FailureMessage & "; over " & sngMaxExecutionTimeMinutes.ToString("0.0") & " minutes have elapsed, which is longer than the expected processing time"
+                LogFileIntegrityError(mZipFileWorkParams.FilePath, strMessage)
+
+                Exit Do
+            End If
+        Loop While objZipLibTest.ThreadState <> Threading.ThreadState.Stopped
+
+        Return mZipFileWorkParams.ZipIsValid
+
+    End Function
+
+    Private Sub CheckZipFileWork()
+        Dim blnThrowExceptionIfInvalid As Boolean = True
+        Dim blnZipIsValid As Boolean
+        Dim strMessage As String
+
+        Try
+
+            blnZipIsValid = CheckZipFileIntegrity(mZipFileWorkParams.FilePath, mZipFileWorkParams.CheckAllData, blnThrowExceptionIfInvalid)
+
+            If Not blnZipIsValid Then
+                If mZipFileWorkParams.CheckAllData Then
+                    strMessage = "Zip file failed exhaustive CRC check"
+                Else
+                    strMessage = "Zip file failed quick check"
+                End If
+
+                LogFileIntegrityError(mZipFileWorkParams.FilePath, strMessage)
+            End If
+
+        Catch ex As Exception
+            ' Error reading .Zip file
+            LogFileIntegrityError(mZipFileWorkParams.FilePath, ex.Message)
+        End Try
+
+        mZipFileWorkParams.ZipIsValid = blnZipIsValid
+
+    End Sub
+
+    ''' <summary>
+    ''' Validate every entry in strZipFilePath
+    ''' </summary>
+    ''' <param name="strZipFilePath">Path to the zip file to validate</param>
+    ''' <param name="blnThrowExceptionIfInvalid">If True, then throws exceptions, otherwise simply returns True or False</param>
+    ''' <returns>True if the file is Valid; false if an error</returns>
+    ''' <remarks>Extracts each file in the zip file to a temporary file.  Will return false if you run out of disk space</remarks>
+    Private Function CheckZipFileIntegrity(ByVal strZipFilePath As String, ByVal blnCheckAllData As Boolean, ByVal blnThrowExceptionIfInvalid As Boolean) As Boolean
+
+        Dim strTempPath As String = String.Empty
+        Dim blnZipIsValid As Boolean = False
+
+        If Not File.Exists(strZipFilePath) Then
+            ' Zip file not found
+            If blnThrowExceptionIfInvalid Then
+                Throw New FileNotFoundException("File not found", strZipFilePath)
+            End If
+            Return False
+        End If
+
+        Try
+            If blnCheckAllData Then
+
+                ' Obtain a random file name
+                strTempPath = Path.GetTempFileName
+
+                ' Open the zip file
+                Using objZipFile As Ionic.Zip.ZipFile = New Ionic.Zip.ZipFile(strZipFilePath)
+
+                    ' Extract each file to strTempPath
+                    For Each objEntry As Ionic.Zip.ZipEntry In objZipFile.Entries
+                        objEntry.ZipErrorAction = Ionic.Zip.ZipErrorAction.Throw
+
+                        If Not objEntry.IsDirectory Then
+
+                            Dim swTestStream As FileStream = New FileStream(strTempPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)
+                            objEntry.Extract(swTestStream)
+                            swTestStream.Close()
+
+                        End If
+                    Next
+
+                End Using
+
+                blnZipIsValid = True
+
+            Else
+                blnZipIsValid = Ionic.Zip.ZipFile.CheckZip(strZipFilePath)
+            End If
+
+
+        Catch ex As Exception
+            If blnThrowExceptionIfInvalid Then
+                Throw ex
+            End If
+            blnZipIsValid = False
+        Finally
+            Try
+                If Not String.IsNullOrEmpty(strTempPath) AndAlso File.Exists(strTempPath) Then
+                    File.Delete(strTempPath)
+                End If
+            Catch ex As Exception
+                ' Ignore errors deleting the temp file
+            End Try
+        End Try
+
+        Return blnZipIsValid
+
+    End Function
+
+    ''' <summary>
+    ''' Checks the integrity of a CSV file
+    ''' </summary>
+    ''' <param name="strFilePath"></param>
+    ''' <returns>True if the file passes the integrity check; otherwise False</returns>
+    ''' <remarks></remarks>
+    Protected Function CheckCSVFile(ByVal strFilePath As String) As Boolean
+        Dim intMinimumCommaCount As Integer
+        Dim strHeaderRequired As String = String.Empty
+
+        Dim strFileNameLower As String
+
+        strFileNameLower = Path.GetFileName(strFilePath).ToLower
+
+        If strFileNameLower.EndsWith("_isos.csv") Then
+            ' scan_num,charge,abundance,mz,fit,average_mw,monoisotopic_mw,mostabundant_mw,fwhm,signal_noise,mono_abundance,mono_plus2_abundance
+            strHeaderRequired = "scan_num"
+            intMinimumCommaCount = 10
+
+        ElseIf strFileNameLower.EndsWith("_scans.csv") Then
+            ' scan_num,scan_time,type,bpi,bpi_mz,tic,num_peaks,num_deisotoped
+            strHeaderRequired = "scan_num"
+            intMinimumCommaCount = 7
+        Else
+            ' Unknown CSV file; do not check it
+            intMinimumCommaCount = 0
+        End If
+
+        If intMinimumCommaCount > 0 Then
+            Return CheckTextFileWork(strFilePath, 1, 0, intMinimumCommaCount, False, True, New String() {strHeaderRequired}, True, False, 0)
+        Else
+            Return True
+        End If
+
+    End Function
+
+    ''' <summary>
+    ''' Validates the given XML file; tries to determine the expected element names based on the file name and its parent folder
+    ''' </summary>
+    ''' <param name="strFilePath">File Path</param>
+    ''' <returns>True if the file passes the integrity check; otherwise False</returns>
+    Protected Function CheckXMLFile(ByVal strFilePath As String) As Boolean
+        ' Examine the parent folder name to determine the type of XML file strFilePath most likely is
+
+        Dim strFileNameLCase As String
+        Dim strParentFolderName As String
+
+        Dim blnXMLIsValid As Boolean = True
+
+        Dim fiFile = New FileInfo(strFilePath)
+
+        strFileNameLCase = fiFile.Name.ToLower
+        strParentFolderName = fiFile.Directory.Name
+
+        Select Case strParentFolderName.Substring(0, 3).ToUpper
+            Case "SIC", "DLS"
+                ' MASIC or Decon2LS folder
+                If FileIsXMLSettingsFile(fiFile.FullName) Then
+                    blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, New String() {"section", "item"}, New String() {"key", "value"})
+                ElseIf FileIsDecon2LSXMLSettingsFile(fiFile.FullName) Then
+                    blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, New String() {"parameters", "PeakParameters"}, New String() {})
+                Else
+                    ' Unknown XML file; just check for one element
+                    blnXMLIsValid = CheckXMLFileWork(strFilePath, 1)
+                End If
+
+            Case "SEQ"
+                ' Sequest folder
+                If strFileNameLCase = "finnigandefsettings.xml" OrElse FileIsXMLSettingsFile(fiFile.FullName) Then
+                    blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, New String() {"section", "item"}, New String() {"key", "value"})
+                Else
+                    ' Unknown XML file; just check for one element
+                    blnXMLIsValid = CheckXMLFileWork(strFilePath, 1)
+                End If
+
+            Case "XTM"
+                ' Xtandem folder
+                Select Case strFileNameLCase
+                    Case "default_input.xml"
+                        blnXMLIsValid = CheckXMLFileWork(strFilePath, 10, New String() {"bioml", "note"}, New String() {"type", "label"})
+
+                    Case "input.xml"
+                        blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, New String() {"bioml", "note"}, New String() {"type", "label"})
+
+                    Case "taxonomy.xml"
+                        blnXMLIsValid = CheckXMLFileWork(strFilePath, 3, New String() {"bioml", "taxon"}, New String() {"label", "format"})
+
+                    Case Else
+                        If strFileNameLCase = "iontrapdefsettings.xml" OrElse FileIsXMLSettingsFile(fiFile.FullName) Then
+                            blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, New String() {"section", "item"}, New String() {"key", "value"})
+                        ElseIf strFileNameLCase.StartsWith("xtandem_") Then
+                            blnXMLIsValid = CheckXMLFileWork(strFilePath, 2, New String() {"bioml", "note"}, New String() {})
+                        Else
+                            ' Unknown XML file; just check for one element
+                            blnXMLIsValid = CheckXMLFileWork(strFilePath, 1)
+                        End If
+                End Select
+
+            Case Else
+                ' Unknown XML file; just check for one element
+                blnXMLIsValid = CheckXMLFileWork(strFilePath, 1)
+        End Select
+
+        Return blnXMLIsValid
+
+    End Function
+
+    ''' <summary>
+    ''' Overloaded version of CheckXMLFileWork; takes filename and minimum element count
+    ''' </summary>
+    ''' <returns>True if the file passes the integrity check; otherwise False</returns>
+    Protected Function CheckXMLFileWork(ByVal strFilePath As String, ByVal intMinimumElementCount As Integer) As Boolean
+        Return CheckXMLFileWork(strFilePath, intMinimumElementCount, New String() {}, New String() {})
+    End Function
+
+    ''' <summary>
+    ''' Validates the contents of the given XML file
+    ''' </summary>
+    ''' <param name="strFilePath">File Path</param>
+    ''' <param name="intMinimumElementCount">Minimum number of XML elements that must be in the file; maximum number of elements is defined by mMaximumXMLElementNodesToCheck</param>
+    ''' <param name="strRequiredElementNames">Optional list of element names that must be found (within the first mMaximumXMLElementNodesToCheck elements); the names are case-sensitive</param>
+    ''' <param name="strRequiredAttributeNames">Optional list of attribute names that must be found  (within the first mMaximumXMLElementNodesToCheck elements); the names are case-sensitive</param>
+    ''' <returns>True if the file passes the integrity check; otherwise False</returns>
+    ''' <remarks></remarks>
+    Protected Function CheckXMLFileWork(ByVal strFilePath As String, _
+       ByVal intMinimumElementCount As Integer, _
+       ByVal strRequiredElementNames() As String, _
+       ByVal strRequiredAttributeNames() As String) As Boolean
+
+        Dim blnCheckElementNamesThisFile As Boolean = False
+        Dim blnNeedToCheckElementNames As Boolean = False           ' If blnCheckElementNamesThisFile is True, then this will be set to True.  However, once all of the expected headers are found, this is set to False
+        Dim intElementNameMatchCount As Integer = 0
+        Dim blnElementNameFound() As Boolean
+
+        Dim blnCheckAttributeNamesThisFile As Boolean = False
+        Dim blnNeedToCheckAttributeNames As Boolean = False         ' If blnCheckAttributeNamesThisFile is True, then this will be set to True.  However, once all of the expected headers are found, this is set to False
+        Dim intAttributeNameMatchCount As Integer = 0
+        Dim blnAttributeNameFound() As Boolean
+
+        Dim intMaximumXMLElementNodesToCheck As Integer
+        Dim intElementsRead As Integer = 0
+
+        Dim blnErrorLogged As Boolean = False
+        Dim strErrorMessage As String
+
+        Try
+            If Not strRequiredElementNames Is Nothing AndAlso strRequiredElementNames.Length > 0 Then
+                blnCheckElementNamesThisFile = True
+                blnNeedToCheckElementNames = True
+                ReDim blnElementNameFound(strRequiredElementNames.Length - 1)
+            Else
+                ReDim blnElementNameFound(0)
+            End If
+
+            If Not strRequiredAttributeNames Is Nothing AndAlso strRequiredAttributeNames.Length > 0 Then
+                blnCheckAttributeNamesThisFile = True
+                blnNeedToCheckAttributeNames = True
+                ReDim blnAttributeNameFound(strRequiredAttributeNames.Length - 1)
+            Else
+                ReDim blnAttributeNameFound(0)
+            End If
+
+            If mMaximumXMLElementNodesToCheck <= 0 Then
+                intMaximumXMLElementNodesToCheck = Integer.MaxValue
+            Else
+                intMaximumXMLElementNodesToCheck = mMaximumXMLElementNodesToCheck
+            End If
+
+            If intMaximumXMLElementNodesToCheck < 1 Then intMaximumXMLElementNodesToCheck = 1
+            If intMaximumXMLElementNodesToCheck < intMinimumElementCount Then
+                intMaximumXMLElementNodesToCheck = intMinimumElementCount
+            End If
+
+            Try
+                ' Initialize the stream reader and the XML Text Reader
+                Using srInFile = New StreamReader(strFilePath)
+                    Using objXMLReader As Xml.XmlTextReader = New Xml.XmlTextReader(srInFile)
+
+                        ' Read each of the nodes and examine them
+                        Do While objXMLReader.Read()
+
+                            XMLTextReaderSkipWhitespace(objXMLReader)
+                            If Not objXMLReader.ReadState = Xml.ReadState.Interactive Then Exit Do
+
+
+                            If objXMLReader.NodeType = Xml.XmlNodeType.Element Then
+                                ' Note: If needed, read the element's value using XMLTextReaderGetInnerText(objXMLReader)
+
+                                If blnNeedToCheckElementNames Then
+                                    FindRequiredTextInLine(objXMLReader.Name, blnNeedToCheckElementNames, strRequiredElementNames, blnElementNameFound, intElementNameMatchCount, True)
+                                End If
+
+                                If blnNeedToCheckAttributeNames AndAlso objXMLReader.HasAttributes Then
+                                    If objXMLReader.MoveToFirstAttribute Then
+                                        Do
+                                            FindRequiredTextInLine(objXMLReader.Name, blnNeedToCheckAttributeNames, strRequiredAttributeNames, blnAttributeNameFound, intAttributeNameMatchCount, True)
+                                            If Not blnNeedToCheckAttributeNames Then Exit Do
+                                        Loop While objXMLReader.MoveToNextAttribute
+
+                                    End If
+                                End If
+
+                                intElementsRead += 1
+                                If intMaximumXMLElementNodesToCheck > 0 AndAlso intElementsRead >= MaximumXMLElementNodesToCheck Then
+                                    Exit Do
+                                ElseIf Not blnNeedToCheckElementNames AndAlso Not blnNeedToCheckAttributeNames AndAlso intElementsRead > intMinimumElementCount Then
+                                    ' All conditions have been met; no need to continue reading the file
+                                    Exit Do
+                                End If
+
+                            End If
+
+                        Loop
+
+                    End Using           ' objXMLReader
+                End Using           ' srInFile
+
+                ' Make sure that all of the required element names were found; log an error if any were missing
+                ValidateRequiredTextFound(strFilePath, "XML elements", blnCheckElementNamesThisFile, blnNeedToCheckElementNames, strRequiredElementNames, blnElementNameFound, strRequiredElementNames.Length, blnErrorLogged)
+
+                ' Make sure that all of the required attribute names were found; log an error if any were missing
+                ValidateRequiredTextFound(strFilePath, "XML attributes", blnCheckAttributeNamesThisFile, blnNeedToCheckAttributeNames, strRequiredAttributeNames, blnAttributeNameFound, strRequiredAttributeNames.Length, blnErrorLogged)
+
+                If Not blnErrorLogged AndAlso intElementsRead < intMinimumElementCount Then
+                    strErrorMessage = "File contains " & intElementsRead.ToString & " XML elements, but the required minimum is " & intMinimumElementCount.ToString
+                    LogFileIntegrityError(strFilePath, strErrorMessage)
+                    blnErrorLogged = True
+                End If
+
+            Catch ex As Exception
+                ' Error opening file or stepping through file
+                LogFileIntegrityError(strFilePath, ex.Message)
+                blnErrorLogged = True
+            End Try
+
+        Catch ex As Exception
+            LogErrors("CheckXMLFileWork", "Error opening XML file: " & strFilePath, ex)
+            blnErrorLogged = True
+        End Try
+
+        Return Not blnErrorLogged
+
+    End Function
+
+
+    ''' <summary>
+    ''' Checks the integrity of each file in the given folder (provided the extension is recognized)
+    ''' Will populate udtFolderStats with stats on the files in this folder
+    ''' Will populate udtFileDetails with the name of each file parsed, plus details on the files
+    ''' </summary>
+    ''' <param name="strFolderPath">Folder to examine</param>
+    ''' <param name="udtFolderStats">Stats on the folder, including number of files and number of files that failed the integrity check</param>
+    ''' <param name="udtFileStats">Details on each file checked; use udtFolderStatsType.FileCount to determine the number of entries in udtFileStats </param>
+    ''' <param name="strFileIgnoreList">List of files to skip; can be file names or full file paths</param>
+    ''' <returns>Returns True if all files pass the integrity checks; otherwise, returns False</returns>
+    ''' <remarks>Note that udtFileStats will never be shrunk in size; only increased as needed</remarks>
+    Public Function CheckIntegrityOfFilesInFolder(ByVal strFolderPath As String, _
+     ByRef udtFolderStats As udtFolderStatsType, _
+     ByRef udtFileStats() As udtFileStatsType, _
+     ByRef strFileIgnoreList() As String) As Boolean
+
+        Dim objMSInfoScanner As iMSFileInfoProcessor
+        Dim udtFileInfo As iMSFileInfoProcessor.udtFileInfoType = New iMSFileInfoProcessor.udtFileInfoType
+
+        Dim intIndex As Integer
+        Dim blnPassedIntegrityCheck As Boolean
+
+        Dim blnUseIgnoreList As Boolean = False
+        Dim blnSkipFile As Boolean
+
+        Try
+            If udtFileStats Is Nothing Then
+                ReDim udtFileStats(9)
+            End If
+
+            For intIndex = 0 To udtFileStats.Length - 1
+                udtFileStats(intIndex).Initialize()
+            Next
+
+            If Not strFileIgnoreList Is Nothing AndAlso strFileIgnoreList.Length > 0 Then
+                ' Assure strFileIgnoreList is sorted and that the entries are lowercase
+                blnUseIgnoreList = True
+                Array.Sort(strFileIgnoreList)
+
+                For intIndex = 0 To strFileIgnoreList.Length - 1
+                    If strFileIgnoreList.Length > 0 Then
+                        strFileIgnoreList(intIndex) = strFileIgnoreList(intIndex).ToLower
+                    End If
+                Next
+            End If
+
+            Dim diFolderInfo = New DirectoryInfo(strFolderPath)
+
+            udtFolderStats = GetNewFolderStats(diFolderInfo.FullName)
+
+            For Each fiFile In diFolderInfo.GetFiles()
+
+                Try
+
+                    ' Assume True for now
+                    blnPassedIntegrityCheck = True
+                    blnSkipFile = False
+
+                    If blnUseIgnoreList Then
+                        If Array.BinarySearch(strFileIgnoreList, fiFile.FullName.ToLower) >= 0 Then
+                            blnSkipFile = True
+                        ElseIf Array.BinarySearch(strFileIgnoreList, fiFile.Name.ToLower) >= 0 Then
+                            blnSkipFile = True
+                        End If
+                    End If
+
+                    If Not blnSkipFile = True Then
+
+                        Select Case fiFile.Extension.ToUpper
+                            Case FILE_EXTENSION_TXT, FILE_EXTENSION_LOG
+                                blnPassedIntegrityCheck = CheckTextFile(fiFile.FullName)
+
+
+                            Case FILE_EXTENSION_PARAMS
+                                blnPassedIntegrityCheck = CheckParamsFile(fiFile.FullName)
+
+                            Case FILE_EXTENSION_DAT
+                                ' ToDo: Possibly check these files (Decon2LS DAT files)
+
+                            Case FILE_EXTENSION_TIC
+                                blnPassedIntegrityCheck = CheckTICFile(fiFile.FullName)
+
+                            Case FILE_EXTENSION_ZIP
+                                blnPassedIntegrityCheck = CheckZIPFile(fiFile.FullName)
+
+                            Case FILE_EXTENSION_CSV
+                                blnPassedIntegrityCheck = CheckCSVFile(fiFile.FullName)
+
+                            Case FILE_EXTENSION_XML
+                                blnPassedIntegrityCheck = CheckXMLFile(fiFile.FullName)
+
+                            Case FINNIGAN_RAW_FILE_EXTENSION
+                                ' File was not in strFileIgnoreList
+                                ' Re-check using clsFinniganRawFileInfoScanner
+
+                                objMSInfoScanner = New clsFinniganRawFileInfoScanner
+                                objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, False)
+                                objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, False)
+                                objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, False)
+
+                                blnPassedIntegrityCheck = objMSInfoScanner.ProcessDataFile(fiFile.FullName, udtFileInfo)
+
+                            Case AGILENT_TOF_OR_QTRAP_FILE_EXTENSION
+                                ' File was not in strFileIgnoreList
+                                ' Re-check using clsAgilentTOFOrQTRAPWiffFileInfoScanner
+
+                                objMSInfoScanner = New clsAgilentTOFOrQStarWiffFileInfoScanner
+                                objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, False)
+                                objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, False)
+                                objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, False)
+
+                                blnPassedIntegrityCheck = objMSInfoScanner.ProcessDataFile(fiFile.FullName, udtFileInfo)
+
+                            Case "."
+                                ' No extension
+                                blnPassedIntegrityCheck = CheckExtensionFreeFile(fiFile.FullName)
+
+                            Case Else
+                                ' Do not check this file (but add it to udtFileStats anyway)
+
+                        End Select
+                    End If
+
+                    If udtFolderStats.FileCount >= udtFileStats.Length Then
+                        ' Reserve more space in udtFileStats
+                        ReDim Preserve udtFileStats(udtFileStats.Length * 2 - 1)
+                    End If
+
+                    With udtFileStats(udtFolderStats.FileCount)
+                        .FileName = fiFile.FullName
+                        .ModificationDate = fiFile.LastWriteTime
+                        .SizeBytes = fiFile.Length
+                        .FailIntegrity = Not blnPassedIntegrityCheck
+
+                        If mComputeFileHashes Then
+                            '.FileHash = MD5CalcFile(fiFile.FullName)
+                            .FileHash = Sha1CalcFile(fiFile.FullName)
+                        End If
+                    End With
+
+                    udtFolderStats.FileCount += 1
+                    If Not blnPassedIntegrityCheck Then
+                        udtFolderStats.FileCountFailIntegrity += 1
+                    End If
+
+                Catch ex As Exception
+                    LogErrors("CheckIntegrityOfFilesInFolder", "Error checking file " & fiFile.FullName, ex)
+                End Try
+
+            Next
+
+        Catch ex As Exception
+            LogErrors("CheckIntegrityOfFilesInFolder", "Error in CheckIntegrityOfFilesInFolder", ex)
+        End Try
+
+        If udtFolderStats.FileCountFailIntegrity = 0 Then
+            Return True
+        Else
+            Return False
+        End If
+
+    End Function
+
+    Protected Function CountChars(ByVal strText As String, ByVal chSearchChar As Char) As Integer
+        Dim intCharCount As Integer = 0
+        Dim intMatchIndex As Integer = -1
+
+        Do
+            intMatchIndex = strText.IndexOf(chSearchChar, intMatchIndex + 1)
+            If intMatchIndex >= 0 Then
+                intCharCount += 1
+            Else
+                Exit Do
+            End If
+        Loop
+
+        Return intCharCount
+    End Function
+
+    ''' <summary>
+    ''' Searches strLineToSearch for each of the items in strRequiredText; if blnMatchStart = True, then only checks the start of the line
+    ''' </summary>
+    ''' <param name="strLineToSearch">Text to search</param>
+    ''' <param name="blnNeedToCheckRequiredText">True until all items in strRequiredText() have been found</param>
+    ''' <param name="strRequiredText">List of items to look for</param>
+    ''' <param name="blnRequiredTextFound">Set to True when each item is found</param>
+    ''' <param name="intRequiredTextMatchCount">Total number of items that have been matched; equivalent to the number of True entries in blnRequiredTextFound</param>
+    ''' <param name="blnMatchStart"></param>
+    ''' <remarks></remarks>
+    Protected Sub FindRequiredTextInLine(ByRef strLineToSearch As String, _
+     ByRef blnNeedToCheckRequiredText As Boolean, _
+     ByRef strRequiredText() As String, _
+     ByRef blnRequiredTextFound() As Boolean, _
+     ByRef intRequiredTextMatchCount As Integer, _
+     ByVal blnMatchStart As Boolean)
+
+        Dim intIndex As Integer
+
+        If strRequiredText.Length > 0 Then
+            For intIndex = 0 To blnRequiredTextFound.Length - 1
+                If Not blnRequiredTextFound(intIndex) Then
+                    If blnMatchStart Then
+                        If strLineToSearch.StartsWith(strRequiredText(intIndex)) Then
+                            blnRequiredTextFound(intIndex) = True
+                            intRequiredTextMatchCount += 1
+                            Exit For
+                        End If
+                    Else
+                        If strLineToSearch.Contains(strRequiredText(intIndex)) Then
+                            blnRequiredTextFound(intIndex) = True
+                            intRequiredTextMatchCount += 1
+                            Exit For
+                        End If
+                    End If
+                End If
+            Next intIndex
+
+            If intRequiredTextMatchCount >= blnRequiredTextFound.Length Then
+                ' All required headers have been matched
+                ' Do not need to check for line headers any more
+                blnNeedToCheckRequiredText = False
+            End If
+        End If
+
+    End Sub
+
+    ''' <summary>
+    ''' Opens the file using a text reader and looks for XML elements parameters and PeakParameters
+    ''' </summary>
+    ''' <returns>True if this file contains the XML elements that indicate this is an Decon2LS XML settings file</returns>
+    ''' <remarks></remarks>
+    Protected Function FileIsDecon2LSXMLSettingsFile(ByVal strFilePath As String) As Boolean
+        Return XMLFileContainsElements(strFilePath, New String() {"<parameters>", "<peakparameters>"})
+    End Function
+
+    ''' <summary>
+    ''' Opens the file using a text reader and looks for XML elements "sections" and "section"
+    ''' </summary>
+    ''' <param name="strFilePath">File to examine</param>
+    ''' <returns>True if this file contains the XML elements that indicate this is an XML settings file</returns>
+    ''' <remarks></remarks>
+    Protected Function FileIsXMLSettingsFile(ByVal strFilePath As String) As Boolean
+        Return XMLFileContainsElements(strFilePath, New String() {"<sections>", "<section", "<item"})
+    End Function
+
+    ''' <summary>
+    ''' Overloaded form of XMLFileContainsElements; assumes intMaximumTextFileLinesToCheck = 50
+    ''' </summary>
+    ''' <returns>True if this file contains the required element text</returns>
+    ''' <remarks></remarks>
+    Protected Function XMLFileContainsElements(ByVal strFilePath As String, ByVal strElementsToMatch() As String) As Boolean
+        Return XMLFileContainsElements(strFilePath, strElementsToMatch, 50)
+    End Function
+
+    ''' <summary>
+    ''' Opens the file using a text reader and looks for XML elements specified in strElementsToMatch()
+    ''' </summary>
+    ''' <param name="strFilePath">File to examine</param>
+    ''' <param name="strElementsToMatch">Element text to match; item text must include the desired element Less Than Signs to match; items must be all lower-case</param>
+    ''' <returns>True if this file contains the required element text</returns>
+    ''' <remarks></remarks>
+    Protected Function XMLFileContainsElements(ByVal strFilePath As String, ByVal strElementsToMatch() As String, ByVal intMaximumTextFileLinesToCheck As Integer) As Boolean
+
+        Dim intLinesRead As Integer = 0
+        Dim intIndex As Integer
+
+        Dim strLineIn As String
+
+        Dim intElementMatchCount As Integer
+        Dim blnElementFound() As Boolean
+
+        Dim blnAllElementsFound As Boolean = False
+
+        Try
+            If strElementsToMatch Is Nothing OrElse strElementsToMatch.Length = 0 Then
+                Return False
+            End If
+
+            intElementMatchCount = 0
+            ReDim blnElementFound(strElementsToMatch.Length - 1)
+
+            ' Read, at most, the first intMaximumTextFileLinesToCheck lines to determine if this is an XML settings file
+            If intMaximumTextFileLinesToCheck < 10 Then
+                intMaximumTextFileLinesToCheck = 50
+            End If
+
+            ' Open the file
+            Using srInFile = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+
+                ' Read each line and examine it
+                Do While srInFile.Peek >= 0 AndAlso intLinesRead < intMaximumTextFileLinesToCheck
+                    strLineIn = srInFile.ReadLine
+                    intLinesRead += 1
+
+                    If Not strLineIn Is Nothing Then
+                        strLineIn = strLineIn.Trim.ToLower
+
+                        For intIndex = 0 To blnElementFound.Length - 1
+                            If Not blnElementFound(intIndex) Then
+                                If strLineIn.Trim.StartsWith(strElementsToMatch(intIndex)) Then
+                                    blnElementFound(intIndex) = True
+                                    intElementMatchCount += 1
+
+                                    If intElementMatchCount = blnElementFound.Length Then
+                                        blnAllElementsFound = True
+                                        Exit Do
+                                    End If
+
+                                    Exit For
+                                End If
+                            End If
+                        Next
+                    End If
+                Loop
+
+            End Using
+
+        Catch ex As Exception
+            LogErrors("XMLFileContainsElements", "Error checking XML file for desired elements: " & strFilePath, ex)
+        End Try
+
+        Return blnAllElementsFound
+
+    End Function
 
 	Public Shared Function GetNewFolderStats(ByVal strFolderPath As String) As udtFolderStatsType
 		Dim udtFolderStats As udtFolderStatsType

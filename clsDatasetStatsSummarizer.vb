@@ -397,9 +397,7 @@ Namespace DSSummarizer
 		  ByRef udtDatasetFileInfo As udtDatasetFileInfoType, _
 		  ByRef udtSampleInfo As udtSampleInfoType) As Boolean
 
-			Dim swOutFile As StreamWriter
-
-			Dim blnSuccess As Boolean
+            Dim blnSuccess As Boolean
 
 			Try
 				If objScanStats Is Nothing Then
@@ -411,18 +409,18 @@ Namespace DSSummarizer
 
 				' If CreateDatasetInfoXML() used a StringBuilder to cache the XML data, then we would have to use Text.Encoding.Unicode
 				' However, CreateDatasetInfoXML() now uses a MemoryStream, so we're able to use UTF8
-				swOutFile = New StreamWriter(New FileStream(strDatasetInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read), Text.Encoding.UTF8)
+                Using swOutFile = New StreamWriter(New FileStream(strDatasetInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read), Text.Encoding.UTF8)
 
-				swOutFile.WriteLine(CreateDatasetInfoXML(strDatasetName, objScanStats, udtDatasetFileInfo, udtSampleInfo))
+                    swOutFile.WriteLine(CreateDatasetInfoXML(strDatasetName, objScanStats, udtDatasetFileInfo, udtSampleInfo))
 
-				swOutFile.Close()
+                End Using
 
-				blnSuccess = True
+                blnSuccess = True
 
-			Catch ex As Exception
-				ReportError("Error in CreateDatasetInfoFile: " & ex.Message)
-				blnSuccess = False
-			End Try
+            Catch ex As Exception
+                ReportError("Error in CreateDatasetInfoFile: " & ex.Message)
+                blnSuccess = False
+            End Try
 
 			Return blnSuccess
 
@@ -683,8 +681,7 @@ Namespace DSSummarizer
 
 				' Now Rewind the memory stream and output as a string
 				objMemStream.Position = 0
-				Dim srStreamReader As StreamReader
-				srStreamReader = New StreamReader(objMemStream)
+                Dim srStreamReader = New StreamReader(objMemStream)
 
 				' Return the XML as text
 				Return srStreamReader.ReadToEnd()
@@ -729,9 +726,6 @@ Namespace DSSummarizer
 
 			Dim strScanStatsExFilePath As String
 
-			Dim swOutFile As StreamWriter
-			Dim swScanStatsExFile As StreamWriter
-
 			Dim intDatasetID As Integer = udtDatasetFileInfo.DatasetID
 			Dim sbLineOut As Text.StringBuilder = New Text.StringBuilder
 
@@ -750,79 +744,78 @@ Namespace DSSummarizer
 				strScanStatsExFilePath = Path.Combine(fiScanStatsFile.DirectoryName, Path.GetFileNameWithoutExtension(fiScanStatsFile.Name) & "Ex.txt")
 
 				' Open the output files
-				swOutFile = New StreamWriter(New FileStream(fiScanStatsFile.FullName, FileMode.Create, FileAccess.Write, FileShare.Read))
-				swScanStatsExFile = New StreamWriter(New FileStream(strScanStatsExFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                Using swOutFile = New StreamWriter(New FileStream(fiScanStatsFile.FullName, FileMode.Create, FileAccess.Write, FileShare.Read)),
+                      swScanStatsExFile = New StreamWriter(New FileStream(strScanStatsExFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
-				' Write the headers
-				sbLineOut.Clear()
-				sbLineOut.Append("Dataset" & ControlChars.Tab & "ScanNumber" & ControlChars.Tab & "ScanTime" & ControlChars.Tab & _
-				  "ScanType" & ControlChars.Tab & "TotalIonIntensity" & ControlChars.Tab & "BasePeakIntensity" & ControlChars.Tab & _
-				  "BasePeakMZ" & ControlChars.Tab & "BasePeakSignalToNoiseRatio" & ControlChars.Tab & _
-				  "IonCount" & ControlChars.Tab & "IonCountRaw" & ControlChars.Tab & "ScanTypeName")
+                    ' Write the headers
+                    sbLineOut.Clear()
+                    sbLineOut.Append("Dataset" & ControlChars.Tab & "ScanNumber" & ControlChars.Tab & "ScanTime" & ControlChars.Tab & _
+                      "ScanType" & ControlChars.Tab & "TotalIonIntensity" & ControlChars.Tab & "BasePeakIntensity" & ControlChars.Tab & _
+                      "BasePeakMZ" & ControlChars.Tab & "BasePeakSignalToNoiseRatio" & ControlChars.Tab & _
+                      "IonCount" & ControlChars.Tab & "IonCountRaw" & ControlChars.Tab & "ScanTypeName")
 
-				swOutFile.WriteLine(sbLineOut.ToString())
+                    swOutFile.WriteLine(sbLineOut.ToString())
 
-				sbLineOut.Clear()
-				sbLineOut.Append("Dataset" & ControlChars.Tab & "ScanNumber" & ControlChars.Tab & _
-				  clsScanStatsEntry.SCANSTATS_COL_ION_INJECTION_TIME & ControlChars.Tab & _
-				  clsScanStatsEntry.SCANSTATS_COL_SCAN_SEGMENT & ControlChars.Tab & _
-				  clsScanStatsEntry.SCANSTATS_COL_SCAN_EVENT & ControlChars.Tab & _
-				  clsScanStatsEntry.SCANSTATS_COL_CHARGE_STATE & ControlChars.Tab & _
-				  clsScanStatsEntry.SCANSTATS_COL_MONOISOTOPIC_MZ & ControlChars.Tab & _
-				  clsScanStatsEntry.SCANSTATS_COL_COLLISION_MODE & ControlChars.Tab & _
-				  clsScanStatsEntry.SCANSTATS_COL_SCAN_FILTER_TEXT)
+                    sbLineOut.Clear()
+                    sbLineOut.Append("Dataset" & ControlChars.Tab & "ScanNumber" & ControlChars.Tab & _
+                      clsScanStatsEntry.SCANSTATS_COL_ION_INJECTION_TIME & ControlChars.Tab & _
+                      clsScanStatsEntry.SCANSTATS_COL_SCAN_SEGMENT & ControlChars.Tab & _
+                      clsScanStatsEntry.SCANSTATS_COL_SCAN_EVENT & ControlChars.Tab & _
+                      clsScanStatsEntry.SCANSTATS_COL_CHARGE_STATE & ControlChars.Tab & _
+                      clsScanStatsEntry.SCANSTATS_COL_MONOISOTOPIC_MZ & ControlChars.Tab & _
+                      clsScanStatsEntry.SCANSTATS_COL_COLLISION_MODE & ControlChars.Tab & _
+                      clsScanStatsEntry.SCANSTATS_COL_SCAN_FILTER_TEXT)
 
-				swScanStatsExFile.WriteLine(sbLineOut.ToString())
+                    swScanStatsExFile.WriteLine(sbLineOut.ToString())
 
-				For Each objScanStatsEntry As clsScanStatsEntry In objScanStats
+                    For Each objScanStatsEntry As clsScanStatsEntry In objScanStats
 
-					sbLineOut.Clear()
-					sbLineOut.Append(intDatasetID.ToString & ControlChars.Tab)							' Dataset number (aka Dataset ID)
-					sbLineOut.Append(objScanStatsEntry.ScanNumber.ToString & ControlChars.Tab)			' Scan number
-					sbLineOut.Append(objScanStatsEntry.ElutionTime & ControlChars.Tab)					' Scan time (minutes)
-					sbLineOut.Append(objScanStatsEntry.ScanType.ToString & ControlChars.Tab)			' Scan type (1 for MS, 2 for MS2, etc.)
-					sbLineOut.Append(objScanStatsEntry.TotalIonIntensity & ControlChars.Tab)			' Total ion intensity
-					sbLineOut.Append(objScanStatsEntry.BasePeakIntensity & ControlChars.Tab)			' Base peak ion intensity
-					sbLineOut.Append(objScanStatsEntry.BasePeakMZ & ControlChars.Tab)					' Base peak ion m/z
-					sbLineOut.Append(objScanStatsEntry.BasePeakSignalToNoiseRatio & ControlChars.Tab)	' Base peak signal to noise ratio
-					sbLineOut.Append(objScanStatsEntry.IonCount.ToString & ControlChars.Tab)			' Number of peaks (aka ions) in the spectrum
-					sbLineOut.Append(objScanStatsEntry.IonCountRaw.ToString & ControlChars.Tab)			' Number of peaks (aka ions) in the spectrum prior to any filtering
-					sbLineOut.Append(objScanStatsEntry.ScanTypeName)									' Scan type name
+                        sbLineOut.Clear()
+                        sbLineOut.Append(intDatasetID.ToString & ControlChars.Tab)                          ' Dataset number (aka Dataset ID)
+                        sbLineOut.Append(objScanStatsEntry.ScanNumber.ToString & ControlChars.Tab)          ' Scan number
+                        sbLineOut.Append(objScanStatsEntry.ElutionTime & ControlChars.Tab)                  ' Scan time (minutes)
+                        sbLineOut.Append(objScanStatsEntry.ScanType.ToString & ControlChars.Tab)            ' Scan type (1 for MS, 2 for MS2, etc.)
+                        sbLineOut.Append(objScanStatsEntry.TotalIonIntensity & ControlChars.Tab)            ' Total ion intensity
+                        sbLineOut.Append(objScanStatsEntry.BasePeakIntensity & ControlChars.Tab)            ' Base peak ion intensity
+                        sbLineOut.Append(objScanStatsEntry.BasePeakMZ & ControlChars.Tab)                   ' Base peak ion m/z
+                        sbLineOut.Append(objScanStatsEntry.BasePeakSignalToNoiseRatio & ControlChars.Tab)   ' Base peak signal to noise ratio
+                        sbLineOut.Append(objScanStatsEntry.IonCount.ToString & ControlChars.Tab)            ' Number of peaks (aka ions) in the spectrum
+                        sbLineOut.Append(objScanStatsEntry.IonCountRaw.ToString & ControlChars.Tab)         ' Number of peaks (aka ions) in the spectrum prior to any filtering
+                        sbLineOut.Append(objScanStatsEntry.ScanTypeName)                                    ' Scan type name
 
-					swOutFile.WriteLine(sbLineOut.ToString())
+                        swOutFile.WriteLine(sbLineOut.ToString())
 
-					' Write the next entry to swScanStatsExFile
-					' Note that this file format is compatible with that created by MASIC
-					' However, only a limited number of columns are written out, since StoreExtendedScanInfo only stores a certain set of parameters
+                        ' Write the next entry to swScanStatsExFile
+                        ' Note that this file format is compatible with that created by MASIC
+                        ' However, only a limited number of columns are written out, since StoreExtendedScanInfo only stores a certain set of parameters
 
-					sbLineOut.Clear()
-					sbLineOut.Append(intDatasetID.ToString & ControlChars.Tab)						' Dataset number
-					sbLineOut.Append(objScanStatsEntry.ScanNumber.ToString & ControlChars.Tab)			' Scan number
+                        sbLineOut.Clear()
+                        sbLineOut.Append(intDatasetID.ToString & ControlChars.Tab)                      ' Dataset number
+                        sbLineOut.Append(objScanStatsEntry.ScanNumber.ToString & ControlChars.Tab)          ' Scan number
 
-					With objScanStatsEntry.ExtendedScanInfo
-						sbLineOut.Append(.IonInjectionTime & ControlChars.Tab)
-						sbLineOut.Append(.ScanSegment & ControlChars.Tab)
-						sbLineOut.Append(.ScanEvent & ControlChars.Tab)
-						sbLineOut.Append(.ChargeState & ControlChars.Tab)
-						sbLineOut.Append(.MonoisotopicMZ & ControlChars.Tab)
-						sbLineOut.Append(.CollisionMode & ControlChars.Tab)
-						sbLineOut.Append(.ScanFilterText)
-					End With
+                        With objScanStatsEntry.ExtendedScanInfo
+                            sbLineOut.Append(.IonInjectionTime & ControlChars.Tab)
+                            sbLineOut.Append(.ScanSegment & ControlChars.Tab)
+                            sbLineOut.Append(.ScanEvent & ControlChars.Tab)
+                            sbLineOut.Append(.ChargeState & ControlChars.Tab)
+                            sbLineOut.Append(.MonoisotopicMZ & ControlChars.Tab)
+                            sbLineOut.Append(.CollisionMode & ControlChars.Tab)
+                            sbLineOut.Append(.ScanFilterText)
+                        End With
 
-					swScanStatsExFile.WriteLine(sbLineOut.ToString())
+                        swScanStatsExFile.WriteLine(sbLineOut.ToString())
 
-				Next
+                    Next
+
+                End Using
 
 
-				swOutFile.Close()
-				swScanStatsExFile.Close()
+                blnSuccess = True
 
-				blnSuccess = True
-
-			Catch ex As Exception
-				ReportError("Error in CreateScanStatsFile: " & ex.Message)
-				blnSuccess = False
-			End Try
+            Catch ex As Exception
+                ReportError("Error in CreateScanStatsFile: " & ex.Message)
+                blnSuccess = False
+            End Try
 
 			Return blnSuccess
 
@@ -921,8 +914,7 @@ Namespace DSSummarizer
 		 ByRef udtDatasetFileInfo As udtDatasetFileInfoType, _
 		 ByRef udtSampleInfo As udtSampleInfoType) As Boolean
 
-			Dim swOutFile As StreamWriter
-			Dim blnWriteHeaders As Boolean
+            Dim blnWriteHeaders As Boolean
 
 			Dim strLineOut As String
 
@@ -953,49 +945,49 @@ Namespace DSSummarizer
 				End If
 
 				' Create or open the output file
-				swOutFile = New StreamWriter(New FileStream(strDatasetStatsFilePath, FileMode.Append, FileAccess.Write, FileShare.Read))
+                Using swOutFile = New StreamWriter(New FileStream(strDatasetStatsFilePath, FileMode.Append, FileAccess.Write, FileShare.Read))
 
-				If blnWriteHeaders Then
-					' Write the header line
-					strLineOut = "Dataset" & ControlChars.Tab & _
-					 "ScanCount" & ControlChars.Tab & _
-					 "ScanCountMS" & ControlChars.Tab & _
-					 "ScanCountMSn" & ControlChars.Tab & _
-					 "Elution_Time_Max" & ControlChars.Tab & _
-					 "AcqTimeMinutes" & ControlChars.Tab & _
-					 "StartTime" & ControlChars.Tab & _
-					 "EndTime" & ControlChars.Tab & _
-					 "FileSizeBytes" & ControlChars.Tab & _
-					 "SampleName" & ControlChars.Tab & _
-					 "Comment1" & ControlChars.Tab & _
-					 "Comment2"
+                    If blnWriteHeaders Then
+                        ' Write the header line
+                        strLineOut = "Dataset" & ControlChars.Tab & _
+                         "ScanCount" & ControlChars.Tab & _
+                         "ScanCountMS" & ControlChars.Tab & _
+                         "ScanCountMSn" & ControlChars.Tab & _
+                         "Elution_Time_Max" & ControlChars.Tab & _
+                         "AcqTimeMinutes" & ControlChars.Tab & _
+                         "StartTime" & ControlChars.Tab & _
+                         "EndTime" & ControlChars.Tab & _
+                         "FileSizeBytes" & ControlChars.Tab & _
+                         "SampleName" & ControlChars.Tab & _
+                         "Comment1" & ControlChars.Tab & _
+                         "Comment2"
 
-					swOutFile.WriteLine(strLineOut)
-				End If
+                        swOutFile.WriteLine(strLineOut)
+                    End If
 
-				strLineOut = strDatasetName & ControlChars.Tab & _
-				 (objSummaryStats.MSStats.ScanCount + objSummaryStats.MSnStats.ScanCount).ToString & ControlChars.Tab & _
-				 objSummaryStats.MSStats.ScanCount.ToString & ControlChars.Tab & _
-				 objSummaryStats.MSnStats.ScanCount.ToString & ControlChars.Tab & _
-				 objSummaryStats.ElutionTimeMax.ToString & ControlChars.Tab & _
-				 udtDatasetFileInfo.AcqTimeEnd.Subtract(udtDatasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00") & ControlChars.Tab & _
-				 udtDatasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab & _
-				 udtDatasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab & _
-				 udtDatasetFileInfo.FileSizeBytes.ToString & ControlChars.Tab & _
-				 FixNull(udtSampleInfo.SampleName) & ControlChars.Tab & _
-				 FixNull(udtSampleInfo.Comment1) & ControlChars.Tab & _
-				 FixNull(udtSampleInfo.Comment2)
+                    strLineOut = strDatasetName & ControlChars.Tab & _
+                     (objSummaryStats.MSStats.ScanCount + objSummaryStats.MSnStats.ScanCount).ToString & ControlChars.Tab & _
+                     objSummaryStats.MSStats.ScanCount.ToString & ControlChars.Tab & _
+                     objSummaryStats.MSnStats.ScanCount.ToString & ControlChars.Tab & _
+                     objSummaryStats.ElutionTimeMax.ToString & ControlChars.Tab & _
+                     udtDatasetFileInfo.AcqTimeEnd.Subtract(udtDatasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00") & ControlChars.Tab & _
+                     udtDatasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab & _
+                     udtDatasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab & _
+                     udtDatasetFileInfo.FileSizeBytes.ToString & ControlChars.Tab & _
+                     FixNull(udtSampleInfo.SampleName) & ControlChars.Tab & _
+                     FixNull(udtSampleInfo.Comment1) & ControlChars.Tab & _
+                     FixNull(udtSampleInfo.Comment2)
 
-				swOutFile.WriteLine(strLineOut)
+                    swOutFile.WriteLine(strLineOut)
 
-				swOutFile.Close()
+                End Using
 
-				blnSuccess = True
+                blnSuccess = True
 
-			Catch ex As Exception
-				ReportError("Error in UpdateDatasetStatsTextFile: " & ex.Message)
-				blnSuccess = False
-			End Try
+            Catch ex As Exception
+                ReportError("Error in UpdateDatasetStatsTextFile: " & ex.Message)
+                blnSuccess = False
+            End Try
 
 			Return blnSuccess
 

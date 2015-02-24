@@ -384,198 +384,233 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 		RaiseEvent MessageEvent(strMessage)
 	End Sub
 
-	Protected Function UpdateDatasetFileStats(ByRef fiFileInfo As FileInfo, ByVal intDatasetID As Integer) As Boolean
+    Protected Sub ShowProgress(
+       ByVal scanNumber As Integer,
+       ByVal scanCount As Integer,
+       ByRef dtLastProgressTime As DateTime,
+       Optional ByVal modulusValue As Integer = 100,
+       Optional ByVal detailedUpdateIntervalSeconds As Integer = 30)
 
-		Try
-			If Not fiFileInfo.Exists Then Return False
+        If modulusValue < 1 Then modulusValue = 10
+        If detailedUpdateIntervalSeconds < 5 Then detailedUpdateIntervalSeconds = 15
 
-			' Record the file size and Dataset ID
-			With mDatasetStatsSummarizer.DatasetFileInfo
-				.FileSystemCreationTime = fiFileInfo.CreationTime
-				.FileSystemModificationTime = fiFileInfo.LastWriteTime
+        If scanNumber Mod modulusValue = 0 Then
+            If Not mShowDebugInfo Then
+                Console.Write(".")
+            End If
 
-				.AcqTimeStart = .FileSystemModificationTime
-				.AcqTimeEnd = .FileSystemModificationTime
+            If scanCount > 0 Then
+                Dim sngProgress = CSng(scanNumber / scanCount * 100)
 
-				.DatasetID = intDatasetID
-				.DatasetName = Path.GetFileNameWithoutExtension(fiFileInfo.Name)
-				.FileExtension = fiFileInfo.Extension
-				.FileSizeBytes = fiFileInfo.Length
+                If DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > detailedUpdateIntervalSeconds Then
+                    dtLastProgressTime = DateTime.UtcNow
+                    Dim strPercentComplete As String = sngProgress.ToString("0.0") & "% "
 
-				.ScanCount = 0
-			End With
+                    If mShowDebugInfo Then
+                        Console.WriteLine(strPercentComplete)
+                    Else
+                        Console.WriteLine()
+                        Console.Write(strPercentComplete)
+                    End If
+                End If
+            End If
 
-		Catch ex As Exception
-			Return False
-		End Try
+        End If
 
-		Return True
+    End Sub
 
-	End Function
+    Protected Function UpdateDatasetFileStats(ByRef fiFileInfo As FileInfo, ByVal intDatasetID As Integer) As Boolean
 
-	Protected Function UpdateDatasetFileStats(ByRef diFolderInfo As DirectoryInfo, ByVal intDatasetID As Integer) As Boolean
+        Try
+            If Not fiFileInfo.Exists Then Return False
 
-		Try
-			If Not diFolderInfo.Exists Then Return False
+            ' Record the file size and Dataset ID
+            With mDatasetStatsSummarizer.DatasetFileInfo
+                .FileSystemCreationTime = fiFileInfo.CreationTime
+                .FileSystemModificationTime = fiFileInfo.LastWriteTime
 
-			' Record the file size and Dataset ID
-			With mDatasetStatsSummarizer.DatasetFileInfo
-				.FileSystemCreationTime = diFolderInfo.CreationTime
-				.FileSystemModificationTime = diFolderInfo.LastWriteTime
+                .AcqTimeStart = .FileSystemModificationTime
+                .AcqTimeEnd = .FileSystemModificationTime
 
-				.AcqTimeStart = .FileSystemModificationTime
-				.AcqTimeEnd = .FileSystemModificationTime
+                .DatasetID = intDatasetID
+                .DatasetName = Path.GetFileNameWithoutExtension(fiFileInfo.Name)
+                .FileExtension = fiFileInfo.Extension
+                .FileSizeBytes = fiFileInfo.Length
 
-				.DatasetID = intDatasetID
-				.DatasetName = Path.GetFileNameWithoutExtension(diFolderInfo.Name)
-				.FileExtension = diFolderInfo.Extension
+                .ScanCount = 0
+            End With
 
-				For Each fiFileInfo In diFolderInfo.GetFiles("*", SearchOption.AllDirectories)
-					.FileSizeBytes += fiFileInfo.Length
-				Next
+        Catch ex As Exception
+            Return False
+        End Try
 
-				.ScanCount = 0
-			End With
+        Return True
 
-		Catch ex As Exception
-			Return False
-		End Try
+    End Function
 
-		Return True
+    Protected Function UpdateDatasetFileStats(ByRef diFolderInfo As DirectoryInfo, ByVal intDatasetID As Integer) As Boolean
 
-	End Function
+        Try
+            If Not diFolderInfo.Exists Then Return False
 
-	Protected Function CreateOverview2DPlots(
-	 ByVal strDatasetName As String,
-	 ByVal strOutputFolderPath As String,
-	 ByVal intLCMS2DOverviewPlotDivisor As Integer) As Boolean
+            ' Record the file size and Dataset ID
+            With mDatasetStatsSummarizer.DatasetFileInfo
+                .FileSystemCreationTime = diFolderInfo.CreationTime
+                .FileSystemModificationTime = diFolderInfo.LastWriteTime
 
-		Return CreateOverview2DPlots(strDatasetName, strOutputFolderPath, intLCMS2DOverviewPlotDivisor, String.Empty)
+                .AcqTimeStart = .FileSystemModificationTime
+                .AcqTimeEnd = .FileSystemModificationTime
 
-	End Function
+                .DatasetID = intDatasetID
+                .DatasetName = Path.GetFileNameWithoutExtension(diFolderInfo.Name)
+                .FileExtension = diFolderInfo.Extension
 
-	Protected Function CreateOverview2DPlots(
-	  ByVal strDatasetName As String,
-	  ByVal strOutputFolderPath As String,
-	  ByVal intLCMS2DOverviewPlotDivisor As Integer,
-	  ByVal strScanModeSuffixAddon As String) As Boolean
+                For Each fiFileInfo In diFolderInfo.GetFiles("*", SearchOption.AllDirectories)
+                    .FileSizeBytes += fiFileInfo.Length
+                Next
 
-		Dim objScan As clsLCMSDataPlotter.clsScanData
+                .ScanCount = 0
+            End With
 
-		Dim blnSuccess As Boolean
-		Dim intIndex As Integer
+        Catch ex As Exception
+            Return False
+        End Try
 
-		If intLCMS2DOverviewPlotDivisor <= 1 Then
-			' Nothing to do; just return True
-			Return True
-		End If
+        Return True
 
-		mLCMS2DPlotOverview.Reset()
+    End Function
 
-		mLCMS2DPlotOverview.Options = mLCMS2DPlot.Options.Clone()
+    Protected Function CreateOverview2DPlots(
+     ByVal strDatasetName As String,
+     ByVal strOutputFolderPath As String,
+     ByVal intLCMS2DOverviewPlotDivisor As Integer) As Boolean
 
-		' Set MaxPointsToPlot in mLCMS2DPlotOverview to be intLCMS2DOverviewPlotDivisor times smaller 
-		' than the MaxPointsToPlot value in mLCMS2DPlot
-		mLCMS2DPlotOverview.Options.MaxPointsToPlot = CInt(Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / intLCMS2DOverviewPlotDivisor, 0))
+        Return CreateOverview2DPlots(strDatasetName, strOutputFolderPath, intLCMS2DOverviewPlotDivisor, String.Empty)
 
-		' Copy the data from mLCMS2DPlot to mLCMS2DPlotOverview
-		' mLCMS2DPlotOverview will auto-filter the data to track, at most, mLCMS2DPlotOverview.Options.MaxPointsToPlot points
-		For intIndex = 0 To mLCMS2DPlot.ScanCountCached - 1
-			objScan = mLCMS2DPlot.GetCachedScanByIndex(intIndex)
+    End Function
 
-			mLCMS2DPlotOverview.AddScanSkipFilters(objScan)
-		Next
+    Protected Function CreateOverview2DPlots(
+      ByVal strDatasetName As String,
+      ByVal strOutputFolderPath As String,
+      ByVal intLCMS2DOverviewPlotDivisor As Integer,
+      ByVal strScanModeSuffixAddon As String) As Boolean
 
-		' Write out the Overview 2D plot of m/z vs. intensity
-		' Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-		blnSuccess = mLCMS2DPlotOverview.Save2DPlots(strDatasetName, strOutputFolderPath, "HighAbu_", strScanModeSuffixAddon)
+        Dim objScan As clsLCMSDataPlotter.clsScanData
 
-		Return blnSuccess
+        Dim blnSuccess As Boolean
+        Dim intIndex As Integer
 
-	End Function
+        If intLCMS2DOverviewPlotDivisor <= 1 Then
+            ' Nothing to do; just return True
+            Return True
+        End If
 
-	Protected Function CreateOutputFiles(ByVal strInputFileName As String, _
-	 ByVal strOutputFolderPath As String) As Boolean Implements iMSFileInfoProcessor.CreateOutputFiles
+        mLCMS2DPlotOverview.Reset()
 
-		Dim blnSuccess As Boolean
-		Dim blnSuccessOverall As Boolean
+        mLCMS2DPlotOverview.Options = mLCMS2DPlot.Options.Clone()
 
-		Dim strErrorMessage As String
-		Dim strDatasetName As String
+        ' Set MaxPointsToPlot in mLCMS2DPlotOverview to be intLCMS2DOverviewPlotDivisor times smaller 
+        ' than the MaxPointsToPlot value in mLCMS2DPlot
+        mLCMS2DPlotOverview.Options.MaxPointsToPlot = CInt(Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / intLCMS2DOverviewPlotDivisor, 0))
 
-		Dim blnCreateQCPlotHtmlFile As Boolean
+        ' Copy the data from mLCMS2DPlot to mLCMS2DPlotOverview
+        ' mLCMS2DPlotOverview will auto-filter the data to track, at most, mLCMS2DPlotOverview.Options.MaxPointsToPlot points
+        For intIndex = 0 To mLCMS2DPlot.ScanCountCached - 1
+            objScan = mLCMS2DPlot.GetCachedScanByIndex(intIndex)
 
-		Dim diFolderInfo As DirectoryInfo
+            mLCMS2DPlotOverview.AddScanSkipFilters(objScan)
+        Next
 
-		Try
+        ' Write out the Overview 2D plot of m/z vs. intensity
+        ' Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
+        blnSuccess = mLCMS2DPlotOverview.Save2DPlots(strDatasetName, strOutputFolderPath, "HighAbu_", strScanModeSuffixAddon)
 
-			strDatasetName = Me.GetDatasetNameViaPath(strInputFileName)
-			blnSuccessOverall = True
-			blnCreateQCPlotHtmlFile = False
+        Return blnSuccess
 
-			If strOutputFolderPath Is Nothing Then strOutputFolderPath = String.Empty
+    End Function
 
-			If strOutputFolderPath.Length > 0 Then
-				' Make sure the output folder exists
-				diFolderInfo = New DirectoryInfo(strOutputFolderPath)
+    Protected Function CreateOutputFiles(ByVal strInputFileName As String, _
+     ByVal strOutputFolderPath As String) As Boolean Implements iMSFileInfoProcessor.CreateOutputFiles
 
-				If Not diFolderInfo.Exists Then
-					diFolderInfo.Create()
-				End If
-			Else
-				diFolderInfo = New DirectoryInfo(".")
-			End If
+        Dim blnSuccess As Boolean
+        Dim blnSuccessOverall As Boolean
 
-			If mSaveTICAndBPI Then
-				' Write out the TIC and BPI plots
-				strErrorMessage = String.Empty
-				blnSuccess = mTICandBPIPlot.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, strErrorMessage)
-				If Not blnSuccess Then
-					ReportError("Error calling mTICandBPIPlot.SaveTICAndBPIPlotFiles: " & strErrorMessage)
-					blnSuccessOverall = False
-				End If
+        Dim strErrorMessage As String
+        Dim strDatasetName As String
 
-				' Write out any instrument-specific plots
-				blnSuccess = mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, strErrorMessage)
-				If Not blnSuccess Then
-					ReportError("Error calling mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles: " & strErrorMessage)
-					blnSuccessOverall = False
-				End If
+        Dim blnCreateQCPlotHtmlFile As Boolean
 
-				blnCreateQCPlotHtmlFile = True
-			End If
+        Dim diFolderInfo As DirectoryInfo
 
-			If mSaveLCMS2DPlots Then
-				' Write out the 2D plot of m/z vs. intensity
-				' Plots will be named Dataset_LCMS.png and Dataset_LCMSn.png
-				blnSuccess = mLCMS2DPlot.Save2DPlots(strDatasetName, diFolderInfo.FullName)
-				If Not blnSuccess Then
-					blnSuccessOverall = False
-				Else
-					If mLCMS2DOverviewPlotDivisor > 0 Then
-						' Also save the Overview 2D Plots
-						' Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-						blnSuccess = CreateOverview2DPlots(strDatasetName, strOutputFolderPath, mLCMS2DOverviewPlotDivisor)
-						If Not blnSuccess Then
-							blnSuccessOverall = False
-						End If
-					Else
-						mLCMS2DPlotOverview.ClearRecentFileInfo()
-					End If
+        Try
 
-					If blnSuccessOverall AndAlso mLCMS2DPlot.Options.PlottingDeisotopedData Then
-						' Create two more plots 2D plots, but this with a smaller maximum m/z
-						mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT
-						mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT
+            strDatasetName = Me.GetDatasetNameViaPath(strInputFileName)
+            blnSuccessOverall = True
+            blnCreateQCPlotHtmlFile = False
 
-						mLCMS2DPlot.Save2DPlots(strDatasetName, diFolderInfo.FullName, "", "_zoom")
-						If mLCMS2DOverviewPlotDivisor > 0 Then
-							CreateOverview2DPlots(strDatasetName, strOutputFolderPath, mLCMS2DOverviewPlotDivisor, "_zoom")
-						End If
-					End If
-				End If
-				blnCreateQCPlotHtmlFile = True
-			End If
+            If strOutputFolderPath Is Nothing Then strOutputFolderPath = String.Empty
+
+            If strOutputFolderPath.Length > 0 Then
+                ' Make sure the output folder exists
+                diFolderInfo = New DirectoryInfo(strOutputFolderPath)
+
+                If Not diFolderInfo.Exists Then
+                    diFolderInfo.Create()
+                End If
+            Else
+                diFolderInfo = New DirectoryInfo(".")
+            End If
+
+            If mSaveTICAndBPI Then
+                ' Write out the TIC and BPI plots
+                strErrorMessage = String.Empty
+                blnSuccess = mTICandBPIPlot.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, strErrorMessage)
+                If Not blnSuccess Then
+                    ReportError("Error calling mTICandBPIPlot.SaveTICAndBPIPlotFiles: " & strErrorMessage)
+                    blnSuccessOverall = False
+                End If
+
+                ' Write out any instrument-specific plots
+                blnSuccess = mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, strErrorMessage)
+                If Not blnSuccess Then
+                    ReportError("Error calling mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles: " & strErrorMessage)
+                    blnSuccessOverall = False
+                End If
+
+                blnCreateQCPlotHtmlFile = True
+            End If
+
+            If mSaveLCMS2DPlots Then
+                ' Write out the 2D plot of m/z vs. intensity
+                ' Plots will be named Dataset_LCMS.png and Dataset_LCMSn.png
+                blnSuccess = mLCMS2DPlot.Save2DPlots(strDatasetName, diFolderInfo.FullName)
+                If Not blnSuccess Then
+                    blnSuccessOverall = False
+                Else
+                    If mLCMS2DOverviewPlotDivisor > 0 Then
+                        ' Also save the Overview 2D Plots
+                        ' Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
+                        blnSuccess = CreateOverview2DPlots(strDatasetName, strOutputFolderPath, mLCMS2DOverviewPlotDivisor)
+                        If Not blnSuccess Then
+                            blnSuccessOverall = False
+                        End If
+                    Else
+                        mLCMS2DPlotOverview.ClearRecentFileInfo()
+                    End If
+
+                    If blnSuccessOverall AndAlso mLCMS2DPlot.Options.PlottingDeisotopedData Then
+                        ' Create two more plots 2D plots, but this with a smaller maximum m/z
+                        mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT
+                        mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT
+
+                        mLCMS2DPlot.Save2DPlots(strDatasetName, diFolderInfo.FullName, "", "_zoom")
+                        If mLCMS2DOverviewPlotDivisor > 0 Then
+                            CreateOverview2DPlots(strDatasetName, strOutputFolderPath, mLCMS2DOverviewPlotDivisor, "_zoom")
+                        End If
+                    End If
+                End If
+                blnCreateQCPlotHtmlFile = True
+            End If
 
             If mCreateDatasetInfoFile Then
                 ' Create the _DatasetInfo.xml file
@@ -586,271 +621,263 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
                 blnCreateQCPlotHtmlFile = True
             End If
 
-			If mCreateScanStatsFile Then
-				' Create the _ScanStats.txt file
-				blnSuccess = Me.CreateDatasetScanStatsFile(strInputFileName, diFolderInfo.FullName)
-				If Not blnSuccess Then
-					blnSuccessOverall = False
-				End If
-			End If
+            If mCreateScanStatsFile Then
+                ' Create the _ScanStats.txt file
+                blnSuccess = Me.CreateDatasetScanStatsFile(strInputFileName, diFolderInfo.FullName)
+                If Not blnSuccess Then
+                    blnSuccessOverall = False
+                End If
+            End If
 
-			If mUpdateDatasetStatsTextFile Then
-				' Add a new row to the MSFileInfo_DatasetStats.txt file
-				blnSuccess = Me.UpdateDatasetStatsTextFile(strInputFileName, diFolderInfo.FullName, mDatasetStatsTextFileName)
-				If Not blnSuccess Then
-					blnSuccessOverall = False
-				End If
-			End If
+            If mUpdateDatasetStatsTextFile Then
+                ' Add a new row to the MSFileInfo_DatasetStats.txt file
+                blnSuccess = Me.UpdateDatasetStatsTextFile(strInputFileName, diFolderInfo.FullName, mDatasetStatsTextFileName)
+                If Not blnSuccess Then
+                    blnSuccessOverall = False
+                End If
+            End If
 
-			If blnCreateQCPlotHtmlFile Then
-				blnSuccess = CreateQCPlotHTMLFile(strDatasetName, diFolderInfo.FullName)
-				If Not blnSuccess Then
-					blnSuccessOverall = False
-				End If
-			End If
+            If blnCreateQCPlotHtmlFile Then
+                blnSuccess = CreateQCPlotHTMLFile(strDatasetName, diFolderInfo.FullName)
+                If Not blnSuccess Then
+                    blnSuccessOverall = False
+                End If
+            End If
 
-		Catch ex As Exception
-			ReportError("Error creating output files: " & ex.Message)
-			blnSuccessOverall = False
-		End Try
+        Catch ex As Exception
+            ReportError("Error creating output files: " & ex.Message)
+            blnSuccessOverall = False
+        End Try
 
-		Return blnSuccessOverall
+        Return blnSuccessOverall
 
-	End Function
+    End Function
 
-	Protected Function CreateQCPlotHTMLFile(ByVal strDatasetName As String, _
-	 ByVal strOutputFolderPath As String) As Boolean
+    Protected Function CreateQCPlotHTMLFile(ByVal strDatasetName As String, _
+     ByVal strOutputFolderPath As String) As Boolean
 
-		Dim swOutFile As StreamWriter
+        Dim strHTMLFilePath As String
+        Dim strFile1 As String
+        Dim strFile2 As String
+        Dim strFile3 As String
 
-		Dim strHTMLFilePath As String
-		Dim strFile1 As String
-		Dim strFile2 As String
-		Dim strFile3 As String
+        Dim strTop As String
 
-		Dim strTop As String
+        Dim strDSInfoFileName As String
 
-		Dim strDSInfoFileName As String
+        Try
 
-		Dim blnSuccess As Boolean
+            ' Obtain the dataset summary stats (they will be auto-computed if not up to date)
+            Dim objSummaryStats = mDatasetStatsSummarizer.GetDatasetSummaryStats
 
-		Dim objSummaryStats As DSSummarizer.clsDatasetSummaryStats
+            strHTMLFilePath = Path.Combine(strOutputFolderPath, "index.html")
 
-		Try
+            Using swOutFile = New StreamWriter(New FileStream(strHTMLFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
-			blnSuccess = False
+                swOutFile.WriteLine("<!DOCTYPE html PUBLIC ""-//W3C//DTD HTML 3.2//EN"">")
+                swOutFile.WriteLine("<html>")
+                swOutFile.WriteLine("<head>")
+                swOutFile.WriteLine("  <title>" & strDatasetName & "</title>")
+                swOutFile.WriteLine("</head>")
+                swOutFile.WriteLine("")
+                swOutFile.WriteLine("<body>")
+                swOutFile.WriteLine("  <h2>" & strDatasetName & "</h2>")
+                swOutFile.WriteLine("")
+                swOutFile.WriteLine("  <table>")
 
-			' Obtain the dataset summary stats (they will be auto-computed if not up to date)
-			objSummaryStats = mDatasetStatsSummarizer.GetDatasetSummaryStats
+                ' First the plots with the top 50,000 points
+                strFile1 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS)
 
-			strHTMLFilePath = Path.Combine(strOutputFolderPath, "index.html")
+                If mLCMS2DPlotOverview.Options.PlottingDeisotopedData Then
+                    strFile2 = strFile1.Replace("_zoom.png", ".png")
+                Else
+                    strFile2 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn)
+                End If
 
-			swOutFile = New StreamWriter(New FileStream(strHTMLFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                strTop = IntToEngineeringNotation(mLCMS2DPlotOverview.Options.MaxPointsToPlot)
 
-			swOutFile.WriteLine("<!DOCTYPE html PUBLIC ""-//W3C//DTD HTML 3.2//EN"">")
-			swOutFile.WriteLine("<html>")
-			swOutFile.WriteLine("<head>")
-			swOutFile.WriteLine("  <title>" & strDatasetName & "</title>")
-			swOutFile.WriteLine("</head>")
-			swOutFile.WriteLine("")
-			swOutFile.WriteLine("<body>")
-			swOutFile.WriteLine("  <h2>" & strDatasetName & "</h2>")
-			swOutFile.WriteLine("")
-			swOutFile.WriteLine("  <table>")
+                If strFile1.Length > 0 OrElse strFile2.Length > 0 Then
+                    swOutFile.WriteLine("    <tr>")
+                    swOutFile.WriteLine("      <td valign=""middle"">LCMS<br>(Top " & strTop & ")</td>")
+                    swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile1, 250) & "</td>")
+                    swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile2, 250) & "</td>")
+                    swOutFile.WriteLine("    </tr>")
+                    swOutFile.WriteLine("")
+                End If
 
-			' First the plots with the top 50,000 points
-			strFile1 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS)
+                ' Now the plots with the top 500,000 points
+                strFile1 = mLCMS2DPlot.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS)
 
-			If mLCMS2DPlotOverview.Options.PlottingDeisotopedData Then
-				strFile2 = strFile1.Replace("_zoom.png", ".png")
-			Else
-				strFile2 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn)
-			End If
+                If mLCMS2DPlotOverview.Options.PlottingDeisotopedData Then
+                    strFile2 = strFile1.Replace("_zoom.png", ".png")
+                Else
+                    strFile2 = mLCMS2DPlot.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn)
+                End If
 
-			strTop = IntToEngineeringNotation(mLCMS2DPlotOverview.Options.MaxPointsToPlot)
+                strTop = IntToEngineeringNotation(mLCMS2DPlot.Options.MaxPointsToPlot)
 
-			If strFile1.Length > 0 OrElse strFile2.Length > 0 Then
-				swOutFile.WriteLine("    <tr>")
-				swOutFile.WriteLine("      <td valign=""middle"">LCMS<br>(Top " & strTop & ")</td>")
-				swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile1, 250) & "</td>")
-				swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile2, 250) & "</td>")
-				swOutFile.WriteLine("    </tr>")
-				swOutFile.WriteLine("")
-			End If
+                If strFile1.Length > 0 OrElse strFile2.Length > 0 Then
+                    swOutFile.WriteLine("    <tr>")
+                    swOutFile.WriteLine("      <td valign=""middle"">LCMS<br>(Top " & strTop & ")</td>")
+                    swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile1, 250) & "</td>")
+                    swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile2, 250) & "</td>")
+                    swOutFile.WriteLine("    </tr>")
+                    swOutFile.WriteLine("")
+                End If
 
-			' Now the plots with the top 500,000 points
-			strFile1 = mLCMS2DPlot.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS)
+                strFile1 = mTICandBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS)
+                strFile2 = mTICandBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn)
+                If strFile1.Length > 0 OrElse strFile2.Length > 0 Then
+                    swOutFile.WriteLine("    <tr>")
+                    swOutFile.WriteLine("      <td valign=""middle"">BPI</td>")
+                    swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile1, 250) & "</td>")
+                    swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile2, 250) & "</td>")
+                    swOutFile.WriteLine("    </tr>")
+                    swOutFile.WriteLine("")
+                End If
 
-			If mLCMS2DPlotOverview.Options.PlottingDeisotopedData Then
-				strFile2 = strFile1.Replace("_zoom.png", ".png")
-			Else
-				strFile2 = mLCMS2DPlot.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn)
-			End If
+                strFile1 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC)
+                strFile2 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS)
+                strFile3 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn)
 
-			strTop = IntToEngineeringNotation(mLCMS2DPlot.Options.MaxPointsToPlot)
+                If strFile1.Length > 0 OrElse strFile2.Length > 0 OrElse strFile3.Length > 0 Then
+                    swOutFile.WriteLine("    <tr>")
+                    swOutFile.WriteLine("      <td valign=""middle"">Addnl Plots</td>")
+                    If strFile1.Length > 0 Then swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile1, 250) & "</td>") Else swOutFile.WriteLine("      <td></td>")
+                    If strFile2.Length > 0 Then swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile2, 250) & "</td>") Else swOutFile.WriteLine("      <td></td>")
+                    If strFile3.Length > 0 Then swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile3, 250) & "</td>") Else swOutFile.WriteLine("      <td></td>")
+                    swOutFile.WriteLine("    </tr>")
+                    swOutFile.WriteLine("")
+                End If
 
-			If strFile1.Length > 0 OrElse strFile2.Length > 0 Then
-				swOutFile.WriteLine("    <tr>")
-				swOutFile.WriteLine("      <td valign=""middle"">LCMS<br>(Top " & strTop & ")</td>")
-				swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile1, 250) & "</td>")
-				swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile2, 250) & "</td>")
-				swOutFile.WriteLine("    </tr>")
-				swOutFile.WriteLine("")
-			End If
+                swOutFile.WriteLine("    <tr>")
+                swOutFile.WriteLine("      <td valign=""middle"">TIC</td>")
+                swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(mTICandBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC), 250) & "</td>")
+                swOutFile.WriteLine("      <td valign=""middle"">")
 
-			strFile1 = mTICandBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS)
-			strFile2 = mTICandBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn)
-			If strFile1.Length > 0 OrElse strFile2.Length > 0 Then
-				swOutFile.WriteLine("    <tr>")
-				swOutFile.WriteLine("      <td valign=""middle"">BPI</td>")
-				swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile1, 250) & "</td>")
-				swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile2, 250) & "</td>")
-				swOutFile.WriteLine("    </tr>")
-				swOutFile.WriteLine("")
-			End If
+                GenerateQCScanTypeSummaryHTML(swOutFile, objSummaryStats, "        ")
 
-			strFile1 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC)
-			strFile2 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS)
-			strFile3 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn)
+                swOutFile.WriteLine("      </td>")
+                swOutFile.WriteLine("    </tr>")
 
-			If strFile1.Length > 0 OrElse strFile2.Length > 0 OrElse strFile3.Length > 0 Then
-				swOutFile.WriteLine("    <tr>")
-				swOutFile.WriteLine("      <td valign=""middle"">Addnl Plots</td>")
-				If strFile1.Length > 0 Then swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile1, 250) & "</td>") Else swOutFile.WriteLine("      <td></td>")
-				If strFile2.Length > 0 Then swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile2, 250) & "</td>") Else swOutFile.WriteLine("      <td></td>")
-				If strFile3.Length > 0 Then swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(strFile3, 250) & "</td>") Else swOutFile.WriteLine("      <td></td>")
-				swOutFile.WriteLine("    </tr>")
-				swOutFile.WriteLine("")
-			End If
+                swOutFile.WriteLine("    <tr>")
+                swOutFile.WriteLine("      <td>&nbsp;</td>")
+                swOutFile.WriteLine("      <td align=""center"">DMS <a href=""http://dms2.pnl.gov/dataset/show/" & strDatasetName & """>Dataset Detail Report</a></td>")
 
-			swOutFile.WriteLine("    <tr>")
-			swOutFile.WriteLine("      <td valign=""middle"">TIC</td>")
-			swOutFile.WriteLine("      <td>" & GenerateQCFigureHTML(mTICandBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC), 250) & "</td>")
-			swOutFile.WriteLine("      <td valign=""middle"">")
+                strDSInfoFileName = strDatasetName & DSSummarizer.clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX
+                If mCreateDatasetInfoFile OrElse File.Exists(Path.Combine(strOutputFolderPath, strDSInfoFileName)) Then
+                    swOutFile.WriteLine("      <td align=""center""><a href=""" & strDSInfoFileName & """>Dataset Info XML file</a></td>")
+                Else
+                    swOutFile.WriteLine("      <td>&nbsp;</td>")
+                End If
 
-			GenerateQCScanTypeSummaryHTML(swOutFile, objSummaryStats, "        ")
+                swOutFile.WriteLine("    </tr>")
 
-			swOutFile.WriteLine("      </td>")
-			swOutFile.WriteLine("    </tr>")
+                swOutFile.WriteLine("")
+                swOutFile.WriteLine("  </table>")
+                swOutFile.WriteLine("")
+                swOutFile.WriteLine("</body>")
+                swOutFile.WriteLine("</html>")
+                swOutFile.WriteLine("")
 
-			swOutFile.WriteLine("    <tr>")
-			swOutFile.WriteLine("      <td>&nbsp;</td>")
-			swOutFile.WriteLine("      <td align=""center"">DMS <a href=""http://dms2.pnl.gov/dataset/show/" & strDatasetName & """>Dataset Detail Report</a></td>")
+            End Using
 
-			strDSInfoFileName = strDatasetName & DSSummarizer.clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX
-			If mCreateDatasetInfoFile OrElse File.Exists(Path.Combine(strOutputFolderPath, strDSInfoFileName)) Then
-				swOutFile.WriteLine("      <td align=""center""><a href=""" & strDSInfoFileName & """>Dataset Info XML file</a></td>")
-			Else
-				swOutFile.WriteLine("      <td>&nbsp;</td>")
-			End If
+            Return True
 
-			swOutFile.WriteLine("    </tr>")
+        Catch ex As Exception
+            ReportError("Error creating QC plot HTML file: " & ex.Message)
+            Return False
+        End Try
 
-			swOutFile.WriteLine("")
-			swOutFile.WriteLine("  </table>")
-			swOutFile.WriteLine("")
-			swOutFile.WriteLine("</body>")
-			swOutFile.WriteLine("</html>")
-			swOutFile.WriteLine("")
+    End Function
 
-			swOutFile.Close()
+    Private Function GenerateQCFigureHTML(ByVal strFilename As String, ByVal intWidthPixels As Integer) As String
 
-			blnSuccess = True
-		Catch ex As Exception
-			ReportError("Error creating QC plot HTML file: " & ex.Message)
-			blnSuccess = False
-		End Try
+        If strFilename Is Nothing OrElse strFilename.Length = 0 Then
+            Return "&nbsp;"
+        Else
+            Return "<a href=""" & strFilename & """>" & _
+             "<img src=""" & strFilename & """ width=""" & intWidthPixels.ToString & """ border=""0""></a>"
+        End If
 
-		Return blnSuccess
-	End Function
+    End Function
 
-	Private Function GenerateQCFigureHTML(ByVal strFilename As String, ByVal intWidthPixels As Integer) As String
+    Private Sub GenerateQCScanTypeSummaryHTML(ByRef swOutFile As StreamWriter, _
+       ByRef objDatasetSummaryStats As DSSummarizer.clsDatasetSummaryStats, _
+       ByVal strIndent As String)
 
-		If strFilename Is Nothing OrElse strFilename.Length = 0 Then
-			Return "&nbsp;"
-		Else
-			Return "<a href=""" & strFilename & """>" & _
-			 "<img src=""" & strFilename & """ width=""" & intWidthPixels.ToString & """ border=""0""></a>"
-		End If
+        Dim objEnum As Dictionary(Of String, Integer).Enumerator
+        Dim strScanType As String
+        Dim intIndexMatch As Integer
 
-	End Function
+        Dim strScanFilterText As String
+        Dim intScanCount As Integer
 
-	Private Sub GenerateQCScanTypeSummaryHTML(ByRef swOutFile As StreamWriter, _
-	   ByRef objDatasetSummaryStats As DSSummarizer.clsDatasetSummaryStats, _
-	   ByVal strIndent As String)
+        If strIndent Is Nothing Then strIndent = String.Empty
 
-		Dim objEnum As Dictionary(Of String, Integer).Enumerator
-		Dim strScanType As String
-		Dim intIndexMatch As Integer
+        swOutFile.WriteLine(strIndent & "<table border=""1"">")
+        swOutFile.WriteLine(strIndent & "  <tr><th>Scan Type</th><th>Scan Count</th><th>Scan Filter Text</th></tr>")
 
-		Dim strScanFilterText As String
-		Dim intScanCount As Integer
+        objEnum = objDatasetSummaryStats.objScanTypeStats.GetEnumerator
+        Do While objEnum.MoveNext
 
-		If strIndent Is Nothing Then strIndent = String.Empty
+            strScanType = objEnum.Current.Key
+            intIndexMatch = strScanType.IndexOf(DSSummarizer.clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR)
 
-		swOutFile.WriteLine(strIndent & "<table border=""1"">")
-		swOutFile.WriteLine(strIndent & "  <tr><th>Scan Type</th><th>Scan Count</th><th>Scan Filter Text</th></tr>")
-
-		objEnum = objDatasetSummaryStats.objScanTypeStats.GetEnumerator
-		Do While objEnum.MoveNext
-
-			strScanType = objEnum.Current.Key
-			intIndexMatch = strScanType.IndexOf(DSSummarizer.clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR)
-
-			If intIndexMatch >= 0 Then
-				strScanFilterText = strScanType.Substring(intIndexMatch + DSSummarizer.clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR.Length)
-				If intIndexMatch > 0 Then
-					strScanType = strScanType.Substring(0, intIndexMatch)
-				Else
-					strScanType = String.Empty
-				End If
-			Else
-				strScanFilterText = String.Empty
-			End If
-			intScanCount = objEnum.Current.Value
+            If intIndexMatch >= 0 Then
+                strScanFilterText = strScanType.Substring(intIndexMatch + DSSummarizer.clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR.Length)
+                If intIndexMatch > 0 Then
+                    strScanType = strScanType.Substring(0, intIndexMatch)
+                Else
+                    strScanType = String.Empty
+                End If
+            Else
+                strScanFilterText = String.Empty
+            End If
+            intScanCount = objEnum.Current.Value
 
 
-			swOutFile.WriteLine(strIndent & "  <tr><td>" & strScanType & "</td>" & _
-			 "<td align=""center"">" & intScanCount & "</td>" & _
-			 "<td>" & strScanFilterText & "</td></tr>")
+            swOutFile.WriteLine(strIndent & "  <tr><td>" & strScanType & "</td>" & _
+             "<td align=""center"">" & intScanCount & "</td>" & _
+             "<td>" & strScanFilterText & "</td></tr>")
 
-		Loop
+        Loop
 
-		swOutFile.WriteLine(strIndent & "</table>")
+        swOutFile.WriteLine(strIndent & "</table>")
 
-	End Sub
+    End Sub
 
-	''' <summary>
-	''' Converts an integer to engineering notation
-	''' For example, 50000 will be returned as 50K
-	''' </summary>
-	''' <param name="intValue"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Protected Function IntToEngineeringNotation(ByVal intValue As Integer) As String
+    ''' <summary>
+    ''' Converts an integer to engineering notation
+    ''' For example, 50000 will be returned as 50K
+    ''' </summary>
+    ''' <param name="intValue"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Protected Function IntToEngineeringNotation(ByVal intValue As Integer) As String
 
-		If intValue < 1000 Then
-			Return intValue.ToString
-		ElseIf intValue < 1000000.0 Then
-			Return CInt(Math.Round(intValue / 1000, 0)).ToString & "K"
-		Else
-			Return CInt(Math.Round(intValue / 1000 / 1000, 0)).ToString & "M"
-		End If
+        If intValue < 1000 Then
+            Return intValue.ToString
+        ElseIf intValue < 1000000.0 Then
+            Return CInt(Math.Round(intValue / 1000, 0)).ToString & "K"
+        Else
+            Return CInt(Math.Round(intValue / 1000 / 1000, 0)).ToString & "M"
+        End If
 
-	End Function
+    End Function
 
-	Public MustOverride Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean Implements iMSFileInfoProcessor.ProcessDataFile
-	Public MustOverride Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String Implements iMSFileInfoProcessor.GetDatasetNameViaPath
+    Public MustOverride Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean Implements iMSFileInfoProcessor.ProcessDataFile
+    Public MustOverride Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String Implements iMSFileInfoProcessor.GetDatasetNameViaPath
 
-	Private Sub mLCMS2DPlot_ErrorEvent(ByVal Message As String) Handles mLCMS2DPlot.ErrorEvent
-		ReportError("Error in LCMS2DPlot: " & Message)
-	End Sub
+    Private Sub mLCMS2DPlot_ErrorEvent(ByVal Message As String) Handles mLCMS2DPlot.ErrorEvent
+        ReportError("Error in LCMS2DPlot: " & Message)
+    End Sub
 
-	Private Sub mLCMS2DPlotOverview_ErrorEvent(ByVal Message As String) Handles mLCMS2DPlotOverview.ErrorEvent
-		ReportError("Error in LCMS2DPlotOverview: " & Message)
-	End Sub
+    Private Sub mLCMS2DPlotOverview_ErrorEvent(ByVal Message As String) Handles mLCMS2DPlotOverview.ErrorEvent
+        ReportError("Error in LCMS2DPlotOverview: " & Message)
+    End Sub
 
-	Private Sub mDatasetStatsSummarizer_ErrorEvent(errorMessage As String) Handles mDatasetStatsSummarizer.ErrorEvent
-		ReportError(errorMessage)
-	End Sub
+    Private Sub mDatasetStatsSummarizer_ErrorEvent(errorMessage As String) Handles mDatasetStatsSummarizer.ErrorEvent
+        ReportError(errorMessage)
+    End Sub
 End Class

@@ -745,10 +745,8 @@ Public Class clsMSFileInfoDataCache
         Return blnSuccess
 
     End Function
-
-
-
-    Private Sub WriteMSInfoDataLine(ByRef srOutFile As StreamWriter, ByRef objRow As DataRow)
+    
+    Private Sub WriteMSInfoDataLine(ByVal srOutFile As StreamWriter, ByVal objRow As DataRow)
         With objRow
             ' Note: HH:mm:ss corresponds to time in 24 hour format
             srOutFile.WriteLine(.Item(COL_NAME_DATASET_ID).ToString & ControlChars.Tab & _
@@ -764,7 +762,7 @@ Public Class clsMSFileInfoDataCache
         End With
     End Sub
 
-    Private Sub WriteFolderIntegrityInfoDataLine(ByRef srOutFile As StreamWriter, ByRef objRow As DataRow)
+    Private Sub WriteFolderIntegrityInfoDataLine(ByVal srOutFile As StreamWriter, ByVal objRow As DataRow)
 
         With objRow
             srOutFile.WriteLine(.Item(COL_NAME_FOLDER_ID).ToString & ControlChars.Tab & _

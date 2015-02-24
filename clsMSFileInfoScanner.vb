@@ -1807,83 +1807,83 @@ Public Class clsMSFileInfoScanner
 			End If
 
 			' See if strInputFilePath contains a wildcard
-			If Not strInputFileOrFolderPath Is Nothing AndAlso (strInputFileOrFolderPath.IndexOf("*") >= 0 Or strInputFileOrFolderPath.IndexOf("?") >= 0) Then
-				' Obtain a list of the matching files and folders
+            If Not strInputFileOrFolderPath Is Nothing AndAlso (strInputFileOrFolderPath.IndexOf("*"c) >= 0 Or strInputFileOrFolderPath.IndexOf("?"c) >= 0) Then
+                ' Obtain a list of the matching files and folders
 
-				' Copy the path into strCleanPath and replace any * or ? characters with _
-				strCleanPath = strInputFileOrFolderPath.Replace("*", "_")
-				strCleanPath = strCleanPath.Replace("?", "_")
+                ' Copy the path into strCleanPath and replace any * or ? characters with _
+                strCleanPath = strInputFileOrFolderPath.Replace("*", "_")
+                strCleanPath = strCleanPath.Replace("?", "_")
 
-				Dim fiFileInfo = New FileInfo(strCleanPath)
-				If fiFileInfo.Directory.Exists Then
-					strInputFolderPath = fiFileInfo.DirectoryName
-				Else
-					' Use the current working directory
-					strInputFolderPath = Path.GetDirectoryName(Reflection.Assembly.GetExecutingAssembly().Location)
-				End If
+                Dim fiFileInfo = New FileInfo(strCleanPath)
+                If fiFileInfo.Directory.Exists Then
+                    strInputFolderPath = fiFileInfo.DirectoryName
+                Else
+                    ' Use the current working directory
+                    strInputFolderPath = Path.GetDirectoryName(Reflection.Assembly.GetExecutingAssembly().Location)
+                End If
 
-				Dim diFolderInfo = New DirectoryInfo(strInputFolderPath)
+                Dim diFolderInfo = New DirectoryInfo(strInputFolderPath)
 
-				' Remove any directory information from strInputFileOrFolderPath
-				strInputFileOrFolderPath = Path.GetFileName(strInputFileOrFolderPath)
+                ' Remove any directory information from strInputFileOrFolderPath
+                strInputFileOrFolderPath = Path.GetFileName(strInputFileOrFolderPath)
 
-				intMatchCount = 0
-				For Each fiFileMatch In diFolderInfo.GetFiles(strInputFileOrFolderPath)
+                intMatchCount = 0
+                For Each fiFileMatch In diFolderInfo.GetFiles(strInputFileOrFolderPath)
 
-					blnSuccess = ProcessMSFileOrFolder(fiFileMatch.FullName, strOutputFolderPath, blnResetErrorCode, eMSFileProcessingState)
+                    blnSuccess = ProcessMSFileOrFolder(fiFileMatch.FullName, strOutputFolderPath, blnResetErrorCode, eMSFileProcessingState)
 
-					If eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully OrElse _
-					   eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing Then
-						AddToStringList(strProcessedFileList, fiFileMatch.FullName, intProcessedFileListCount)
-					End If
+                    If eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully OrElse _
+                       eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing Then
+                        AddToStringList(strProcessedFileList, fiFileMatch.FullName, intProcessedFileListCount)
+                    End If
 
-					CheckForAbortProcessingFile()
-					If mAbortProcessing Then Exit For
+                    CheckForAbortProcessingFile()
+                    If mAbortProcessing Then Exit For
 
-					If Not blnSuccess And Not SKIP_FILES_IN_ERROR Then Exit For
+                    If Not blnSuccess And Not SKIP_FILES_IN_ERROR Then Exit For
 
-					intMatchCount += 1
+                    intMatchCount += 1
 
-					If intMatchCount Mod 100 = 0 Then Console.Write(".")
-				Next
+                    If intMatchCount Mod 100 = 0 Then Console.Write(".")
+                Next
 
-				If mAbortProcessing Then Return False
+                If mAbortProcessing Then Return False
 
-				For Each diFolderMatch In diFolderInfo.GetDirectories(strInputFileOrFolderPath)
+                For Each diFolderMatch In diFolderInfo.GetDirectories(strInputFileOrFolderPath)
 
-					blnSuccess = ProcessMSFileOrFolder(diFolderMatch.FullName, strOutputFolderPath, blnResetErrorCode, eMSFileProcessingState)
+                    blnSuccess = ProcessMSFileOrFolder(diFolderMatch.FullName, strOutputFolderPath, blnResetErrorCode, eMSFileProcessingState)
 
-					If eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully OrElse _
-					   eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing Then
-						AddToStringList(strProcessedFileList, diFolderMatch.FullName, intProcessedFileListCount)
-					End If
+                    If eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.ProcessedSuccessfully OrElse _
+                       eMSFileProcessingState = iMSFileInfoScanner.eMSFileProcessingStateConstants.FailedProcessing Then
+                        AddToStringList(strProcessedFileList, diFolderMatch.FullName, intProcessedFileListCount)
+                    End If
 
-					CheckForAbortProcessingFile()
-					If mAbortProcessing Then Exit For
-					If Not blnSuccess And Not SKIP_FILES_IN_ERROR Then Exit For
+                    CheckForAbortProcessingFile()
+                    If mAbortProcessing Then Exit For
+                    If Not blnSuccess And Not SKIP_FILES_IN_ERROR Then Exit For
 
-					intMatchCount += 1
+                    intMatchCount += 1
 
-					If intMatchCount Mod 100 = 0 Then Console.Write(".")
-				Next
+                    If intMatchCount Mod 100 = 0 Then Console.Write(".")
+                Next
 
-				If mAbortProcessing Then Return False
+                If mAbortProcessing Then Return False
 
-				If mCheckFileIntegrity Then
-					ReDim Preserve strProcessedFileList(intProcessedFileListCount - 1)
-					CheckIntegrityOfFilesInFolder(diFolderInfo.FullName, mRecheckFileIntegrityForExistingFolders, strProcessedFileList)
-				End If
+                If mCheckFileIntegrity Then
+                    ReDim Preserve strProcessedFileList(intProcessedFileListCount - 1)
+                    CheckIntegrityOfFilesInFolder(diFolderInfo.FullName, mRecheckFileIntegrityForExistingFolders, strProcessedFileList)
+                End If
 
-				If intMatchCount = 0 Then
-					If mErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError Then
-						ShowMessage("No match was found for the input file path:" & strInputFileOrFolderPath, eMessageTypeConstants.Warning)
-					End If
-				Else
-					Console.WriteLine()
-				End If
-			Else
-				blnSuccess = ProcessMSFileOrFolder(strInputFileOrFolderPath, strOutputFolderPath, blnResetErrorCode, eMSFileProcessingState)
-			End If
+                If intMatchCount = 0 Then
+                    If mErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError Then
+                        ShowMessage("No match was found for the input file path:" & strInputFileOrFolderPath, eMessageTypeConstants.Warning)
+                    End If
+                Else
+                    Console.WriteLine()
+                End If
+            Else
+                blnSuccess = ProcessMSFileOrFolder(strInputFileOrFolderPath, strOutputFolderPath, blnResetErrorCode, eMSFileProcessingState)
+            End If
 
 		Catch ex As Exception
 			HandleException("Error in ProcessMSFileOrFolderWildcard", ex)

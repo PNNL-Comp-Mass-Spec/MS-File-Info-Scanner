@@ -598,99 +598,99 @@ Public Class clsLCMSDataPlotter
 		' When this is true, then will write a text file of the mass spectrum before before and after it is filtered
 		' Used for debugging
 		Dim blnWriteDebugData As Boolean
-		Dim srOutFile As StreamWriter = Nothing
+        Dim swOutFile As StreamWriter = Nothing
 
-		Try
-			If dblMZIgnoreRangeStart > 0 Or dblMZIgnoreRangeEnd > 0 Then
-				blnMZIgnoreRangleEnabled = True
-			Else
-				blnMZIgnoreRangleEnabled = False
-			End If
-
-
-			With objMSSpectrum
-
-				If objMSSpectrum.IonCount > intMaxIonCountToRetain Then
-					objFilterDataArray = New clsFilterDataArrayMaxCount(objMSSpectrum.IonCount)
-
-					objFilterDataArray.MaximumDataCountToLoad = intMaxIonCountToRetain
-					objFilterDataArray.TotalIntensityPercentageFilterEnabled = False
-
-					blnWriteDebugData = False
-					If blnWriteDebugData Then
-						srOutFile = New StreamWriter(New FileStream("DataDump_" & objMSSpectrum.ScanNumber.ToString & "_BeforeFilter.txt", FileMode.Create, FileAccess.Write, FileShare.Read))
-						srOutFile.WriteLine("m/z" & ControlChars.Tab & "Intensity")
-					End If
-
-					' Store the intensity values in objFilterDataArray
-					For intIonIndex = 0 To .IonCount - 1
-						objFilterDataArray.AddDataPoint(.IonsIntensity(intIonIndex), intIonIndex)
-						If blnWriteDebugData Then
-							srOutFile.WriteLine(.IonsMZ(intIonIndex) & ControlChars.Tab & .IonsIntensity(intIonIndex))
-						End If
-					Next
-
-					If blnWriteDebugData Then
-						srOutFile.Close()
-					End If
+        Try
+            If dblMZIgnoreRangeStart > 0 Or dblMZIgnoreRangeEnd > 0 Then
+                blnMZIgnoreRangleEnabled = True
+            Else
+                blnMZIgnoreRangleEnabled = False
+            End If
 
 
-					' Call .FilterData, which will determine which data points to keep
-					objFilterDataArray.FilterData()
+            With objMSSpectrum
 
-					intIonCountNew = 0
-					For intIonIndex = 0 To .IonCount - 1
+                If objMSSpectrum.IonCount > intMaxIonCountToRetain Then
+                    objFilterDataArray = New clsFilterDataArrayMaxCount(objMSSpectrum.IonCount)
 
-						If blnMZIgnoreRangleEnabled Then
-							If .IonsMZ(intIonIndex) <= dblMZIgnoreRangeEnd AndAlso .IonsMZ(intIonIndex) >= dblMZIgnoreRangeStart Then
-								' The m/z value is between dblMZIgnoreRangeStart and dblMZIgnoreRangeEnd
-								' Keep this point
-								blnPointPassesFilter = True
-							Else
-								blnPointPassesFilter = False
-							End If
-						Else
-							blnPointPassesFilter = False
-						End If
+                    objFilterDataArray.MaximumDataCountToLoad = intMaxIonCountToRetain
+                    objFilterDataArray.TotalIntensityPercentageFilterEnabled = False
 
-						If Not blnPointPassesFilter Then
-							' See if the point's intensity is negative
-							If objFilterDataArray.GetAbundanceByIndex(intIonIndex) >= 0 Then
-								blnPointPassesFilter = True
-							End If
-						End If
+                    blnWriteDebugData = False
+                    If blnWriteDebugData Then
+                        swOutFile = New StreamWriter(New FileStream("DataDump_" & objMSSpectrum.ScanNumber.ToString & "_BeforeFilter.txt", FileMode.Create, FileAccess.Write, FileShare.Read))
+                        swOutFile.WriteLine("m/z" & ControlChars.Tab & "Intensity")
+                    End If
 
-						If blnPointPassesFilter Then
-							.IonsMZ(intIonCountNew) = .IonsMZ(intIonIndex)
-							.IonsIntensity(intIonCountNew) = .IonsIntensity(intIonIndex)
-							.Charge(intIonCountNew) = .Charge(intIonIndex)
-							intIonCountNew += 1
-						End If
+                    ' Store the intensity values in objFilterDataArray
+                    For intIonIndex = 0 To .IonCount - 1
+                        objFilterDataArray.AddDataPoint(.IonsIntensity(intIonIndex), intIonIndex)
+                        If blnWriteDebugData Then
+                            swOutFile.WriteLine(.IonsMZ(intIonIndex) & ControlChars.Tab & .IonsIntensity(intIonIndex))
+                        End If
+                    Next
 
-					Next intIonIndex
-				Else
-					intIonCountNew = .IonCount
-				End If
+                    If blnWriteDebugData Then
+                        swOutFile.Close()
+                    End If
 
-				If intIonCountNew < .IonCount Then
-					.IonCount = intIonCountNew
-				End If
 
-				If blnWriteDebugData Then
-					srOutFile = New StreamWriter(New FileStream("DataDump_" & objMSSpectrum.ScanNumber.ToString & "_PostFilter.txt", FileMode.Create, FileAccess.Write, FileShare.Read))
-					srOutFile.WriteLine("m/z" & ControlChars.Tab & "Intensity")
+                    ' Call .FilterData, which will determine which data points to keep
+                    objFilterDataArray.FilterData()
 
-					' Store the intensity values in objFilterDataArray
-					For intIonIndex = 0 To .IonCount - 1
-						srOutFile.WriteLine(.IonsMZ(intIonIndex) & ControlChars.Tab & .IonsIntensity(intIonIndex))
-					Next
-					srOutFile.Close()
-				End If
+                    intIonCountNew = 0
+                    For intIonIndex = 0 To .IonCount - 1
 
-			End With
-		Catch ex As Exception
-			Throw New Exception("Error in clsLCMSDataPlotter.DiscardDataToLimitIonCount: " & ex.Message, ex)
-		End Try
+                        If blnMZIgnoreRangleEnabled Then
+                            If .IonsMZ(intIonIndex) <= dblMZIgnoreRangeEnd AndAlso .IonsMZ(intIonIndex) >= dblMZIgnoreRangeStart Then
+                                ' The m/z value is between dblMZIgnoreRangeStart and dblMZIgnoreRangeEnd
+                                ' Keep this point
+                                blnPointPassesFilter = True
+                            Else
+                                blnPointPassesFilter = False
+                            End If
+                        Else
+                            blnPointPassesFilter = False
+                        End If
+
+                        If Not blnPointPassesFilter Then
+                            ' See if the point's intensity is negative
+                            If objFilterDataArray.GetAbundanceByIndex(intIonIndex) >= 0 Then
+                                blnPointPassesFilter = True
+                            End If
+                        End If
+
+                        If blnPointPassesFilter Then
+                            .IonsMZ(intIonCountNew) = .IonsMZ(intIonIndex)
+                            .IonsIntensity(intIonCountNew) = .IonsIntensity(intIonIndex)
+                            .Charge(intIonCountNew) = .Charge(intIonIndex)
+                            intIonCountNew += 1
+                        End If
+
+                    Next intIonIndex
+                Else
+                    intIonCountNew = .IonCount
+                End If
+
+                If intIonCountNew < .IonCount Then
+                    .IonCount = intIonCountNew
+                End If
+
+                If blnWriteDebugData Then
+                    swOutFile = New StreamWriter(New FileStream("DataDump_" & objMSSpectrum.ScanNumber.ToString & "_PostFilter.txt", FileMode.Create, FileAccess.Write, FileShare.Read))
+                    swOutFile.WriteLine("m/z" & ControlChars.Tab & "Intensity")
+
+                    ' Store the intensity values in objFilterDataArray
+                    For intIonIndex = 0 To .IonCount - 1
+                        swOutFile.WriteLine(.IonsMZ(intIonIndex) & ControlChars.Tab & .IonsIntensity(intIonIndex))
+                    Next
+                    swOutFile.Close()
+                End If
+
+            End With
+        Catch ex As Exception
+            Throw New Exception("Error in clsLCMSDataPlotter.DiscardDataToLimitIonCount: " & ex.Message, ex)
+        End Try
 
 	End Sub
 
