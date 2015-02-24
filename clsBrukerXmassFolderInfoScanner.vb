@@ -212,7 +212,6 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-
     Protected Function GetMetaDataFieldAndTable(ByVal eMcfMetadataField As eMcfMetadataFields, ByRef strField As String, ByRef strTable As String) As Boolean
 
         Select Case eMcfMetadataField
@@ -844,17 +843,24 @@ Public Class clsBrukerXmassFolderInfoScanner
                     ' If the scans.xml file contains runtime entries (e.g. <minutes>100.0456</minutes>) then .AcqTimeEnd is updated using .AcqTimeStart + RunTimeMinutes
                     blnSuccess = ParseScanXMLFile(diDatasetFolder, udtFileInfo, scanElutionTimeMap)
 
+                    Dim bafFileParsed As Boolean
+
                     If Not blnSuccess Then
                         ' Use ProteoWizard to extract the scan counts and acquisition time information
                         ' If mSaveLCMS2DPlots = True, this method will also read the m/z and intensity values from each scan so that we can make 2D plots
-                        blnSuccess = ParseBAFFile(fiFileInfo, udtFileInfo)
+                        bafFileParsed = ParseBAFFile(fiFileInfo, udtFileInfo)
                     End If
 
                     If mSaveTICAndBPI And mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC = 0 OrElse
                        mSaveLCMS2DPlots And mLCMS2DPlot.ScanCountCached = 0 Then
                         ' If a ser or fid file exists, we can read the data from it to create the TIC and BPI plots, plus also the 2D plot
 
-                        ParseSerOrFidFile(fiFileInfo.Directory, scanElutionTimeMap)
+                        Dim serOrFidParsed = ParseSerOrFidFile(fiFileInfo.Directory, scanElutionTimeMap)
+
+                        If Not serOrFidParsed And Not bafFileParsed Then
+                            ' Look for an analysis.baf file
+                            bafFileParsed = ParseBAFFile(fiFileInfo, udtFileInfo)
+                        End If
 
                     End If
                 End If
@@ -895,6 +901,7 @@ Public Class clsBrukerXmassFolderInfoScanner
                 fiSerOrFidFile = New FileInfo(Path.Combine(diDotDFolder.FullName, "fid"))
                 If Not fiSerOrFidFile.Exists Then Return False
             End If
+
 
             ' Look for the apexAcquisition.method
             Dim fiSettingsFile As FileInfo = FindBrukerSettingsFile(diDotDFolder)
