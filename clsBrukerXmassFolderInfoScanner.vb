@@ -3,361 +3,424 @@
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 '
 ' Last modified January 17, 2013
-
+Imports System.Runtime.InteropServices
 Imports PNNLOmics.Utilities
 
 <CLSCompliant(False)>
 Public Class clsBrukerXmassFolderInfoScanner
-	Inherits clsMSFileInfoProcessorBaseClass
+    Inherits clsMSFileInfoProcessorBaseClass
 
-	Public Const BRUKER_BAF_FILE_NAME As String = "analysis.baf"
-	Public Const BRUKER_SER_FILE_NAME As String = "ser"
-	Public Const BRUKER_FID_FILE_NAME As String = "fid"
-	Public Const BRUKER_EXTENSION_BAF_FILE_NAME As String = "extension.baf"
-	Public Const BRUKER_ANALYSIS_YEP_FILE_NAME As String = "analysis.yep"
-	Public Const BRUKER_SQLITE_INDEX_FILE_NAME As String = "Storage.mcf_idx"
+    Public Const BRUKER_BAF_FILE_NAME As String = "analysis.baf"
+    Public Const BRUKER_SER_FILE_NAME As String = "ser"
+    Public Const BRUKER_FID_FILE_NAME As String = "fid"
+    Public Const BRUKER_EXTENSION_BAF_FILE_NAME As String = "extension.baf"
+    Public Const BRUKER_ANALYSIS_YEP_FILE_NAME As String = "analysis.yep"
+    Public Const BRUKER_SQLITE_INDEX_FILE_NAME As String = "Storage.mcf_idx"
 
-	' Note: The extension must be in all caps
-	Public Const BRUKER_BAF_FILE_EXTENSION As String = ".BAF"
-	Public Const BRUKER_MCF_FILE_EXTENSION As String = ".MCF"
-	Public Const BRUKER_SQLITE_INDEX_EXTENSION As String = ".MCF_IDX"
+    ' Note: The extension must be in all caps
+    Public Const BRUKER_BAF_FILE_EXTENSION As String = ".BAF"
+    Public Const BRUKER_MCF_FILE_EXTENSION As String = ".MCF"
+    Public Const BRUKER_SQLITE_INDEX_EXTENSION As String = ".MCF_IDX"
 
-	Private Const BRUKER_SCANINFO_XML_FILE As String = "scan.xml"
-	Private Const BRUKER_XMASS_LOG_FILE As String = "log.txt"
-	Private Const BRUKER_AUTOMS_FILE As String = "AutoMS.txt"
+    Private Const BRUKER_SCANINFO_XML_FILE As String = "scan.xml"
+    Private Const BRUKER_XMASS_LOG_FILE As String = "log.txt"
+    Private Const BRUKER_AUTOMS_FILE As String = "AutoMS.txt"
 
-	Protected WithEvents mPWizParser As clsProteowizardDataParser
+    Protected WithEvents mPWizParser As clsProteowizardDataParser
 
-	Protected Structure udtMCFScanInfoType
-		Public ScanMode As Double
-		Public MSLevel As Integer
-		Public RT As Double
-		Public BPI As Double
-		Public TIC As Double
-		Public AcqTime As DateTime
-		Public SpotNumber As String		 ' Only used with MALDI imaging
-	End Structure
+    Protected Structure udtMCFScanInfoType
+        Public ScanMode As Double
+        Public MSLevel As Integer
+        Public RT As Double
+        Public BPI As Double
+        Public TIC As Double
+        Public AcqTime As DateTime
+        Public SpotNumber As String      ' Only used with MALDI imaging
+    End Structure
 
-	Protected Enum eMcfMetadataFields
-		ScanMode = 0
-		MSLevel = 1
-		RT = 2
-		BPI = 3
-		TIC = 4
-		AcqTime = 5
-		SpotNumber = 6
-	End Enum
+    Protected Enum eMcfMetadataFields
+        ScanMode = 0
+        MSLevel = 1
+        RT = 2
+        BPI = 3
+        TIC = 4
+        AcqTime = 5
+        SpotNumber = 6
+    End Enum
 
-	Protected Sub AddDatasetScan(ByVal intScanNumber As Integer, ByVal intMSLevel As Integer, ByVal sngElutionTime As Single, ByVal dblBPI As Double, ByVal dblTIC As Double, ByVal strScanTypeName As String, ByRef dblMaxRunTimeMinutes As Double)
+    Protected Sub AddDatasetScan(ByVal intScanNumber As Integer, ByVal intMSLevel As Integer, ByVal sngElutionTime As Single, ByVal dblBPI As Double, ByVal dblTIC As Double, ByVal strScanTypeName As String, ByRef dblMaxRunTimeMinutes As Double)
 
-		If mSaveTICAndBPI AndAlso intScanNumber > 0 Then
-			mTICandBPIPlot.AddData(intScanNumber, intMSLevel, sngElutionTime, dblBPI, dblTIC)
-		End If
+        If mSaveTICAndBPI AndAlso intScanNumber > 0 Then
+            mTICandBPIPlot.AddData(intScanNumber, intMSLevel, sngElutionTime, dblBPI, dblTIC)
+        End If
 
-		Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
-		objScanStatsEntry.ScanNumber = intScanNumber
-		objScanStatsEntry.ScanType = intMSLevel
+        Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
+        objScanStatsEntry.ScanNumber = intScanNumber
+        objScanStatsEntry.ScanType = intMSLevel
 
-		objScanStatsEntry.ScanTypeName = strScanTypeName
-		objScanStatsEntry.ScanFilterText = ""
+        objScanStatsEntry.ScanTypeName = strScanTypeName
+        objScanStatsEntry.ScanFilterText = ""
 
-		objScanStatsEntry.ElutionTime = sngElutionTime.ToString("0.0000")
-		objScanStatsEntry.TotalIonIntensity = MathUtilities.ValueToString(dblTIC, 5)
-		objScanStatsEntry.BasePeakIntensity = MathUtilities.ValueToString(dblBPI, 5)
-		objScanStatsEntry.BasePeakMZ = "0"
+        objScanStatsEntry.ElutionTime = sngElutionTime.ToString("0.0000")
+        objScanStatsEntry.TotalIonIntensity = MathUtilities.ValueToString(dblTIC, 5)
+        objScanStatsEntry.BasePeakIntensity = MathUtilities.ValueToString(dblBPI, 5)
+        objScanStatsEntry.BasePeakMZ = "0"
 
-		' Base peak signal to noise ratio
-		objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
+        ' Base peak signal to noise ratio
+        objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
 
-		objScanStatsEntry.IonCount = 0
-		objScanStatsEntry.IonCountRaw = 0
+        objScanStatsEntry.IonCount = 0
+        objScanStatsEntry.IonCountRaw = 0
 
-		Dim dblElutionTime As Double
-		If Double.TryParse(objScanStatsEntry.ElutionTime, dblElutionTime) Then
-			If dblElutionTime > dblMaxRunTimeMinutes Then
-				dblMaxRunTimeMinutes = dblElutionTime
-			End If
-		End If
+        Dim dblElutionTime As Double
+        If Double.TryParse(objScanStatsEntry.ElutionTime, dblElutionTime) Then
+            If dblElutionTime > dblMaxRunTimeMinutes Then
+                dblMaxRunTimeMinutes = dblElutionTime
+            End If
+        End If
 
-		mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
+        mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
 
-	End Sub
+    End Sub
 
-	''' <summary>
-	''' Looks for a .m folder then looks for apexAcquisition.method or submethods.xml in that folder
-	''' Uses the file modification time as the run start time
-	''' Also looks for the .hdx file in the dataset folder and examine its modification time
-	''' </summary>
-	''' <param name="diDatasetFolder"></param>
-	''' <param name="udtFileInfo"></param>
-	''' <returns>True if a valid file is found; otherwise false</returns>
-	''' <remarks></remarks>
-	Protected Function DetermineAcqStartTime(ByVal diDatasetFolder As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    ''' <summary>
+    ''' Looks for a .m folder then looks for apexAcquisition.method or submethods.xml in that folder
+    ''' Uses the file modification time as the run start time
+    ''' Also looks for the .hdx file in the dataset folder and examine its modification time
+    ''' </summary>
+    ''' <param name="diDatasetFolder"></param>
+    ''' <param name="udtFileInfo"></param>
+    ''' <returns>True if a valid file is found; otherwise false</returns>
+    ''' <remarks></remarks>
+    Protected Function DetermineAcqStartTime(ByVal diDatasetFolder As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
-		Dim blnSuccess As Boolean = False
+        Dim blnSuccess As Boolean = False
 
-		Dim diSubFolders As List(Of DirectoryInfo)
+        Dim diSubFolders As List(Of DirectoryInfo)
 
-		Try
-			' Look for the method folder (folder name should end in .m)
-			diSubFolders = diDatasetFolder.GetDirectories("*.m").ToList()
+        Try
+            ' Look for the method folder (folder name should end in .m)
+            diSubFolders = diDatasetFolder.GetDirectories("*.m").ToList()
 
-			If diSubFolders.Count = 0 Then
-				' Match not found
-				' Look for any XMass folders
-				diSubFolders = diDatasetFolder.GetDirectories("XMass*").ToList()
-			End If
+            If diSubFolders.Count = 0 Then
+                ' Match not found
+                ' Look for any XMass folders
+                diSubFolders = diDatasetFolder.GetDirectories("XMass*").ToList()
+            End If
 
 
-			If diSubFolders.Count > 0 Then
-				' Look for the apexAcquisition.method in each matching subfolder
-				' Assume the file modification time is the acquisition start time
-				' Note that the submethods.xml file sometimes gets modified after the run starts, so it should not be used to determine run start time
+            If diSubFolders.Count > 0 Then
+                ' Look for the apexAcquisition.method in each matching subfolder
+                ' Assume the file modification time is the acquisition start time
+                ' Note that the submethods.xml file sometimes gets modified after the run starts, so it should not be used to determine run start time
 
-				For Each diSubFolder In diSubFolders
-					For Each fiFile In diSubFolder.GetFiles("apexAcquisition.method")
-						udtFileInfo.AcqTimeStart = fiFile.LastWriteTime
-						blnSuccess = True
-						Exit For
-					Next
-					If blnSuccess Then Exit For
-				Next
+                For Each diSubFolder In diSubFolders
+                    For Each fiFile In diSubFolder.GetFiles("apexAcquisition.method")
+                        udtFileInfo.AcqTimeStart = fiFile.LastWriteTime
+                        blnSuccess = True
+                        Exit For
+                    Next
+                    If blnSuccess Then Exit For
+                Next
 
-				If Not blnSuccess Then
-					' apexAcquisition.method not found; try submethods.xml instead
-					For Each diSubFolder In diSubFolders
-						For Each fiFile In diSubFolder.GetFiles("submethods.xml")
-							udtFileInfo.AcqTimeStart = fiFile.LastWriteTime
-							blnSuccess = True
-							Exit For
-						Next
-						If blnSuccess Then Exit For
-					Next
-				End If
+                If Not blnSuccess Then
+                    ' apexAcquisition.method not found; try submethods.xml instead
+                    For Each diSubFolder In diSubFolders
+                        For Each fiFile In diSubFolder.GetFiles("submethods.xml")
+                            udtFileInfo.AcqTimeStart = fiFile.LastWriteTime
+                            blnSuccess = True
+                            Exit For
+                        Next
+                        If blnSuccess Then Exit For
+                    Next
+                End If
 
-			End If
+            End If
 
-			' Also look for the .hdx file
-			' Its file modification time typically also matches the run start time
+            ' Also look for the .hdx file
+            ' Its file modification time typically also matches the run start time
 
-			For Each fiFile In diDatasetFolder.GetFiles("*.hdx")
-				If Not blnSuccess OrElse fiFile.LastWriteTime < udtFileInfo.AcqTimeStart Then
-					udtFileInfo.AcqTimeStart = fiFile.LastWriteTime
-				End If
+            For Each fiFile In diDatasetFolder.GetFiles("*.hdx")
+                If Not blnSuccess OrElse fiFile.LastWriteTime < udtFileInfo.AcqTimeStart Then
+                    udtFileInfo.AcqTimeStart = fiFile.LastWriteTime
+                End If
 
-				blnSuccess = True
-				Exit For
-			Next
+                blnSuccess = True
+                Exit For
+            Next
 
-			' Make sure AcqTimeEnd and AcqTimeStart match
-			udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart
+            ' Make sure AcqTimeEnd and AcqTimeStart match
+            udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart
 
-		Catch ex As Exception
-			ReportError("Error finding XMass method folder: " & ex.Message)
-			blnSuccess = False
-		End Try
+        Catch ex As Exception
+            ReportError("Error finding XMass method folder: " & ex.Message)
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
+    
+    Private Function FindBrukerSettingsFile(ByVal diDotDFolder As DirectoryInfo) As FileInfo
 
-	Protected Function GetMetaDataFieldAndTable(ByVal eMcfMetadataField As eMcfMetadataFields, ByRef strField As String, ByRef strTable As String) As Boolean
+        Dim dotMethodFiles = diDotDFolder.GetFiles("*.method", SearchOption.AllDirectories)
 
-		Select Case eMcfMetadataField
-			Case eMcfMetadataFields.ScanMode
-				strField = "pScanMode"
-				strTable = "MetaDataInt"
+        If dotMethodFiles Is Nothing OrElse dotMethodFiles.Length = 0 Then
+            Return Nothing
+        End If
 
-			Case eMcfMetadataFields.MSLevel
-				strField = "pMSLevel"
-				strTable = "MetaDataInt"
+        Dim acquistionMethodFiles = (From methodFile In dotMethodFiles Where methodFile.Name.ToLower().EndsWith("apexacquisition.method") Select methodFile).ToList()
 
-			Case eMcfMetadataFields.RT
-				strField = "pRT"
-				strTable = "MetaDataDouble"
+        If acquistionMethodFiles.Count = 0 Then
+            Return Nothing
+        End If
 
-			Case eMcfMetadataFields.BPI
-				strField = "pIntMax"
-				strTable = "MetaDataDouble"
+        If acquistionMethodFiles.Count = 1 Then
+            Return acquistionMethodFiles.First
+        End If
 
-			Case eMcfMetadataFields.TIC
-				strField = "pTic"
-				strTable = "MetaDataDouble"
+        ReportError("Multiple 'apexAcquisition.method' files were found in the .D folder; not sure which to use")
+        Return Nothing
 
-			Case eMcfMetadataFields.AcqTime
-				strField = "pDateTime"
-				strTable = "MetaDataString"
+    End Function
 
-			Case eMcfMetadataFields.SpotNumber
-				strField = "pSpotNo"
-				strTable = "MetaDataString"
+    Private Function FindBrukerAcqusFile(ByVal diDotDFolder As DirectoryInfo) As FileInfo
 
-			Case Else
-				' Unknown field
-				strField = String.Empty
-				strTable = String.Empty
-				Return False
-		End Select
+        Dim acqusFiles = diDotDFolder.GetFiles("acqus", SearchOption.AllDirectories)
 
-		Return True
-	End Function
+        If acqusFiles Is Nothing OrElse acqusFiles.Length = 0 Then
+            Return Nothing
+        End If
 
-	Protected Function ParseAutoMSFile(ByVal diDatasetFolder As DirectoryInfo, _
-	  ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+        If acqusFiles.Length = 1 Then
+            Return acqusFiles.First
+        End If
 
-		Dim strAutoMSFilePath As String
+        ' Often the Bruker file structures contain multiple Acqus files. I will select 
+        ' the one that is in the same folder as the 'ser' file and if that isn't present,
+        ' the same folder as the 'fid' file. Otherwise, throw errors
 
-		Dim srReader As StreamReader
 
-		Dim strLineIn As String
-		Dim strSplitLine() As String
+        For Each acquFile In acqusFiles
+            If acquFile.Directory.Name.Equals(diDotDFolder.Name, StringComparison.OrdinalIgnoreCase) Then
+                Return acquFile
+            End If
+        Next
 
-		Dim blnSuccess As Boolean
+        ReportError("Multiple 'acqus' files were found in the .D folder; not sure which one to use")
+        Return Nothing
 
-		Dim intScanNumber As Integer
-		Dim intMSLevel As Integer
-		Dim strScanTypeName As String
+    End Function
 
-		Try
 
-			strAutoMSFilePath = Path.Combine(diDatasetFolder.FullName, BRUKER_AUTOMS_FILE)
-			Dim fiFileInfo = New FileInfo(strAutoMSFilePath)
+    Protected Function GetMetaDataFieldAndTable(ByVal eMcfMetadataField As eMcfMetadataFields, ByRef strField As String, ByRef strTable As String) As Boolean
 
-			If fiFileInfo.Exists Then
+        Select Case eMcfMetadataField
+            Case eMcfMetadataFields.ScanMode
+                strField = "pScanMode"
+                strTable = "MetaDataInt"
 
-				srReader = New StreamReader(New FileStream(fiFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
+            Case eMcfMetadataFields.MSLevel
+                strField = "pMSLevel"
+                strTable = "MetaDataInt"
 
-				Do While srReader.Peek() >= 0
-					strLineIn = srReader.ReadLine
+            Case eMcfMetadataFields.RT
+                strField = "pRT"
+                strTable = "MetaDataDouble"
 
-					If Not strLineIn Is Nothing AndAlso strLineIn.Length > 0 Then
-						strSplitLine = strLineIn.Split(ControlChars.Tab)
+            Case eMcfMetadataFields.BPI
+                strField = "pIntMax"
+                strTable = "MetaDataDouble"
 
-						If strSplitLine.Length >= 2 Then
-							If Integer.TryParse(strSplitLine(0), intScanNumber) Then
-								' First column contains a number
-								' See if the second column is a known scan type
+            Case eMcfMetadataFields.TIC
+                strField = "pTic"
+                strTable = "MetaDataDouble"
 
-								Select Case strSplitLine(1)
-									Case "MS"
-										strScanTypeName = "HMS"
-										intMSLevel = 1
-									Case "MSMS"
-										strScanTypeName = "HMSn"
-										intMSLevel = 2
-									Case Else
-										strScanTypeName = String.Empty
-								End Select
+            Case eMcfMetadataFields.AcqTime
+                strField = "pDateTime"
+                strTable = "MetaDataString"
 
-								mDatasetStatsSummarizer.UpdateDatasetScanType(intScanNumber, intMSLevel, strScanTypeName)
-							End If
-						End If
-					End If
-				Loop
+            Case eMcfMetadataFields.SpotNumber
+                strField = "pSpotNo"
+                strTable = "MetaDataString"
 
-				srReader.Close()
+            Case Else
+                ' Unknown field
+                strField = String.Empty
+                strTable = String.Empty
+                Return False
+        End Select
 
-				blnSuccess = True
-			End If
-		Catch ex As Exception
-			ReportError("Error finding AutoMS.txt file: " & ex.Message)
-			blnSuccess = False
-		End Try
+        Return True
+    End Function
 
-		Return blnSuccess
-	End Function
+    Protected Function ParseAutoMSFile(ByVal diDatasetFolder As DirectoryInfo, _
+      ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
-	Protected Function ParseBAFFile(ByVal fiBAFFileInfo As FileInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+        Dim strAutoMSFilePath As String
+
+        Dim strLineIn As String
+        Dim strSplitLine() As String
+
+        Dim intScanNumber As Integer
+        Dim intMSLevel As Integer
+        Dim strScanTypeName As String
+
+        Try
+
+            strAutoMSFilePath = Path.Combine(diDatasetFolder.FullName, BRUKER_AUTOMS_FILE)
+            Dim fiFileInfo = New FileInfo(strAutoMSFilePath)
+
+            If Not fiFileInfo.Exists Then
+                Return False
+            End If
+
+            Using srReader = New StreamReader(New FileStream(fiFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
+
+                Do While srReader.Peek() >= 0
+                    strLineIn = srReader.ReadLine
+
+                    If Not strLineIn Is Nothing AndAlso strLineIn.Length > 0 Then
+                        strSplitLine = strLineIn.Split(ControlChars.Tab)
+
+                        If strSplitLine.Length >= 2 Then
+                            If Integer.TryParse(strSplitLine(0), intScanNumber) Then
+                                ' First column contains a number
+                                ' See if the second column is a known scan type
+
+                                Select Case strSplitLine(1)
+                                    Case "MS"
+                                        strScanTypeName = "HMS"
+                                        intMSLevel = 1
+                                    Case "MSMS"
+                                        strScanTypeName = "HMSn"
+                                        intMSLevel = 2
+                                    Case Else
+                                        strScanTypeName = String.Empty
+                                End Select
+
+                                mDatasetStatsSummarizer.UpdateDatasetScanType(intScanNumber, intMSLevel, strScanTypeName)
+                            End If
+                        End If
+                    End If
+                Loop
+
+            End Using
+
+            Return True
+
+        Catch ex As Exception
+            ReportError("Error finding AutoMS.txt file: " & ex.Message)
+            Return False
+        End Try
+
+    End Function
+
+    Protected Function ParseBAFFile(ByVal fiBAFFileInfo As FileInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
         Dim blnSuccess As Boolean
 
         Dim blnTICStored As Boolean = False
-		Dim blnSRMDataCached As Boolean = False
+        Dim blnSRMDataCached As Boolean = False
 
-		' Override strDataFilePath here, if needed
+        ' Override strDataFilePath here, if needed
         Dim blnOverride As Boolean = False
-		If blnOverride Then
+        If blnOverride Then
             Dim strNewDataFilePath As String = "c:\temp\analysis.baf"
-			fiBAFFileInfo = New FileInfo(strNewDataFilePath)
-		End If
+            fiBAFFileInfo = New FileInfo(strNewDataFilePath)
+        End If
 
-		mDatasetStatsSummarizer.ClearCachedData()
-		mLCMS2DPlot.Options.UseObservedMinScan = False
+        mDatasetStatsSummarizer.ClearCachedData()
+        mLCMS2DPlot.Options.UseObservedMinScan = False
 
-		Try
-			' Open the analysis.baf (or extension.baf) file using the ProteoWizardWrapper
-			ShowMessage("Determining acquisition info using Proteowizard (this could take a while)")
+        Try
+            If fiBAFFileInfo.Length > 1024 * 1024 * 1024 Then
+                ShowMessage("analysis.baf file is over 1 GB; ProteoWizard typically cannot handle .baf files this large")
 
-			Dim objPWiz As pwiz.ProteowizardWrapper.MSDataFileReader
-			objPWiz = New pwiz.ProteowizardWrapper.MSDataFileReader(fiBAFFileInfo.FullName)
+                ' Look for a ser file
+                If File.Exists(Path.Combine(fiBAFFileInfo.Directory.FullName, "ser")) Then
+                    ShowMessage("Will parse the ser file instead")
+                    Return False
+                Else
+                    ShowMessage("Ser file not found; trying ProteoWizard anyway")
+                End If
 
-			Try
+            End If
+
+            ' Open the analysis.baf (or extension.baf) file using the ProteoWizardWrapper
+            ShowMessage("Determining acquisition info using Proteowizard (this could take a while)")
+
+
+            Dim objPWiz As pwiz.ProteowizardWrapper.MSDataFileReader
+            objPWiz = New pwiz.ProteowizardWrapper.MSDataFileReader(fiBAFFileInfo.FullName)
+
+            Try
                 Dim dtRunStartTime As DateTime = CDate(objPWiz.RunStartTime())
 
-				' Update AcqTimeEnd if possible
-				' Found out by trial and error that we need to use .ToUniversalTime() to adjust the time reported by ProteoWizard
-				dtRunStartTime = dtRunStartTime.ToUniversalTime()
-				If dtRunStartTime < udtFileInfo.AcqTimeEnd Then
-					If udtFileInfo.AcqTimeEnd.Subtract(dtRunStartTime).TotalDays < 1 Then
-						udtFileInfo.AcqTimeStart = dtRunStartTime
-					End If
-				End If
+                ' Update AcqTimeEnd if possible
+                ' Found out by trial and error that we need to use .ToUniversalTime() to adjust the time reported by ProteoWizard
+                dtRunStartTime = dtRunStartTime.ToUniversalTime()
+                If dtRunStartTime < udtFileInfo.AcqTimeEnd Then
+                    If udtFileInfo.AcqTimeEnd.Subtract(dtRunStartTime).TotalDays < 1 Then
+                        udtFileInfo.AcqTimeStart = dtRunStartTime
+                    End If
+                End If
 
-			Catch ex As Exception
-				udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd
-			End Try
+            Catch ex As Exception
+                udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd
+            End Try
 
-			' Instantiate the Proteowizard Data Parser class
-			mPWizParser = New clsProteowizardDataParser(
-			  objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot,
-			  mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus)
+            ' Instantiate the Proteowizard Data Parser class
+            mPWizParser = New clsProteowizardDataParser(
+              objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot,
+              mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus)
 
-			mPWizParser.HighResMS1 = True
-			mPWizParser.HighResMS2 = True
+            mPWizParser.HighResMS1 = True
+            mPWizParser.HighResMS2 = True
 
-			Dim dblRuntimeMinutes As Double = 0
+            Dim dblRuntimeMinutes As Double = 0
 
-			' Note that SRM .Wiff files will only have chromatograms, and no spectra
-			If objPWiz.ChromatogramCount > 0 Then
+            ' Note that SRM .Wiff files will only have chromatograms, and no spectra
+            If objPWiz.ChromatogramCount > 0 Then
 
-				' Process the chromatograms
-				mPWizParser.StoreChromatogramInfo(udtFileInfo, blnTICStored, blnSRMDataCached, dblRuntimeMinutes)
-				mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
+                ' Process the chromatograms
+                mPWizParser.StoreChromatogramInfo(udtFileInfo, blnTICStored, blnSRMDataCached, dblRuntimeMinutes)
+                mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
 
-				udtFileInfo.ScanCount = objPWiz.ChromatogramCount
-			End If
+                udtFileInfo.ScanCount = objPWiz.ChromatogramCount
+            End If
 
 
-			If objPWiz.SpectrumCount > 0 And Not blnSRMDataCached Then
-				' Process the spectral data (though only if we did not process SRM data)
-				mPWizParser.StoreMSSpectraInfo(udtFileInfo, blnTICStored, dblRuntimeMinutes)
-				mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
+            If objPWiz.SpectrumCount > 0 And Not blnSRMDataCached Then
+                ' Process the spectral data (though only if we did not process SRM data)
+                mPWizParser.StoreMSSpectraInfo(udtFileInfo, blnTICStored, dblRuntimeMinutes)
+                mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
 
-				udtFileInfo.ScanCount = objPWiz.SpectrumCount
-			End If
+                udtFileInfo.ScanCount = objPWiz.SpectrumCount
+            End If
 
             objPWiz.Dispose()
             PRISM.Processes.clsProgRunner.GarbageCollectNow()
 
-			blnSuccess = True
-		Catch ex As Exception
-			ReportError("Error using ProteoWizard reader: " & ex.Message)
-			blnSuccess = False
-		End Try
+            blnSuccess = True
+        Catch ex As Exception
+            ReportError("Error using ProteoWizard reader: " & ex.Message)
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Protected Function ParseMcfIndexFiles(ByVal diDatasetFolder As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    Protected Function ParseMcfIndexFiles(ByVal diDatasetFolder As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
-		Dim strMetadataFile As String
-		Dim strConnectionString As String
+        Dim strMetadataFile As String
+        Dim strConnectionString As String
 
-		Dim blnSuccess As Boolean = False
-		Dim intMetadataId As Integer
-		Dim strMetadataName As String
-		Dim strMetadataDescription As String
+        Dim blnSuccess As Boolean = False
+        Dim intMetadataId As Integer
+        Dim strMetadataName As String
+        Dim strMetadataDescription As String
 
         Dim lstMetadataNameToID As Dictionary(Of String, Integer)
         Dim lstMetadataNameToDescription As Dictionary(Of String, String)
@@ -366,15 +429,15 @@ Public Class clsBrukerXmassFolderInfoScanner
 
         Dim intScanCount As Integer
         Dim intScanNumber As Integer
-		Dim sngElutionTime As Single
-		Dim strScanTypeName As String
+        Dim sngElutionTime As Single
+        Dim strScanTypeName As String
 
-		Dim dblMaxRunTimeMinutes As Double = 0
+        Dim dblMaxRunTimeMinutes As Double = 0
 
-		Dim dtAcqTimeStart As DateTime = DateTime.MaxValue
-		Dim dtAcqTimeEnd As DateTime = DateTime.MinValue
+        Dim dtAcqTimeStart As DateTime = DateTime.MaxValue
+        Dim dtAcqTimeEnd As DateTime = DateTime.MinValue
 
-		Try
+        Try
 
             lstMetadataNameToID = New Dictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
             lstMetadataNameToDescription = New Dictionary(Of String, String)
@@ -383,6 +446,10 @@ Public Class clsBrukerXmassFolderInfoScanner
             If mSaveTICAndBPI Then
                 ' Initialize the TIC and BPI arrays
                 MyBase.InitializeTICAndBPI()
+            End If
+
+            If mSaveLCMS2DPlots Then
+                MyBase.InitializeLCMS2DPlot()
             End If
 
             strMetadataFile = Path.Combine(diDatasetFolder.FullName, BRUKER_SQLITE_INDEX_FILE_NAME)
@@ -522,7 +589,10 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-    Protected Function ParseScanXMLFile(ByVal diDatasetFolder As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    Protected Function ParseScanXMLFile(
+       ByVal diDatasetFolder As DirectoryInfo,
+       ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType,
+       <Out> ByRef scanElutionTimeMap As Dictionary(Of Integer, Single)) As Boolean
 
         Dim strScanXMLFilePath As String
 
@@ -542,6 +612,7 @@ Public Class clsBrukerXmassFolderInfoScanner
         Dim dblMaxRunTimeMinutes As Double = 0
 
         Try
+            scanElutionTimeMap = New Dictionary(Of Integer, Single)
 
             If mSaveTICAndBPI Then
                 ' Initialize the TIC and BPI arrays
@@ -598,6 +669,7 @@ Public Class clsBrukerXmassFolderInfoScanner
                             If srReader.Name = "scan" Then
                                 blnInScanNode = False
 
+                                scanElutionTimeMap.Add(intScanNumber, sngElutionTime)
                                 AddDatasetScan(intScanNumber, intMSLevel, sngElutionTime, dblBPI, dblTIC, "HMS", dblMaxRunTimeMinutes)
 
                             End If
@@ -764,17 +836,27 @@ Public Class clsBrukerXmassFolderInfoScanner
                 blnSuccess = ParseMcfIndexFiles(diDatasetFolder, udtFileInfo)
 
                 If Not blnSuccess Then
+                    Dim scanElutionTimeMap As Dictionary(Of Integer, Single) = Nothing
+
                     ' Parse the scan.xml file (if it exists) to determine the number of spectra acquired
                     ' We can also obtain TIC and elution time values from this file
                     ' However, it does not track whether a scan is MS or MSn
                     ' If the scans.xml file contains runtime entries (e.g. <minutes>100.0456</minutes>) then .AcqTimeEnd is updated using .AcqTimeStart + RunTimeMinutes
-                    blnSuccess = ParseScanXMLFile(diDatasetFolder, udtFileInfo)
+                    blnSuccess = ParseScanXMLFile(diDatasetFolder, udtFileInfo, scanElutionTimeMap)
 
                     If Not blnSuccess Then
                         ' Use ProteoWizard to extract the scan counts and acquisition time information
+                        ' If mSaveLCMS2DPlots = True, this method will also read the m/z and intensity values from each scan so that we can make 2D plots
                         blnSuccess = ParseBAFFile(fiFileInfo, udtFileInfo)
                     End If
 
+                    If mSaveTICAndBPI And mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC = 0 OrElse
+                       mSaveLCMS2DPlots And mLCMS2DPlot.ScanCountCached = 0 Then
+                        ' If a ser or fid file exists, we can read the data from it to create the TIC and BPI plots, plus also the 2D plot
+
+                        ParseSerOrFidFile(fiFileInfo.Directory, scanElutionTimeMap)
+
+                    End If
                 End If
 
                 ' Parse the AutoMS.txt file (if it exists) to determine which scans are MS and which are MS/MS
@@ -798,6 +880,86 @@ Public Class clsBrukerXmassFolderInfoScanner
         End Try
 
         Return blnSuccess
+
+    End Function
+
+    Private Function ParseSerOrFidFile(
+      ByVal diDotDFolder As DirectoryInfo,
+      ByVal scanElutionTimeMap As Dictionary(Of Integer, Single)) As Boolean
+
+        Try
+
+            Dim fiSerOrFidFile = New FileInfo(Path.Combine(diDotDFolder.FullName, "ser"))
+
+            If Not fiSerOrFidFile.Exists Then
+                fiSerOrFidFile = New FileInfo(Path.Combine(diDotDFolder.FullName, "fid"))
+                If Not fiSerOrFidFile.Exists Then Return False
+            End If
+
+            ' Look for the apexAcquisition.method
+            Dim fiSettingsFile As FileInfo = FindBrukerSettingsFile(diDotDFolder)
+
+            If fiSettingsFile Is Nothing Then
+                ' Not found; look for an acqus file
+                Dim fiAcqusFile As FileInfo = FindBrukerAcqusFile(diDotDFolder)
+
+                If fiAcqusFile Is Nothing Then
+                    ' Not found; cannot parse the ser file
+                    Return False
+                End If
+
+                fiSettingsFile = fiAcqusFile
+            End If
+
+            Dim needToSaveTICAndBPI = (mSaveTICAndBPI AndAlso mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC = 0)
+            Dim dtLastProgressTime = DateTime.UtcNow
+
+            Dim serReader = New BrukerDataReader.DataReader(fiSerOrFidFile.FullName, fiSettingsFile.FullName)
+
+            Dim scanCount = serReader.GetNumMSScans()
+            Dim mzValues As Single() = Nothing
+            Dim intensities As Single() = Nothing
+
+            For scanNumber = 1 To scanCount
+                serReader.GetMassSpectrum(scanNumber, mzValues, intensities)
+
+                Const msLevel = 1
+                Dim elutionTime As Single
+                If Not scanElutionTimeMap.TryGetValue(scanNumber, elutionTime) Then
+                    elutionTime = scanNumber / 60.0F
+                End If
+
+                If needToSaveTICAndBPI Then
+                    Dim basePeakIntensity As Double = intensities.Max
+                    Dim totalIonCurrent As Double = intensities.Sum
+
+                    mTICandBPIPlot.AddData(scanNumber, msLevel, elutionTime, basePeakIntensity, totalIonCurrent)
+                End If
+
+                If mzValues.Length > 0 Then
+                    If mSaveLCMS2DPlots Then
+                        Dim dblMassIntensityPairs As Double(,)
+                        ReDim dblMassIntensityPairs(1, mzValues.Length)
+
+                        For i = 0 To mzValues.Length - 1
+                            dblMassIntensityPairs(0, i) = mzValues(i)
+                            dblMassIntensityPairs(1, i) = intensities(i)
+                        Next
+
+                        mLCMS2DPlot.AddScan2D(scanNumber, msLevel, elutionTime, mzValues.Length, dblMassIntensityPairs)
+                    End If
+
+                End If
+
+                ShowProgress(scanNumber, scanCount, dtLastProgressTime, 2)
+            Next
+
+            Return True
+
+        Catch ex As Exception
+            ReportError("Exception processing Bruker ser file: " & ex.Message)
+            Return False
+        End Try
 
     End Function
 
@@ -897,91 +1059,91 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-	Private Sub UpdateScanInfo(ByVal eMcfMetadataField As eMcfMetadataFields, ByVal strValue As String, ByRef udtScanInfo As udtMCFScanInfoType)
+    Private Sub UpdateScanInfo(ByVal eMcfMetadataField As eMcfMetadataFields, ByVal strValue As String, ByRef udtScanInfo As udtMCFScanInfoType)
 
-		Dim intValue As Integer
-		Dim dblValue As Double
-		Dim dtValue As DateTime
+        Dim intValue As Integer
+        Dim dblValue As Double
+        Dim dtValue As DateTime
 
-		Select Case eMcfMetadataField
-			Case eMcfMetadataFields.ScanMode
-				If Integer.TryParse(strValue, intValue) Then
-					udtScanInfo.ScanMode = intValue
-				End If
+        Select Case eMcfMetadataField
+            Case eMcfMetadataFields.ScanMode
+                If Integer.TryParse(strValue, intValue) Then
+                    udtScanInfo.ScanMode = intValue
+                End If
 
-			Case eMcfMetadataFields.MSLevel
-				If Integer.TryParse(strValue, intValue) Then
-					udtScanInfo.MSLevel = intValue
-				End If
+            Case eMcfMetadataFields.MSLevel
+                If Integer.TryParse(strValue, intValue) Then
+                    udtScanInfo.MSLevel = intValue
+                End If
 
-			Case eMcfMetadataFields.RT
-				If Double.TryParse(strValue, dblValue) Then
-					udtScanInfo.RT = dblValue
-				End If
+            Case eMcfMetadataFields.RT
+                If Double.TryParse(strValue, dblValue) Then
+                    udtScanInfo.RT = dblValue
+                End If
 
-			Case eMcfMetadataFields.BPI
-				If Double.TryParse(strValue, dblValue) Then
-					udtScanInfo.BPI = dblValue
-				End If
+            Case eMcfMetadataFields.BPI
+                If Double.TryParse(strValue, dblValue) Then
+                    udtScanInfo.BPI = dblValue
+                End If
 
-			Case eMcfMetadataFields.TIC
-				If Double.TryParse(strValue, dblValue) Then
-					udtScanInfo.TIC = dblValue
-				End If
+            Case eMcfMetadataFields.TIC
+                If Double.TryParse(strValue, dblValue) Then
+                    udtScanInfo.TIC = dblValue
+                End If
 
-			Case eMcfMetadataFields.AcqTime
-				If DateTime.TryParse(strValue, dtValue) Then
-					udtScanInfo.AcqTime = dtValue
-				End If
+            Case eMcfMetadataFields.AcqTime
+                If DateTime.TryParse(strValue, dtValue) Then
+                    udtScanInfo.AcqTime = dtValue
+                End If
 
-			Case eMcfMetadataFields.SpotNumber
-				udtScanInfo.SpotNumber = strValue
-			Case Else
-				' Unknown field
-		End Select
+            Case eMcfMetadataFields.SpotNumber
+                udtScanInfo.SpotNumber = strValue
+            Case Else
+                ' Unknown field
+        End Select
 
-	End Sub
+    End Sub
 
-	Private Sub mPWizParser_ErrorEvent(Message As String) Handles mPWizParser.ErrorEvent
-		ReportError(Message)
-	End Sub
+    Private Sub mPWizParser_ErrorEvent(Message As String) Handles mPWizParser.ErrorEvent
+        ReportError(Message)
+    End Sub
 
-	Private Sub mPWizParser_MessageEvent(Message As String) Handles mPWizParser.MessageEvent
-		ShowMessage(Message)
-	End Sub
+    Private Sub mPWizParser_MessageEvent(Message As String) Handles mPWizParser.MessageEvent
+        ShowMessage(Message)
+    End Sub
 
-	Protected Class clsScanDataSortComparer
-		Implements IComparer(Of udtMCFScanInfoType)
+    Protected Class clsScanDataSortComparer
+        Implements IComparer(Of udtMCFScanInfoType)
 
-		Public Function Compare(x As udtMCFScanInfoType, y As udtMCFScanInfoType) As Integer Implements IComparer(Of udtMCFScanInfoType).Compare
+        Public Function Compare(x As udtMCFScanInfoType, y As udtMCFScanInfoType) As Integer Implements IComparer(Of udtMCFScanInfoType).Compare
 
-			If x.RT < y.RT Then
-				Return -1
-			ElseIf x.RT > y.RT Then
-				Return 1
-			Else
-				If x.AcqTime < y.AcqTime Then
-					Return -1
-				ElseIf x.AcqTime > y.AcqTime Then
-					Return 1
-				Else
-					If String.IsNullOrEmpty(x.SpotNumber) OrElse String.IsNullOrEmpty(y.SpotNumber) Then
-						Return 0
-					Else
-						If x.SpotNumber < y.SpotNumber Then
-							Return -1
-						ElseIf x.SpotNumber > y.SpotNumber Then
-							Return 1
-						Else
-							Return 0
-						End If
-					End If
+            If x.RT < y.RT Then
+                Return -1
+            ElseIf x.RT > y.RT Then
+                Return 1
+            Else
+                If x.AcqTime < y.AcqTime Then
+                    Return -1
+                ElseIf x.AcqTime > y.AcqTime Then
+                    Return 1
+                Else
+                    If String.IsNullOrEmpty(x.SpotNumber) OrElse String.IsNullOrEmpty(y.SpotNumber) Then
+                        Return 0
+                    Else
+                        If x.SpotNumber < y.SpotNumber Then
+                            Return -1
+                        ElseIf x.SpotNumber > y.SpotNumber Then
+                            Return 1
+                        Else
+                            Return 0
+                        End If
+                    End If
 
-				End If
-			End If
+                End If
+            End If
 
-		End Function
-	End Class
+        End Function
+    End Class
 
 End Class
 
