@@ -607,86 +607,92 @@ Namespace DSSummarizer
 					End If
 
 					objDSInfo.WriteStartElement("ScanType")
-					objDSInfo.WriteAttributeString("ScanCount", objEnum.Current.Value.ToString)
-					objDSInfo.WriteAttributeString("ScanFilterText", FixNull(strScanFilterText))
-					objDSInfo.WriteString(strScanType)
-					objDSInfo.WriteEndElement()		' ScanType EndElement
-				Loop
+                    objDSInfo.WriteAttributeString("ScanCount", objEnum.Current.Value.ToString())
+                    objDSInfo.WriteAttributeString("ScanFilterText", FixNull(strScanFilterText))
+                    objDSInfo.WriteString(strScanType)
+                    objDSInfo.WriteEndElement()     ' ScanType EndElement
+                Loop
 
-				objDSInfo.WriteEndElement()		  ' ScanTypes
+                objDSInfo.WriteEndElement()       ' ScanTypes
 
-				objDSInfo.WriteStartElement("AcquisitionInfo")
+                objDSInfo.WriteStartElement("AcquisitionInfo")
 
-				objDSInfo.WriteElementString("ScanCount", (objSummaryStats.MSStats.ScanCount + objSummaryStats.MSnStats.ScanCount).ToString)
-				objDSInfo.WriteElementString("ScanCountMS", objSummaryStats.MSStats.ScanCount.ToString)
-				objDSInfo.WriteElementString("ScanCountMSn", objSummaryStats.MSnStats.ScanCount.ToString)
-				objDSInfo.WriteElementString("Elution_Time_Max", objSummaryStats.ElutionTimeMax.ToString)
+                Dim scanCountTotal = objSummaryStats.MSStats.ScanCount + objSummaryStats.MSnStats.ScanCount
+                If scanCountTotal = 0 And udtDatasetFileInfo.ScanCount > 0 Then
+                    scanCountTotal = udtDatasetFileInfo.ScanCount
+                End If
 
-				objDSInfo.WriteElementString("AcqTimeMinutes", udtDatasetFileInfo.AcqTimeEnd.Subtract(udtDatasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00"))
-				objDSInfo.WriteElementString("StartTime", udtDatasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt"))
-				objDSInfo.WriteElementString("EndTime", udtDatasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt"))
+                objDSInfo.WriteElementString("ScanCount", scanCountTotal.ToString())
 
-				objDSInfo.WriteElementString("FileSizeBytes", udtDatasetFileInfo.FileSizeBytes.ToString)
+                objDSInfo.WriteElementString("ScanCountMS", objSummaryStats.MSStats.ScanCount.ToString())
+                objDSInfo.WriteElementString("ScanCountMSn", objSummaryStats.MSnStats.ScanCount.ToString())
+                objDSInfo.WriteElementString("Elution_Time_Max", objSummaryStats.ElutionTimeMax.ToString())
 
-				If includeCentroidStats Then
-					Dim centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedSpectra(1)
-					Dim centroidedMS2Spectra = mSpectraTypeClassifier.CentroidedSpectra(2)
+                objDSInfo.WriteElementString("AcqTimeMinutes", udtDatasetFileInfo.AcqTimeEnd.Subtract(udtDatasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00"))
+                objDSInfo.WriteElementString("StartTime", udtDatasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt"))
+                objDSInfo.WriteElementString("EndTime", udtDatasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt"))
 
-					Dim totalMS1Spectra = mSpectraTypeClassifier.TotalSpectra(1)
-					Dim totalMS2Spectra = mSpectraTypeClassifier.TotalSpectra(2)
+                objDSInfo.WriteElementString("FileSizeBytes", udtDatasetFileInfo.FileSizeBytes.ToString())
 
-					If totalMS1Spectra + totalMS2Spectra = 0 Then
-						' None of the spectra had MSLevel 1 or MSLevel 2
-						' This shouldn't normally be the case; nevertheless, we'll report the totals, regardless of MSLevel, using the MS1 elements
-						centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedSpectra()
-						totalMS1Spectra = mSpectraTypeClassifier.TotalSpectra()
-					End If
+                If includeCentroidStats Then
+                    Dim centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedSpectra(1)
+                    Dim centroidedMS2Spectra = mSpectraTypeClassifier.CentroidedSpectra(2)
 
-					objDSInfo.WriteElementString("ProfileScanCountMS1", (totalMS1Spectra - centroidedMS1Spectra).ToString())
-					objDSInfo.WriteElementString("ProfileScanCountMS2", (totalMS2Spectra - centroidedMS2Spectra).ToString())
+                    Dim totalMS1Spectra = mSpectraTypeClassifier.TotalSpectra(1)
+                    Dim totalMS2Spectra = mSpectraTypeClassifier.TotalSpectra(2)
 
-					objDSInfo.WriteElementString("CentroidScanCountMS1", centroidedMS1Spectra.ToString())
-					objDSInfo.WriteElementString("CentroidScanCountMS2", centroidedMS2Spectra.ToString())
+                    If totalMS1Spectra + totalMS2Spectra = 0 Then
+                        ' None of the spectra had MSLevel 1 or MSLevel 2
+                        ' This shouldn't normally be the case; nevertheless, we'll report the totals, regardless of MSLevel, using the MS1 elements
+                        centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedSpectra()
+                        totalMS1Spectra = mSpectraTypeClassifier.TotalSpectra()
+                    End If
 
-				End If
+                    objDSInfo.WriteElementString("ProfileScanCountMS1", (totalMS1Spectra - centroidedMS1Spectra).ToString())
+                    objDSInfo.WriteElementString("ProfileScanCountMS2", (totalMS2Spectra - centroidedMS2Spectra).ToString())
 
-				objDSInfo.WriteEndElement()		  ' AcquisitionInfo EndElement
+                    objDSInfo.WriteElementString("CentroidScanCountMS1", centroidedMS1Spectra.ToString())
+                    objDSInfo.WriteElementString("CentroidScanCountMS2", centroidedMS2Spectra.ToString())
 
-				objDSInfo.WriteStartElement("TICInfo")
-				objDSInfo.WriteElementString("TIC_Max_MS", MathUtilities.ValueToString(objSummaryStats.MSStats.TICMax, 5))
-				objDSInfo.WriteElementString("TIC_Max_MSn", MathUtilities.ValueToString(objSummaryStats.MSnStats.TICMax, 5))
-				objDSInfo.WriteElementString("BPI_Max_MS", MathUtilities.ValueToString(objSummaryStats.MSStats.BPIMax, 5))
-				objDSInfo.WriteElementString("BPI_Max_MSn", MathUtilities.ValueToString(objSummaryStats.MSnStats.BPIMax, 5))
-				objDSInfo.WriteElementString("TIC_Median_MS", MathUtilities.ValueToString(objSummaryStats.MSStats.TICMedian, 5))
-				objDSInfo.WriteElementString("TIC_Median_MSn", MathUtilities.ValueToString(objSummaryStats.MSnStats.TICMedian, 5))
-				objDSInfo.WriteElementString("BPI_Median_MS", MathUtilities.ValueToString(objSummaryStats.MSStats.BPIMedian, 5))
-				objDSInfo.WriteElementString("BPI_Median_MSn", MathUtilities.ValueToString(objSummaryStats.MSnStats.BPIMedian, 5))
-				objDSInfo.WriteEndElement()		  ' TICInfo EndElement
+                End If
 
-				' Only write the SampleInfo block if udtSampleInfo contains entries
-				If udtSampleInfo.HasData() Then
-					objDSInfo.WriteStartElement("SampleInfo")
-					objDSInfo.WriteElementString("SampleName", FixNull(udtSampleInfo.SampleName))
-					objDSInfo.WriteElementString("Comment1", FixNull(udtSampleInfo.Comment1))
-					objDSInfo.WriteElementString("Comment2", FixNull(udtSampleInfo.Comment2))
-					objDSInfo.WriteEndElement()		  ' SampleInfo EndElement
-				End If
+                objDSInfo.WriteEndElement()       ' AcquisitionInfo EndElement
+
+                objDSInfo.WriteStartElement("TICInfo")
+                objDSInfo.WriteElementString("TIC_Max_MS", MathUtilities.ValueToString(objSummaryStats.MSStats.TICMax, 5))
+                objDSInfo.WriteElementString("TIC_Max_MSn", MathUtilities.ValueToString(objSummaryStats.MSnStats.TICMax, 5))
+                objDSInfo.WriteElementString("BPI_Max_MS", MathUtilities.ValueToString(objSummaryStats.MSStats.BPIMax, 5))
+                objDSInfo.WriteElementString("BPI_Max_MSn", MathUtilities.ValueToString(objSummaryStats.MSnStats.BPIMax, 5))
+                objDSInfo.WriteElementString("TIC_Median_MS", MathUtilities.ValueToString(objSummaryStats.MSStats.TICMedian, 5))
+                objDSInfo.WriteElementString("TIC_Median_MSn", MathUtilities.ValueToString(objSummaryStats.MSnStats.TICMedian, 5))
+                objDSInfo.WriteElementString("BPI_Median_MS", MathUtilities.ValueToString(objSummaryStats.MSStats.BPIMedian, 5))
+                objDSInfo.WriteElementString("BPI_Median_MSn", MathUtilities.ValueToString(objSummaryStats.MSnStats.BPIMedian, 5))
+                objDSInfo.WriteEndElement()       ' TICInfo EndElement
+
+                ' Only write the SampleInfo block if udtSampleInfo contains entries
+                If udtSampleInfo.HasData() Then
+                    objDSInfo.WriteStartElement("SampleInfo")
+                    objDSInfo.WriteElementString("SampleName", FixNull(udtSampleInfo.SampleName))
+                    objDSInfo.WriteElementString("Comment1", FixNull(udtSampleInfo.Comment1))
+                    objDSInfo.WriteElementString("Comment2", FixNull(udtSampleInfo.Comment2))
+                    objDSInfo.WriteEndElement()       ' SampleInfo EndElement
+                End If
 
 
-				objDSInfo.WriteEndElement()	 'End the "Root" element (DatasetInfo)
-				objDSInfo.WriteEndDocument() 'End the document
+                objDSInfo.WriteEndElement()  'End the "Root" element (DatasetInfo)
+                objDSInfo.WriteEndDocument() 'End the document
 
-				objDSInfo.Close()
-				objDSInfo = Nothing
+                objDSInfo.Close()
+                objDSInfo = Nothing
 
-				' Now Rewind the memory stream and output as a string
-				objMemStream.Position = 0
+                ' Now Rewind the memory stream and output as a string
+                objMemStream.Position = 0
                 Dim srStreamReader = New StreamReader(objMemStream)
 
-				' Return the XML as text
-				Return srStreamReader.ReadToEnd()
+                ' Return the XML as text
+                Return srStreamReader.ReadToEnd()
 
-			Catch ex As Exception
+            Catch ex As Exception
 				ReportError("Error in CreateDatasetInfoXML: " & ex.Message)
 			End Try
 
