@@ -58,13 +58,17 @@ Public Class clsSpectrumTypeClassifier
 		Return mCentroidedSpectra.Sum(Function(item) item.Value)
 	End Function
 
-	Public Function CentroidedSpectra(ByVal msLevel As Integer) As Integer
-		Return (From item In mCentroidedSpectra Where item.Key = msLevel).Sum(Function(item) item.Value)
-	End Function
+    Public Function CentroidedMS1Spectra() As Integer
+        Return (From item In mCentroidedSpectra Where item.Key <= 1).Sum(Function(item) item.Value)
+    End Function
+
+    Public Function CentroidedMSnSpectra() As Integer
+        Return (From item In mCentroidedSpectra Where item.Key > 1).Sum(Function(item) item.Value)
+    End Function
 
 	Public Function FractionCentroided() As Double
 
-		Dim total = TotalSpectra
+        Dim total = TotalSpectra()
 		If total = 0 Then
 			Return 0
 		Else
@@ -73,24 +77,29 @@ Public Class clsSpectrumTypeClassifier
 
 	End Function
 
-	Public Function FractionCentroided(ByVal msLevel As Integer) As Double
+    Public Function FractionCentroidedMSn() As Double
 
-		Dim total = TotalSpectra(msLevel)
-		If total = 0 Then
-			Return 0
-		Else
-			Return CentroidedSpectra(msLevel) / CDbl(total)
-		End If
+        Dim total = TotalMSnSpectra()
+        If total = 0 Then
+            Return 0
+        Else
+            Return CentroidedMSnSpectra() / CDbl(total)
+        End If
 
-	End Function
+    End Function
 
 	Public Function TotalSpectra() As Integer
 		Return mTotalSpectra.Sum(Function(item) item.Value)
 	End Function
 
-	Public Function TotalSpectra(ByVal msLevel As Integer) As Integer
-		Return (From item In mTotalSpectra Where item.Key = msLevel).Sum(Function(item) item.Value)
-	End Function
+    Public Function TotalMS1Spectra() As Integer
+        Return (From item In mTotalSpectra Where item.Key <= 1).Sum(Function(item) item.Value)
+    End Function
+
+    Public Function TotalMSnSpectra() As Integer
+        Return (From item In mTotalSpectra Where item.Key > 1).Sum(Function(item) item.Value)
+    End Function
+
 
 	''' <summary>
 	''' Examine the spectra in a _DTA.txt file to determine the number of centroided spectra

@@ -635,13 +635,13 @@ Namespace DSSummarizer
                 objDSInfo.WriteElementString("FileSizeBytes", udtDatasetFileInfo.FileSizeBytes.ToString())
 
                 If includeCentroidStats Then
-                    Dim centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedSpectra(1)
-                    Dim centroidedMS2Spectra = mSpectraTypeClassifier.CentroidedSpectra(2)
+                    Dim centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedMS1Spectra
+                    Dim centroidedMSnSpectra = mSpectraTypeClassifier.CentroidedMSnSpectra
 
-                    Dim totalMS1Spectra = mSpectraTypeClassifier.TotalSpectra(1)
-                    Dim totalMS2Spectra = mSpectraTypeClassifier.TotalSpectra(2)
+                    Dim totalMS1Spectra = mSpectraTypeClassifier.TotalMS1Spectra
+                    Dim totalMSnSpectra = mSpectraTypeClassifier.TotalMSnSpectra
 
-                    If totalMS1Spectra + totalMS2Spectra = 0 Then
+                    If totalMS1Spectra + totalMSnSpectra = 0 Then
                         ' None of the spectra had MSLevel 1 or MSLevel 2
                         ' This shouldn't normally be the case; nevertheless, we'll report the totals, regardless of MSLevel, using the MS1 elements
                         centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedSpectra()
@@ -649,10 +649,10 @@ Namespace DSSummarizer
                     End If
 
                     objDSInfo.WriteElementString("ProfileScanCountMS1", (totalMS1Spectra - centroidedMS1Spectra).ToString())
-                    objDSInfo.WriteElementString("ProfileScanCountMS2", (totalMS2Spectra - centroidedMS2Spectra).ToString())
+                    objDSInfo.WriteElementString("ProfileScanCountMS2", (totalMSnSpectra - centroidedMSnSpectra).ToString())
 
                     objDSInfo.WriteElementString("CentroidScanCountMS1", centroidedMS1Spectra.ToString())
-                    objDSInfo.WriteElementString("CentroidScanCountMS2", centroidedMS2Spectra.ToString())
+                    objDSInfo.WriteElementString("CentroidScanCountMS2", centroidedMSnSpectra.ToString())
 
                 End If
 
