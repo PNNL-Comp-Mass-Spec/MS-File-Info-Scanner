@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.3.5609; May 11, 2015
+	- Switched to AnyCPU
+		- File access that involves ProteoWizard will only work on a 64-bit machine
+
 Version 1.2.5567; March 30, 2015
 	- Updated SpectraTypeClassifier to count all scans with MSLevel 2 or higher as MSn spectra
 		- Previously only considered MS2 spectra, thus skipping MS3 spectra 

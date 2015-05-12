@@ -5,6 +5,7 @@ Option Strict On
 ' Last modified August 27, 2013
 
 Imports PNNLOmics.Utilities
+Imports System.IO
 Imports UIMFLibrary
 
 Public Class clsUIMFInfoScanner

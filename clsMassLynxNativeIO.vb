@@ -921,18 +921,21 @@ LoadMSScanHeaderErrorHandler:
 
 	End Sub
 
-	Private Function CLngSafe(ByRef strValue As String) As Integer
-		On Error Resume Next
-		If IsNumeric(strValue) Then
-			CLngSafe = CInt(strValue)
-		End If
-	End Function
+    Private Function CLngSafe(strValue As String) As Integer
+        Dim value As Integer
+        If Integer.TryParse(strValue, value) Then
+            Return value
+        End If        
+        Return 0
+    End Function
 
-	Private Function CSngSafe(ByRef strValue As String) As Single
-		If IsNumeric(strValue) Then
-			CSngSafe = CSng(strValue)
-		End If
-	End Function
+    Private Function CSngSafe(strValue As String) As Single
+        Dim value As Single
+        If Single.TryParse(strValue, value) Then
+            Return value
+        End If
+        Return 0
+    End Function
 
 	Private Function GetFunctionNumberZeroPadded(ByRef lngFunctionNumber As Integer) As String
 		Return lngFunctionNumber.ToString.PadLeft(3, "0")

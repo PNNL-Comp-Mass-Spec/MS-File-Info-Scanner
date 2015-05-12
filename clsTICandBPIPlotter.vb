@@ -1,5 +1,9 @@
 ﻿Option Strict On
 
+Imports System.IO
+Imports OxyPlot
+Imports OxyPlot.Series
+
 Public Class clsTICandBPIPlotter
 
 #Region "Constants, Enums, Structures"
@@ -197,6 +201,33 @@ Public Class clsTICandBPIPlotter
 		mRecentFiles.Add(udtOutputFileInfo)
 	End Sub
 
+    Protected Sub AddSeries(myplot As PlotModel, objPoints As List(Of DataPoint))
+
+        ' Generate a black curve with no symbols
+        Dim series = New LineSeries
+
+        If objPoints.Count > 0 Then
+            Dim eSymbolType = MarkerType.None
+            If objPoints.Count = 1 Then
+                eSymbolType = MarkerType.Circle
+            End If
+
+            series.Color = OxyColors.Black
+            series.StrokeThickness = 1
+            series.MarkerType = eSymbolType
+
+            If objPoints.Count = 1 Then
+                series.MarkerSize = 8
+                series.MarkerFill = OxyColors.DarkRed
+            End If
+
+            series.Points.AddRange(objPoints)
+
+            myPlot.Series.Add(series)
+        End If
+
+    End Sub
+
 	''' <summary>
 	''' Returns the file name of the recently saved file of the given type
 	''' </summary>
@@ -241,258 +272,183 @@ Public Class clsTICandBPIPlotter
 	''' <param name="intMSLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
 	''' <returns>Zedgraph plot</returns>
 	''' <remarks></remarks>
-	Private Function InitializeGraphPane(ByRef objData As clsChromatogramInfo, _
-										 ByVal strTitle As String, _
-										 ByVal intMSLevelFilter As Integer, _
-										 ByVal strXAxisLabel As String, _
-										 ByVal strYAxisLabel As String, _
-										 ByVal blnAutoMinMaxY As Boolean, _
-										 ByVal blnYAxisExponentialNotation As Boolean) As ZedGraph.GraphPane
+    Private Function InitializePlot(
+      objData As clsChromatogramInfo,
+      strTitle As String,
+      intMSLevelFilter As Integer,
+      strXAxisLabel As String,
+      strYAxisLabel As String,
+      blnAutoMinMaxY As Boolean,
+      blnYAxisExponentialNotation As Boolean) As clsPlotContainer
 
-		Const FONT_SIZE_BASE As Integer = 11
+        Dim intMaxScan = 0
+        Dim dblScanTimeMax As Double = 0
+        Dim dblMaxIntensity As Double = 0
+        
+        ' Instantiate the ZedGraph object to track the points
+        Dim objPoints = New List(Of DataPoint)
 
-		Dim myPane As New ZedGraph.GraphPane
+        For Each chromDataPoint In objData.Scans
 
-		Dim objPoints As ZedGraph.PointPairList
+            If intMSLevelFilter = 0 OrElse _
+               chromDataPoint.MSLevel = intMSLevelFilter OrElse _
+               intMSLevelFilter = 2 And chromDataPoint.MSLevel >= 2 Then
 
-		Dim intIndex As Integer
+                objPoints.Add(New DataPoint(chromDataPoint.ScanNum, chromDataPoint.Intensity))
 
-		Dim intMaxScan As Integer
-		Dim dblScanTimeMax As Double
-		Dim dblMaxIntensity As Double
+                If chromDataPoint.TimeMinutes > dblScanTimeMax Then
+                    dblScanTimeMax = chromDataPoint.TimeMinutes
+                End If
 
+                If chromDataPoint.ScanNum > intMaxScan Then
+                    intMaxScan = chromDataPoint.ScanNum
+                End If
 
-		' Instantiate the ZedGraph object to track the points
-		objPoints = New ZedGraph.PointPairList
+                If chromDataPoint.Intensity > dblMaxIntensity Then
+                    dblMaxIntensity = chromDataPoint.Intensity
+                End If
+            End If
+        Next
 
-		intMaxScan = 0
-		dblScanTimeMax = 0
-		dblMaxIntensity = 0
+        If objPoints.Count = 0 Then
+            ' Nothing to plot
+            Return New clsPlotContainer(New PlotModel)
+        End If
 
+        ' Round intMaxScan down to the nearest multiple of 10
+        intMaxScan = CInt(Math.Ceiling(intMaxScan / 10.0) * 10)
 
-		With objData
+        ' Multiple dblMaxIntensity by 2% and then round up to the nearest integer
+        dblMaxIntensity = CDbl(Math.Ceiling(dblMaxIntensity * 1.02))
 
-			For intIndex = 0 To .ScanCount - 1
-				If intMSLevelFilter = 0 OrElse _
-				   .ScanMSLevel(intIndex) = intMSLevelFilter OrElse _
-				   intMSLevelFilter = 2 And .ScanMSLevel(intIndex) >= 2 Then
+        Dim myPlot = clsOxyplotUtilities.GetBasicPlotModel(strTitle, strXAxisLabel, strYAxisLabel)
 
-					objPoints.Add(New ZedGraph.PointPair(.ScanNum(intIndex), .ScanIntensity(intIndex)))
+        If blnYAxisExponentialNotation Then
+            myPlot.Axes(1).StringFormat = "0.00E+00"
+        End If
 
-					If .ScanTimeMinutes(intIndex) > dblScanTimeMax Then
-						dblScanTimeMax = .ScanTimeMinutes(intIndex)
-					End If
+        AddSeries(myPlot, objPoints)
+       
+        Dim plotContainer = New clsPlotContainer(myPlot)
+        plotContainer.FontSizeBase = clsOxyplotUtilities.FONT_SIZE_BASE
 
-					If .ScanNum(intIndex) > intMaxScan Then
-						intMaxScan = .ScanNum(intIndex)
-					End If
+        ' Possibly add a label showing the maximum elution time
+        If dblScanTimeMax > 0 Then
 
-					If .ScanIntensity(intIndex) > dblMaxIntensity Then
-						dblMaxIntensity = .ScanIntensity(intIndex)
-					End If
-				End If
-			Next intIndex
-
-		End With
-
-		If objPoints.Count = 0 Then
-			' Nothing to plot
-			Return myPane
-		End If
-
-		' Round intMaxScan down to the nearest multiple of 10
-		intMaxScan = CInt(Math.Ceiling(intMaxScan / 10.0) * 10)
-
-		' Multiple dblMaxIntensity by 2% and then round up to the nearest integer
-		dblMaxIntensity = CDbl(Math.Ceiling(dblMaxIntensity * 1.02))
-
-		' Set the titles and axis labels
-		myPane.Title.Text = String.Copy(strTitle)
-		myPane.XAxis.Title.Text = strXAxisLabel
-		myPane.YAxis.Title.Text = strYAxisLabel
-
-		' Generate a black curve with no symbols
-		Dim myCurve As ZedGraph.LineItem
-		myPane.CurveList.Clear()
-
-        If objPoints.Count > 0 Then
-            Dim eSymbolType = ZedGraph.SymbolType.None
-            If objPoints.Count = 1 Then
-                eSymbolType = ZedGraph.SymbolType.Circle
+            Dim strCaption As String
+            If dblScanTimeMax < 2 Then
+                strCaption = Math.Round(dblScanTimeMax, 2).ToString("0.00") & " minutes"
+            ElseIf dblScanTimeMax < 10 Then
+                strCaption = Math.Round(dblScanTimeMax, 1).ToString("0.0") & " minutes"
+            Else
+                strCaption = Math.Round(dblScanTimeMax, 0).ToString("0") & " minutes"
             End If
 
-            myCurve = myPane.AddCurve(strTitle, objPoints, Drawing.Color.Black, eSymbolType)
+            plotContainer.AnnotationBottomRight = strCaption
 
-            myCurve.Line.Width = 1
+            ' Alternative method is to add a TextAnnotation, but these are inside the main plot area
+            ' and are tied to a data point
 
-            If objPoints.Count = 1 Then
-                myCurve.Symbol.Size = 8
-                myCurve.Symbol.Fill.Type = ZedGraph.FillType.Solid
-                myCurve.Symbol.Fill.Color = Drawing.Color.DarkRed
-            End If
+            'Dim objScanTimeMaxText = New TextAnnotation() With {
+            '    .TextRotation = 0,
+            '    .Text = strCaption,
+            '    .Stroke = OxyColors.Black,
+            '    .StrokeThickness = 2,
+            '    .FontSize = FONT_SIZE_BASE
+            '}
+
+            'objScanTimeMaxText.TextPosition = New OxyPlot.DataPoint(intMaxScan, 0)
+            'myPlot.Annotations.Add(objScanTimeMaxText)
 
         End If
 
-		' Possibly add a label showing the maximum elution time
-		If dblScanTimeMax > 0 Then
+        ' Override the auto-computed axis range
+        myPlot.Axes(0).Minimum = 0
+        myPlot.Axes(0).Maximum = intMaxScan
 
-			Dim strCaption As String
-			If dblScanTimeMax < 2 Then
-				strCaption = Math.Round(dblScanTimeMax, 2).ToString("0.00") & " minutes"
-			ElseIf dblScanTimeMax < 10 Then
-				strCaption = Math.Round(dblScanTimeMax, 1).ToString("0.0") & " minutes"
-			Else
-				strCaption = Math.Round(dblScanTimeMax, 0).ToString("0") & " minutes"
-			End If
+        ' Override the auto-computed axis range
+        If blnAutoMinMaxY Then
+            ' Auto scale
+        Else
+            myPlot.Axes(1).Minimum = 0
+            myPlot.Axes(1).Maximum = dblMaxIntensity
+        End If
 
-			Dim objScanTimeMaxText As New ZedGraph.TextObj(strCaption, 1, 1, ZedGraph.CoordType.PaneFraction)
+        ' Hide the legend
+        myPlot.IsLegendVisible = False
 
-			With objScanTimeMaxText
-				.FontSpec.Angle = 0
-				.FontSpec.FontColor = Drawing.Color.Black
-				.FontSpec.IsBold = False
-				.FontSpec.Size = FONT_SIZE_BASE
-				.FontSpec.Border.IsVisible = False
-				.FontSpec.Fill.IsVisible = False
-				.Location.AlignH = ZedGraph.AlignH.Right
-				.Location.AlignV = ZedGraph.AlignV.Bottom
-			End With
-			myPane.GraphObjList.Add(objScanTimeMaxText)
+        Return plotContainer
 
-		End If
+    End Function
 
-		' Hide the x and y axis grids
-		myPane.XAxis.MajorGrid.IsVisible = False
-		myPane.YAxis.MajorGrid.IsVisible = False
+    Public Sub Reset()
 
-		' Set the X-axis to display unmodified scan numbers (by default, ZedGraph scales them to a range between 0 and 10)
-		myPane.XAxis.Scale.Mag = 0
-		myPane.XAxis.Scale.MagAuto = False
-		myPane.XAxis.Scale.MaxGrace = 0
+        If mBPI Is Nothing Then
+            mBPI = New clsChromatogramInfo
+            mTIC = New clsChromatogramInfo
+        Else
+            mBPI.Initialize()
+            mTIC.Initialize()
+        End If
 
-		' Override the auto-computed axis range
-		myPane.XAxis.Scale.Min = 0
-		myPane.XAxis.Scale.Max = intMaxScan
+        mRecentFiles.Clear()
 
-		'' Could set the Y-axis to display unmodified m/z values
-		'myPane.YAxis.Scale.Mag = 0
-		'myPane.YAxis.Scale.MagAuto = False
-		'myPane.YAxis.Scale.MaxGrace = 0.01
+    End Sub
 
-		' Override the auto-computed axis range
-		If blnAutoMinMaxY Then
-			myPane.YAxis.Scale.MinAuto = True
-			myPane.YAxis.Scale.MaxAuto = True
-		Else
-			myPane.YAxis.Scale.Min = 0
-			myPane.YAxis.Scale.Max = dblMaxIntensity
-		End If
+    Public Function SaveTICAndBPIPlotFiles(ByVal strDatasetName As String, _
+                ByVal strOutputFolderPath As String, _
+                ByRef strErrorMessage As String) As Boolean
 
-		myPane.YAxis.Title.IsOmitMag = True
+        Dim plotContainer As clsPlotContainer
+        Dim strPNGFilePath As String
+        Dim blnSuccess As Boolean
 
-		If blnYAxisExponentialNotation Then
-			AddHandler myPane.YAxis.ScaleFormatEvent, AddressOf ZedGraphYScaleFormatter
-		End If
+        Try
+            strErrorMessage = String.Empty
 
-		' Align the Y axis labels so they are flush to the axis
-		myPane.YAxis.Scale.Align = ZedGraph.AlignP.Inside
+            mRecentFiles.Clear()
 
-		' Adjust the font sizes
-		myPane.XAxis.Title.FontSpec.Size = FONT_SIZE_BASE
-		myPane.XAxis.Title.FontSpec.IsBold = True
-		myPane.XAxis.Scale.FontSpec.Size = FONT_SIZE_BASE
+            ' Check whether all of the spectra have .MSLevel = 0
+            ' If they do, change the level to 1
+            ValidateMSLevel(mBPI)
+            ValidateMSLevel(mTIC)
 
-		myPane.YAxis.Title.FontSpec.Size = FONT_SIZE_BASE
-		myPane.YAxis.Title.FontSpec.IsBold = True
-		myPane.YAxis.Scale.FontSpec.Size = FONT_SIZE_BASE
+            If mRemoveZeroesFromEnds Then
+                ' Check whether the last few scans have values if 0; if they do, remove them
+                RemoveZeroesAtFrontAndBack(mBPI)
+                RemoveZeroesAtFrontAndBack(mTIC)
+            End If
 
-		myPane.Title.FontSpec.Size = FONT_SIZE_BASE + 1
-		myPane.Title.FontSpec.IsBold = True
+            plotContainer = InitializePlot(mBPI, strDatasetName & " - " & mBPIPlotAbbrev & " - MS Spectra", 1, mBPIXAxisLabel, mBPIYAxisLabel, mBPIAutoMinMaxY, mBPIYAxisExponentialNotation)
+            If plotContainer.SeriesCount > 0 Then
+                strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName & "_" & mBPIPlotAbbrev & "_MS.png")
+                plotContainer.SaveToPNG(strPNGFilePath, 1024, 600, 96)
+                AddRecentFile(strPNGFilePath, eOutputFileTypes.BPIMS)
+            End If
 
-		' Fill the axis background with a gradient
-		myPane.Chart.Fill = New ZedGraph.Fill(System.Drawing.Color.White, Drawing.Color.FromArgb(255, 230, 230, 230), 45.0F)
+            plotContainer = InitializePlot(mBPI, strDatasetName & " - " & mBPIPlotAbbrev & " - MS2 Spectra", 2, mBPIXAxisLabel, mBPIYAxisLabel, mBPIAutoMinMaxY, mBPIYAxisExponentialNotation)
+            If plotContainer.SeriesCount > 0 Then
+                strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName & "_" & mBPIPlotAbbrev & "_MSn.png")
+                plotContainer.SaveToPNG(strPNGFilePath, 1024, 600, 96)
+                AddRecentFile(strPNGFilePath, eOutputFileTypes.BPIMSn)
+            End If
 
-		' Could use the following to simply fill with white
-		'myPane.Chart.Fill = New ZedGraph.Fill(Drawing.Color.White)
+            plotContainer = InitializePlot(mTIC, strDatasetName & " - " & mTICPlotAbbrev & " - All Spectra", 0, mTICXAxisLabel, mTICYAxisLabel, mTICAutoMinMaxY, mTICYAxisExponentialNotation)
+            If plotContainer.SeriesCount > 0 Then
+                strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName & "_" & mTICPlotAbbrev & ".png")
+                plotContainer.SaveToPNG(strPNGFilePath, 1024, 600, 96)
+                AddRecentFile(strPNGFilePath, eOutputFileTypes.TIC)
+            End If
 
-		' Hide the legend
-		myPane.Legend.IsVisible = False
+            blnSuccess = True
+        Catch ex As Exception
+            strErrorMessage = ex.Message
+            blnSuccess = False
+        End Try
 
-		' Force a plot update
-		myPane.AxisChange()
+        Return blnSuccess
 
-		Return myPane
-
-	End Function
-
-	Public Sub Reset()
-
-		If mBPI Is Nothing Then
-			mBPI = New clsChromatogramInfo
-			mTIC = New clsChromatogramInfo
-		Else
-			mBPI.Initialize()
-			mTIC.Initialize()
-		End If
-
-		mRecentFiles.Clear()
-
-	End Sub
-
-	Public Function SaveTICAndBPIPlotFiles(ByVal strDatasetName As String, _
-				ByVal strOutputFolderPath As String, _
-				ByRef strErrorMessage As String) As Boolean
-
-		Dim myPane As ZedGraph.GraphPane
-		Dim strPNGFilePath As String
-		Dim blnSuccess As Boolean
-
-		Try
-			strErrorMessage = String.Empty
-
-			mRecentFiles.Clear()
-
-			' Check whether all of the spectra have .MSLevel = 0
-			' If they do, change the level to 1
-			ValidateMSLevel(mBPI)
-			ValidateMSLevel(mTIC)
-
-			If mRemoveZeroesFromEnds Then
-				' Check whether the last few scans have values if 0; if they do, remove them
-				RemoveZeroesAtFrontAndBack(mBPI)
-				RemoveZeroesAtFrontAndBack(mTIC)
-			End If
-
-			myPane = InitializeGraphPane(mBPI, strDatasetName & " - " & mBPIPlotAbbrev & " - MS Spectra", 1, mBPIXAxisLabel, mBPIYAxisLabel, mBPIAutoMinMaxY, mBPIYAxisExponentialNotation)
-			If myPane.CurveList.Count > 0 Then
-				strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName & "_" & mBPIPlotAbbrev & "_MS.png")
-				myPane.GetImage(1024, 600, 300, False).Save(strPNGFilePath, Drawing.Imaging.ImageFormat.Png)
-				AddRecentFile(strPNGFilePath, eOutputFileTypes.BPIMS)
-			End If
-
-			myPane = InitializeGraphPane(mBPI, strDatasetName & " - " & mBPIPlotAbbrev & " - MS2 Spectra", 2, mBPIXAxisLabel, mBPIYAxisLabel, mBPIAutoMinMaxY, mBPIYAxisExponentialNotation)
-			If myPane.CurveList.Count > 0 Then
-				strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName & "_" & mBPIPlotAbbrev & "_MSn.png")
-				myPane.GetImage(1024, 600, 300, False).Save(strPNGFilePath, Drawing.Imaging.ImageFormat.Png)
-				AddRecentFile(strPNGFilePath, eOutputFileTypes.BPIMSn)
-			End If
-
-			myPane = InitializeGraphPane(mTIC, strDatasetName & " - " & mTICPlotAbbrev & " - All Spectra", 0, mTICXAxisLabel, mTICYAxisLabel, mTICAutoMinMaxY, mTICYAxisExponentialNotation)
-			If myPane.CurveList.Count > 0 Then
-				strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName & "_" & mTICPlotAbbrev & ".png")
-				myPane.GetImage(1024, 600, 300, False).Save(strPNGFilePath, Drawing.Imaging.ImageFormat.Png)
-				AddRecentFile(strPNGFilePath, eOutputFileTypes.TIC)
-			End If
-
-			blnSuccess = True
-		Catch ex As Exception
-			strErrorMessage = ex.Message
-			blnSuccess = False
-		End Try
-
-		Return blnSuccess
-
-	End Function
+    End Function
 
     Protected Sub RemoveZeroesAtFrontAndBack(ByRef objChrom As clsChromatogramInfo)
         Const MAX_POINTS_TO_CHECK As Integer = 100
@@ -507,7 +463,7 @@ Public Class clsTICandBPIPlotter
         intIndexNonZeroValue = -1
         intZeroPointCount = 0
         For intIndex = objChrom.ScanCount - 1 To 0 Step -1
-            If objChrom.ScanIntensity(intIndex) = 0 Then
+            If Math.Abs(objChrom.GetDataPoint(intIndex).Intensity) < Single.Epsilon Then
                 intZeroPointCount += 1
             Else
                 intIndexNonZeroValue = intIndex
@@ -526,7 +482,7 @@ Public Class clsTICandBPIPlotter
         intIndexNonZeroValue = -1
         intZeroPointCount = 0
         For intIndex = 0 To objChrom.ScanCount - 1
-            If objChrom.ScanIntensity(intIndex) = 0 Then
+            If Math.Abs(objChrom.GetDataPoint(intIndex).Intensity) < Single.Epsilon Then
                 intZeroPointCount += 1
             Else
                 intIndexNonZeroValue = intIndex
@@ -547,7 +503,7 @@ Public Class clsTICandBPIPlotter
         Dim blnMSLevelDefined As Boolean
 
         For intIndex = 0 To objChrom.ScanCount - 1
-            If objChrom.ScanMSLevel(intIndex) > 0 Then
+            If objChrom.GetDataPoint(intIndex).MSLevel > 0 Then
                 blnMSLevelDefined = True
                 Exit For
             End If
@@ -556,31 +512,34 @@ Public Class clsTICandBPIPlotter
         If Not blnMSLevelDefined Then
             ' Set the MSLevel to 1 for all scans
             For intIndex = 0 To objChrom.ScanCount - 1
-                objChrom.ScanMSLevel(intIndex) = 1
+                objChrom.GetDataPoint(intIndex).MSLevel = 1
             Next intIndex
         End If
 
     End Sub
 
-    Private Function ZedGraphYScaleFormatter(ByVal pane As ZedGraph.GraphPane, _
-                                               ByVal axis As ZedGraph.Axis, _
-                                               ByVal val As Double, _
-                                               ByVal index As Int32) As String
-        If val = 0 Then
-            Return "0"
-        Else
-            Return val.ToString("0.00E+00")
-        End If
-
-    End Function
+    Protected Class clsChromatogramDataPoint
+        Public Property ScanNum As Integer
+        Public Property TimeMinutes As Single
+        Public Property Intensity As Double
+        Public Property MSLevel As Integer
+    End Class
 
     Protected Class clsChromatogramInfo
 
-        Public ScanCount As Integer
-        Public ScanNum() As Integer
-        Public ScanTimeMinutes() As Single
-        Public ScanIntensity() As Double
-        Public ScanMSLevel() As Integer
+        Public ReadOnly Property ScanCount As Integer
+            Get
+                Return mScans.Count
+            End Get
+        End Property
+
+        Public ReadOnly Property Scans As IEnumerable(Of clsChromatogramDataPoint)
+            Get
+                Return mScans
+            End Get
+        End Property
+
+        Protected mScans As List(Of clsChromatogramDataPoint)
 
         Public Sub New()
             Me.Initialize()
@@ -591,38 +550,39 @@ Public Class clsTICandBPIPlotter
                             ByVal sngScanTimeMinutes As Single, _
                             ByVal dblIntensity As Double)
 
-            If ScanNum.Contains(intScanNumber) Then
+            If (From item In mScans Where item.ScanNum = intScanNumber Select item).Any() Then
                 Throw New Exception("Scan " & intScanNumber & " has already been added to the TIC or BPI; programming error")
             End If
 
-            If Me.ScanCount >= Me.ScanNum.Length Then
-                ReDim Preserve Me.ScanNum(Me.ScanNum.Length * 2 - 1)
-                ReDim Preserve Me.ScanTimeMinutes(Me.ScanNum.Length - 1)
-                ReDim Preserve Me.ScanIntensity(Me.ScanNum.Length - 1)
-                ReDim Preserve Me.ScanMSLevel(Me.ScanNum.Length - 1)
+            Dim chromDataPoint = New clsChromatogramDataPoint With {
+                .ScanNum = intScanNumber,
+                .TimeMinutes = sngScanTimeMinutes,
+                .Intensity = dblIntensity,
+                .MSLevel = intMSLevel
+            }
+
+            mScans.Add(chromDataPoint)
+        End Sub
+
+        Public Function GetDataPoint(ByVal index As Integer) As clsChromatogramDataPoint
+            If mScans.Count = 0 Then
+                Throw New Exception("Chromatogram list is empty; cannot retrieve data point at index " & index)
+            End If
+            If index < 0 OrElse index >= mScans.Count Then
+                Throw New Exception("Chromatogram index out of range: " & index & "; should be between 0 and " & mScans.Count - 1)
             End If
 
-            Me.ScanNum(Me.ScanCount) = intScanNumber
-            Me.ScanTimeMinutes(Me.ScanCount) = sngScanTimeMinutes
-            Me.ScanIntensity(Me.ScanCount) = dblIntensity
-            Me.ScanMSLevel(Me.ScanCount) = intMSLevel
+            Return mScans(index)
 
-            Me.ScanCount += 1
-        End Sub
+        End Function
 
         Public Sub Initialize()
-            ScanCount = 0
-            ReDim ScanNum(9)
-            ReDim ScanTimeMinutes(9)
-            ReDim ScanIntensity(9)
-            ReDim ScanMSLevel(9)
+            mScans = New List(Of clsChromatogramDataPoint)
         End Sub
 
+        <Obsolete("No longer needed")>
         Public Sub TrimArrays()
-            ReDim Preserve ScanNum(ScanCount - 1)
-            ReDim Preserve ScanTimeMinutes(ScanCount - 1)
-            ReDim Preserve ScanIntensity(ScanCount - 1)
-            ReDim Preserve ScanMSLevel(ScanCount - 1)
+
         End Sub
 
         Public Sub RemoveAt(ByVal Index As Integer)
@@ -630,33 +590,9 @@ Public Class clsTICandBPIPlotter
         End Sub
 
         Public Sub RemoveRange(ByVal Index As Integer, ByVal Count As Integer)
-            Dim intSourceIndex As Integer
-            Dim i As Integer
-            Dim intIndexMaxNew As Integer
 
             If Index >= 0 And Index < ScanCount And Count > 0 Then
-                intSourceIndex = -1
-                intIndexMaxNew = ScanCount - 1
-
-                For i = Index To ScanCount - 1
-                    If i + Count >= ScanCount Then
-                        intIndexMaxNew = i - 1
-                        Exit For
-                    Else
-                        intIndexMaxNew = i
-                    End If
-                    intSourceIndex = i + Count
-
-                    ScanNum(i) = ScanNum(intSourceIndex)
-                    ScanTimeMinutes(i) = ScanTimeMinutes(intSourceIndex)
-                    ScanIntensity(i) = ScanIntensity(intSourceIndex)
-                    ScanMSLevel(i) = ScanMSLevel(intSourceIndex)
-                Next
-
-                If intIndexMaxNew < ScanCount - 1 Then
-                    ScanCount = intIndexMaxNew + 1
-                    TrimArrays()
-                End If
+                mScans.RemoveRange(index, count)
             End If
 
         End Sub

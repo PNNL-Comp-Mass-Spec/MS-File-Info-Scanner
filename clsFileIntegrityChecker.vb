@@ -846,7 +846,7 @@ Public Class clsFileIntegrityChecker
         Dim blnZipIsValid As Boolean = False
         Dim strMessage As String
 
-        Dim objZipLibTest As Threading.Thread
+        Dim objZipLibTest As System.Threading.Thread
         Dim dtStartTime As DateTime
         Dim sngMaxExecutionTimeMinutes As Single
 
@@ -894,14 +894,14 @@ Public Class clsFileIntegrityChecker
             sngMaxExecutionTimeMinutes = CSng(dblFileSizeMB * MAX_THREAD_RATE_QUICK_CHECK)
         End If
 
-        objZipLibTest = New Threading.Thread(AddressOf CheckZipFileWork)
+        objZipLibTest = New System.Threading.Thread(AddressOf CheckZipFileWork)
         dtStartTime = DateTime.UtcNow
 
         objZipLibTest.Start()
         Do
             objZipLibTest.Join(250)
 
-            If objZipLibTest.ThreadState = Threading.ThreadState.Aborted Then
+            If objZipLibTest.ThreadState = System.Threading.ThreadState.Aborted Then
                 Exit Do
             ElseIf DateTime.UtcNow.Subtract(dtStartTime).TotalMinutes >= sngMaxExecutionTimeMinutes Then
                 ' Execution took too long; abort
@@ -913,7 +913,7 @@ Public Class clsFileIntegrityChecker
 
                 Exit Do
             End If
-        Loop While objZipLibTest.ThreadState <> Threading.ThreadState.Stopped
+        Loop While objZipLibTest.ThreadState <> System.Threading.ThreadState.Stopped
 
         Return mZipFileWorkParams.ZipIsValid
 

@@ -356,7 +356,7 @@ Public Class clsParseCommandLine
 		Do
 			Console.Write("."c)
 
-			Threading.Thread.Sleep(intMillisecondsBetweenDots)
+            System.Threading.Thread.Sleep(intMillisecondsBetweenDots)
 
 			intIteration += 1
 		Loop While intIteration < intTotalIterations

@@ -3,14 +3,40 @@
 <CLSCompliant(True)>
 Public Class clsSpectrumTypeClassifier
 
-	Public Const DEFAULT_PPM_DIFF_THRESHOLD As Integer = 50
+#Region "Constants and Enums"
+    Public Const DEFAULT_PPM_DIFF_THRESHOLD As Integer = 50
+
+    Public Enum eCentroidStatusConstants
+        Unknown = 0
+        Profile = 1
+        Centroid = 2
+    End Enum
+
+#End Region
+	
 
 #Region "Module Wide Variables"
 	Protected mErrorMessage As String
 	Protected mPpmDiffThreshold As Integer
 
 	' The following dictionaries keep track of the number of spectra at each MSLevel (1 for MS1, 2 for MS2, etc.)
-	Protected mCentroidedSpectra As Dictionary(Of Integer, Integer)
+
+    ''' <summary>
+    ''' Centroided spectra
+    ''' </summary>
+    ''' <remarks></remarks>
+    Protected mCentroidedSpectra As Dictionary(Of Integer, Integer)
+
+    ''' <summary>
+    ''' Centroided spectra that were mis-classified as profile mode
+    ''' </summary>
+    ''' <remarks></remarks>
+    Protected mCentroidedSpectraClassifiedAsProfile As Dictionary(Of Integer, Integer)
+
+    ''' <summary>
+    ''' All spectra
+    ''' </summary>
+    ''' <remarks></remarks>
 	Protected mTotalSpectra As Dictionary(Of Integer, Integer)
 
 	Protected ReadOnly mMedianUtils As clsMedianUtilities
@@ -46,7 +72,8 @@ Public Class clsSpectrumTypeClassifier
 	Public Sub New()
 		mMedianUtils = New clsMedianUtilities()
 
-		mCentroidedSpectra = New Dictionary(Of Integer, Integer)
+        mCentroidedSpectra = New Dictionary(Of Integer, Integer)
+        mCentroidedSpectraClassifiedAsProfile = New Dictionary(Of Integer, Integer)
 		mTotalSpectra = New Dictionary(Of Integer, Integer)
 
 		mPpmDiffThreshold = DEFAULT_PPM_DIFF_THRESHOLD
@@ -64,6 +91,14 @@ Public Class clsSpectrumTypeClassifier
 
     Public Function CentroidedMSnSpectra() As Integer
         Return (From item In mCentroidedSpectra Where item.Key > 1).Sum(Function(item) item.Value)
+    End Function
+
+    Public Function CentroidedMS1SpectraClassifiedAsProfile() As Integer
+        Return (From item In mCentroidedSpectraClassifiedAsProfile Where item.Key <= 1).Sum(Function(item) item.Value)
+    End Function
+
+    Public Function CentroidedMSnSpectraClassifiedAsProfile() As Integer
+        Return (From item In mCentroidedSpectraClassifiedAsProfile Where item.Key > 1).Sum(Function(item) item.Value)
     End Function
 
 	Public Function FractionCentroided() As Double
@@ -138,7 +173,7 @@ Public Class clsSpectrumTypeClassifier
 							' DTA header line
 
 							' Process the data for the previous spectrum
-							CheckPPMDiffs(lstPpmDiffs, 2)
+                            CheckPPMDiffs(lstPpmDiffs, 2, eCentroidStatusConstants.Unknown)
 
 							' Reset the previous m/z value and skip the next line
 							If srDtaFile.Peek > -1 Then srDtaFile.ReadLine()
@@ -168,7 +203,7 @@ Public Class clsSpectrumTypeClassifier
 				End While
 
 				' Process the data for the previous spectrum
-				CheckPPMDiffs(lstPpmDiffs, 2)
+                CheckPPMDiffs(lstPpmDiffs, 2, eCentroidStatusConstants.Unknown)
 
 			End Using
 
@@ -190,17 +225,33 @@ Public Class clsSpectrumTypeClassifier
 	''' <param name="lstPpmDiffs"></param>
 	''' <param name="msLevel">1 for MS1, 2 for MS2, etc.</param>
 	''' <remarks>Increments class property TotalSpectra if lstPpmDiffs is not empty; increments class property CentroidedSpectra if the data is centroided</remarks>
-	Protected Sub CheckPPMDiffs(ByVal lstPpmDiffs As List(Of Double), ByVal msLevel As Integer)
+    Protected Sub CheckPPMDiffs(
+      ByVal lstPpmDiffs As List(Of Double),
+      ByVal msLevel As Integer,
+      ByVal centroidingStatus As eCentroidStatusConstants)
 
-		If lstPpmDiffs.Count > 0 Then
-			IncrementDictionaryByMSLevel(mTotalSpectra, msLevel)
+        If lstPpmDiffs.Count > 0 Then
+            IncrementDictionaryByMSLevel(mTotalSpectra, msLevel)
 
-			If IsDataCentroided(lstPpmDiffs) Then
-				IncrementDictionaryByMSLevel(mCentroidedSpectra, msLevel)
-			End If
-		End If
+            Dim empiricalCentroidStatus = eCentroidStatusConstants.Profile
+            If IsDataCentroided(lstPpmDiffs) Then
+                empiricalCentroidStatus = eCentroidStatusConstants.Centroid
+            End If
 
-	End Sub
+            If centroidingStatus = eCentroidStatusConstants.Centroid And empiricalCentroidStatus = eCentroidStatusConstants.Profile Then
+                ' The empirical algorithm has classified a centroid spectrum as profile
+                ' Change it back to centroid
+                empiricalCentroidStatus = eCentroidStatusConstants.Centroid
+
+                IncrementDictionaryByMSLevel(mCentroidedSpectraClassifiedAsProfile, msLevel)
+            End If
+
+            If empiricalCentroidStatus = eCentroidStatusConstants.Centroid Then
+                IncrementDictionaryByMSLevel(mCentroidedSpectra, msLevel)
+            End If
+        End If
+
+    End Sub
 
 	Private Sub IncrementDictionaryByMSLevel(ByRef dctSpectrumCounts As Dictionary(Of Integer, Integer), ByVal msLevel As Integer)
 
@@ -210,40 +261,49 @@ Public Class clsSpectrumTypeClassifier
 			dctSpectrumCounts(msLevel) = spectraCount + 1
 		Else
 			dctSpectrumCounts(msLevel) = 1
-		End If
+        End If
+
 	End Sub
 
 	Public Sub CheckSpectrum(ByVal lstMZs As List(Of Double), ByVal msLevel As Integer)
 		CheckSpectrum(lstMZs, msLevel, assumeSorted:=False)
 	End Sub
 
-	Public Sub CheckSpectrum(ByVal lstMZs As List(Of Double), ByVal msLevel As Integer, ByVal assumeSorted As Boolean)
+    Public Sub CheckSpectrum(ByVal lstMZs As List(Of Double), ByVal msLevel As Integer, ByVal centroidingStatus As eCentroidStatusConstants)
+        CheckSpectrum(lstMZs, msLevel, assumeSorted:=False, centroidingStatus:=centroidingStatus)
+    End Sub
 
-		If Not assumeSorted Then
-			' Check whether sorting is required
-			For i As Integer = 1 To lstMZs.Count - 1
-				If lstMZs(i) < lstMZs(i - 1) Then
-					lstMZs.Sort()
-					Exit For
-				End If
-			Next
-		End If
+    Public Sub CheckSpectrum(
+      ByVal lstMZs As List(Of Double),
+      ByVal msLevel As Integer,
+      ByVal assumeSorted As Boolean,
+      Optional ByVal centroidingStatus As eCentroidStatusConstants = eCentroidStatusConstants.Unknown)
 
-		Dim lstPpmDiffs = New List(Of Double)(lstMZs.Count)
+        If Not assumeSorted Then
+            ' Check whether sorting is required
+            For i As Integer = 1 To lstMZs.Count - 1
+                If lstMZs(i) < lstMZs(i - 1) Then
+                    lstMZs.Sort()
+                    Exit For
+                End If
+            Next
+        End If
 
-		For i As Integer = 1 To lstMZs.Count - 1
-			Dim dblMZ = lstMZs(i)
-			Dim dblPreviousMZ = lstMZs(i - 1)
+        Dim lstPpmDiffs = New List(Of Double)(lstMZs.Count)
 
-			If dblPreviousMZ > 0 AndAlso dblMZ > dblPreviousMZ Then
-				Dim delMppm = 1000000.0 * (dblMZ - dblPreviousMZ) / dblMZ
-				lstPpmDiffs.Add(delMppm)
-			End If
-		Next
+        For i As Integer = 1 To lstMZs.Count - 1
+            Dim dblMZ = lstMZs(i)
+            Dim dblPreviousMZ = lstMZs(i - 1)
 
-		CheckPPMDiffs(lstPpmDiffs, msLevel)
+            If dblPreviousMZ > 0 AndAlso dblMZ > dblPreviousMZ Then
+                Dim delMppm = 1000000.0 * (dblMZ - dblPreviousMZ) / dblMZ
+                lstPpmDiffs.Add(delMppm)
+            End If
+        Next
 
-	End Sub
+        CheckPPMDiffs(lstPpmDiffs, msLevel, centroidingStatus)
+
+    End Sub
 
 	''' <summary>
 	''' Step through the MZ values in array dblMZs and compute the ppm-based mass difference between adjacent points
@@ -262,11 +322,15 @@ Public Class clsSpectrumTypeClassifier
 	''' <param name="dblMZs"></param>
 	''' <param name="msLevel"></param>
 	''' <remarks>Assumes the ions are sorted</remarks>
-	Public Sub CheckSpectrum(ByVal ionCount As Integer, ByVal dblMZs As Double(), ByVal msLevel As Integer)
+    Public Sub CheckSpectrum(
+      ByVal ionCount As Integer,
+      ByVal dblMZs As Double(),
+      ByVal msLevel As Integer,
+      Optional ByVal centroidingStatus As eCentroidStatusConstants = eCentroidStatusConstants.Unknown)
 
-		If ionCount < 0 Then
-			ionCount = dblMZs.Count
-		End If
+        If ionCount < 0 Then
+            ionCount = dblMZs.Count
+        End If
 
         ' Possibly sort dblMZs
         For i As Integer = 1 To ionCount - 1
@@ -277,25 +341,26 @@ Public Class clsSpectrumTypeClassifier
             End If
         Next
 
-		Dim lstPpmDiffs = New List(Of Double)(ionCount)
+        Dim lstPpmDiffs = New List(Of Double)(ionCount)
 
-		For i As Integer = 1 To ionCount - 1
-			Dim dblMZ = dblMZs(i)
-			Dim dblPreviousMZ = dblMZs(i - 1)
+        For i As Integer = 1 To ionCount - 1
+            Dim dblMZ = dblMZs(i)
+            Dim dblPreviousMZ = dblMZs(i - 1)
 
-			If dblPreviousMZ > 0 AndAlso dblMZ > dblPreviousMZ Then
-				Dim delMppm = 1000000.0 * (dblMZ - dblPreviousMZ) / dblMZ
-				lstPpmDiffs.Add(delMppm)
-			End If
-		Next
+            If dblPreviousMZ > 0 AndAlso dblMZ > dblPreviousMZ Then
+                Dim delMppm = 1000000.0 * (dblMZ - dblPreviousMZ) / dblMZ
+                lstPpmDiffs.Add(delMppm)
+            End If
+        Next
 
-		CheckPPMDiffs(lstPpmDiffs, msLevel)
-	End Sub
+        CheckPPMDiffs(lstPpmDiffs, msLevel, centroidingStatus)
+    End Sub
 
 	Public Sub Reset()
 		mErrorMessage = String.Empty
 		mTotalSpectra.Clear()
-		mCentroidedSpectra.Clear()
+        mCentroidedSpectra.Clear()
+        mCentroidedSpectraClassifiedAsProfile.Clear()
 	End Sub
 
 	''' <summary>

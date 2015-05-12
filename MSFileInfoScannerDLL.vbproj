@@ -1,85 +1,81 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <ProjectType>Local</ProjectType>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{E151DC79-60C0-4F15-9E50-099C8E2617F9}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ApplicationIcon>
-    </ApplicationIcon>
-    <AssemblyKeyContainerName>
-    </AssemblyKeyContainerName>
-    <AssemblyName>MSFileInfoScanner</AssemblyName>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
-    <AssemblyOriginatorKeyMode>None</AssemblyOriginatorKeyMode>
-    <DefaultClientScript>JScript</DefaultClientScript>
-    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
-    <DefaultTargetSchema>IE50</DefaultTargetSchema>
-    <DelaySign>false</DelaySign>
+    <ProjectGuid>{E151DC79-60C0-4F15-9E50-099C8E2617F9}</ProjectGuid>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{F184B08F-C81C-45F6-A57F-5ABD9991F28F}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <OptionCompare>Binary</OptionCompare>
-    <OptionExplicit>On</OptionExplicit>
-    <OptionStrict>On</OptionStrict>
     <RootNamespace>MSFileInfoScanner</RootNamespace>
-    <StartupObject>
-    </StartupObject>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <MyType>Windows</MyType>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <ApplicationRevision>0</ApplicationRevision>
+    <AssemblyName>MSFileInfoScanner</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <MyType>Custom</MyType>
     <TargetFrameworkProfile />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DefineDebug>true</DefineDebug>
-    <DefineTrace>true</DefineTrace>
-    <OutputPath>bin\Dll\</OutputPath>
-    <DefineConstants>XRAW_Missing=False</DefineConstants>
-    <BaseAddress>285212672</BaseAddress>
-    <DocumentationFile>MSFileInfoScanner.xml</DocumentationFile>
-    <WarningLevel>1</WarningLevel>
-    <NoWarn>42016,42017,42018,42019,42032,42353,42354,42355</NoWarn>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
+  <PropertyGroup>
+    <OptionExplicit>On</OptionExplicit>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <DefineTrace>true</DefineTrace>
-    <OutputPath>bin\DLL\</OutputPath>
-    <DefineConstants>XRAW_Missing=False</DefineConstants>
-    <BaseAddress>285212672</BaseAddress>
-    <DocumentationFile>MSFileInfoScanner.xml</DocumentationFile>
-    <Optimize>true</Optimize>
-    <WarningLevel>1</WarningLevel>
-    <NoWarn>42016,42017,42018,42019,42032,42353,42354,42355</NoWarn>
-    <PlatformTarget>x86</PlatformTarget>
+  <PropertyGroup>
+    <OptionCompare>Binary</OptionCompare>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionStrict>Off</OptionStrict>
   </PropertyGroup>
   <PropertyGroup>
     <OptionInfer>On</OptionInfer>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\DLL\</OutputPath>
+    <DocumentationFile>MSFileInfoScanner.xml</DocumentationFile>
+    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036,42314</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\DLL\Release\</OutputPath>
+    <DocumentationFile>MSFileInfoScanner.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036,42314</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BrukerDataReader">
       <HintPath>Lib\BrukerDataReader.dll</HintPath>
     </Reference>
-    <Reference Include="ChemstationMSFileReader, Version=1.0.4469.30221, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="ChemstationMSFileReader">
       <HintPath>Lib\ChemstationMSFileReader.dll</HintPath>
     </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>Lib\Ionic.Zip.dll</HintPath>
     </Reference>
+    <Reference Include="MathNet.Numerics">
+      <HintPath>Lib\MathNet.Numerics.dll</HintPath>
+    </Reference>
     <Reference Include="MSFileInfoScannerInterfaces">
       <HintPath>MSFileInfoScannerInterfaces\bin\MSFileInfoScannerInterfaces.dll</HintPath>
     </Reference>
-    <Reference Include="NetCDFReader, Version=1.0.1484.41937, Culture=neutral">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="NetCDFReader">
       <HintPath>Lib\NetCDFReader.dll</HintPath>
+    </Reference>
+    <Reference Include="OxyPlot">
+      <HintPath>Lib\OxyPlot.dll</HintPath>
+    </Reference>
+    <Reference Include="OxyPlot.Wpf">
+      <HintPath>Lib\OxyPlot.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="OxyPlot.Xps">
+      <HintPath>Lib\OxyPlot.Xps.dll</HintPath>
     </Reference>
     <Reference Include="PNNLOmics">
       <HintPath>Lib\PNNLOmics.dll</HintPath>
@@ -88,130 +84,103 @@
       <HintPath>Lib\PRISM.dll</HintPath>
     </Reference>
     <Reference Include="ProteowizardWrapper">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\ProteowizardWrapper.dll</HintPath>
     </Reference>
     <Reference Include="pwiz.CommonUtil">
       <HintPath>Lib\pwiz.CommonUtil.dll</HintPath>
     </Reference>
-    <Reference Include="pwiz_bindings_cli, Version=0.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="pwiz_bindings_cli">
       <HintPath>Lib\pwiz_bindings_cli.dll</HintPath>
     </Reference>
-    <Reference Include="SharedVBNetRoutines, Version=1.0.3224.30718, Culture=neutral">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SharedVBNetRoutines">
       <HintPath>Lib\SharedVBNetRoutines.dll</HintPath>
     </Reference>
-    <Reference Include="System">
-      <Name>System</Name>
-    </Reference>
-    <Reference Include="System.Data">
-      <Name>System.Data</Name>
-    </Reference>
-    <Reference Include="System.Data.SQLite, Version=1.0.93.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite, Version=1.0.51.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\System.Data.SQLite.dll</HintPath>
     </Reference>
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms">
-      <Name>System.Windows.Forms</Name>
-    </Reference>
-    <Reference Include="System.Xml">
-      <Name>System.XML</Name>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="ThermoRawFileReaderDLL">
       <HintPath>Lib\ThermoRawFileReaderDLL.dll</HintPath>
     </Reference>
-    <Reference Include="UIMFLibrary, Version=1.2.4084.31407, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="UIMFLibrary">
       <HintPath>Lib\UIMFLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="ZedGraph, Version=5.1.5.28844, Culture=neutral, PublicKeyToken=02a83cbd123fcd60, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Lib\ZedGraph.dll</HintPath>
-    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Import Include="System.IO" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
     <Import Include="Microsoft.VisualBasic" />
     <Import Include="System" />
     <Import Include="System.Collections" />
     <Import Include="System.Collections.Generic" />
-    <Import Include="System.Data" />
     <Import Include="System.Diagnostics" />
-    <Import Include="System.IO" />
-    <Import Include="System.Linq" />
+    <Import Include="System.Windows" />
+    <Import Include="System.Windows.Controls" />
+    <Import Include="System.Windows.Data" />
+    <Import Include="System.Windows.Documents" />
+    <Import Include="System.Windows.Input" />
+    <Import Include="System.Windows.Media" />
+    <Import Include="System.Windows.Media.Imaging" />
+    <Import Include="System.Windows.Navigation" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.vb">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="clsAgilentGCDFolderInfoScanner.vb" />
-    <Compile Include="clsAgilentIonTrapDFolderInfoScanner.vb">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="clsAgilentOrQStarWiffFileInfoScanner.vb">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="clsAgilentIonTrapDFolderInfoScanner.vb" />
+    <Compile Include="clsAgilentOrQStarWiffFileInfoScanner.vb" />
     <Compile Include="clsAgilentTOFDFolderInfoScanner.vb" />
-    <Compile Include="clsBrukerOneFolderInfoScanner.vb">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="clsBrukerOneFolderInfoScanner.vb" />
     <Compile Include="clsBrukerXmassFolderInfoScanner.vb" />
     <Compile Include="clsDatasetStatsSummarizer.vb" />
     <Compile Include="clsDeconToolsIsosInfoScanner.vb" />
     <Compile Include="clsFileIntegrityChecker.vb" />
     <Compile Include="clsFilterDataArrayMaxCount.vb" />
-    <Compile Include="clsFinniganRawFileInfoScanner.vb">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="clsFinniganRawFileInfoScanner.vb" />
     <Compile Include="clsLCMSDataPlotter.vb" />
-    <Compile Include="clsMassLynxNativeIO.vb">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="clsMicromassRawFolderInfoScanner.vb">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="clsMassLynxNativeIO.vb" />
+    <Compile Include="clsMicromassRawFolderInfoScanner.vb" />
     <Compile Include="clsMSFileInfoDataCache.vb" />
     <Compile Include="clsMSFileInfoProcessorBaseClass.vb" />
-    <Compile Include="clsMSFileInfoScanner.vb">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="clsMSFileInfoScanner.vb" />
+    <Compile Include="clsOxyplotUtilities.vb" />
     <Compile Include="clsParseCommandLine.vb" />
+    <Compile Include="clsPlotContainer.vb" />
     <Compile Include="clsProteowizardDataParser.vb" />
     <Compile Include="clsTICandBPIPlotter.vb" />
     <Compile Include="clsUIMFInfoScanner.vb" />
-    <Compile Include="clsXmlSettingsFileAccessor.vb">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="clsXmlSettingsFileAccessor.vb" />
     <Compile Include="clsZippedImagingFilesScanner.vb" />
     <Compile Include="MSFileInfoProcessorInterface.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="My Project\MyExtensions\MyWpfExtension.vb">
+      <VBMyExtensionTemplateID>Microsoft.VisualBasic.WPF.MyExtension</VBMyExtensionTemplateID>
+      <VBMyExtensionTemplateVersion>1.0.0.0</VBMyExtensionTemplateVersion>
+    </Compile>
+    <AppDesigner Include="My Project\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="My Project\" />
-  </ItemGroup>
-  <ItemGroup>
-    <COMReference Include="MSFileReaderLib">
-      <Guid>{F0C5F3E3-4F2A-443E-A74D-0AABE3237494}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
+    <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="SpectraTypeClassifier\SpectraTypeClassifier.vbproj">
-      <Project>{6A61E034-6960-4AA4-B9AC-B1674588CC62}</Project>
+      <Project>{6a61e034-6960-4aa4-b9ac-b1674588cc62}</Project>
       <Name>SpectraTypeClassifier</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-    <PostBuildEvent>xcopy "$(ProjectDir)Lib\x86\SQLite.Interop.dll" "$(TargetDir)" /D /Y
-rem xcopy "$(ProjectDir)Lib\*.interfaces" "$(TargetDir)" /D /Y
-</PostBuildEvent>
-  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

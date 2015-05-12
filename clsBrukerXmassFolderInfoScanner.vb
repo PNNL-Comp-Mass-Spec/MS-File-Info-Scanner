@@ -2,9 +2,10 @@
 
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 '
-' Last modified January 17, 2013
+' Last modified May 5, 2015
 Imports System.Runtime.InteropServices
 Imports PNNLOmics.Utilities
+Imports System.Data
 
 <CLSCompliant(False)>
 Public Class clsBrukerXmassFolderInfoScanner
@@ -111,7 +112,9 @@ Public Class clsBrukerXmassFolderInfoScanner
 
             If diSubFolders.Count > 0 Then
                 ' Look for the apexAcquisition.method in each matching subfolder
-                ' Assume the file modification time is the acquisition start time
+                ' We have historically used that file's modification time as the acquisition start time for the dataset
+                ' However, we've found that on the 12T a series of datasets will all use the same method file and thus the modification time is not necessarily appropriate
+
                 ' Note that the submethods.xml file sometimes gets modified after the run starts, so it should not be used to determine run start time
 
                 For Each diSubFolder In diSubFolders
@@ -160,7 +163,7 @@ Public Class clsBrukerXmassFolderInfoScanner
         Return blnSuccess
 
     End Function
-    
+
     Private Function FindBrukerSettingsFile(ByVal diDotDFolder As DirectoryInfo) As FileInfo
 
         Dim dotMethodFiles = diDotDFolder.GetFiles("*.method", SearchOption.AllDirectories)
@@ -682,7 +685,11 @@ Public Class clsBrukerXmassFolderInfoScanner
                     udtFileInfo.ScanCount = intScanCount
 
                     If dblMaxRunTimeMinutes > 0 Then
-                        udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart.AddMinutes(dblMaxRunTimeMinutes)
+                        If Math.Abs(udtFileInfo.AcqTimeEnd.Subtract(udtFileInfo.AcqTimeStart).TotalMinutes) < dblMaxRunTimeMinutes Then
+                            udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart.AddMinutes(dblMaxRunTimeMinutes)
+                        Else
+                            udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd.AddMinutes(-dblMaxRunTimeMinutes)
+                        End If
                     End If
 
                     blnSuccess = True
@@ -928,7 +935,21 @@ Public Class clsBrukerXmassFolderInfoScanner
             Dim intensities As Single() = Nothing
 
             For scanNumber = 1 To scanCount
-                serReader.GetMassSpectrum(scanNumber, mzValues, intensities)
+                Try
+                    serReader.GetMassSpectrum(scanNumber, mzValues, intensities)
+                Catch ex As Exception
+
+                    If scanNumber >= scanCount - 1 Then
+                        ' Treat this as a warning
+                        ShowMessage("Unable to retrieve scan " & scanNumber & " using the BrukerDataReader: " & ex.Message)
+                    Else
+                        ' Treat this as an error
+                        ReportError("Error retrieving scan " & scanNumber & " using the BrukerDataReader: " & ex.Message)
+                    End If
+
+                    ' Ignore this scan
+                    Continue For
+                End Try
 
                 Const msLevel = 1
                 Dim elutionTime As Single

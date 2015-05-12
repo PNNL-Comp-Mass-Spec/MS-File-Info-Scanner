@@ -6,6 +6,7 @@ Option Strict On
 
 Imports PNNLOmics.Utilities
 Imports System.Text.RegularExpressions
+Imports System.IO
 
 Public Class clsAgilentGCDFolderInfoScanner
     Inherits clsMSFileInfoProcessorBaseClass
@@ -72,7 +73,7 @@ Public Class clsAgilentGCDFolderInfoScanner
 
 		Try
 			' Open the acqmeth.txt file
-			strFilePath = Path.Combine(strFolderPath, AGILENT_ACQ_METHOD_FILE)
+            strFilePath = Path.Combine(strFolderPath, AGILENT_ACQ_METHOD_FILE)
 			If Not File.Exists(strFilePath) Then
 				Return False
 			End If

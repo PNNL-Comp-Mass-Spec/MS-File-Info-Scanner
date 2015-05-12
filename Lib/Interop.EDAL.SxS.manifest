@@ -17,10 +17,10 @@
   <comInterfaceExternalProxyStub name="IMSSpectrumParameterCollection" iid="{9cc1cd9a-98d0-45b7-b8df-ca019cebd314}" tlbid="{8e79b9a2-107e-4e91-a0ff-01f2591103f3}" proxyStubClsid32="{00020424-0000-0000-C000-000000000046}" />
   <comInterfaceExternalProxyStub name="IMSSpectrumParameterEnumerator" iid="{c98ee3dc-f8dd-4aff-afd2-1c8d29af208e}" tlbid="{8e79b9a2-107e-4e91-a0ff-01f2591103f3}" proxyStubClsid32="{00020424-0000-0000-C000-000000000046}" />
 
-<file name="boost_date_time-vc90-mt-1_37-BDAL_20091123.dll" />
-<file name="boost_regex-vc90-mt-1_37-BDAL_20091123.dll" />
-<file name="boost_system-vc90-mt-1_37-BDAL_20091123.dll" />
-<file name="boost_thread-vc90-mt-1_37-BDAL_20091123.dll" />
+<file name="boost_date_time-vc90-mt-1_37-x64-BDAL_20091123.dll" />
+<file name="boost_regex-vc90-mt-1_37-x64-BDAL_20091123.dll" />
+<file name="boost_system-vc90-mt-1_37-x64-BDAL_20091123.dll" />
+<file name="boost_thread-vc90-mt-1_37-x64-BDAL_20091123.dll" />
 <file name="Compressor_12451AC8-3BF1-48e1-8E66-DA05BF3852A0.dll" />
 <file name="Compressor_382D5134-9727-4be6-B6F8-754F577426D6.dll" />
 <file name="Compressor_4F1EA0CB-5A6A-43ED-9562-D6D873034577.dll" />
@@ -30,7 +30,6 @@
 <file name="FlexVariableTable.xml" />
 <file name="ICRVariableTable.xml" />
 <file name="mkl_sequential.dll" />
-<file name="msvcr71.dll" />
 
   <dependency>
     <dependentAssembly>

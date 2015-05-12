@@ -1,5 +1,7 @@
 ﻿Option Strict On
 
+Imports System.Data
+
 Public Class clsMSFileInfoDataCache
 
 #Region "Constants and Enums"

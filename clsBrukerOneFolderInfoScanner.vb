@@ -5,6 +5,7 @@ Option Strict On
 '
 ' Last modified September 17, 2005
 
+Imports System.IO
 Imports System.Text.RegularExpressions
 
 Public Class clsBrukerOneFolderInfoScanner

@@ -9,6 +9,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Started October 11, 2003
 Imports MSFileInfoScannerInterfaces
+Imports System.Data
 
 Public Class clsMSFileInfoScanner
 	Implements iMSFileInfoScanner
@@ -1475,7 +1476,7 @@ Public Class clsMSFileInfoScanner
 					   DateTime.Now.Subtract(udtFileInfo.FileSystemModificationTime).TotalMinutes < FILE_MODIFICATION_WINDOW_MINUTES Then
 
 						' Sleep for 10 seconds then try again
-						Threading.Thread.Sleep(10000)
+                        SleepNow(10)
 					Else
 						intRetryCount = MAX_FILE_READ_ACCESS_ATTEMPTS
 					End If
@@ -1492,7 +1493,7 @@ Public Class clsMSFileInfoScanner
 
 		If blnSuccess Then
 
-			blnSuccess = objMSInfoScanner.CreateOutputFiles(strInputFileOrFolderPath, strOutputFolderPath)
+            blnSuccess = objMSInfoScanner.CreateOutputFiles(strInputFileOrFolderPath, strOutputFolderPath)
 			If Not blnSuccess Then
 				SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.OutputFileWriteError)
 			End If
@@ -2058,7 +2059,7 @@ Public Class clsMSFileInfoScanner
 				Return False
 			Else
 				' Wait 1 second, then try again
-				Threading.Thread.Sleep(1000)
+                SleepNow(1)
 			End If
 
 		Loop While intRetryCount < MAX_ACCESS_ATTEMPTS
@@ -2136,7 +2137,7 @@ Public Class clsMSFileInfoScanner
 						Return False
 					Else
 						' Wait 1 second, then try again
-						Threading.Thread.Sleep(1000)
+                        SleepNow(1)
 					End If
 
 				Loop While intRetryCount < MAX_ACCESS_ATTEMPTS
@@ -2223,7 +2224,7 @@ Public Class clsMSFileInfoScanner
 							Return False
 						Else
 							' Wait 1 second, then try again
-							Threading.Thread.Sleep(1000)
+                            SleepNow(1)
 						End If
 
 					Loop While intRetryCount < MAX_ACCESS_ATTEMPTS
@@ -2267,7 +2268,7 @@ Public Class clsMSFileInfoScanner
 								Return False
 							Else
 								' Wait 1 second, then try again
-								Threading.Thread.Sleep(1000)
+                                SleepNow(1)
 							End If
 
 						Loop While intRetryCount < MAX_ACCESS_ATTEMPTS
@@ -2427,6 +2428,10 @@ Public Class clsMSFileInfoScanner
 
 		Return blnValidFile
 	End Function
+
+    Protected Sub SleepNow(sleepTimeSeconds As Integer)
+        System.Threading.Thread.Sleep(sleepTimeSeconds * 10)
+    End Sub
 
 	Private Function ValidateExtensions(ByRef strExtensions() As String) As Boolean
 		' Returns True if one of the entries in strExtensions = "*" or ".*"
