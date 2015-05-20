@@ -149,7 +149,7 @@ Public Class clsPlotContainer
             End If
 
             If PlottingDeisotopedData Then
-                AddDeisotopedDataLegend(drawContext, width, height, 110, 45, 25)
+                AddDeisotopedDataLegend(drawContext, width, height, 10, -30, 25)
             End If
         End Using
 
@@ -188,9 +188,12 @@ Public Class clsPlotContainer
       drawContext As DrawingContext,
       canvasWidth As Integer,
       canvasHeight As Integer,
-      paddingLeft As Integer,
-      paddingTop As Integer,
+      offsetLeft As Integer,
+      offsetTop As Integer,
       spacing As Integer)
+
+        Const CHARGE_START = 1
+        Const CHARGE_END = 6
 
         Dim usCulture = Globalization.CultureInfo.GetCultureInfo("en-us")
         ' Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
@@ -205,21 +208,20 @@ Public Class clsPlotContainer
         rectPen.Brush = New SolidColorBrush(Colors.Black)
         rectPen.Thickness = 1
 
+        For chargeState = CHARGE_START To CHARGE_END
 
-        For charge = 1 To 6
+            Dim newBrush = New SolidColorBrush(GetColorByCharge(chargeState))
 
-            Dim newBrush = New SolidColorBrush(GetColorByCharge(charge))
-
-            Dim newText = New FormattedText(charge & "+", usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, newBrush)
+            Dim newText = New FormattedText(chargeState & "+", usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, newBrush)
 
             Dim textRect = New Rect(0, 0, canvasWidth, canvasHeight)
             Dim position = textRect.Location
 
-            position.X = paddingLeft + (charge - 1) * (newText.Width + spacing)
-            position.Y = paddingTop
+            position.X = mPlot.PlotArea.Left + offsetLeft + (chargeState - 1) * (newText.Width + spacing)
+            position.Y = mPlot.PlotArea.Top + offsetTop
 
-            If charge = 1 Then
-                Dim legendBox = New Rect(paddingLeft - 10, paddingTop, 6 * (newText.Width + spacing), newText.Height)
+            If chargeState = CHARGE_START Then
+                Dim legendBox = New Rect(position.X - 10, position.Y, CHARGE_END * (newText.Width + spacing) - spacing / 4, newText.Height)
                 drawContext.DrawRectangle(Nothing, rectPen, legendBox)
             End If
 

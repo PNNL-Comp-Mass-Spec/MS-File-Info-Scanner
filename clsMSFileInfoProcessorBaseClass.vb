@@ -3,9 +3,10 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Started in 2007
 '
-' Last modified April 18, 2014
+' Last modified May 11, 2015
 
 Imports System.IO
+Imports MSFileInfoScannerInterfaces
 
 Public MustInherit Class clsMSFileInfoProcessorBaseClass
 	Implements iMSFileInfoProcessor
@@ -15,7 +16,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 	End Sub
 
 #Region "Constants"
-	Public Const DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR As Integer = 10
+
 #End Region
 
 #Region "Member variables"
@@ -79,15 +80,15 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 		End Set
 	End Property
 
-	Public Property LCMS2DPlotOptions() As clsLCMSDataPlotter.clsOptions Implements iMSFileInfoProcessor.LCMS2DPlotOptions
-		Get
-			Return mLCMS2DPlot.Options
-		End Get
-		Set(ByVal value As clsLCMSDataPlotter.clsOptions)
-			mLCMS2DPlot.Options = value
-			mLCMS2DPlotOverview.Options = value.Clone()
-		End Set
-	End Property
+    Public Property LCMS2DPlotOptions() As clsLCMSDataPlotterOptions Implements iMSFileInfoProcessor.LCMS2DPlotOptions
+        Get
+            Return mLCMS2DPlot.Options
+        End Get
+        Set(ByVal value As clsLCMSDataPlotterOptions)
+            mLCMS2DPlot.Options = value
+            mLCMS2DPlotOverview.Options = value.Clone()
+        End Set
+    End Property
 
 	Public Property LCMS2DOverviewPlotDivisor() As Integer Implements iMSFileInfoProcessor.LCMS2DOverviewPlotDivisor
 		Get
@@ -338,7 +339,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 		mLCMS2DPlot = New clsLCMSDataPlotter()
 		mLCMS2DPlotOverview = New clsLCMSDataPlotter
 
-		mLCMS2DOverviewPlotDivisor = DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
+        mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
 
 		mSaveTICAndBPI = False
 		mSaveLCMS2DPlots = False
@@ -600,8 +601,8 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
                     If blnSuccessOverall AndAlso mLCMS2DPlot.Options.PlottingDeisotopedData Then
                         ' Create two more plots 2D plots, but this with a smaller maximum m/z
-                        mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT
-                        mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT
+                        mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT
+                        mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT
 
                         mLCMS2DPlot.Save2DPlots(strDatasetName, diFolderInfo.FullName, "", "_zoom")
                         If mLCMS2DOverviewPlotDivisor > 0 Then

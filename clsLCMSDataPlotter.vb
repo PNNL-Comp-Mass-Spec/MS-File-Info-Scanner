@@ -53,7 +53,7 @@ Public Class clsLCMSDataPlotter
 
     Protected mScans As List(Of clsLCMSDataPlotter.clsScanData)
 
-    Protected mOptions As clsOptions
+    Protected mOptions As MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions
 
     Protected mRecentFiles As List(Of udtOutputFileInfoType)
 
@@ -61,11 +61,11 @@ Public Class clsLCMSDataPlotter
 #End Region
 
 #Region "Properties"
-    Public Property Options() As clsOptions
+    Public Property Options() As MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions
         Get
             Return mOptions
         End Get
-        Set(ByVal value As clsOptions)
+        Set(ByVal value As MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions)
             mOptions = value
         End Set
     End Property
@@ -79,10 +79,10 @@ Public Class clsLCMSDataPlotter
 #End Region
 
     Public Sub New()
-        Me.New(New clsOptions)
+        Me.New(New MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions)
     End Sub
 
-    Public Sub New(ByVal objOptions As clsOptions)
+    Public Sub New(ByVal objOptions As MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions)
         mOptions = objOptions
         mRecentFiles = New List(Of udtOutputFileInfoType)
         Reset()
@@ -984,13 +984,13 @@ Public Class clsLCMSDataPlotter
 
             ' Customize the points
             If mScans.Count < 250 Then
-                ' Use a point size of 3 when fewer than 250 scans
+                ' Use a point size of 2 when fewer than 250 scans
                 series.MarkerSize = 2
             ElseIf mScans.Count < 500 Then
-                ' Use a point size of 2 when 250 to 500 scans
+                ' Use a point size of 1 when 250 to 500 scans
                 series.MarkerSize = 1
             Else
-                ' Use a point size of 1 or 1.2 when >= 500 scans
+                ' Use a point size of 0.8 or 0.6 when >= 500 scans
                 If intTotalPoints < 80000 Then
                     series.MarkerSize = 0.8
                 Else
@@ -1591,155 +1591,6 @@ Public Class clsLCMSDataPlotter
 
         Public Sub UpdateMSLevel(ByVal NewMSLevel As Integer)
             mMSLevel = NewMSLevel
-        End Sub
-
-    End Class
-
-    ''' <summary>
-    ''' Options class for clsLCMSDatPlotter
-    ''' </summary>
-    ''' <remarks></remarks>
-    Public Class clsOptions
-        Public Const DEFAULT_MAX_POINTS_TO_PLOT As Integer = 200000
-        Public Const DEFAULT_MIN_POINTS_PER_SPECTRUM As Integer = 2
-
-        Public Const DEFAULT_MZ_RESOLUTION As Single = 0.4
-        Public Const DEFAULT_MIN_INTENSITY As Single = 0
-
-        Protected Const DEFAULT_MS1_PLOT_TITLE As String = "MS Spectra"
-        Protected Const DEFAULT_MS2_PLOT_TITLE As String = "MS2 Spectra"
-
-        Public Const DEFAULT_MAX_MONO_MASS_FOR_DEISOTOPED_PLOT As Double = 12000
-        Public Const DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT As Double = 4000
-
-        Protected mMaxPointsToPlot As Integer
-        Protected mMinPointsPerSpectrum As Integer
-
-        Protected mMZResolution As Single
-        Protected mMinIntensity As Single
-
-        Protected mMS1PlotTitle As String
-        Protected mMS2PlotTitle As String
-
-        ' The following is only used when PlottingDeisotopedData is true
-        Protected mMaxMonoMass As Double
-
-        Public Property MaxPointsToPlot() As Integer
-            Get
-                Return mMaxPointsToPlot
-            End Get
-            Set(ByVal value As Integer)
-                If value < 10 Then value = 10
-                mMaxPointsToPlot = value
-            End Set
-        End Property
-
-        Public Property MinPointsPerSpectrum() As Integer
-            Get
-                Return mMinPointsPerSpectrum
-            End Get
-            Set(ByVal value As Integer)
-                If value < 0 Then value = 0
-                mMinPointsPerSpectrum = value
-            End Set
-        End Property
-
-        Public Property MS1PlotTitle() As String
-            Get
-                Return mMS1PlotTitle
-            End Get
-            Set(value As String)
-                If String.IsNullOrEmpty(value) Then
-                    value = DEFAULT_MS1_PLOT_TITLE
-                End If
-                mMS1PlotTitle = value
-            End Set
-        End Property
-
-        Public Property MS2PlotTitle() As String
-            Get
-                Return mMS2PlotTitle
-            End Get
-            Set(value As String)
-                If String.IsNullOrEmpty(value) Then
-                    value = DEFAULT_MS2_PLOT_TITLE
-                End If
-                mMS2PlotTitle = value
-            End Set
-        End Property
-
-        Public Property MZResolution() As Single
-            Get
-                Return mMZResolution
-            End Get
-            Set(ByVal value As Single)
-                If value < 0 Then value = 0
-                mMZResolution = value
-            End Set
-        End Property
-
-        Public Property MinIntensity() As Single
-            Get
-                Return mMinIntensity
-            End Get
-            Set(ByVal value As Single)
-                If value < 0 Then value = 0
-                mMinIntensity = value
-            End Set
-        End Property
-
-        Public Property MaxMonoMassForDeisotopedPlot() As Double
-            Get
-                Return mMaxMonoMass
-            End Get
-            Set(value As Double)
-                If value < 100 Then value = 100
-                mMaxMonoMass = value
-            End Set
-        End Property
-
-        Public Property PlottingDeisotopedData() As Boolean
-
-        Public Property UseObservedMinScan() As Boolean
-
-
-        Public Function Clone() As clsOptions
-            Dim objClone As New clsOptions
-
-            With objClone
-                .MaxPointsToPlot = MaxPointsToPlot
-                .MinPointsPerSpectrum = MinPointsPerSpectrum
-
-                .MZResolution = MZResolution
-                .MinIntensity = MinIntensity
-
-                .MS1PlotTitle = MS1PlotTitle
-                .MS2PlotTitle = MS2PlotTitle
-
-                .PlottingDeisotopedData = PlottingDeisotopedData
-                .UseObservedMinScan = UseObservedMinScan
-
-                .MaxMonoMassForDeisotopedPlot = MaxMonoMassForDeisotopedPlot
-            End With
-
-            Return objClone
-
-        End Function
-
-        Public Sub New()
-            mMaxPointsToPlot = DEFAULT_MAX_POINTS_TO_PLOT
-            mMinPointsPerSpectrum = DEFAULT_MIN_POINTS_PER_SPECTRUM
-
-            mMZResolution = DEFAULT_MZ_RESOLUTION
-            mMinIntensity = DEFAULT_MIN_INTENSITY
-
-            mMS1PlotTitle = DEFAULT_MS1_PLOT_TITLE
-            mMS2PlotTitle = DEFAULT_MS2_PLOT_TITLE
-
-            mMaxMonoMass = DEFAULT_MAX_MONO_MASS_FOR_DEISOTOPED_PLOT
-
-            PlottingDeisotopedData = False
-            UseObservedMinScan = False
         End Sub
 
     End Class

@@ -3,7 +3,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Started in 2005
 '
-' Last modified April 18, 2014
+' Last modified May 11, 2015
 
 Imports MSFileInfoScanner.DSSummarizer.clsScanStatsEntry
 Imports PNNLOmics.Utilities

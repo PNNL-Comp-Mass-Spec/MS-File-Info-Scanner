@@ -1,5 +1,11 @@
 MS File Info Scanner Change Log
 
+Version 1.3.5618; May 20, 2015
+	- Moved the LCMS Plotting options from clsLCMSDataPlotter.clsOptions to MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions
+
+Version 1.3.5610; May 12, 2015
+	- Tweaked plot fonts and placement of the "1+  2+  3+" legend
+
 Version 1.3.5609; May 11, 2015
 	- Switched to AnyCPU
 		- File access that involves ProteoWizard will only work on a 64-bit machine

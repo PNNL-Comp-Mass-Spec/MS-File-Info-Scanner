@@ -15,7 +15,7 @@ Public Class clsMSFileInfoScanner
 	Implements iMSFileInfoScanner
 
 	Public Sub New()
-		mFileDate = "May 8, 2014"
+        mFileDate = "May 20, 2015"
 
 		mFileIntegrityChecker = New clsFileIntegrityChecker
 		mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -137,7 +137,7 @@ Public Class clsMSFileInfoScanner
 	Private mDSInfoStoredProcedure As String
 	Private mDSInfoDatasetIDOverride As Integer
 
-	Private mLCMS2DPlotOptions As clsLCMSDataPlotter.clsOptions
+    Private mLCMS2DPlotOptions As clsLCMSDataPlotterOptions
 	Private mLCMS2DOverviewPlotDivisor As Integer
 
 	Private mScanStart As Integer
@@ -989,8 +989,8 @@ Public Class clsMSFileInfoScanner
 		mSaveLCMS2DPlots = False
 		mCheckCentroidingStatus = False
 
-		mLCMS2DPlotOptions = New clsLCMSDataPlotter.clsOptions
-		mLCMS2DOverviewPlotDivisor = clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
+        mLCMS2DPlotOptions = New clsLCMSDataPlotterOptions
+        mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
 
 		mScanStart = 0
 		mScanEnd = 0

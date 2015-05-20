@@ -3,7 +3,7 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Started in 2005
 '
-' Last modified January 31, 2013
+' Last modified May 20, 2015
 
 Public Interface iMSFileInfoProcessor
 
@@ -42,7 +42,7 @@ Public Interface iMSFileInfoProcessor
     'ReadOnly Property BPI() As udtChromatogramInfoType
     'ReadOnly Property TIC() As udtChromatogramInfoType
 
-    Property LCMS2DPlotOptions() As clsLCMSDataPlotter.clsOptions
+    Property LCMS2DPlotOptions() As MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions
     Property LCMS2DOverviewPlotDivisor() As Integer
 
     Property DatasetStatsTextFileName() As String

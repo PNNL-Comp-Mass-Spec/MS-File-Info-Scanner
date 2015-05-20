@@ -6,6 +6,11 @@ MSFileInfoScannerInterfaces
 </name>
 </assembly>
 <members>
-
+<member name="T:MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions">
+	<summary>
+ Options class for clsLCMSDatPlotter
+ </summary>
+	<remarks></remarks>
+</member>
 </members>
 </doc>

@@ -64,6 +64,7 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="clsLCMSDataPlotterOptions.vb" />
     <Compile Include="iMSFileInfoScanner.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
   </ItemGroup>

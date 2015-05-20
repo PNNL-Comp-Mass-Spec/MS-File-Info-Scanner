@@ -1,12 +1,13 @@
 Option Strict On
 
+Imports MSFileInfoScannerInterfaces
 ' Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
 
 ' See clsMSFileInfoScanner for a program description
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "May 11, 2015"
+    Public Const PROGRAM_DATE As String = "May 20, 2015"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -73,8 +74,8 @@ Module modMain
 
         mSaveTICandBPIPlots = True
         mSaveLCMS2DPlots = False
-        mLCMS2DMaxPointsToPlot = clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_POINTS_TO_PLOT
-        mLCMS2DOverviewPlotDivisor = clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
+        mLCMS2DMaxPointsToPlot = clsLCMSDataPlotterOptions.DEFAULT_MAX_POINTS_TO_PLOT
+        mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
 
         mCheckCentroidingStatus = False
 
@@ -398,8 +399,8 @@ Module modMain
             Console.WriteLine("Use /L to specify the file path for logging messages.")
             Console.WriteLine()
 
-            Console.WriteLine("Use /LC to create 2D LCMS plots (this process could take several minutes for each dataset).  By default, plots the top " & clsLCMSDataPlotter.clsOptions.DEFAULT_MAX_POINTS_TO_PLOT & " points.  To plot the top 20000 points, use /LC:20000.")
-            Console.WriteLine("Use /LCDiv to specify the divisor to use when creating the overview 2D LCMS plots.  By default, uses /LCDiv:" & clsMSFileInfoProcessorBaseClass.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR & "; use /LCDiv:0 to disable creation of the overview plots.")
+            Console.WriteLine("Use /LC to create 2D LCMS plots (this process could take several minutes for each dataset).  By default, plots the top " & clsLCMSDataPlotterOptions.DEFAULT_MAX_POINTS_TO_PLOT & " points.  To plot the top 20000 points, use /LC:20000.")
+            Console.WriteLine("Use /LCDiv to specify the divisor to use when creating the overview 2D LCMS plots.  By default, uses /LCDiv:" & clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR & "; use /LCDiv:0 to disable creation of the overview plots.")
             Console.WriteLine("Use /NoTIC to not save TIC and BPI plots.")
             Console.WriteLine()
             Console.WriteLine("Use /DatasetID:# to define the dataset's DatasetID value (where # is an integer); only appropriate if processing a single dataset")
@@ -439,7 +440,7 @@ Module modMain
             Console.WriteLine()
 
             Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com")
-            Console.WriteLine("Website: http://panomics.pnnl.gov/ or http://www.sysbio.org/resources/staff/")
+            Console.WriteLine("Website: http://omics.pnl.gov/ or http://panomics.pnnl.gov/")
             Console.WriteLine()
 
             ' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
