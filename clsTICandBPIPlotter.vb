@@ -541,6 +541,8 @@ Public Class clsTICandBPIPlotter
         ElseIf maxValue < 20 Then
             minDigitsPrecision = 1
             currentAxis.StringFormat = "0.0"
+        ElseIf maxValue >= 1000000 Then
+            currentAxis.StringFormat = EXPONENTIAL_FORMAT
         End If
 
         If maxValue - minValue < 0.00001 Then
