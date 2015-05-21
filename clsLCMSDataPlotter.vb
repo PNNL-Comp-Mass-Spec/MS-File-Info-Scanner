@@ -1472,7 +1472,7 @@ Public Class clsLCMSDataPlotter
             If strFileNameSuffixAddon Is Nothing Then strFileNameSuffixAddon = String.Empty
             If strScanModeSuffixAddon Is Nothing Then strScanModeSuffixAddon = String.Empty
 
-            Const TEST_GRADIENTS = False
+
             Dim colorGradients = New Dictionary(Of String, OxyPalette)
             colorGradients.Add("BlackWhiteRed30", OxyPalettes.BlackWhiteRed(30))
             colorGradients.Add("BlueWhiteRed30", OxyPalettes.BlueWhiteRed(30))
@@ -1487,7 +1487,7 @@ Public Class clsLCMSDataPlotter
             plotContainer = InitializePlot(strDatasetName & " - " & mOptions.MS1PlotTitle, 1, False)
             plotContainer.PlottingDeisotopedData = mOptions.PlottingDeisotopedData
 
-            If TEST_GRADIENTS Then
+            If mOptions.TestGradientColorSchemes Then
                 plotContainer.AddGradients(colorGradients)
             End If
 

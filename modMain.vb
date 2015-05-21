@@ -26,6 +26,7 @@ Module modMain
     Private mSaveLCMS2DPlots As Boolean
     Private mLCMS2DMaxPointsToPlot As Integer
     Private mLCMS2DOverviewPlotDivisor As Integer
+    Private mTestLCMSGradientColorSchemes As Boolean
 
     Private mCheckCentroidingStatus As Boolean
 
@@ -76,6 +77,7 @@ Module modMain
         mSaveLCMS2DPlots = False
         mLCMS2DMaxPointsToPlot = clsLCMSDataPlotterOptions.DEFAULT_MAX_POINTS_TO_PLOT
         mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
+        mTestLCMSGradientColorSchemes = False
 
         mCheckCentroidingStatus = False
 
@@ -129,6 +131,7 @@ Module modMain
                     .SaveLCMS2DPlots = mSaveLCMS2DPlots
                     .LCMS2DPlotMaxPointsToPlot = mLCMS2DMaxPointsToPlot
                     .LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor
+                    .TestLCMSGradientColorSchemes = mTestLCMSGradientColorSchemes
 
                     .CheckCentroidingStatus = mCheckCentroidingStatus
 
@@ -199,7 +202,13 @@ Module modMain
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String = String.Empty
-        Dim lstValidParameters As List(Of String) = New List(Of String) From {"I", "O", "P", "S", "IE", "L", "C", "M", "H", "QZ", "NoTIC", "LC", "LCDiv", "CC", "QS", "ScanStart", "ScanEnd", "DatasetID", "DI", "DST", "SS", "CF", "R", "Z", "Debug"}
+        Dim lstValidParameters As List(Of String) = New List(Of String) From {
+            "I", "O", "P", "S", "IE", "L", "C", "M", "H", "QZ", "NoTIC",
+            "LC", "LCDiv", "LCGrad",
+            "CC", "QS",
+            "ScanStart", "ScanEnd",
+            "DatasetID", "DI", "DST",
+            "SS", "CF", "R", "Z", "Debug"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -254,6 +263,8 @@ Module modMain
                             mLCMS2DOverviewPlotDivisor = CInt(strValue)
                         End If
                     End If
+
+                    If .IsParameterPresent("LCGrad") Then mTestLCMSGradientColorSchemes = True
 
                     If .IsParameterPresent("CC") Then mCheckCentroidingStatus = True
 
@@ -384,7 +395,8 @@ Module modMain
             Console.WriteLine("Program syntax:" & Environment.NewLine & Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location))
             Console.WriteLine(" /I:InputFileNameOrFolderPath [/O:OutputFolderName]")
             Console.WriteLine(" [/P:ParamFilePath] [/S[:MaxLevel]] [/IE] [/L:LogFilePath]")
-            Console.WriteLine(" [/LC[:MaxPointsToPlot]] [/NoTIC] [/DI] [/SS] [/QS] [/CC]")
+            Console.WriteLine(" [/LC[:MaxPointsToPlot]] [/NoTIC] [/LCGrad]")
+            Console.WriteLine(" [/DI] [/SS] [/QS] [/CC]")
             Console.WriteLine(" [/DST:DatasetStatsFileName]")
             Console.WriteLine(" [/ScanStart:0] [/ScanEnd:0] [/Debug]")
             Console.WriteLine(" [/C] [/M:nnn] [/H] [/QZ]")
@@ -402,6 +414,7 @@ Module modMain
             Console.WriteLine("Use /LC to create 2D LCMS plots (this process could take several minutes for each dataset).  By default, plots the top " & clsLCMSDataPlotterOptions.DEFAULT_MAX_POINTS_TO_PLOT & " points.  To plot the top 20000 points, use /LC:20000.")
             Console.WriteLine("Use /LCDiv to specify the divisor to use when creating the overview 2D LCMS plots.  By default, uses /LCDiv:" & clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR & "; use /LCDiv:0 to disable creation of the overview plots.")
             Console.WriteLine("Use /NoTIC to not save TIC and BPI plots.")
+            Console.WriteLine("Use /LCGrad to save a series of 2D LC plots, each using a different color scheme.  The default color scheme is OxyPalettes.Jet")
             Console.WriteLine()
             Console.WriteLine("Use /DatasetID:# to define the dataset's DatasetID value (where # is an integer); only appropriate if processing a single dataset")
             Console.WriteLine("Use /DI to create a dataset info XML file for each dataset.")

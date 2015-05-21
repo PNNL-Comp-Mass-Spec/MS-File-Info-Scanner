@@ -2,6 +2,7 @@
 
 Imports System.IO
 Imports OxyPlot
+Imports OxyPlot.Axes
 Imports OxyPlot.Series
 
 Public Class clsTICandBPIPlotter
@@ -18,6 +19,9 @@ Public Class clsTICandBPIPlotter
         Public FileName As String
         Public FilePath As String
     End Structure
+
+    Protected Const EXPONENTIAL_FORMAT As String = "0.00E+00"
+
 #End Region
 
 #Region "Member variables"
@@ -42,125 +46,125 @@ Public Class clsTICandBPIPlotter
     Protected mTICAutoMinMaxY As Boolean
     Protected mRemoveZeroesFromEnds As Boolean
 
-	Protected mRecentFiles As List(Of udtOutputFileInfoType)
+    Protected mRecentFiles As List(Of udtOutputFileInfoType)
 #End Region
 
 
-	Public Property BPIAutoMinMaxY() As Boolean
-		Get
-			Return mBPIAutoMinMaxY
-		End Get
-		Set(ByVal value As Boolean)
-			mBPIAutoMinMaxY = value
-		End Set
-	End Property
+    Public Property BPIAutoMinMaxY() As Boolean
+        Get
+            Return mBPIAutoMinMaxY
+        End Get
+        Set(ByVal value As Boolean)
+            mBPIAutoMinMaxY = value
+        End Set
+    End Property
 
-	Public Property BPIPlotAbbrev() As String
-		Get
-			Return mBPIPlotAbbrev
-		End Get
-		Set(ByVal value As String)
-			mBPIPlotAbbrev = value
-		End Set
-	End Property
+    Public Property BPIPlotAbbrev() As String
+        Get
+            Return mBPIPlotAbbrev
+        End Get
+        Set(ByVal value As String)
+            mBPIPlotAbbrev = value
+        End Set
+    End Property
 
-	Public Property BPIXAxisLabel() As String
-		Get
-			Return mBPIXAxisLabel
-		End Get
-		Set(ByVal value As String)
-			mBPIXAxisLabel = value
-		End Set
-	End Property
+    Public Property BPIXAxisLabel() As String
+        Get
+            Return mBPIXAxisLabel
+        End Get
+        Set(ByVal value As String)
+            mBPIXAxisLabel = value
+        End Set
+    End Property
 
-	Public Property BPIYAxisLabel() As String
-		Get
-			Return mBPIYAxisLabel
-		End Get
-		Set(ByVal value As String)
-			mBPIYAxisLabel = value
-		End Set
-	End Property
+    Public Property BPIYAxisLabel() As String
+        Get
+            Return mBPIYAxisLabel
+        End Get
+        Set(ByVal value As String)
+            mBPIYAxisLabel = value
+        End Set
+    End Property
 
-	Public Property BPIYAxisExponentialNotation() As Boolean
-		Get
-			Return mBPIYAxisExponentialNotation
-		End Get
-		Set(ByVal value As Boolean)
-			mBPIYAxisExponentialNotation = value
-		End Set
-	End Property
+    Public Property BPIYAxisExponentialNotation() As Boolean
+        Get
+            Return mBPIYAxisExponentialNotation
+        End Get
+        Set(ByVal value As Boolean)
+            mBPIYAxisExponentialNotation = value
+        End Set
+    End Property
 
-	Public ReadOnly Property CountBPI() As Integer
-		Get
-			Return mBPI.ScanCount
-		End Get
-	End Property
+    Public ReadOnly Property CountBPI() As Integer
+        Get
+            Return mBPI.ScanCount
+        End Get
+    End Property
 
-	Public ReadOnly Property CountTIC() As Integer
-		Get
-			Return mTIC.ScanCount
-		End Get
-	End Property
+    Public ReadOnly Property CountTIC() As Integer
+        Get
+            Return mTIC.ScanCount
+        End Get
+    End Property
 
-	Public Property RemoveZeroesFromEnds() As Boolean
-		Get
-			Return mRemoveZeroesFromEnds
-		End Get
-		Set(ByVal value As Boolean)
-			mRemoveZeroesFromEnds = value
-		End Set
-	End Property
+    Public Property RemoveZeroesFromEnds() As Boolean
+        Get
+            Return mRemoveZeroesFromEnds
+        End Get
+        Set(ByVal value As Boolean)
+            mRemoveZeroesFromEnds = value
+        End Set
+    End Property
 
-	Public Property TICAutoMinMaxY() As Boolean
-		Get
-			Return mTICAutoMinMaxY
-		End Get
-		Set(ByVal value As Boolean)
-			mTICAutoMinMaxY = value
-		End Set
-	End Property
+    Public Property TICAutoMinMaxY() As Boolean
+        Get
+            Return mTICAutoMinMaxY
+        End Get
+        Set(ByVal value As Boolean)
+            mTICAutoMinMaxY = value
+        End Set
+    End Property
 
-	Public Property TICPlotAbbrev() As String
-		Get
-			Return mTICPlotAbbrev
-		End Get
-		Set(ByVal value As String)
-			mTICPlotAbbrev = value
-		End Set
-	End Property
+    Public Property TICPlotAbbrev() As String
+        Get
+            Return mTICPlotAbbrev
+        End Get
+        Set(ByVal value As String)
+            mTICPlotAbbrev = value
+        End Set
+    End Property
 
-	Public Property TICXAxisLabel() As String
-		Get
-			Return mTICXAxisLabel
-		End Get
-		Set(ByVal value As String)
-			mTICXAxisLabel = value
-		End Set
-	End Property
+    Public Property TICXAxisLabel() As String
+        Get
+            Return mTICXAxisLabel
+        End Get
+        Set(ByVal value As String)
+            mTICXAxisLabel = value
+        End Set
+    End Property
 
-	Public Property TICYAxisLabel() As String
-		Get
-			Return mTICYAxisLabel
-		End Get
-		Set(ByVal value As String)
-			mTICYAxisLabel = value
-		End Set
-	End Property
+    Public Property TICYAxisLabel() As String
+        Get
+            Return mTICYAxisLabel
+        End Get
+        Set(ByVal value As String)
+            mTICYAxisLabel = value
+        End Set
+    End Property
 
-	Public Property TICYAxisExponentialNotation() As Boolean
-		Get
-			Return mTICYAxisExponentialNotation
-		End Get
-		Set(ByVal value As Boolean)
-			mTICYAxisExponentialNotation = value
-		End Set
-	End Property
+    Public Property TICYAxisExponentialNotation() As Boolean
+        Get
+            Return mTICYAxisExponentialNotation
+        End Get
+        Set(ByVal value As Boolean)
+            mTICYAxisExponentialNotation = value
+        End Set
+    End Property
 
-	Public Sub New()
-		mRecentFiles = New List(Of udtOutputFileInfoType)
-		Me.Reset()
-	End Sub
+    Public Sub New()
+        mRecentFiles = New List(Of udtOutputFileInfoType)
+        Me.Reset()
+    End Sub
 
     Public Sub AddData(ByVal intScanNumber As Integer, _
                        ByVal intMSLevel As Integer, _
@@ -195,11 +199,11 @@ Public Class clsTICandBPIPlotter
         Dim udtOutputFileInfo As udtOutputFileInfoType
 
         udtOutputFileInfo.FileType = eFileType
-		udtOutputFileInfo.FileName = Path.GetFileName(strFilePath)
-		udtOutputFileInfo.FilePath = strFilePath
+        udtOutputFileInfo.FileName = Path.GetFileName(strFilePath)
+        udtOutputFileInfo.FilePath = strFilePath
 
-		mRecentFiles.Add(udtOutputFileInfo)
-	End Sub
+        mRecentFiles.Add(udtOutputFileInfo)
+    End Sub
 
     Protected Sub AddSeries(myplot As PlotModel, objPoints As List(Of DataPoint))
 
@@ -223,55 +227,55 @@ Public Class clsTICandBPIPlotter
 
             series.Points.AddRange(objPoints)
 
-            myPlot.Series.Add(series)
+            myplot.Series.Add(series)
         End If
 
     End Sub
 
-	''' <summary>
-	''' Returns the file name of the recently saved file of the given type
-	''' </summary>
-	''' <param name="eFileType">File type to find</param>
-	''' <returns>File name if found; empty string if this file type was not saved</returns>
-	''' <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
-	Public Function GetRecentFileInfo(ByVal eFileType As eOutputFileTypes) As String
-		Dim intIndex As Integer
-		For intIndex = 0 To mRecentFiles.Count - 1
-			If mRecentFiles(intIndex).FileType = eFileType Then
-				Return mRecentFiles(intIndex).FileName
-			End If
-		Next
-		Return String.Empty
-	End Function
+    ''' <summary>
+    ''' Returns the file name of the recently saved file of the given type
+    ''' </summary>
+    ''' <param name="eFileType">File type to find</param>
+    ''' <returns>File name if found; empty string if this file type was not saved</returns>
+    ''' <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
+    Public Function GetRecentFileInfo(ByVal eFileType As eOutputFileTypes) As String
+        Dim intIndex As Integer
+        For intIndex = 0 To mRecentFiles.Count - 1
+            If mRecentFiles(intIndex).FileType = eFileType Then
+                Return mRecentFiles(intIndex).FileName
+            End If
+        Next
+        Return String.Empty
+    End Function
 
-	''' <summary>
-	''' Returns the file name and path of the recently saved file of the given type
-	''' </summary>
-	''' <param name="eFileType">File type to find</param>
-	''' <param name="strFileName">File name (output)</param>
-	''' <param name="strFilePath">File Path (output)</param>
-	''' <returns>True if a match was found; otherwise returns false</returns>
-	''' <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
-	Public Function GetRecentFileInfo(ByVal eFileType As eOutputFileTypes, ByRef strFileName As String, ByRef strFilePath As String) As Boolean
-		Dim intIndex As Integer
-		For intIndex = 0 To mRecentFiles.Count - 1
-			If mRecentFiles(intIndex).FileType = eFileType Then
-				strFileName = mRecentFiles(intIndex).FileName
-				strFilePath = mRecentFiles(intIndex).FilePath
-				Return True
-			End If
-		Next
-		Return False
-	End Function
+    ''' <summary>
+    ''' Returns the file name and path of the recently saved file of the given type
+    ''' </summary>
+    ''' <param name="eFileType">File type to find</param>
+    ''' <param name="strFileName">File name (output)</param>
+    ''' <param name="strFilePath">File Path (output)</param>
+    ''' <returns>True if a match was found; otherwise returns false</returns>
+    ''' <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
+    Public Function GetRecentFileInfo(ByVal eFileType As eOutputFileTypes, ByRef strFileName As String, ByRef strFilePath As String) As Boolean
+        Dim intIndex As Integer
+        For intIndex = 0 To mRecentFiles.Count - 1
+            If mRecentFiles(intIndex).FileType = eFileType Then
+                strFileName = mRecentFiles(intIndex).FileName
+                strFilePath = mRecentFiles(intIndex).FilePath
+                Return True
+            End If
+        Next
+        Return False
+    End Function
 
-	''' <summary>
-	''' Plots a BPI or TIC chromatogram
-	''' </summary>
-	''' <param name="objData">Data to display</param>
-	''' <param name="strTitle">Title of the plot</param>
-	''' <param name="intMSLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
-	''' <returns>Zedgraph plot</returns>
-	''' <remarks></remarks>
+    ''' <summary>
+    ''' Plots a BPI or TIC chromatogram
+    ''' </summary>
+    ''' <param name="objData">Data to display</param>
+    ''' <param name="strTitle">Title of the plot</param>
+    ''' <param name="intMSLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
+    ''' <returns>Zedgraph plot</returns>
+    ''' <remarks></remarks>
     Private Function InitializePlot(
       objData As clsChromatogramInfo,
       strTitle As String,
@@ -284,7 +288,7 @@ Public Class clsTICandBPIPlotter
         Dim intMaxScan = 0
         Dim dblScanTimeMax As Double = 0
         Dim dblMaxIntensity As Double = 0
-        
+
         ' Instantiate the ZedGraph object to track the points
         Dim objPoints = New List(Of DataPoint)
 
@@ -324,11 +328,18 @@ Public Class clsTICandBPIPlotter
         Dim myPlot = clsOxyplotUtilities.GetBasicPlotModel(strTitle, strXAxisLabel, strYAxisLabel)
 
         If blnYAxisExponentialNotation Then
-            myPlot.Axes(1).StringFormat = "0.00E+00"
+            myPlot.Axes(1).StringFormat = EXPONENTIAL_FORMAT
         End If
 
         AddSeries(myPlot, objPoints)
-       
+
+        ' Update the axis format codes if the data values or small or the range of data is small
+        Dim xVals = From item In objPoints Select item.X
+        UpdateAxisFormatCodeIfSmallValues(myPlot.Axes(0), xVals)
+
+        Dim yVals = From item In objPoints Select item.Y
+        UpdateAxisFormatCodeIfSmallValues(myPlot.Axes(1), yVals)
+
         Dim plotContainer = New clsPlotContainer(myPlot)
         plotContainer.FontSizeBase = clsOxyplotUtilities.FONT_SIZE_BASE
 
@@ -498,6 +509,59 @@ Public Class clsTICandBPIPlotter
 
     End Sub
 
+    ''' <summary>
+    ''' Examine the values in dataPoints to see if they are all less than 10 (or all less than 1)
+    ''' If they are, change the axis format code from the default of "#,##0" (see DEFAULT_AXIS_LABEL_FORMAT)
+    ''' </summary>
+    ''' <param name="currentAxis"></param>
+    ''' <param name="dataPoints"></param>
+    ''' <remarks></remarks>
+    Private Sub UpdateAxisFormatCodeIfSmallValues(currentAxis As Axis, dataPoints As IEnumerable(Of Double))
+
+        If Not dataPoints.Any Then Return
+
+        Dim minValue = Math.Abs(dataPoints(0))
+        Dim maxValue = minValue
+
+        For Each currentValAbs In From value In dataPoints Select Math.Abs(value)
+            minValue = Math.Min(minValue, currentValAbs)
+            maxValue = Math.Max(maxValue, currentValAbs)
+        Next
+
+        Dim minDigitsPrecision = 0
+
+        If maxValue < 0.02 Then
+            currentAxis.StringFormat = EXPONENTIAL_FORMAT
+        ElseIf maxValue < 0.2 Then
+            minDigitsPrecision = 3
+            currentAxis.StringFormat = "0.000"
+        ElseIf maxValue < 2 Then
+            minDigitsPrecision = 2
+            currentAxis.StringFormat = "0.00"
+        ElseIf maxValue < 20 Then
+            minDigitsPrecision = 1
+            currentAxis.StringFormat = "0.0"
+        End If
+
+        If maxValue - minValue < 0.00001 Then
+            currentAxis.StringFormat = "0.00000E+00"
+        Else
+            ' Examine the range of values between the minimum and the maximum
+            ' If the range is small, e.g. between 3.95 and 3.98, then we need to guarantee that we have at least 2 digits of precision
+            ' The following combination of Log10 and ceiling determins the minimum needed
+            Dim minDigitsRangeBased = CInt(Math.Ceiling(-(Math.Log10(maxValue - minValue))))
+
+            If minDigitsRangeBased > minDigitsPrecision Then
+                minDigitsPrecision = minDigitsRangeBased
+            End If
+
+            If minDigitsPrecision > 0 Then
+                currentAxis.StringFormat = "0." & New String("0"c, minDigitsPrecision)
+            End If
+        End If
+
+    End Sub
+
     Protected Sub ValidateMSLevel(ByRef objChrom As clsChromatogramInfo)
         Dim intIndex As Integer
         Dim blnMSLevelDefined As Boolean
@@ -592,7 +656,7 @@ Public Class clsTICandBPIPlotter
         Public Sub RemoveRange(ByVal Index As Integer, ByVal Count As Integer)
 
             If Index >= 0 And Index < ScanCount And Count > 0 Then
-                mScans.RemoveRange(index, count)
+                mScans.RemoveRange(Index, Count)
             End If
 
         End Sub

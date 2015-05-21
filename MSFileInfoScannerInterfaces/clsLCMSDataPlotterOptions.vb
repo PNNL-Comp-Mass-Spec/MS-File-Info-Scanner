@@ -106,6 +106,11 @@ Public Class clsLCMSDataPlotterOptions
 
     Public Property PlottingDeisotopedData() As Boolean
 
+    ''' <summary>
+    ''' Set to True to print out a series of 2D plots, each using a different color scheme
+    ''' </summary>
+    Public Property TestGradientColorSchemes As Boolean     
+
     Public Property UseObservedMinScan() As Boolean
 
 

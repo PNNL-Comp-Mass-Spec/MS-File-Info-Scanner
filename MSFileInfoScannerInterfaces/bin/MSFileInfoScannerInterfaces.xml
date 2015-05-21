@@ -6,7 +6,11 @@ MSFileInfoScannerInterfaces
 </name>
 </assembly>
 <members>
-<member name="T:MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions">
+<member name="P:MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions.TestGradientColorSchemes">
+	<summary>
+ Set to True to print out a series of 2D plots, each using a different color scheme
+ </summary>
+</member><member name="T:MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions">
 	<summary>
  Options class for clsLCMSDatPlotter
  </summary>

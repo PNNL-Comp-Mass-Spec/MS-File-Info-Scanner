@@ -609,6 +609,18 @@ Public Class clsMSFileInfoScanner
 		End Set
 	End Property
 
+    ''' <summary>
+    ''' Set to True to print out a series of 2D plots, each using a different color scheme
+    ''' </summary>
+    Public Property TestLCMSGradientColorSchemes As Boolean
+        Get           
+            Return mLCMS2DPlotOptions.TestGradientColorSchemes
+        End Get
+        Set(value As Boolean)
+            mLCMS2DPlotOptions.TestGradientColorSchemes = value
+        End Set
+    End Property
+
 	Public Property UpdateDatasetStatsTextFile() As Boolean Implements iMSFileInfoScanner.UpdateDatasetStatsTextFile
 		Get
 			Return mUpdateDatasetStatsTextFile

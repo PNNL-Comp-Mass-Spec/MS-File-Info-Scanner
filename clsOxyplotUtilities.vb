@@ -5,6 +5,8 @@ Public Class clsOxyplotUtilities
 
     Public Const FONT_SIZE_BASE As Integer = 16
 
+    Protected Const DEFAULT_AXIS_LABEL_FORMAT As String = "#,##0"
+
     Public Shared Function GetBasicPlotModel(strTitle As String, xAxisLabel As String, yAxisLabel As String) As PlotModel
 
         Dim myPlot As New PlotModel
@@ -53,7 +55,7 @@ Public Class clsOxyplotUtilities
         axis.MajorGridlineStyle = LineStyle.None
         axis.MinorGridlineStyle = LineStyle.None
 
-        axis.StringFormat = "#,##0"
+        axis.StringFormat = DEFAULT_AXIS_LABEL_FORMAT
         axis.Font = "Arial"
 
         Return axis
