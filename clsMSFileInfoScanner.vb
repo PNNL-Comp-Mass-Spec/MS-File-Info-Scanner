@@ -15,7 +15,7 @@ Public Class clsMSFileInfoScanner
 	Implements iMSFileInfoScanner
 
 	Public Sub New()
-        mFileDate = "May 20, 2015"
+        mFileDate = "May 21, 2015"
 
 		mFileIntegrityChecker = New clsFileIntegrityChecker
 		mMSFileInfoDataCache = New clsMSFileInfoDataCache
@@ -873,10 +873,14 @@ Public Class clsMSFileInfoScanner
 				objFileSystemInfo = diFolderInfo
 				blnExists = True
 				blnIsFolder = True
-			Else
-				blnExists = False
+            Else                
+                blnExists = False
 			End If
 		End If
+
+        If Not blnExists Then
+            objFileSystemInfo = New FileInfo(strFileOrFolderPath)
+        End If
 
 		Return blnExists
 
@@ -1521,20 +1525,20 @@ Public Class clsMSFileInfoScanner
 				AutosaveCachedResults()
 			End If
 
-			If mDSInfoDBPostingEnabled Then
-				blnSuccess = PostDatasetInfoToDB(mDatasetInfoXML)
-				If Not blnSuccess Then
-					SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
-				End If
-			Else
-				blnSuccess = True
-			End If
+            If mDSInfoDBPostingEnabled Then
+                blnSuccess = PostDatasetInfoToDB(mDatasetInfoXML)
+                If Not blnSuccess Then
+                    SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
+                End If
+            Else
+                blnSuccess = True
+            End If
 
-		Else
-			If SKIP_FILES_IN_ERROR Then
-				blnSuccess = True
-			End If
-		End If
+        Else
+            If SKIP_FILES_IN_ERROR Then
+                blnSuccess = True
+            End If
+        End If
 
 		Return blnSuccess
 
@@ -1604,7 +1608,7 @@ Public Class clsMSFileInfoScanner
 				' Determine whether strInputFileOrFolderPath points to a file or a folder
 
 				If Not GetFileOrFolderInfo(strInputFileOrFolderPath, blnIsFolder, objFileSystemInfo) Then
-					ShowErrorMessage("File or folder not found: " & strInputFileOrFolderPath)
+                    ShowErrorMessage("File or folder not found: " & objFileSystemInfo.FullName)
 					If SKIP_FILES_IN_ERROR Then
 						Return True
 					Else

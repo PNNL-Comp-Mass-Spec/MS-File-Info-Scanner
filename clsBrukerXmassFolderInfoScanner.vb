@@ -582,7 +582,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 
             End If
         Catch ex As Exception
-            ' Error finding Scan.xml file
+            ' Error parsing Storage.mcf_idx file
             ReportError("Error parsing " & BRUKER_SQLITE_INDEX_FILE_NAME & " file: " & ex.Message)
             blnSuccess = False
         End Try
@@ -934,12 +934,18 @@ Public Class clsBrukerXmassFolderInfoScanner
             Dim mzValues As Single() = Nothing
             Dim intensities As Single() = Nothing
 
-            For scanNumber = 1 To scanCount
+            ' BrukerDataReader.DataReader treats scan 0 as the first scan
+
+            For scanNumber = 0 To scanCount - 1
                 Try
                     serReader.GetMassSpectrum(scanNumber, mzValues, intensities)
                 Catch ex As Exception
 
                     If scanNumber >= scanCount - 1 Then
+                        If scanNumber = 0 Then
+                            ' Silently ignore this
+                            Continue For
+                        End If
                         ' Treat this as a warning
                         ShowMessage("Unable to retrieve scan " & scanNumber & " using the BrukerDataReader: " & ex.Message)
                     Else

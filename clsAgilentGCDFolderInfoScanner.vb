@@ -193,7 +193,7 @@ Public Class clsAgilentGCDFolderInfoScanner
         Dim intCurrentIndex As Integer = 0
 
         Try
-            Using oReader As ChemstationMSFileReader.clsChemstationDataMSFileReader = New ChemstationMSFileReader.clsChemstationDataMSFileReader(strDatafilePath)
+            Using oReader = New ChemstationMSFileReader.clsChemstationDataMSFileReader(strDatafilePath)
 
                 udtFileInfo.AcqTimeStart = oReader.Header.AcqDate
                 udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart.AddMinutes(oReader.Header.RetentionTimeMinutesEnd)

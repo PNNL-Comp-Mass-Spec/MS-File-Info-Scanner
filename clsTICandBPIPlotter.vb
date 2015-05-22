@@ -20,8 +20,6 @@ Public Class clsTICandBPIPlotter
         Public FilePath As String
     End Structure
 
-    Protected Const EXPONENTIAL_FORMAT As String = "0.00E+00"
-
 #End Region
 
 #Region "Member variables"
@@ -274,7 +272,7 @@ Public Class clsTICandBPIPlotter
     ''' <param name="objData">Data to display</param>
     ''' <param name="strTitle">Title of the plot</param>
     ''' <param name="intMSLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
-    ''' <returns>Zedgraph plot</returns>
+    ''' <returns>OxyPlot PlotContainer</returns>
     ''' <remarks></remarks>
     Private Function InitializePlot(
       objData As clsChromatogramInfo,
@@ -285,11 +283,12 @@ Public Class clsTICandBPIPlotter
       blnAutoMinMaxY As Boolean,
       blnYAxisExponentialNotation As Boolean) As clsPlotContainer
 
+        Dim intMinScan = Integer.MaxValue
         Dim intMaxScan = 0
         Dim dblScanTimeMax As Double = 0
         Dim dblMaxIntensity As Double = 0
 
-        ' Instantiate the ZedGraph object to track the points
+        ' Instantiate the list to track the data points
         Dim objPoints = New List(Of DataPoint)
 
         For Each chromDataPoint In objData.Scans
@@ -302,6 +301,10 @@ Public Class clsTICandBPIPlotter
 
                 If chromDataPoint.TimeMinutes > dblScanTimeMax Then
                     dblScanTimeMax = chromDataPoint.TimeMinutes
+                End If
+
+                If chromDataPoint.ScanNum < intMinScan Then
+                    intMinScan = chromDataPoint.ScanNum
                 End If
 
                 If chromDataPoint.ScanNum > intMaxScan Then
@@ -328,17 +331,17 @@ Public Class clsTICandBPIPlotter
         Dim myPlot = clsOxyplotUtilities.GetBasicPlotModel(strTitle, strXAxisLabel, strYAxisLabel)
 
         If blnYAxisExponentialNotation Then
-            myPlot.Axes(1).StringFormat = EXPONENTIAL_FORMAT
+            myPlot.Axes(1).StringFormat = clsOxyplotUtilities.EXPONENTIAL_FORMAT
         End If
 
         AddSeries(myPlot, objPoints)
 
-        ' Update the axis format codes if the data values or small or the range of data is small
+        ' Update the axis format codes if the data values are small or the range of data is small
         Dim xVals = From item In objPoints Select item.X
-        UpdateAxisFormatCodeIfSmallValues(myPlot.Axes(0), xVals)
+        clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes(0), xVals, True)
 
         Dim yVals = From item In objPoints Select item.Y
-        UpdateAxisFormatCodeIfSmallValues(myPlot.Axes(1), yVals)
+        clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes(1), yVals, False)
 
         Dim plotContainer = New clsPlotContainer(myPlot)
         plotContainer.FontSizeBase = clsOxyplotUtilities.FONT_SIZE_BASE
@@ -373,11 +376,24 @@ Public Class clsTICandBPIPlotter
 
         End If
 
-        ' Override the auto-computed axis range
-        myPlot.Axes(0).Minimum = 0
-        myPlot.Axes(0).Maximum = intMaxScan
+        ' Override the auto-computed X axis range
+        If intMinScan = intMaxScan Then
+            myPlot.Axes(0).Minimum = intMinScan - 1
+            myPlot.Axes(0).Maximum = intMinScan + 1
+        Else
+            myPlot.Axes(0).Minimum = 0
 
-        ' Override the auto-computed axis range
+            If intMaxScan = 0 Then
+                myPlot.Axes(0).Maximum = 1
+            Else
+                myPlot.Axes(0).Maximum = intMaxScan
+            End If
+        End If
+
+        ' Assure that we don't see ticks between scan numbers
+        clsOxyplotUtilities.ValidateMajorStep(myPlot.Axes(0))
+
+        ' Override the auto-computed Y axis range
         If blnAutoMinMaxY Then
             ' Auto scale
         Else
@@ -508,62 +524,7 @@ Public Class clsTICandBPIPlotter
         End If
 
     End Sub
-
-    ''' <summary>
-    ''' Examine the values in dataPoints to see if they are all less than 10 (or all less than 1)
-    ''' If they are, change the axis format code from the default of "#,##0" (see DEFAULT_AXIS_LABEL_FORMAT)
-    ''' </summary>
-    ''' <param name="currentAxis"></param>
-    ''' <param name="dataPoints"></param>
-    ''' <remarks></remarks>
-    Private Sub UpdateAxisFormatCodeIfSmallValues(currentAxis As Axis, dataPoints As IEnumerable(Of Double))
-
-        If Not dataPoints.Any Then Return
-
-        Dim minValue = Math.Abs(dataPoints(0))
-        Dim maxValue = minValue
-
-        For Each currentValAbs In From value In dataPoints Select Math.Abs(value)
-            minValue = Math.Min(minValue, currentValAbs)
-            maxValue = Math.Max(maxValue, currentValAbs)
-        Next
-
-        Dim minDigitsPrecision = 0
-
-        If maxValue < 0.02 Then
-            currentAxis.StringFormat = EXPONENTIAL_FORMAT
-        ElseIf maxValue < 0.2 Then
-            minDigitsPrecision = 3
-            currentAxis.StringFormat = "0.000"
-        ElseIf maxValue < 2 Then
-            minDigitsPrecision = 2
-            currentAxis.StringFormat = "0.00"
-        ElseIf maxValue < 20 Then
-            minDigitsPrecision = 1
-            currentAxis.StringFormat = "0.0"
-        ElseIf maxValue >= 1000000 Then
-            currentAxis.StringFormat = EXPONENTIAL_FORMAT
-        End If
-
-        If maxValue - minValue < 0.00001 Then
-            currentAxis.StringFormat = "0.00000E+00"
-        Else
-            ' Examine the range of values between the minimum and the maximum
-            ' If the range is small, e.g. between 3.95 and 3.98, then we need to guarantee that we have at least 2 digits of precision
-            ' The following combination of Log10 and ceiling determins the minimum needed
-            Dim minDigitsRangeBased = CInt(Math.Ceiling(-(Math.Log10(maxValue - minValue))))
-
-            If minDigitsRangeBased > minDigitsPrecision Then
-                minDigitsPrecision = minDigitsRangeBased
-            End If
-
-            If minDigitsPrecision > 0 Then
-                currentAxis.StringFormat = "0." & New String("0"c, minDigitsPrecision)
-            End If
-        End If
-
-    End Sub
-
+    
     Protected Sub ValidateMSLevel(ByRef objChrom As clsChromatogramInfo)
         Dim intIndex As Integer
         Dim blnMSLevelDefined As Boolean

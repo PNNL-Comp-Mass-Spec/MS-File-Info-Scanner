@@ -3,6 +3,8 @@ Imports OxyPlot.Axes
 
 Public Class clsOxyplotUtilities
 
+    Public Const EXPONENTIAL_FORMAT As String = "0.00E+00"
+    
     Public Const FONT_SIZE_BASE As Integer = 16
 
     Protected Const DEFAULT_AXIS_LABEL_FORMAT As String = "#,##0"
@@ -61,4 +63,80 @@ Public Class clsOxyplotUtilities
         Return axis
 
     End Function
+
+    ''' <summary>
+    ''' Examine the values in dataPoints to see if they are all less than 10 (or all less than 1)
+    ''' If they are, change the axis format code from the default of "#,##0" (see DEFAULT_AXIS_LABEL_FORMAT)
+    ''' </summary>
+    ''' <param name="currentAxis"></param>
+    ''' <param name="dataPoints"></param>
+    ''' <remarks></remarks>
+    Public Shared Sub UpdateAxisFormatCodeIfSmallValues(currentAxis As Axis, dataPoints As IEnumerable(Of Double), integerData As Boolean)
+
+        If Not dataPoints.Any Then Return
+
+        Dim minValue = Math.Abs(dataPoints(0))
+        Dim maxValue = minValue
+
+        For Each currentValAbs In From value In dataPoints Select Math.Abs(value)
+            minValue = Math.Min(minValue, currentValAbs)
+            maxValue = Math.Max(maxValue, currentValAbs)
+        Next
+
+        If Math.Abs(minValue - 0) < Single.Epsilon And Math.Abs(maxValue - 0) < Single.Epsilon Then
+            currentAxis.StringFormat = "0"
+            currentAxis.MinorGridlineThickness = 0
+            currentAxis.MajorStep = 1
+            Return
+        End If
+
+        If integerData Then
+            If maxValue >= 1000000 Then
+                currentAxis.StringFormat = EXPONENTIAL_FORMAT
+            End If
+            Return
+        End If
+
+        Dim minDigitsPrecision = 0
+
+        If maxValue < 0.02 Then
+            currentAxis.StringFormat = EXPONENTIAL_FORMAT
+        ElseIf maxValue < 0.2 Then
+            minDigitsPrecision = 2
+            currentAxis.StringFormat = "0.00"
+        ElseIf maxValue < 2 Then
+            minDigitsPrecision = 1
+            currentAxis.StringFormat = "0.0"
+        ElseIf maxValue >= 1000000 Then
+            currentAxis.StringFormat = EXPONENTIAL_FORMAT
+        End If
+
+        If maxValue - minValue < 0.00001 Then
+            If Not currentAxis.StringFormat.Contains(".") Then
+                currentAxis.StringFormat = "0.00"
+            End If
+        Else
+            ' Examine the range of values between the minimum and the maximum
+            ' If the range is small, e.g. between 3.95 and 3.98, then we need to guarantee that we have at least 2 digits of precision
+            ' The following combination of Log10 and ceiling determins the minimum needed
+            Dim minDigitsRangeBased = CInt(Math.Ceiling(-(Math.Log10(maxValue - minValue))))
+
+            If minDigitsRangeBased > minDigitsPrecision Then
+                minDigitsPrecision = minDigitsRangeBased
+            End If
+
+            If minDigitsPrecision > 0 Then
+                currentAxis.StringFormat = "0." & New String("0"c, minDigitsPrecision)
+            End If
+        End If
+
+    End Sub
+
+    Public Shared Sub ValidateMajorStep(currentAxis As Axis)
+        If Math.Abs(currentAxis.ActualMajorStep) > Single.Epsilon AndAlso currentAxis.ActualMajorStep < 1 Then
+            currentAxis.MinorGridlineThickness = 0
+            currentAxis.MajorStep = 1
+        End If
+    End Sub
+       
 End Class

@@ -1264,7 +1264,7 @@ Public Class clsLCMSDataPlotter
     ''' <param name="strTitle">Title of the plot</param>
     ''' <param name="intMSLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
     ''' <param name="blnSkipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for intMSLevelFilter, set blnSkipTrimCachedData to False on the first call and True on subsequent calls)</param>
-    ''' <returns>Zedgraph plot</returns>
+    ''' <returns>OxyPlot PlotContainer</returns>
     ''' <remarks></remarks>
     Private Function InitializePlot(
       ByVal strTitle As String,
@@ -1308,7 +1308,7 @@ Public Class clsLCMSDataPlotter
         ' At the same time, determine the range of m/z and intensity values
         ' Lastly, compute the median and average intensity values
 
-        ' Instantiate the ZedGraph object to track the points
+        ' Instantiate the list to track the data points
         Dim lstPointsByCharge = New List(Of List(Of ScatterPoint))
 
         If mOptions.PlottingDeisotopedData Then
@@ -1371,6 +1371,13 @@ Public Class clsLCMSDataPlotter
             AddSeriesMzVsScan(strTitle, lstPointsByCharge.First(), sngColorScaleMinIntensity, sngColorScaleMaxIntensity, myPlot)
         End If
 
+        ' Update the axis format codes if the data values are small or the range of data is small
+        Dim xVals = From item In lstPointsByCharge.First() Select item.X
+        clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes(0), xVals, True)
+
+        Dim yVals = From item In lstPointsByCharge.First() Select item.Y
+        clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes(1), yVals, False)
+
         Dim plotContainer = New clsPlotContainer(myPlot)
         plotContainer.FontSizeBase = clsOxyplotUtilities.FONT_SIZE_BASE
 
@@ -1393,14 +1400,30 @@ Public Class clsLCMSDataPlotter
 
         End If
 
-        ' Override the auto-computed axis range
+        ' Override the auto-computed X axis range
         If mOptions.UseObservedMinScan Then
             myPlot.Axes(0).Minimum = intMinScan
         Else
             myPlot.Axes(0).Minimum = 0
         End If
 
-        myPlot.Axes(0).Maximum = intMaxScan
+        If intMaxScan = 0 Then
+            myPlot.Axes(0).Maximum = 1
+        Else
+            myPlot.Axes(0).Maximum = intMaxScan
+        End If
+
+        If Math.Abs(myPlot.Axes(0).Minimum - myPlot.Axes(0).Maximum) < 0.01 Then
+            intMinScan = CInt(myPlot.Axes(0).Minimum)
+            myPlot.Axes(0).Minimum = intMinScan - 1
+            myPlot.Axes(0).Maximum = intMinScan + 1
+        ElseIf intMinScan = intMaxScan Then
+            myPlot.Axes(0).Minimum = intMinScan - 1
+            myPlot.Axes(0).Maximum = intMinScan + 1
+        End If
+
+         ' Assure that we don't see ticks between scan numbers
+        clsOxyplotUtilities.ValidateMajorStep(myPlot.Axes(0))
 
         ' Set the maximum value for the Y-axis
         If mOptions.PlottingDeisotopedData Then
