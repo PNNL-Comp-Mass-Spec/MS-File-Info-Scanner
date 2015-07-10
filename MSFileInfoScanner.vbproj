@@ -38,6 +38,7 @@
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <DefineTrace>true</DefineTrace>
@@ -48,6 +49,7 @@
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BrukerDataReader">
@@ -85,9 +87,6 @@
     </Reference>
     <Reference Include="ProteowizardWrapper">
       <HintPath>Lib\ProteowizardWrapper.dll</HintPath>
-    </Reference>
-    <Reference Include="pwiz.CommonUtil">
-      <HintPath>Lib\pwiz.CommonUtil.dll</HintPath>
     </Reference>
     <Reference Include="pwiz_bindings_cli">
       <HintPath>Lib\pwiz_bindings_cli.dll</HintPath>

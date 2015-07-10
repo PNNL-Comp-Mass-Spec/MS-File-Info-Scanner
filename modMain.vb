@@ -7,7 +7,7 @@ Imports MSFileInfoScannerInterfaces
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "May 21, 2015"
+    Public Const PROGRAM_DATE As String = "July 10, 2015"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -202,7 +202,7 @@ Module modMain
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String = String.Empty
-        Dim lstValidParameters As List(Of String) = New List(Of String) From {
+        Dim lstValidParameters = New List(Of String) From {
             "I", "O", "P", "S", "IE", "L", "C", "M", "H", "QZ", "NoTIC",
             "LC", "LCDiv", "LCGrad",
             "CC", "QS",

@@ -1,5 +1,10 @@
 MS File Info Scanner Change Log
 
+Version 1.3.5669; July 10, 2015
+	- Updated to July 2015 release of ProteoWizard (64-bit)
+		- Note: Ignore the processor architecture mismatch warning with pwiz_bindings_cli.  
+		        This is due to compiling MSFileInfoScanner as AnyCPU while pwiz_bindings_cli is 64-bit 
+
 Version 1.3.5619; May 21, 2015
 	- Updated to March 2015 release of ProteoWizard (64-bit)
 
