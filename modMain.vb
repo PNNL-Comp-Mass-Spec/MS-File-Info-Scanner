@@ -48,6 +48,8 @@ Module modMain
     Private mComputeFileHashes As Boolean
     Private mZipFileCheckAllData As Boolean
 
+    Private mPostResultsToDMS As Boolean
+
     Private WithEvents mMSFileScanner As clsMSFileInfoScanner
 
     <System.STAThreadAttribute()>
@@ -97,6 +99,8 @@ Module modMain
         mZipFileCheckAllData = True
 
         mMaximumTextFileLinesToCheck = clsFileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK
+
+        mPostResultsToDMS = False
 
         ''TestZipper("\\proto-6\Db_Backups\Albert_Backup\MT_Shewanella_P196", "*.BAK.zip")
         ''Return 0
@@ -159,6 +163,7 @@ Module modMain
                     End If
 
                     .DatasetIDOverride = mDatasetID
+                    .DSInfoDBPostingEnabled = mPostResultsToDMS
 
                     If Not mParameterFilePath Is Nothing AndAlso mParameterFilePath.Length > 0 Then
                         .LoadParameterFileSettings(mParameterFilePath)
@@ -208,7 +213,8 @@ Module modMain
             "CC", "QS",
             "ScanStart", "ScanEnd",
             "DatasetID", "DI", "DST",
-            "SS", "CF", "R", "Z", "Debug"}
+            "SS", "CF", "R", "Z",
+            "PostToDMS", "Debug"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -307,6 +313,8 @@ Module modMain
                     If .IsParameterPresent("R") Then mReprocessingExistingFiles = True
                     If .IsParameterPresent("Z") Then mReprocessIfCachedSizeIsZero = True
 
+                    If .IsParameterPresent("PostToDMS") Then mPostResultsToDMS = True
+
                 End With
 
                 Return True
@@ -401,6 +409,7 @@ Module modMain
             Console.WriteLine(" [/ScanStart:0] [/ScanEnd:0] [/Debug]")
             Console.WriteLine(" [/C] [/M:nnn] [/H] [/QZ]")
             Console.WriteLine(" [/CF] [/R] [/Z]")
+            Console.WriteLine(" [/PostToDMS]")
             Console.WriteLine()
             Console.WriteLine("Use /I to specify the name of a file or folder to scan; the path can contain the wildcard character *")
             Console.WriteLine("The output folder name is optional.  If omitted, the output files will be created in the program directory.")
@@ -443,7 +452,8 @@ Module modMain
             Console.WriteLine("Use /R to reprocess files that are already defined in the acquisition time file.")
             Console.WriteLine("Use /Z to reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes.")
             Console.WriteLine()
-
+            Console.WriteLine("Use /PostToDMS to store the dataset info in the DMS database.  To customize the server name and/or stored procedure to use for posting, use an XML parameter file with settings DSInfoConnectionString, DSInfoDBPostingEnabled, and DSInfoStoredProcedure")
+            Console.WriteLine()
             Console.WriteLine("Known file extensions: " & CollapseList(mMSFileScanner.GetKnownFileExtensionsList()))
             Console.WriteLine("Known folder extensions: " & CollapseList(mMSFileScanner.GetKnownFolderExtensionsList()))
             Console.WriteLine()

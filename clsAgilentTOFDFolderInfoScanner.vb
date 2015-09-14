@@ -5,341 +5,349 @@
 ' Last modified August 22, 2012
 
 <CLSCompliant(False)> Public Class clsAgilentTOFDFolderInfoScanner
-	Inherits clsMSFileInfoProcessorBaseClass
-
-	' Note: The extension must be in all caps
-	Public Const AGILENT_DATA_FOLDER_D_EXTENSION As String = ".D"
-
-	Public Const AGILENT_ACQDATA_FOLDER_NAME As String = "AcqData"
-	Public Const AGILENT_MS_SCAN_FILE As String = "MSScan.bin"
-	Public Const AGILENT_XML_CONTENTS_FILE As String = "Contents.xml"
-	Public Const AGILENT_TIME_SEGMENT_FILE As String = "MSTS.xml"
-
-	Protected WithEvents mPWizParser As clsProteowizardDataParser
-
-	Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
-		' The dataset name is simply the folder name without .D
-		Try
-			Return Path.GetFileNameWithoutExtension(strDataFilePath)
-		Catch ex As Exception
-			Return String.Empty
-		End Try
-	End Function
-
-	''' <summary>
-	''' Reads the Contents.xml file to look for the AcquiredTime entry
-	''' </summary>
-	''' <param name="strFolderPath"></param>
-	''' <param name="udtFileInfo"></param>
-	''' <returns>True if the file exists and the AcquiredTime entry was successfully parsed; otherwise false</returns>
-	''' <remarks></remarks>
-	Private Function ProcessContentsXMLFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-		Dim strFilePath As String = String.Empty
-		Dim blnSuccess As Boolean
-
-		Try
-			blnSuccess = False
-
-			' Open the Contents.xml file
-			strFilePath = Path.Combine(strFolderPath, AGILENT_XML_CONTENTS_FILE)
-
-			Using srReader As Xml.XmlTextReader = New Xml.XmlTextReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-
-				Do While Not srReader.EOF
-					srReader.Read()
-
-					Select Case srReader.NodeType
-						Case Xml.XmlNodeType.Element
-							Select Case srReader.Name
-								Case "AcquiredTime"
-									Try
-										Dim dtAcquisitionStartTime As DateTime
-										dtAcquisitionStartTime = srReader.ReadElementContentAsDateTime
-										' Convert from Universal time to Local time
-										udtFileInfo.AcqTimeStart = dtAcquisitionStartTime.ToLocalTime
-										blnSuccess = True
-									Catch ex As Exception
-										' Ignore errors here
-									End Try
+    Inherits clsMSFileInfoProcessorBaseClass
 
-								Case Else
-									' Ignore it
-							End Select
-						Case Else
-					End Select
+    ' Note: The extension must be in all caps
+    Public Const AGILENT_DATA_FOLDER_D_EXTENSION As String = ".D"
 
-				Loop
+    Public Const AGILENT_ACQDATA_FOLDER_NAME As String = "AcqData"
+    Public Const AGILENT_MS_SCAN_FILE As String = "MSScan.bin"
+    Public Const AGILENT_XML_CONTENTS_FILE As String = "Contents.xml"
+    Public Const AGILENT_TIME_SEGMENT_FILE As String = "MSTS.xml"
 
-			End Using
+    Protected WithEvents mPWizParser As clsProteowizardDataParser
 
+    Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
+        ' The dataset name is simply the folder name without .D
+        Try
+            Return Path.GetFileNameWithoutExtension(strDataFilePath)
+        Catch ex As Exception
+            Return String.Empty
+        End Try
+    End Function
 
-		Catch ex As Exception
-			' Exception reading file
-			ReportError("Exception reading " & AGILENT_XML_CONTENTS_FILE & ": " & ex.Message)
-			blnSuccess = False
-		End Try
+    ''' <summary>
+    ''' Reads the Contents.xml file to look for the AcquiredTime entry
+    ''' </summary>
+    ''' <param name="strFolderPath"></param>
+    ''' <param name="udtFileInfo"></param>
+    ''' <returns>True if the file exists and the AcquiredTime entry was successfully parsed; otherwise false</returns>
+    ''' <remarks></remarks>
+    Private Function ProcessContentsXMLFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+        Dim strFilePath As String = String.Empty
+        Dim blnSuccess As Boolean
 
-		Return blnSuccess
+        Try
+            blnSuccess = False
 
-	End Function
+            ' Open the Contents.xml file
+            strFilePath = Path.Combine(strFolderPath, AGILENT_XML_CONTENTS_FILE)
 
-	''' <summary>
-	''' Reads the MSTS.xml file to determine the acquisition length and the number of scans
-	''' </summary>
-	''' <param name="strFolderPath"></param>
-	''' <param name="udtFileInfo"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Protected Function ProcessTimeSegmentFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, ByRef dblTotalAcqTimeMinutes As Double) As Boolean
-		Dim strFilePath As String = String.Empty
-		Dim blnSuccess As Boolean
+            Using srReader As Xml.XmlTextReader = New Xml.XmlTextReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-		Dim dblStartTime As Double
-		Dim dblEndTime As Double
+                Do While Not srReader.EOF
+                    srReader.Read()
 
+                    Select srReader.NodeType
+                        Case Xml.XmlNodeType.Element
 
-		Try
-			blnSuccess = False
-			udtFileInfo.ScanCount = 0
-			dblTotalAcqTimeMinutes = 0
+                            If srReader.Name = "AcquiredTime" Then
+                                Try
+                                    Dim dtAcquisitionStartTime As DateTime
+                                    dtAcquisitionStartTime = srReader.ReadElementContentAsDateTime
 
-			' Open the Contents.xml file
-			strFilePath = Path.Combine(strFolderPath, AGILENT_TIME_SEGMENT_FILE)
+                                    ' Convert from Universal time to Local time
+                                    Dim dtAcquisitionTime = dtAcquisitionStartTime.ToLocalTime
 
-			Using srReader As Xml.XmlTextReader = New Xml.XmlTextReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                    ' There have been some cases where the acquisition start time is several years before the file modification time, 
+                                    ' for example XG_A83CapiHSSWash1.d where the time in the Contents.xml file is 3/20/2005 while the file modification time is 2010
+                                    ' Thus, we use a sanity check of a maximum run time of 24 hours
 
-				Do While Not srReader.EOF
-					srReader.Read()
+                                    If udtFileInfo.AcqTimeEnd.Subtract(dtAcquisitionTime).TotalDays < 1 Then
+                                        udtFileInfo.AcqTimeStart = dtAcquisitionStartTime.ToLocalTime
+                                        blnSuccess = True
+                                    End If
 
-					Select Case srReader.NodeType
-						Case Xml.XmlNodeType.Element
-							Select Case srReader.Name
-								Case "TimeSegment"
-									dblStartTime = 0
-									dblEndTime = 0
+                                Catch ex As Exception
+                                    ' Ignore errors here
+                                End Try
 
-								Case "StartTime"
-									dblStartTime = srReader.ReadElementContentAsDouble()
+                            End If
 
-								Case "EndTime"
-									dblEndTime = srReader.ReadElementContentAsDouble()
+                    End Select
 
-								Case "NumOfScans"
-									udtFileInfo.ScanCount += srReader.ReadElementContentAsInt()
-									blnSuccess = True
+                Loop
 
-								Case Else
-									' Ignore it
-							End Select
+            End Using
 
-						Case Xml.XmlNodeType.EndElement
-							If srReader.Name = "TimeSegment" Then
-								' Store the acqtime for this time segment
 
-								If dblEndTime > dblStartTime Then
-									blnSuccess = True
-									dblTotalAcqTimeMinutes += (dblEndTime - dblStartTime)
-								End If
+        Catch ex As Exception
+            ' Exception reading file
+            ReportError("Exception reading " & AGILENT_XML_CONTENTS_FILE & ": " & ex.Message)
+            blnSuccess = False
+        End Try
 
-							End If
+        Return blnSuccess
 
-					End Select
+    End Function
 
-				Loop
+    ''' <summary>
+    ''' Reads the MSTS.xml file to determine the acquisition length and the number of scans
+    ''' </summary>
+    ''' <param name="strFolderPath"></param>
+    ''' <param name="udtFileInfo"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Protected Function ProcessTimeSegmentFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, ByRef dblTotalAcqTimeMinutes As Double) As Boolean
+        Dim strFilePath As String = String.Empty
+        Dim blnSuccess As Boolean
 
-			End Using
+        Dim dblStartTime As Double
+        Dim dblEndTime As Double
 
-		Catch ex As Exception
-			' Exception reading file
-			ReportError("Exception reading " & AGILENT_TIME_SEGMENT_FILE & ": " & ex.Message)
-			blnSuccess = False
-		End Try
 
-		Return blnSuccess
+        Try
+            blnSuccess = False
+            udtFileInfo.ScanCount = 0
+            dblTotalAcqTimeMinutes = 0
 
-	End Function
+            ' Open the Contents.xml file
+            strFilePath = Path.Combine(strFolderPath, AGILENT_TIME_SEGMENT_FILE)
 
-	Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-		' Returns True if success, False if an error
+            Using srReader As Xml.XmlTextReader = New Xml.XmlTextReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-		Dim dblAcquisitionLengthMinutes As Double = 0
+                Do While Not srReader.EOF
+                    srReader.Read()
 
-		Dim blnAcqStartTimeDetermined As Boolean = False
-		Dim blnValidMSTS As Boolean
-		Dim blnSuccess As Boolean
+                    Select Case srReader.NodeType
+                        Case Xml.XmlNodeType.Element
+                            Select Case srReader.Name
+                                Case "TimeSegment"
+                                    dblStartTime = 0
+                                    dblEndTime = 0
 
-		Dim ioRootFolderInfo As DirectoryInfo
-		Dim ioAcqDataFolderInfo As DirectoryInfo
+                                Case "StartTime"
+                                    dblStartTime = srReader.ReadElementContentAsDouble()
 
-		Dim ioFileInfo As FileInfo
+                                Case "EndTime"
+                                    dblEndTime = srReader.ReadElementContentAsDouble()
 
-		Try
-			blnSuccess = False
-			ioRootFolderInfo = New DirectoryInfo(strDataFilePath)
-			ioAcqDataFolderInfo = New DirectoryInfo(Path.Combine(ioRootFolderInfo.FullName, AGILENT_ACQDATA_FOLDER_NAME))
+                                Case "NumOfScans"
+                                    udtFileInfo.ScanCount += srReader.ReadElementContentAsInt()
+                                    blnSuccess = True
 
-			With udtFileInfo
-				.FileSystemCreationTime = ioAcqDataFolderInfo.CreationTime
-				.FileSystemModificationTime = ioAcqDataFolderInfo.LastWriteTime
+                                Case Else
+                                    ' Ignore it
+                            End Select
 
-				' The acquisition times will get updated below to more accurate values
-				.AcqTimeStart = .FileSystemModificationTime
-				.AcqTimeEnd = .FileSystemModificationTime
+                        Case Xml.XmlNodeType.EndElement
+                            If srReader.Name = "TimeSegment" Then
+                                ' Store the acqtime for this time segment
 
-				.DatasetName = GetDatasetNameViaPath(ioRootFolderInfo.Name)
-				.FileExtension = ioRootFolderInfo.Extension
-				.FileSizeBytes = 0
-				.ScanCount = 0
+                                If dblEndTime > dblStartTime Then
+                                    blnSuccess = True
+                                    dblTotalAcqTimeMinutes += (dblEndTime - dblStartTime)
+                                End If
 
-				If ioAcqDataFolderInfo.Exists Then
-					' Sum up the sizes of all of the files in the AcqData folder
-					For Each ioFileInfo In ioAcqDataFolderInfo.GetFiles("*", SearchOption.AllDirectories)
-						.FileSizeBytes += ioFileInfo.Length
-					Next ioFileInfo
+                            End If
 
-					' Look for the MSScan.bin file
-					' Use its modification time to get an initial estimate for the acquisition end time
-					ioFileInfo = New FileInfo(Path.Combine(ioAcqDataFolderInfo.FullName, AGILENT_MS_SCAN_FILE))
+                    End Select
 
-					If ioFileInfo.Exists Then
-						.AcqTimeStart = ioFileInfo.LastWriteTime
-						.AcqTimeEnd = ioFileInfo.LastWriteTime
+                Loop
 
-						' Read the file info from the file system
-						' Several of these stats will be further updated later
-						UpdateDatasetFileStats(ioFileInfo, udtFileInfo.DatasetID)
-					Else
-						' Read the file info from the file system
-						' Several of these stats will be further updated later
-						UpdateDatasetFileStats(ioAcqDataFolderInfo, udtFileInfo.DatasetID)
-					End If
+            End Using
 
-					blnSuccess = True
-				End If
+        Catch ex As Exception
+            ' Exception reading file
+            ReportError("Exception reading " & AGILENT_TIME_SEGMENT_FILE & ": " & ex.Message)
+            blnSuccess = False
+        End Try
 
-			End With
+        Return blnSuccess
 
-			If blnSuccess Then
-				' The AcqData folder exists
+    End Function
 
-				' Parse the Contents.xml file to determine the acquisition start time
-				blnAcqStartTimeDetermined = ProcessContentsXMLFile(ioAcqDataFolderInfo.FullName, udtFileInfo)
+    Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+        ' Returns True if success, False if an error
 
-				' Parse the MSTS.xml file to determine the acquisition length and number of scans
-				blnValidMSTS = ProcessTimeSegmentFile(ioAcqDataFolderInfo.FullName, udtFileInfo, dblAcquisitionLengthMinutes)
+        Dim dblAcquisitionLengthMinutes As Double = 0
 
-				If Not blnAcqStartTimeDetermined AndAlso blnValidMSTS Then
-					' Compute the start time from .AcqTimeEnd minus dblAcquisitionLengthMinutes
-					udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd.AddMinutes(-dblAcquisitionLengthMinutes)
-				End If
+        Dim blnAcqStartTimeDetermined As Boolean = False
+        Dim blnValidMSTS As Boolean
+        Dim blnSuccess As Boolean
 
-				' Note: could parse the AcqMethod.xml file to determine if MS2 spectra are present
-				'<AcqMethod>
-				'	<QTOF>
-				'		<TimeSegment>
-				'	      <Acquisition>
-				'	        <AcqMode>TargetedMS2</AcqMode>
+        Dim ioRootFolderInfo As DirectoryInfo
+        Dim ioAcqDataFolderInfo As DirectoryInfo
 
-				' Read the raw data to create the TIC and BPI
-				ReadBinaryData(ioRootFolderInfo.FullName, udtFileInfo)
+        Dim ioFileInfo As FileInfo
 
-			End If
+        Try
+            blnSuccess = False
+            ioRootFolderInfo = New DirectoryInfo(strDataFilePath)
+            ioAcqDataFolderInfo = New DirectoryInfo(Path.Combine(ioRootFolderInfo.FullName, AGILENT_ACQDATA_FOLDER_NAME))
 
-			If blnSuccess Then
+            With udtFileInfo
+                .FileSystemCreationTime = ioAcqDataFolderInfo.CreationTime
+                .FileSystemModificationTime = ioAcqDataFolderInfo.LastWriteTime
 
-				' Copy over the updated filetime info and scan info from udtFileInfo to mDatasetFileInfo
-				With mDatasetStatsSummarizer.DatasetFileInfo
-					.DatasetName = String.Copy(udtFileInfo.DatasetName)
-					.FileExtension = String.Copy(udtFileInfo.FileExtension)
-					.FileSizeBytes = udtFileInfo.FileSizeBytes
-					.AcqTimeStart = udtFileInfo.AcqTimeStart
-					.AcqTimeEnd = udtFileInfo.AcqTimeEnd
-					.ScanCount = udtFileInfo.ScanCount
-				End With
-			End If
+                ' The acquisition times will get updated below to more accurate values
+                .AcqTimeStart = .FileSystemModificationTime
+                .AcqTimeEnd = .FileSystemModificationTime
 
+                .DatasetName = GetDatasetNameViaPath(ioRootFolderInfo.Name)
+                .FileExtension = ioRootFolderInfo.Extension
+                .FileSizeBytes = 0
+                .ScanCount = 0
 
-		Catch ex As Exception
-			ReportError("Exception parsing Agilent TOF .D folder: " & ex.Message)
-			blnSuccess = False
-		End Try
+                If ioAcqDataFolderInfo.Exists Then
+                    ' Sum up the sizes of all of the files in the AcqData folder
+                    For Each ioFileInfo In ioAcqDataFolderInfo.GetFiles("*", SearchOption.AllDirectories)
+                        .FileSizeBytes += ioFileInfo.Length
+                    Next ioFileInfo
 
-		Return blnSuccess
-	End Function
+                    ' Look for the MSScan.bin file
+                    ' Use its modification time to get an initial estimate for the acquisition end time
+                    ioFileInfo = New FileInfo(Path.Combine(ioAcqDataFolderInfo.FullName, AGILENT_MS_SCAN_FILE))
 
-	Protected Function ReadBinaryData(ByVal strDataFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+                    If ioFileInfo.Exists Then
+                        .AcqTimeStart = ioFileInfo.LastWriteTime
+                        .AcqTimeEnd = ioFileInfo.LastWriteTime
 
-		Dim blnTICStored As Boolean = False
-		Dim blnSRMDataCached As Boolean = False
+                        ' Read the file info from the file system
+                        ' Several of these stats will be further updated later
+                        UpdateDatasetFileStats(ioFileInfo, udtFileInfo.DatasetID)
+                    Else
+                        ' Read the file info from the file system
+                        ' Several of these stats will be further updated later
+                        UpdateDatasetFileStats(ioAcqDataFolderInfo, udtFileInfo.DatasetID)
+                    End If
 
-		Dim blnSuccess As Boolean
+                    blnSuccess = True
+                End If
 
-		Try
-			' Open the data folder using the ProteoWizardWrapper
+            End With
 
-			Dim objPWiz As pwiz.ProteowizardWrapper.MSDataFileReader
-			objPWiz = New pwiz.ProteowizardWrapper.MSDataFileReader(strDataFolderPath)
+            If blnSuccess Then
+                ' The AcqData folder exists
 
+                ' Parse the Contents.xml file to determine the acquisition start time
+                blnAcqStartTimeDetermined = ProcessContentsXMLFile(ioAcqDataFolderInfo.FullName, udtFileInfo)
 
-			Try
-				Dim dtRunStartTime As DateTime = udtFileInfo.AcqTimeStart
-				dtRunStartTime = CDate(objPWiz.RunStartTime())
+                ' Parse the MSTS.xml file to determine the acquisition length and number of scans
+                blnValidMSTS = ProcessTimeSegmentFile(ioAcqDataFolderInfo.FullName, udtFileInfo, dblAcquisitionLengthMinutes)
 
-				' Update AcqTimeEnd if possible
-				If dtRunStartTime < udtFileInfo.AcqTimeEnd Then
-					If udtFileInfo.AcqTimeEnd.Subtract(dtRunStartTime).TotalDays < 1 Then
-						udtFileInfo.AcqTimeStart = dtRunStartTime
-					End If
-				End If
+                If Not blnAcqStartTimeDetermined AndAlso blnValidMSTS Then
+                    ' Compute the start time from .AcqTimeEnd minus dblAcquisitionLengthMinutes
+                    udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd.AddMinutes(-dblAcquisitionLengthMinutes)
+                End If
 
-			Catch ex As Exception
-				' Leave the times unchanged
-			End Try
+                ' Note: could parse the AcqMethod.xml file to determine if MS2 spectra are present
+                '<AcqMethod>
+                '	<QTOF>
+                '		<TimeSegment>
+                '	      <Acquisition>
+                '	        <AcqMode>TargetedMS2</AcqMode>
 
+                ' Read the raw data to create the TIC and BPI
+                ReadBinaryData(ioRootFolderInfo.FullName, udtFileInfo)
 
-			' Instantiate the Proteowizard Data Parser class
-			mPWizParser = New clsProteowizardDataParser(
-			  objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot,
-			  mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus)
+            End If
 
-			mPWizParser.HighResMS1 = True
-			mPWizParser.HighResMS2 = True
+            If blnSuccess Then
 
-			Dim dblRuntimeMinutes As Double = 0
+                ' Copy over the updated filetime info and scan info from udtFileInfo to mDatasetFileInfo
+                With mDatasetStatsSummarizer.DatasetFileInfo
+                    .DatasetName = String.Copy(udtFileInfo.DatasetName)
+                    .FileExtension = String.Copy(udtFileInfo.FileExtension)
+                    .FileSizeBytes = udtFileInfo.FileSizeBytes
+                    .AcqTimeStart = udtFileInfo.AcqTimeStart
+                    .AcqTimeEnd = udtFileInfo.AcqTimeEnd
+                    .ScanCount = udtFileInfo.ScanCount
+                End With
+            End If
 
-			If objPWiz.ChromatogramCount > 0 Then
 
-				' Process the chromatograms
-				mPWizParser.StoreChromatogramInfo(udtFileInfo, blnTICStored, blnSRMDataCached, dblRuntimeMinutes)
-				mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
+        Catch ex As Exception
+            ReportError("Exception parsing Agilent TOF .D folder: " & ex.Message)
+            blnSuccess = False
+        End Try
 
-			End If
+        Return blnSuccess
+    End Function
 
-			If objPWiz.SpectrumCount > 0 Then
-				' Process the spectral data
-				mPWizParser.StoreMSSpectraInfo(udtFileInfo, blnTICStored, dblRuntimeMinutes)
-				mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
-			End If
+    Protected Function ReadBinaryData(ByVal strDataFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+
+        Dim blnTICStored As Boolean = False
+        Dim blnSRMDataCached As Boolean = False
+
+        Dim blnSuccess As Boolean
+
+        Try
+            ' Open the data folder using the ProteoWizardWrapper
+
+            Dim objPWiz As pwiz.ProteowizardWrapper.MSDataFileReader
+            objPWiz = New pwiz.ProteowizardWrapper.MSDataFileReader(strDataFolderPath)
+
+
+            Try
+                Dim dtRunStartTime As DateTime = udtFileInfo.AcqTimeStart
+                dtRunStartTime = CDate(objPWiz.RunStartTime())
+
+                ' Update AcqTimeEnd if possible
+                If dtRunStartTime < udtFileInfo.AcqTimeEnd Then
+                    If udtFileInfo.AcqTimeEnd.Subtract(dtRunStartTime).TotalDays < 1 Then
+                        udtFileInfo.AcqTimeStart = dtRunStartTime
+                    End If
+                End If
+
+            Catch ex As Exception
+                ' Leave the times unchanged
+            End Try
+
+
+            ' Instantiate the Proteowizard Data Parser class
+            mPWizParser = New clsProteowizardDataParser(
+              objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot,
+              mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus)
+
+            mPWizParser.HighResMS1 = True
+            mPWizParser.HighResMS2 = True
+
+            Dim dblRuntimeMinutes As Double = 0
+
+            If objPWiz.ChromatogramCount > 0 Then
+
+                ' Process the chromatograms
+                mPWizParser.StoreChromatogramInfo(udtFileInfo, blnTICStored, blnSRMDataCached, dblRuntimeMinutes)
+                mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
+
+            End If
+
+            If objPWiz.SpectrumCount > 0 Then
+                ' Process the spectral data
+                mPWizParser.StoreMSSpectraInfo(udtFileInfo, blnTICStored, dblRuntimeMinutes)
+                mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
+            End If
 
             objPWiz.Dispose()
             PRISM.Processes.clsProgRunner.GarbageCollectNow()
 
-			blnSuccess = True
+            blnSuccess = True
 
-		Catch ex As Exception
-			ReportError("Exception reading the Binary Data in the Agilent TOF .D folder using Proteowizard: " & ex.Message)
-			blnSuccess = False
-		End Try
+        Catch ex As Exception
+            ReportError("Exception reading the Binary Data in the Agilent TOF .D folder using Proteowizard: " & ex.Message)
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
-	End Function
+        Return blnSuccess
+    End Function
 
-	Private Sub mPWizParser_ErrorEvent(Message As String) Handles mPWizParser.ErrorEvent
-		ReportError(Message)
-	End Sub
+    Private Sub mPWizParser_ErrorEvent(Message As String) Handles mPWizParser.ErrorEvent
+        ReportError(Message)
+    End Sub
 
-	Private Sub mPWizParser_MessageEvent(Message As String) Handles mPWizParser.MessageEvent
-		ShowMessage(Message)
-	End Sub
+    Private Sub mPWizParser_MessageEvent(Message As String) Handles mPWizParser.MessageEvent
+        ShowMessage(Message)
+    End Sub
 
 End Class

@@ -1269,7 +1269,7 @@ Public Class clsMSFileInfoScanner
 			' This line will look like this:
 			'   <?xml version="1.0" encoding="utf-16" standalone="yes"?>
 
-			intStartIndex = strDatasetInfoXML.IndexOf("?>")
+            intStartIndex = strDatasetInfoXML.IndexOf("?>")
 			If intStartIndex > 0 Then
 				strDSInfoXMLClean = strDatasetInfoXML.Substring(intStartIndex + 2).Trim
 			Else
@@ -1311,7 +1311,7 @@ Public Class clsMSFileInfoScanner
 				blnSuccess = True
 			Else
 				ShowErrorMessage("Error calling stored procedure, return code = " & intResult)
-				SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
+                SetErrorCode(iMSFileInfoScanner.eMSFileScannerErrorCodes.DatabasePostingError)
 				blnSuccess = False
 			End If
 
@@ -1501,10 +1501,10 @@ Public Class clsMSFileInfoScanner
 		Loop While Not blnSuccess And intRetryCount < MAX_FILE_READ_ACCESS_ATTEMPTS
 
 		If Not blnSuccess And intRetryCount >= MAX_FILE_READ_ACCESS_ATTEMPTS Then
-			If udtFileInfo.DatasetName.Length > 0 Then
-				' Make an entry anyway; probably a corrupted file
-				blnSuccess = True
-			End If
+            If Not String.IsNullOrWhiteSpace(udtFileInfo.DatasetName) Then
+                ' Make an entry anyway; probably a corrupted file
+                blnSuccess = True
+            End If
 		End If
 
 		If blnSuccess Then
@@ -1634,24 +1634,26 @@ Public Class clsMSFileInfoScanner
 							Case clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION
 								' Agilent .D folder or Bruker .D folder
 
-								If Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 OrElse
-								   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_SER_FILE_NAME).Length > 0 OrElse
-								   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_FID_FILE_NAME).Length > 0 OrElse
-								   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 OrElse
-								   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME).Length > 0 Then
-									mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+                                If Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 OrElse
+                                   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_SER_FILE_NAME).Length > 0 OrElse
+                                   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_FID_FILE_NAME).Length > 0 OrElse
+                                   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME & "_idx").Length > 0 OrElse
+                                   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME & "_xtr").Length > 0 OrElse
+                                   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 OrElse
+                                   Directory.GetFiles(strInputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME).Length > 0 Then
+                                    mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
 
-								ElseIf Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 OrElse
-								  Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 OrElse
-								  Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0 Then
-									mMSInfoScanner = New clsAgilentGCDFolderInfoScanner
+                                ElseIf Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 OrElse
+                                  Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 OrElse
+                                  Directory.GetFiles(strInputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0 Then
+                                    mMSInfoScanner = New clsAgilentGCDFolderInfoScanner
 
-								ElseIf Directory.GetDirectories(strInputFileOrFolderPath, clsAgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Length > 0 Then
-									mMSInfoScanner = New clsAgilentTOFDFolderInfoScanner
+                                ElseIf Directory.GetDirectories(strInputFileOrFolderPath, clsAgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Length > 0 Then
+                                    mMSInfoScanner = New clsAgilentTOFDFolderInfoScanner
 
-								Else
-									mMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
-								End If
+                                Else
+                                    mMSInfoScanner = New clsAgilentIonTrapDFolderInfoScanner
+                                End If
 
 								blnKnownMSDataType = True
 							Case clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION
@@ -1668,28 +1670,28 @@ Public Class clsMSFileInfoScanner
 						End Select
 					End If
 				Else
-					If objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME.ToLower() Then
-						mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
-						blnKnownMSDataType = True
+                    If [String].Equals(objFileSystemInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME, StringComparison.CurrentCultureIgnoreCase) Then
+                        mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+                        blnKnownMSDataType = True
 
-					ElseIf objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME.ToLower() Then
-						mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
-						blnKnownMSDataType = True
+                    ElseIf [String].Equals(objFileSystemInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME, StringComparison.CurrentCultureIgnoreCase) Then
+                        mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+                        blnKnownMSDataType = True
 
-					ElseIf objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME.ToLower() Then
-						mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
-						blnKnownMSDataType = True
+                    ElseIf [String].Equals(objFileSystemInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME, StringComparison.CurrentCultureIgnoreCase) Then
+                        mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+                        blnKnownMSDataType = True
 
-					ElseIf objFileSystemInfo.Name.ToLower() = clsBrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME.ToLower() Then
-						' If the folder also contains file BRUKER_EXTENSION_BAF_FILE_NAME then this is a Bruker XMass folder
-						Dim strPathCheck As String
+                    ElseIf [String].Equals(objFileSystemInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME, StringComparison.CurrentCultureIgnoreCase) Then
+                        ' If the folder also contains file BRUKER_EXTENSION_BAF_FILE_NAME then this is a Bruker XMass folder
+                        Dim strPathCheck As String
 
-						strPathCheck = Path.Combine(Path.GetDirectoryName(objFileSystemInfo.FullName), clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME)
-						If File.Exists(strPathCheck) Then
-							mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
-							blnKnownMSDataType = True
-						End If
-					End If
+                        strPathCheck = Path.Combine(Path.GetDirectoryName(objFileSystemInfo.FullName), clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME)
+                        If File.Exists(strPathCheck) Then
+                            mMSInfoScanner = New clsBrukerXmassFolderInfoScanner
+                            blnKnownMSDataType = True
+                        End If
+                    End If
 
 					If Not blnKnownMSDataType Then
 
