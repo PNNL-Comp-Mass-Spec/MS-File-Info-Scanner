@@ -974,7 +974,7 @@ Public Class clsBrukerXmassFolderInfoScanner
             Return True
 
         Catch ex As Exception
-            ReportError("Exception processing Bruker ser file: " & ex.Message)
+            ReportError("Exception processing Bruker ser or fid file: " & ex.Message)
             Return False
         End Try
 

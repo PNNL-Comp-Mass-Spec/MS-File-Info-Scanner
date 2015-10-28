@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.3.5778; October 27, 2015
+	- Updated BrukerDataReader.dll that handles malformed apexAcquisition.method XML files
+
 Version 1.3.5735; September 14, 2015
 	- Updated the Bruker scanner to properly report the acquisition start/end time for datasets with no scans
 	- Updated the Agilent .D folder scanner to check for invalid dates for AcquiredTime 
