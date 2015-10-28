@@ -947,8 +947,13 @@ Public Class clsBrukerXmassFolderInfoScanner
                 End If
 
                 If needToSaveTICAndBPI Then
-                    Dim basePeakIntensity As Double = intensities.Max
-                    Dim totalIonCurrent As Double = intensities.Sum
+                    Dim basePeakIntensity As Double = 0
+                    Dim totalIonCurrent As Double = 0
+
+                    If intensities.Count > 0 Then
+                        basePeakIntensity = intensities.Max
+                        totalIonCurrent = intensities.Sum
+                    End If
 
                     mTICandBPIPlot.AddData(scanNumber, msLevel, elutionTime, basePeakIntensity, totalIonCurrent)
                 End If
