@@ -32,57 +32,57 @@ Public Class clsAgilentGCDFolderInfoScanner
         End Sub
     End Class
 
-    Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
+    Public Overrides Function GetDatasetNameViaPath(strDataFilePath As String) As String
         ' The dataset name is simply the folder name without .D
         Try
-			Return Path.GetFileNameWithoutExtension(strDataFilePath)
-		Catch ex As Exception
-			Return String.Empty
-		End Try
-	End Function
+            Return Path.GetFileNameWithoutExtension(strDataFilePath)
+        Catch ex As Exception
+            Return String.Empty
+        End Try
+    End Function
 
-	Private Function ExtractRunTime(ByVal strText As String, ByRef dblRunTimeMinutes As Double) As Boolean
+    Private Function ExtractRunTime(strText As String, ByRef dblRunTimeMinutes As Double) As Boolean
 
-		Static reExtractTime As Regex = New Regex("([0-9.]+) min", Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
+        Static reExtractTime As Regex = New Regex("([0-9.]+) min", Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
 
-		Dim reMatch As Match
+        Dim reMatch As Match
 
-		reMatch = reExtractTime.Match(strText)
+        reMatch = reExtractTime.Match(strText)
 
-		If Not reMatch Is Nothing AndAlso reMatch.Success Then
-			If Double.TryParse(reMatch.Groups(1).Value, dblRunTimeMinutes) Then
-				Return True
-			End If
-		End If
+        If Not reMatch Is Nothing AndAlso reMatch.Success Then
+            If Double.TryParse(reMatch.Groups(1).Value, dblRunTimeMinutes) Then
+                Return True
+            End If
+        End If
 
-		Return False
+        Return False
 
-	End Function
+    End Function
 
-	Private Function ParseAcqMethodFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-		Dim strFilePath As String = String.Empty
-		Dim strLineIn As String
+    Private Function ParseAcqMethodFile(strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+        Dim strFilePath As String = String.Empty
+        Dim strLineIn As String
 
-		Dim dctRunTimeText As Dictionary(Of String, clsLineMatchSearchInfo)
-		Dim dblTotalRuntime As Double = 0
-		Dim dblRunTime As Double = 0
+        Dim dctRunTimeText As Dictionary(Of String, clsLineMatchSearchInfo)
+        Dim dblTotalRuntime As Double = 0
+        Dim dblRunTime As Double = 0
 
-		Dim blnRunTimeFound As Boolean
-		Dim blnSuccess As Boolean
-		Dim blnMatchSuccess As Boolean
+        Dim blnRunTimeFound As Boolean
+        Dim blnSuccess As Boolean
+        Dim blnMatchSuccess As Boolean
 
-		Try
-			' Open the acqmeth.txt file
+        Try
+            ' Open the acqmeth.txt file
             strFilePath = Path.Combine(strFolderPath, AGILENT_ACQ_METHOD_FILE)
-			If Not File.Exists(strFilePath) Then
-				Return False
-			End If
+            If Not File.Exists(strFilePath) Then
+                Return False
+            End If
 
-			' Populate a dictionary object with the text strings for finding lines with runtime information
-			' Note that "Post Run" occurs twice in the file, so we use clsLineMatchSearchInfo.Matched to track whether or not the text has been matched
-			dctRunTimeText = New Dictionary(Of String, clsLineMatchSearchInfo)
-			dctRunTimeText.Add(ACQ_METHOD_FILE_EQUILIBRATION_TIME_LINE, New clsLineMatchSearchInfo(True))
-			dctRunTimeText.Add(ACQ_METHOD_FILE_RUN_TIME_LINE, New clsLineMatchSearchInfo(True))
+            ' Populate a dictionary object with the text strings for finding lines with runtime information
+            ' Note that "Post Run" occurs twice in the file, so we use clsLineMatchSearchInfo.Matched to track whether or not the text has been matched
+            dctRunTimeText = New Dictionary(Of String, clsLineMatchSearchInfo)
+            dctRunTimeText.Add(ACQ_METHOD_FILE_EQUILIBRATION_TIME_LINE, New clsLineMatchSearchInfo(True))
+            dctRunTimeText.Add(ACQ_METHOD_FILE_RUN_TIME_LINE, New clsLineMatchSearchInfo(True))
 
             ' We could also add in the "Post Run" time for determining total acquisition time, but we don't do this, to stay consistent with run times reported by the MS file
             ' dctRunTimeText.Add(ACQ_METHOD_FILE_POST_RUN_LINE, New clsLineMatchSearchInfo(False))
@@ -134,7 +134,7 @@ Public Class clsAgilentGCDFolderInfoScanner
 
     End Function
 
-    Private Function ParseGCIniFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    Private Function ParseGCIniFile(strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
         Dim strFilePath As String = String.Empty
         Dim strLineIn As String
         Dim strSplitLine() As String
@@ -186,7 +186,7 @@ Public Class clsAgilentGCDFolderInfoScanner
 
     End Function
 
-    Protected Function ProcessChemstationMSDataFile(ByVal strDatafilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    Protected Function ProcessChemstationMSDataFile(strDatafilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
         Dim blnValidSpectrum As Boolean
         Dim blnSuccess As Boolean
@@ -286,7 +286,7 @@ Public Class clsAgilentGCDFolderInfoScanner
 
     End Function
 
-    Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    Public Overrides Function ProcessDataFile(strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
         ' Returns True if success, False if an error
 
         Dim blnSuccess As Boolean

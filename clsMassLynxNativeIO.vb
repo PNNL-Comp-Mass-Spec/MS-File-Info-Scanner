@@ -329,7 +329,7 @@ Friend Class clsMassLynxNativeIO
         GetErrorMessage = strError
     End Function
 
-    Public Function GetFileInfo(ByVal strMLynxDataFolderPath As String, ByRef strAcquDate As String, ByVal strAcquTime As String, ByRef strAcquName As String, ByRef strInstrument As String, ByRef strInstrumentType As String, ByRef strSampleDesc As String, ByRef lngVersionMajor As Integer, ByRef lngVersionMinor As Integer) As Boolean
+    Public Function GetFileInfo(strMLynxDataFolderPath As String, ByRef strAcquDate As String, strAcquTime As String, ByRef strAcquName As String, ByRef strInstrument As String, ByRef strInstrumentType As String, ByRef strSampleDesc As String, ByRef lngVersionMajor As Integer, ByRef lngVersionMinor As Integer) As Boolean
         ' Returns information on the given MassLynx data file (actually a folder)
         ' Returns True if success, false if failure
 
@@ -349,583 +349,583 @@ Friend Class clsMassLynxNativeIO
                 End With
             End If
 
-		Catch ex As Exception
-			blnSuccess = False
-		End Try
+        Catch ex As Exception
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Public Function GetFileInfo(ByVal strMLynxDataFolderPath As String, ByRef udtHeaderInfo As udtMSHeaderInfoType) As Boolean
-		' Returns information on the given MassLynx data file (actually a folder)
-		' Returns True if success, false if failure
+    Public Function GetFileInfo(strMLynxDataFolderPath As String, ByRef udtHeaderInfo As udtMSHeaderInfoType) As Boolean
+        ' Returns information on the given MassLynx data file (actually a folder)
+        ' Returns True if success, false if failure
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		Try
-			blnSuccess = ValidateDataFolder(strMLynxDataFolderPath)
-			If blnSuccess Then
-				udtHeaderInfo = MSData.HeaderInfo
-			End If
-		Catch ex As Exception
-			blnSuccess = False
-		End Try
+        Try
+            blnSuccess = ValidateDataFolder(strMLynxDataFolderPath)
+            If blnSuccess Then
+                udtHeaderInfo = MSData.HeaderInfo
+            End If
+        Catch ex As Exception
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Public Function GetFunctionAcquisitionDataType(ByVal strMLynxDataFolderPath As String, ByVal lngFunctionNumber As Integer) As Short
-		Dim intAcquisitionDataTypeID As Short
+    Public Function GetFunctionAcquisitionDataType(strMLynxDataFolderPath As String, lngFunctionNumber As Integer) As Short
+        Dim intAcquisitionDataTypeID As Short
 
-		On Error GoTo GetFunctionAcquisitionDataTypeExit
+        On Error GoTo GetFunctionAcquisitionDataTypeExit
 
-		intAcquisitionDataTypeID = -1
-		If ValidateDataFolder(strMLynxDataFolderPath) Then
-			If lngFunctionNumber >= 1 And lngFunctionNumber <= MSData.FunctionCount Then
-				With MSData.FunctionInfo(lngFunctionNumber)
-					intAcquisitionDataTypeID = .AcquisitionDataType
-				End With
-			End If
-		End If
+        intAcquisitionDataTypeID = -1
+        If ValidateDataFolder(strMLynxDataFolderPath) Then
+            If lngFunctionNumber >= 1 And lngFunctionNumber <= MSData.FunctionCount Then
+                With MSData.FunctionInfo(lngFunctionNumber)
+                    intAcquisitionDataTypeID = .AcquisitionDataType
+                End With
+            End If
+        End If
 
 GetFunctionAcquisitionDataTypeExit:
-		GetFunctionAcquisitionDataType = intAcquisitionDataTypeID
+        GetFunctionAcquisitionDataType = intAcquisitionDataTypeID
 
-	End Function
+    End Function
 
-	Public Function GetFunctionInfo(ByVal strMLynxDataFolderPath As String, ByVal lngFunctionNumber As Integer, ByRef lngScanCount As Integer, ByRef sngStartRT As Single, ByRef sngEndRT As Single, ByRef sngStartMass As Single, ByRef sngEndMass As Single, ByRef intFunctionType As Short, Optional ByRef strFunctionTypeText As String = "", Optional ByRef dblFunctionSetMass As Double = 0) As Boolean
-		' Returns information on the given function
-		' Returns True if success, false if failure
+    Public Function GetFunctionInfo(strMLynxDataFolderPath As String, lngFunctionNumber As Integer, ByRef lngScanCount As Integer, ByRef sngStartRT As Single, ByRef sngEndRT As Single, ByRef sngStartMass As Single, ByRef sngEndMass As Single, ByRef intFunctionType As Short, Optional ByRef strFunctionTypeText As String = "", Optional ByRef dblFunctionSetMass As Double = 0) As Boolean
+        ' Returns information on the given function
+        ' Returns True if success, false if failure
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		Try
-			blnSuccess = ValidateDataFolder(strMLynxDataFolderPath)
-			If blnSuccess Then
-				If lngFunctionNumber >= 1 And lngFunctionNumber <= MSData.FunctionCount Then
-					With MSData.FunctionInfo(lngFunctionNumber)
-						lngScanCount = .ScanCount
-						sngStartRT = .StartRT
-						sngEndRT = .EndRT
-						sngStartMass = .StartMass
-						sngEndMass = .EndMass
-						intFunctionType = .FunctionType
-						dblFunctionSetMass = .FunctionSetMass
-						strFunctionTypeText = .FunctionTypeText
-					End With
-				Else
-					blnSuccess = False
-				End If
-			End If
-		Catch ex As Exception
-			blnSuccess = False
-		End Try
+        Try
+            blnSuccess = ValidateDataFolder(strMLynxDataFolderPath)
+            If blnSuccess Then
+                If lngFunctionNumber >= 1 And lngFunctionNumber <= MSData.FunctionCount Then
+                    With MSData.FunctionInfo(lngFunctionNumber)
+                        lngScanCount = .ScanCount
+                        sngStartRT = .StartRT
+                        sngEndRT = .EndRT
+                        sngStartMass = .StartMass
+                        sngEndMass = .EndMass
+                        intFunctionType = .FunctionType
+                        dblFunctionSetMass = .FunctionSetMass
+                        strFunctionTypeText = .FunctionTypeText
+                    End With
+                Else
+                    blnSuccess = False
+                End If
+            End If
+        Catch ex As Exception
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Public Function GetFunctionInfo(ByVal strMLynxDataFolderPath As String, ByVal lngFunctionNumber As Integer, ByRef udtFunctionInfo As udtMSFunctionInfoType) As Boolean
-		' Returns information on the given function
-		' Returns True if success, false if failure
+    Public Function GetFunctionInfo(strMLynxDataFolderPath As String, lngFunctionNumber As Integer, ByRef udtFunctionInfo As udtMSFunctionInfoType) As Boolean
+        ' Returns information on the given function
+        ' Returns True if success, false if failure
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		Try
-			blnSuccess = ValidateDataFolder(strMLynxDataFolderPath)
-			If blnSuccess Then
-				If lngFunctionNumber >= 1 And lngFunctionNumber <= MSData.FunctionCount Then
-					udtFunctionInfo = MSData.FunctionInfo(lngFunctionNumber)
-				Else
-					blnSuccess = False
-				End If
-			End If
-		Catch ex As Exception
-			blnSuccess = False
-		End Try
+        Try
+            blnSuccess = ValidateDataFolder(strMLynxDataFolderPath)
+            If blnSuccess Then
+                If lngFunctionNumber >= 1 And lngFunctionNumber <= MSData.FunctionCount Then
+                    udtFunctionInfo = MSData.FunctionInfo(lngFunctionNumber)
+                Else
+                    blnSuccess = False
+                End If
+            End If
+        Catch ex As Exception
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Public Function GetFunctionCount(ByVal strMLynxDataFolderPath As String) As Integer
-		' Function returns the number of functions in the datafile
-		' Returns 0 if an error
+    Public Function GetFunctionCount(strMLynxDataFolderPath As String) As Integer
+        ' Function returns the number of functions in the datafile
+        ' Returns 0 if an error
 
-		Dim lngFunctionCount As Integer
+        Dim lngFunctionCount As Integer
 
-		On Error GoTo GetNumScansExit
+        On Error GoTo GetNumScansExit
 
-		lngFunctionCount = 0
-		If ValidateDataFolder(strMLynxDataFolderPath) Then
-			lngFunctionCount = MSData.FunctionCount
-		End If
-
-GetNumScansExit:
-		GetFunctionCount = lngFunctionCount
-
-	End Function
-
-	Public Function GetNumScans(ByVal strMLynxDataFolderPath As String, Optional ByVal lngFunctionNumber As Integer = 1) As Integer
-		' Function returns the number of scans for the given function
-		' Returns 0 if an error
-
-		Dim lngScanCount As Integer
-
-		On Error GoTo GetNumScansExit
-
-		lngScanCount = 0
-		If ValidateDataFolder(strMLynxDataFolderPath) Then
-			If lngFunctionNumber >= 1 And lngFunctionNumber <= MSData.FunctionCount Then
-				lngScanCount = MSData.FunctionInfo(lngFunctionNumber).ScanCount
-			Else
-				lngScanCount = 0
-			End If
-		End If
+        lngFunctionCount = 0
+        If ValidateDataFolder(strMLynxDataFolderPath) Then
+            lngFunctionCount = MSData.FunctionCount
+        End If
 
 GetNumScansExit:
-		GetNumScans = lngScanCount
-	End Function
+        GetFunctionCount = lngFunctionCount
+
+    End Function
+
+    Public Function GetNumScans(strMLynxDataFolderPath As String, Optional lngFunctionNumber As Integer = 1) As Integer
+        ' Function returns the number of scans for the given function
+        ' Returns 0 if an error
+
+        Dim lngScanCount As Integer
+
+        On Error GoTo GetNumScansExit
+
+        lngScanCount = 0
+        If ValidateDataFolder(strMLynxDataFolderPath) Then
+            If lngFunctionNumber >= 1 And lngFunctionNumber <= MSData.FunctionCount Then
+                lngScanCount = MSData.FunctionInfo(lngFunctionNumber).ScanCount
+            Else
+                lngScanCount = 0
+            End If
+        End If
+
+GetNumScansExit:
+        GetNumScans = lngScanCount
+    End Function
 
 
-	Public Function GetScanInfo(ByVal strMLynxDataFolderPath As String, ByVal lngFunctionNumber As Integer, ByVal lngScanNumber As Integer, ByRef lngScanType As Integer, ByRef sngBasePeakMZ As Single, ByRef sngParentIonMZ As Single, ByRef sngRT As Single, ByRef sngBasePeakIntensity As Single, ByRef sngTotalIonCurrent As Single) As Boolean
-		' Returns scan information in the ByRef variables
-		' Function returns True if no error, False if an error
-		'
-		' Note that ScanType = 0 means MS-only scan (survey scan)
-		' ScanType > 0 means ms/ms scan
+    Public Function GetScanInfo(strMLynxDataFolderPath As String, lngFunctionNumber As Integer, lngScanNumber As Integer, ByRef lngScanType As Integer, ByRef sngBasePeakMZ As Single, ByRef sngParentIonMZ As Single, ByRef sngRT As Single, ByRef sngBasePeakIntensity As Single, ByRef sngTotalIonCurrent As Single) As Boolean
+        ' Returns scan information in the ByRef variables
+        ' Function returns True if no error, False if an error
+        '
+        ' Note that ScanType = 0 means MS-only scan (survey scan)
+        ' ScanType > 0 means ms/ms scan
 
-		GetScanInfo = GetScanInfoEx(strMLynxDataFolderPath, lngFunctionNumber, lngScanNumber, lngScanType, sngBasePeakMZ, sngParentIonMZ, sngRT, sngBasePeakIntensity, sngTotalIonCurrent, False, False, False, 0, 0)
-	End Function
+        GetScanInfo = GetScanInfoEx(strMLynxDataFolderPath, lngFunctionNumber, lngScanNumber, lngScanType, sngBasePeakMZ, sngParentIonMZ, sngRT, sngBasePeakIntensity, sngTotalIonCurrent, False, False, False, 0, 0)
+    End Function
 
-	Public Function GetScanInfoEx(ByVal strMLynxDataFolderPath As String, ByVal lngFunctionNumber As Integer, ByVal lngScanNumber As Integer, ByRef lngScanType As Integer, ByRef sngBasePeakMZ As Single, ByRef sngParentIonMZ As Single, ByRef sngRT As Single, ByRef sngBasePeakIntensity As Single, ByRef sngTotalIonCurrent As Single, ByRef blnCalibrated As Boolean, ByRef blnContinuum As Boolean, ByRef blnOverload As Boolean, ByRef sngMassStart As Single, ByRef sngMassEnd As Single) As Boolean
-		' Returns scan information in the ByRef variables
-		' Function returns True if no error, False if an error
-		' Note that if LoadMSScanHeader returns 0, indicating no data points, this function will still return True
-		'
-		' Note that ScanType = 0 means MS-only scan (survey scan)
-		' ScanType > 0 means ms/ms scan
+    Public Function GetScanInfoEx(strMLynxDataFolderPath As String, lngFunctionNumber As Integer, lngScanNumber As Integer, ByRef lngScanType As Integer, ByRef sngBasePeakMZ As Single, ByRef sngParentIonMZ As Single, ByRef sngRT As Single, ByRef sngBasePeakIntensity As Single, ByRef sngTotalIonCurrent As Single, ByRef blnCalibrated As Boolean, ByRef blnContinuum As Boolean, ByRef blnOverload As Boolean, ByRef sngMassStart As Single, ByRef sngMassEnd As Single) As Boolean
+        ' Returns scan information in the ByRef variables
+        ' Function returns True if no error, False if an error
+        ' Note that if LoadMSScanHeader returns 0, indicating no data points, this function will still return True
+        '
+        ' Note that ScanType = 0 means MS-only scan (survey scan)
+        ' ScanType > 0 means ms/ms scan
 
-		Dim udtScanStatsSingleScan As udtScanStatsType
+        Dim udtScanStatsSingleScan As udtScanStatsType
 
-		If ValidateDataFolder(strMLynxDataFolderPath) Then
-			If lngFunctionNumber >= 1 And lngFunctionNumber <= MSData.FunctionCount Then
-				LoadMSScanHeader(udtScanStatsSingleScan, MSData, lngFunctionNumber, lngScanNumber)
+        If ValidateDataFolder(strMLynxDataFolderPath) Then
+            If lngFunctionNumber >= 1 And lngFunctionNumber <= MSData.FunctionCount Then
+                LoadMSScanHeader(udtScanStatsSingleScan, MSData, lngFunctionNumber, lngScanNumber)
 
-				lngScanType = MSData.FunctionInfo(lngFunctionNumber).FunctionType
-				With udtScanStatsSingleScan
-					sngBasePeakMZ = .BPIMass
-					sngParentIonMZ = .SetMass
-					sngRT = .RetnTime
-					sngBasePeakIntensity = .BPI
-					sngTotalIonCurrent = .TIC
-					blnCalibrated = .Calibrated
-					blnContinuum = .Continuum
-					blnOverload = .Overload
-					sngMassStart = .MassStart
-					sngMassEnd = .MassEnd
-				End With
-				GetScanInfoEx = True
-			Else
-				GetScanInfoEx = False
-			End If
-		Else
-			GetScanInfoEx = False
-		End If
-	End Function
+                lngScanType = MSData.FunctionInfo(lngFunctionNumber).FunctionType
+                With udtScanStatsSingleScan
+                    sngBasePeakMZ = .BPIMass
+                    sngParentIonMZ = .SetMass
+                    sngRT = .RetnTime
+                    sngBasePeakIntensity = .BPI
+                    sngTotalIonCurrent = .TIC
+                    blnCalibrated = .Calibrated
+                    blnContinuum = .Continuum
+                    blnOverload = .Overload
+                    sngMassStart = .MassStart
+                    sngMassEnd = .MassEnd
+                End With
+                GetScanInfoEx = True
+            Else
+                GetScanInfoEx = False
+            End If
+        Else
+            GetScanInfoEx = False
+        End If
+    End Function
 
-	Private Sub InitializeFunctionInfo(ByRef udtMSFunctionInfo As udtMSFunctionInfoType, ByRef lngFunctionNumber As Integer)
-		With udtMSFunctionInfo
-			.FunctionNumber = lngFunctionNumber
-			.ProcessNumber = 0
+    Private Sub InitializeFunctionInfo(ByRef udtMSFunctionInfo As udtMSFunctionInfoType, ByRef lngFunctionNumber As Integer)
+        With udtMSFunctionInfo
+            .FunctionNumber = lngFunctionNumber
+            .ProcessNumber = 0
 
-			.CalibrationCoefficientCount = 0
+            .CalibrationCoefficientCount = 0
 
-			ReDim .CalibrationCoefficients(6)
-			.CalTypeID = 0
-			.CalStDev = 0
-		End With
-	End Sub
+            ReDim .CalibrationCoefficients(6)
+            .CalTypeID = 0
+            .CalStDev = 0
+        End With
+    End Sub
 
-	Private Sub InitializeNativeFunctionInfo(ByRef udtNativeFunctionInfo As udtRawFunctionDescriptorRecordType)
-		With udtNativeFunctionInfo
-			ReDim .SegmentScanTimes(31)
-			ReDim .SegmentStartMasses(31)
-			ReDim .SegmentEndMasses(31)
-		End With
-	End Sub
+    Private Sub InitializeNativeFunctionInfo(ByRef udtNativeFunctionInfo As udtRawFunctionDescriptorRecordType)
+        With udtNativeFunctionInfo
+            ReDim .SegmentScanTimes(31)
+            ReDim .SegmentStartMasses(31)
+            ReDim .SegmentEndMasses(31)
+        End With
+    End Sub
 
-	Public Function IsFunctionMsMs(ByVal strMLynxDataFolderPath As String, ByRef lngFunctionNumber As Integer) As Boolean
-		Dim intFunctionType As Short
+    Public Function IsFunctionMsMs(strMLynxDataFolderPath As String, ByRef lngFunctionNumber As Integer) As Boolean
+        Dim intFunctionType As Short
 
-		If GetFunctionInfo(strMLynxDataFolderPath, lngFunctionNumber, 0, 0, 0, 0, 0, intFunctionType) Then
-			IsFunctionMsMs = (intFunctionType <> 0)
-		Else
-			IsFunctionMsMs = False
-		End If
+        If GetFunctionInfo(strMLynxDataFolderPath, lngFunctionNumber, 0, 0, 0, 0, 0, intFunctionType) Then
+            IsFunctionMsMs = (intFunctionType <> 0)
+        Else
+            IsFunctionMsMs = False
+        End If
 
-	End Function
+    End Function
 
-	Public Function IsSpectrumContinuumData(ByVal strMLynxDataFolderPath As String, ByRef lngFunctionNumber As Integer, Optional ByRef lngScanNumber As Integer = 1) As Boolean
-		Dim blnContinuum As Boolean
+    Public Function IsSpectrumContinuumData(strMLynxDataFolderPath As String, ByRef lngFunctionNumber As Integer, Optional ByRef lngScanNumber As Integer = 1) As Boolean
+        Dim blnContinuum As Boolean
 
-		If GetScanInfoEx(strMLynxDataFolderPath, lngFunctionNumber, lngScanNumber, 0, 0, 0, 0, 0, 0, 0, blnContinuum, 0, 0, 0) Then
-			IsSpectrumContinuumData = blnContinuum
-		Else
-			IsSpectrumContinuumData = False
-		End If
+        If GetScanInfoEx(strMLynxDataFolderPath, lngFunctionNumber, lngScanNumber, 0, 0, 0, 0, 0, 0, 0, blnContinuum, 0, 0, 0) Then
+            IsSpectrumContinuumData = blnContinuum
+        Else
+            IsSpectrumContinuumData = False
+        End If
 
-	End Function
+    End Function
 
-	Public Function IsMassLynxData(ByVal strMLynxDataFolderPath As String) As Boolean
-		' strMLynxDataFolderPath should contain the path to a folder that ends in the text .RAW
-		' If strMLynxDataFolderPath contains the path to a file, then the ValidateDataFolder function
-		'  will strip off the filename and only examine the folder
+    Public Function IsMassLynxData(strMLynxDataFolderPath As String) As Boolean
+        ' strMLynxDataFolderPath should contain the path to a folder that ends in the text .RAW
+        ' If strMLynxDataFolderPath contains the path to a file, then the ValidateDataFolder function
+        '  will strip off the filename and only examine the folder
 
-		IsMassLynxData = ValidateDataFolder(strMLynxDataFolderPath)
+        IsMassLynxData = ValidateDataFolder(strMLynxDataFolderPath)
 
-	End Function
+    End Function
 
-	Public Function IsMassLynxInstalled() As Boolean
-		' This function is included for compatibility with MassLynxReader3 and MassLynxReader4
-		' It always returns True since this class doesn't require MassLynx
-		IsMassLynxInstalled = True
-	End Function
+    Public Function IsMassLynxInstalled() As Boolean
+        ' This function is included for compatibility with MassLynxReader3 and MassLynxReader4
+        ' It always returns True since this class doesn't require MassLynx
+        IsMassLynxInstalled = True
+    End Function
 
-	Private Function LoadMSFileHeader(ByRef udtThisMSData As udtMSDataType, ByVal strMLynxDataFolderPath As String) As Boolean
-		' Verifies that strMLynxDataFolderPath exists
-		' Loads the header information for the given MassLynx folder path
-		' Returns True if success, false if failure
+    Private Function LoadMSFileHeader(ByRef udtThisMSData As udtMSDataType, strMLynxDataFolderPath As String) As Boolean
+        ' Verifies that strMLynxDataFolderPath exists
+        ' Loads the header information for the given MassLynx folder path
+        ' Returns True if success, false if failure
 
-		''Dim udtHeaderInfo As DMRAWHEADER
-		Dim blnSuccess As Boolean
+        ''Dim udtHeaderInfo As DMRAWHEADER
+        Dim blnSuccess As Boolean
 
-		On Error GoTo LoadMSHeaderErrorHandler
+        On Error GoTo LoadMSHeaderErrorHandler
 
-		If Directory.Exists(strMLynxDataFolderPath) Then
+        If Directory.Exists(strMLynxDataFolderPath) Then
 
-			' Read the header information from the current file
-			blnSuccess = NativeIOReadHeader(strMLynxDataFolderPath, udtThisMSData.HeaderInfo)
+            ' Read the header information from the current file
+            blnSuccess = NativeIOReadHeader(strMLynxDataFolderPath, udtThisMSData.HeaderInfo)
 
-			udtThisMSData.FunctionCount = 0
-		Else
-			SetErrorCode(eErrorCodeConstants.InvalidDataFolderPath)
-			blnSuccess = False
-			udtThisMSData.FunctionCount = 0
-		End If
+            udtThisMSData.FunctionCount = 0
+        Else
+            SetErrorCode(eErrorCodeConstants.InvalidDataFolderPath)
+            blnSuccess = False
+            udtThisMSData.FunctionCount = 0
+        End If
 
 LoadMSHeaderCleanup:
 
-		On Error Resume Next
-		LoadMSFileHeader = blnSuccess
-		Exit Function
+        On Error Resume Next
+        LoadMSFileHeader = blnSuccess
+        Exit Function
 
 LoadMSHeaderErrorHandler:
-		System.Diagnostics.Debug.WriteLine("Error in LoadMSFileHeader:" & Err.Description)
+        System.Diagnostics.Debug.WriteLine("Error in LoadMSFileHeader:" & Err.Description)
 
-		If Not blnSuccess Then
-			' Assume invalid data file
-			SetErrorCode(eErrorCodeConstants.DataFolderReadError)
-			udtThisMSData.FunctionCount = 0
-		End If
-		Resume LoadMSHeaderCleanup
+        If Not blnSuccess Then
+            ' Assume invalid data file
+            SetErrorCode(eErrorCodeConstants.DataFolderReadError)
+            udtThisMSData.FunctionCount = 0
+        End If
+        Resume LoadMSHeaderCleanup
 
-	End Function
+    End Function
 
-	Private Function LoadMSFunctionInfo(ByRef udtThisMSData As udtMSDataType, ByVal strMLynxDataFolderPath As String) As Integer
-		' Determines the number of functions in the given data file
-		' Returns the function count, or 0 on failure
+    Private Function LoadMSFunctionInfo(ByRef udtThisMSData As udtMSDataType, strMLynxDataFolderPath As String) As Integer
+        ' Determines the number of functions in the given data file
+        ' Returns the function count, or 0 on failure
 
-		Dim udtScanIndexRecord As udtScanIndexRecordType
-		Dim strCleanMLynxDataFolderPath As String
+        Dim udtScanIndexRecord As udtScanIndexRecordType
+        Dim strCleanMLynxDataFolderPath As String
 
-		Dim ioFileInfo As FileInfo
+        Dim ioFileInfo As FileInfo
 
-		Dim intFunctionType As Short
-		Dim lngFunctionNumber As Integer
-		Dim lngScanCount As Integer
-		Dim blnFileValidated As Boolean
+        Dim intFunctionType As Short
+        Dim lngFunctionNumber As Integer
+        Dim lngScanCount As Integer
+        Dim blnFileValidated As Boolean
 
-		Dim sngStartMass, sngEndMass As Single
-		Dim sngStartRT, sngEndRT As Single
+        Dim sngStartMass, sngEndMass As Single
+        Dim sngStartRT, sngEndRT As Single
 
-		On Error GoTo LoadMSFunctionInfoErrorHandler
+        On Error GoTo LoadMSFunctionInfoErrorHandler
 
-		ioFileInfo = New FileInfo(strMLynxDataFolderPath)
-		If ioFileInfo.Exists Then
-			' strMLynxDataFolderPath contains a file; remove the filename from strMLynxDataFolderPath
-			strCleanMLynxDataFolderPath = ioFileInfo.Directory.FullName
-		Else
-			strCleanMLynxDataFolderPath = String.Copy(strMLynxDataFolderPath)
-		End If
+        ioFileInfo = New FileInfo(strMLynxDataFolderPath)
+        If ioFileInfo.Exists Then
+            ' strMLynxDataFolderPath contains a file; remove the filename from strMLynxDataFolderPath
+            strCleanMLynxDataFolderPath = ioFileInfo.Directory.FullName
+        Else
+            strCleanMLynxDataFolderPath = String.Copy(strMLynxDataFolderPath)
+        End If
 
-		blnFileValidated = False
-		If LoadMSFileHeader(udtThisMSData, strCleanMLynxDataFolderPath) Then
-			udtThisMSData.UserSuppliedDataDirPath = strMLynxDataFolderPath
-			udtThisMSData.CurrentDataDirPath = strCleanMLynxDataFolderPath
+        blnFileValidated = False
+        If LoadMSFileHeader(udtThisMSData, strCleanMLynxDataFolderPath) Then
+            udtThisMSData.UserSuppliedDataDirPath = strMLynxDataFolderPath
+            udtThisMSData.CurrentDataDirPath = strCleanMLynxDataFolderPath
 
-			With udtThisMSData
-				' Use sFuncInfo to read the header information from the current file
-				.FunctionCount = NativeIOGetFunctionCount(strCleanMLynxDataFolderPath)
+            With udtThisMSData
+                ' Use sFuncInfo to read the header information from the current file
+                .FunctionCount = NativeIOGetFunctionCount(strCleanMLynxDataFolderPath)
 
-				If .FunctionCount > 0 Then
-					blnFileValidated = True
-					ReDim .FunctionInfo(.FunctionCount)
+                If .FunctionCount > 0 Then
+                    blnFileValidated = True
+                    ReDim .FunctionInfo(.FunctionCount)
 
-					' Note that the function array is 1-based
-					For lngFunctionNumber = 1 To .FunctionCount
+                    ' Note that the function array is 1-based
+                    For lngFunctionNumber = 1 To .FunctionCount
 
-						InitializeFunctionInfo(.FunctionInfo(lngFunctionNumber), lngFunctionNumber)
+                        InitializeFunctionInfo(.FunctionInfo(lngFunctionNumber), lngFunctionNumber)
 
-						If NativeIOGetFunctionInfo(strCleanMLynxDataFolderPath, .FunctionInfo(lngFunctionNumber)) Then
+                        If NativeIOGetFunctionInfo(strCleanMLynxDataFolderPath, .FunctionInfo(lngFunctionNumber)) Then
 
-							If .FunctionInfo(lngFunctionNumber).ScanCount > 0 Then
-								Call NativeIOGetScanInfo(strCleanMLynxDataFolderPath, .FunctionInfo(lngFunctionNumber), 1, udtScanIndexRecord)
+                            If .FunctionInfo(lngFunctionNumber).ScanCount > 0 Then
+                                Call NativeIOGetScanInfo(strCleanMLynxDataFolderPath, .FunctionInfo(lngFunctionNumber), 1, udtScanIndexRecord)
 
-								' ToDo: Get the Start and End mass for the given scan
-								sngStartMass = 0
-								sngEndMass = 0
+                                ' ToDo: Get the Start and End mass for the given scan
+                                sngStartMass = 0
+                                sngEndMass = 0
 
-								' Since the first scan may not have the full mass range, we'll also check a scan
-								'  in the middle of the file as a random comparison
-								If .FunctionInfo(lngFunctionNumber).ScanCount >= 3 Then
-									'Call sScanStats.GetScanStats(strCleanMLynxDataFolderPath, lngFunctionNumber, .ProcessNumber, CLng(.ScanCount / 3))
-									'If sScanStats.LoMass < sngStartMass Then sngStartMass = sScanStats.LoMass
-									'If sScanStats.HiMass > sngEndMass Then sngEndMass = sScanStats.HiMass
-								End If
+                                ' Since the first scan may not have the full mass range, we'll also check a scan
+                                '  in the middle of the file as a random comparison
+                                If .FunctionInfo(lngFunctionNumber).ScanCount >= 3 Then
+                                    'Call sScanStats.GetScanStats(strCleanMLynxDataFolderPath, lngFunctionNumber, .ProcessNumber, CLng(.ScanCount / 3))
+                                    'If sScanStats.LoMass < sngStartMass Then sngStartMass = sScanStats.LoMass
+                                    'If sScanStats.HiMass > sngEndMass Then sngEndMass = sScanStats.HiMass
+                                End If
 
-								If .FunctionInfo(lngFunctionNumber).ScanCount >= 2 Then
-									'Call sScanStats.GetScanStats(strCleanMLynxDataFolderPath, lngFunctionNumber, .ProcessNumber, CLng(.ScanCount / 2))
-									'If sScanStats.LoMass < sngStartMass Then sngStartMass = sScanStats.LoMass
-									'If sScanStats.HiMass > sngEndMass Then sngEndMass = sScanStats.HiMass
-								End If
+                                If .FunctionInfo(lngFunctionNumber).ScanCount >= 2 Then
+                                    'Call sScanStats.GetScanStats(strCleanMLynxDataFolderPath, lngFunctionNumber, .ProcessNumber, CLng(.ScanCount / 2))
+                                    'If sScanStats.LoMass < sngStartMass Then sngStartMass = sScanStats.LoMass
+                                    'If sScanStats.HiMass > sngEndMass Then sngEndMass = sScanStats.HiMass
+                                End If
 
-								'Call sScanStats.GetScanStats(strCleanMLynxDataFolderPath, lngFunctionNumber, .ProcessNumber, .ScanCount)
-								'If sScanStats.LoMass < sngStartMass Then sngStartMass = sScanStats.LoMass
-								'If sScanStats.HiMass > sngEndMass Then sngEndMass = sScanStats.HiMass
-							Else
-								sngStartMass = 0
-								sngEndMass = 0
-							End If
+                                'Call sScanStats.GetScanStats(strCleanMLynxDataFolderPath, lngFunctionNumber, .ProcessNumber, .ScanCount)
+                                'If sScanStats.LoMass < sngStartMass Then sngStartMass = sScanStats.LoMass
+                                'If sScanStats.HiMass > sngEndMass Then sngEndMass = sScanStats.HiMass
+                            Else
+                                sngStartMass = 0
+                                sngEndMass = 0
+                            End If
 
-							.FunctionInfo(lngFunctionNumber).StartMass = sngStartMass
-							.FunctionInfo(lngFunctionNumber).EndMass = sngEndMass
-						Else
-							.FunctionInfo(lngFunctionNumber).ScanCount = 0
-						End If
-					Next lngFunctionNumber
-				Else
-					.FunctionCount = 0
-				End If
-			End With
+                            .FunctionInfo(lngFunctionNumber).StartMass = sngStartMass
+                            .FunctionInfo(lngFunctionNumber).EndMass = sngEndMass
+                        Else
+                            .FunctionInfo(lngFunctionNumber).ScanCount = 0
+                        End If
+                    Next lngFunctionNumber
+                Else
+                    .FunctionCount = 0
+                End If
+            End With
 
-			If udtThisMSData.FunctionCount > 0 Then
-				Call NativeIOReadCalInfoFromHeader(udtThisMSData)
-			End If
-		Else
-			udtThisMSData.FunctionCount = 0
-		End If
+            If udtThisMSData.FunctionCount > 0 Then
+                Call NativeIOReadCalInfoFromHeader(udtThisMSData)
+            End If
+        Else
+            udtThisMSData.FunctionCount = 0
+        End If
 
-		LoadMSFunctionInfo = udtThisMSData.FunctionCount
-		Exit Function
+        LoadMSFunctionInfo = udtThisMSData.FunctionCount
+        Exit Function
 
 LoadMSFunctionInfoErrorHandler:
-		System.Diagnostics.Debug.WriteLine("Error in LoadMSFunctionInfo:" & Err.Description)
+        System.Diagnostics.Debug.WriteLine("Error in LoadMSFunctionInfo:" & Err.Description)
 
-		If Not blnFileValidated Then
-			' Assume invalid data file
-			SetErrorCode(eErrorCodeConstants.DataFolderReadError)
-			udtThisMSData.FunctionCount = 0
-		End If
-		LoadMSFunctionInfo = udtThisMSData.FunctionCount
+        If Not blnFileValidated Then
+            ' Assume invalid data file
+            SetErrorCode(eErrorCodeConstants.DataFolderReadError)
+            udtThisMSData.FunctionCount = 0
+        End If
+        LoadMSFunctionInfo = udtThisMSData.FunctionCount
 
-	End Function
+    End Function
 
-	Private Function LoadMSScanHeader(ByRef udtScanStatsSingleScan As udtScanStatsType, ByRef udtThisMSData As udtMSDataType, ByVal lngFunctionNumber As Integer, ByVal lngScanNumber As Integer) As Integer
-		' Loads information on the given scan for the given function
-		' Returns the number of peaks in the scan; returns 0 if an error
-		'
-		' Note that the calling function must validate that lngFunctionNumber is valid
-		' Since this function uses MSData.FunctionInfo, one must call NativeIOGetFunctionInfo
-		'  to populate .FunctionInfo before calling this function
+    Private Function LoadMSScanHeader(ByRef udtScanStatsSingleScan As udtScanStatsType, ByRef udtThisMSData As udtMSDataType, lngFunctionNumber As Integer, lngScanNumber As Integer) As Integer
+        ' Loads information on the given scan for the given function
+        ' Returns the number of peaks in the scan; returns 0 if an error
+        '
+        ' Note that the calling function must validate that lngFunctionNumber is valid
+        ' Since this function uses MSData.FunctionInfo, one must call NativeIOGetFunctionInfo
+        '  to populate .FunctionInfo before calling this function
 
-		Dim udtScanIndexRecord As udtScanIndexRecordType
+        Dim udtScanIndexRecord As udtScanIndexRecordType
 
-		On Error GoTo LoadMSScanHeaderErrorHandler
+        On Error GoTo LoadMSScanHeaderErrorHandler
 
-		udtScanStatsSingleScan.PeakCount = 0
+        udtScanStatsSingleScan.PeakCount = 0
 
-		With udtScanStatsSingleScan
-			.Calibrated = False
-			.Continuum = False
-			.Overload = False
+        With udtScanStatsSingleScan
+            .Calibrated = False
+            .Continuum = False
+            .Overload = False
 
-			.MassStart = 0
-			.MassEnd = 0
-			.SetMass = 0
+            .MassStart = 0
+            .MassEnd = 0
+            .SetMass = 0
 
-			.BPI = 0
-			.BPIMass = 0
-			.TIC = 0
+            .BPI = 0
+            .BPIMass = 0
+            .TIC = 0
 
-			.PeakCount = 0
-			.RetnTime = 0
-		End With
+            .PeakCount = 0
+            .RetnTime = 0
+        End With
 
-		If NativeIOGetScanInfo(udtThisMSData.CurrentDataDirPath, udtThisMSData.FunctionInfo(lngFunctionNumber), lngScanNumber, udtScanIndexRecord) Then
-			With udtScanStatsSingleScan
-				.Calibrated = udtScanIndexRecord.ScanContainsCalibratedMasses
-				.Continuum = udtScanIndexRecord.ContiuumDataOverride
-				.Overload = udtScanIndexRecord.ScanOverload
+        If NativeIOGetScanInfo(udtThisMSData.CurrentDataDirPath, udtThisMSData.FunctionInfo(lngFunctionNumber), lngScanNumber, udtScanIndexRecord) Then
+            With udtScanStatsSingleScan
+                .Calibrated = udtScanIndexRecord.ScanContainsCalibratedMasses
+                .Continuum = udtScanIndexRecord.ContiuumDataOverride
+                .Overload = udtScanIndexRecord.ScanOverload
 
-				.MassStart = udtScanIndexRecord.LoMass
-				.MassEnd = udtScanIndexRecord.HiMass
+                .MassStart = udtScanIndexRecord.LoMass
+                .MassEnd = udtScanIndexRecord.HiMass
 
-				.BPI = udtScanIndexRecord.BasePeakIntensity
-				.BPIMass = udtScanIndexRecord.BasePeakMass
-				.TIC = udtScanIndexRecord.TicValue
+                .BPI = udtScanIndexRecord.BasePeakIntensity
+                .BPIMass = udtScanIndexRecord.BasePeakMass
+                .TIC = udtScanIndexRecord.TicValue
 
-				.PeakCount = udtScanIndexRecord.NumSpectralPeaks
-				.RetnTime = udtScanIndexRecord.ScanTime
+                .PeakCount = udtScanIndexRecord.NumSpectralPeaks
+                .RetnTime = udtScanIndexRecord.ScanTime
 
-				.SetMass = udtScanIndexRecord.SetMass
-			End With
+                .SetMass = udtScanIndexRecord.SetMass
+            End With
 
-		End If
+        End If
 
 LoadMSScanHeaderCleanup:
-		On Error Resume Next
-		LoadMSScanHeader = udtScanStatsSingleScan.PeakCount
-		Exit Function
+        On Error Resume Next
+        LoadMSScanHeader = udtScanStatsSingleScan.PeakCount
+        Exit Function
 
 LoadMSScanHeaderErrorHandler:
-		System.Diagnostics.Debug.WriteLine("Error in LoadMSScanHeader:" & Err.Description)
+        System.Diagnostics.Debug.WriteLine("Error in LoadMSScanHeader:" & Err.Description)
 
-		Resume LoadMSScanHeaderCleanup
+        Resume LoadMSScanHeaderCleanup
 
-	End Function
+    End Function
 
-	Private Sub SetErrorCode(ByRef eNewErrorCode As eErrorCodeConstants)
-		mErrorCode = eNewErrorCode
-	End Sub
+    Private Sub SetErrorCode(ByRef eNewErrorCode As eErrorCodeConstants)
+        mErrorCode = eNewErrorCode
+    End Sub
 
-	Private Function ValidateDataFolder(ByVal strMLynxDataFolderPath As String) As Boolean
-		' Returns True if valid, False if not valid
+    Private Function ValidateDataFolder(strMLynxDataFolderPath As String) As Boolean
+        ' Returns True if valid, False if not valid
 
-		Dim blnValidDataFolder As Boolean
-		Dim lngNumFunctions As Integer
+        Dim blnValidDataFolder As Boolean
+        Dim lngNumFunctions As Integer
 
-		mErrorCode = eErrorCodeConstants.NoError
-		blnValidDataFolder = False
+        mErrorCode = eErrorCodeConstants.NoError
+        blnValidDataFolder = False
 
-		If strMLynxDataFolderPath Is Nothing OrElse strMLynxDataFolderPath.Length = 0 Then
-			Return False
-		Else
-			strMLynxDataFolderPath = strMLynxDataFolderPath.Trim
-		End If
-		If MSData.UserSuppliedDataDirPath Is Nothing Then
-			MSData.UserSuppliedDataDirPath = String.Empty
-		End If
+        If strMLynxDataFolderPath Is Nothing OrElse strMLynxDataFolderPath.Length = 0 Then
+            Return False
+        Else
+            strMLynxDataFolderPath = strMLynxDataFolderPath.Trim
+        End If
+        If MSData.UserSuppliedDataDirPath Is Nothing Then
+            MSData.UserSuppliedDataDirPath = String.Empty
+        End If
 
-		If MSData.FunctionCount = 0 OrElse MSData.UserSuppliedDataDirPath.ToLower <> strMLynxDataFolderPath.ToLower Then
+        If MSData.FunctionCount = 0 OrElse MSData.UserSuppliedDataDirPath.ToLower <> strMLynxDataFolderPath.ToLower Then
 
-			lngNumFunctions = LoadMSFunctionInfo(MSData, strMLynxDataFolderPath)
-			If lngNumFunctions > 0 Then
-				blnValidDataFolder = True
-			Else
-				If mErrorCode = eErrorCodeConstants.NoError Then SetErrorCode(eErrorCodeConstants.DataFolderReadError)
-			End If
-		Else
-			blnValidDataFolder = True
-			mErrorCode = eErrorCodeConstants.NoError
-		End If
+            lngNumFunctions = LoadMSFunctionInfo(MSData, strMLynxDataFolderPath)
+            If lngNumFunctions > 0 Then
+                blnValidDataFolder = True
+            Else
+                If mErrorCode = eErrorCodeConstants.NoError Then SetErrorCode(eErrorCodeConstants.DataFolderReadError)
+            End If
+        Else
+            blnValidDataFolder = True
+            mErrorCode = eErrorCodeConstants.NoError
+        End If
 
-		Return blnValidDataFolder
+        Return blnValidDataFolder
 
-	End Function
+    End Function
 
 
-	'---------------------------------------------------------
-	' The following functions are used for Native file IO
-	'---------------------------------------------------------
+    '---------------------------------------------------------
+    ' The following functions are used for Native file IO
+    '---------------------------------------------------------
 
-	Private Function ConstructValidDataFilePath(ByRef strDesiredDataFilePath As String, ByRef DataFilePath As String) As Boolean
-		' Fill Datafile variable with directory selected in selection box
-		Dim x As Short
+    Private Function ConstructValidDataFilePath(ByRef strDesiredDataFilePath As String, ByRef DataFilePath As String) As Boolean
+        ' Fill Datafile variable with directory selected in selection box
+        Dim x As Short
 
-		x = InStr(LCase(strDesiredDataFilePath), ".raw")
-		If x = 0 Then
-			SetErrorCode(eErrorCodeConstants.InvalidDataFolderPath)
-			ConstructValidDataFilePath = False
-		Else
-			DataFilePath = strDesiredDataFilePath
-			ConstructValidDataFilePath = True
-		End If
+        x = InStr(LCase(strDesiredDataFilePath), ".raw")
+        If x = 0 Then
+            SetErrorCode(eErrorCodeConstants.InvalidDataFolderPath)
+            ConstructValidDataFilePath = False
+        Else
+            DataFilePath = strDesiredDataFilePath
+            ConstructValidDataFilePath = True
+        End If
 
-	End Function
+    End Function
 
-	Private Function CreateMask(ByRef StartBit As Byte, ByRef EndBit As Byte) As Int64
-		' Note: The mask needs to be Int64 data type to allow for unsigned Int32 masks
-		' This is because the VB Int32 data type has a maximum value of 2^32 / 2 - 1 while
-		'  unsigned Int32 can be up to 2^32-1
+    Private Function CreateMask(ByRef StartBit As Byte, ByRef EndBit As Byte) As Int64
+        ' Note: The mask needs to be Int64 data type to allow for unsigned Int32 masks
+        ' This is because the VB Int32 data type has a maximum value of 2^32 / 2 - 1 while
+        '  unsigned Int32 can be up to 2^32-1
 
-		Dim BitIndex As Byte
-		Dim ThisMask As Int64
+        Dim BitIndex As Byte
+        Dim ThisMask As Int64
 
-		If StartBit = 0 Then
-			ThisMask = (2 ^ (EndBit + 1)) - 1
-		Else
-			ThisMask = 0
-			For BitIndex = StartBit To EndBit
-				ThisMask += (2 ^ BitIndex)
-			Next BitIndex
-		End If
+        If StartBit = 0 Then
+            ThisMask = (2 ^ (EndBit + 1)) - 1
+        Else
+            ThisMask = 0
+            For BitIndex = StartBit To EndBit
+                ThisMask += (2 ^ BitIndex)
+            Next BitIndex
+        End If
 
-		Return ThisMask
+        Return ThisMask
 
-	End Function
+    End Function
 
-	Private Sub CreateNativeDataMasks()
+    Private Sub CreateNativeDataMasks()
 
-		' Create the bit masks for the PackedFunctionInfo
-		maskFunctionType = CreateMask(0, 4)
-		maskIonMode = CreateMask(5, 9)
-		maskAcquisitionDataType = CreateMask(10, 13)
+        ' Create the bit masks for the PackedFunctionInfo
+        maskFunctionType = CreateMask(0, 4)
+        maskIonMode = CreateMask(5, 9)
+        maskAcquisitionDataType = CreateMask(10, 13)
 
-		' Create the bit masks for the Packed MS/MS Info
-		maskCollisionEnergy = CreateMask(0, 7)
-		maskSegmentChannelCount = CreateMask(8, 15)
+        ' Create the bit masks for the Packed MS/MS Info
+        maskCollisionEnergy = CreateMask(0, 7)
+        maskSegmentChannelCount = CreateMask(8, 15)
 
-		' Create the bit masks for the packed scan info
-		maskSpectralPeak = CreateMask(0, 21)
-		maskSegment = CreateMask(22, 26)
-		maskUseFollowingContinuum = CreateMask(27, 27)
-		maskContiuumDataOverride = CreateMask(28, 28)
-		maskScanContainsMolecularMasses = CreateMask(29, 29)
-		maskScanContainsCalibratedMasses = CreateMask(30, 30)
+        ' Create the bit masks for the packed scan info
+        maskSpectralPeak = CreateMask(0, 21)
+        maskSegment = CreateMask(22, 26)
+        maskUseFollowingContinuum = CreateMask(27, 27)
+        maskContiuumDataOverride = CreateMask(28, 28)
+        maskScanContainsMolecularMasses = CreateMask(29, 29)
+        maskScanContainsCalibratedMasses = CreateMask(30, 30)
 
-		' Create the masks for the packed base peak info
-		maskBPIntensityScale = CreateMask(0, 3)	' Also applies to High Intensity Calibrated data and High Accuracy Calibrated Data
-		maskBPMassExponent = CreateMask(4, 8)
+        ' Create the masks for the packed base peak info
+        maskBPIntensityScale = CreateMask(0, 3) ' Also applies to High Intensity Calibrated data and High Accuracy Calibrated Data
+        maskBPMassExponent = CreateMask(4, 8)
 
-		maskBPCompressedDataIntensityScale = CreateMask(0, 2)
-		maskBPCompressedDataIntensity = CreateMask(3, 10)
+        maskBPCompressedDataIntensityScale = CreateMask(0, 2)
+        maskBPCompressedDataIntensity = CreateMask(3, 10)
 
-		maskBPStandardDataIntensityScale = CreateMask(0, 2)	' Also applies to Uncalibrated data
-		maskBPStandardDataIntensity = CreateMask(3, 15)	' Also applies to Uncalibrated data
-		maskBPStandardDataMass = CreateMask(0, 23)
+        maskBPStandardDataIntensityScale = CreateMask(0, 2) ' Also applies to Uncalibrated data
+        maskBPStandardDataIntensity = CreateMask(3, 15) ' Also applies to Uncalibrated data
+        maskBPStandardDataMass = CreateMask(0, 23)
 
-		maskBPUncalibratedDataChannelNumber = CreateMask(0, 27)
+        maskBPUncalibratedDataChannelNumber = CreateMask(0, 27)
 
-	End Sub
+    End Sub
 
     Private Function CLngSafe(strValue As String) As Integer
         Dim value As Integer
         If Integer.TryParse(strValue, value) Then
             Return value
-        End If        
+        End If
         Return 0
     End Function
 
@@ -937,404 +937,404 @@ LoadMSScanHeaderErrorHandler:
         Return 0
     End Function
 
-	Private Function GetFunctionNumberZeroPadded(ByRef lngFunctionNumber As Integer) As String
-		Return lngFunctionNumber.ToString.PadLeft(3, "0")
-	End Function
+    Private Function GetFunctionNumberZeroPadded(ByRef lngFunctionNumber As Integer) As String
+        Return lngFunctionNumber.ToString.PadLeft(3, "0")
+    End Function
 
-	Private Function NativeIOGetFunctionCount(ByRef DataDirPath As String) As Integer
-		' Returns the number of functions, 0 if an error
+    Private Function NativeIOGetFunctionCount(ByRef DataDirPath As String) As Integer
+        ' Returns the number of functions, 0 if an error
 
-		Dim strFunctnsFile, strDataFile As String
+        Dim strFunctnsFile, strDataFile As String
 
-		Dim intFileNumber As Short
-		Dim lngFunctionCount As Integer
+        Dim intFileNumber As Short
+        Dim lngFunctionCount As Integer
 
-		On Error GoTo NativeIOGetNumFunctionsErrorHandler
+        On Error GoTo NativeIOGetNumFunctionsErrorHandler
 
 
-		strFunctnsFile = Path.Combine(DataDirPath, "_functns.inf")
-		lngFunctionCount = 0
+        strFunctnsFile = Path.Combine(DataDirPath, "_functns.inf")
+        lngFunctionCount = 0
 
-		If File.Exists(strFunctnsFile) Then
-			intFileNumber = FreeFile()
-			FileOpen(intFileNumber, strFunctnsFile, OpenMode.Random, OpenAccess.Read, OpenShare.Shared)
-			lngFunctionCount = LOF(intFileNumber) / NATIVE_FUNCTION_INFO_SIZE_BYTES
-			FileClose(intFileNumber)
-			intFileNumber = -1
-		End If
+        If File.Exists(strFunctnsFile) Then
+            intFileNumber = FreeFile()
+            FileOpen(intFileNumber, strFunctnsFile, OpenMode.Random, OpenAccess.Read, OpenShare.Shared)
+            lngFunctionCount = LOF(intFileNumber) / NATIVE_FUNCTION_INFO_SIZE_BYTES
+            FileClose(intFileNumber)
+            intFileNumber = -1
+        End If
 
 NativeIOGetNumFunctionsCleanup:
-		NativeIOGetFunctionCount = lngFunctionCount
-		Exit Function
+        NativeIOGetFunctionCount = lngFunctionCount
+        Exit Function
 
 NativeIOGetNumFunctionsErrorHandler:
-		System.Diagnostics.Debug.WriteLine("Error in NativeIOGetFunctionCount: " & Err.Description)
+        System.Diagnostics.Debug.WriteLine("Error in NativeIOGetFunctionCount: " & Err.Description)
 
-		On Error Resume Next
-		If intFileNumber > 0 Then FileClose(intFileNumber)
-		Resume NativeIOGetNumFunctionsCleanup
+        On Error Resume Next
+        If intFileNumber > 0 Then FileClose(intFileNumber)
+        Resume NativeIOGetNumFunctionsCleanup
 
-	End Function
+    End Function
 
-	Private Function NativeIOGetFunctionInfo(ByRef DataDirPath As String, ByRef udtMSFunctionInfo As udtMSFunctionInfoType) As Boolean
-		' Returns True if success, False if failure
+    Private Function NativeIOGetFunctionInfo(ByRef DataDirPath As String, ByRef udtMSFunctionInfo As udtMSFunctionInfoType) As Boolean
+        ' Returns True if success, False if failure
 
-		Dim udtNativeFunctionInfo As udtRawFunctionDescriptorRecordType = New udtRawFunctionDescriptorRecordType
-		InitializeNativeFunctionInfo(udtNativeFunctionInfo)
+        Dim udtNativeFunctionInfo As udtRawFunctionDescriptorRecordType = New udtRawFunctionDescriptorRecordType
+        InitializeNativeFunctionInfo(udtNativeFunctionInfo)
 
-		Dim strFunctnsFile As String
+        Dim strFunctnsFile As String
 
-		Dim brInFile As BinaryReader
+        Dim brInFile As BinaryReader
 
-		Dim intIndex As Integer
-		Dim lngFunctionCount As Integer
-		Dim lngScanCount As Integer
+        Dim intIndex As Integer
+        Dim lngFunctionCount As Integer
+        Dim lngScanCount As Integer
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		On Error GoTo NativeIOGetFunctionInfoErrorHandler
+        On Error GoTo NativeIOGetFunctionInfoErrorHandler
 
-		strFunctnsFile = Path.Combine(DataDirPath, "_functns.inf")
-		lngFunctionCount = 0
+        strFunctnsFile = Path.Combine(DataDirPath, "_functns.inf")
+        lngFunctionCount = 0
 
-		If File.Exists(strFunctnsFile) Then
-			brInFile = New BinaryReader(New FileStream(strFunctnsFile, FileMode.Open, FileAccess.Read, FileShare.Read))
-			lngFunctionCount = brInFile.BaseStream.Length / NATIVE_FUNCTION_INFO_SIZE_BYTES
+        If File.Exists(strFunctnsFile) Then
+            brInFile = New BinaryReader(New FileStream(strFunctnsFile, FileMode.Open, FileAccess.Read, FileShare.Read))
+            lngFunctionCount = brInFile.BaseStream.Length / NATIVE_FUNCTION_INFO_SIZE_BYTES
 
-			If udtMSFunctionInfo.FunctionNumber < 1 Or udtMSFunctionInfo.FunctionNumber > lngFunctionCount Then
-				brInFile.Close()
-				blnSuccess = False
-			Else
-				' Since we're using Binary Access, we need to specify the Byte Offset to start reading at
-				' The first byte is 1, and that is where Function 1 can be found
-				' Function 2 can be found NATIVE_FUNCTION_INFO_SIZE_BYTES+1 bytes into the file
+            If udtMSFunctionInfo.FunctionNumber < 1 Or udtMSFunctionInfo.FunctionNumber > lngFunctionCount Then
+                brInFile.Close()
+                blnSuccess = False
+            Else
+                ' Since we're using Binary Access, we need to specify the Byte Offset to start reading at
+                ' The first byte is 1, and that is where Function 1 can be found
+                ' Function 2 can be found NATIVE_FUNCTION_INFO_SIZE_BYTES+1 bytes into the file
 
-				brInFile.BaseStream.Seek((udtMSFunctionInfo.FunctionNumber - 1) * NATIVE_FUNCTION_INFO_SIZE_BYTES, SeekOrigin.Begin)
+                brInFile.BaseStream.Seek((udtMSFunctionInfo.FunctionNumber - 1) * NATIVE_FUNCTION_INFO_SIZE_BYTES, SeekOrigin.Begin)
 
-				With udtNativeFunctionInfo
-					.PackedFunctionInfo = brInFile.ReadInt16()
-					.CycleTime = brInFile.ReadSingle()
-					.InterScanDelay = brInFile.ReadSingle()
-					.StartRT = brInFile.ReadSingle()
-					.EndRT = brInFile.ReadSingle()
-					.ScanCount = brInFile.ReadInt32()
+                With udtNativeFunctionInfo
+                    .PackedFunctionInfo = brInFile.ReadInt16()
+                    .CycleTime = brInFile.ReadSingle()
+                    .InterScanDelay = brInFile.ReadSingle()
+                    .StartRT = brInFile.ReadSingle()
+                    .EndRT = brInFile.ReadSingle()
+                    .ScanCount = brInFile.ReadInt32()
 
-					' Packed MS/MS Info:
-					'   bits 0-7: collision energy
-					'   bits 8-15: segment/channel count
-					.PackedMSMSInfo = brInFile.ReadInt16()
+                    ' Packed MS/MS Info:
+                    '   bits 0-7: collision energy
+                    '   bits 8-15: segment/channel count
+                    .PackedMSMSInfo = brInFile.ReadInt16()
 
-					' The following are more MS/MS parameters
-					.FunctionSetMass = brInFile.ReadSingle()
-					.InterSegmentChannelTime = brInFile.ReadSingle()
+                    ' The following are more MS/MS parameters
+                    .FunctionSetMass = brInFile.ReadSingle()
+                    .InterSegmentChannelTime = brInFile.ReadSingle()
 
-					' Up to 32 segment scans can be conducted for a MS/MS run
-					' The following three arrays store the segment times, start, and end masses
-					For intIndex = 0 To 31
-						.SegmentScanTimes(intIndex) = brInFile.ReadInt32()
-					Next intIndex
-					For intIndex = 0 To 31
-						.SegmentStartMasses(intIndex) = brInFile.ReadInt32()
-					Next intIndex
-					For intIndex = 0 To 31
-						.SegmentEndMasses(intIndex) = brInFile.ReadInt32()
-					Next intIndex
+                    ' Up to 32 segment scans can be conducted for a MS/MS run
+                    ' The following three arrays store the segment times, start, and end masses
+                    For intIndex = 0 To 31
+                        .SegmentScanTimes(intIndex) = brInFile.ReadInt32()
+                    Next intIndex
+                    For intIndex = 0 To 31
+                        .SegmentStartMasses(intIndex) = brInFile.ReadInt32()
+                    Next intIndex
+                    For intIndex = 0 To 31
+                        .SegmentEndMasses(intIndex) = brInFile.ReadInt32()
+                    Next intIndex
 
 
-				End With
-				brInFile.Close()
+                End With
+                brInFile.Close()
 
-				blnSuccess = True
-				With udtNativeFunctionInfo
-					If .PackedFunctionInfo = 0 And .CycleTime = 0 And .InterScanDelay = 0 Then
-						' Empty function record; see if file even exists
-						If File.Exists(Path.Combine(DataDirPath, "_func" & GetFunctionNumberZeroPadded(lngFunctionCount + 1) & ".dat")) Then
-							' Nope, file does not exist, function is invalid
-							blnSuccess = False
-						End If
-					End If
-				End With
+                blnSuccess = True
+                With udtNativeFunctionInfo
+                    If .PackedFunctionInfo = 0 And .CycleTime = 0 And .InterScanDelay = 0 Then
+                        ' Empty function record; see if file even exists
+                        If File.Exists(Path.Combine(DataDirPath, "_func" & GetFunctionNumberZeroPadded(lngFunctionCount + 1) & ".dat")) Then
+                            ' Nope, file does not exist, function is invalid
+                            blnSuccess = False
+                        End If
+                    End If
+                End With
 
-				If blnSuccess Then
-					' Copy data from udtNativeFunctionInfo to udtFunctionInfo
-					With udtMSFunctionInfo
-						.FunctionTypeID = udtNativeFunctionInfo.PackedFunctionInfo And maskFunctionType
+                If blnSuccess Then
+                    ' Copy data from udtNativeFunctionInfo to udtFunctionInfo
+                    With udtMSFunctionInfo
+                        .FunctionTypeID = udtNativeFunctionInfo.PackedFunctionInfo And maskFunctionType
 
-						' 0=MS, 1=SIR, 2=DLY, 3=CAT, 4=OFF, 5=PAR, 6=DAU, 7=NL, 8=NG,
-						' 9=MRM, 10=Q1F, 11=MS2, 12=DAD, 13=TOF, 14=PSD
-						' 16=QTOF MS/MS, 17=MTOF, 18=LCT/QTOF Normal
-						.FunctionType = 0
-						Select Case .FunctionTypeID
-							Case 0 : .FunctionTypeText = "MS"
-							Case 1 : .FunctionTypeText = "SIR"
-							Case 2 : .FunctionTypeText = "DLY"
-							Case 3 : .FunctionTypeText = "CAT"
-							Case 4 : .FunctionTypeText = "OFF"
-							Case 5 : .FunctionTypeText = "PAR"
-							Case 6 : .FunctionTypeText = "DAU"
-								.FunctionType = 1
-							Case 7 : .FunctionTypeText = "NL"
-							Case 8 : .FunctionTypeText = "NG"
-							Case 9 : .FunctionTypeText = "MRM"
-							Case 10 : .FunctionTypeText = "Q1F"
-							Case 11 : .FunctionTypeText = "MS2"
-								.FunctionType = 1
-							Case 12 : .FunctionTypeText = "DAD"
-							Case 13 : .FunctionTypeText = "TOF"
-							Case 14 : .FunctionTypeText = "PSD"
-							Case 16 : .FunctionTypeText = "TOF MS/MS"
-								.FunctionType = 1
-							Case 17 : .FunctionTypeText = "TOF MS"
-							Case 18 : .FunctionTypeText = "TOF MS"
-							Case Else : .FunctionTypeText = "MS Unknown"
-						End Select
+                        ' 0=MS, 1=SIR, 2=DLY, 3=CAT, 4=OFF, 5=PAR, 6=DAU, 7=NL, 8=NG,
+                        ' 9=MRM, 10=Q1F, 11=MS2, 12=DAD, 13=TOF, 14=PSD
+                        ' 16=QTOF MS/MS, 17=MTOF, 18=LCT/QTOF Normal
+                        .FunctionType = 0
+                        Select Case .FunctionTypeID
+                            Case 0 : .FunctionTypeText = "MS"
+                            Case 1 : .FunctionTypeText = "SIR"
+                            Case 2 : .FunctionTypeText = "DLY"
+                            Case 3 : .FunctionTypeText = "CAT"
+                            Case 4 : .FunctionTypeText = "OFF"
+                            Case 5 : .FunctionTypeText = "PAR"
+                            Case 6 : .FunctionTypeText = "DAU"
+                                .FunctionType = 1
+                            Case 7 : .FunctionTypeText = "NL"
+                            Case 8 : .FunctionTypeText = "NG"
+                            Case 9 : .FunctionTypeText = "MRM"
+                            Case 10 : .FunctionTypeText = "Q1F"
+                            Case 11 : .FunctionTypeText = "MS2"
+                                .FunctionType = 1
+                            Case 12 : .FunctionTypeText = "DAD"
+                            Case 13 : .FunctionTypeText = "TOF"
+                            Case 14 : .FunctionTypeText = "PSD"
+                            Case 16 : .FunctionTypeText = "TOF MS/MS"
+                                .FunctionType = 1
+                            Case 17 : .FunctionTypeText = "TOF MS"
+                            Case 18 : .FunctionTypeText = "TOF MS"
+                            Case Else : .FunctionTypeText = "MS Unknown"
+                        End Select
 
-						.IonMode = CShort(udtNativeFunctionInfo.PackedFunctionInfo And maskIonMode) / 32 ' 32 = 2^5
-						.AcquisitionDataType = CShort(udtNativeFunctionInfo.PackedFunctionInfo And maskAcquisitionDataType) / 1024 ' 1024 = 2^10
+                        .IonMode = CShort(udtNativeFunctionInfo.PackedFunctionInfo And maskIonMode) / 32 ' 32 = 2^5
+                        .AcquisitionDataType = CShort(udtNativeFunctionInfo.PackedFunctionInfo And maskAcquisitionDataType) / 1024 ' 1024 = 2^10
 
-						.CycleTime = udtNativeFunctionInfo.CycleTime
-						.InterScanDelay = udtNativeFunctionInfo.InterScanDelay
-						.StartRT = udtNativeFunctionInfo.StartRT
-						.EndRT = udtNativeFunctionInfo.EndRT
+                        .CycleTime = udtNativeFunctionInfo.CycleTime
+                        .InterScanDelay = udtNativeFunctionInfo.InterScanDelay
+                        .StartRT = udtNativeFunctionInfo.StartRT
+                        .EndRT = udtNativeFunctionInfo.EndRT
 
-						.MsMsCollisionEnergy = udtNativeFunctionInfo.PackedMSMSInfo And maskCollisionEnergy
-						.MSMSSegmentOrChannelCount = NumConversion.Int32ToUnsigned(udtNativeFunctionInfo.PackedMSMSInfo) / 256 ' 256 = 2^8
+                        .MsMsCollisionEnergy = udtNativeFunctionInfo.PackedMSMSInfo And maskCollisionEnergy
+                        .MSMSSegmentOrChannelCount = NumConversion.Int32ToUnsigned(udtNativeFunctionInfo.PackedMSMSInfo) / 256 ' 256 = 2^8
 
-						.FunctionSetMass = udtNativeFunctionInfo.FunctionSetMass
-						.InterSegmentChannelTime = udtNativeFunctionInfo.InterSegmentChannelTime
+                        .FunctionSetMass = udtNativeFunctionInfo.FunctionSetMass
+                        .InterSegmentChannelTime = udtNativeFunctionInfo.InterSegmentChannelTime
 
-					End With
+                    End With
 
-					' Since udtNativeFunctionInfo.ScanCount is always 0, we need to use NativeIOGetScanCount instead
-					lngScanCount = NativeIOGetScanCount(DataDirPath, udtMSFunctionInfo)
-					If udtMSFunctionInfo.ScanCount <> lngScanCount Then
-						' This is unexpected
-						Debug.WriteLine("Scan count values do not agree in NativeIOGetFunctionInfo")
-					End If
+                    ' Since udtNativeFunctionInfo.ScanCount is always 0, we need to use NativeIOGetScanCount instead
+                    lngScanCount = NativeIOGetScanCount(DataDirPath, udtMSFunctionInfo)
+                    If udtMSFunctionInfo.ScanCount <> lngScanCount Then
+                        ' This is unexpected
+                        Debug.WriteLine("Scan count values do not agree in NativeIOGetFunctionInfo")
+                    End If
 
-				End If
-			End If
+                End If
+            End If
 
-		End If
+        End If
 
 NativeIOGetFunctionInfoCleanup:
-		NativeIOGetFunctionInfo = blnSuccess
-		Exit Function
+        NativeIOGetFunctionInfo = blnSuccess
+        Exit Function
 
 NativeIOGetFunctionInfoErrorHandler:
-		System.Diagnostics.Debug.WriteLine("Error in NativeIOGetFunctionInfo: " & Err.Description)
+        System.Diagnostics.Debug.WriteLine("Error in NativeIOGetFunctionInfo: " & Err.Description)
 
-		On Error Resume Next
-		If Not brInFile Is Nothing Then brInFile.Close()
+        On Error Resume Next
+        If Not brInFile Is Nothing Then brInFile.Close()
 
-		Resume NativeIOGetFunctionInfoCleanup
+        Resume NativeIOGetFunctionInfoCleanup
 
-	End Function
+    End Function
 
-	Private Function NativeIOGetScanCount(ByRef DataDirPath As String, ByRef udtMSFunctionInfo As udtMSFunctionInfoType) As Integer
-		' Returns the number of scans for the given function
-		' Also updates udtMSFunctionInfo.ScanCount
-		' Returns 0 if an error
-		'
-		' Note that udtMSFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
+    Private Function NativeIOGetScanCount(ByRef DataDirPath As String, ByRef udtMSFunctionInfo As udtMSFunctionInfoType) As Integer
+        ' Returns the number of scans for the given function
+        ' Also updates udtMSFunctionInfo.ScanCount
+        ' Returns 0 if an error
+        '
+        ' Note that udtMSFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
 
-		' This udt is used for most files
-		Dim udtNativeScanIndexRecord As udtRawScanIndexRecordType
+        ' This udt is used for most files
+        Dim udtNativeScanIndexRecord As udtRawScanIndexRecordType
 
-		Dim strFuncIdxFile As String
+        Dim strFuncIdxFile As String
 
-		Dim ioFileInfo As FileInfo
-		Dim lngNumberOfScansInFunction As Integer
+        Dim ioFileInfo As FileInfo
+        Dim lngNumberOfScansInFunction As Integer
 
-		On Error GoTo NativeIOGetScanCountErrorHandler
+        On Error GoTo NativeIOGetScanCountErrorHandler
 
-		strFuncIdxFile = Path.Combine(DataDirPath, "_func" & GetFunctionNumberZeroPadded(udtMSFunctionInfo.FunctionNumber) & ".idx")
-		ioFileInfo = New FileInfo(strFuncIdxFile)
+        strFuncIdxFile = Path.Combine(DataDirPath, "_func" & GetFunctionNumberZeroPadded(udtMSFunctionInfo.FunctionNumber) & ".idx")
+        ioFileInfo = New FileInfo(strFuncIdxFile)
 
-		lngNumberOfScansInFunction = 0
-		If ioFileInfo.Exists Then
-			' The ScanCount stored in the function index file is always 0 rather than the correct number of scans
-			' Thus, we can determine the number of scans in the function by dividing the size of the file (in bytes)
-			'  by the size of each udtRawScanIndexRecordType
+        lngNumberOfScansInFunction = 0
+        If ioFileInfo.Exists Then
+            ' The ScanCount stored in the function index file is always 0 rather than the correct number of scans
+            ' Thus, we can determine the number of scans in the function by dividing the size of the file (in bytes)
+            '  by the size of each udtRawScanIndexRecordType
 
-			lngNumberOfScansInFunction = ioFileInfo.Length / RAW_SCAN_INDEX_RECORD_SIZE
-			udtMSFunctionInfo.ScanCount = lngNumberOfScansInFunction
+            lngNumberOfScansInFunction = ioFileInfo.Length / RAW_SCAN_INDEX_RECORD_SIZE
+            udtMSFunctionInfo.ScanCount = lngNumberOfScansInFunction
 
-		End If
+        End If
 
 NativeIOGetScanCountCleanup:
-		On Error Resume Next
+        On Error Resume Next
 
-		Return lngNumberOfScansInFunction
-		Exit Function
+        Return lngNumberOfScansInFunction
+        Exit Function
 
 NativeIOGetScanCountErrorHandler:
-		System.Diagnostics.Debug.WriteLine("Error in NativeIOGetScanCount: " & Err.Description)
-		Resume NativeIOGetScanCountCleanup
+        System.Diagnostics.Debug.WriteLine("Error in NativeIOGetScanCount: " & Err.Description)
+        Resume NativeIOGetScanCountCleanup
 
-	End Function
+    End Function
 
-	Private Function NativeIOGetScanInfo(ByRef DataDirPath As String, ByRef udtMSFunctionInfo As udtMSFunctionInfoType, ByVal lngScanNumber As Integer, ByRef udtScanIndexRecord As udtScanIndexRecordType, Optional ByVal blnScanOffsetAndPeakCountOnly As Boolean = False) As Boolean
-		' Returns information on the given scan for the given function
-		' Returns True if success, False if failure
-		'
-		' Note that udtMSFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
+    Private Function NativeIOGetScanInfo(ByRef DataDirPath As String, ByRef udtMSFunctionInfo As udtMSFunctionInfoType, lngScanNumber As Integer, ByRef udtScanIndexRecord As udtScanIndexRecordType, Optional blnScanOffsetAndPeakCountOnly As Boolean = False) As Boolean
+        ' Returns information on the given scan for the given function
+        ' Returns True if success, False if failure
+        '
+        ' Note that udtMSFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
 
-		' This udt is used for most files
-		Dim udtNativeScanIndexRecord As udtRawScanIndexRecordType
+        ' This udt is used for most files
+        Dim udtNativeScanIndexRecord As udtRawScanIndexRecordType
 
-		' This udt is used for files with udtMSFunctionInfo.AcquisitionDataType = 0
-		' The difference is that udtRawScanIndexRecordType ends in an Integer then a Long
-		'  while this udt ends in a Long, then an Integer
-		' When this udt is used, its values are copied to udtNativeScanIndexRecord directly after reading
-		Dim udtNativeScanIndexRecordCompressedScan As udtRawScanIndexRecordCompressedScanType
+        ' This udt is used for files with udtMSFunctionInfo.AcquisitionDataType = 0
+        ' The difference is that udtRawScanIndexRecordType ends in an Integer then a Long
+        '  while this udt ends in a Long, then an Integer
+        ' When this udt is used, its values are copied to udtNativeScanIndexRecord directly after reading
+        Dim udtNativeScanIndexRecordCompressedScan As udtRawScanIndexRecordCompressedScanType
 
 
-		Dim strFuncIdxFile As String
-		Dim strFuncStsFile As String
+        Dim strFuncIdxFile As String
+        Dim strFuncStsFile As String
 
-		Dim lngNumberOfScansInFunction As Integer
+        Dim lngNumberOfScansInFunction As Integer
 
-		Dim brInFile As BinaryReader = Nothing
-		Dim blnSuccess As Boolean
+        Dim brInFile As BinaryReader = Nothing
+        Dim blnSuccess As Boolean
 
-		On Error GoTo NativeIOGetScanInfoErrorHandler
+        On Error GoTo NativeIOGetScanInfoErrorHandler
 
-		strFuncIdxFile = Path.Combine(DataDirPath, "_func" & GetFunctionNumberZeroPadded(udtMSFunctionInfo.FunctionNumber) & ".idx")
-		strFuncStsFile = Path.Combine(DataDirPath, "_func" & GetFunctionNumberZeroPadded(udtMSFunctionInfo.FunctionNumber) & ".sts")
+        strFuncIdxFile = Path.Combine(DataDirPath, "_func" & GetFunctionNumberZeroPadded(udtMSFunctionInfo.FunctionNumber) & ".idx")
+        strFuncStsFile = Path.Combine(DataDirPath, "_func" & GetFunctionNumberZeroPadded(udtMSFunctionInfo.FunctionNumber) & ".sts")
 
-		blnSuccess = False
-		If File.Exists(strFuncIdxFile) Then
-			brInFile = New BinaryReader(New FileStream(strFuncIdxFile, FileMode.Open, FileAccess.Read, FileShare.Read))
-			lngNumberOfScansInFunction = brInFile.BaseStream.Length / RAW_SCAN_INDEX_RECORD_SIZE
+        blnSuccess = False
+        If File.Exists(strFuncIdxFile) Then
+            brInFile = New BinaryReader(New FileStream(strFuncIdxFile, FileMode.Open, FileAccess.Read, FileShare.Read))
+            lngNumberOfScansInFunction = brInFile.BaseStream.Length / RAW_SCAN_INDEX_RECORD_SIZE
 
-			' The ScanCount stored in the function index file is always 0 rather than the correct number of scans
-			' Thus, we can determine the number of scans in the function by dividing the size of the file (in bytes)
-			'  by the size of each udtRawScanIndexRecordType
+            ' The ScanCount stored in the function index file is always 0 rather than the correct number of scans
+            ' Thus, we can determine the number of scans in the function by dividing the size of the file (in bytes)
+            '  by the size of each udtRawScanIndexRecordType
 
-			If lngScanNumber < 1 Then lngScanNumber = 1
-			If lngNumberOfScansInFunction > 0 And lngScanNumber <= lngNumberOfScansInFunction Then
-				' Just read the record for this scan
+            If lngScanNumber < 1 Then lngScanNumber = 1
+            If lngNumberOfScansInFunction > 0 And lngScanNumber <= lngNumberOfScansInFunction Then
+                ' Just read the record for this scan
 
-				' Jump to the appropriate file offset based on lngScanNumber
-				brInFile.BaseStream.Seek((lngScanNumber - 1) * RAW_SCAN_INDEX_RECORD_SIZE, SeekOrigin.Begin)
+                ' Jump to the appropriate file offset based on lngScanNumber
+                brInFile.BaseStream.Seek((lngScanNumber - 1) * RAW_SCAN_INDEX_RECORD_SIZE, SeekOrigin.Begin)
 
-				If udtMSFunctionInfo.AcquisitionDataType = 0 Then
-					' File saved with Acquisition Data Type 0
-					With udtNativeScanIndexRecordCompressedScan
-						.StartScanOffset = brInFile.ReadInt32()
-						.PackedScanInfo = brInFile.ReadInt32()
-						.TicValue = brInFile.ReadSingle()
-						.ScanTime = brInFile.ReadSingle()
-						.PackedBasePeakInfo = brInFile.ReadInt32()
-						.Spare = brInFile.ReadInt16()
-					End With
+                If udtMSFunctionInfo.AcquisitionDataType = 0 Then
+                    ' File saved with Acquisition Data Type 0
+                    With udtNativeScanIndexRecordCompressedScan
+                        .StartScanOffset = brInFile.ReadInt32()
+                        .PackedScanInfo = brInFile.ReadInt32()
+                        .TicValue = brInFile.ReadSingle()
+                        .ScanTime = brInFile.ReadSingle()
+                        .PackedBasePeakInfo = brInFile.ReadInt32()
+                        .Spare = brInFile.ReadInt16()
+                    End With
 
-					' Copy from udtNativeScanIndexRecordCompressedScan to udtNativeScanIndexRecord
-					With udtNativeScanIndexRecord
-						.StartScanOffset = udtNativeScanIndexRecordCompressedScan.StartScanOffset
-						.PackedScanInfo = udtNativeScanIndexRecordCompressedScan.PackedScanInfo
+                    ' Copy from udtNativeScanIndexRecordCompressedScan to udtNativeScanIndexRecord
+                    With udtNativeScanIndexRecord
+                        .StartScanOffset = udtNativeScanIndexRecordCompressedScan.StartScanOffset
+                        .PackedScanInfo = udtNativeScanIndexRecordCompressedScan.PackedScanInfo
 
-						.TicValue = udtNativeScanIndexRecordCompressedScan.TicValue
-						.ScanTime = udtNativeScanIndexRecordCompressedScan.ScanTime
+                        .TicValue = udtNativeScanIndexRecordCompressedScan.TicValue
+                        .ScanTime = udtNativeScanIndexRecordCompressedScan.ScanTime
 
-						.PackedBasePeakIntensity = 0 ' Unused
-						.PackedBasePeakInfo = udtNativeScanIndexRecordCompressedScan.PackedBasePeakInfo
-					End With
-				Else
-					' File saved with Acquisition Data Type other than 0
-					With udtNativeScanIndexRecord
-						.StartScanOffset = brInFile.ReadInt32()
-						.PackedScanInfo = brInFile.ReadInt32()
-						.TicValue = brInFile.ReadSingle()
-						.ScanTime = brInFile.ReadSingle()
-						.PackedBasePeakIntensity = brInFile.ReadInt16
-						.PackedBasePeakInfo = brInFile.ReadInt32()
-					End With
-				End If
+                        .PackedBasePeakIntensity = 0 ' Unused
+                        .PackedBasePeakInfo = udtNativeScanIndexRecordCompressedScan.PackedBasePeakInfo
+                    End With
+                Else
+                    ' File saved with Acquisition Data Type other than 0
+                    With udtNativeScanIndexRecord
+                        .StartScanOffset = brInFile.ReadInt32()
+                        .PackedScanInfo = brInFile.ReadInt32()
+                        .TicValue = brInFile.ReadSingle()
+                        .ScanTime = brInFile.ReadSingle()
+                        .PackedBasePeakIntensity = brInFile.ReadInt16
+                        .PackedBasePeakInfo = brInFile.ReadInt32()
+                    End With
+                End If
 
-				blnSuccess = True
-			End If
-			brInFile.Close()
+                blnSuccess = True
+            End If
+            brInFile.Close()
 
-		End If
+        End If
 
-		If blnSuccess Then
-			With udtScanIndexRecord
-				.StartScanOffset = udtNativeScanIndexRecord.StartScanOffset
+        If blnSuccess Then
+            With udtScanIndexRecord
+                .StartScanOffset = udtNativeScanIndexRecord.StartScanOffset
 
-				.NumSpectralPeaks = udtNativeScanIndexRecord.PackedScanInfo And maskSpectralPeak
+                .NumSpectralPeaks = udtNativeScanIndexRecord.PackedScanInfo And maskSpectralPeak
 
-				If Not blnScanOffsetAndPeakCountOnly Then
-					.SegmentNumber = CShort(udtNativeScanIndexRecord.PackedScanInfo And maskSegment) / 4194304 ' 4194304 = 2^22
-					.UseFollowingContinuum = (udtNativeScanIndexRecord.PackedScanInfo And maskUseFollowingContinuum)
-					.ContiuumDataOverride = (udtNativeScanIndexRecord.PackedScanInfo And maskContiuumDataOverride)
-					.ScanContainsMolecularMasses = (udtNativeScanIndexRecord.PackedScanInfo And maskScanContainsMolecularMasses)
-					.ScanContainsCalibratedMasses = (udtNativeScanIndexRecord.PackedScanInfo And maskScanContainsCalibratedMasses)
-					If udtNativeScanIndexRecord.PackedScanInfo <> Math.Abs(udtNativeScanIndexRecord.PackedScanInfo) Then
-						.ScanOverload = True
-					End If
+                If Not blnScanOffsetAndPeakCountOnly Then
+                    .SegmentNumber = CShort(udtNativeScanIndexRecord.PackedScanInfo And maskSegment) / 4194304 ' 4194304 = 2^22
+                    .UseFollowingContinuum = (udtNativeScanIndexRecord.PackedScanInfo And maskUseFollowingContinuum)
+                    .ContiuumDataOverride = (udtNativeScanIndexRecord.PackedScanInfo And maskContiuumDataOverride)
+                    .ScanContainsMolecularMasses = (udtNativeScanIndexRecord.PackedScanInfo And maskScanContainsMolecularMasses)
+                    .ScanContainsCalibratedMasses = (udtNativeScanIndexRecord.PackedScanInfo And maskScanContainsCalibratedMasses)
+                    If udtNativeScanIndexRecord.PackedScanInfo <> Math.Abs(udtNativeScanIndexRecord.PackedScanInfo) Then
+                        .ScanOverload = True
+                    End If
 
-					.TicValue = udtNativeScanIndexRecord.TicValue
-					.ScanTime = udtNativeScanIndexRecord.ScanTime
+                    .TicValue = udtNativeScanIndexRecord.TicValue
+                    .ScanTime = udtNativeScanIndexRecord.ScanTime
 
-					.BasePeakIntensity = UnpackIntensity(udtNativeScanIndexRecord.PackedBasePeakIntensity, udtNativeScanIndexRecord.PackedBasePeakInfo, udtMSFunctionInfo.AcquisitionDataType)
+                    .BasePeakIntensity = UnpackIntensity(udtNativeScanIndexRecord.PackedBasePeakIntensity, udtNativeScanIndexRecord.PackedBasePeakInfo, udtMSFunctionInfo.AcquisitionDataType)
 
-					.BasePeakMass = UnpackMass(udtNativeScanIndexRecord.PackedBasePeakInfo, udtMSFunctionInfo.AcquisitionDataType, True)
+                    .BasePeakMass = UnpackMass(udtNativeScanIndexRecord.PackedBasePeakInfo, udtMSFunctionInfo.AcquisitionDataType, True)
 
-					' ToDo: May need to calibrate the base peak mass
-					.BasePeakMass = .BasePeakMass
+                    ' ToDo: May need to calibrate the base peak mass
+                    .BasePeakMass = .BasePeakMass
 
-					.LoMass = 0	' ToDo: Figure out if this can be read from the FunctionIndex file
-					.HiMass = 0
-					.SetMass = 0 ' This will get populated below
-				End If
-			End With
+                    .LoMass = 0 ' ToDo: Figure out if this can be read from the FunctionIndex file
+                    .HiMass = 0
+                    .SetMass = 0 ' This will get populated below
+                End If
+            End With
 
-		End If
+        End If
 
 
 NativeIOGetScanInfoCleanup:
-		On Error Resume Next
-		If Not brInFile Is Nothing Then brInFile.Close()
+        On Error Resume Next
+        If Not brInFile Is Nothing Then brInFile.Close()
 
-		NativeIOGetScanInfo = blnSuccess
-		Exit Function
+        NativeIOGetScanInfo = blnSuccess
+        Exit Function
 
 NativeIOGetScanInfoErrorHandler:
-		System.Diagnostics.Debug.WriteLine("Error in NativeIOGetScanInfo: " & Err.Description)
-		Resume NativeIOGetScanInfoCleanup
+        System.Diagnostics.Debug.WriteLine("Error in NativeIOGetScanInfo: " & Err.Description)
+        Resume NativeIOGetScanInfoCleanup
 
-	End Function
+    End Function
 
-	Private Sub NativeIOParseCalibrationCoeffs(ByVal strTextToParse As String, ByRef intCalibrationCoeffCount As Short, ByRef dblCalibrationCoeffs() As Double, ByRef intCalibrationTypeID As Short)
+    Private Sub NativeIOParseCalibrationCoeffs(strTextToParse As String, ByRef intCalibrationCoeffCount As Short, ByRef dblCalibrationCoeffs() As Double, ByRef intCalibrationTypeID As Short)
 
-		Dim strCalParameters() As String
-		Dim intCalIndex As Short
+        Dim strCalParameters() As String
+        Dim intCalIndex As Short
 
-		strCalParameters = strTextToParse.Split(","c)
-		intCalibrationCoeffCount = 0
-		For intCalIndex = 0 To strCalParameters.Length - 1
-			If IsNumeric(strCalParameters(intCalIndex)) Then
-				dblCalibrationCoeffs(intCalIndex) = CDbl(strCalParameters(intCalIndex))
-				intCalibrationCoeffCount = intCalibrationCoeffCount + 1
-			Else
-				' Non-numeric coefficient encountered; stop populating the coefficients
-				Exit For
-			End If
-		Next intCalIndex
+        strCalParameters = strTextToParse.Split(","c)
+        intCalibrationCoeffCount = 0
+        For intCalIndex = 0 To strCalParameters.Length - 1
+            If IsNumeric(strCalParameters(intCalIndex)) Then
+                dblCalibrationCoeffs(intCalIndex) = CDbl(strCalParameters(intCalIndex))
+                intCalibrationCoeffCount = intCalibrationCoeffCount + 1
+            Else
+                ' Non-numeric coefficient encountered; stop populating the coefficients
+                Exit For
+            End If
+        Next intCalIndex
 
-		For intCalIndex = strCalParameters.Length - 1 To 0 Step -1
-			If UCase(Left(strCalParameters(intCalIndex), 1)) = "T" Then
-				strCalParameters(intCalIndex) = Mid(strCalParameters(intCalIndex), 2)
-				If IsNumeric(strCalParameters(intCalIndex)) Then
-					intCalibrationTypeID = CShort(strCalParameters(intCalIndex))
-				End If
-				Exit For
-			End If
-		Next intCalIndex
+        For intCalIndex = strCalParameters.Length - 1 To 0 Step -1
+            If UCase(Left(strCalParameters(intCalIndex), 1)) = "T" Then
+                strCalParameters(intCalIndex) = Mid(strCalParameters(intCalIndex), 2)
+                If IsNumeric(strCalParameters(intCalIndex)) Then
+                    intCalibrationTypeID = CShort(strCalParameters(intCalIndex))
+                End If
+                Exit For
+            End If
+        Next intCalIndex
 
-	End Sub
+    End Sub
 
 	Private Function NativeIOReadCalInfoFromHeader(ByRef udtThisMSData As udtMSDataType) As Boolean
 		' Looks for the "$$ Cal Function" lines in the _HEADER.TXT file

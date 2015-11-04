@@ -2,7 +2,6 @@
 
 Imports System.IO
 Imports OxyPlot
-Imports OxyPlot.Axes
 Imports OxyPlot.Series
 
 Public Class clsTICandBPIPlotter
@@ -52,7 +51,7 @@ Public Class clsTICandBPIPlotter
         Get
             Return mBPIAutoMinMaxY
         End Get
-        Set(ByVal value As Boolean)
+        Set(value As Boolean)
             mBPIAutoMinMaxY = value
         End Set
     End Property
@@ -61,7 +60,7 @@ Public Class clsTICandBPIPlotter
         Get
             Return mBPIPlotAbbrev
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mBPIPlotAbbrev = value
         End Set
     End Property
@@ -70,7 +69,7 @@ Public Class clsTICandBPIPlotter
         Get
             Return mBPIXAxisLabel
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mBPIXAxisLabel = value
         End Set
     End Property
@@ -79,7 +78,7 @@ Public Class clsTICandBPIPlotter
         Get
             Return mBPIYAxisLabel
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mBPIYAxisLabel = value
         End Set
     End Property
@@ -88,7 +87,7 @@ Public Class clsTICandBPIPlotter
         Get
             Return mBPIYAxisExponentialNotation
         End Get
-        Set(ByVal value As Boolean)
+        Set(value As Boolean)
             mBPIYAxisExponentialNotation = value
         End Set
     End Property
@@ -109,7 +108,7 @@ Public Class clsTICandBPIPlotter
         Get
             Return mRemoveZeroesFromEnds
         End Get
-        Set(ByVal value As Boolean)
+        Set(value As Boolean)
             mRemoveZeroesFromEnds = value
         End Set
     End Property
@@ -118,7 +117,7 @@ Public Class clsTICandBPIPlotter
         Get
             Return mTICAutoMinMaxY
         End Get
-        Set(ByVal value As Boolean)
+        Set(value As Boolean)
             mTICAutoMinMaxY = value
         End Set
     End Property
@@ -127,7 +126,7 @@ Public Class clsTICandBPIPlotter
         Get
             Return mTICPlotAbbrev
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mTICPlotAbbrev = value
         End Set
     End Property
@@ -136,7 +135,7 @@ Public Class clsTICandBPIPlotter
         Get
             Return mTICXAxisLabel
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mTICXAxisLabel = value
         End Set
     End Property
@@ -145,7 +144,7 @@ Public Class clsTICandBPIPlotter
         Get
             Return mTICYAxisLabel
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mTICYAxisLabel = value
         End Set
     End Property
@@ -154,7 +153,7 @@ Public Class clsTICandBPIPlotter
         Get
             Return mTICYAxisExponentialNotation
         End Get
-        Set(ByVal value As Boolean)
+        Set(value As Boolean)
             mTICYAxisExponentialNotation = value
         End Set
     End Property
@@ -164,36 +163,39 @@ Public Class clsTICandBPIPlotter
         Me.Reset()
     End Sub
 
-    Public Sub AddData(ByVal intScanNumber As Integer, _
-                       ByVal intMSLevel As Integer, _
-                       ByVal sngScanTimeMinutes As Single, _
-                       ByVal dblBPI As Double, _
-                       ByVal dblTIC As Double)
+    Public Sub AddData(
+       intScanNumber As Integer,
+       intMSLevel As Integer,
+       sngScanTimeMinutes As Single,
+       dblBPI As Double,
+       dblTIC As Double)
 
         mBPI.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblBPI)
         mTIC.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblTIC)
 
     End Sub
 
-    Public Sub AddDataBPIOnly(ByVal intScanNumber As Integer, _
-                               ByVal intMSLevel As Integer, _
-                               ByVal sngScanTimeMinutes As Single, _
-                               ByVal dblBPI As Double)
+    Public Sub AddDataBPIOnly(
+       intScanNumber As Integer,
+       intMSLevel As Integer,
+       sngScanTimeMinutes As Single,
+       dblBPI As Double)
 
         mBPI.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblBPI)
 
     End Sub
 
-    Public Sub AddDataTICOnly(ByVal intScanNumber As Integer, _
-                                 ByVal intMSLevel As Integer, _
-                                 ByVal sngScanTimeMinutes As Single, _
-                                 ByVal dblTIC As Double)
+    Public Sub AddDataTICOnly(
+       intScanNumber As Integer,
+       intMSLevel As Integer,
+       sngScanTimeMinutes As Single,
+       dblTIC As Double)
 
         mTIC.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblTIC)
 
     End Sub
 
-    Protected Sub AddRecentFile(ByVal strFilePath As String, ByVal eFileType As eOutputFileTypes)
+    Protected Sub AddRecentFile(strFilePath As String, eFileType As eOutputFileTypes)
         Dim udtOutputFileInfo As udtOutputFileInfoType
 
         udtOutputFileInfo.FileType = eFileType
@@ -236,7 +238,7 @@ Public Class clsTICandBPIPlotter
     ''' <param name="eFileType">File type to find</param>
     ''' <returns>File name if found; empty string if this file type was not saved</returns>
     ''' <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
-    Public Function GetRecentFileInfo(ByVal eFileType As eOutputFileTypes) As String
+    Public Function GetRecentFileInfo(eFileType As eOutputFileTypes) As String
         Dim intIndex As Integer
         For intIndex = 0 To mRecentFiles.Count - 1
             If mRecentFiles(intIndex).FileType = eFileType Then
@@ -254,7 +256,7 @@ Public Class clsTICandBPIPlotter
     ''' <param name="strFilePath">File Path (output)</param>
     ''' <returns>True if a match was found; otherwise returns false</returns>
     ''' <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
-    Public Function GetRecentFileInfo(ByVal eFileType As eOutputFileTypes, ByRef strFileName As String, ByRef strFilePath As String) As Boolean
+    Public Function GetRecentFileInfo(eFileType As eOutputFileTypes, ByRef strFileName As String, ByRef strFilePath As String) As Boolean
         Dim intIndex As Integer
         For intIndex = 0 To mRecentFiles.Count - 1
             If mRecentFiles(intIndex).FileType = eFileType Then
@@ -293,8 +295,8 @@ Public Class clsTICandBPIPlotter
 
         For Each chromDataPoint In objData.Scans
 
-            If intMSLevelFilter = 0 OrElse _
-               chromDataPoint.MSLevel = intMSLevelFilter OrElse _
+            If intMSLevelFilter = 0 OrElse
+               chromDataPoint.MSLevel = intMSLevelFilter OrElse
                intMSLevelFilter = 2 And chromDataPoint.MSLevel >= 2 Then
 
                 objPoints.Add(New DataPoint(chromDataPoint.ScanNum, chromDataPoint.Intensity))
@@ -422,9 +424,10 @@ Public Class clsTICandBPIPlotter
 
     End Sub
 
-    Public Function SaveTICAndBPIPlotFiles(ByVal strDatasetName As String, _
-                ByVal strOutputFolderPath As String, _
-                ByRef strErrorMessage As String) As Boolean
+    Public Function SaveTICAndBPIPlotFiles(
+       strDatasetName As String,
+       strOutputFolderPath As String,
+      ByRef strErrorMessage As String) As Boolean
 
         Dim plotContainer As clsPlotContainer
         Dim strPNGFilePath As String
@@ -524,7 +527,7 @@ Public Class clsTICandBPIPlotter
         End If
 
     End Sub
-    
+
     Protected Sub ValidateMSLevel(ByRef objChrom As clsChromatogramInfo)
         Dim intIndex As Integer
         Dim blnMSLevelDefined As Boolean
@@ -572,10 +575,11 @@ Public Class clsTICandBPIPlotter
             Me.Initialize()
         End Sub
 
-        Public Sub AddPoint(ByVal intScanNumber As Integer, _
-                            ByVal intMSLevel As Integer, _
-                            ByVal sngScanTimeMinutes As Single, _
-                            ByVal dblIntensity As Double)
+        Public Sub AddPoint(
+           intScanNumber As Integer,
+           intMSLevel As Integer,
+           sngScanTimeMinutes As Single,
+           dblIntensity As Double)
 
             If (From item In mScans Where item.ScanNum = intScanNumber Select item).Any() Then
                 Throw New Exception("Scan " & intScanNumber & " has already been added to the TIC or BPI; programming error")
@@ -591,7 +595,7 @@ Public Class clsTICandBPIPlotter
             mScans.Add(chromDataPoint)
         End Sub
 
-        Public Function GetDataPoint(ByVal index As Integer) As clsChromatogramDataPoint
+        Public Function GetDataPoint(index As Integer) As clsChromatogramDataPoint
             If mScans.Count = 0 Then
                 Throw New Exception("Chromatogram list is empty; cannot retrieve data point at index " & index)
             End If
@@ -612,11 +616,11 @@ Public Class clsTICandBPIPlotter
 
         End Sub
 
-        Public Sub RemoveAt(ByVal Index As Integer)
+        Public Sub RemoveAt(Index As Integer)
             RemoveRange(Index, 1)
         End Sub
 
-        Public Sub RemoveRange(ByVal Index As Integer, ByVal Count As Integer)
+        Public Sub RemoveRange(Index As Integer, Count As Integer)
 
             If Index >= 0 And Index < ScanCount And Count > 0 Then
                 mScans.RemoveRange(Index, Count)

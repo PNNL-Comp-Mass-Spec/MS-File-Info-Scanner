@@ -7,7 +7,7 @@ Imports MSFileInfoScannerInterfaces
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "October 27, 2015"
+    Public Const PROGRAM_DATE As String = "November 3, 2015"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -113,9 +113,9 @@ Module modMain
 
             If mInputDataFilePath Is Nothing Then mInputDataFilePath = String.Empty
 
-            If Not blnProceed OrElse _
-               objParseCommandLine.NeedToShowHelp OrElse _
-               objParseCommandLine.ParameterCount + objParseCommandLine.NonSwitchParameterCount = 0 OrElse _
+            If Not blnProceed OrElse
+               objParseCommandLine.NeedToShowHelp OrElse
+               objParseCommandLine.ParameterCount + objParseCommandLine.NonSwitchParameterCount = 0 OrElse
                mInputDataFilePath.Length = 0 Then
                 ShowProgramHelp()
                 intReturnCode = -1
@@ -396,8 +396,12 @@ Module modMain
         Try
             mMSFileScanner = New clsMSFileInfoScanner
 
-            Console.WriteLine("This program will scan a series of MS data files (or data folders) and extract the acquisition start and end times, number of spectra, and the total size of the data, saving the values in the file " & clsMSFileInfoScanner.DefaultAcquisitionTimeFilename & ". " & _
-               "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar/QTrap .WIFF files, Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, .UIMF files (IMS), and zipped Bruker imaging datasets (with 0_R*.zip files)")
+            Console.WriteLine("This program will scan a series of MS data files (or data folders) and " &
+                              "extract the acquisition start and end times, number of spectra, and the " &
+                              "total size of the data, saving the values in the file " & clsMSFileInfoScanner.DefaultAcquisitionTimeFilename & ". " &
+                              "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), " &
+                              "Agilent or QStar/QTrap .WIFF files, Masslynx .Raw folders, Bruker 1 folders, " &
+                              "Bruker XMass analysis.baf files, .UIMF files (IMS), and zipped Bruker imaging datasets (with 0_R*.zip files)")
             Console.WriteLine()
 
             Console.WriteLine("Program syntax:" & Environment.NewLine & Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location))

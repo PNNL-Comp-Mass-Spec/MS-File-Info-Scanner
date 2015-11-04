@@ -28,82 +28,82 @@ Public Class clsBrukerOneFolderInfoScanner
 
     Private Const MINIMUM_ACCEPTABLE_ACQ_START_TIME As DateTime = #1/1/1975#
 
-    Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
-		Dim ioFolderInfo As DirectoryInfo
-		Dim strDatasetName As String = String.Empty
+    Public Overrides Function GetDatasetNameViaPath(strDataFilePath As String) As String
+        Dim ioFolderInfo As DirectoryInfo
+        Dim strDatasetName As String = String.Empty
 
-		Try
-			' The dataset name for a Bruker 1 folder or zipped S folder is the name of the parent directory
-			ioFolderInfo = New DirectoryInfo(strDataFilePath)
-			strDatasetName = ioFolderInfo.Parent.Name
-		Catch ex As Exception
-			' Ignore errors
-		End Try
+        Try
+            ' The dataset name for a Bruker 1 folder or zipped S folder is the name of the parent directory
+            ioFolderInfo = New DirectoryInfo(strDataFilePath)
+            strDatasetName = ioFolderInfo.Parent.Name
+        Catch ex As Exception
+            ' Ignore errors
+        End Try
 
-		If strDatasetName Is Nothing Then strDatasetName = String.Empty
-		Return strDatasetName
+        If strDatasetName Is Nothing Then strDatasetName = String.Empty
+        Return strDatasetName
 
-	End Function
+    End Function
 
-	Public Shared Function IsZippedSFolder(ByVal strFilePath As String) As Boolean
+    Public Shared Function IsZippedSFolder(strFilePath As String) As Boolean
 
-		Static reCheckFile As Regex = New Regex("s[0-9]+\.zip", Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
+        Static reCheckFile As Regex = New Regex("s[0-9]+\.zip", Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
 
-		Return reCheckFile.Match(strFilePath).Success
+        Return reCheckFile.Match(strFilePath).Success
 
-	End Function
+    End Function
 
-	Private Function ParseBrukerDateFromArray(ByRef strLineIn As String, ByRef dtDate As DateTime) As Boolean
-		Dim strDate As String
-		Dim blnSuccess As Boolean
+    Private Function ParseBrukerDateFromArray(ByRef strLineIn As String, ByRef dtDate As DateTime) As Boolean
+        Dim strDate As String
+        Dim blnSuccess As Boolean
 
-		Dim intStartIndex As Integer
-		Dim intIndexCheck As Integer
-		Dim intIndexCompare As Integer
+        Dim intStartIndex As Integer
+        Dim intIndexCheck As Integer
+        Dim intIndexCompare As Integer
 
-		Dim strSplitLine() As String
+        Dim strSplitLine() As String
 
-		Try
-			strSplitLine = strLineIn.Split(" "c)
+        Try
+            strSplitLine = strLineIn.Split(" "c)
 
-			' Remove any entries from strSplitLine() that are blank
-			intIndexCheck = intStartIndex
-			Do While intIndexCheck < strSplitLine.Length AndAlso strSplitLine.Length > 0
-				If strSplitLine(intIndexCheck).Length = 0 Then
-					For intIndexCompare = intIndexCheck To strSplitLine.Length - 2
-						strSplitLine(intIndexCompare) = strSplitLine(intIndexCompare + 1)
-					Next intIndexCompare
-					ReDim Preserve strSplitLine(strSplitLine.Length - 2)
-				Else
-					intIndexCheck += 1
-				End If
-			Loop
+            ' Remove any entries from strSplitLine() that are blank
+            intIndexCheck = intStartIndex
+            Do While intIndexCheck < strSplitLine.Length AndAlso strSplitLine.Length > 0
+                If strSplitLine(intIndexCheck).Length = 0 Then
+                    For intIndexCompare = intIndexCheck To strSplitLine.Length - 2
+                        strSplitLine(intIndexCompare) = strSplitLine(intIndexCompare + 1)
+                    Next intIndexCompare
+                    ReDim Preserve strSplitLine(strSplitLine.Length - 2)
+                Else
+                    intIndexCheck += 1
+                End If
+            Loop
 
-			If strSplitLine.Length >= 5 Then
-				intStartIndex = strSplitLine.Length - 5
-				strDate = strSplitLine(4 + intStartIndex) & "-" & strSplitLine(1 + intStartIndex) & "-" & strSplitLine(2 + intStartIndex) & " " & strSplitLine(3 + intStartIndex)
-				dtDate = DateTime.Parse(strDate)
-				blnSuccess = True
-			Else
-				blnSuccess = False
-			End If
-		Catch ex As Exception
-			' Date parse failed
-			blnSuccess = False
-		End Try
+            If strSplitLine.Length >= 5 Then
+                intStartIndex = strSplitLine.Length - 5
+                strDate = strSplitLine(4 + intStartIndex) & "-" & strSplitLine(1 + intStartIndex) & "-" & strSplitLine(2 + intStartIndex) & " " & strSplitLine(3 + intStartIndex)
+                dtDate = DateTime.Parse(strDate)
+                blnSuccess = True
+            Else
+                blnSuccess = False
+            End If
+        Catch ex As Exception
+            ' Date parse failed
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Private Function ParseBrukerAcquFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-		Dim strLineIn As String
+    Private Function ParseBrukerAcquFile(strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+        Dim strLineIn As String
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		Try
-			' Try to open the acqu file
-			blnSuccess = False
+        Try
+            ' Try to open the acqu file
+            blnSuccess = False
             Using srInFile = New StreamReader(Path.Combine(strFolderPath, BRUKER_ACQU_FILE))
                 Do While srInFile.Peek() >= 0
                     strLineIn = srInFile.ReadLine()
@@ -131,7 +131,7 @@ Public Class clsBrukerOneFolderInfoScanner
 
     End Function
 
-    Private Function ParseBrukerLockFile(ByVal strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    Private Function ParseBrukerLockFile(strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
         Dim strLineIn As String
         Dim strSplitLine() As String
 
@@ -307,181 +307,181 @@ Public Class clsBrukerOneFolderInfoScanner
 
     End Function
 
-	Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-		' Process a Bruker 1 folder or Bruker s001.zip file, specified by strDataFilePath
-		' If a Bruker 1 folder, then it must contain file acqu and typically contains file LOCK
+    Public Overrides Function ProcessDataFile(strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+        ' Process a Bruker 1 folder or Bruker s001.zip file, specified by strDataFilePath
+        ' If a Bruker 1 folder, then it must contain file acqu and typically contains file LOCK
 
-		Dim ioFileInfo As FileInfo
-		Dim ioZippedSFilesFolderInfo As DirectoryInfo = Nothing
-		Dim ioSubFolder As DirectoryInfo
+        Dim ioFileInfo As FileInfo
+        Dim ioZippedSFilesFolderInfo As DirectoryInfo = Nothing
+        Dim ioSubFolder As DirectoryInfo
 
-		Dim intScanCountSaved As Integer
-		Dim dtTICModificationDate As DateTime
+        Dim intScanCountSaved As Integer
+        Dim dtTICModificationDate As DateTime
 
-		Dim blnParsingBrukerOneFolder As Boolean
-		Dim blnSuccess As Boolean
+        Dim blnParsingBrukerOneFolder As Boolean
+        Dim blnSuccess As Boolean
 
-		Try
-			' Determine whether strDataFilePath points to a file or a folder
-			' See if strFileOrFolderPath points to a valid file
-			ioFileInfo = New FileInfo(strDataFilePath)
+        Try
+            ' Determine whether strDataFilePath points to a file or a folder
+            ' See if strFileOrFolderPath points to a valid file
+            ioFileInfo = New FileInfo(strDataFilePath)
 
-			If ioFileInfo.Exists() Then
-				' Parsing a zipped S folder
-				blnParsingBrukerOneFolder = False
+            If ioFileInfo.Exists() Then
+                ' Parsing a zipped S folder
+                blnParsingBrukerOneFolder = False
 
-				' The dataset name is equivalent to the name of the folder containing strDataFilePath
-				ioZippedSFilesFolderInfo = ioFileInfo.Directory
-				blnSuccess = True
+                ' The dataset name is equivalent to the name of the folder containing strDataFilePath
+                ioZippedSFilesFolderInfo = ioFileInfo.Directory
+                blnSuccess = True
 
-				' Cannot determine accurate acqusition start or end times
-				' We have to assign a date, so we'll assign the date for the zipped s-folder
-				With udtFileInfo
-					.AcqTimeStart = ioFileInfo.LastWriteTime
-					.AcqTimeEnd = ioFileInfo.LastWriteTime
-				End With
+                ' Cannot determine accurate acqusition start or end times
+                ' We have to assign a date, so we'll assign the date for the zipped s-folder
+                With udtFileInfo
+                    .AcqTimeStart = ioFileInfo.LastWriteTime
+                    .AcqTimeEnd = ioFileInfo.LastWriteTime
+                End With
 
-			Else
-				' Assuming it's a "1" folder
-				blnParsingBrukerOneFolder = True
+            Else
+                ' Assuming it's a "1" folder
+                blnParsingBrukerOneFolder = True
 
-				ioZippedSFilesFolderInfo = New DirectoryInfo(strDataFilePath)
-				If ioZippedSFilesFolderInfo.Exists Then
-					' Determine the dataset name by looking up the name of the parent folder of strDataFilePath
-					ioZippedSFilesFolderInfo = ioZippedSFilesFolderInfo.Parent
-					blnSuccess = True
-				Else
-					blnSuccess = False
-				End If
-			End If
+                ioZippedSFilesFolderInfo = New DirectoryInfo(strDataFilePath)
+                If ioZippedSFilesFolderInfo.Exists Then
+                    ' Determine the dataset name by looking up the name of the parent folder of strDataFilePath
+                    ioZippedSFilesFolderInfo = ioZippedSFilesFolderInfo.Parent
+                    blnSuccess = True
+                Else
+                    blnSuccess = False
+                End If
+            End If
 
-			If blnSuccess Then
-				With udtFileInfo
-					.FileSystemCreationTime = ioZippedSFilesFolderInfo.CreationTime
-					.FileSystemModificationTime = ioZippedSFilesFolderInfo.LastWriteTime
+            If blnSuccess Then
+                With udtFileInfo
+                    .FileSystemCreationTime = ioZippedSFilesFolderInfo.CreationTime
+                    .FileSystemModificationTime = ioZippedSFilesFolderInfo.LastWriteTime
 
-					' The acquisition times will get updated below to more accurate values
-					.AcqTimeStart = .FileSystemModificationTime
-					.AcqTimeEnd = .FileSystemModificationTime
+                    ' The acquisition times will get updated below to more accurate values
+                    .AcqTimeStart = .FileSystemModificationTime
+                    .AcqTimeEnd = .FileSystemModificationTime
 
-					.DatasetName = ioZippedSFilesFolderInfo.Name
-					.FileExtension = String.Empty
-					.FileSizeBytes = 0
-					.ScanCount = 0
-				End With
-			End If
-		Catch ex As Exception
-			blnSuccess = False
-		End Try
+                    .DatasetName = ioZippedSFilesFolderInfo.Name
+                    .FileExtension = String.Empty
+                    .FileSizeBytes = 0
+                    .ScanCount = 0
+                End With
+            End If
+        Catch ex As Exception
+            blnSuccess = False
+        End Try
 
-		If blnSuccess AndAlso blnParsingBrukerOneFolder Then
-			' Parse the Acqu File to populate .AcqTimeEnd
-			blnSuccess = ParseBrukerAcquFile(strDataFilePath, udtFileInfo)
+        If blnSuccess AndAlso blnParsingBrukerOneFolder Then
+            ' Parse the Acqu File to populate .AcqTimeEnd
+            blnSuccess = ParseBrukerAcquFile(strDataFilePath, udtFileInfo)
 
-			If blnSuccess Then
-				' Parse the Lock file to populate.AcqTimeStart
-				blnSuccess = ParseBrukerLockFile(strDataFilePath, udtFileInfo)
+            If blnSuccess Then
+                ' Parse the Lock file to populate.AcqTimeStart
+                blnSuccess = ParseBrukerLockFile(strDataFilePath, udtFileInfo)
 
-				If Not blnSuccess Then
-					' Use the end time as the start time
-					udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd
-					blnSuccess = True
-				End If
-			End If
-		End If
+                If Not blnSuccess Then
+                    ' Use the end time as the start time
+                    udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd
+                    blnSuccess = True
+                End If
+            End If
+        End If
 
-		If blnSuccess Then
-			' Look for the zipped S folders in ioZippedSFilesFolderInfo
-			Try
-				blnSuccess = ParseBrukerZippedSFolders(ioZippedSFilesFolderInfo, udtFileInfo)
-				intScanCountSaved = udtFileInfo.ScanCount
-			Catch ex As Exception
-				' Error parsing zipped S Folders; do not abort
-			End Try
+        If blnSuccess Then
+            ' Look for the zipped S folders in ioZippedSFilesFolderInfo
+            Try
+                blnSuccess = ParseBrukerZippedSFolders(ioZippedSFilesFolderInfo, udtFileInfo)
+                intScanCountSaved = udtFileInfo.ScanCount
+            Catch ex As Exception
+                ' Error parsing zipped S Folders; do not abort
+            End Try
 
-			Try
-				blnSuccess = False
+            Try
+                blnSuccess = False
 
-				' Look for the TIC* folder to obtain the scan count from a .Tic file
-				' If the Scan Count in the TIC is larger than the scan count from ParseBrukerZippedSFolders,
-				'  then we'll use that instead
-				For Each ioSubFolder In ioZippedSFilesFolderInfo.GetDirectories("TIC*")
-					blnSuccess = ParseTICFolder(ioSubFolder, udtFileInfo, dtTICModificationDate)
+                ' Look for the TIC* folder to obtain the scan count from a .Tic file
+                ' If the Scan Count in the TIC is larger than the scan count from ParseBrukerZippedSFolders,
+                '  then we'll use that instead
+                For Each ioSubFolder In ioZippedSFilesFolderInfo.GetDirectories("TIC*")
+                    blnSuccess = ParseTICFolder(ioSubFolder, udtFileInfo, dtTICModificationDate)
 
-					If blnSuccess Then
-						' Successfully parsed a TIC folder; do not parse any others
-						Exit For
-					End If
-				Next ioSubFolder
+                    If blnSuccess Then
+                        ' Successfully parsed a TIC folder; do not parse any others
+                        Exit For
+                    End If
+                Next ioSubFolder
 
-				If Not blnSuccess Then
-					' TIC folder not found; see if a .TIC file is present in ioZippedSFilesFolderInfo
-					blnSuccess = ParseTICFolder(ioZippedSFilesFolderInfo, udtFileInfo, dtTICModificationDate)
-				End If
+                If Not blnSuccess Then
+                    ' TIC folder not found; see if a .TIC file is present in ioZippedSFilesFolderInfo
+                    blnSuccess = ParseTICFolder(ioZippedSFilesFolderInfo, udtFileInfo, dtTICModificationDate)
+                End If
 
-				If blnSuccess And Not blnParsingBrukerOneFolder AndAlso dtTICModificationDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME Then
-					' If dtTICModificationDate is earlier than .AcqTimeStart then update to dtTICMOdificationDate
-					With udtFileInfo
-						If dtTICModificationDate < .AcqTimeStart Then
-							.AcqTimeStart = dtTICModificationDate
-							.AcqTimeEnd = dtTICModificationDate
-						End If
-					End With
-				End If
+                If blnSuccess And Not blnParsingBrukerOneFolder AndAlso dtTICModificationDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME Then
+                    ' If dtTICModificationDate is earlier than .AcqTimeStart then update to dtTICMOdificationDate
+                    With udtFileInfo
+                        If dtTICModificationDate < .AcqTimeStart Then
+                            .AcqTimeStart = dtTICModificationDate
+                            .AcqTimeEnd = dtTICModificationDate
+                        End If
+                    End With
+                End If
 
-				If Not blnSuccess Then
-					' .Tic file not found in ioZippedSFilesFolderInfo
-					' Look for an ICR* folder to obtain the scan count from a .Pek file
-					For Each ioSubFolder In ioZippedSFilesFolderInfo.GetDirectories("ICR*")
-						blnSuccess = ParseICRFolder(ioSubFolder, udtFileInfo)
+                If Not blnSuccess Then
+                    ' .Tic file not found in ioZippedSFilesFolderInfo
+                    ' Look for an ICR* folder to obtain the scan count from a .Pek file
+                    For Each ioSubFolder In ioZippedSFilesFolderInfo.GetDirectories("ICR*")
+                        blnSuccess = ParseICRFolder(ioSubFolder, udtFileInfo)
 
-						If blnSuccess Then
-							' Successfully parsed an ICR folder; do not parse any others
-							Exit For
-						End If
-					Next ioSubFolder
-				End If
+                        If blnSuccess Then
+                            ' Successfully parsed an ICR folder; do not parse any others
+                            Exit For
+                        End If
+                    Next ioSubFolder
+                End If
 
-				If blnSuccess = True Then
-					If intScanCountSaved > udtFileInfo.ScanCount Then
-						udtFileInfo.ScanCount = intScanCountSaved
-					End If
-				Else
-					' Set success to true anyway since we do have enough information to save the MS file info
-					blnSuccess = True
-				End If
+                If blnSuccess = True Then
+                    If intScanCountSaved > udtFileInfo.ScanCount Then
+                        udtFileInfo.ScanCount = intScanCountSaved
+                    End If
+                Else
+                    ' Set success to true anyway since we do have enough information to save the MS file info
+                    blnSuccess = True
+                End If
 
-			Catch ex As Exception
-				' Error parsing the TIC* or ICR* folders; do not abort
-			End Try
+            Catch ex As Exception
+                ' Error parsing the TIC* or ICR* folders; do not abort
+            End Try
 
-			' Validate udtFileInfo.AcqTimeStart vs. udtFileInfo.AcqTimeEnd
-			With udtFileInfo
-				If udtFileInfo.AcqTimeEnd >= MINIMUM_ACCEPTABLE_ACQ_START_TIME Then
-					If .AcqTimeStart > .AcqTimeEnd Then
-						' Start time cannot be greater than the end time
-						.AcqTimeStart = .AcqTimeEnd
-					ElseIf .AcqTimeStart < MINIMUM_ACCEPTABLE_ACQ_START_TIME Then
-						.AcqTimeStart = .AcqTimeEnd
-					Else
-						''Dim dtDateCompare As DateTime
-						''If .ScanCount > 0 Then
-						''    ' Make sure the start time is greater than the end time minus the scan count times 30 seconds per scan
-						''    dtDateCompare = .AcqTimeEnd.Subtract(New TimeSpan(0, 0, .ScanCount * 30))
-						''Else
-						''    dtDateCompare = .AcqTimeEnd - 
-						''End If
+            ' Validate udtFileInfo.AcqTimeStart vs. udtFileInfo.AcqTimeEnd
+            With udtFileInfo
+                If udtFileInfo.AcqTimeEnd >= MINIMUM_ACCEPTABLE_ACQ_START_TIME Then
+                    If .AcqTimeStart > .AcqTimeEnd Then
+                        ' Start time cannot be greater than the end time
+                        .AcqTimeStart = .AcqTimeEnd
+                    ElseIf .AcqTimeStart < MINIMUM_ACCEPTABLE_ACQ_START_TIME Then
+                        .AcqTimeStart = .AcqTimeEnd
+                    Else
+                        ''Dim dtDateCompare As DateTime
+                        ''If .ScanCount > 0 Then
+                        ''    ' Make sure the start time is greater than the end time minus the scan count times 30 seconds per scan
+                        ''    dtDateCompare = .AcqTimeEnd.Subtract(New TimeSpan(0, 0, .ScanCount * 30))
+                        ''Else
+                        ''    dtDateCompare = .AcqTimeEnd - 
+                        ''End If
 
-						''If .AcqTimeStart < dtDateCompare Then
-						''    .AcqTimeStart = .AcqTimeEnd
-						''End If
-					End If
-				End If
-			End With
-		End If
+                        ''If .AcqTimeStart < dtDateCompare Then
+                        ''    .AcqTimeStart = .AcqTimeEnd
+                        ''End If
+                    End If
+                End If
+            End With
+        End If
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
 End Class

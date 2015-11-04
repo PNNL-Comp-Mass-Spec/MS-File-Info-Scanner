@@ -57,7 +57,7 @@ Public Class clsLCMSDataPlotter
 
     Protected mRecentFiles As List(Of udtOutputFileInfoType)
 
-    Public Event ErrorEvent(ByVal Message As String)
+    Public Event ErrorEvent(Message As String)
 #End Region
 
 #Region "Properties"
@@ -65,7 +65,7 @@ Public Class clsLCMSDataPlotter
         Get
             Return mOptions
         End Get
-        Set(ByVal value As MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions)
+        Set(value As MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions)
             mOptions = value
         End Set
     End Property
@@ -82,13 +82,13 @@ Public Class clsLCMSDataPlotter
         Me.New(New MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions)
     End Sub
 
-    Public Sub New(ByVal objOptions As MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions)
+    Public Sub New(objOptions As MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions)
         mOptions = objOptions
         mRecentFiles = New List(Of udtOutputFileInfoType)
         Reset()
     End Sub
 
-    Protected Sub AddRecentFile(ByVal strFilePath As String, ByVal eFileType As eOutputFileTypes)
+    Protected Sub AddRecentFile(strFilePath As String, eFileType As eOutputFileTypes)
         Dim udtOutputFileInfo As udtOutputFileInfoType
 
         udtOutputFileInfo.FileType = eFileType
@@ -98,11 +98,11 @@ Public Class clsLCMSDataPlotter
         mRecentFiles.Add(udtOutputFileInfo)
     End Sub
 
-    Public Function AddScan2D(ByVal intScanNumber As Integer,
-      ByVal intMSLevel As Integer,
-      ByVal sngScanTimeMinutes As Single,
-      ByVal intIonCount As Integer,
-      ByVal dblMassIntensityPairs(,) As Double) As Boolean
+    Public Function AddScan2D(intScanNumber As Integer,
+       intMSLevel As Integer,
+       sngScanTimeMinutes As Single,
+       intIonCount As Integer,
+       dblMassIntensityPairs(,) As Double) As Boolean
 
         Static intSortingWarnCount As Integer = 0
 
@@ -207,12 +207,12 @@ Public Class clsLCMSDataPlotter
     End Function
 
     Public Function AddScan(
-      ByVal intScanNumber As Integer,
-      ByVal intMSLevel As Integer,
-      ByVal sngScanTimeMinutes As Single,
-      ByVal intIonCount As Integer,
-      ByVal dblIonsMZ() As Double,
-      ByVal dblIonsIntensity() As Double) As Boolean
+       intScanNumber As Integer,
+       intMSLevel As Integer,
+       sngScanTimeMinutes As Single,
+       intIonCount As Integer,
+       dblIonsMZ() As Double,
+       dblIonsIntensity() As Double) As Boolean
 
         Dim lstIons As List(Of udtMSIonType)
 
@@ -250,10 +250,10 @@ Public Class clsLCMSDataPlotter
     End Function
 
     Public Function AddScan(
-      ByVal intScanNumber As Integer,
-      ByVal intMSLevel As Integer,
-      ByVal sngScanTimeMinutes As Single,
-      ByVal lstIons As List(Of udtMSIonType)) As Boolean
+       intScanNumber As Integer,
+       intMSLevel As Integer,
+       sngScanTimeMinutes As Single,
+       lstIons As List(Of udtMSIonType)) As Boolean
 
         Static intSortingWarnCount As Integer = 0
 
@@ -331,13 +331,13 @@ Public Class clsLCMSDataPlotter
     End Function
 
     Private Sub AddScanCheckData(
-      ByVal intScanNumber As Integer,
-      ByVal intMSLevel As Integer,
-      ByVal sngScanTimeMinutes As Single,
-      ByVal intIonCount As Integer,
-      ByVal dblIonsMZFiltered As Double(),
-      ByVal sngIonsIntensityFiltered As Single(),
-      ByVal bytChargeFiltered As Byte())
+       intScanNumber As Integer,
+       intMSLevel As Integer,
+       sngScanTimeMinutes As Single,
+       intIonCount As Integer,
+       dblIonsMZFiltered As Double(),
+       sngIonsIntensityFiltered As Single(),
+       bytChargeFiltered As Byte())
 
         Static intSpectraFoundExceedingMaxIonCount As Integer = 0
         Static intMaxIonCountReported As Integer = 0
@@ -448,7 +448,7 @@ Public Class clsLCMSDataPlotter
         mRecentFiles.Clear()
     End Sub
 
-    Public Function ComputeAverageIntensityAllScans(ByVal intMSLevelFilter As Integer) As Single
+    Public Function ComputeAverageIntensityAllScans(intMSLevelFilter As Integer) As Single
 
         Dim intScanIndex As Integer
         Dim intIonIndex As Integer
@@ -495,7 +495,7 @@ Public Class clsLCMSDataPlotter
     End Function
 
     Private Sub CentroidMSData(
-      ByVal sngMZResolution As Single,
+       sngMZResolution As Single,
       ByRef intIonCount As Integer,
       ByRef dblIonsMZ() As Double,
       ByRef sngIonsIntensity() As Single,
@@ -597,9 +597,9 @@ Public Class clsLCMSDataPlotter
     End Sub
 
     Private Sub DiscardDataToLimitIonCount(ByRef objMSSpectrum As clsScanData,
-      ByVal dblMZIgnoreRangeStart As Double,
-      ByVal dblMZIgnoreRangeEnd As Double,
-      ByVal intMaxIonCountToRetain As Integer)
+       dblMZIgnoreRangeStart As Double,
+       dblMZIgnoreRangeEnd As Double,
+       intMaxIonCountToRetain As Integer)
 
         Dim intIonCountNew As Integer
         Dim intIonIndex As Integer
@@ -713,7 +713,7 @@ Public Class clsLCMSDataPlotter
     ''' <param name="eFileType">File type to find</param>
     ''' <returns>File name if found; empty string if this file type was not saved</returns>
     ''' <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
-    Public Function GetRecentFileInfo(ByVal eFileType As eOutputFileTypes) As String
+    Public Function GetRecentFileInfo(eFileType As eOutputFileTypes) As String
         Dim intIndex As Integer
         For intIndex = 0 To mRecentFiles.Count - 1
             If mRecentFiles(intIndex).FileType = eFileType Then
@@ -731,7 +731,7 @@ Public Class clsLCMSDataPlotter
     ''' <param name="strFilePath">File Path (output)</param>
     ''' <returns>True if a match was found; otherwise returns false</returns>
     ''' <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
-    Public Function GetRecentFileInfo(ByVal eFileType As eOutputFileTypes, ByRef strFileName As String, ByRef strFilePath As String) As Boolean
+    Public Function GetRecentFileInfo(eFileType As eOutputFileTypes, ByRef strFileName As String, ByRef strFilePath As String) As Boolean
         Dim intIndex As Integer
         For intIndex = 0 To mRecentFiles.Count - 1
             If mRecentFiles(intIndex).FileType = eFileType Then
@@ -749,7 +749,7 @@ Public Class clsLCMSDataPlotter
     ''' <param name="intIndex"></param>
     ''' <returns>ScanData class</returns>
     ''' <remarks></remarks>
-    Public Function GetCachedScanByIndex(ByVal intIndex As Integer) As clsScanData
+    Public Function GetCachedScanByIndex(intIndex As Integer) As clsScanData
 
         If intIndex >= 0 AndAlso intIndex < mScans.Count Then
             Return mScans(intIndex)
@@ -783,7 +783,7 @@ Public Class clsLCMSDataPlotter
     '''   at least 5*5000 = 25000 data points in memory.  If intTargetDataPointCount = 10000, then 
     '''   there could be as many as 25000 + 10000 = 25000 points in memory
     '''</remarks>
-    Protected Sub TrimCachedData(ByVal intTargetDataPointCount As Integer, ByVal intMinPointsPerSpectrum As Integer)
+    Protected Sub TrimCachedData(intTargetDataPointCount As Integer, intMinPointsPerSpectrum As Integer)
 
         Static dtLastGCTime As DateTime = DateTime.UtcNow
 
@@ -915,7 +915,7 @@ Public Class clsLCMSDataPlotter
 
     End Sub
 
-    Protected Sub UpdateMinMax(ByVal sngValue As Single, ByRef sngMin As Single, ByRef sngMax As Single)
+    Protected Sub UpdateMinMax(sngValue As Single, ByRef sngMin As Single, ByRef sngMax As Single)
         If sngValue < sngMin Then
             sngMin = sngValue
         End If
@@ -925,7 +925,7 @@ Public Class clsLCMSDataPlotter
         End If
     End Sub
 
-    Protected Sub UpdateMinMax(ByVal dblValue As Double, ByRef dblMin As Double, ByRef dblMax As Double)
+    Protected Sub UpdateMinMax(dblValue As Double, ByRef dblMin As Double, ByRef dblMax As Double)
         If dblValue < dblMin Then
             dblMin = dblValue
         End If
@@ -958,8 +958,8 @@ Public Class clsLCMSDataPlotter
 #Region "Plotting Functions"
 
     Private Sub AddSeriesMonoMassVsScan(
-      ByVal lstPointsByCharge As IList(Of List(Of ScatterPoint)),
-      ByVal myPlot As PlotModel)
+       lstPointsByCharge As IList(Of List(Of ScatterPoint)),
+       myPlot As PlotModel)
 
         ' Determine the number of data points to be plotted
         Dim intTotalPoints = 0
@@ -1006,11 +1006,11 @@ Public Class clsLCMSDataPlotter
     End Sub
 
     Private Sub AddSeriesMzVsScan(
-      ByVal strTitle As String,
-      ByVal objPoints As IEnumerable(Of ScatterPoint),
-      ByVal sngColorScaleMinIntensity As Single,
-      ByVal sngColorScaleMaxIntensity As Single,
-      ByVal myPlot As PlotModel)
+       strTitle As String,
+       objPoints As IEnumerable(Of ScatterPoint),
+       sngColorScaleMinIntensity As Single,
+       sngColorScaleMaxIntensity As Single,
+       myPlot As PlotModel)
 
         ' We use a linear color axis to color the data points based on intensity
         Dim colorAxis = New LinearColorAxis With {
@@ -1045,7 +1045,7 @@ Public Class clsLCMSDataPlotter
         myPlot.Series.Add(series)
     End Sub
 
-    Protected Function ComputeMedian(ByRef sngList() As Single, ByVal intItemCount As Integer) As Single
+    Protected Function ComputeMedian(ByRef sngList() As Single, intItemCount As Integer) As Single
 
         Dim intMidpointIndex As Integer
         Dim blnAverage As Boolean
@@ -1086,7 +1086,7 @@ Public Class clsLCMSDataPlotter
     End Function
 
     Private Function GetMonoMassSeriesByCharge(
-      ByVal intMsLevelFilter As Integer,
+       intMsLevelFilter As Integer,
       ByRef dblMinMz As Double,
       ByRef dblMaxMz As Double,
       ByRef dblScanTimeMax As Double,
@@ -1158,7 +1158,7 @@ Public Class clsLCMSDataPlotter
     End Function
 
     Private Function GetMzVsScanSeries(
-      ByVal intMSLevelFilter As Integer,
+       intMSLevelFilter As Integer,
       ByRef sngColorScaleMinIntensity As Single,
       ByRef sngColorScaleMaxIntensity As Single,
       ByRef dblMinMZ As Double,
@@ -1166,8 +1166,8 @@ Public Class clsLCMSDataPlotter
       ByRef dblScanTimeMax As Double,
       ByRef intMinScan As Integer,
       ByRef intMaxScan As Integer,
-      ByVal blnWriteDebugData As Boolean,
-      ByVal swDebugFile As StreamWriter) As List(Of ScatterPoint)
+       blnWriteDebugData As Boolean,
+       swDebugFile As StreamWriter) As List(Of ScatterPoint)
 
         Dim intScanIndex As Integer
         Dim intIonIndex As Integer
@@ -1267,9 +1267,9 @@ Public Class clsLCMSDataPlotter
     ''' <returns>OxyPlot PlotContainer</returns>
     ''' <remarks></remarks>
     Private Function InitializePlot(
-      ByVal strTitle As String,
-      ByVal intMSLevelFilter As Integer,
-      ByVal blnSkipTrimCachedData As Boolean) As clsPlotContainer
+       strTitle As String,
+       intMSLevelFilter As Integer,
+       blnSkipTrimCachedData As Boolean) As clsPlotContainer
 
         Dim intMinScan As Integer
         Dim intMaxScan As Integer
@@ -1422,7 +1422,7 @@ Public Class clsLCMSDataPlotter
             myPlot.Axes(0).Maximum = intMinScan + 1
         End If
 
-         ' Assure that we don't see ticks between scan numbers
+        ' Assure that we don't see ticks between scan numbers
         clsOxyplotUtilities.ValidateMajorStep(myPlot.Axes(0))
 
         ' Set the maximum value for the Y-axis
@@ -1454,7 +1454,7 @@ Public Class clsLCMSDataPlotter
     ''' <param name="intValue"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function IntToEngineeringNotation(ByVal intValue As Integer) As String
+    Protected Function IntToEngineeringNotation(intValue As Integer) As String
 
         If intValue < 1000 Then
             Return intValue.ToString
@@ -1466,17 +1466,17 @@ Public Class clsLCMSDataPlotter
 
     End Function
 
-    Public Function Save2DPlots(ByVal strDatasetName As String, ByVal strOutputFolderPath As String) As Boolean
+    Public Function Save2DPlots(strDatasetName As String, strOutputFolderPath As String) As Boolean
 
         Return Save2DPlots(strDatasetName, strOutputFolderPath, "", "")
 
     End Function
 
     Public Function Save2DPlots(
-      ByVal strDatasetName As String,
-      ByVal strOutputFolderPath As String,
-      ByVal strFileNameSuffixAddon As String,
-      ByVal strScanModeSuffixAddon As String) As Boolean
+       strDatasetName As String,
+       strOutputFolderPath As String,
+       strFileNameSuffixAddon As String,
+       strScanModeSuffixAddon As String) As Boolean
 
         Const EMBED_FILTER_SETTINGS_IN_NAME As Boolean = False
 
@@ -1581,13 +1581,13 @@ Public Class clsLCMSDataPlotter
             End Get
         End Property
 
-        Public Sub New(ByVal intScanNumber As Integer,
-          ByVal intMSLevel As Integer,
-          ByVal sngScanTimeMinutes As Single,
-          ByVal intDataCount As Integer,
-          ByVal dblIonsMZ() As Double,
-          ByVal sngIonsIntensity() As Single,
-          ByVal bytCharge() As Byte)
+        Public Sub New(intScanNumber As Integer,
+           intMSLevel As Integer,
+           sngScanTimeMinutes As Single,
+           intDataCount As Integer,
+           dblIonsMZ() As Double,
+           sngIonsIntensity() As Single,
+           bytCharge() As Byte)
 
             mScanNumber = intScanNumber
             mMSLevel = intMSLevel
@@ -1612,7 +1612,7 @@ Public Class clsLCMSDataPlotter
             End If
         End Sub
 
-        Public Sub UpdateMSLevel(ByVal NewMSLevel As Integer)
+        Public Sub UpdateMSLevel(NewMSLevel As Integer)
             mMSLevel = NewMSLevel
         End Sub
 

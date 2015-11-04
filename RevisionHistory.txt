@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.3.5785; November 3, 2015
+	- Globally remove the ByVal keyword and the underscore line continuation character
+
 Version 1.3.5778; October 27, 2015
 	- Updated BrukerDataReader.dll that handles malformed apexAcquisition.method XML files
 

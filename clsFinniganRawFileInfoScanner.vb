@@ -90,8 +90,8 @@ Public Class clsFinniganRawFileInfoScanner
     End Sub
 
     Protected Function GetCentroidStatus(
-      ByVal intScanNumber As Integer,
-      ByVal udtScanHeaderInfoType As FinniganFileReaderBaseClass.udtScanHeaderInfoType) As clsSpectrumTypeClassifier.eCentroidStatusConstants
+       intScanNumber As Integer,
+       udtScanHeaderInfoType As FinniganFileReaderBaseClass.udtScanHeaderInfoType) As clsSpectrumTypeClassifier.eCentroidStatusConstants
 
         Static reIsCentroid As New Regex("([FI]TMS [+-] c .+)|([FI]TMS {[^ ]+} +[+-] c .+)|(^ *[+-] c .+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
         Static reIsProfileM As New Regex("([FI]TMS [+-] p .+)|([FI]TMS {[^ ]+} +[+-] p .+)|(^ *[+-] p .+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
@@ -119,7 +119,7 @@ Public Class clsFinniganRawFileInfoScanner
     ''' <param name="strDataFilePath"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
+    Public Overrides Function GetDatasetNameViaPath(strDataFilePath As String) As String
         Try
             ' The dataset name is simply the file name without .Raw
             Return Path.GetFileNameWithoutExtension(strDataFilePath)
@@ -250,7 +250,7 @@ Public Class clsFinniganRawFileInfoScanner
         Console.WriteLine()
 
     End Sub
-    
+
     ''' <summary>
     ''' Process the dataset
     ''' </summary>
@@ -258,7 +258,7 @@ Public Class clsFinniganRawFileInfoScanner
     ''' <param name="udtFileInfo"></param>
     ''' <returns>True if success, False if an error</returns>
     ''' <remarks></remarks>
-    Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    Public Overrides Function ProcessDataFile(strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
         Dim objXcaliburAccessor As XRawFileIO
         Dim udtScanHeaderInfo = New XRawFileIO.udtScanHeaderInfoType
@@ -447,7 +447,7 @@ Public Class clsFinniganRawFileInfoScanner
 
     End Function
 
-    Protected Sub StoreExtendedScanInfo(ByRef udtExtendedScanInfo As udtExtendedStatsInfoType, ByVal strEntryName As String, ByVal strEntryValue As String)
+    Protected Sub StoreExtendedScanInfo(ByRef udtExtendedScanInfo As udtExtendedStatsInfoType, strEntryName As String, strEntryValue As String)
 
         If strEntryValue Is Nothing Then
             strEntryValue = String.Empty

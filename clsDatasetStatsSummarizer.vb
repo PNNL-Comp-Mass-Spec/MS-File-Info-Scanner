@@ -75,8 +75,8 @@ Namespace DSSummarizer
             End Sub
 
             Public Function HasData() As Boolean
-                If Not String.IsNullOrEmpty(SampleName) OrElse _
-                   Not String.IsNullOrEmpty(Comment1) OrElse _
+                If Not String.IsNullOrEmpty(SampleName) OrElse
+                   Not String.IsNullOrEmpty(Comment1) OrElse
                    Not String.IsNullOrEmpty(Comment2) Then
                     Return True
                 Else
@@ -106,7 +106,7 @@ Namespace DSSummarizer
 #End Region
 
 #Region "Events"
-        Public Event ErrorEvent(ByVal message As String)
+        Public Event ErrorEvent(message As String)
 
 #End Region
 #Region "Properties"
@@ -115,7 +115,7 @@ Namespace DSSummarizer
             Get
                 Return mDatasetStatsSummaryFileName
             End Get
-            Set(ByVal value As String)
+            Set(value As String)
                 If Not value Is Nothing Then
                     mDatasetStatsSummaryFileName = value
                 End If
@@ -141,7 +141,7 @@ Namespace DSSummarizer
             InitializeLocalVariables()
         End Sub
 
-        Public Sub AddDatasetScan(ByVal objScanStats As clsScanStatsEntry)
+        Public Sub AddDatasetScan(objScanStats As clsScanStatsEntry)
 
             mDatasetScanStats.Add(objScanStats)
             mDatasetSummaryStatsUpToDate = False
@@ -149,36 +149,36 @@ Namespace DSSummarizer
         End Sub
 
         Public Sub ClassifySpectrum(
-          ByVal lstMZs As List(Of Double),
-          ByVal msLevel As Integer)
+           lstMZs As List(Of Double),
+           msLevel As Integer)
             ClassifySpectrum(lstMZs, msLevel, clsSpectrumTypeClassifier.eCentroidStatusConstants.Unknown)
         End Sub
 
         Public Sub ClassifySpectrum(
-          ByVal lstMZs As List(Of Double),
-          ByVal msLevel As Integer,
-          ByVal centroidingStatus As clsSpectrumTypeClassifier.eCentroidStatusConstants)
+           lstMZs As List(Of Double),
+           msLevel As Integer,
+           centroidingStatus As clsSpectrumTypeClassifier.eCentroidStatusConstants)
             mSpectraTypeClassifier.CheckSpectrum(lstMZs, msLevel, centroidingStatus)
         End Sub
 
         Public Sub ClassifySpectrum(
-          ByVal dblMZs As Double(),
-          ByVal msLevel As Integer)
+           dblMZs As Double(),
+           msLevel As Integer)
             mSpectraTypeClassifier.CheckSpectrum(dblMZs, msLevel)
         End Sub
 
         Public Sub ClassifySpectrum(
-          ByVal ionCount As Integer,
-          ByVal dblMZs As Double(),
-          ByVal msLevel As Integer)
+           ionCount As Integer,
+           dblMZs As Double(),
+           msLevel As Integer)
             mSpectraTypeClassifier.CheckSpectrum(ionCount, dblMZs, msLevel)
         End Sub
 
         Public Sub ClassifySpectrum(
-          ByVal ionCount As Integer,
-          ByVal dblMZs As Double(),
-          ByVal msLevel As Integer,
-          ByVal centroidingStatus As clsSpectrumTypeClassifier.eCentroidStatusConstants)
+           ionCount As Integer,
+           dblMZs As Double(),
+           msLevel As Integer,
+           centroidingStatus As clsSpectrumTypeClassifier.eCentroidStatusConstants)
             mSpectraTypeClassifier.CheckSpectrum(ionCount, dblMZs, msLevel, centroidingStatus)
         End Sub
 
@@ -212,8 +212,9 @@ Namespace DSSummarizer
         ''' <param name="objSummaryStats">Stats output</param>
         ''' <returns>>True if success, false if error</returns>
         ''' <remarks></remarks>
-        Public Function ComputeScanStatsSummary(ByRef objScanStats As List(Of clsScanStatsEntry), _
-         ByRef objSummaryStats As clsDatasetSummaryStats) As Boolean
+        Public Function ComputeScanStatsSummary(
+          ByRef objScanStats As List(Of clsScanStatsEntry),
+          ByRef objSummaryStats As clsDatasetSummaryStats) As Boolean
 
             Dim intScanStatsCount As Integer
             Dim objEntry As clsScanStatsEntry
@@ -261,16 +262,18 @@ Namespace DSSummarizer
 
                     If objEntry.ScanType > 1 Then
                         ' MSn spectrum
-                        ComputeScanStatsUpdateDetails(objEntry, objSummaryStats.ElutionTimeMax, _
-                           objSummaryStats.MSnStats, _
-                           dblTICListMSn, intTICListMSnCount, _
-                           dblBPIListMSn, intBPIListMSnCount)
+                        ComputeScanStatsUpdateDetails(objEntry,
+                                                      objSummaryStats.ElutionTimeMax,
+                                                     objSummaryStats.MSnStats,
+                                                     dblTICListMSn, intTICListMSnCount,
+                                                     dblBPIListMSn, intBPIListMSnCount)
                     Else
                         ' MS spectrum
-                        ComputeScanStatsUpdateDetails(objEntry, objSummaryStats.ElutionTimeMax, _
-                           objSummaryStats.MSStats, _
-                           dblTICListMS, intTICListMSCount, _
-                           dblBPIListMS, intBPIListMSCount)
+                        ComputeScanStatsUpdateDetails(objEntry,
+                                                      objSummaryStats.ElutionTimeMax,
+                                                      objSummaryStats.MSStats,
+                                                      dblTICListMS, intTICListMSCount,
+                                                      dblBPIListMS, intBPIListMSCount)
                     End If
 
                     strScanTypeKey = objEntry.ScanTypeName & SCANTYPE_STATS_SEPCHAR & objEntry.ScanFilterText
@@ -296,12 +299,13 @@ Namespace DSSummarizer
 
         End Function
 
-        Protected Sub ComputeScanStatsUpdateDetails(ByRef objScanStats As clsScanStatsEntry, _
-          ByRef dblElutionTimeMax As Double, _
-          ByRef udtSummaryStatDetails As clsDatasetSummaryStats.udtSummaryStatDetailsType, _
-          ByRef dblTICList() As Double, _
-          ByRef intTICListCount As Integer, _
-          ByRef dblBPIList() As Double, _
+        Protected Sub ComputeScanStatsUpdateDetails(
+          ByRef objScanStats As clsScanStatsEntry,
+          ByRef dblElutionTimeMax As Double,
+          ByRef udtSummaryStatDetails As clsDatasetSummaryStats.udtSummaryStatDetailsType,
+          ByRef dblTICList() As Double,
+          ByRef intTICListCount As Integer,
+          ByRef dblBPIList() As Double,
           ByRef intBPIListCount As Integer)
 
             Dim dblElutionTime As Double
@@ -338,7 +342,7 @@ Namespace DSSummarizer
 
         End Sub
 
-        Protected Function ComputeMedian(ByRef dblList() As Double, ByVal intItemCount As Integer) As Double
+        Protected Function ComputeMedian(ByRef dblList() As Double, intItemCount As Integer) As Double
 
             Dim lstData = New List(Of Double)(intItemCount)
             For i As Integer = 0 To intItemCount - 1
@@ -399,8 +403,9 @@ Namespace DSSummarizer
         ''' <param name="strDatasetInfoFilePath">File path to write the XML to</param>
         ''' <returns>True if success; False if failure</returns>
         ''' <remarks></remarks>
-        Public Function CreateDatasetInfoFile(ByVal strDatasetName As String, _
-          ByVal strDatasetInfoFilePath As String) As Boolean
+        Public Function CreateDatasetInfoFile(
+           strDatasetName As String,
+           strDatasetInfoFilePath As String) As Boolean
 
             Return CreateDatasetInfoFile(strDatasetName, strDatasetInfoFilePath, mDatasetScanStats, Me.DatasetFileInfo, Me.SampleInfo)
         End Function
@@ -415,10 +420,11 @@ Namespace DSSummarizer
         ''' <param name="udtSampleInfo">Sample Info</param>
         ''' <returns>True if success; False if failure</returns>
         ''' <remarks></remarks>
-        Public Function CreateDatasetInfoFile(ByVal strDatasetName As String, _
-          ByVal strDatasetInfoFilePath As String, _
-          ByRef objScanStats As List(Of clsScanStatsEntry), _
-          ByRef udtDatasetFileInfo As udtDatasetFileInfoType, _
+        Public Function CreateDatasetInfoFile(
+           strDatasetName As String,
+           strDatasetInfoFilePath As String,
+          ByRef objScanStats As List(Of clsScanStatsEntry),
+          ByRef udtDatasetFileInfo As udtDatasetFileInfoType,
           ByRef udtSampleInfo As udtSampleInfoType) As Boolean
 
             Dim blnSuccess As Boolean
@@ -466,7 +472,7 @@ Namespace DSSummarizer
         ''' <param name="strDatasetName">Dataset Name</param>
         ''' <returns>XML (as string)</returns>
         ''' <remarks></remarks>
-        Public Function CreateDatasetInfoXML(ByVal strDatasetName As String) As String
+        Public Function CreateDatasetInfoXML(strDatasetName As String) As String
             Return CreateDatasetInfoXML(strDatasetName, mDatasetScanStats, Me.DatasetFileInfo, Me.SampleInfo)
         End Function
 
@@ -479,8 +485,9 @@ Namespace DSSummarizer
         ''' <param name="udtDatasetFileInfo">Dataset Info</param>
         ''' <returns>XML (as string)</returns>
         ''' <remarks></remarks>
-        Public Function CreateDatasetInfoXML(ByRef objScanStats As List(Of clsScanStatsEntry), _
-         ByRef udtDatasetFileInfo As udtDatasetFileInfoType) As String
+        Public Function CreateDatasetInfoXML(
+          ByRef objScanStats As List(Of clsScanStatsEntry),
+          ByRef udtDatasetFileInfo As udtDatasetFileInfoType) As String
 
             Return CreateDatasetInfoXML(udtDatasetFileInfo.DatasetName, objScanStats, udtDatasetFileInfo)
         End Function
@@ -494,9 +501,10 @@ Namespace DSSummarizer
         ''' <param name="udtSampleInfo">Sample Info</param>
         ''' <returns>XML (as string)</returns>
         ''' <remarks></remarks>
-        Public Function CreateDatasetInfoXML(ByRef objScanStats As List(Of clsScanStatsEntry), _
-         ByRef udtDatasetFileInfo As udtDatasetFileInfoType, _
-         ByRef udtSampleInfo As udtSampleInfoType) As String
+        Public Function CreateDatasetInfoXML(
+          ByRef objScanStats As List(Of clsScanStatsEntry),
+          ByRef udtDatasetFileInfo As udtDatasetFileInfoType,
+          ByRef udtSampleInfo As udtSampleInfoType) As String
 
             Return CreateDatasetInfoXML(udtDatasetFileInfo.DatasetName, objScanStats, udtDatasetFileInfo, udtSampleInfo)
         End Function
@@ -509,9 +517,10 @@ Namespace DSSummarizer
         ''' <param name="udtDatasetFileInfo">Dataset Info</param>
         ''' <returns>XML (as string)</returns>
         ''' <remarks></remarks>
-        Public Function CreateDatasetInfoXML(ByVal strDatasetName As String, _
-         ByRef objScanStats As List(Of clsScanStatsEntry), _
-         ByRef udtDatasetFileInfo As udtDatasetFileInfoType) As String
+        Public Function CreateDatasetInfoXML(
+           strDatasetName As String,
+          ByRef objScanStats As List(Of clsScanStatsEntry),
+          ByRef udtDatasetFileInfo As udtDatasetFileInfoType) As String
 
             Dim udtSampleInfo As udtSampleInfoType = New udtSampleInfoType
             udtSampleInfo.Clear()
@@ -527,10 +536,11 @@ Namespace DSSummarizer
         ''' <param name="udtDatasetFileInfo">Dataset Info</param>
         ''' <returns>XML (as string)</returns>
         ''' <remarks></remarks>
-        Public Function CreateDatasetInfoXML(ByVal strDatasetName As String, _
-         ByRef objScanStats As List(Of clsScanStatsEntry), _
-         ByRef udtDatasetFileInfo As udtDatasetFileInfoType, _
-         ByRef udtSampleInfo As udtSampleInfoType) As String
+        Public Function CreateDatasetInfoXML(
+           strDatasetName As String,
+          ByRef objScanStats As List(Of clsScanStatsEntry),
+          ByRef udtDatasetFileInfo As udtDatasetFileInfoType,
+          ByRef udtSampleInfo As udtSampleInfoType) As String
 
             ' Create a MemoryStream to hold the results
             Dim objMemStream As MemoryStream
@@ -740,8 +750,9 @@ Namespace DSSummarizer
         ''' <param name="strScanStatsFilePath">File path to write the text file to</param>
         ''' <returns>True if success; False if failure</returns>
         ''' <remarks></remarks>
-        Public Function CreateScanStatsFile(ByVal strDatasetName As String, _
-          ByVal strScanStatsFilePath As String) As Boolean
+        Public Function CreateScanStatsFile(
+           strDatasetName As String,
+           strScanStatsFilePath As String) As Boolean
 
             Return CreateScanStatsFile(strDatasetName, strScanStatsFilePath, mDatasetScanStats, Me.DatasetFileInfo, Me.SampleInfo)
         End Function
@@ -756,10 +767,11 @@ Namespace DSSummarizer
         ''' <param name="udtSampleInfo">Sample Info</param>
         ''' <returns>True if success; False if failure</returns>
         ''' <remarks></remarks>
-        Public Function CreateScanStatsFile(ByVal strDatasetName As String, _
-          ByVal strScanStatsFilePath As String, _
-          ByRef objScanStats As List(Of clsScanStatsEntry), _
-          ByRef udtDatasetFileInfo As udtDatasetFileInfoType, _
+        Public Function CreateScanStatsFile(
+           strDatasetName As String,
+           strScanStatsFilePath As String,
+          ByRef objScanStats As List(Of clsScanStatsEntry),
+          ByRef udtDatasetFileInfo As udtDatasetFileInfoType,
           ByRef udtSampleInfo As udtSampleInfoType) As Boolean
 
             Dim strScanStatsExFilePath As String
@@ -787,21 +799,21 @@ Namespace DSSummarizer
 
                     ' Write the headers
                     sbLineOut.Clear()
-                    sbLineOut.Append("Dataset" & ControlChars.Tab & "ScanNumber" & ControlChars.Tab & "ScanTime" & ControlChars.Tab & _
-                      "ScanType" & ControlChars.Tab & "TotalIonIntensity" & ControlChars.Tab & "BasePeakIntensity" & ControlChars.Tab & _
-                      "BasePeakMZ" & ControlChars.Tab & "BasePeakSignalToNoiseRatio" & ControlChars.Tab & _
+                    sbLineOut.Append("Dataset" & ControlChars.Tab & "ScanNumber" & ControlChars.Tab & "ScanTime" & ControlChars.Tab &
+                      "ScanType" & ControlChars.Tab & "TotalIonIntensity" & ControlChars.Tab & "BasePeakIntensity" & ControlChars.Tab &
+                      "BasePeakMZ" & ControlChars.Tab & "BasePeakSignalToNoiseRatio" & ControlChars.Tab &
                       "IonCount" & ControlChars.Tab & "IonCountRaw" & ControlChars.Tab & "ScanTypeName")
 
                     swOutFile.WriteLine(sbLineOut.ToString())
 
                     sbLineOut.Clear()
-                    sbLineOut.Append("Dataset" & ControlChars.Tab & "ScanNumber" & ControlChars.Tab & _
-                      clsScanStatsEntry.SCANSTATS_COL_ION_INJECTION_TIME & ControlChars.Tab & _
-                      clsScanStatsEntry.SCANSTATS_COL_SCAN_SEGMENT & ControlChars.Tab & _
-                      clsScanStatsEntry.SCANSTATS_COL_SCAN_EVENT & ControlChars.Tab & _
-                      clsScanStatsEntry.SCANSTATS_COL_CHARGE_STATE & ControlChars.Tab & _
-                      clsScanStatsEntry.SCANSTATS_COL_MONOISOTOPIC_MZ & ControlChars.Tab & _
-                      clsScanStatsEntry.SCANSTATS_COL_COLLISION_MODE & ControlChars.Tab & _
+                    sbLineOut.Append("Dataset" & ControlChars.Tab & "ScanNumber" & ControlChars.Tab &
+                      clsScanStatsEntry.SCANSTATS_COL_ION_INJECTION_TIME & ControlChars.Tab &
+                      clsScanStatsEntry.SCANSTATS_COL_SCAN_SEGMENT & ControlChars.Tab &
+                      clsScanStatsEntry.SCANSTATS_COL_SCAN_EVENT & ControlChars.Tab &
+                      clsScanStatsEntry.SCANSTATS_COL_CHARGE_STATE & ControlChars.Tab &
+                      clsScanStatsEntry.SCANSTATS_COL_MONOISOTOPIC_MZ & ControlChars.Tab &
+                      clsScanStatsEntry.SCANSTATS_COL_COLLISION_MODE & ControlChars.Tab &
                       clsScanStatsEntry.SCANSTATS_COL_SCAN_FILTER_TEXT)
 
                     swScanStatsExFile.WriteLine(sbLineOut.ToString())
@@ -859,7 +871,7 @@ Namespace DSSummarizer
 
         End Function
 
-        Protected Function FixNull(ByVal strText As String) As String
+        Protected Function FixNull(strText As String) As String
             If String.IsNullOrEmpty(strText) Then
                 Return String.Empty
             Else
@@ -887,7 +899,7 @@ Namespace DSSummarizer
             ClearCachedData()
         End Sub
 
-        Protected Sub ReportError(ByVal message As String)
+        Protected Sub ReportError(message As String)
             mErrorMessage = String.Copy(message)
             RaiseEvent ErrorEvent(mErrorMessage)
         End Sub
@@ -900,9 +912,10 @@ Namespace DSSummarizer
         ''' <param name="strScanTypeName"></param>
         ''' <returns>True if the scan was found and updated; otherwise false</returns>
         ''' <remarks></remarks>
-        Public Function UpdateDatasetScanType(ByVal intScanNumber As Integer, _
-          ByVal intScanType As Integer, _
-          ByVal strScanTypeName As String) As Boolean
+        Public Function UpdateDatasetScanType(
+           intScanNumber As Integer,
+           intScanType As Integer,
+           strScanTypeName As String) As Boolean
 
             Dim intIndex As Integer
             Dim blnMatchFound As Boolean
@@ -930,8 +943,9 @@ Namespace DSSummarizer
         ''' <param name="strDatasetInfoFilePath">File path to write the XML to</param>
         ''' <returns>True if success; False if failure</returns>
         ''' <remarks></remarks>
-        Public Function UpdateDatasetStatsTextFile(ByVal strDatasetName As String, _
-         ByVal strDatasetInfoFilePath As String) As Boolean
+        Public Function UpdateDatasetStatsTextFile(
+           strDatasetName As String,
+           strDatasetInfoFilePath As String) As Boolean
 
             Return UpdateDatasetStatsTextFile(strDatasetName, strDatasetInfoFilePath, mDatasetScanStats, Me.DatasetFileInfo, Me.SampleInfo)
         End Function
@@ -946,11 +960,12 @@ Namespace DSSummarizer
         ''' <param name="udtSampleInfo">Sample Info</param>
         ''' <returns>True if success; False if failure</returns>
         ''' <remarks></remarks>
-        Public Function UpdateDatasetStatsTextFile(ByVal strDatasetName As String, _
-         ByVal strDatasetStatsFilePath As String, _
-         ByRef objScanStats As List(Of clsScanStatsEntry), _
-         ByRef udtDatasetFileInfo As udtDatasetFileInfoType, _
-         ByRef udtSampleInfo As udtSampleInfoType) As Boolean
+        Public Function UpdateDatasetStatsTextFile(
+           strDatasetName As String,
+           strDatasetStatsFilePath As String,
+          ByRef objScanStats As List(Of clsScanStatsEntry),
+          ByRef udtDatasetFileInfo As udtDatasetFileInfoType,
+          ByRef udtSampleInfo As udtSampleInfoType) As Boolean
 
             Dim blnWriteHeaders As Boolean
 
@@ -987,33 +1002,33 @@ Namespace DSSummarizer
 
                     If blnWriteHeaders Then
                         ' Write the header line
-                        strLineOut = "Dataset" & ControlChars.Tab & _
-                         "ScanCount" & ControlChars.Tab & _
-                         "ScanCountMS" & ControlChars.Tab & _
-                         "ScanCountMSn" & ControlChars.Tab & _
-                         "Elution_Time_Max" & ControlChars.Tab & _
-                         "AcqTimeMinutes" & ControlChars.Tab & _
-                         "StartTime" & ControlChars.Tab & _
-                         "EndTime" & ControlChars.Tab & _
-                         "FileSizeBytes" & ControlChars.Tab & _
-                         "SampleName" & ControlChars.Tab & _
-                         "Comment1" & ControlChars.Tab & _
+                        strLineOut = "Dataset" & ControlChars.Tab &
+                         "ScanCount" & ControlChars.Tab &
+                         "ScanCountMS" & ControlChars.Tab &
+                         "ScanCountMSn" & ControlChars.Tab &
+                         "Elution_Time_Max" & ControlChars.Tab &
+                         "AcqTimeMinutes" & ControlChars.Tab &
+                         "StartTime" & ControlChars.Tab &
+                         "EndTime" & ControlChars.Tab &
+                         "FileSizeBytes" & ControlChars.Tab &
+                         "SampleName" & ControlChars.Tab &
+                         "Comment1" & ControlChars.Tab &
                          "Comment2"
 
                         swOutFile.WriteLine(strLineOut)
                     End If
 
-                    strLineOut = strDatasetName & ControlChars.Tab & _
-                     (objSummaryStats.MSStats.ScanCount + objSummaryStats.MSnStats.ScanCount).ToString & ControlChars.Tab & _
-                     objSummaryStats.MSStats.ScanCount.ToString & ControlChars.Tab & _
-                     objSummaryStats.MSnStats.ScanCount.ToString & ControlChars.Tab & _
-                     objSummaryStats.ElutionTimeMax.ToString & ControlChars.Tab & _
-                     udtDatasetFileInfo.AcqTimeEnd.Subtract(udtDatasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00") & ControlChars.Tab & _
-                     udtDatasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab & _
-                     udtDatasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab & _
-                     udtDatasetFileInfo.FileSizeBytes.ToString & ControlChars.Tab & _
-                     FixNull(udtSampleInfo.SampleName) & ControlChars.Tab & _
-                     FixNull(udtSampleInfo.Comment1) & ControlChars.Tab & _
+                    strLineOut = strDatasetName & ControlChars.Tab &
+                     (objSummaryStats.MSStats.ScanCount + objSummaryStats.MSnStats.ScanCount).ToString & ControlChars.Tab &
+                     objSummaryStats.MSStats.ScanCount.ToString & ControlChars.Tab &
+                     objSummaryStats.MSnStats.ScanCount.ToString & ControlChars.Tab &
+                     objSummaryStats.ElutionTimeMax.ToString & ControlChars.Tab &
+                     udtDatasetFileInfo.AcqTimeEnd.Subtract(udtDatasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00") & ControlChars.Tab &
+                     udtDatasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab &
+                     udtDatasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt") & ControlChars.Tab &
+                     udtDatasetFileInfo.FileSizeBytes.ToString & ControlChars.Tab &
+                     FixNull(udtSampleInfo.SampleName) & ControlChars.Tab &
+                     FixNull(udtSampleInfo.Comment1) & ControlChars.Tab &
                      FixNull(udtSampleInfo.Comment2)
 
                     swOutFile.WriteLine(strLineOut)
@@ -1031,7 +1046,7 @@ Namespace DSSummarizer
 
         End Function
 
-        Private Sub mSpectraTypeClassifier_ErrorEvent(ByVal Message As String) Handles mSpectraTypeClassifier.ErrorEvent
+        Private Sub mSpectraTypeClassifier_ErrorEvent(Message As String) Handles mSpectraTypeClassifier.ErrorEvent
             ReportError("Error in SpectraTypeClassifier: " & Message)
         End Sub
 

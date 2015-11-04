@@ -81,8 +81,8 @@ Public Class clsMSFileInfoDataCache
     Private mFolderIntegrityInfoResultsState As eCachedResultsStateConstants
     Private mMaximumFolderIntegrityInfoFolderID As Integer = 0
 
-    Public Event ErrorEvent(ByVal Message As String)
-    Public Event StatusEvent(ByVal Message As String)
+    Public Event ErrorEvent(Message As String)
+    Public Event StatusEvent(Message As String)
 #End Region
 
 #Region "Properties"
@@ -91,7 +91,7 @@ Public Class clsMSFileInfoDataCache
         Get
             Return mAcquisitionTimeFilePath
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mAcquisitionTimeFilePath = value
         End Set
     End Property
@@ -100,14 +100,14 @@ Public Class clsMSFileInfoDataCache
         Get
             Return mFolderIntegrityInfoFilePath
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mFolderIntegrityInfoFilePath = value
         End Set
     End Property
 
 #End Region
 
-    Private Function AssureMinimumDate(ByVal dtDate As DateTime, ByVal dtMinimumDate As DateTime) As DateTime
+    Private Function AssureMinimumDate(dtDate As DateTime, dtMinimumDate As DateTime) As DateTime
         ' Assures that dtDate is >= dtMinimumDate
 
         If dtDate < dtMinimumDate Then
@@ -138,20 +138,20 @@ Public Class clsMSFileInfoDataCache
 
     End Sub
 
-    Public Function CachedMSInfoContainsDataset(ByVal strDatasetName As String) As Boolean
+    Public Function CachedMSInfoContainsDataset(strDatasetName As String) As Boolean
         Return CachedMSInfoContainsDataset(strDatasetName, Nothing)
     End Function
 
-    Public Function CachedMSInfoContainsDataset(ByVal strDatasetName As String, ByRef objRowMatch As DataRow) As Boolean
+    Public Function CachedMSInfoContainsDataset(strDatasetName As String, ByRef objRowMatch As DataRow) As Boolean
         Return DatasetTableContainsPrimaryKeyValue(mMSFileInfoDataset, MS_FILEINFO_DATATABLE, strDatasetName, objRowMatch)
     End Function
 
 
-    Public Function CachedFolderIntegrityInfoContainsFolder(ByVal strFolderPath As String, ByRef intFolderID As Integer) As Boolean
+    Public Function CachedFolderIntegrityInfoContainsFolder(strFolderPath As String, ByRef intFolderID As Integer) As Boolean
         Return CachedFolderIntegrityInfoContainsFolder(strFolderPath, intFolderID, Nothing)
     End Function
 
-    Public Function CachedFolderIntegrityInfoContainsFolder(ByVal strFolderPath As String, ByRef intFolderID As Integer, ByRef objRowMatch As DataRow) As Boolean
+    Public Function CachedFolderIntegrityInfoContainsFolder(strFolderPath As String, ByRef intFolderID As Integer, ByRef objRowMatch As DataRow) As Boolean
         If DatasetTableContainsPrimaryKeyValue(mFolderIntegrityInfoDataset, FOLDER_INTEGRITY_INFO_DATATABLE, strFolderPath, objRowMatch) Then
             intFolderID = CInt(objRowMatch(COL_NAME_FOLDER_ID))
             Return True
@@ -171,36 +171,36 @@ Public Class clsMSFileInfoDataCache
         mMaximumFolderIntegrityInfoFolderID = 0
     End Sub
 
-    Public Function ConstructHeaderLine(ByVal eDataFileType As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants) As String
+    Public Function ConstructHeaderLine(eDataFileType As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants) As String
         Select Case eDataFileType
             Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo
                 ' Note: The order of the output should match eMSFileInfoResultsFileColumns
-                Return COL_NAME_DATASET_ID & ControlChars.Tab & _
-                  COL_NAME_DATASET_NAME & ControlChars.Tab & _
-                  COL_NAME_FILE_EXTENSION & ControlChars.Tab & _
-                  COL_NAME_ACQ_TIME_START & ControlChars.Tab & _
-                  COL_NAME_ACQ_TIME_END & ControlChars.Tab & _
-                  COL_NAME_SCAN_COUNT & ControlChars.Tab & _
-                  COL_NAME_FILE_SIZE_BYTES & ControlChars.Tab & _
-                  COL_NAME_INFO_LAST_MODIFIED & ControlChars.Tab & _
+                Return COL_NAME_DATASET_ID & ControlChars.Tab &
+                  COL_NAME_DATASET_NAME & ControlChars.Tab &
+                  COL_NAME_FILE_EXTENSION & ControlChars.Tab &
+                  COL_NAME_ACQ_TIME_START & ControlChars.Tab &
+                  COL_NAME_ACQ_TIME_END & ControlChars.Tab &
+                  COL_NAME_SCAN_COUNT & ControlChars.Tab &
+                  COL_NAME_FILE_SIZE_BYTES & ControlChars.Tab &
+                  COL_NAME_INFO_LAST_MODIFIED & ControlChars.Tab &
                   COL_NAME_FILE_MODIFICATION_DATE
 
             Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo
                 ' Note: The order of the output should match eFolderIntegrityInfoFileColumns
-                Return COL_NAME_FOLDER_ID & ControlChars.Tab & _
-                  COL_NAME_FOLDER_PATH & ControlChars.Tab & _
-                  COL_NAME_FILE_COUNT & ControlChars.Tab & _
-                  COL_NAME_COUNT_FAIL_INTEGRITY & ControlChars.Tab & _
+                Return COL_NAME_FOLDER_ID & ControlChars.Tab &
+                  COL_NAME_FOLDER_PATH & ControlChars.Tab &
+                  COL_NAME_FILE_COUNT & ControlChars.Tab &
+                  COL_NAME_COUNT_FAIL_INTEGRITY & ControlChars.Tab &
                   COL_NAME_INFO_LAST_MODIFIED
 
             Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails
                 ' Note: The order of the output should match eFileIntegrityDetailsFileColumns
-                Return COL_NAME_FOLDER_ID & ControlChars.Tab & _
-                  COL_NAME_FILE_NAME & ControlChars.Tab & _
-                  COL_NAME_FILE_SIZE_BYTES & ControlChars.Tab & _
-                  COL_NAME_FILE_MODIFICATION_DATE & ControlChars.Tab & _
-                  COL_NAME_FAILED_INTEGRITY_CHECK & ControlChars.Tab & _
-                  COL_NAME_SHA1_HASH & ControlChars.Tab & _
+                Return COL_NAME_FOLDER_ID & ControlChars.Tab &
+                  COL_NAME_FILE_NAME & ControlChars.Tab &
+                  COL_NAME_FILE_SIZE_BYTES & ControlChars.Tab &
+                  COL_NAME_FILE_MODIFICATION_DATE & ControlChars.Tab &
+                  COL_NAME_FAILED_INTEGRITY_CHECK & ControlChars.Tab &
+                  COL_NAME_SHA1_HASH & ControlChars.Tab &
                   COL_NAME_INFO_LAST_MODIFIED
 
             Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors
@@ -210,11 +210,11 @@ Public Class clsMSFileInfoDataCache
         End Select
     End Function
 
-    Private Function DatasetTableContainsPrimaryKeyValue(ByRef dsDataset As DataSet, ByVal strTableName As String, ByVal strValueToFind As String) As Boolean
+    Private Function DatasetTableContainsPrimaryKeyValue(ByRef dsDataset As DataSet, strTableName As String, strValueToFind As String) As Boolean
         Return DatasetTableContainsPrimaryKeyValue(dsDataset, strTableName, strValueToFind, Nothing)
     End Function
 
-    Private Function DatasetTableContainsPrimaryKeyValue(ByRef dsDataset As DataSet, ByVal strTableName As String, ByVal strValueToFind As String, ByRef objRowMatch As DataRow) As Boolean
+    Private Function DatasetTableContainsPrimaryKeyValue(ByRef dsDataset As DataSet, strTableName As String, strValueToFind As String, ByRef objRowMatch As DataRow) As Boolean
 
         Try
             If dsDataset Is Nothing OrElse dsDataset.Tables(strTableName).Rows.Count = 0 Then
@@ -254,7 +254,7 @@ Public Class clsMSFileInfoDataCache
         InitializeDatasets()
     End Sub
 
-    Private Function IsNumber(ByVal strValue As String) As Boolean
+    Private Function IsNumber(strValue As String) As Boolean
         Dim objFormatProvider As New Globalization.NumberFormatInfo
         Try
             Return Double.TryParse(strValue, Globalization.NumberStyles.Any, objFormatProvider, 0)
@@ -316,7 +316,7 @@ Public Class clsMSFileInfoDataCache
         mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized
     End Sub
 
-    Public Sub LoadCachedResults(ByVal blnForceLoad As Boolean)
+    Public Sub LoadCachedResults(blnForceLoad As Boolean)
         If blnForceLoad OrElse mMSFileInfoCachedResultsState = eCachedResultsStateConstants.NotInitialized Then
             LoadCachedMSFileInfoResults()
             LoadCachedFolderIntegrityInfoResults()
@@ -487,7 +487,7 @@ Public Class clsMSFileInfoDataCache
         PopulateMSInfoDataRow(udtFileInfo, objRow, DateTime.Now())
     End Sub
 
-    Private Sub PopulateMSInfoDataRow(ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, ByRef objRow As DataRow, ByVal dtInfoLastModified As DateTime)
+    Private Sub PopulateMSInfoDataRow(ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, ByRef objRow As DataRow, dtInfoLastModified As DateTime)
 
         ' ToDo: Update udtFileInfo to include some overall quality scores
 
@@ -505,11 +505,11 @@ Public Class clsMSFileInfoDataCache
         End With
     End Sub
 
-    Private Sub PopulateFolderIntegrityInfoDataRow(ByVal intFolderID As Integer, ByRef udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType, ByRef objRow As DataRow)
+    Private Sub PopulateFolderIntegrityInfoDataRow(intFolderID As Integer, ByRef udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType, ByRef objRow As DataRow)
         PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow, DateTime.Now())
     End Sub
 
-    Private Sub PopulateFolderIntegrityInfoDataRow(ByVal intFolderID As Integer, ByRef udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType, ByRef objRow As DataRow, ByVal dtInfoLastModified As DateTime)
+    Private Sub PopulateFolderIntegrityInfoDataRow(intFolderID As Integer, ByRef udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType, ByRef objRow As DataRow, dtInfoLastModified As DateTime)
 
         With objRow
             .Item(COL_NAME_FOLDER_ID) = intFolderID
@@ -533,7 +533,7 @@ Public Class clsMSFileInfoDataCache
         Return SaveCachedResults(True)
     End Function
 
-    Public Function SaveCachedResults(ByVal blnClearCachedData As Boolean) As Boolean
+    Public Function SaveCachedResults(blnClearCachedData As Boolean) As Boolean
         Dim blnSuccess1 As Boolean
         Dim blnSuccess2 As Boolean
 
@@ -544,7 +544,7 @@ Public Class clsMSFileInfoDataCache
 
     End Function
 
-    Public Function SaveCachedFolderIntegrityInfoResults(ByVal blnClearCachedData As Boolean) As Boolean
+    Public Function SaveCachedFolderIntegrityInfoResults(blnClearCachedData As Boolean) As Boolean
 
         Dim fsOutfile As FileStream
         Dim srOutFile As StreamWriter
@@ -552,8 +552,8 @@ Public Class clsMSFileInfoDataCache
         Dim objRow As DataRow
         Dim blnSuccess As Boolean
 
-        If Not mFolderIntegrityInfoDataset Is Nothing AndAlso _
-           mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).Rows.Count > 0 AndAlso _
+        If Not mFolderIntegrityInfoDataset Is Nothing AndAlso
+           mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).Rows.Count > 0 AndAlso
            mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.Modified Then
 
             RaiseEvent StatusEvent("Saving cached folder integrity info to: " & Path.GetFileName(mFolderIntegrityInfoFilePath))
@@ -605,7 +605,7 @@ Public Class clsMSFileInfoDataCache
 
     End Function
 
-    Public Function SaveCachedMSInfoResults(ByVal blnClearCachedData As Boolean) As Boolean
+    Public Function SaveCachedMSInfoResults(blnClearCachedData As Boolean) As Boolean
 
         Dim fsOutfile As FileStream
         Dim srOutFile As StreamWriter
@@ -613,8 +613,8 @@ Public Class clsMSFileInfoDataCache
         Dim objRow As DataRow
         Dim blnSuccess As Boolean
 
-        If Not mMSFileInfoDataset Is Nothing AndAlso _
-           mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).Rows.Count > 0 AndAlso _
+        If Not mMSFileInfoDataset Is Nothing AndAlso
+           mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).Rows.Count > 0 AndAlso
            mMSFileInfoCachedResultsState = eCachedResultsStateConstants.Modified Then
 
             RaiseEvent StatusEvent("Saving cached acquisition time file data to: " & Path.GetFileName(mAcquisitionTimeFilePath))
@@ -666,7 +666,7 @@ Public Class clsMSFileInfoDataCache
 
     End Function
 
-    Public Function UpdateCachedMSFileInfo(ByVal udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    Public Function UpdateCachedMSFileInfo(udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
         ' Update the entry for this dataset in mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE)
 
         Dim objRow As DataRow = Nothing
@@ -701,7 +701,7 @@ Public Class clsMSFileInfoDataCache
 
     End Function
 
-    Public Function UpdateCachedFolderIntegrityInfo(ByVal udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType, ByRef intFolderID As Integer) As Boolean
+    Public Function UpdateCachedFolderIntegrityInfo(udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType, ByRef intFolderID As Integer) As Boolean
         ' Update the entry for this dataset in mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE)
 
         Dim objRow As DataRow = Nothing
@@ -747,30 +747,30 @@ Public Class clsMSFileInfoDataCache
         Return blnSuccess
 
     End Function
-    
-    Private Sub WriteMSInfoDataLine(ByVal srOutFile As StreamWriter, ByVal objRow As DataRow)
+
+    Private Sub WriteMSInfoDataLine(srOutFile As StreamWriter, objRow As DataRow)
         With objRow
             ' Note: HH:mm:ss corresponds to time in 24 hour format
-            srOutFile.WriteLine(.Item(COL_NAME_DATASET_ID).ToString & ControlChars.Tab & _
-                 .Item(COL_NAME_DATASET_NAME).ToString & ControlChars.Tab & _
-                 .Item(COL_NAME_FILE_EXTENSION).ToString & ControlChars.Tab & _
-                 CType(.Item(COL_NAME_ACQ_TIME_START), DateTime).ToString("yyyy-MM-dd HH:mm:ss") & ControlChars.Tab & _
-                 CType(.Item(COL_NAME_ACQ_TIME_END), DateTime).ToString("yyyy-MM-dd HH:mm:ss") & ControlChars.Tab & _
-                 .Item(COL_NAME_SCAN_COUNT).ToString & ControlChars.Tab & _
-                 .Item(COL_NAME_FILE_SIZE_BYTES).ToString & ControlChars.Tab & _
-                 .Item(COL_NAME_INFO_LAST_MODIFIED).ToString & ControlChars.Tab & _
+            srOutFile.WriteLine(.Item(COL_NAME_DATASET_ID).ToString & ControlChars.Tab &
+                 .Item(COL_NAME_DATASET_NAME).ToString & ControlChars.Tab &
+                 .Item(COL_NAME_FILE_EXTENSION).ToString & ControlChars.Tab &
+                 CType(.Item(COL_NAME_ACQ_TIME_START), DateTime).ToString("yyyy-MM-dd HH:mm:ss") & ControlChars.Tab &
+                 CType(.Item(COL_NAME_ACQ_TIME_END), DateTime).ToString("yyyy-MM-dd HH:mm:ss") & ControlChars.Tab &
+                 .Item(COL_NAME_SCAN_COUNT).ToString & ControlChars.Tab &
+                 .Item(COL_NAME_FILE_SIZE_BYTES).ToString & ControlChars.Tab &
+                 .Item(COL_NAME_INFO_LAST_MODIFIED).ToString & ControlChars.Tab &
                  CType(.Item(COL_NAME_FILE_MODIFICATION_DATE), DateTime).ToString("yyyy-MM-dd HH:mm:ss"))
 
         End With
     End Sub
 
-    Private Sub WriteFolderIntegrityInfoDataLine(ByVal srOutFile As StreamWriter, ByVal objRow As DataRow)
+    Private Sub WriteFolderIntegrityInfoDataLine(srOutFile As StreamWriter, objRow As DataRow)
 
         With objRow
-            srOutFile.WriteLine(.Item(COL_NAME_FOLDER_ID).ToString & ControlChars.Tab & _
-                 .Item(COL_NAME_FOLDER_PATH).ToString & ControlChars.Tab & _
-                 .Item(COL_NAME_FILE_COUNT).ToString & ControlChars.Tab & _
-                 .Item(COL_NAME_COUNT_FAIL_INTEGRITY).ToString & ControlChars.Tab & _
+            srOutFile.WriteLine(.Item(COL_NAME_FOLDER_ID).ToString & ControlChars.Tab &
+                 .Item(COL_NAME_FOLDER_PATH).ToString & ControlChars.Tab &
+                 .Item(COL_NAME_FILE_COUNT).ToString & ControlChars.Tab &
+                 .Item(COL_NAME_COUNT_FAIL_INTEGRITY).ToString & ControlChars.Tab &
                  .Item(COL_NAME_INFO_LAST_MODIFIED).ToString)
         End With
     End Sub

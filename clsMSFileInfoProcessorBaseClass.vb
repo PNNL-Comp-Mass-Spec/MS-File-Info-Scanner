@@ -48,349 +48,355 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
 	Protected WithEvents mDatasetStatsSummarizer As DSSummarizer.clsDatasetStatsSummarizer
 
-	Public Event ErrorEvent(ByVal Message As String) Implements iMSFileInfoProcessor.ErrorEvent
-	Public Event MessageEvent(ByVal Message As String) Implements iMSFileInfoProcessor.MessageEvent
-	'Public Event ProgressUpdate(ByVal Progress As Single)
+    Public Event ErrorEvent(Message As String) Implements iMSFileInfoProcessor.ErrorEvent
+    Public Event MessageEvent(Message As String) Implements iMSFileInfoProcessor.MessageEvent
+    'Public Event ProgressUpdate( Progress As Single)
 #End Region
 
 #Region "Properties"
 
-	''' <summary>
-	''' This property allows the parent class to define the DatasetID value
-	''' </summary>
-	Public Property DatasetID As Integer Implements iMSFileInfoProcessor.DatasetID
-		Get
-			Return mDatasetID
-		End Get
-		Set(value As Integer)
-			mDatasetID = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' This property allows the parent class to define the DatasetID value
+    ''' </summary>
+    Public Property DatasetID As Integer Implements iMSFileInfoProcessor.DatasetID
+        Get
+            Return mDatasetID
+        End Get
+        Set(value As Integer)
+            mDatasetID = value
+        End Set
+    End Property
 
-	Public Property DatasetStatsTextFileName() As String Implements iMSFileInfoProcessor.DatasetStatsTextFileName
-		Get
-			Return mDatasetStatsTextFileName
-		End Get
-		Set(ByVal value As String)
-			If String.IsNullOrEmpty(value) Then
-				' Do not update mDatasetStatsTextFileName
-			Else
-				mDatasetStatsTextFileName = value
-			End If
-		End Set
-	End Property
+    Public Property DatasetStatsTextFileName() As String Implements iMSFileInfoProcessor.DatasetStatsTextFileName
+        Get
+            Return mDatasetStatsTextFileName
+        End Get
+        Set(value As String)
+            If String.IsNullOrEmpty(value) Then
+                ' Do not update mDatasetStatsTextFileName
+            Else
+                mDatasetStatsTextFileName = value
+            End If
+        End Set
+    End Property
 
     Public Property LCMS2DPlotOptions() As clsLCMSDataPlotterOptions Implements iMSFileInfoProcessor.LCMS2DPlotOptions
         Get
             Return mLCMS2DPlot.Options
         End Get
-        Set(ByVal value As clsLCMSDataPlotterOptions)
+        Set(value As clsLCMSDataPlotterOptions)
             mLCMS2DPlot.Options = value
             mLCMS2DPlotOverview.Options = value.Clone()
         End Set
     End Property
 
-	Public Property LCMS2DOverviewPlotDivisor() As Integer Implements iMSFileInfoProcessor.LCMS2DOverviewPlotDivisor
-		Get
-			Return mLCMS2DOverviewPlotDivisor
-		End Get
-		Set(ByVal value As Integer)
-			mLCMS2DOverviewPlotDivisor = value
-		End Set
-	End Property
+    Public Property LCMS2DOverviewPlotDivisor() As Integer Implements iMSFileInfoProcessor.LCMS2DOverviewPlotDivisor
+        Get
+            Return mLCMS2DOverviewPlotDivisor
+        End Get
+        Set(value As Integer)
+            mLCMS2DOverviewPlotDivisor = value
+        End Set
+    End Property
 
-	Public Property ScanStart() As Integer Implements iMSFileInfoProcessor.ScanStart
-		Get
-			Return mScanStart
-		End Get
-		Set(ByVal value As Integer)
-			mScanStart = value
-		End Set
-	End Property
+    Public Property ScanStart() As Integer Implements iMSFileInfoProcessor.ScanStart
+        Get
+            Return mScanStart
+        End Get
+        Set(value As Integer)
+            mScanStart = value
+        End Set
+    End Property
 
-	Public Property ShowDebugInfo As Boolean Implements iMSFileInfoProcessor.ShowDebugInfo
-		Get
-			Return mShowDebugInfo
-		End Get
-		Set(value As Boolean)
-			mShowDebugInfo = value
-		End Set
-	End Property
+    Public Property ShowDebugInfo As Boolean Implements iMSFileInfoProcessor.ShowDebugInfo
+        Get
+            Return mShowDebugInfo
+        End Get
+        Set(value As Boolean)
+            mShowDebugInfo = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' When ScanEnd is > 0, then will stop processing at the specified scan number
-	''' </summary>
-	Public Property ScanEnd() As Integer Implements iMSFileInfoProcessor.ScanEnd
-		Get
-			Return mScanEnd
-		End Get
-		Set(ByVal value As Integer)
-			mScanEnd = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' When ScanEnd is > 0, then will stop processing at the specified scan number
+    ''' </summary>
+    Public Property ScanEnd() As Integer Implements iMSFileInfoProcessor.ScanEnd
+        Get
+            Return mScanEnd
+        End Get
+        Set(value As Integer)
+            mScanEnd = value
+        End Set
+    End Property
 
 #End Region
 
-	Public Function GetOption(ByVal eOption As iMSFileInfoProcessor.ProcessingOptions) As Boolean Implements iMSFileInfoProcessor.GetOption
-		Select Case eOption
-			Case iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI
-				Return mSaveTICAndBPI
-			Case iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores
-				Return mComputeOverallQualityScores
-			Case iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile
-				Return mCreateDatasetInfoFile
-			Case iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots
-				Return mSaveLCMS2DPlots
-			Case iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError
-				Return mCopyFileLocalOnReadError
-			Case iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile
-				Return mUpdateDatasetStatsTextFile
-			Case iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile
-				Return mCreateScanStatsFile
-			Case iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus
-				Return mCheckCentroidingStatus
-		End Select
+    Public Function GetOption(eOption As iMSFileInfoProcessor.ProcessingOptions) As Boolean Implements iMSFileInfoProcessor.GetOption
+        Select Case eOption
+            Case iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI
+                Return mSaveTICAndBPI
+            Case iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores
+                Return mComputeOverallQualityScores
+            Case iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile
+                Return mCreateDatasetInfoFile
+            Case iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots
+                Return mSaveLCMS2DPlots
+            Case iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError
+                Return mCopyFileLocalOnReadError
+            Case iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile
+                Return mUpdateDatasetStatsTextFile
+            Case iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile
+                Return mCreateScanStatsFile
+            Case iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus
+                Return mCheckCentroidingStatus
+        End Select
 
-		Throw New Exception("Unrecognized option, " & eOption.ToString)
-	End Function
+        Throw New Exception("Unrecognized option, " & eOption.ToString)
+    End Function
 
-	Public Sub SetOption(ByVal eOption As iMSFileInfoProcessor.ProcessingOptions, ByVal blnValue As Boolean) Implements iMSFileInfoProcessor.SetOption
-		Select Case eOption
-			Case iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI
-				mSaveTICAndBPI = blnValue
-			Case iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores
-				mComputeOverallQualityScores = blnValue
-			Case iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile
-				mCreateDatasetInfoFile = blnValue
-			Case iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots
-				mSaveLCMS2DPlots = blnValue
-			Case iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError
-				mCopyFileLocalOnReadError = blnValue
-			Case iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile
-				mUpdateDatasetStatsTextFile = blnValue
-			Case iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile
-				mCreateScanStatsFile = blnValue
-			Case iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus
-				mCheckCentroidingStatus = blnValue
-			Case Else
-				Throw New Exception("Unrecognized option, " & eOption.ToString)
-		End Select
+    Public Sub SetOption(eOption As iMSFileInfoProcessor.ProcessingOptions, blnValue As Boolean) Implements iMSFileInfoProcessor.SetOption
+        Select Case eOption
+            Case iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI
+                mSaveTICAndBPI = blnValue
+            Case iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores
+                mComputeOverallQualityScores = blnValue
+            Case iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile
+                mCreateDatasetInfoFile = blnValue
+            Case iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots
+                mSaveLCMS2DPlots = blnValue
+            Case iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError
+                mCopyFileLocalOnReadError = blnValue
+            Case iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile
+                mUpdateDatasetStatsTextFile = blnValue
+            Case iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile
+                mCreateScanStatsFile = blnValue
+            Case iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus
+                mCheckCentroidingStatus = blnValue
+            Case Else
+                Throw New Exception("Unrecognized option, " & eOption.ToString)
+        End Select
 
-	End Sub
+    End Sub
 
-	Protected Function CreateDatasetInfoFile(ByVal strInputFileName As String, ByVal strOutputFolderPath As String) As Boolean
+    Protected Function CreateDatasetInfoFile(strInputFileName As String, strOutputFolderPath As String) As Boolean
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		Try
-			Dim strDatasetName = GetDatasetNameViaPath(strInputFileName)
-			Dim strDatasetInfoFilePath = Path.Combine(strOutputFolderPath, strDatasetName)
-			strDatasetInfoFilePath &= DSSummarizer.clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX
+        Try
+            Dim strDatasetName = GetDatasetNameViaPath(strInputFileName)
+            Dim strDatasetInfoFilePath = Path.Combine(strOutputFolderPath, strDatasetName)
+            strDatasetInfoFilePath &= DSSummarizer.clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX
 
-			If mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = 0 AndAlso mDatasetID > 0 Then
-				mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID
-			End If
+            If mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = 0 AndAlso mDatasetID > 0 Then
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID
+            End If
 
-			blnSuccess = mDatasetStatsSummarizer.CreateDatasetInfoFile(strDatasetName, strDatasetInfoFilePath)
+            blnSuccess = mDatasetStatsSummarizer.CreateDatasetInfoFile(strDatasetName, strDatasetInfoFilePath)
 
-			If Not blnSuccess Then
-				ReportError("Error calling objDatasetStatsSummarizer.CreateDatasetInfoFile: " & mDatasetStatsSummarizer.ErrorMessage)
-			End If
+            If Not blnSuccess Then
+                ReportError("Error calling objDatasetStatsSummarizer.CreateDatasetInfoFile: " & mDatasetStatsSummarizer.ErrorMessage)
+            End If
 
-		Catch ex As Exception
-			ReportError("Error creating dataset info file: " & ex.Message)
-			blnSuccess = False
-		End Try
+        Catch ex As Exception
+            ReportError("Error creating dataset info file: " & ex.Message)
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Public Function CreateDatasetScanStatsFile(ByVal strInputFileName As String, ByVal strOutputFolderPath As String) As Boolean
+    Public Function CreateDatasetScanStatsFile(strInputFileName As String, strOutputFolderPath As String) As Boolean
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		Dim strDatasetName As String
-		Dim strScanStatsFilePath As String
+        Dim strDatasetName As String
+        Dim strScanStatsFilePath As String
 
-		strScanStatsFilePath = String.Empty
+        strScanStatsFilePath = String.Empty
 
-		Try
-			strDatasetName = GetDatasetNameViaPath(strInputFileName)
-			strScanStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetName)
-			strScanStatsFilePath &= "_ScanStats.txt"
+        Try
+            strDatasetName = GetDatasetNameViaPath(strInputFileName)
+            strScanStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetName)
+            strScanStatsFilePath &= "_ScanStats.txt"
 
-			If mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = 0 AndAlso mDatasetID > 0 Then
-				mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID
-			End If
+            If mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = 0 AndAlso mDatasetID > 0 Then
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID
+            End If
 
-			blnSuccess = mDatasetStatsSummarizer.CreateScanStatsFile(strDatasetName, strScanStatsFilePath)
+            blnSuccess = mDatasetStatsSummarizer.CreateScanStatsFile(strDatasetName, strScanStatsFilePath)
 
-			If Not blnSuccess Then
-				ReportError("Error calling objDatasetStatsSummarizer.CreateScanStatsFile: " & mDatasetStatsSummarizer.ErrorMessage)
-			End If
+            If Not blnSuccess Then
+                ReportError("Error calling objDatasetStatsSummarizer.CreateScanStatsFile: " & mDatasetStatsSummarizer.ErrorMessage)
+            End If
 
-		Catch ex As Exception
-			ReportError("Error creating dataset ScanStats file: " & ex.Message)
-			blnSuccess = False
-		End Try
+        Catch ex As Exception
+            ReportError("Error creating dataset ScanStats file: " & ex.Message)
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Public Function UpdateDatasetStatsTextFile(ByVal strInputFileName As String, _
-	 ByVal strOutputFolderPath As String) As Boolean
+    Public Function UpdateDatasetStatsTextFile(
+       strInputFileName As String,
+       strOutputFolderPath As String) As Boolean
 
-		Return UpdateDatasetStatsTextFile(strInputFileName, strOutputFolderPath, DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME)
+        Return UpdateDatasetStatsTextFile(strInputFileName, strOutputFolderPath, DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME)
 
-	End Function
+    End Function
 
-	Public Function UpdateDatasetStatsTextFile(ByVal strInputFileName As String, _
-	 ByVal strOutputFolderPath As String, _
-	 ByVal strDatasetStatsFilename As String) As Boolean
+    Public Function UpdateDatasetStatsTextFile(
+       strInputFileName As String,
+       strOutputFolderPath As String,
+       strDatasetStatsFilename As String) As Boolean
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		Dim strDatasetName As String
-		Dim strDatasetStatsFilePath As String
+        Dim strDatasetName As String
+        Dim strDatasetStatsFilePath As String
 
-		strDatasetStatsFilePath = String.Empty
+        strDatasetStatsFilePath = String.Empty
 
-		Try
-			strDatasetName = GetDatasetNameViaPath(strInputFileName)
+        Try
+            strDatasetName = GetDatasetNameViaPath(strInputFileName)
 
-			strDatasetStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetStatsFilename)
+            strDatasetStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetStatsFilename)
 
-			blnSuccess = mDatasetStatsSummarizer.UpdateDatasetStatsTextFile(strDatasetName, strDatasetStatsFilePath)
+            blnSuccess = mDatasetStatsSummarizer.UpdateDatasetStatsTextFile(strDatasetName, strDatasetStatsFilePath)
 
-			If Not blnSuccess Then
-				ReportError("Error calling objDatasetStatsSummarizer.UpdateDatasetStatsTextFile: " & mDatasetStatsSummarizer.ErrorMessage)
-			End If
+            If Not blnSuccess Then
+                ReportError("Error calling objDatasetStatsSummarizer.UpdateDatasetStatsTextFile: " & mDatasetStatsSummarizer.ErrorMessage)
+            End If
 
-		Catch ex As Exception
-			ReportError("Error updating the dataset stats text file: " & ex.Message)
-			blnSuccess = False
-		End Try
+        Catch ex As Exception
+            ReportError("Error updating the dataset stats text file: " & ex.Message)
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Public Function GetDatasetInfoXML() As String Implements iMSFileInfoProcessor.GetDatasetInfoXML
+    Public Function GetDatasetInfoXML() As String Implements iMSFileInfoProcessor.GetDatasetInfoXML
 
-		Try
-			If mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = 0 AndAlso mDatasetID > 0 Then
-				mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID
-			End If
+        Try
+            If mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = 0 AndAlso mDatasetID > 0 Then
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID
+            End If
 
-			Return mDatasetStatsSummarizer.CreateDatasetInfoXML()
+            Return mDatasetStatsSummarizer.CreateDatasetInfoXML()
 
-		Catch ex As Exception
-			ReportError("Error getting dataset info XML: " & ex.Message)
-		End Try
+        Catch ex As Exception
+            ReportError("Error getting dataset info XML: " & ex.Message)
+        End Try
 
-		Return String.Empty
+        Return String.Empty
 
-	End Function
+    End Function
 
-	''' <summary>
-	''' Returns the range of scan numbers to process
-	''' </summary>
-	''' <param name="intScanCount">Number of scans in the file</param>
-	''' <param name="intScanStart">1 if mScanStart is zero; otherwise mScanStart</param>
-	''' <param name="intScanEnd">intScanCount if mScanEnd is zero; otherwise Min(mScanEnd, intScanCount)</param>
-	''' <remarks></remarks>
-	Protected Sub GetStartAndEndScans(ByVal intScanCount As Integer, _
-	 ByRef intScanStart As Integer, ByRef intScanEnd As Integer)
-		GetStartAndEndScans(intScanCount, 1, intScanStart, intScanEnd)
-	End Sub
+    ''' <summary>
+    ''' Returns the range of scan numbers to process
+    ''' </summary>
+    ''' <param name="intScanCount">Number of scans in the file</param>
+    ''' <param name="intScanStart">1 if mScanStart is zero; otherwise mScanStart</param>
+    ''' <param name="intScanEnd">intScanCount if mScanEnd is zero; otherwise Min(mScanEnd, intScanCount)</param>
+    ''' <remarks></remarks>
+    Protected Sub GetStartAndEndScans(
+       intScanCount As Integer,
+      ByRef intScanStart As Integer, ByRef intScanEnd As Integer)
+        GetStartAndEndScans(intScanCount, 1, intScanStart, intScanEnd)
+    End Sub
 
-	''' <summary>
-	''' Returns the range of scan numbers to process
-	''' </summary>
-	''' <param name="intScanCount">Number of scans in the file</param>
-	''' <param name="intScanNumFirst">The first scan number in the file</param>
-	''' <param name="intScanStart">1 if mScanStart is zero; otherwise mScanStart</param>
-	''' <param name="intScanEnd">intScanCount if mScanEnd is zero; otherwise Min(mScanEnd, intScanCount)</param>
-	''' <remarks></remarks>
-	Protected Sub GetStartAndEndScans(ByVal intScanCount As Integer, ByVal intScanNumFirst As Integer, _
-	 ByRef intScanStart As Integer, ByRef intScanEnd As Integer)
+    ''' <summary>
+    ''' Returns the range of scan numbers to process
+    ''' </summary>
+    ''' <param name="intScanCount">Number of scans in the file</param>
+    ''' <param name="intScanNumFirst">The first scan number in the file</param>
+    ''' <param name="intScanStart">1 if mScanStart is zero; otherwise mScanStart</param>
+    ''' <param name="intScanEnd">intScanCount if mScanEnd is zero; otherwise Min(mScanEnd, intScanCount)</param>
+    ''' <remarks></remarks>
+    Protected Sub GetStartAndEndScans(
+       intScanCount As Integer,
+       intScanNumFirst As Integer,
+      ByRef intScanStart As Integer,
+      ByRef intScanEnd As Integer)
 
-		If mScanStart > 0 Then
-			intScanStart = mScanStart
-		Else
-			intScanStart = 1
-		End If
+        If mScanStart > 0 Then
+            intScanStart = mScanStart
+        Else
+            intScanStart = 1
+        End If
 
-		If mScanEnd > 0 AndAlso mScanEnd < intScanCount Then
-			intScanEnd = mScanEnd
-		Else
-			intScanEnd = intScanCount
-		End If
+        If mScanEnd > 0 AndAlso mScanEnd < intScanCount Then
+            intScanEnd = mScanEnd
+        Else
+            intScanEnd = intScanCount
+        End If
 
-	End Sub
+    End Sub
 
-	Protected Sub InitializeLocalVariables()
+    Protected Sub InitializeLocalVariables()
 
-		mTICandBPIPlot = New clsTICandBPIPlotter()
-		mInstrumentSpecificPlots = New clsTICandBPIPlotter()
+        mTICandBPIPlot = New clsTICandBPIPlotter()
+        mInstrumentSpecificPlots = New clsTICandBPIPlotter()
 
-		mLCMS2DPlot = New clsLCMSDataPlotter()
-		mLCMS2DPlotOverview = New clsLCMSDataPlotter
+        mLCMS2DPlot = New clsLCMSDataPlotter()
+        mLCMS2DPlotOverview = New clsLCMSDataPlotter
 
         mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR
 
-		mSaveTICAndBPI = False
-		mSaveLCMS2DPlots = False
-		mCheckCentroidingStatus = False
+        mSaveTICAndBPI = False
+        mSaveLCMS2DPlots = False
+        mCheckCentroidingStatus = False
 
-		mComputeOverallQualityScores = False
+        mComputeOverallQualityScores = False
 
-		mCreateDatasetInfoFile = False
-		mCreateScanStatsFile = False
+        mCreateDatasetInfoFile = False
+        mCreateScanStatsFile = False
 
-		mUpdateDatasetStatsTextFile = False
-		mDatasetStatsTextFileName = DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME
+        mUpdateDatasetStatsTextFile = False
+        mDatasetStatsTextFileName = DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME
 
-		mScanStart = 0
-		mScanEnd = 0
-		mShowDebugInfo = False
+        mScanStart = 0
+        mScanEnd = 0
+        mShowDebugInfo = False
 
-		mDatasetID = 0
+        mDatasetID = 0
 
-		mDatasetStatsSummarizer = New DSSummarizer.clsDatasetStatsSummarizer
+        mDatasetStatsSummarizer = New DSSummarizer.clsDatasetStatsSummarizer
 
-		mCopyFileLocalOnReadError = False
+        mCopyFileLocalOnReadError = False
 
-	End Sub
+    End Sub
 
-	Protected Sub InitializeTICAndBPI()
-		' Initialize TIC, BPI, and m/z vs. time arrays
-		mTICandBPIPlot.Reset()
-		mInstrumentSpecificPlots.Reset()
-	End Sub
+    Protected Sub InitializeTICAndBPI()
+        ' Initialize TIC, BPI, and m/z vs. time arrays
+        mTICandBPIPlot.Reset()
+        mInstrumentSpecificPlots.Reset()
+    End Sub
 
-	Protected Sub InitializeLCMS2DPlot()
-		' Initialize object that tracks m/z vs. time
-		mLCMS2DPlot.Reset()
-		mLCMS2DPlotOverview.Reset()
-	End Sub
+    Protected Sub InitializeLCMS2DPlot()
+        ' Initialize object that tracks m/z vs. time
+        mLCMS2DPlot.Reset()
+        mLCMS2DPlotOverview.Reset()
+    End Sub
 
-	Protected Sub ReportError(ByVal strMessage As String)
-		RaiseEvent ErrorEvent(strMessage)
-	End Sub
+    Protected Sub ReportError(strMessage As String)
+        RaiseEvent ErrorEvent(strMessage)
+    End Sub
 
-	Protected Sub ShowMessage(ByVal strMessage As String)
-		RaiseEvent MessageEvent(strMessage)
-	End Sub
+    Protected Sub ShowMessage(strMessage As String)
+        RaiseEvent MessageEvent(strMessage)
+    End Sub
 
     Protected Sub ShowProgress(
-       ByVal scanNumber As Integer,
-       ByVal scanCount As Integer,
+        scanNumber As Integer,
+        scanCount As Integer,
        ByRef dtLastProgressTime As DateTime,
-       Optional ByVal modulusValue As Integer = 100,
-       Optional ByVal detailedUpdateIntervalSeconds As Integer = 30)
+       Optional modulusValue As Integer = 100,
+       Optional detailedUpdateIntervalSeconds As Integer = 30)
 
         If modulusValue < 1 Then modulusValue = 10
         If detailedUpdateIntervalSeconds < 5 Then detailedUpdateIntervalSeconds = 15
@@ -420,7 +426,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
     End Sub
 
-    Protected Function UpdateDatasetFileStats(ByRef fiFileInfo As FileInfo, ByVal intDatasetID As Integer) As Boolean
+    Protected Function UpdateDatasetFileStats(ByRef fiFileInfo As FileInfo, intDatasetID As Integer) As Boolean
 
         Try
             If Not fiFileInfo.Exists Then Return False
@@ -449,7 +455,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
     End Function
 
-    Protected Function UpdateDatasetFileStats(ByRef diFolderInfo As DirectoryInfo, ByVal intDatasetID As Integer) As Boolean
+    Protected Function UpdateDatasetFileStats(ByRef diFolderInfo As DirectoryInfo, intDatasetID As Integer) As Boolean
 
         Try
             If Not diFolderInfo.Exists Then Return False
@@ -482,19 +488,19 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     End Function
 
     Protected Function CreateOverview2DPlots(
-     ByVal strDatasetName As String,
-     ByVal strOutputFolderPath As String,
-     ByVal intLCMS2DOverviewPlotDivisor As Integer) As Boolean
+      strDatasetName As String,
+      strOutputFolderPath As String,
+      intLCMS2DOverviewPlotDivisor As Integer) As Boolean
 
         Return CreateOverview2DPlots(strDatasetName, strOutputFolderPath, intLCMS2DOverviewPlotDivisor, String.Empty)
 
     End Function
 
     Protected Function CreateOverview2DPlots(
-      ByVal strDatasetName As String,
-      ByVal strOutputFolderPath As String,
-      ByVal intLCMS2DOverviewPlotDivisor As Integer,
-      ByVal strScanModeSuffixAddon As String) As Boolean
+       strDatasetName As String,
+       strOutputFolderPath As String,
+       intLCMS2DOverviewPlotDivisor As Integer,
+       strScanModeSuffixAddon As String) As Boolean
 
         Dim objScan As clsLCMSDataPlotter.clsScanData
 
@@ -530,8 +536,9 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
     End Function
 
-    Protected Function CreateOutputFiles(ByVal strInputFileName As String, _
-     ByVal strOutputFolderPath As String) As Boolean Implements iMSFileInfoProcessor.CreateOutputFiles
+    Protected Function CreateOutputFiles(
+       strInputFileName As String,
+       strOutputFolderPath As String) As Boolean Implements iMSFileInfoProcessor.CreateOutputFiles
 
         Dim blnSuccess As Boolean
         Dim blnSuccessOverall As Boolean
@@ -654,8 +661,9 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
     End Function
 
-    Protected Function CreateQCPlotHTMLFile(ByVal strDatasetName As String, _
-     ByVal strOutputFolderPath As String) As Boolean
+    Protected Function CreateQCPlotHTMLFile(
+       strDatasetName As String,
+       strOutputFolderPath As String) As Boolean
 
         Dim strHTMLFilePath As String
         Dim strFile1 As String
@@ -792,20 +800,21 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
     End Function
 
-    Private Function GenerateQCFigureHTML(ByVal strFilename As String, ByVal intWidthPixels As Integer) As String
+    Private Function GenerateQCFigureHTML(strFilename As String, intWidthPixels As Integer) As String
 
         If strFilename Is Nothing OrElse strFilename.Length = 0 Then
             Return "&nbsp;"
         Else
-            Return "<a href=""" & strFilename & """>" & _
-             "<img src=""" & strFilename & """ width=""" & intWidthPixels.ToString & """ border=""0""></a>"
+            Return "<a href=""" & strFilename & """>" &
+                   "<img src=""" & strFilename & """ width=""" & intWidthPixels.ToString & """ border=""0""></a>"
         End If
 
     End Function
 
-    Private Sub GenerateQCScanTypeSummaryHTML(ByRef swOutFile As StreamWriter, _
-       ByRef objDatasetSummaryStats As DSSummarizer.clsDatasetSummaryStats, _
-       ByVal strIndent As String)
+    Private Sub GenerateQCScanTypeSummaryHTML(
+      ByRef swOutFile As StreamWriter,
+      ByRef objDatasetSummaryStats As DSSummarizer.clsDatasetSummaryStats,
+       strIndent As String)
 
         Dim objEnum As Dictionary(Of String, Integer).Enumerator
         Dim strScanType As String
@@ -838,9 +847,9 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
             intScanCount = objEnum.Current.Value
 
 
-            swOutFile.WriteLine(strIndent & "  <tr><td>" & strScanType & "</td>" & _
-             "<td align=""center"">" & intScanCount & "</td>" & _
-             "<td>" & strScanFilterText & "</td></tr>")
+            swOutFile.WriteLine(strIndent & "  <tr><td>" & strScanType & "</td>" &
+                                "<td align=""center"">" & intScanCount & "</td>" &
+                                "<td>" & strScanFilterText & "</td></tr>")
 
         Loop
 
@@ -855,7 +864,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     ''' <param name="intValue"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function IntToEngineeringNotation(ByVal intValue As Integer) As String
+    Protected Function IntToEngineeringNotation(intValue As Integer) As String
 
         If intValue < 1000 Then
             Return intValue.ToString
@@ -867,14 +876,14 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
     End Function
 
-    Public MustOverride Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean Implements iMSFileInfoProcessor.ProcessDataFile
-    Public MustOverride Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String Implements iMSFileInfoProcessor.GetDatasetNameViaPath
+    Public MustOverride Function ProcessDataFile(strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean Implements iMSFileInfoProcessor.ProcessDataFile
+    Public MustOverride Function GetDatasetNameViaPath(strDataFilePath As String) As String Implements iMSFileInfoProcessor.GetDatasetNameViaPath
 
-    Private Sub mLCMS2DPlot_ErrorEvent(ByVal Message As String) Handles mLCMS2DPlot.ErrorEvent
+    Private Sub mLCMS2DPlot_ErrorEvent(Message As String) Handles mLCMS2DPlot.ErrorEvent
         ReportError("Error in LCMS2DPlot: " & Message)
     End Sub
 
-    Private Sub mLCMS2DPlotOverview_ErrorEvent(ByVal Message As String) Handles mLCMS2DPlotOverview.ErrorEvent
+    Private Sub mLCMS2DPlotOverview_ErrorEvent(Message As String) Handles mLCMS2DPlotOverview.ErrorEvent
         ReportError("Error in LCMS2DPlotOverview: " & Message)
     End Sub
 

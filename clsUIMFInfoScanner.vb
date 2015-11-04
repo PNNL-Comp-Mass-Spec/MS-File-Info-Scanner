@@ -14,9 +14,10 @@ Public Class clsUIMFInfoScanner
     ' Note: The extension must be in all caps
     Public Const UIMF_FILE_EXTENSION As String = ".UIMF"
 
-    Private Sub ComputeQualityScores(ByRef objUIMFReader As DataReader, _
-       ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, _
-       ByRef dctMasterFrameList As Dictionary(Of Integer, DataReader.FrameType), _
+    Private Sub ComputeQualityScores(
+       ByRef objUIMFReader As DataReader,
+       ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType,
+       ByRef dctMasterFrameList As Dictionary(Of Integer, DataReader.FrameType),
        ByRef intMasterFrameNumList() As Integer)
 
         ' This function is used to determine one or more overall quality scores
@@ -150,8 +151,12 @@ Public Class clsUIMFInfoScanner
 
     End Sub
 
-    Private Sub ConstructTICandBPI(ByRef objUIMFReader As DataReader, ByVal intFrameStart As Integer, ByVal intFrameEnd As Integer, _
-     ByRef dctTIC As Dictionary(Of Integer, Double), ByRef dctBPI As Dictionary(Of Integer, Double))
+    Private Sub ConstructTICandBPI(
+      ByRef objUIMFReader As DataReader,
+       intFrameStart As Integer,
+       intFrameEnd As Integer,
+      ByRef dctTIC As Dictionary(Of Integer, Double),
+      ByRef dctBPI As Dictionary(Of Integer, Double))
 
         Try
             ' Obtain the TIC and BPI for each MS frame
@@ -168,7 +173,7 @@ Public Class clsUIMFInfoScanner
 
     End Sub
 
-    Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
+    Public Overrides Function GetDatasetNameViaPath(strDataFilePath As String) As String
         ' The dataset name is simply the file name without .UIMF
         Try
             Return Path.GetFileNameWithoutExtension(strDataFilePath)
@@ -177,8 +182,9 @@ Public Class clsUIMFInfoScanner
         End Try
     End Function
 
-    Private Sub LoadFrameDetails(ByRef objUIMFReader As DataReader, _
-     ByRef dctMasterFrameList As Dictionary(Of Integer, DataReader.FrameType), _
+    Private Sub LoadFrameDetails(
+     ByRef objUIMFReader As DataReader,
+     ByRef dctMasterFrameList As Dictionary(Of Integer, DataReader.FrameType),
      ByRef intMasterFrameNumList As Integer())
 
         Const BAD_TIC_OR_BPI As Integer = Integer.MinValue
@@ -449,7 +455,7 @@ Public Class clsUIMFInfoScanner
 
     End Sub
 
-    Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    Public Overrides Function ProcessDataFile(strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
         ' Returns True if success, False if an error
 
         Dim objUIMFReader As DataReader = Nothing

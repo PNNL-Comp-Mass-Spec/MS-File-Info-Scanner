@@ -2,7 +2,6 @@
 Imports System.IO
 Imports OxyPlot
 Imports OxyPlot.Axes
-Imports PNNLOmics.Data.Constants
 
 Public Class clsPlotContainer
 

@@ -49,7 +49,7 @@ Public Class clsBrukerXmassFolderInfoScanner
         SpotNumber = 6
     End Enum
 
-    Protected Sub AddDatasetScan(ByVal intScanNumber As Integer, ByVal intMSLevel As Integer, ByVal sngElutionTime As Single, ByVal dblBPI As Double, ByVal dblTIC As Double, ByVal strScanTypeName As String, ByRef dblMaxRunTimeMinutes As Double)
+    Protected Sub AddDatasetScan(intScanNumber As Integer, intMSLevel As Integer, sngElutionTime As Single, dblBPI As Double, dblTIC As Double, strScanTypeName As String, ByRef dblMaxRunTimeMinutes As Double)
 
         If mSaveTICAndBPI AndAlso intScanNumber > 0 Then
             mTICandBPIPlot.AddData(intScanNumber, intMSLevel, sngElutionTime, dblBPI, dblTIC)
@@ -93,7 +93,7 @@ Public Class clsBrukerXmassFolderInfoScanner
     ''' <param name="udtFileInfo"></param>
     ''' <returns>True if a valid file is found; otherwise false</returns>
     ''' <remarks></remarks>
-    Protected Function DetermineAcqStartTime(ByVal diDatasetFolder As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    Protected Function DetermineAcqStartTime(diDatasetFolder As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
         Dim blnSuccess As Boolean = False
 
@@ -163,7 +163,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-    Private Function FindBrukerSettingsFile(ByVal diDotDFolder As DirectoryInfo) As FileInfo
+    Private Function FindBrukerSettingsFile(diDotDFolder As DirectoryInfo) As FileInfo
 
         Dim dotMethodFiles = diDotDFolder.GetFiles("*.method", SearchOption.AllDirectories)
 
@@ -186,7 +186,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-    Private Function FindBrukerAcqusFile(ByVal diDotDFolder As DirectoryInfo) As FileInfo
+    Private Function FindBrukerAcqusFile(diDotDFolder As DirectoryInfo) As FileInfo
 
         Dim acqusFiles = diDotDFolder.GetFiles("acqus", SearchOption.AllDirectories)
 
@@ -214,7 +214,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-    Protected Function GetMetaDataFieldAndTable(ByVal eMcfMetadataField As eMcfMetadataFields, ByRef strField As String, ByRef strTable As String) As Boolean
+    Protected Function GetMetaDataFieldAndTable(eMcfMetadataField As eMcfMetadataFields, ByRef strField As String, ByRef strTable As String) As Boolean
 
         Select Case eMcfMetadataField
             Case eMcfMetadataFields.ScanMode
@@ -255,7 +255,8 @@ Public Class clsBrukerXmassFolderInfoScanner
         Return True
     End Function
 
-    Protected Function ParseAutoMSFile(ByVal diDatasetFolder As DirectoryInfo, _
+    Protected Function ParseAutoMSFile(
+       diDatasetFolder As DirectoryInfo,
       ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
         Dim strAutoMSFilePath As String
@@ -317,7 +318,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-    Protected Function ParseBAFFile(ByVal fiBAFFileInfo As FileInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    Protected Function ParseBAFFile(fiBAFFileInfo As FileInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
         Dim blnSuccess As Boolean
 
@@ -413,7 +414,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-    Protected Function ParseMcfIndexFiles(ByVal diDatasetFolder As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    Protected Function ParseMcfIndexFiles(diDatasetFolder As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
 
         Try
 
@@ -569,7 +570,7 @@ Public Class clsBrukerXmassFolderInfoScanner
     End Function
 
     Protected Function ParseScanXMLFile(
-       ByVal diDatasetFolder As DirectoryInfo,
+        diDatasetFolder As DirectoryInfo,
        ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType,
        <Out> ByRef scanElutionTimeMap As Dictionary(Of Integer, Single)) As Boolean
 
@@ -655,7 +656,7 @@ Public Class clsBrukerXmassFolderInfoScanner
                     End Select
 
                 Loop
-                
+
             End Using
 
             If intScanCount > 0 Then
@@ -686,7 +687,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-    Protected Function GetDatasetFolder(ByVal strDataFilePath As String) As DirectoryInfo
+    Protected Function GetDatasetFolder(strDataFilePath As String) As DirectoryInfo
 
         ' First see if strFileOrFolderPath points to a valid file
         Dim fiFileInfo = New FileInfo(strDataFilePath)
@@ -701,7 +702,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-    Public Overrides Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
+    Public Overrides Function GetDatasetNameViaPath(strDataFilePath As String) As String
         Dim strDatasetName As String = String.Empty
 
         Try
@@ -723,7 +724,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-    Public Overrides Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+    Public Overrides Function ProcessDataFile(strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
         ' Process a Bruker Xmass folder, specified by strDataFilePath (which can either point to the dataset folder containing the XMass files, or any of the XMass files in the dataset folder)
 
         Dim fiFileInfo As FileInfo
@@ -880,8 +881,8 @@ Public Class clsBrukerXmassFolderInfoScanner
     End Function
 
     Private Function ParseSerOrFidFile(
-      ByVal diDotDFolder As DirectoryInfo,
-      ByVal scanElutionTimeMap As Dictionary(Of Integer, Single)) As Boolean
+       diDotDFolder As DirectoryInfo,
+       scanElutionTimeMap As Dictionary(Of Integer, Single)) As Boolean
 
         Try
 
@@ -985,10 +986,11 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-    Protected Function ReadAndStoreMcfIndexData(ByVal cnDB As SQLite.SQLiteConnection, _
-      ByVal lstMetadataNameToID As Dictionary(Of String, Integer), _
-      ByRef lstScanData As Dictionary(Of String, udtMCFScanInfoType), _
-      ByVal eMcfMetadataField As eMcfMetadataFields) As Boolean
+    Protected Function ReadAndStoreMcfIndexData(
+       cnDB As SQLite.SQLiteConnection,
+       lstMetadataNameToID As Dictionary(Of String, Integer),
+      ByRef lstScanData As Dictionary(Of String, udtMCFScanInfoType),
+       eMcfMetadataField As eMcfMetadataFields) As Boolean
 
         Dim cmd As SQLite.SQLiteCommand
         cmd = New SQLite.SQLiteCommand(cnDB)
@@ -1041,11 +1043,11 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-    Protected Function ReadDbString(ByVal drReader As SQLite.SQLiteDataReader, ByVal strColumnName As String) As String
+    Protected Function ReadDbString(drReader As SQLite.SQLiteDataReader, strColumnName As String) As String
         Return ReadDbString(drReader, strColumnName, strValueIfNotFound:=String.Empty)
     End Function
 
-    Protected Function ReadDbString(ByVal drReader As SQLite.SQLiteDataReader, ByVal strColumnName As String, ByVal strValueIfNotFound As String) As String
+    Protected Function ReadDbString(drReader As SQLite.SQLiteDataReader, strColumnName As String, strValueIfNotFound As String) As String
         Dim strValue As String
 
         Try
@@ -1061,7 +1063,7 @@ Public Class clsBrukerXmassFolderInfoScanner
         Return strValue
     End Function
 
-    Protected Function ReadDbInt(ByVal drReader As SQLite.SQLiteDataReader, ByVal strColumnName As String) As Integer
+    Protected Function ReadDbInt(drReader As SQLite.SQLiteDataReader, strColumnName As String) As Integer
         Dim intValue As Integer
         Dim strValue As String
 
@@ -1081,7 +1083,7 @@ Public Class clsBrukerXmassFolderInfoScanner
 
     End Function
 
-    Private Sub UpdateScanInfo(ByVal eMcfMetadataField As eMcfMetadataFields, ByVal strValue As String, ByRef udtScanInfo As udtMCFScanInfoType)
+    Private Sub UpdateScanInfo(eMcfMetadataField As eMcfMetadataFields, strValue As String, ByRef udtScanInfo As udtMCFScanInfoType)
 
         Dim intValue As Integer
         Dim dblValue As Double

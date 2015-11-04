@@ -31,14 +31,14 @@ Public Class clsFilterDataArrayMaxCount
 
     Private mProgress As Single     ' Value between 0 and 100
 
-    Public Event ProgressChanged(ByVal Progress As Single)
+    Public Event ProgressChanged(Progress As Single)
 
 #Region "Properties"
     Public Property MaximumDataCountToLoad() As Integer
         Get
             Return mMaximumDataCountToKeep
         End Get
-        Set(ByVal value As Integer)
+        Set(value As Integer)
             mMaximumDataCountToKeep = value
         End Set
     End Property
@@ -53,7 +53,7 @@ Public Class clsFilterDataArrayMaxCount
         Get
             Return mSkipDataPointFlag
         End Get
-        Set(ByVal value As Single)
+        Set(value As Single)
             mSkipDataPointFlag = value
         End Set
     End Property
@@ -62,7 +62,7 @@ Public Class clsFilterDataArrayMaxCount
         Get
             Return mTotalIntensityPercentageFilterEnabled
         End Get
-        Set(ByVal value As Boolean)
+        Set(value As Boolean)
             mTotalIntensityPercentageFilterEnabled = value
         End Set
     End Property
@@ -71,7 +71,7 @@ Public Class clsFilterDataArrayMaxCount
         Get
             Return mTotalIntensityPercentageFilter
         End Get
-        Set(ByVal value As Single)
+        Set(value As Single)
             mTotalIntensityPercentageFilter = value
         End Set
     End Property
@@ -81,12 +81,12 @@ Public Class clsFilterDataArrayMaxCount
         Me.New(INITIAL_MEMORY_RESERVE)
     End Sub
 
-    Public Sub New(ByVal InitialCapacity As Integer)
+    Public Sub New(InitialCapacity As Integer)
         mSkipDataPointFlag = DEFAULT_SKIP_DATA_POINT_FLAG
         Me.Clear(InitialCapacity)
     End Sub
 
-    Public Sub AddDataPoint(ByVal sngAbundance As Single, ByVal intDataPointIndex As Integer)
+    Public Sub AddDataPoint(sngAbundance As Single, intDataPointIndex As Integer)
 
         If mDataCount >= mDataValues.Length Then
             ReDim Preserve mDataValues(CInt(Math.Floor(mDataValues.Length * 1.5)) - 1)
@@ -99,7 +99,7 @@ Public Class clsFilterDataArrayMaxCount
         mDataCount += 1
     End Sub
 
-    Public Sub Clear(ByVal InitialCapacity As Integer)
+    Public Sub Clear(InitialCapacity As Integer)
         mMaximumDataCountToKeep = 400000
 
         mTotalIntensityPercentageFilterEnabled = False
@@ -114,7 +114,7 @@ Public Class clsFilterDataArrayMaxCount
         ReDim mDataIndices(InitialCapacity - 1)
     End Sub
 
-    Public Function GetAbundanceByIndex(ByVal intDataPointIndex As Integer) As Single
+    Public Function GetAbundanceByIndex(intDataPointIndex As Integer) As Single
         If intDataPointIndex >= 0 And intDataPointIndex < mDataCount Then
             Return mDataValues(intDataPointIndex)
         Else
@@ -194,7 +194,7 @@ Public Class clsFilterDataArrayMaxCount
                 Next intIndex
 
                 ' Round sngMaxAbundance up to the next highest integer
-				sngMaxAbundance = CSng(Math.Ceiling(sngMaxAbundance))
+                sngMaxAbundance = CSng(Math.Ceiling(sngMaxAbundance))
 
                 ' Now determine the histogram bin size
                 dblBinSize = sngMaxAbundance / HISTOGRAM_BIN_COUNT
@@ -360,15 +360,15 @@ Public Class clsFilterDataArrayMaxCount
 
             Exit Sub
 
-		Catch ex As Exception
-			Throw New Exception("Error in FilterDataByMaxDataCountToKeep: " & ex.Message, ex)
+        Catch ex As Exception
+            Throw New Exception("Error in FilterDataByMaxDataCountToKeep: " & ex.Message, ex)
         End Try
 
     End Sub
 
-	' This sub uses a full sort to filter the data
+    ' This sub uses a full sort to filter the data
     ' This will be slow for large arrays and you should therefore use FilterDataByMaxDataCountToKeep if possible
-    Private Sub SortAndMarkPointsToSkip(ByRef sngAbundances() As Single, ByRef intDataIndices() As Integer, ByVal intDataCount As Integer, ByVal intMaximumDataCountInArraysToLoad As Integer, ByVal intSubtaskStepCount As Integer)
+    Private Sub SortAndMarkPointsToSkip(ByRef sngAbundances() As Single, ByRef intDataIndices() As Integer, intDataCount As Integer, intMaximumDataCountInArraysToLoad As Integer, intSubtaskStepCount As Integer)
 
         Dim intIndex As Integer
 
@@ -394,7 +394,7 @@ Public Class clsFilterDataArrayMaxCount
 
     End Sub
 
-    Private Sub UpdateProgress(ByVal sngProgress As Single)
+    Private Sub UpdateProgress(sngProgress As Single)
         mProgress = sngProgress
 
         RaiseEvent ProgressChanged(mProgress)

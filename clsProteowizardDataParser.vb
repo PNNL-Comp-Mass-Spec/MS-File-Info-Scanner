@@ -6,8 +6,8 @@ Imports System.Text.RegularExpressions
 <CLSCompliant(False)> Public Class clsProteowizardDataParser
 
 
-    Public Event ErrorEvent(ByVal Message As String)
-    Public Event MessageEvent(ByVal Message As String)
+    Public Event ErrorEvent(Message As String)
+    Public Event MessageEvent(Message As String)
 
     Protected mPWiz As pwiz.ProteowizardWrapper.MSDataFileReader
     Protected mDatasetStatsSummarizer As DSSummarizer.clsDatasetStatsSummarizer
@@ -45,9 +45,9 @@ Imports System.Text.RegularExpressions
       ByRef objDatasetStatsSummarizer As DSSummarizer.clsDatasetStatsSummarizer,
       ByRef objTICandBPIPlot As clsTICandBPIPlotter,
       ByRef objLCMS2DPlot As clsLCMSDataPlotter,
-      ByVal blnSaveLCMS2DPlots As Boolean,
-      ByVal blnSaveTICandBPI As Boolean,
-      ByVal blnCheckCentroidingStatus As Boolean)
+       blnSaveLCMS2DPlots As Boolean,
+       blnSaveTICandBPI As Boolean,
+       blnCheckCentroidingStatus As Boolean)
 
         mPWiz = objPWiz
         mDatasetStatsSummarizer = objDatasetStatsSummarizer
@@ -59,25 +59,25 @@ Imports System.Text.RegularExpressions
         mCheckCentroidingStatus = blnCheckCentroidingStatus
     End Sub
 
-    Private Function ExtractQ1MZ(ByVal strChromID As String, ByRef dblMZ As Double) As Boolean
+    Private Function ExtractQ1MZ(strChromID As String, ByRef dblMZ As Double) As Boolean
 
-        Const Q_REGEX As String = "Q[0-9]=([0-9.]+)"
+        Const Q_REGEX = "Q[0-9]=([0-9.]+)"
         Static reGetQ1MZ As Regex = New Regex(Q_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
 
         Return ExtractQMZ(reGetQ1MZ, strChromID, dblMZ)
 
     End Function
 
-    Private Function ExtractQ3MZ(ByVal strChromID As String, ByRef dblMZ As Double) As Boolean
+    Private Function ExtractQ3MZ(strChromID As String, ByRef dblMZ As Double) As Boolean
 
-        Const Q1_Q3_REGEX As String = "Q1=[0-9.]+ Q3=([0-9.]+)"
+        Const Q1_Q3_REGEX = "Q1=[0-9.]+ Q3=([0-9.]+)"
         Static reGetQ3MZ As Regex = New Regex(Q1_Q3_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
 
         Return ExtractQMZ(reGetQ3MZ, strChromID, dblMZ)
 
     End Function
 
-    Private Function ExtractQMZ(ByRef reGetMZ As Regex, ByVal strChromID As String, ByRef dblMZ As Double) As Boolean
+    Private Function ExtractQMZ(ByRef reGetMZ As Regex, strChromID As String, ByRef dblMZ As Double) As Boolean
         Dim reMatch As Match
 
         reMatch = reGetMZ.Match(strChromID)
@@ -90,7 +90,7 @@ Imports System.Text.RegularExpressions
         Return False
     End Function
 
-    Private Function FindNearestInList(ByRef lstItems As List(Of Single), ByVal sngValToFind As Single) As Integer
+    Private Function FindNearestInList(ByRef lstItems As List(Of Single), sngValToFind As Single) As Integer
 
         Dim intIndexMatch As Integer
 
@@ -129,7 +129,7 @@ Imports System.Text.RegularExpressions
         Return intIndexMatch
     End Function
 
-    Public Sub PossiblyUpdateAcqTimeStart(ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, ByVal dblRuntimeMinutes As Double)
+    Public Sub PossiblyUpdateAcqTimeStart(ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, dblRuntimeMinutes As Double)
 
         If dblRuntimeMinutes > 0 Then
             Dim dtAcqTimeStartAlt As DateTime
@@ -142,17 +142,18 @@ Imports System.Text.RegularExpressions
 
     End Sub
 
-    Private Sub ProcessSRM(ByVal strChromID As String, _
-     ByRef sngTimes() As Single, _
-     ByRef sngIntensities() As Single, _
-     ByRef lstTICScanTimes As List(Of Single), _
-     ByRef lstTICScanNumbers As List(Of Integer), _
-     ByRef dblRuntimeMinutes As Double, _
-     ByRef dct2DDataParent As Dictionary(Of Integer, Dictionary(Of Double, Double)), _
-     ByRef dct2DDataProduct As Dictionary(Of Integer, Dictionary(Of Double, Double)), _
-     ByRef dct2DDataScanTimes As Dictionary(Of Integer, Single))
+    Private Sub ProcessSRM(
+       strChromID As String,
+      ByRef sngTimes() As Single,
+      ByRef sngIntensities() As Single,
+      ByRef lstTICScanTimes As List(Of Single),
+      ByRef lstTICScanNumbers As List(Of Integer),
+      ByRef dblRuntimeMinutes As Double,
+      ByRef dct2DDataParent As Dictionary(Of Integer, Dictionary(Of Double, Double)),
+      ByRef dct2DDataProduct As Dictionary(Of Integer, Dictionary(Of Double, Double)),
+      ByRef dct2DDataScanTimes As Dictionary(Of Integer, Single))
 
-        Dim intScanNumber As Integer = 0
+        Dim intScanNumber = 0
         Dim intIndexMatch As Integer
 
         Dim blnParentMZFound As Boolean
@@ -165,7 +166,7 @@ Imports System.Text.RegularExpressions
         blnParentMZFound = ExtractQ1MZ(strChromID, dblParentMZ)
         blnProductMZFound = ExtractQ3MZ(strChromID, dblProductMZ)
 
-        For intIndex As Integer = 0 To sngTimes.Length - 1
+        For intIndex = 0 To sngTimes.Length - 1
 
             ' Find the ScanNumber in the TIC nearest to sngTimes(intIndex)
             intIndexMatch = FindNearestInList(lstTICScanTimes, sngTimes(intIndex))
@@ -228,15 +229,16 @@ Imports System.Text.RegularExpressions
 
     End Sub
 
-    Private Sub ProcessTIC(ByVal strChromID As String, _
-     ByRef sngTimes() As Single, _
-     ByRef sngIntensities() As Single, _
-     ByRef lstTICScanTimes As List(Of Single), _
-     ByRef lstTICScanNumbers As List(Of Integer), _
-     ByRef dblRuntimeMinutes As Double, _
-     ByVal blnStoreInTICandBPIPlot As Boolean)
+    Private Sub ProcessTIC(
+       strChromID As String,
+      ByRef sngTimes() As Single,
+      ByRef sngIntensities() As Single,
+      ByRef lstTICScanTimes As List(Of Single),
+      ByRef lstTICScanNumbers As List(Of Integer),
+      ByRef dblRuntimeMinutes As Double,
+       blnStoreInTICandBPIPlot As Boolean)
 
-        For intIndex As Integer = 0 To sngTimes.Length - 1
+        For intIndex = 0 To sngTimes.Length - 1
             lstTICScanTimes.Add(sngTimes(intIndex))
             lstTICScanNumbers.Add(intIndex + 1)
 
@@ -254,8 +256,8 @@ Imports System.Text.RegularExpressions
         Next
 
         ' Make sure lstTICScanTimes is sorted
-        Dim blnNeedToSort As Boolean = False
-        For intIndex As Integer = 1 To lstTICScanTimes.Count - 1
+        Dim blnNeedToSort = False
+        For intIndex = 1 To lstTICScanTimes.Count - 1
             If lstTICScanTimes(intIndex) < lstTICScanTimes(intIndex - 1) Then
                 blnNeedToSort = True
                 Exit For
@@ -276,7 +278,7 @@ Imports System.Text.RegularExpressions
             lstTICScanTimes.Clear()
             lstTICScanNumbers.Clear()
 
-            For intIndex As Integer = 0 To sngTICScanTimes.Length - 1
+            For intIndex = 0 To sngTICScanTimes.Length - 1
                 lstTICScanTimes.Add(sngTICScanTimes(intIndex))
                 lstTICScanNumbers.Add(intTICScanNumbers(intIndex))
             Next
@@ -286,16 +288,19 @@ Imports System.Text.RegularExpressions
 
     End Sub
 
-    Protected Sub ReportMessage(ByVal strMessage As String)
+    Protected Sub ReportMessage(strMessage As String)
         RaiseEvent MessageEvent(strMessage)
     End Sub
 
-    Protected Sub ReportError(ByVal strError As String)
+    Protected Sub ReportError(strError As String)
         RaiseEvent ErrorEvent(strError)
     End Sub
 
-    Public Sub StoreChromatogramInfo(ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, _
-      ByRef blnTICStored As Boolean, ByRef blnSRMDataCached As Boolean, ByRef dblRuntimeMinutes As Double)
+    Public Sub StoreChromatogramInfo(
+      ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType,
+      ByRef blnTICStored As Boolean,
+      ByRef blnSRMDataCached As Boolean,
+      ByRef dblRuntimeMinutes As Double)
 
         Dim strChromID As String = String.Empty
         Dim sngTimes() As Single
@@ -303,8 +308,8 @@ Imports System.Text.RegularExpressions
         ReDim sngTimes(0)
         ReDim sngIntensities(0)
 
-        Dim lstTICScanTimes As List(Of Single) = New List(Of Single)
-        Dim lstTICScanNumbers As List(Of Integer) = New List(Of Integer)
+        Dim lstTICScanTimes = New List(Of Single)
+        Dim lstTICScanNumbers = New List(Of Integer)
 
         ' This dictionary tracks the m/z and intensity values for parent (Q1) ions of each scan
         ' Key is ScanNumber; Value is a dictionary holding m/z and intensity values for that scan
@@ -325,7 +330,7 @@ Imports System.Text.RegularExpressions
 
         dblRuntimeMinutes = 0
 
-        For intChromIndex As Integer = 0 To mPWiz.ChromatogramCount - 1
+        For intChromIndex = 0 To mPWiz.ChromatogramCount - 1
 
             Try
                 If intChromIndex = 0 Then
@@ -342,7 +347,7 @@ Imports System.Text.RegularExpressions
                 If TryGetCVParam(oCVParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, param) Then
                     ' This chromatogram is the TIC
 
-                    Dim blnStoreInTICandBPIPlot As Boolean = False
+                    Dim blnStoreInTICandBPIPlot = False
                     If mSaveTICAndBPI AndAlso mPWiz.SpectrumCount = 0 Then
                         blnStoreInTICandBPIPlot = True
                     End If
@@ -386,7 +391,7 @@ Imports System.Text.RegularExpressions
 
     End Sub
 
-    Public Sub StoreMSSpectraInfo(ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, ByVal blnTICStored As Boolean, ByRef dblRuntimeMinutes As Double)
+    Public Sub StoreMSSpectraInfo(ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, blnTICStored As Boolean, ByRef dblRuntimeMinutes As Double)
 
         Try
             Dim dblScanTimes() As Double
@@ -416,8 +421,8 @@ Imports System.Text.RegularExpressions
 
                 Try
 
-                    Dim blnComputeTIC As Boolean = True
-                    Dim blnComputeBPI As Boolean = True
+                    Dim blnComputeTIC = True
+                    Dim blnComputeBPI = True
 
                     ' Obtain the raw mass spectrum
                     Dim oMSDataSpectrum As pwiz.ProteowizardWrapper.MsDataSpectrum
@@ -491,7 +496,7 @@ Imports System.Text.RegularExpressions
                         dblBPI = 0
                         dblBasePeakMZ = 0
 
-                        For intIndex As Integer = 0 To dblMZs.Length - 1
+                        For intIndex = 0 To dblMZs.Length - 1
                             dblTIC += dblIntensities(intIndex)
                             If dblIntensities(intIndex) > dblBPI Then
                                 dblBPI = dblIntensities(intIndex)
@@ -536,15 +541,16 @@ Imports System.Text.RegularExpressions
 
     End Sub
 
-    Private Sub Store2DPlotData(ByRef dct2DDataScanTimes As Dictionary(Of Integer, Single), _
-      ByRef dct2DDataParent As Dictionary(Of Integer, Dictionary(Of Double, Double)), _
+    Private Sub Store2DPlotData(
+      ByRef dct2DDataScanTimes As Dictionary(Of Integer, Single),
+      ByRef dct2DDataParent As Dictionary(Of Integer, Dictionary(Of Double, Double)),
       ByRef dct2DDataProduct As Dictionary(Of Integer, Dictionary(Of Double, Double)))
 
         ' This variable keeps track of the length of the largest Dictionary(Of Double, Double) object in dct2DData
-        Dim intMax2DDataCount As Integer = 1
+        Dim intMax2DDataCount = 1
 
         Dim int2DScanNumMin As Integer = Integer.MaxValue
-        Dim int2DScanNumMax As Integer = 0
+        Dim int2DScanNumMax = 0
 
         ' Determine the min/max scan numbers in dct2DDataParent
         ' Also determine intMax2DDataCount
@@ -558,7 +564,7 @@ Imports System.Text.RegularExpressions
 
     End Sub
 
-    Private Sub Store2DPlotDataPoint(ByRef dct2DData As Dictionary(Of Integer, Dictionary(Of Double, Double)), ByVal intScanNumber As Integer, ByVal dblMZ As Double, ByVal dblIntensity As Double)
+    Private Sub Store2DPlotDataPoint(ByRef dct2DData As Dictionary(Of Integer, Dictionary(Of Double, Double)), intScanNumber As Integer, dblMZ As Double, dblIntensity As Double)
 
         Dim obj2DMzAndIntensity As Dictionary(Of Double, Double) = Nothing
 
@@ -580,9 +586,10 @@ Imports System.Text.RegularExpressions
 
     End Sub
 
-    Private Sub Store2DPlotDataWork(ByRef dct2DData As Dictionary(Of Integer, Dictionary(Of Double, Double)), _
-      ByRef dct2DDataScanTimes As Dictionary(Of Integer, Single), _
-      ByVal intMSLevel As Integer, ByVal intMax2DDataCount As Integer, ByVal int2DScanNumMin As Integer, ByVal int2DScanNumMax As Integer)
+    Private Sub Store2DPlotDataWork(
+      ByRef dct2DData As Dictionary(Of Integer, Dictionary(Of Double, Double)),
+      ByRef dct2DDataScanTimes As Dictionary(Of Integer, Single),
+       intMSLevel As Integer, intMax2DDataCount As Integer, int2DScanNumMin As Integer, int2DScanNumMax As Integer)
 
         Dim dblMZList() As Double
         Dim dblIntensityList() As Double
@@ -617,7 +624,7 @@ Imports System.Text.RegularExpressions
 
     End Sub
 
-    Private Function StripExtraFromChromID(ByVal strText As String) As String
+    Private Function StripExtraFromChromID(strText As String) As String
 
         ' If strText looks like:
         ' SRM SIC Q1=506.6 Q3=132.1 sample=1 period=1 experiment=1 transition=0
@@ -635,7 +642,7 @@ Imports System.Text.RegularExpressions
 
     End Function
 
-    Public Shared Function TryGetCVParam(ByRef oCVParams As pwiz.CLI.data.CVParamList, ByVal cvidToFind As pwiz.CLI.cv.CVID, ByRef paramMatch As pwiz.CLI.data.CVParam) As Boolean
+    Public Shared Function TryGetCVParam(ByRef oCVParams As pwiz.CLI.data.CVParamList, cvidToFind As pwiz.CLI.cv.CVID, ByRef paramMatch As pwiz.CLI.data.CVParam) As Boolean
 
         For Each param As pwiz.CLI.data.CVParam In oCVParams
             If param.cvid = cvidToFind Then
@@ -649,8 +656,11 @@ Imports System.Text.RegularExpressions
         Return False
     End Function
 
-    Private Sub UpdateDataRanges(ByRef dct2DData As Dictionary(Of Integer, Dictionary(Of Double, Double)), _
-      ByRef intMax2DDataCount As Integer, ByRef int2DScanNumMin As Integer, ByRef int2DScanNumMax As Integer)
+    Private Sub UpdateDataRanges(
+      ByRef dct2DData As Dictionary(Of Integer, Dictionary(Of Double, Double)),
+      ByRef intMax2DDataCount As Integer,
+      ByRef int2DScanNumMin As Integer,
+      ByRef int2DScanNumMax As Integer)
 
         Dim dct2DEnum As Dictionary(Of Integer, Dictionary(Of Double, Double)).Enumerator
         Dim int2DPlotScanNum As Integer

@@ -33,11 +33,11 @@ Public Interface iMSFileInfoProcessor
         Public OverallQualityScore As Single
     End Structure
 
-	Function ProcessDataFile(ByVal strDataFilePath As String, ByRef udtFileInfo As udtFileInfoType) As Boolean
-    Function CreateOutputFiles(ByVal strInputFileName As String, ByVal strOutputFolderPath As String) As Boolean
+    Function ProcessDataFile(strDataFilePath As String, ByRef udtFileInfo As udtFileInfoType) As Boolean
+    Function CreateOutputFiles(strInputFileName As String, strOutputFolderPath As String) As Boolean
 
     Function GetDatasetInfoXML() As String
-    Function GetDatasetNameViaPath(ByVal strDataFilePath As String) As String
+    Function GetDatasetNameViaPath(strDataFilePath As String) As String
 
     'ReadOnly Property BPI() As udtChromatogramInfoType
     'ReadOnly Property TIC() As udtChromatogramInfoType
@@ -46,18 +46,18 @@ Public Interface iMSFileInfoProcessor
     Property LCMS2DOverviewPlotDivisor() As Integer
 
     Property DatasetStatsTextFileName() As String
-	Property DatasetID As Integer
+    Property DatasetID As Integer
 
     Property ScanStart() As Integer
     Property ScanEnd() As Integer
-	Property ShowDebugInfo() As Boolean
+    Property ShowDebugInfo() As Boolean
 
-    Function GetOption(ByVal eOption As ProcessingOptions) As Boolean
-    Sub SetOption(ByVal eOption As ProcessingOptions, ByVal blnValue As Boolean)
+    Function GetOption(eOption As ProcessingOptions) As Boolean
+    Sub SetOption(eOption As ProcessingOptions, blnValue As Boolean)
 
-	Event ErrorEvent(ByVal Message As String)
+    Event ErrorEvent(Message As String)
 
-    Event MessageEvent(ByVal message As String)
+    Event MessageEvent(message As String)
 
 End Interface
 
