@@ -165,42 +165,42 @@ Public Class clsSpectrumTypeClassifier
 
 				Dim dblPreviousMZ As Double = 0
 
-				While srDtaFile.Peek > -1
-					Dim strLineIn = srDtaFile.ReadLine
+                While srDtaFile.Peek > -1
+                    Dim strLineIn = srDtaFile.ReadLine
 
-					If Not String.IsNullOrEmpty(strLineIn) Then
-						If strLineIn.StartsWith("=============") Then
-							' DTA header line
+                    If Not String.IsNullOrEmpty(strLineIn) Then
+                        If strLineIn.StartsWith("=============") Then
+                            ' DTA header line
 
-							' Process the data for the previous spectrum
+                            ' Process the data for the previous spectrum
                             CheckPPMDiffs(lstPpmDiffs, 2, eCentroidStatusConstants.Unknown)
 
-							' Reset the previous m/z value and skip the next line
-							If srDtaFile.Peek > -1 Then srDtaFile.ReadLine()
-							dblPreviousMZ = 0
-							lstPpmDiffs.Clear()
+                            ' Reset the previous m/z value and skip the next line
+                            If srDtaFile.Peek > -1 Then srDtaFile.ReadLine()
+                            dblPreviousMZ = 0
+                            lstPpmDiffs.Clear()
 
-							If DateTime.UtcNow.Subtract(dtLastStatusTime).TotalSeconds >= 30 Then
-								RaiseEvent ReadingSpectra(TotalSpectra())
-								dtLastStatusTime = DateTime.UtcNow
-							End If
+                            If DateTime.UtcNow.Subtract(dtLastStatusTime).TotalSeconds >= 30 Then
+                                RaiseEvent ReadingSpectra(TotalSpectra())
+                                dtLastStatusTime = DateTime.UtcNow
+                            End If
 
-						Else
-							Dim dataColumns = strLineIn.Split(splitChars, 3)
+                        Else
+                            Dim dataColumns = strLineIn.Split(splitChars, 3)
 
-							Dim dblMZ As Double
-							If Double.TryParse(dataColumns(0), dblMZ) Then
-								If dblPreviousMZ > 0 AndAlso dblMZ > dblPreviousMZ Then
-									Dim delMPPM = 1000000.0 * (dblMZ - dblPreviousMZ) / dblMZ
-									lstPpmDiffs.Add(delMPPM)
-								End If
-								dblPreviousMZ = dblMZ
-							End If
-						End If
+                            Dim dblMZ As Double
+                            If Double.TryParse(dataColumns(0), dblMZ) Then
+                                If dblPreviousMZ > 0 AndAlso dblMZ > dblPreviousMZ Then
+                                    Dim delMPPM = 1000000.0 * (dblMZ - dblPreviousMZ) / dblMZ
+                                    lstPpmDiffs.Add(delMPPM)
+                                End If
+                                dblPreviousMZ = dblMZ
+                            End If
+                        End If
 
-					End If
+                    End If
 
-				End While
+                End While
 
 				' Process the data for the previous spectrum
                 CheckPPMDiffs(lstPpmDiffs, 2, eCentroidStatusConstants.Unknown)

@@ -229,10 +229,10 @@ Public Class clsAgilentGCDFolderInfoScanner
 
                         objScanStatsEntry.ScanFilterText = ""
                         objScanStatsEntry.ElutionTime = oSpectrum.RetentionTimeMinutes.ToString("0.0000")
-                        objScanStatsEntry.TotalIonIntensity = MathUtilities.ValueToString(oSpectrum.TIC, 1)
+                        objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(oSpectrum.TIC, 1)
 
-                        objScanStatsEntry.BasePeakIntensity = MathUtilities.ValueToString(oSpectrum.BasePeakAbundance, 1)
-                        objScanStatsEntry.BasePeakMZ = MathUtilities.ValueToString(oSpectrum.BasePeakMZ, 5)
+                        objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(oSpectrum.BasePeakAbundance, 1)
+                        objScanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(oSpectrum.BasePeakMZ, 5)
 
                         ' Base peak signal to noise ratio
                         objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"

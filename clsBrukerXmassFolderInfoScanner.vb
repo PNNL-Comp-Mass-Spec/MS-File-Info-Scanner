@@ -63,8 +63,8 @@ Public Class clsBrukerXmassFolderInfoScanner
         objScanStatsEntry.ScanFilterText = ""
 
         objScanStatsEntry.ElutionTime = sngElutionTime.ToString("0.0000")
-        objScanStatsEntry.TotalIonIntensity = MathUtilities.ValueToString(dblTIC, 5)
-        objScanStatsEntry.BasePeakIntensity = MathUtilities.ValueToString(dblBPI, 5)
+        objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5)
+        objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5)
         objScanStatsEntry.BasePeakMZ = "0"
 
         ' Base peak signal to noise ratio

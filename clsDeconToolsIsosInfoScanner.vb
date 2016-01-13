@@ -347,8 +347,8 @@ Public Class clsDeconToolsIsosInfoScanner
                         objScanStatsEntry.ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(.FilterText)
 
                         objScanStatsEntry.ElutionTime = .ElutionTime.ToString("0.0000")
-                        objScanStatsEntry.TotalIonIntensity = MathUtilities.ValueToString(.TotalIonCurrent, 5)
-                        objScanStatsEntry.BasePeakIntensity = MathUtilities.ValueToString(.BasePeakIntensity, 5)
+                        objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(.TotalIonCurrent, 5)
+                        objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(.BasePeakIntensity, 5)
                         objScanStatsEntry.BasePeakMZ = Math.Round(.BasePeakMZ, 4).ToString
 
                         ' Base peak signal to noise ratio

@@ -7,23 +7,17 @@ Option Strict On
 ' Program started May 7, 2009
 ' Ported from clsMASICScanStatsParser to clsDatasetStatsSummarizer in February 2010
 '
-' E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnl.gov/ or http://omics.pnl.gov
+' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+' Website: http://panomics.pnnl.gov/ or http://omics.pnl.gov
 ' -------------------------------------------------------------------------------
 ' 
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
 ' in compliance with the License.  You may obtain a copy of the License at 
 ' http://www.apache.org/licenses/LICENSE-2.0
 '
-' Notice: This computer software was prepared by Battelle Memorial Institute, 
-' hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the 
-' Department of Energy (DOE).  All rights in the computer software are reserved 
-' by DOE on behalf of the United States Government and the Contractor as 
-' provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY 
-' WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS 
-' SOFTWARE.  This notice including this sentence must appear on any copies of 
-' this computer software.
 
+Imports System.Text
+Imports System.Xml
 Imports PNNLOmics.Utilities
 Imports SpectraTypeClassifier
 
@@ -107,8 +101,8 @@ Namespace DSSummarizer
 
 #Region "Events"
         Public Event ErrorEvent(message As String)
-
 #End Region
+
 #Region "Properties"
 
         Public Property DatasetStatsSummaryFileName() As String
@@ -137,7 +131,7 @@ Namespace DSSummarizer
 #End Region
 
         Public Sub New()
-            mFileDate = "May 11, 2015"
+            mFileDate = "January 12, 2016"
             InitializeLocalVariables()
         End Sub
 
@@ -351,47 +345,6 @@ Namespace DSSummarizer
 
             Dim dblMedian1 = mMedianUtils.Median(lstData)
 
-            'Dim dblMedian2 As Double
-            'Dim intMidpointIndex As Integer
-            'Dim blnAverage As Boolean
-
-            'If dblList Is Nothing OrElse dblList.Length < 1 OrElse intItemCount < 1 Then
-            '	' List is empty (or intItemCount = 0)
-            '	dblMedian2 = 0
-            'ElseIf intItemCount <= 1 Then
-            '	' Only 1 item; the median is the value
-            '	dblMedian2 = dblList(0)
-            'Else
-            '	' Sort dblList ascending, then find the midpoint
-            '	Array.Sort(dblList, 0, intItemCount)
-
-            '	If intItemCount Mod 2 = 0 Then
-            '		' Even number
-            '		intMidpointIndex = CInt(Math.Floor(intItemCount / 2)) - 1
-            '		blnAverage = True
-            '	Else
-            '		' Odd number
-            '		intMidpointIndex = CInt(Math.Floor(intItemCount / 2))
-            '	End If
-
-            '	If intMidpointIndex > intItemCount Then intMidpointIndex = intItemCount - 1
-            '	If intMidpointIndex < 0 Then intMidpointIndex = 0
-
-            '	If blnAverage Then
-            '		' Even number of items
-            '		' Return the average of the two middle points
-            '		dblMedian2 = (dblList(intMidpointIndex) + dblList(intMidpointIndex + 1)) / 2
-            '	Else
-            '		' Odd number of items
-            '		dblMedian2 = dblList(intMidpointIndex)
-            '	End If
-
-            'End If
-
-            'If Math.Abs(dblMedian1 - dblMedian2) > 0.001 Then
-            '	Console.WriteLine("Median discrepancy found: " & dblMedian1 & " vs. " & dblMedian2)
-            'End If
-
             Return dblMedian1
 
         End Function
@@ -437,9 +390,9 @@ Namespace DSSummarizer
                     mErrorMessage = ""
                 End If
 
-                ' If CreateDatasetInfoXML() used a StringBuilder to cache the XML data, then we would have to use Text.Encoding.Unicode
+                ' If CreateDatasetInfoXML() used a StringBuilder to cache the XML data, then we would have to use Encoding.Unicode
                 ' However, CreateDatasetInfoXML() now uses a MemoryStream, so we're able to use UTF8
-                Using swOutFile = New StreamWriter(New FileStream(strDatasetInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read), Text.Encoding.UTF8)
+                Using swOutFile = New StreamWriter(New FileStream(strDatasetInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read), Encoding.UTF8)
 
                     swOutFile.WriteLine(CreateDatasetInfoXML(strDatasetName, objScanStats, udtDatasetFileInfo, udtSampleInfo))
 
@@ -544,12 +497,12 @@ Namespace DSSummarizer
 
             ' Create a MemoryStream to hold the results
             Dim objMemStream As MemoryStream
-            Dim objXMLSettings As Xml.XmlWriterSettings
+            Dim objXMLSettings As XmlWriterSettings
 
-            Dim objDSInfo As Xml.XmlWriter
+            Dim objDSInfo As XmlWriter
             Dim objEnum As Dictionary(Of String, Integer).Enumerator
 
-            Dim objSummaryStats As DSSummarizer.clsDatasetSummaryStats
+            Dim objSummaryStats As clsDatasetSummaryStats
 
             Dim intIndexMatch As Integer
             Dim strScanType As String
@@ -582,13 +535,13 @@ Namespace DSSummarizer
                     includeCentroidStats = False
                 End If
 
-                objXMLSettings = New Xml.XmlWriterSettings()
+                objXMLSettings = New XmlWriterSettings()
 
                 With objXMLSettings
                     .CheckCharacters = True
                     .Indent = True
                     .IndentChars = "  "
-                    .Encoding = Text.Encoding.UTF8
+                    .Encoding = Encoding.UTF8
 
                     ' Do not close output automatically so that MemoryStream
                     ' can be read after the XmlWriter has been closed
@@ -597,7 +550,7 @@ Namespace DSSummarizer
 
                 ' We could cache the text using a StringBuilder, like this:
                 '
-                ' Dim sbDatasetInfo As New Text.StringBuilder
+                ' Dim sbDatasetInfo As New StringBuilder
                 ' Dim objStringWriter As StringWriter
                 ' objStringWriter = New StringWriter(sbDatasetInfo)
                 ' objDSInfo = New Xml.XmlTextWriter(objStringWriter)
@@ -609,10 +562,10 @@ Namespace DSSummarizer
                 '  and thus you'll see the attribute encoding="utf-16" in the opening XML declaration 
                 ' The alternative is to use a MemoryStream.  Here, the stream encoding is set by the XmlWriter 
                 '  and so you see the attribute encoding="utf-8" in the opening XML declaration encoding 
-                '  (since we used objXMLSettings.Encoding = Text.Encoding.UTF8)
+                '  (since we used objXMLSettings.Encoding = Encoding.UTF8)
                 '
                 objMemStream = New MemoryStream()
-                objDSInfo = Xml.XmlWriter.Create(objMemStream, objXMLSettings)
+                objDSInfo = XmlWriter.Create(objMemStream, objXMLSettings)
 
                 objDSInfo.WriteStartDocument(True)
 
@@ -701,14 +654,14 @@ Namespace DSSummarizer
                 objDSInfo.WriteEndElement()       ' AcquisitionInfo EndElement
 
                 objDSInfo.WriteStartElement("TICInfo")
-                objDSInfo.WriteElementString("TIC_Max_MS", MathUtilities.ValueToString(objSummaryStats.MSStats.TICMax, 5))
-                objDSInfo.WriteElementString("TIC_Max_MSn", MathUtilities.ValueToString(objSummaryStats.MSnStats.TICMax, 5))
-                objDSInfo.WriteElementString("BPI_Max_MS", MathUtilities.ValueToString(objSummaryStats.MSStats.BPIMax, 5))
-                objDSInfo.WriteElementString("BPI_Max_MSn", MathUtilities.ValueToString(objSummaryStats.MSnStats.BPIMax, 5))
-                objDSInfo.WriteElementString("TIC_Median_MS", MathUtilities.ValueToString(objSummaryStats.MSStats.TICMedian, 5))
-                objDSInfo.WriteElementString("TIC_Median_MSn", MathUtilities.ValueToString(objSummaryStats.MSnStats.TICMedian, 5))
-                objDSInfo.WriteElementString("BPI_Median_MS", MathUtilities.ValueToString(objSummaryStats.MSStats.BPIMedian, 5))
-                objDSInfo.WriteElementString("BPI_Median_MSn", MathUtilities.ValueToString(objSummaryStats.MSnStats.BPIMedian, 5))
+                objDSInfo.WriteElementString("TIC_Max_MS", StringUtilities.ValueToString(objSummaryStats.MSStats.TICMax, 5))
+                objDSInfo.WriteElementString("TIC_Max_MSn", StringUtilities.ValueToString(objSummaryStats.MSnStats.TICMax, 5))
+                objDSInfo.WriteElementString("BPI_Max_MS", StringUtilities.ValueToString(objSummaryStats.MSStats.BPIMax, 5))
+                objDSInfo.WriteElementString("BPI_Max_MSn", StringUtilities.ValueToString(objSummaryStats.MSnStats.BPIMax, 5))
+                objDSInfo.WriteElementString("TIC_Median_MS", StringUtilities.ValueToString(objSummaryStats.MSStats.TICMedian, 5))
+                objDSInfo.WriteElementString("TIC_Median_MSn", StringUtilities.ValueToString(objSummaryStats.MSnStats.TICMedian, 5))
+                objDSInfo.WriteElementString("BPI_Median_MS", StringUtilities.ValueToString(objSummaryStats.MSStats.BPIMedian, 5))
+                objDSInfo.WriteElementString("BPI_Median_MSn", StringUtilities.ValueToString(objSummaryStats.MSnStats.BPIMedian, 5))
                 objDSInfo.WriteEndElement()       ' TICInfo EndElement
 
                 ' Only write the SampleInfo block if udtSampleInfo contains entries
@@ -768,8 +721,8 @@ Namespace DSSummarizer
         ''' <returns>True if success; False if failure</returns>
         ''' <remarks></remarks>
         Public Function CreateScanStatsFile(
-           strDatasetName As String,
-           strScanStatsFilePath As String,
+          strDatasetName As String,
+          strScanStatsFilePath As String,
           ByRef objScanStats As List(Of clsScanStatsEntry),
           ByRef udtDatasetFileInfo As udtDatasetFileInfoType,
           ByRef udtSampleInfo As udtSampleInfoType) As Boolean
@@ -777,7 +730,7 @@ Namespace DSSummarizer
             Dim strScanStatsExFilePath As String
 
             Dim intDatasetID As Integer = udtDatasetFileInfo.DatasetID
-            Dim sbLineOut As Text.StringBuilder = New Text.StringBuilder
+            Dim sbLineOut = New StringBuilder
 
             Dim blnSuccess As Boolean
 

@@ -7,7 +7,7 @@ Imports MSFileInfoScannerInterfaces
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "November 3, 2015"
+    Public Const PROGRAM_DATE As String = "January 12, 2016"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional

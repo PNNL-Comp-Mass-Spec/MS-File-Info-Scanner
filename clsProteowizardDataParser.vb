@@ -465,16 +465,16 @@ Imports System.Text.RegularExpressions
 
                     If TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, param) Then
                         dblTIC = param.value
-                        objScanStatsEntry.TotalIonIntensity = MathUtilities.ValueToString(dblTIC, 5)
+                        objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5)
                         blnComputeTIC = False
                     End If
 
                     If TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, param) Then
                         dblBPI = param.value
-                        objScanStatsEntry.BasePeakIntensity = MathUtilities.ValueToString(dblBPI, 5)
+                        objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5)
 
                         If TryGetCVParam(oSpectrum.scanList.scans(0).cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, param) Then
-                            objScanStatsEntry.BasePeakMZ = MathUtilities.ValueToString(param.value, 5)
+                            objScanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(param.value, 5)
                             blnComputeBPI = False
                         End If
                     End If
@@ -504,9 +504,9 @@ Imports System.Text.RegularExpressions
                             End If
                         Next
 
-                        objScanStatsEntry.TotalIonIntensity = MathUtilities.ValueToString(dblTIC, 5)
-                        objScanStatsEntry.BasePeakIntensity = MathUtilities.ValueToString(dblBPI, 5)
-                        objScanStatsEntry.BasePeakMZ = MathUtilities.ValueToString(dblBasePeakMZ, 5)
+                        objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5)
+                        objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5)
+                        objScanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(dblBasePeakMZ, 5)
 
                     End If
 

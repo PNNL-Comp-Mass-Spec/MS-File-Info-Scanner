@@ -355,13 +355,13 @@ Public Class clsUIMFInfoScanner
 
                 objScanStatsEntry.ElutionTime = dblElutionTime.ToString("0.0000")
                 If dblTIC > BAD_TIC_OR_BPI Then
-                    objScanStatsEntry.TotalIonIntensity = MathUtilities.ValueToString(dblTIC, 5)
+                    objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5)
                 Else
                     objScanStatsEntry.TotalIonIntensity = "0"
                 End If
 
                 If dblBPI > BAD_TIC_OR_BPI Then
-                    objScanStatsEntry.BasePeakIntensity = MathUtilities.ValueToString(dblBPI, 5)
+                    objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5)
                 Else
                     objScanStatsEntry.BasePeakIntensity = "0"
                 End If
