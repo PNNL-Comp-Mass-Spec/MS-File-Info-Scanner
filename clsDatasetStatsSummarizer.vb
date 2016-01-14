@@ -216,16 +216,16 @@ Namespace DSSummarizer
             Dim strScanTypeKey As String
 
             Dim dblTICListMS() As Double
-            Dim intTICListMSCount As Integer = 0
+            Dim intTICListMSCount = 0
 
             Dim dblTICListMSn() As Double
-            Dim intTICListMSnCount As Integer = 0
+            Dim intTICListMSnCount = 0
 
             Dim dblBPIListMS() As Double
-            Dim intBPIListMSCount As Integer = 0
+            Dim intBPIListMSCount = 0
 
             Dim dblBPIListMSn() As Double
-            Dim intBPIListMSnCount As Integer = 0
+            Dim intBPIListMSnCount = 0
 
             Try
 
@@ -475,7 +475,7 @@ Namespace DSSummarizer
           ByRef objScanStats As List(Of clsScanStatsEntry),
           ByRef udtDatasetFileInfo As udtDatasetFileInfoType) As String
 
-            Dim udtSampleInfo As udtSampleInfoType = New udtSampleInfoType
+            Dim udtSampleInfo = New udtSampleInfoType()
             udtSampleInfo.Clear()
 
             Return CreateDatasetInfoXML(strDatasetName, objScanStats, udtDatasetFileInfo, udtSampleInfo)
@@ -508,7 +508,7 @@ Namespace DSSummarizer
             Dim strScanType As String
             Dim strScanFilterText As String
 
-            Dim includeCentroidStats As Boolean = False
+            Dim includeCentroidStats = False
 
             Try
 
@@ -678,8 +678,7 @@ Namespace DSSummarizer
                 objDSInfo.WriteEndDocument() 'End the document
 
                 objDSInfo.Close()
-                objDSInfo = Nothing
-
+                
                 ' Now Rewind the memory stream and output as a string
                 objMemStream.Position = 0
                 Dim srStreamReader = New StreamReader(objMemStream)
@@ -846,8 +845,8 @@ Namespace DSSummarizer
         Private Sub InitializeLocalVariables()
             mErrorMessage = String.Empty
 
-            mMedianUtils = New SpectraTypeClassifier.clsMedianUtilities()
-            mSpectraTypeClassifier = New SpectraTypeClassifier.clsSpectrumTypeClassifier
+            mMedianUtils = New clsMedianUtilities()
+            mSpectraTypeClassifier = New clsSpectrumTypeClassifier
 
             ClearCachedData()
         End Sub

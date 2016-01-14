@@ -24,7 +24,7 @@ Public Class clsFinniganRawFileInfoScanner
     ''' <param name="objXcaliburAccessor"></param>
     ''' <param name="udtFileInfo"></param>
     ''' <remarks></remarks>
-    Protected Sub ComputeQualityScores(ByRef objXcaliburAccessor As XRawFileIO, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType)
+    Protected Sub ComputeQualityScores(objXcaliburAccessor As XRawFileIO, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType)
 
         Dim intScanCount As Integer
         Dim intScanNumber As Integer
@@ -48,7 +48,7 @@ Public Class clsFinniganRawFileInfoScanner
         If mLCMS2DPlot.ScanCountCached > 0 Then
             ' Obtain the overall average intensity value using the data cached in mLCMS2DPlot
             ' This avoids having to reload all of the data using objXcaliburAccessor
-            Const intMSLevelFilter As Integer = 1
+            Const intMSLevelFilter = 1
             sngOverallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(intMSLevelFilter)
         Else
 
@@ -128,12 +128,12 @@ Public Class clsFinniganRawFileInfoScanner
         End Try
     End Function
 
-    Protected Sub LoadScanDetails(ByRef objXcaliburAccessor As XRawFileIO)
+    Protected Sub LoadScanDetails(objXcaliburAccessor As XRawFileIO)
 
         Dim intScanCount As Integer
         Dim intScanNumber As Integer
 
-        Dim udtScanHeaderInfo As FinniganFileReaderBaseClass.udtScanHeaderInfoType = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
+        Dim udtScanHeaderInfo = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
         Dim blnSuccess As Boolean
 
         Dim intScanStart As Integer
@@ -467,9 +467,9 @@ Public Class clsFinniganRawFileInfoScanner
 
     End Sub
 
-    Protected Sub StoreExtendedScanInfo(ByRef udtExtendedScanInfo As udtExtendedStatsInfoType, ByRef strEntryNames() As String, ByRef strEntryValues() As String)
+    Protected Sub StoreExtendedScanInfo(ByRef udtExtendedScanInfo As udtExtendedStatsInfoType, strEntryNames() As String, strEntryValues() As String)
 
-        Dim cTrimChars() As Char = New Char() {":"c, " "c}
+        Dim cTrimChars = New Char() {":"c, " "c}
         Dim intIndex As Integer
 
         Try

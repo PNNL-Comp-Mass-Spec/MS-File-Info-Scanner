@@ -6,47 +6,49 @@ Option Strict On
 ' Last modified May 11, 2015
 
 Imports System.IO
+Imports System.Runtime.InteropServices
+Imports MSFileInfoScanner.DSSummarizer
 Imports MSFileInfoScannerInterfaces
 
 Public MustInherit Class clsMSFileInfoProcessorBaseClass
-	Implements iMSFileInfoProcessor
+    Implements iMSFileInfoProcessor
 
-	Public Sub New()
-		InitializeLocalVariables()
-	End Sub
+    Public Sub New()
+        InitializeLocalVariables()
+    End Sub
 
 #Region "Constants"
 
 #End Region
 
 #Region "Member variables"
-	Protected mSaveTICAndBPI As Boolean
-	Protected mSaveLCMS2DPlots As Boolean
-	Protected mCheckCentroidingStatus As Boolean
+    Protected mSaveTICAndBPI As Boolean
+    Protected mSaveLCMS2DPlots As Boolean
+    Protected mCheckCentroidingStatus As Boolean
 
-	Protected mComputeOverallQualityScores As Boolean
-	Protected mCreateDatasetInfoFile As Boolean					' When True, then creates an XML file with dataset info
-	Protected mCreateScanStatsFile As Boolean					' When True, then creates a _ScanStats.txt file
-	Protected mLCMS2DOverviewPlotDivisor As Integer
+    Protected mComputeOverallQualityScores As Boolean
+    Protected mCreateDatasetInfoFile As Boolean                 ' When True, then creates an XML file with dataset info
+    Protected mCreateScanStatsFile As Boolean                   ' When True, then creates a _ScanStats.txt file
+    Protected mLCMS2DOverviewPlotDivisor As Integer
 
-	Protected mUpdateDatasetStatsTextFile As Boolean			' When True, then adds a new row to a tab-delimited text file that has dataset stats
-	Protected mDatasetStatsTextFileName As String
+    Protected mUpdateDatasetStatsTextFile As Boolean            ' When True, then adds a new row to a tab-delimited text file that has dataset stats
+    Protected mDatasetStatsTextFileName As String
 
-	Protected mScanStart As Integer
-	Protected mScanEnd As Integer
-	Protected mShowDebugInfo As Boolean
+    Protected mScanStart As Integer
+    Protected mScanEnd As Integer
+    Protected mShowDebugInfo As Boolean
 
-	Protected mDatasetID As Integer
+    Protected mDatasetID As Integer
 
-	Protected mCopyFileLocalOnReadError As Boolean
+    Protected mCopyFileLocalOnReadError As Boolean
 
-	Protected WithEvents mTICandBPIPlot As clsTICandBPIPlotter
-	Protected WithEvents mInstrumentSpecificPlots As clsTICandBPIPlotter
+    Protected WithEvents mTICandBPIPlot As clsTICandBPIPlotter
+    Protected WithEvents mInstrumentSpecificPlots As clsTICandBPIPlotter
 
-	Protected WithEvents mLCMS2DPlot As clsLCMSDataPlotter
-	Protected WithEvents mLCMS2DPlotOverview As clsLCMSDataPlotter
+    Protected WithEvents mLCMS2DPlot As clsLCMSDataPlotter
+    Protected WithEvents mLCMS2DPlotOverview As clsLCMSDataPlotter
 
-	Protected WithEvents mDatasetStatsSummarizer As DSSummarizer.clsDatasetStatsSummarizer
+    Protected WithEvents mDatasetStatsSummarizer As clsDatasetStatsSummarizer
 
     Public Event ErrorEvent(Message As String) Implements iMSFileInfoProcessor.ErrorEvent
     Public Event MessageEvent(Message As String) Implements iMSFileInfoProcessor.MessageEvent
@@ -185,7 +187,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         Try
             Dim strDatasetName = GetDatasetNameViaPath(strInputFileName)
             Dim strDatasetInfoFilePath = Path.Combine(strOutputFolderPath, strDatasetName)
-            strDatasetInfoFilePath &= DSSummarizer.clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX
+            strDatasetInfoFilePath &= clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX
 
             If mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = 0 AndAlso mDatasetID > 0 Then
                 mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID
@@ -211,14 +213,10 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         Dim blnSuccess As Boolean
 
         Dim strDatasetName As String
-        Dim strScanStatsFilePath As String
-
-        strScanStatsFilePath = String.Empty
 
         Try
             strDatasetName = GetDatasetNameViaPath(strInputFileName)
-            strScanStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetName)
-            strScanStatsFilePath &= "_ScanStats.txt"
+            Dim strScanStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetName) & "_ScanStats.txt"
 
             If mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = 0 AndAlso mDatasetID > 0 Then
                 mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID
@@ -243,7 +241,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
        strInputFileName As String,
        strOutputFolderPath As String) As Boolean
 
-        Return UpdateDatasetStatsTextFile(strInputFileName, strOutputFolderPath, DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME)
+        Return UpdateDatasetStatsTextFile(strInputFileName, strOutputFolderPath, clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME)
 
     End Function
 
@@ -255,14 +253,11 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         Dim blnSuccess As Boolean
 
         Dim strDatasetName As String
-        Dim strDatasetStatsFilePath As String
-
-        strDatasetStatsFilePath = String.Empty
 
         Try
             strDatasetName = GetDatasetNameViaPath(strInputFileName)
 
-            strDatasetStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetStatsFilename)
+            Dim strDatasetStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetStatsFilename)
 
             blnSuccess = mDatasetStatsSummarizer.UpdateDatasetStatsTextFile(strDatasetName, strDatasetStatsFilePath)
 
@@ -304,8 +299,9 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     ''' <param name="intScanEnd">intScanCount if mScanEnd is zero; otherwise Min(mScanEnd, intScanCount)</param>
     ''' <remarks></remarks>
     Protected Sub GetStartAndEndScans(
-       intScanCount As Integer,
-      ByRef intScanStart As Integer, ByRef intScanEnd As Integer)
+      intScanCount As Integer,
+      <Out()> ByRef intScanStart As Integer,
+      <Out()> ByRef intScanEnd As Integer)
         GetStartAndEndScans(intScanCount, 1, intScanStart, intScanEnd)
     End Sub
 
@@ -318,10 +314,10 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     ''' <param name="intScanEnd">intScanCount if mScanEnd is zero; otherwise Min(mScanEnd, intScanCount)</param>
     ''' <remarks></remarks>
     Protected Sub GetStartAndEndScans(
-       intScanCount As Integer,
-       intScanNumFirst As Integer,
-      ByRef intScanStart As Integer,
-      ByRef intScanEnd As Integer)
+      intScanCount As Integer,
+      intScanNumFirst As Integer,
+      <Out()> ByRef intScanStart As Integer,
+      <Out()> ByRef intScanEnd As Integer)
 
         If mScanStart > 0 Then
             intScanStart = mScanStart
@@ -357,7 +353,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         mCreateScanStatsFile = False
 
         mUpdateDatasetStatsTextFile = False
-        mDatasetStatsTextFileName = DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME
+        mDatasetStatsTextFileName = clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME
 
         mScanStart = 0
         mScanEnd = 0
@@ -365,7 +361,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
         mDatasetID = 0
 
-        mDatasetStatsSummarizer = New DSSummarizer.clsDatasetStatsSummarizer
+        mDatasetStatsSummarizer = New clsDatasetStatsSummarizer
 
         mCopyFileLocalOnReadError = False
 
@@ -392,11 +388,11 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     End Sub
 
     Protected Sub ShowProgress(
-        scanNumber As Integer,
-        scanCount As Integer,
-       ByRef dtLastProgressTime As DateTime,
-       Optional modulusValue As Integer = 100,
-       Optional detailedUpdateIntervalSeconds As Integer = 30)
+      scanNumber As Integer,
+      scanCount As Integer,
+      ByRef dtLastProgressTime As DateTime,
+      Optional modulusValue As Integer = 100,
+      Optional detailedUpdateIntervalSeconds As Integer = 30)
 
         If modulusValue < 1 Then modulusValue = 10
         If detailedUpdateIntervalSeconds < 5 Then detailedUpdateIntervalSeconds = 15
@@ -426,7 +422,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
     End Sub
 
-    Protected Function UpdateDatasetFileStats(ByRef fiFileInfo As FileInfo, intDatasetID As Integer) As Boolean
+    Protected Function UpdateDatasetFileStats(fiFileInfo As FileInfo, intDatasetID As Integer) As Boolean
 
         Try
             If Not fiFileInfo.Exists Then Return False
@@ -455,7 +451,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
 
     End Function
 
-    Protected Function UpdateDatasetFileStats(ByRef diFolderInfo As DirectoryInfo, intDatasetID As Integer) As Boolean
+    Protected Function UpdateDatasetFileStats(diFolderInfo As DirectoryInfo, intDatasetID As Integer) As Boolean
 
         Try
             If Not diFolderInfo.Exists Then Return False
@@ -773,7 +769,7 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
                 swOutFile.WriteLine("      <td>&nbsp;</td>")
                 swOutFile.WriteLine("      <td align=""center"">DMS <a href=""http://dms2.pnl.gov/dataset/show/" & strDatasetName & """>Dataset Detail Report</a></td>")
 
-                strDSInfoFileName = strDatasetName & DSSummarizer.clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX
+                strDSInfoFileName = strDatasetName & clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX
                 If mCreateDatasetInfoFile OrElse File.Exists(Path.Combine(strOutputFolderPath, strDSInfoFileName)) Then
                     swOutFile.WriteLine("      <td align=""center""><a href=""" & strDSInfoFileName & """>Dataset Info XML file</a></td>")
                 Else
@@ -812,8 +808,8 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
     End Function
 
     Private Sub GenerateQCScanTypeSummaryHTML(
-      ByRef swOutFile As StreamWriter,
-      ByRef objDatasetSummaryStats As DSSummarizer.clsDatasetSummaryStats,
+      swOutFile As StreamWriter,
+      objDatasetSummaryStats As clsDatasetSummaryStats,
        strIndent As String)
 
         Dim objEnum As Dictionary(Of String, Integer).Enumerator
@@ -832,10 +828,10 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         Do While objEnum.MoveNext
 
             strScanType = objEnum.Current.Key
-            intIndexMatch = strScanType.IndexOf(DSSummarizer.clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR)
+            intIndexMatch = strScanType.IndexOf(clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR, StringComparison.Ordinal)
 
             If intIndexMatch >= 0 Then
-                strScanFilterText = strScanType.Substring(intIndexMatch + DSSummarizer.clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR.Length)
+                strScanFilterText = strScanType.Substring(intIndexMatch + clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR.Length)
                 If intIndexMatch > 0 Then
                     strScanType = strScanType.Substring(0, intIndexMatch)
                 Else
