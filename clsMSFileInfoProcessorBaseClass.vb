@@ -812,7 +812,6 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
       objDatasetSummaryStats As clsDatasetSummaryStats,
        strIndent As String)
 
-        Dim objEnum As Dictionary(Of String, Integer).Enumerator
         Dim strScanType As String
         Dim intIndexMatch As Integer
 
@@ -824,10 +823,9 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
         swOutFile.WriteLine(strIndent & "<table border=""1"">")
         swOutFile.WriteLine(strIndent & "  <tr><th>Scan Type</th><th>Scan Count</th><th>Scan Filter Text</th></tr>")
 
-        objEnum = objDatasetSummaryStats.objScanTypeStats.GetEnumerator
-        Do While objEnum.MoveNext
+        For Each scanTypeEntry In objDatasetSummaryStats.objScanTypeStats
 
-            strScanType = objEnum.Current.Key
+            strScanType = scanTypeEntry.Key
             intIndexMatch = strScanType.IndexOf(clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR, StringComparison.Ordinal)
 
             If intIndexMatch >= 0 Then
@@ -840,14 +838,14 @@ Public MustInherit Class clsMSFileInfoProcessorBaseClass
             Else
                 strScanFilterText = String.Empty
             End If
-            intScanCount = objEnum.Current.Value
+            intScanCount = scanTypeEntry.Value
 
 
             swOutFile.WriteLine(strIndent & "  <tr><td>" & strScanType & "</td>" &
                                 "<td align=""center"">" & intScanCount & "</td>" &
                                 "<td>" & strScanFilterText & "</td></tr>")
 
-        Loop
+        Next
 
         swOutFile.WriteLine(strIndent & "</table>")
 

@@ -500,7 +500,6 @@ Namespace DSSummarizer
             Dim objXMLSettings As XmlWriterSettings
 
             Dim objDSInfo As XmlWriter
-            Dim objEnum As Dictionary(Of String, Integer).Enumerator
 
             Dim objSummaryStats As clsDatasetSummaryStats
 
@@ -576,10 +575,9 @@ Namespace DSSummarizer
 
                 objDSInfo.WriteStartElement("ScanTypes")
 
-                objEnum = objSummaryStats.objScanTypeStats.GetEnumerator()
-                Do While objEnum.MoveNext
+                For Each scanTypeEntry In objSummaryStats.objScanTypeStats
 
-                    strScanType = objEnum.Current.Key
+                    strScanType = scanTypeEntry.Key
                     intIndexMatch = strScanType.IndexOf(SCANTYPE_STATS_SEPCHAR, StringComparison.Ordinal)
 
                     If intIndexMatch >= 0 Then
@@ -594,11 +592,11 @@ Namespace DSSummarizer
                     End If
 
                     objDSInfo.WriteStartElement("ScanType")
-                    objDSInfo.WriteAttributeString("ScanCount", objEnum.Current.Value.ToString())
+                    objDSInfo.WriteAttributeString("ScanCount", scanTypeEntry.Value.ToString())
                     objDSInfo.WriteAttributeString("ScanFilterText", FixNull(strScanFilterText))
                     objDSInfo.WriteString(strScanType)
                     objDSInfo.WriteEndElement()     ' ScanType EndElement
-                Loop
+                Next
 
                 objDSInfo.WriteEndElement()       ' ScanTypes
 
@@ -678,7 +676,7 @@ Namespace DSSummarizer
                 objDSInfo.WriteEndDocument() 'End the document
 
                 objDSInfo.Close()
-                
+
                 ' Now Rewind the memory stream and output as a string
                 objMemStream.Position = 0
                 Dim srStreamReader = New StreamReader(objMemStream)

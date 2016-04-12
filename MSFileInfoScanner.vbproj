@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>MSFileInfoScanner</RootNamespace>
     <AssemblyName>MSFileInfoScanner</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <MyType>Custom</MyType>
     <TargetFrameworkProfile />
   </PropertyGroup>

@@ -69,8 +69,7 @@ Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
         Try
             ' Open the .Wiff file using the ProteoWizardWrapper
 
-            Dim objPWiz As pwiz.ProteowizardWrapper.MSDataFileReader
-            objPWiz = New pwiz.ProteowizardWrapper.MSDataFileReader(ioFileInfo.FullName)
+            Dim objPWiz = New pwiz.ProteowizardWrapper.MSDataFileReader(ioFileInfo.FullName)
 
             Try
                 Dim dtRunStartTime As DateTime = udtFileInfo.AcqTimeStart

@@ -353,8 +353,7 @@ Public Class clsBrukerXmassFolderInfoScanner
             ShowMessage("Determining acquisition info using Proteowizard (this could take a while)")
 
 
-            Dim objPWiz As pwiz.ProteowizardWrapper.MSDataFileReader
-            objPWiz = New pwiz.ProteowizardWrapper.MSDataFileReader(fiBAFFileInfo.FullName)
+            Dim objPWiz = New pwiz.ProteowizardWrapper.MSDataFileReader(fiBAFFileInfo.FullName)
 
             Try
                 Dim dtRunStartTime As DateTime = CDate(objPWiz.RunStartTime())
