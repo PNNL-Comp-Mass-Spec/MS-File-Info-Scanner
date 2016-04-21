@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.3.5955; April 21, 2016
+	- Update MSFileInfoScannerInterfaces.dll to .NET 4.5.1
+
 Version 1.3.5945; April 11, 2016
 	- Update to latest ProteoWizardWrapper and latest ProteoWizard
 	- Requires update to .NET 4.5.1 due to SQLite update
