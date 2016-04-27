@@ -2098,6 +2098,20 @@
             Gets or sets the t 0.
             </summary>
         </member>
+        <member name="T:UIMFLibrary.ReaderWriterExtensions">
+            <summary>
+            Extension methods that use functionality specific to .NET 4.5 and above
+            </summary>
+        </member>
+        <member name="M:UIMFLibrary.ReaderWriterExtensions.InsertFrameAsync(UIMFLibrary.DataWriter,System.Int32,System.Collections.Generic.Dictionary{UIMFLibrary.FrameParamKeyType,System.String})">
+            <summary>
+            Asynchronously insert a frame
+            </summary>
+            <param name="dataWriter"></param>
+            <param name="frameNum"></param>
+            <param name="frameParameters"></param>
+            <returns></returns>
+        </member>
         <member name="T:UIMFLibrary.ScanInfo">
             <summary>
             Class for tracking pre-computed information about a given scan
