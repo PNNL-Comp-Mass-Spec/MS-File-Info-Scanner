@@ -7,7 +7,7 @@ Imports MSFileInfoScannerInterfaces
 
 Module modMain
 
-    Public Const PROGRAM_DATE As String = "April 27, 2016"
+    Public Const PROGRAM_DATE As String = "April 29, 2016"
 
     Private mInputDataFilePath As String            ' This path can contain wildcard characters, e.g. C:\*.raw
     Private mOutputFolderName As String             ' Optional
@@ -401,7 +401,10 @@ Module modMain
                               "total size of the data, saving the values in the file " & clsMSFileInfoScanner.DefaultAcquisitionTimeFilename & ". " &
                               "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), " &
                               "Agilent or QStar/QTrap .WIFF files, Masslynx .Raw folders, Bruker 1 folders, " &
-                              "Bruker XMass analysis.baf files, .UIMF files (IMS), and zipped Bruker imaging datasets (with 0_R*.zip files)")
+                              "Bruker XMass analysis.baf files, .UIMF files (IMS), " &
+                              "zipped Bruker imaging datasets (with 0_R*.zip files), and " &
+                              "DeconTools _isos.csv files")
+
             Console.WriteLine()
 
             Console.WriteLine("Program syntax:" & Environment.NewLine & Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location))
@@ -437,7 +440,7 @@ Module modMain
             Console.WriteLine("Use /CC to check spectral data for whether it is centroided or profile")
             Console.WriteLine()
 
-            Console.WriteLine("Use /DST to update (or create) a tab-delimited text file with overview stats for the dataset.  If /DI is used, then will include detailed scan counts; otherwise, will just have the dataset name, acquisition date, and (if available) sample name and comment. By default, the file is named " & DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME & "; to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt")
+            Console.WriteLine("Use /DST to update (or create) a tab-delimited text file with overview stats for the dataset.  If /DI is used, will include detailed scan counts; otherwise, will just have the dataset name, acquisition date, and (if available) sample name and comment. By default, the file is named " & DSSummarizer.clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME & "; to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt")
             Console.WriteLine()
 
             Console.WriteLine("Use /ScanStart and /ScanEnd to limit the scan range to process; useful for files where the first few scans are corrupt.  For example, to start processing at scan 10, use /ScanStart:10")

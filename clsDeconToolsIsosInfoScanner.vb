@@ -3,7 +3,7 @@
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Started in 2013
 '
-' Last modified December 2, 2013
+' Last modified April 29, 2016
 
 Imports ThermoRawFileReaderDLL.FinniganFileIO
 Imports PNNLOmics.Utilities
@@ -111,11 +111,14 @@ Public Class clsDeconToolsIsosInfoScanner
         strScansFilePath = Path.Combine(fiIsosFile.Directory.FullName, strScansFilePath)
 
         Dim lstScanData = LoadScansFile(strScansFilePath)
+        Dim scansFileIsMissing = False
 
         If lstScanData.Count > 0 Then
             udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart.AddMinutes(lstScanData.Last.ElutionTime)
             udtFileInfo.ScanCount = lstScanData.Last.Scan
         Else
+            scansFileIsMissing = True
+
             udtFileInfo.ScanCount = (From item In lstIsosData Select item.Scan).Max
 
             For intScanIndex = 1 To udtFileInfo.ScanCount
@@ -150,6 +153,21 @@ Public Class clsDeconToolsIsosInfoScanner
                     lstIons.Sort(New clsLCMSDataPlotter.udtMSIonTypeComparer)
                     mLCMS2DPlot.AddScan(intCurrentScan, udtCurrentScan.MSLevel, CSng(udtCurrentScan.ElutionTime), lstIons)
 
+                    If scansFileIsMissing AndAlso mSaveTICAndBPI Then
+                        ' Determine the TIC and BPI values using the data from the .isos file
+                        Dim tic As Double = 0
+                        Dim bpi As Double = 0
+
+                        For dataIndex = 0 To lstIons.Count - 1
+                            tic += lstIons(dataIndex).Intensity
+                            If lstIons(dataIndex).Intensity > bpi Then
+                                bpi = lstIons(dataIndex).Intensity
+                            End If
+                        Next
+
+                        mTICandBPIPlot.AddData(intCurrentScan, udtCurrentScan.MSLevel, udtCurrentScan.ElutionTime, bpi, tic)
+                    End If
+
                 End If
 
                 intCurrentScan = lstIsosData(intIndex).Scan
@@ -180,9 +198,9 @@ Public Class clsDeconToolsIsosInfoScanner
         Dim intColIndexScanOrFrameNum As Integer = -1
 
         Dim lstIsosData = New List(Of udtIsosDataType)
-        Dim intRowNumber As Integer = 0
+        Dim intRowNumber = 0
 
-        Dim intLastScan As Integer = 0
+        Dim intLastScan = 0
         Dim intLastScanParseErrors = 0
 
         Console.WriteLine("  Reading the _isos.csv file")
@@ -203,7 +221,7 @@ Public Class clsDeconToolsIsosInfoScanner
                 End If
 
                 Dim blnParseError = False
-                Dim intCurrentScan As Integer = 0
+                Dim intCurrentScan = 0
 
                 Try
                     Dim udtIsosData = New udtIsosDataType
@@ -253,7 +271,7 @@ Public Class clsDeconToolsIsosInfoScanner
 
     Private Function LoadScansFile(strScansFilePath As String) As List(Of udtScansDataType)
 
-        Const FILTERED_SCANS_SUFFIX As String = "_filtered_scans.csv"
+        Const FILTERED_SCANS_SUFFIX = "_filtered_scans.csv"
 
         Dim dctColumnInfo As New Dictionary(Of String, Integer)
         dctColumnInfo.Add("type", -1)
@@ -267,7 +285,7 @@ Public Class clsDeconToolsIsosInfoScanner
         Dim intColIndexScanOrFrameTime As Integer = -1
 
         Dim lstScanData = New List(Of udtScansDataType)
-        Dim intRowNumber As Integer = 0
+        Dim intRowNumber = 0
         Dim intColIndexScanInfo As Integer = -1
 
         If Not File.Exists(strScansFilePath) AndAlso strScansFilePath.ToLower().EndsWith(FILTERED_SCANS_SUFFIX) Then
@@ -275,7 +293,7 @@ Public Class clsDeconToolsIsosInfoScanner
         End If
 
         If Not File.Exists(strScansFilePath) Then
-            ShowMessage("Warning: _scans.csv file is missing; will plot vs. scan number instead of version elution time")
+            ShowMessage("Warning: _scans.csv file is missing; will plot vs. scan number instead of vs. elution time")
             Return lstScanData
         End If
 

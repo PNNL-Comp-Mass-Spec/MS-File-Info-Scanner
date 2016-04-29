@@ -327,6 +327,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_69A64E8F9118D0F07E9142434FE22B1B"
+        "OwnerKey" = "8:_4C49B701F36BB75B8D090ED3DAF73FA6"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_6E036F67C1DD9E74587AB7228EB605BA"
         "OwnerKey" = "8:_4D10B3FA75DF40BDA5A7801FB47B7EDB"
         "MsmSig" = "8:_UNDEFINED"
@@ -1800,7 +1806,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:MathNet.Numerics, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:MathNet.Numerics, Version=3.8.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_69A64E8F9118D0F07E9142434FE22B1B"
@@ -1933,7 +1939,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:UIMFLibrary, Version=3.0.5940.31940, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:UIMFLibrary, Version=3.0.5961.16321, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_94FB45DA835A15D020E6439CB753EC26"
@@ -2447,7 +2453,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:SpectraTypeClassifier, Version=1.0.5955.26251, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:SpectraTypeClassifier, Version=1.0.5963.22324, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_D9EDD9C2C230E37A0873E70A4A6C7E68"
@@ -2756,15 +2762,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:MSFileInfoScanner"
-        "ProductCode" = "8:{989D804F-B8D9-4E37-860C-2EE434D7FEFD}"
-        "PackageCode" = "8:{D29F68B5-E3A9-4BCD-BEF9-A89AA5A89DED}"
+        "ProductCode" = "8:{96E40B40-6AED-40A9-8BC0-84C54A0DAED2}"
+        "PackageCode" = "8:{9D83366D-11A6-4C67-90C5-F311288A9B0E}"
         "UpgradeCode" = "8:{5B7DD97A-9979-4302-9840-188A941F61F1}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.2.20"
+        "ProductVersion" = "8:1.2.21"
         "Manufacturer" = "8:PNNL"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.3.5963; April 29, 2016
+	- Now creating TIC and BPI plots from data in the DeconTools _isos.csv file if the _scans.csv file is missing
+
 Version 1.3.5961; April 27, 2016
 	- Updated UIMFLibrary.dll compiled with .NET 4.5.1 and SQLite 1.0.97
 
