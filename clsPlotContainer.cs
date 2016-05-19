@@ -1,305 +1,337 @@
-﻿
-Imports System.IO
-Imports OxyPlot
-Imports OxyPlot.Axes
-
-Public Class clsPlotContainer
-
-    Protected Enum ImageFileFormat
-        PNG
-        JPG
-    End Enum
-
-    Public Property AnnotationBottomLeft As String
-
-    Public Property AnnotationBottomRight As String
-
-    Public ReadOnly Property Plot As OxyPlot.PlotModel
-        Get
-            Return mPlot
-        End Get
-    End Property
-
-    Public Property FontSizeBase As Integer
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+
+using System.IO;
+using OxyPlot;
+using OxyPlot.Axes;
+
+public class clsPlotContainer
+{
+
+	protected enum ImageFileFormat
+	{
+		PNG,
+		JPG
+	}
+
+	public string AnnotationBottomLeft { get; set; }
+
+	public string AnnotationBottomRight { get; set; }
+
+	public OxyPlot.PlotModel Plot {
+		get { return mPlot; }
+	}
+
+	public int FontSizeBase { get; set; }
+
+	public int SeriesCount {
+		get {
+			if (mPlot == null) {
+				return 0;
+			}
+			return mPlot.Series.Count;
+		}
+	}
+
+	public bool PlottingDeisotopedData { get; set; }
 
-    Public ReadOnly Property SeriesCount As Integer
-        Get
-            If mPlot Is Nothing Then
-                Return 0
-            End If
-            Return mPlot.Series.Count
-        End Get
-    End Property
 
-    Public Property PlottingDeisotopedData As Boolean
+	protected OxyPlot.PlotModel mPlot;
 
+	protected Dictionary<string, OxyPalette> mColorGradients;
+	/// <summary>
+	/// Constructor
+	/// </summary>
+	/// <param name="thePlot"></param>
+	/// <remarks></remarks>
+	public clsPlotContainer(OxyPlot.PlotModel thePlot)
+	{
+		mPlot = thePlot;
+		FontSizeBase = 16;
+	}
 
-    Protected mPlot As OxyPlot.PlotModel
-    Protected mColorGradients As Dictionary(Of String, OxyPalette)
+	/// <summary>
+	/// Save the plot, along with any defined annotations, to a png file
+	/// </summary>
+	/// <param name="pngFilePath">Output file path</param>
+	/// <param name="width">PNG file width, in pixels</param>
+	/// <param name="height">PNG file height, in pixels</param>
+	/// <param name="resolution">Image resolution, in dots per inch</param>
+	/// <remarks></remarks>
+	public void SaveToPNG(string pngFilePath, int width, int height, int resolution)
+	{
+		if (string.IsNullOrWhiteSpace(pngFilePath)) {
+			throw new ArgumentOutOfRangeException(pngFilePath, "Filename cannot be empty");
+		}
 
-    ''' <summary>
-    ''' Constructor
-    ''' </summary>
-    ''' <param name="thePlot"></param>
-    ''' <remarks></remarks>
-    Public Sub New(thePlot As OxyPlot.PlotModel)
-        mPlot = thePlot
-        FontSizeBase = 16
-    End Sub
+		if (Path.GetExtension(pngFilePath).ToLower() != ".png") {
+			pngFilePath += ".png";
+		}
 
-    ''' <summary>
-    ''' Save the plot, along with any defined annotations, to a png file
-    ''' </summary>
-    ''' <param name="pngFilePath">Output file path</param>
-    ''' <param name="width">PNG file width, in pixels</param>
-    ''' <param name="height">PNG file height, in pixels</param>
-    ''' <param name="resolution">Image resolution, in dots per inch</param>
-    ''' <remarks></remarks>
-    Public Sub SaveToPNG(pngFilePath As String, width As Integer, height As Integer, resolution As Integer)
-        If String.IsNullOrWhiteSpace(pngFilePath) Then
-            Throw New ArgumentOutOfRangeException(pngFilePath, "Filename cannot be empty")
-        End If
+		SaveToFileLoop(pngFilePath, ImageFileFormat.PNG, width, height, resolution);
 
-        If Path.GetExtension(pngFilePath).ToLower() <> ".png" Then
-            pngFilePath &= ".png"
-        End If
+	}
 
-        SaveToFileLoop(pngFilePath, ImageFileFormat.PNG, width, height, resolution)
+	public void SaveToJPG(string jpgFilePath, int width, int height, int resolution)
+	{
+		if (string.IsNullOrWhiteSpace(jpgFilePath)) {
+			throw new ArgumentOutOfRangeException(jpgFilePath, "Filename cannot be empty");
+		}
 
-    End Sub
+		if (Path.GetExtension(jpgFilePath).ToLower() != ".png") {
+			jpgFilePath += ".jpg";
+		}
 
-    Public Sub SaveToJPG(jpgFilePath As String, width As Integer, height As Integer, resolution As Integer)
-        If String.IsNullOrWhiteSpace(jpgFilePath) Then
-            Throw New ArgumentOutOfRangeException(jpgFilePath, "Filename cannot be empty")
-        End If
+		SaveToFileLoop(jpgFilePath, ImageFileFormat.JPG, width, height, resolution);
 
-        If Path.GetExtension(jpgFilePath).ToLower() <> ".png" Then
-            jpgFilePath &= ".jpg"
-        End If
+	}
 
-        SaveToFileLoop(jpgFilePath, ImageFileFormat.JPG, width, height, resolution)
 
-    End Sub
-    
-    Protected Sub SaveToFileLoop(imageFilePath As String, fileFormat As ImageFileFormat, width As Integer, height As Integer, resolution As Integer)
+	protected void SaveToFileLoop(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
+	{
+		if (mColorGradients == null || mColorGradients.Count == 0) {
+			SaveToFile(imageFilePath, fileFormat, width, height, resolution);
+			return;
+		}
 
-        If mColorGradients Is Nothing OrElse mColorGradients.Count = 0 Then
-            SaveToFile(imageFilePath, fileFormat, width, height, resolution)
-            Return
-        End If
+		foreach (void colorGradient_loopVariable in mColorGradients) {
+			colorGradient = colorGradient_loopVariable;
+			bool matchFound = false;
 
-        For Each colorGradient In mColorGradients
-            Dim matchFound As Boolean
+			foreach (void axis_loopVariable in mPlot.Axes) {
+				axis = axis_loopVariable;
+				dynamic newAxis = axis as LinearColorAxis;
 
-            For Each axis In mPlot.Axes
-                Dim newAxis = TryCast(axis, LinearColorAxis)
+				if (newAxis == null) {
+					continue;
+				}
 
-                If newAxis Is Nothing Then
-                    Continue For
-                End If
+				matchFound = true;
+				newAxis.Palette = colorGradient.Value;
+				newAxis.IsAxisVisible = true;
 
-                matchFound = True
-                newAxis.Palette = colorGradient.Value
-                newAxis.IsAxisVisible = True
+				dynamic fiBaseImageFile = new FileInfo(imageFilePath);
 
-                Dim fiBaseImageFile = New FileInfo(imageFilePath)
+				dynamic newFileName = Path.GetFileNameWithoutExtension(fiBaseImageFile.Name) + "_Gradient_" + colorGradient.Key + fiBaseImageFile.Extension;
+				newFileName = Path.Combine(fiBaseImageFile.DirectoryName, newFileName);
 
-                Dim newFileName = Path.GetFileNameWithoutExtension(fiBaseImageFile.Name) & "_Gradient_" & colorGradient.Key & fiBaseImageFile.Extension
-                newFileName = Path.Combine(fiBaseImageFile.DirectoryName, newFileName)
+				SaveToFile(newFileName, fileFormat, width, height, resolution);
+			}
 
-                SaveToFile(newFileName, fileFormat, width, height, resolution)
-            Next
+			if (!matchFound) {
+				SaveToFile(imageFilePath, fileFormat, width, height, resolution);
+				return;
+			}
+		}
 
-            If Not matchFound Then
-                SaveToFile(imageFilePath, fileFormat, width, height, resolution)
-                Return
-            End If
-        Next
+	}
 
-    End Sub
 
-    Protected Sub SaveToFile(imageFilePath As String, fileFormat As ImageFileFormat, width As Integer, height As Integer, resolution As Integer)
+	protected void SaveToFile(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
+	{
+		Console.WriteLine("Saving " + Path.GetFileName(imageFilePath));
 
-        Console.WriteLine("Saving " & Path.GetFileName(imageFilePath))
+		// Note that this operation can be slow if there are over 100,000 data points
+		dynamic plotBitmap = OxyPlot.Wpf.PngExporter.ExportToBitmap(mPlot, width, height, OxyPlot.OxyColors.White, resolution);
 
-        ' Note that this operation can be slow if there are over 100,000 data points
-        Dim plotBitmap = OxyPlot.Wpf.PngExporter.ExportToBitmap(mPlot, width, height, OxyPlot.OxyColors.White, resolution)
+		dynamic drawVisual = new DrawingVisual();
+		using (drawContext == drawVisual.RenderOpen()) {
 
-        Dim drawVisual = New DrawingVisual()
-        Using drawContext = drawVisual.RenderOpen()
+			dynamic myCanvas = new Rect(0, 0, width, height);
 
-            Dim myCanvas = New Rect(0, 0, width, height)
+			drawContext.DrawImage(plotBitmap, myCanvas);
 
-            drawContext.DrawImage(plotBitmap, myCanvas)
+			// Add a frame
+			dynamic rectPen = new System.Windows.Media.Pen();
+			rectPen.Brush = new SolidColorBrush(Colors.Black);
+			rectPen.Thickness = 2;
 
-            ' Add a frame
-            Dim rectPen = New System.Windows.Media.Pen()
-            rectPen.Brush = New SolidColorBrush(Colors.Black)
-            rectPen.Thickness = 2
+			drawContext.DrawRectangle(null, rectPen, myCanvas);
 
-            drawContext.DrawRectangle(Nothing, rectPen, myCanvas)
+			if (!string.IsNullOrWhiteSpace(AnnotationBottomLeft)) {
+				AddText(AnnotationBottomLeft, drawContext, width, height, Windows.HorizontalAlignment.Left, Windows.VerticalAlignment.Bottom, 5);
+			}
 
-            If Not String.IsNullOrWhiteSpace(AnnotationBottomLeft) Then
-                AddText(AnnotationBottomLeft, drawContext, width, height, Windows.HorizontalAlignment.Left, Windows.VerticalAlignment.Bottom, 5)
-            End If
+			if (!string.IsNullOrWhiteSpace(AnnotationBottomRight)) {
+				AddText(AnnotationBottomRight, drawContext, width, height, Windows.HorizontalAlignment.Right, Windows.VerticalAlignment.Bottom, 5);
+			}
 
-            If Not String.IsNullOrWhiteSpace(AnnotationBottomRight) Then
-                AddText(AnnotationBottomRight, drawContext, width, height, Windows.HorizontalAlignment.Right, Windows.VerticalAlignment.Bottom, 5)
-            End If
+			if (PlottingDeisotopedData) {
+				AddDeisotopedDataLegend(drawContext, width, height, 10, -30, 25);
+			}
+		}
 
-            If PlottingDeisotopedData Then
-                AddDeisotopedDataLegend(drawContext, width, height, 10, -30, 25)
-            End If
-        End Using
+		const dynamic DPI = 96;
 
-        Const DPI = 96
+		dynamic target = new RenderTargetBitmap(width, height, DPI, DPI, PixelFormats.Default);
+		target.Render(drawVisual);
 
-        Dim target = New RenderTargetBitmap(width, height, DPI, DPI, PixelFormats.Default)
-        target.Render(drawVisual)
+		BitmapEncoder encoder = null;
 
-        Dim encoder As BitmapEncoder = Nothing
+		switch (fileFormat) {
+			case ImageFileFormat.PNG:
+				encoder = new PngBitmapEncoder();
 
-        Select Case fileFormat
-            Case ImageFileFormat.PNG
-                encoder = New PngBitmapEncoder()
+				break;
+			case ImageFileFormat.JPG:
+				encoder = new JpegBitmapEncoder();
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(fileFormat, "Unrecognized value: " + fileFormat.ToString());
+		}
 
-            Case ImageFileFormat.JPG
-                encoder = New JpegBitmapEncoder()
-            Case Else
-                Throw New ArgumentOutOfRangeException(fileFormat, "Unrecognized value: " + fileFormat.ToString())
-        End Select
+		if (encoder != null) {
+			encoder.Frames.Add(BitmapFrame.Create(target));
 
-        If encoder IsNot Nothing Then
-            encoder.Frames.Add(BitmapFrame.Create(target))
+			using (outputStream == new FileStream(imageFilePath, FileMode.Create, FileAccess.Write)) {
+				encoder.Save(outputStream);
+			}
+		}
 
-            Using outputStream = New FileStream(imageFilePath, FileMode.Create, FileAccess.Write)
-                encoder.Save(outputStream)
-            End Using
-        End If
+	}
 
-    End Sub
+	public void AddGradients(Dictionary<string, OxyPalette> colorGradients)
+	{
+		mColorGradients = colorGradients;
+	}
 
-    Public Sub AddGradients(colorGradients As Dictionary(Of String, OxyPalette))
-        mColorGradients = colorGradients
-    End Sub
 
-    Protected Sub AddDeisotopedDataLegend(
-      drawContext As DrawingContext,
-      canvasWidth As Integer,
-      canvasHeight As Integer,
-      offsetLeft As Integer,
-      offsetTop As Integer,
-      spacing As Integer)
+	protected void AddDeisotopedDataLegend(DrawingContext drawContext, int canvasWidth, int canvasHeight, int offsetLeft, int offsetTop, int spacing)
+	{
+		const dynamic CHARGE_START = 1;
+		const dynamic CHARGE_END = 6;
 
-        Const CHARGE_START = 1
-        Const CHARGE_END = 6
+		dynamic usCulture = Globalization.CultureInfo.GetCultureInfo("en-us");
+		// Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
+		dynamic fontTypeface = new Typeface("Arial");
 
-        Dim usCulture = Globalization.CultureInfo.GetCultureInfo("en-us")
-        ' Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
-        Dim fontTypeface = New Typeface("Arial")
+		dynamic fontSizeEm = FontSizeBase + 3;
 
-        Dim fontSizeEm = FontSizeBase + 3
+		// Write out the text 1+  2+  3+  4+  5+  6+  
 
-        ' Write out the text 1+  2+  3+  4+  5+  6+  
+		// Create a box for the legend
+		dynamic rectPen = new System.Windows.Media.Pen();
+		rectPen.Brush = new SolidColorBrush(Colors.Black);
+		rectPen.Thickness = 1;
 
-        ' Create a box for the legend
-        Dim rectPen = New System.Windows.Media.Pen()
-        rectPen.Brush = New SolidColorBrush(Colors.Black)
-        rectPen.Thickness = 1
 
-        For chargeState = CHARGE_START To CHARGE_END
+		for (chargeState = CHARGE_START; chargeState <= CHARGE_END; chargeState++) {
+			dynamic newBrush = new SolidColorBrush(GetColorByCharge(chargeState));
 
-            Dim newBrush = New SolidColorBrush(GetColorByCharge(chargeState))
+			dynamic newText = new FormattedText(chargeState + "+", usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, newBrush);
 
-            Dim newText = New FormattedText(chargeState & "+", usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, newBrush)
+			dynamic textRect = new Rect(0, 0, canvasWidth, canvasHeight);
+			dynamic position = textRect.Location;
 
-            Dim textRect = New Rect(0, 0, canvasWidth, canvasHeight)
-            Dim position = textRect.Location
+			position.X = mPlot.PlotArea.Left + offsetLeft + (chargeState - 1) * (newText.Width + spacing);
+			position.Y = mPlot.PlotArea.Top + offsetTop;
 
-            position.X = mPlot.PlotArea.Left + offsetLeft + (chargeState - 1) * (newText.Width + spacing)
-            position.Y = mPlot.PlotArea.Top + offsetTop
+			if (chargeState == CHARGE_START) {
+				dynamic legendBox = new Rect(position.X - 10, position.Y, CHARGE_END * (newText.Width + spacing) - spacing / 4, newText.Height);
+				drawContext.DrawRectangle(null, rectPen, legendBox);
+			}
 
-            If chargeState = CHARGE_START Then
-                Dim legendBox = New Rect(position.X - 10, position.Y, CHARGE_END * (newText.Width + spacing) - spacing / 4, newText.Height)
-                drawContext.DrawRectangle(Nothing, rectPen, legendBox)
-            End If
+			drawContext.DrawText(newText, position);
+		}
 
-            drawContext.DrawText(newText, position)
-        Next
+	}
 
-    End Sub
 
-    Protected Sub AddText(
-      textToAdd As String,
-      drawContext As DrawingContext,
-      canvasWidth As Integer,
-      canvasHeight As Integer,
-      hAlign As Windows.HorizontalAlignment,
-      vAlign As Windows.VerticalAlignment,
-      padding As Integer)
+	protected void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, Windows.HorizontalAlignment hAlign, Windows.VerticalAlignment vAlign, int padding)
+	{
+		dynamic usCulture = Globalization.CultureInfo.GetCultureInfo("en-us");
+		// Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
+		dynamic fontTypeface = new Typeface("Arial");
 
-        Dim usCulture = Globalization.CultureInfo.GetCultureInfo("en-us")
-        ' Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
-        Dim fontTypeface = New Typeface("Arial")
+		dynamic fontSizeEm = FontSizeBase + 1;
 
-        Dim fontSizeEm = FontSizeBase + 1
+		dynamic newText = new FormattedText(textToAdd, usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, Brushes.Black);
 
-        Dim newText = New FormattedText(textToAdd, usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, Brushes.Black)
+		dynamic textRect = new Rect(0, 0, canvasWidth, canvasHeight);
+		dynamic position = textRect.Location;
 
-        Dim textRect = New Rect(0, 0, canvasWidth, canvasHeight)
-        Dim position = textRect.Location
+		switch (hAlign) {
+			case Windows.HorizontalAlignment.Left:
+				position.X += padding;
 
-        Select Case hAlign
-            Case Windows.HorizontalAlignment.Left
-                position.X += padding
+				break;
+			case Windows.HorizontalAlignment.Center:
+				position.X += (textRect.Width - newText.Width) / 2;
 
-            Case Windows.HorizontalAlignment.Center
-                position.X += (textRect.Width - newText.Width) / 2
+				break;
+			case Windows.HorizontalAlignment.Right:
+				position.X += textRect.Width - newText.Width - padding;
+				break;
+		}
 
-            Case Windows.HorizontalAlignment.Right
-                position.X += textRect.Width - newText.Width - padding
-        End Select
+		switch (vAlign) {
+			case Windows.VerticalAlignment.Top:
+				position.Y += padding;
 
-        Select Case vAlign
-            Case Windows.VerticalAlignment.Top
-                position.Y += padding
+				break;
+			case Windows.VerticalAlignment.Center:
+				position.Y += (textRect.Height - newText.Height) / 2;
 
-            Case Windows.VerticalAlignment.Center
-                position.Y += (textRect.Height - newText.Height) / 2
+				break;
+			case Windows.VerticalAlignment.Bottom:
+				position.Y += textRect.Height - newText.Height - padding;
+				break;
+		}
 
-            Case Windows.VerticalAlignment.Bottom
-                position.Y += textRect.Height - newText.Height - padding
-        End Select
+		drawContext.DrawText(newText, position);
+	}
 
-        drawContext.DrawText(newText, position)
-    End Sub
+	public static Color GetColorByCharge(int charge)
+	{
+		Color seriesColor = default(Color);
+		switch (charge) {
+			case 1:
+				seriesColor = Colors.MediumBlue;
+				break;
+			case 2:
+				seriesColor = Colors.Red;
+				break;
+			case 3:
+				seriesColor = Colors.Green;
+				break;
+			case 4:
+				seriesColor = Colors.Magenta;
+				break;
+			case 5:
+				seriesColor = Colors.SaddleBrown;
+				break;
+			case 6:
+				seriesColor = Colors.Indigo;
+				break;
+			case 7:
+				seriesColor = Colors.LimeGreen;
+				break;
+			case 8:
+				seriesColor = Colors.CornflowerBlue;
+				break;
+			default:
+				seriesColor = Colors.Gray;
+				break;
+		}
 
-    Public Shared Function GetColorByCharge(charge As Integer) As Color
-        Dim seriesColor As Color
-        Select Case charge
-            Case 1 : seriesColor = Colors.MediumBlue
-            Case 2 : seriesColor = Colors.Red
-            Case 3 : seriesColor = Colors.Green
-            Case 4 : seriesColor = Colors.Magenta
-            Case 5 : seriesColor = Colors.SaddleBrown
-            Case 6 : seriesColor = Colors.Indigo
-            Case 7 : seriesColor = Colors.LimeGreen
-            Case 8 : seriesColor = Colors.CornflowerBlue
-            Case Else : seriesColor = Colors.Gray
-        End Select
+		return seriesColor;
 
-        Return seriesColor
+	}
 
-    End Function
+	protected double PointSizeToEm(int fontSizePoints)
+	{
+		dynamic fontSizeEm = fontSizePoints / 12;
+		return fontSizeEm;
+	}
 
-    Protected Function PointSizeToEm(fontSizePoints As Integer) As Double
-        Dim fontSizeEm = fontSizePoints / 12
-        Return fontSizeEm
-    End Function
+	protected int PointSizeToPixels(int fontSizePoints)
+	{
+		dynamic fontSizePixels = fontSizePoints * 1.33;
+		return Convert.ToInt32(Math.Round(fontSizePixels, 0));
+	}
 
-    Protected Function PointSizeToPixels(fontSizePoints As Integer) As Integer
-        Dim fontSizePixels = fontSizePoints * 1.33
-        Return CInt(Math.Round(fontSizePixels, 0))
-    End Function
+}
 
-End Class

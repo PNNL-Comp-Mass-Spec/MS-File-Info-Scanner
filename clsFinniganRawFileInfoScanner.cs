@@ -1,516 +1,553 @@
-Option Strict On
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
+using PNNLOmics.Utilities;
+using ThermoRawFileReaderDLL.FinniganFileIO;
+using SpectraTypeClassifier;
+
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Started in 2005
+//
+// Last modified May 11, 2015
+
+namespace MSFileInfoScanner
+{
+    public class clsFinniganRawFileInfoScanner : clsMSFileInfoProcessorBaseClass
+    {
+
+        // Note: The extension must be in all caps
+        public const string FINNIGAN_RAW_FILE_EXTENSION = ".RAW";
+
+        private readonly Regex mIsCentroid;
+        private readonly Regex mIsProfileM;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public clsFinniganRawFileInfoScanner()
+        {
+            mIsCentroid = new Regex("([FI]TMS [+-] c .+)|([FI]TMS {[^ ]+} +[+-] c .+)|(^ *[+-] c .+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+            mIsProfileM = new Regex("([FI]TMS [+-] p .+)|([FI]TMS {[^ ]+} +[+-] p .+)|(^ *[+-] p .+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        }
+
+        /// <summary>
+        /// This function is used to determine one or more overall quality scores
+        /// </summary>
+        /// <param name="objXcaliburAccessor"></param>
+        /// <param name="datasetFileInfo"></param>
+        /// <remarks></remarks>
+
+        protected void ComputeQualityScores(XRawFileIO objXcaliburAccessor, clsDatasetFileInfo datasetFileInfo)
+        {
+            float sngOverallScore = 0;
+
+            double[,] dblMassIntensityPairs = null;
+
+            double dblOverallAvgIntensitySum = 0;
+            var intOverallAvgCount = 0;
+
+            dblOverallAvgIntensitySum = 0;
+            intOverallAvgCount = 0;
+
+            if (mLCMS2DPlot.ScanCountCached > 0) {
+                // Obtain the overall average intensity value using the data cached in mLCMS2DPlot
+                // This avoids having to reload all of the data using objXcaliburAccessor
+                const int intMSLevelFilter = 1;
+                sngOverallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(intMSLevelFilter);
+
+            } else {
+                var intScanCount = objXcaliburAccessor.GetNumScans();
+                int intScanStart;
+                int intScanEnd;
+                base.GetStartAndEndScans(intScanCount, out intScanStart, out intScanEnd);
+
+                var intScanNumber = 0;
+                for (intScanNumber = intScanStart; intScanNumber <= intScanEnd; intScanNumber++)
+                {
+                    // This function returns the number of points in dblMassIntensityPairs()
+                    var intReturnCode = objXcaliburAccessor.GetScanData2D(intScanNumber, out dblMassIntensityPairs);
+
+
+                    if (intReturnCode <= 0)
+                    {
+                        continue;
+                    }
+
+                    if ((dblMassIntensityPairs == null) || dblMassIntensityPairs.GetLength(1) <= 0)
+                    {
+                        continue;
+                    }
+
+                    // Keep track of the quality scores and then store one or more overall quality scores in datasetFileInfo.OverallQualityScore
+                    // For now, this just computes the average intensity for each scan and then computes and overall average intensity value
+
+                    double dblIntensitySum = 0;
+                    var intIonIndex = 0;
+                    for (intIonIndex = 0; intIonIndex <= dblMassIntensityPairs.GetUpperBound(1); intIonIndex++) {
+                        dblIntensitySum += dblMassIntensityPairs[1, intIonIndex];
+                    }
+
+                    dblOverallAvgIntensitySum += dblIntensitySum / dblMassIntensityPairs.GetLength(1);
+
+                    intOverallAvgCount += 1;
+                }
+
+                if (intOverallAvgCount > 0) {
+                    sngOverallScore = Convert.ToSingle(dblOverallAvgIntensitySum / intOverallAvgCount);
+                } else {
+                    sngOverallScore = 0;
+                }
 
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Started in 2005
-'
-' Last modified May 11, 2015
+            }
 
-Imports MSFileInfoScanner.DSSummarizer.clsScanStatsEntry
-Imports PNNLOmics.Utilities
-Imports System.IO
-Imports System.Text.RegularExpressions
-Imports ThermoRawFileReaderDLL.FinniganFileIO
-Imports SpectraTypeClassifier
+            datasetFileInfo.OverallQualityScore = sngOverallScore;
 
-Public Class clsFinniganRawFileInfoScanner
-    Inherits clsMSFileInfoProcessorBaseClass
+        }
+        
+        protected clsSpectrumTypeClassifier.eCentroidStatusConstants GetCentroidStatus(int intScanNumber, FinniganFileReaderBaseClass.udtScanHeaderInfoType udtScanHeaderInfoType)
+        {
+           
 
-    ' Note: The extension must be in all caps
-    Public Const FINNIGAN_RAW_FILE_EXTENSION As String = ".RAW"
+            if (udtScanHeaderInfoType.IsCentroidScan) {
+                if (mIsProfileM.IsMatch(udtScanHeaderInfoType.FilterText)) {
+                    ShowMessage("Warning: Scan " + intScanNumber + " appears to be profile mode data, yet XRawFileIO reported it to be centroid");
+                }
 
-    ''' <summary>
-    ''' This function is used to determine one or more overall quality scores
-    ''' </summary>
-    ''' <param name="objXcaliburAccessor"></param>
-    ''' <param name="udtFileInfo"></param>
-    ''' <remarks></remarks>
-    Protected Sub ComputeQualityScores(objXcaliburAccessor As XRawFileIO, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType)
-
-        Dim intScanCount As Integer
-        Dim intScanNumber As Integer
-        Dim intIonIndex As Integer
-        Dim intReturnCode As Integer
+                return clsSpectrumTypeClassifier.eCentroidStatusConstants.Centroid;
+            }
 
-        Dim sngOverallScore As Single
-
-        Dim dblMassIntensityPairs(,) As Double = Nothing
+            if (mIsCentroid.IsMatch(udtScanHeaderInfoType.FilterText)) {
+                ShowMessage("Warning: Scan " + intScanNumber + " appears to be centroided data, yet XRawFileIO reported it to be profile");
+            }
 
-        Dim dblIntensitySum As Double
-        Dim dblOverallAvgIntensitySum As Double
-        Dim intOverallAvgCount As Integer
+            return clsSpectrumTypeClassifier.eCentroidStatusConstants.Profile;
+        }
 
-        Dim intScanStart As Integer
-        Dim intScanEnd As Integer
+        /// <summary>
+        /// Returns the dataset name for the given file
+        /// </summary>
+        /// <param name="strDataFilePath"></param>
+        /// <returns></returns>
+        /// <remarks></remarks>
+        public override string GetDatasetNameViaPath(string strDataFilePath)
+        {
+            try {
+                // The dataset name is simply the file name without .Raw
+                return Path.GetFileNameWithoutExtension(strDataFilePath);
+            } catch (Exception ex) {
+                return string.Empty;
+            }
+        }
 
-        dblOverallAvgIntensitySum = 0
-        intOverallAvgCount = 0
 
-        If mLCMS2DPlot.ScanCountCached > 0 Then
-            ' Obtain the overall average intensity value using the data cached in mLCMS2DPlot
-            ' This avoids having to reload all of the data using objXcaliburAccessor
-            Const intMSLevelFilter = 1
-            sngOverallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(intMSLevelFilter)
-        Else
+        protected void LoadScanDetails(XRawFileIO objXcaliburAccessor)
+        {
+            int intScanNumber = 0;
 
-            intScanCount = objXcaliburAccessor.GetNumScans
-            MyBase.GetStartAndEndScans(intScanCount, intScanStart, intScanEnd)
+            var udtScanHeaderInfo = new FinniganFileReaderBaseClass.udtScanHeaderInfoType();
 
-            For intScanNumber = intScanStart To intScanEnd
-                ' This function returns the number of points in dblMassIntensityPairs()
-                intReturnCode = objXcaliburAccessor.GetScanData2D(intScanNumber, dblMassIntensityPairs)
+            int intScanStart = 0;
+            int intScanEnd = 0;
 
-                If intReturnCode > 0 Then
+            Console.Write("  Loading scan details");
 
-                    If Not dblMassIntensityPairs Is Nothing AndAlso dblMassIntensityPairs.GetLength(1) > 0 Then
-                        ' Keep track of the quality scores and then store one or more overall quality scores in udtFileInfo.OverallQualityScore
-                        ' For now, this just computes the average intensity for each scan and then computes and overall average intensity value
+            if (mSaveTICAndBPI) {
+                // Initialize the TIC and BPI arrays
+                base.InitializeTICAndBPI();
+            }
 
-                        dblIntensitySum = 0
-                        For intIonIndex = 0 To dblMassIntensityPairs.GetUpperBound(1)
-                            dblIntensitySum += dblMassIntensityPairs(1, intIonIndex)
-                        Next intIonIndex
+            if (mSaveLCMS2DPlots) {
+                base.InitializeLCMS2DPlot();
+            }
 
-                        dblOverallAvgIntensitySum += dblIntensitySum / dblMassIntensityPairs.GetLength(1)
+            object dtLastProgressTime = DateTime.UtcNow;
 
-                        intOverallAvgCount += 1
-                    End If
-                End If
-            Next intScanNumber
+            var intScanCount = objXcaliburAccessor.GetNumScans();
+            base.GetStartAndEndScans(intScanCount, intScanStart, intScanEnd);
 
-            If intOverallAvgCount > 0 Then
-                sngOverallScore = CSng(dblOverallAvgIntensitySum / intOverallAvgCount)
-            Else
-                sngOverallScore = 0
-            End If
+            for (intScanNumber = intScanStart; intScanNumber <= intScanEnd; intScanNumber++) {
 
-        End If
+                try {
+                    if (mShowDebugInfo) {
+                        Console.WriteLine(" ... scan " + intScanNumber);
+                    }
 
-        udtFileInfo.OverallQualityScore = sngOverallScore
+                    bool blnSuccess = objXcaliburAccessor.GetScanInfo(intScanNumber, udtScanHeaderInfo);
 
-    End Sub
+                    if (blnSuccess) {
+                        if (mSaveTICAndBPI) {
+                            mTICandBPIPlot.AddData(
+                                intScanNumber, 
+                                udtScanHeaderInfo.MSLevel, 
+                                Convert.ToSingle(udtScanHeaderInfo.RetentionTime), 
+                                udtScanHeaderInfo.BasePeakIntensity, 
+                                udtScanHeaderInfo.TotalIonCurrent);
+                        }
 
-    Protected Function GetCentroidStatus(
-       intScanNumber As Integer,
-       udtScanHeaderInfoType As FinniganFileReaderBaseClass.udtScanHeaderInfoType) As clsSpectrumTypeClassifier.eCentroidStatusConstants
+                        clsScanStatsEntry objScanStatsEntry = new clsScanStatsEntry();
 
-        Static reIsCentroid As New Regex("([FI]TMS [+-] c .+)|([FI]TMS {[^ ]+} +[+-] c .+)|(^ *[+-] c .+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
-        Static reIsProfileM As New Regex("([FI]TMS [+-] p .+)|([FI]TMS {[^ ]+} +[+-] p .+)|(^ *[+-] p .+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
+                        objScanStatsEntry.ScanNumber = intScanNumber;
+                        objScanStatsEntry.ScanType = udtScanHeaderInfo.MSLevel;
 
+                        objScanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(udtScanHeaderInfo.FilterText);
+                        objScanStatsEntry.ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(udtScanHeaderInfo.FilterText);
 
-        If udtScanHeaderInfoType.IsCentroidScan Then
-            If reIsProfileM.IsMatch(udtScanHeaderInfoType.FilterText) Then
-                ShowMessage("Warning: Scan " & intScanNumber & " appears to be profile mode data, yet XRawFileIO reported it to be centroid")
-            End If
+                        objScanStatsEntry.ElutionTime = udtScanHeaderInfo.RetentionTime.ToString("0.0000");
+                        objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(udtScanHeaderInfo.TotalIonCurrent, 5);
+                        objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(udtScanHeaderInfo.BasePeakIntensity, 5);
+                        objScanStatsEntry.BasePeakMZ = StringUtilities.DblToString(udtScanHeaderInfo.BasePeakMZ, 4);
 
-            Return clsSpectrumTypeClassifier.eCentroidStatusConstants.Centroid
-        Else
-            If reIsCentroid.IsMatch(udtScanHeaderInfoType.FilterText) Then
-                ShowMessage("Warning: Scan " & intScanNumber & " appears to be centroided data, yet XRawFileIO reported it to be profile")
-            End If
+                        // Base peak signal to noise ratio
+                        objScanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
-            Return clsSpectrumTypeClassifier.eCentroidStatusConstants.Profile
-        End If
+                        objScanStatsEntry.IonCount = udtScanHeaderInfo.NumPeaks;
+                        objScanStatsEntry.IonCountRaw = udtScanHeaderInfo.NumPeaks;
 
-    End Function
+                        // Store the ScanEvent values in .ExtendedScanInfo
+                        StoreExtendedScanInfo(ref objScanStatsEntry.ExtendedScanInfo, udtScanHeaderInfo.ScanEventNames, udtScanHeaderInfo.ScanEventValues);
 
-    ''' <summary>
-    ''' Returns the dataset name for the given file
-    ''' </summary>
-    ''' <param name="strDataFilePath"></param>
-    ''' <returns></returns>
-    ''' <remarks></remarks>
-    Public Overrides Function GetDatasetNameViaPath(strDataFilePath As String) As String
-        Try
-            ' The dataset name is simply the file name without .Raw
-            Return Path.GetFileNameWithoutExtension(strDataFilePath)
-        Catch ex As Exception
-            Return String.Empty
-        End Try
-    End Function
+                        // Store the collision mode and the scan filter text
+                        objScanStatsEntry.ExtendedScanInfo.CollisionMode = udtScanHeaderInfo.CollisionMode;
+                        objScanStatsEntry.ExtendedScanInfo.ScanFilterText = udtScanHeaderInfo.FilterText;
 
-    Protected Sub LoadScanDetails(objXcaliburAccessor As XRawFileIO)
+                        mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
-        Dim intScanCount As Integer
-        Dim intScanNumber As Integer
+                    }
+                } catch (Exception ex) {
+                    ReportError("Error loading header info for scan " + intScanNumber + ": " + ex.Message);
+                }
 
-        Dim udtScanHeaderInfo = New FinniganFileReaderBaseClass.udtScanHeaderInfoType
-        Dim blnSuccess As Boolean
 
-        Dim intScanStart As Integer
-        Dim intScanEnd As Integer
+                try {
+                    if (mSaveLCMS2DPlots | mCheckCentroidingStatus) {
+                        // Also need to load the raw data
 
-        Console.Write("  Loading scan details")
+                        int intIonCount = 0;
+                        double[,] dblMassIntensityPairs = null;
 
-        If mSaveTICAndBPI Then
-            ' Initialize the TIC and BPI arrays
-            MyBase.InitializeTICAndBPI()
-        End If
+                        // Load the ions for this scan
+                        intIonCount = objXcaliburAccessor.GetScanData2D(intScanNumber, dblMassIntensityPairs);
 
-        If mSaveLCMS2DPlots Then
-            MyBase.InitializeLCMS2DPlot()
-        End If
+                        if (intIonCount > 0) {
+                            if (mSaveLCMS2DPlots) {
+                                mLCMS2DPlot.AddScan2D(intScanNumber, udtScanHeaderInfo.MSLevel, Convert.ToSingle(udtScanHeaderInfo.RetentionTime), intIonCount, dblMassIntensityPairs);
+                            }
 
-        Dim dtLastProgressTime = DateTime.UtcNow
+                            if (mCheckCentroidingStatus) {
+                                int mzCount = dblMassIntensityPairs.GetLength(1);
 
-        intScanCount = objXcaliburAccessor.GetNumScans
-        MyBase.GetStartAndEndScans(intScanCount, intScanStart, intScanEnd)
+                                object lstMZs = new List<double>(mzCount);
 
-        For intScanNumber = intScanStart To intScanEnd
-            Try
+                                for (int i = 0; i <= mzCount - 1; i++) {
+                                    lstMZs.Add(dblMassIntensityPairs(0, i));
+                                }
 
-                If mShowDebugInfo Then
-                    Console.WriteLine(" ... scan " & intScanNumber)
-                End If
+                                clsSpectrumTypeClassifier.eCentroidStatusConstants centroidingStatus = GetCentroidStatus(intScanNumber, udtScanHeaderInfo);
 
-                blnSuccess = objXcaliburAccessor.GetScanInfo(intScanNumber, udtScanHeaderInfo)
+                                mDatasetStatsSummarizer.ClassifySpectrum(lstMZs, udtScanHeaderInfo.MSLevel, centroidingStatus);
+                            }
+                        }
 
-                If blnSuccess Then
-                    If mSaveTICAndBPI Then
-                        With udtScanHeaderInfo
-                            mTICandBPIPlot.AddData(intScanNumber, .MSLevel, CSng(.RetentionTime), .BasePeakIntensity, .TotalIonCurrent)
-                        End With
-                    End If
+                    }
 
-                    Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
+                } catch (Exception ex) {
+                    ReportError("Error loading m/z and intensity values for scan " + intScanNumber + ": " + ex.Message);
+                }
 
-                    With udtScanHeaderInfo
-                        objScanStatsEntry.ScanNumber = intScanNumber
-                        objScanStatsEntry.ScanType = .MSLevel
+                ShowProgress(intScanNumber, intScanCount, dtLastProgressTime);
 
-                        objScanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(.FilterText)
-                        objScanStatsEntry.ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(.FilterText)
+            }
 
-                        objScanStatsEntry.ElutionTime = .RetentionTime.ToString("0.0000")
-                        objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(.TotalIonCurrent, 5)
-                        objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(.BasePeakIntensity, 5)
-                        objScanStatsEntry.BasePeakMZ = Math.Round(.BasePeakMZ, 4).ToString
+            Console.WriteLine();
 
-                        ' Base peak signal to noise ratio
-                        objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
+        }
 
-                        objScanStatsEntry.IonCount = .NumPeaks
-                        objScanStatsEntry.IonCountRaw = .NumPeaks
+        /// <summary>
+        /// Process the dataset
+        /// </summary>
+        /// <param name="strDataFilePath"></param>
+        /// <param name="datasetFileInfo"></param>
+        /// <returns>True if success, False if an error</returns>
+        /// <remarks></remarks>
+        public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
+        {
+            var strDataFilePathLocal = string.Empty;
 
-                        ' Store the ScanEvent values in .ExtendedScanInfo
-                        StoreExtendedScanInfo(objScanStatsEntry.ExtendedScanInfo, udtScanHeaderInfo.ScanEventNames, udtScanHeaderInfo.ScanEventValues)
+            bool blnReadError = false;
+            bool blnDeleteLocalFile = false;
 
-                        ' Store the collision mode and the scan filter text
-                        objScanStatsEntry.ExtendedScanInfo.CollisionMode = udtScanHeaderInfo.CollisionMode
-                        objScanStatsEntry.ExtendedScanInfo.ScanFilterText = udtScanHeaderInfo.FilterText
+            // Obtain the full path to the file
+            var fiRawFile = new FileInfo(strDataFilePath);
 
-                    End With
-                    mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
+            if (!fiRawFile.Exists) {
+                ShowMessage(".Raw file not found: " + strDataFilePath);
+                return false;
+            }
 
-                End If
-            Catch ex As Exception
-                ReportError("Error loading header info for scan " & intScanNumber & ": " & ex.Message)
-            End Try
+            // Future, optional: Determine the DatasetID
+            // Unfortunately, this is not present in metadata.txt
+            // intDatasetID = LookupDatasetID(strDatasetName)
+            int intDatasetID = base.DatasetID;
 
-            Try
+            // Record the file size and Dataset ID
+            datasetFileInfo.FileSystemCreationTime = fiRawFile.CreationTime;
+            datasetFileInfo.FileSystemModificationTime = fiRawFile.LastWriteTime;
 
-                If mSaveLCMS2DPlots Or mCheckCentroidingStatus Then
-                    ' Also need to load the raw data
+            // The acquisition times will get updated below to more accurate values
+            datasetFileInfo.AcqTimeStart = datasetFileInfo.FileSystemModificationTime;
+            datasetFileInfo.AcqTimeEnd = datasetFileInfo.FileSystemModificationTime;
 
-                    Dim intIonCount As Integer
-                    Dim dblMassIntensityPairs(,) As Double = Nothing
+            datasetFileInfo.DatasetID = intDatasetID;
+            datasetFileInfo.DatasetName = GetDatasetNameViaPath(fiRawFile.Name);
+            datasetFileInfo.FileExtension = fiRawFile.Extension;
+            datasetFileInfo.FileSizeBytes = fiRawFile.Length;
 
-                    ' Load the ions for this scan
-                    intIonCount = objXcaliburAccessor.GetScanData2D(intScanNumber, dblMassIntensityPairs)
+            datasetFileInfo.ScanCount = 0;
 
-                    If intIonCount > 0 Then
-                        If mSaveLCMS2DPlots Then
-                            mLCMS2DPlot.AddScan2D(intScanNumber, udtScanHeaderInfo.MSLevel, CSng(udtScanHeaderInfo.RetentionTime), intIonCount, dblMassIntensityPairs)
-                        End If
+            mDatasetStatsSummarizer.ClearCachedData();
 
-                        If mCheckCentroidingStatus Then
-                            Dim mzCount As Integer = dblMassIntensityPairs.GetLength(1)
+            blnDeleteLocalFile = false;
+            blnReadError = false;
 
-                            Dim lstMZs = New List(Of Double)(mzCount)
+            // Use Xraw to read the .Raw file
+            // If reading from a SAMBA-mounted network share, and if the current user has 
+            //  Read privileges but not Read&Execute privileges, then we will need to copy the file locally
+            var objXcaliburAccessor = new XRawFileIO();
+
+            // Open a handle to the data file
+            if (!objXcaliburAccessor.OpenRawFile(fiRawFile.FullName)) {
+                // File open failed
+                ReportError("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
+                blnReadError = true;
 
-                            For i As Integer = 0 To mzCount - 1
-                                lstMZs.Add(dblMassIntensityPairs(0, i))
-                            Next
 
-                            Dim centroidingStatus As clsSpectrumTypeClassifier.eCentroidStatusConstants = GetCentroidStatus(intScanNumber, udtScanHeaderInfo)
+                if (!string.Equals(clsMSFileInfoScanner.GetAppFolderPath().Substring(0, 2), fiRawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase)) {
+                    if (mCopyFileLocalOnReadError) {
+                        // Copy the file locally and try again
 
-                            mDatasetStatsSummarizer.ClassifySpectrum(lstMZs, udtScanHeaderInfo.MSLevel, centroidingStatus)
-                        End If
-                    End If
+                        try {
+                            strDataFilePathLocal = Path.Combine(clsMSFileInfoScanner.GetAppFolderPath(), Path.GetFileName(strDataFilePath));
+
+
+                            if (!string.Equals(strDataFilePathLocal, strDataFilePath, StringComparison.InvariantCultureIgnoreCase)) {
+                                ShowMessage("Copying file " + Path.GetFileName(strDataFilePath) + " to the working folder");
+                                File.Copy(strDataFilePath, strDataFilePathLocal, true);
+
+                                strDataFilePath = string.Copy(strDataFilePathLocal);
+                                blnDeleteLocalFile = true;
+
+                                // Update fiRawFile then try to re-open
+                                fiRawFile = new FileInfo(strDataFilePath);
+
+                                if (!objXcaliburAccessor.OpenRawFile(fiRawFile.FullName)) {
+                                    // File open failed
+                                    ReportError("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
+                                    blnReadError = true;
+                                } else {
+                                    blnReadError = false;
+                                }
+                            }
+                        } catch (Exception ex) {
+                            blnReadError = true;
+                        }
+                    }
+
+                }
+
+            }
+
+            if (!blnReadError) {
+                // Read the file info
+                try {
+                    datasetFileInfo.AcqTimeStart = objXcaliburAccessor.FileInfo.CreationDate;
+                } catch (Exception ex) {
+                    // Read error
+                    blnReadError = true;
+                }
+
+                if (!blnReadError) {
+                    try {
+                        // Look up the end scan time then compute .AcqTimeEnd
+                        var intScanEnd = objXcaliburAccessor.FileInfo.ScanEnd;
+                        FinniganFileReaderBaseClass.udtScanHeaderInfoType udtScanHeaderInfo;
+                        objXcaliburAccessor.GetScanInfo(intScanEnd, out udtScanHeaderInfo);
 
-                End If
-
-            Catch ex As Exception
-                ReportError("Error loading m/z and intensity values for scan " & intScanNumber & ": " & ex.Message)
-            End Try
-
-            ShowProgress(intScanNumber, intScanCount, dtLastProgressTime)
-
-        Next intScanNumber
-
-        Console.WriteLine()
-
-    End Sub
-
-    ''' <summary>
-    ''' Process the dataset
-    ''' </summary>
-    ''' <param name="strDataFilePath"></param>
-    ''' <param name="udtFileInfo"></param>
-    ''' <returns>True if success, False if an error</returns>
-    ''' <remarks></remarks>
-    Public Overrides Function ProcessDataFile(strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-
-        Dim objXcaliburAccessor As XRawFileIO
-        Dim udtScanHeaderInfo = New XRawFileIO.udtScanHeaderInfoType
-
-        Dim intScanEnd As Integer
-
-        Dim strDataFilePathLocal As String = String.Empty
-
-        Dim blnReadError As Boolean
-        Dim blnDeleteLocalFile As Boolean
-
-        ' Obtain the full path to the file
-        Dim fiRawFile = New FileInfo(strDataFilePath)
-
-        If Not fiRawFile.Exists Then
-            ShowMessage(".Raw file not found: " + strDataFilePath)
-            Return False
-        End If
-
-        ' Future, optional: Determine the DatasetID
-        ' Unfortunately, this is not present in metadata.txt
-        ' intDatasetID = LookupDatasetID(strDatasetName)
-        Dim intDatasetID As Integer = MyBase.DatasetID
-
-        ' Record the file size and Dataset ID
-        With udtFileInfo
-            .FileSystemCreationTime = fiRawFile.CreationTime
-            .FileSystemModificationTime = fiRawFile.LastWriteTime
-
-            ' The acquisition times will get updated below to more accurate values
-            .AcqTimeStart = .FileSystemModificationTime
-            .AcqTimeEnd = .FileSystemModificationTime
-
-            .DatasetID = intDatasetID
-            .DatasetName = GetDatasetNameViaPath(fiRawFile.Name)
-            .FileExtension = fiRawFile.Extension
-            .FileSizeBytes = fiRawFile.Length
-
-            .ScanCount = 0
-        End With
-
-        mDatasetStatsSummarizer.ClearCachedData()
-
-        blnDeleteLocalFile = False
-        blnReadError = False
-
-        ' Use Xraw to read the .Raw file
-        ' If reading from a SAMBA-mounted network share, and if the current user has 
-        '  Read privileges but not Read&Execute privileges, then we will need to copy the file locally
-        objXcaliburAccessor = New XRawFileIO
-
-        ' Open a handle to the data file
-        If Not objXcaliburAccessor.OpenRawFile(fiRawFile.FullName) Then
-            ' File open failed
-            ReportError("Call to .OpenRawFile failed for: " & fiRawFile.FullName)
-            blnReadError = True
-
-            If clsMSFileInfoScanner.GetAppFolderPath.Substring(0, 2).ToLower <> fiRawFile.FullName.Substring(0, 2).ToLower Then
-
-                If mCopyFileLocalOnReadError Then
-                    ' Copy the file locally and try again
-
-                    Try
-                        strDataFilePathLocal = Path.Combine(clsMSFileInfoScanner.GetAppFolderPath, Path.GetFileName(strDataFilePath))
-
-                        If strDataFilePathLocal.ToLower <> strDataFilePath.ToLower Then
-
-                            ShowMessage("Copying file " & Path.GetFileName(strDataFilePath) & " to the working folder")
-                            File.Copy(strDataFilePath, strDataFilePathLocal, True)
-
-                            strDataFilePath = String.Copy(strDataFilePathLocal)
-                            blnDeleteLocalFile = True
-
-                            ' Update fiRawFile then try to re-open
-                            fiRawFile = New FileInfo(strDataFilePath)
-
-                            If Not objXcaliburAccessor.OpenRawFile(fiRawFile.FullName) Then
-                                ' File open failed
-                                ReportError("Call to .OpenRawFile failed for: " & fiRawFile.FullName)
-                                blnReadError = True
-                            Else
-                                blnReadError = False
-                            End If
-                        End If
-                    Catch ex As Exception
-                        blnReadError = True
-                    End Try
-                End If
-
-            End If
-
-        End If
-
-        If Not blnReadError Then
-            ' Read the file info
-            Try
-                udtFileInfo.AcqTimeStart = objXcaliburAccessor.FileInfo.CreationDate
-            Catch ex As Exception
-                ' Read error
-                blnReadError = True
-            End Try
-
-            If Not blnReadError Then
-                Try
-                    ' Look up the end scan time then compute .AcqTimeEnd
-                    intScanEnd = objXcaliburAccessor.FileInfo.ScanEnd
-                    objXcaliburAccessor.GetScanInfo(intScanEnd, udtScanHeaderInfo)
-
-                    With udtFileInfo
-                        .AcqTimeEnd = .AcqTimeStart.AddMinutes(udtScanHeaderInfo.RetentionTime)
-                        .ScanCount = objXcaliburAccessor.GetNumScans()
-                    End With
-                Catch ex As Exception
-                    ' Error; use default values
-                    With udtFileInfo
-                        .AcqTimeEnd = .AcqTimeStart
-                        .ScanCount = 0
-                    End With
-                End Try
-
-                If mSaveTICAndBPI OrElse mCreateDatasetInfoFile OrElse mCreateScanStatsFile OrElse mSaveLCMS2DPlots OrElse mCheckCentroidingStatus Then
-                    ' Load data from each scan
-                    ' This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
-                    LoadScanDetails(objXcaliburAccessor)
-                End If
-
-                If mComputeOverallQualityScores Then
-                    ' Note that this call will also create the TICs and BPIs
-                    ComputeQualityScores(objXcaliburAccessor, udtFileInfo)
-                End If
-            End If
-        End If
-
-
-        With mDatasetStatsSummarizer.SampleInfo
-            .SampleName = objXcaliburAccessor.FileInfo.SampleName
-            .Comment1 = objXcaliburAccessor.FileInfo.Comment1
-            .Comment2 = objXcaliburAccessor.FileInfo.Comment2
-
-            If Not String.IsNullOrEmpty(objXcaliburAccessor.FileInfo.SampleComment) Then
-                If String.IsNullOrEmpty(.Comment1) Then
-                    .Comment1 = objXcaliburAccessor.FileInfo.SampleComment
-                Else
-                    If String.IsNullOrEmpty(.Comment2) Then
-                        .Comment2 = objXcaliburAccessor.FileInfo.SampleComment
-                    Else
-                        ' Append the sample comment to comment 2
-                        .Comment2 &= "; " & objXcaliburAccessor.FileInfo.SampleComment
-                    End If
-                End If
-            End If
-
-        End With
-
-        ' Close the handle to the data file
-        objXcaliburAccessor.CloseRawFile()
-
-        ' Read the file info from the file system
-        ' (much of this is already in udtFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
-        UpdateDatasetFileStats(fiRawFile, intDatasetID)
-
-        ' Copy over the updated filetime info from udtFileInfo to mDatasetFileInfo
-        With mDatasetStatsSummarizer.DatasetFileInfo
-            .FileSystemCreationTime = udtFileInfo.FileSystemCreationTime
-            .FileSystemModificationTime = udtFileInfo.FileSystemModificationTime
-            .DatasetID = udtFileInfo.DatasetID
-            .DatasetName = String.Copy(udtFileInfo.DatasetName)
-            .FileExtension = String.Copy(udtFileInfo.FileExtension)
-            .AcqTimeStart = udtFileInfo.AcqTimeStart
-            .AcqTimeEnd = udtFileInfo.AcqTimeEnd
-            .ScanCount = udtFileInfo.ScanCount
-            .FileSizeBytes = udtFileInfo.FileSizeBytes
-        End With
-
-        ' Delete the local copy of the data file
-        If blnDeleteLocalFile Then
-            Try
-                File.Delete(strDataFilePathLocal)
-            Catch ex As Exception
-                ' Deletion failed
-                ReportError("Deletion failed for: " & Path.GetFileName(strDataFilePathLocal))
-            End Try
-        End If
-
-        Return Not blnReadError
-
-    End Function
-
-    Protected Sub StoreExtendedScanInfo(ByRef udtExtendedScanInfo As udtExtendedStatsInfoType, strEntryName As String, strEntryValue As String)
-
-        If strEntryValue Is Nothing Then
-            strEntryValue = String.Empty
-        End If
-
-        ''Dim strEntryNames(0) As String
-        ''Dim strEntryValues(0) As String
-
-        ''strEntryNames(0) = String.Copy(strEntryName)
-        ''strEntryValues(0) = String.Copy(strEntryValue)
-
-        ''StoreExtendedScanInfo(htExtendedScanInfo, strEntryNames, strEntryValues)
-
-        ' This command is equivalent to the above series of commands
-        ' It converts strEntryName to an array and strEntryValue to a separate array and passes those arrays to StoreExtendedScanInfo()
-        StoreExtendedScanInfo(udtExtendedScanInfo, New String() {strEntryName}, New String() {strEntryValue})
-
-    End Sub
-
-    Protected Sub StoreExtendedScanInfo(ByRef udtExtendedScanInfo As udtExtendedStatsInfoType, strEntryNames() As String, strEntryValues() As String)
-
-        Dim cTrimChars = New Char() {":"c, " "c}
-        Dim intIndex As Integer
-
-        Try
-            If Not (strEntryNames Is Nothing OrElse strEntryValues Is Nothing) Then
-
-                For intIndex = 0 To strEntryNames.Length - 1
-                    If strEntryNames(intIndex) Is Nothing OrElse strEntryNames(intIndex).Trim.Length = 0 Then
-                        ' Empty entry name; do not add
-                    Else
-                        ' We're only storing certain entries from strEntryNames
-                        Select Case strEntryNames(intIndex).ToLower.TrimEnd(cTrimChars)
-                            Case SCANSTATS_COL_ION_INJECTION_TIME.ToLower
-                                udtExtendedScanInfo.IonInjectionTime = strEntryValues(intIndex)
-
-                            Case SCANSTATS_COL_SCAN_SEGMENT.ToLower
-                                udtExtendedScanInfo.ScanSegment = strEntryValues(intIndex)
-
-                            Case SCANSTATS_COL_SCAN_EVENT.ToLower
-                                udtExtendedScanInfo.ScanEvent = strEntryValues(intIndex)
-
-                            Case SCANSTATS_COL_CHARGE_STATE.ToLower
-                                udtExtendedScanInfo.ChargeState = strEntryValues(intIndex)
-
-                            Case SCANSTATS_COL_MONOISOTOPIC_MZ.ToLower
-                                udtExtendedScanInfo.MonoisotopicMZ = strEntryValues(intIndex)
-
-                            Case SCANSTATS_COL_COLLISION_MODE.ToLower
-                                udtExtendedScanInfo.CollisionMode = strEntryValues(intIndex)
-
-                            Case SCANSTATS_COL_SCAN_FILTER_TEXT.ToLower
-                                udtExtendedScanInfo.ScanFilterText = strEntryValues(intIndex)
-
-                        End Select
-
-                    End If
-                Next intIndex
-            End If
-        Catch ex As Exception
-            ' Ignore any errors here
-        End Try
-
-    End Sub
-
-End Class
+                        datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(udtScanHeaderInfo.RetentionTime);
+                        datasetFileInfo.ScanCount = objXcaliburAccessor.GetNumScans();
+                    } catch (Exception ex) {
+                        // Error; use default values
+                        var _with5 = datasetFileInfo;
+                        _with5.AcqTimeEnd = _with5.AcqTimeStart;
+                        _with5.ScanCount = 0;
+                    }
+
+                    if (mSaveTICAndBPI || mCreateDatasetInfoFile || mCreateScanStatsFile || mSaveLCMS2DPlots || mCheckCentroidingStatus) {
+                        // Load data from each scan
+                        // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
+                        LoadScanDetails(objXcaliburAccessor);
+                    }
+
+                    if (mComputeOverallQualityScores) {
+                        // Note that this call will also create the TICs and BPIs
+                        ComputeQualityScores(objXcaliburAccessor, ref datasetFileInfo);
+                    }
+                }
+            }
+
+
+            var _with6 = mDatasetStatsSummarizer.SampleInfo;
+            _with6.SampleName = objXcaliburAccessor.FileInfo.SampleName;
+            _with6.Comment1 = objXcaliburAccessor.FileInfo.Comment1;
+            _with6.Comment2 = objXcaliburAccessor.FileInfo.Comment2;
+
+            if (!string.IsNullOrEmpty(objXcaliburAccessor.FileInfo.SampleComment)) {
+                if (string.IsNullOrEmpty(_with6.Comment1)) {
+                    _with6.Comment1 = objXcaliburAccessor.FileInfo.SampleComment;
+                } else {
+                    if (string.IsNullOrEmpty(_with6.Comment2)) {
+                        _with6.Comment2 = objXcaliburAccessor.FileInfo.SampleComment;
+                    } else {
+                        // Append the sample comment to comment 2
+                        _with6.Comment2 += "; " + objXcaliburAccessor.FileInfo.SampleComment;
+                    }
+                }
+            }
+
+
+            // Close the handle to the data file
+            objXcaliburAccessor.CloseRawFile();
+
+            // Read the file info from the file system
+            // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
+            UpdateDatasetFileStats(fiRawFile, intDatasetID);
+
+            // Copy over the updated filetime info from datasetFileInfo to mDatasetFileInfo
+            var _with7 = mDatasetStatsSummarizer.DatasetFileInfo;
+            _with7.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
+            _with7.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
+            _with7.DatasetID = datasetFileInfo.DatasetID;
+            _with7.DatasetName = string.Copy(datasetFileInfo.DatasetName);
+            _with7.FileExtension = string.Copy(datasetFileInfo.FileExtension);
+            _with7.AcqTimeStart = datasetFileInfo.AcqTimeStart;
+            _with7.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
+            _with7.ScanCount = datasetFileInfo.ScanCount;
+            _with7.FileSizeBytes = datasetFileInfo.FileSizeBytes;
+
+            // Delete the local copy of the data file
+            if (blnDeleteLocalFile) {
+                try {
+                    File.Delete(strDataFilePathLocal);
+                } catch (Exception ex) {
+                    // Deletion failed
+                    ReportError("Deletion failed for: " + Path.GetFileName(strDataFilePathLocal));
+                }
+            }
+
+            return !blnReadError;
+
+        }
+
+
+        protected void StoreExtendedScanInfo(ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo, string strEntryName, string strEntryValue)
+        {
+            if (strEntryValue == null) {
+                strEntryValue = string.Empty;
+            }
+
+            //'Dim strEntryNames(0) As String
+            //'Dim strEntryValues(0) As String
+
+            //'strEntryNames(0) = String.Copy(strEntryName)
+            //'strEntryValues(0) = String.Copy(strEntryValue)
+
+            //'StoreExtendedScanInfo(htExtendedScanInfo, strEntryNames, strEntryValues)
+
+            // This command is equivalent to the above series of commands
+            // It converts strEntryName to an array and strEntryValue to a separate array and passes those arrays to StoreExtendedScanInfo()
+            StoreExtendedScanInfo(ref udtExtendedScanInfo, new string[] { strEntryName }, new string[] { strEntryValue });
+
+        }
+
+
+        protected void StoreExtendedScanInfo(ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo, string[] strEntryNames, string[] strEntryValues)
+        {
+            var cTrimChars = new[] {
+                ':',
+                ' '
+            };
+
+            try {
+                if (strEntryNames == null || strEntryValues == null)
+                {
+                    return;
+                }
+
+                var intIndex = 0;
+                for (intIndex = 0; intIndex <= strEntryNames.Length - 1; intIndex++) {
+                    if (strEntryNames[intIndex] == null || strEntryNames[intIndex].Trim().Length == 0) {
+                        // Empty entry name; do not add
+                        continue;
+                    }
+
+                    // We're only storing certain entries from strEntryNames
+                    var entryNameLCase = strEntryNames[intIndex].ToLower().TrimEnd(cTrimChars);
+
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_ION_INJECTION_TIME,
+                                      StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        udtExtendedScanInfo.IonInjectionTime = strEntryValues[intIndex];
+                        break;
+                    }
+
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_SCAN_SEGMENT,
+                                      StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        udtExtendedScanInfo.ScanSegment = strEntryValues[intIndex];
+                        break;
+                    }
+
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_SCAN_EVENT,
+                                      StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        udtExtendedScanInfo.ScanEvent = strEntryValues[intIndex];
+                        break;
+                    }
+
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_CHARGE_STATE,
+                                      StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        udtExtendedScanInfo.ChargeState = strEntryValues[intIndex];
+                        break;
+                    }
+
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_MONOISOTOPIC_MZ,
+                                      StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        udtExtendedScanInfo.MonoisotopicMZ = strEntryValues[intIndex];
+                        break;
+                    }
+
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_COLLISION_MODE,
+                                      StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        udtExtendedScanInfo.CollisionMode = strEntryValues[intIndex];
+                        break;
+                    }
+
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_SCAN_FILTER_TEXT,
+                                      StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        udtExtendedScanInfo.ScanFilterText = strEntryValues[intIndex];
+                        break;
+                    }
+                }
+            } catch (Exception ex) {
+                // Ignore any errors here
+            }
+
+        }       
+
+    }
+}

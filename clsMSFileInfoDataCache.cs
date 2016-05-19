@@ -1,783 +1,884 @@
-﻿Option Strict On
-
-Imports System.Data
-
-Public Class clsMSFileInfoDataCache
-
-#Region "Constants and Enums"
-    Private Const MS_FILEINFO_DATATABLE As String = "MSFileInfoTable"
-    Public Const COL_NAME_DATASET_ID As String = "DatasetID"
-    Public Const COL_NAME_DATASET_NAME As String = "DatasetName"
-    Public Const COL_NAME_FILE_EXTENSION As String = "FileExtension"
-    Public Const COL_NAME_ACQ_TIME_START As String = "AcqTimeStart"
-    Public Const COL_NAME_ACQ_TIME_END As String = "AcqTimeEnd"
-    Public Const COL_NAME_SCAN_COUNT As String = "ScanCount"
-    Public Const COL_NAME_FILE_SIZE_BYTES As String = "FileSizeBytes"
-    Public Const COL_NAME_INFO_LAST_MODIFIED As String = "InfoLastModified"
-    Public Const COL_NAME_FILE_MODIFICATION_DATE As String = "FileModificationDate"
-
-    Private Const FOLDER_INTEGRITY_INFO_DATATABLE As String = "FolderIntegrityInfoTable"
-    Public Const COL_NAME_FOLDER_ID As String = "FolderID"
-    Public Const COL_NAME_FOLDER_PATH As String = "FolderPath"
-    Public Const COL_NAME_FILE_COUNT As String = "FileCount"
-    Public Const COL_NAME_COUNT_FAIL_INTEGRITY As String = "FileCountFailedIntegrity"
-
-    Public Const COL_NAME_FILE_NAME As String = "FileName"
-    Public Const COL_NAME_FAILED_INTEGRITY_CHECK As String = "FailedIntegrityCheck"
-    Public Const COL_NAME_SHA1_HASH As String = "Sha1Hash"
-
-    Private Const MINIMUM_DATETIME As DateTime = #1/1/1900#     ' Equivalent to DateTime.MinValue
-
-    Public Enum eMSFileInfoResultsFileColumns
-        DatasetID = 0
-        DatasetName = 1
-        FileExtension = 2
-        AcqTimeStart = 3
-        AcqTimeEnd = 4
-        ScanCount = 5
-        FileSizeBytes = 6
-        InfoLastModified = 7
-        FileModificationDate = 8
-    End Enum
-
-    Public Enum eFolderIntegrityInfoFileColumns
-        FolderID = 0
-        FolderPath = 1
-        FileCount = 2
-        FileCountFailedIntegrity = 3
-        InfoLastModified = 4
-    End Enum
-
-    Public Enum eFileIntegrityDetailsFileColumns
-        FolderID = 0
-        FileName = 1
-        FileSizeBytes = 2
-        FileModified = 3
-        FailedIntegrityCheck = 4
-        Sha1Hash = 5
-        InfoLastModified = 6
-    End Enum
-#End Region
-
-
-    Private Enum eCachedResultsStateConstants
-        NotInitialized = 0
-        InitializedButUnmodified = 1
-        Modified = 2
-    End Enum
-
-#Region "Classwide Variables"
-    Private mAcquisitionTimeFilePath As String
-    Private mFolderIntegrityInfoFilePath As String
-
-    Private mCachedResultsAutoSaveIntervalMinutes As Integer
-    Private mCachedMSInfoResultsLastSaveTime As DateTime
-    Private mCachedFolderIntegrityInfoLastSaveTime As DateTime
-
-    Private mMSFileInfoDataset As DataSet
-    Private mMSFileInfoCachedResultsState As eCachedResultsStateConstants
-
-    Private mFolderIntegrityInfoDataset As DataSet
-    Private mFolderIntegrityInfoResultsState As eCachedResultsStateConstants
-    Private mMaximumFolderIntegrityInfoFolderID As Integer = 0
-
-    Public Event ErrorEvent(Message As String)
-    Public Event StatusEvent(Message As String)
-#End Region
-
-#Region "Properties"
-
-    Public Property AcquisitionTimeFilePath() As String
-        Get
-            Return mAcquisitionTimeFilePath
-        End Get
-        Set(value As String)
-            mAcquisitionTimeFilePath = value
-        End Set
-    End Property
-
-    Public Property FolderIntegrityInfoFilePath() As String
-        Get
-            Return mFolderIntegrityInfoFilePath
-        End Get
-        Set(value As String)
-            mFolderIntegrityInfoFilePath = value
-        End Set
-    End Property
-
-#End Region
-
-    Private Function AssureMinimumDate(dtDate As DateTime, dtMinimumDate As DateTime) As DateTime
-        ' Assures that dtDate is >= dtMinimumDate
-
-        If dtDate < dtMinimumDate Then
-            Return dtMinimumDate
-        Else
-            Return dtDate
-        End If
-
-    End Function
-
-    Public Sub AutosaveCachedResults()
-
-        If mCachedResultsAutoSaveIntervalMinutes > 0 Then
-            If mMSFileInfoCachedResultsState = eCachedResultsStateConstants.Modified Then
-                If DateTime.UtcNow.Subtract(mCachedMSInfoResultsLastSaveTime).TotalMinutes >= mCachedResultsAutoSaveIntervalMinutes Then
-                    ' Auto save the cached results
-                    SaveCachedMSInfoResults(False)
-                End If
-            End If
-
-            If mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.Modified Then
-                If DateTime.UtcNow.Subtract(mCachedFolderIntegrityInfoLastSaveTime).TotalMinutes >= mCachedResultsAutoSaveIntervalMinutes Then
-                    ' Auto save the cached results
-                    SaveCachedFolderIntegrityInfoResults(False)
-                End If
-            End If
-        End If
-
-    End Sub
-
-    Public Function CachedMSInfoContainsDataset(strDatasetName As String) As Boolean
-        Return CachedMSInfoContainsDataset(strDatasetName, Nothing)
-    End Function
-
-    Public Function CachedMSInfoContainsDataset(strDatasetName As String, ByRef objRowMatch As DataRow) As Boolean
-        Return DatasetTableContainsPrimaryKeyValue(mMSFileInfoDataset, MS_FILEINFO_DATATABLE, strDatasetName, objRowMatch)
-    End Function
-
-
-    Public Function CachedFolderIntegrityInfoContainsFolder(strFolderPath As String, ByRef intFolderID As Integer) As Boolean
-        Return CachedFolderIntegrityInfoContainsFolder(strFolderPath, intFolderID, Nothing)
-    End Function
-
-    Public Function CachedFolderIntegrityInfoContainsFolder(strFolderPath As String, ByRef intFolderID As Integer, ByRef objRowMatch As DataRow) As Boolean
-        If DatasetTableContainsPrimaryKeyValue(mFolderIntegrityInfoDataset, FOLDER_INTEGRITY_INFO_DATATABLE, strFolderPath, objRowMatch) Then
-            intFolderID = CInt(objRowMatch(COL_NAME_FOLDER_ID))
-            Return True
-        Else
-            Return False
-        End If
-    End Function
-
-    Private Sub ClearCachedMSInfoResults()
-        mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).Clear()
-        mMSFileInfoCachedResultsState = eCachedResultsStateConstants.NotInitialized
-    End Sub
-
-    Private Sub ClearCachedFolderIntegrityInfoResults()
-        mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).Clear()
-        mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized
-        mMaximumFolderIntegrityInfoFolderID = 0
-    End Sub
-
-    Public Function ConstructHeaderLine(eDataFileType As MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants) As String
-        Select Case eDataFileType
-            Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo
-                ' Note: The order of the output should match eMSFileInfoResultsFileColumns
-                Return COL_NAME_DATASET_ID & ControlChars.Tab &
-                  COL_NAME_DATASET_NAME & ControlChars.Tab &
-                  COL_NAME_FILE_EXTENSION & ControlChars.Tab &
-                  COL_NAME_ACQ_TIME_START & ControlChars.Tab &
-                  COL_NAME_ACQ_TIME_END & ControlChars.Tab &
-                  COL_NAME_SCAN_COUNT & ControlChars.Tab &
-                  COL_NAME_FILE_SIZE_BYTES & ControlChars.Tab &
-                  COL_NAME_INFO_LAST_MODIFIED & ControlChars.Tab &
-                  COL_NAME_FILE_MODIFICATION_DATE
-
-            Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo
-                ' Note: The order of the output should match eFolderIntegrityInfoFileColumns
-                Return COL_NAME_FOLDER_ID & ControlChars.Tab &
-                  COL_NAME_FOLDER_PATH & ControlChars.Tab &
-                  COL_NAME_FILE_COUNT & ControlChars.Tab &
-                  COL_NAME_COUNT_FAIL_INTEGRITY & ControlChars.Tab &
-                  COL_NAME_INFO_LAST_MODIFIED
-
-            Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails
-                ' Note: The order of the output should match eFileIntegrityDetailsFileColumns
-                Return COL_NAME_FOLDER_ID & ControlChars.Tab &
-                  COL_NAME_FILE_NAME & ControlChars.Tab &
-                  COL_NAME_FILE_SIZE_BYTES & ControlChars.Tab &
-                  COL_NAME_FILE_MODIFICATION_DATE & ControlChars.Tab &
-                  COL_NAME_FAILED_INTEGRITY_CHECK & ControlChars.Tab &
-                  COL_NAME_SHA1_HASH & ControlChars.Tab &
-                  COL_NAME_INFO_LAST_MODIFIED
-
-            Case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors
-                Return "File_Path" & ControlChars.Tab & "Error_Message" & ControlChars.Tab & COL_NAME_INFO_LAST_MODIFIED
-            Case Else
-                Return "Unknown_File_Type"
-        End Select
-    End Function
-
-    Private Function DatasetTableContainsPrimaryKeyValue(ByRef dsDataset As DataSet, strTableName As String, strValueToFind As String) As Boolean
-        Return DatasetTableContainsPrimaryKeyValue(dsDataset, strTableName, strValueToFind, Nothing)
-    End Function
-
-    Private Function DatasetTableContainsPrimaryKeyValue(ByRef dsDataset As DataSet, strTableName As String, strValueToFind As String, ByRef objRowMatch As DataRow) As Boolean
-
-        Try
-            If dsDataset Is Nothing OrElse dsDataset.Tables(strTableName).Rows.Count = 0 Then
-                objRowMatch = Nothing
-                Return False
-            End If
-
-            ' Look for strValueToFind in dsDataset
-            Try
-                objRowMatch = dsDataset.Tables(strTableName).Rows.Find(strValueToFind)
-
-                If objRowMatch Is Nothing Then
-                    Return False
-                Else
-                    Return True
-                End If
-            Catch ex As Exception
-                Return False
-            End Try
-
-        Catch ex As Exception
-            Return False
-        End Try
-
-    End Function
-
-    Public Sub InitializeVariables()
-        mCachedResultsAutoSaveIntervalMinutes = 5
-        mCachedMSInfoResultsLastSaveTime = DateTime.UtcNow
-        mCachedFolderIntegrityInfoLastSaveTime = DateTime.UtcNow
-
-        Me.FolderIntegrityInfoFilePath = Path.Combine(clsMSFileInfoScanner.GetAppFolderPath(), clsMSFileInfoScanner.DefaultDataFileName(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo))
-
-        Me.AcquisitionTimeFilePath = Path.Combine(clsMSFileInfoScanner.GetAppFolderPath(), clsMSFileInfoScanner.DefaultDataFileName(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo))
-        clsMSFileInfoScanner.ValidateDataFilePath(Me.AcquisitionTimeFilePath, MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo)
-
-        InitializeDatasets()
-    End Sub
-
-    Private Function IsNumber(strValue As String) As Boolean
-        Dim objFormatProvider As New Globalization.NumberFormatInfo
-        Try
-            Return Double.TryParse(strValue, Globalization.NumberStyles.Any, objFormatProvider, 0)
-        Catch ex As Exception
-            Return False
-        End Try
-    End Function
-
-    Private Sub InitializeDatasets()
-
-        Dim dtDefaultDate As DateTime = DateTime.Now()
-
-        ' Make the MSFileInfo datatable
-        Dim dtMSFileInfo As DataTable = New DataTable(MS_FILEINFO_DATATABLE)
-
-        ' Add the columns to the datatable
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(dtMSFileInfo, COL_NAME_DATASET_ID)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnStringToTable(dtMSFileInfo, COL_NAME_DATASET_NAME)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnStringToTable(dtMSFileInfo, COL_NAME_FILE_EXTENSION)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(dtMSFileInfo, COL_NAME_ACQ_TIME_START, dtDefaultDate)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(dtMSFileInfo, COL_NAME_ACQ_TIME_END, dtDefaultDate)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(dtMSFileInfo, COL_NAME_SCAN_COUNT)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnLongToTable(dtMSFileInfo, COL_NAME_FILE_SIZE_BYTES)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(dtMSFileInfo, COL_NAME_INFO_LAST_MODIFIED, dtDefaultDate)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(dtMSFileInfo, COL_NAME_FILE_MODIFICATION_DATE, dtDefaultDate)
-
-        ' Use the dataset name as the primary key since we won't always know Dataset_ID
-        With dtMSFileInfo
-            Dim MSInfoPrimaryKeyColumn As DataColumn() = New DataColumn() {.Columns(COL_NAME_DATASET_NAME)}
-            .PrimaryKey = MSInfoPrimaryKeyColumn
-        End With
-
-
-        ' Make the Folder Integrity Info datatable
-        Dim dtFolderIntegrityInfo As DataTable = New DataTable(FOLDER_INTEGRITY_INFO_DATATABLE)
-
-        ' Add the columns to the datatable
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(dtFolderIntegrityInfo, COL_NAME_FOLDER_ID)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnStringToTable(dtFolderIntegrityInfo, COL_NAME_FOLDER_PATH)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(dtFolderIntegrityInfo, COL_NAME_FILE_COUNT)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(dtFolderIntegrityInfo, COL_NAME_COUNT_FAIL_INTEGRITY)
-        SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(dtFolderIntegrityInfo, COL_NAME_INFO_LAST_MODIFIED, dtDefaultDate)
-
-        ' Use the folder path as the primary key
-        With dtFolderIntegrityInfo
-            Dim FolderInfoPrimaryKeyColumn As DataColumn() = New DataColumn() {.Columns(COL_NAME_FOLDER_PATH)}
-            .PrimaryKey = FolderInfoPrimaryKeyColumn
-        End With
-
-        ' Instantiate the datasets
-        mMSFileInfoDataset = New DataSet("MSFileInfoDataset")
-        mFolderIntegrityInfoDataset = New DataSet("FolderIntegrityInfoDataset")
-
-        ' Add the new DataTable to each DataSet
-        mMSFileInfoDataset.Tables.Add(dtMSFileInfo)
-        mFolderIntegrityInfoDataset.Tables.Add(dtFolderIntegrityInfo)
-
-        mMSFileInfoCachedResultsState = eCachedResultsStateConstants.NotInitialized
-        mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized
-    End Sub
-
-    Public Sub LoadCachedResults(blnForceLoad As Boolean)
-        If blnForceLoad OrElse mMSFileInfoCachedResultsState = eCachedResultsStateConstants.NotInitialized Then
-            LoadCachedMSFileInfoResults()
-            LoadCachedFolderIntegrityInfoResults()
-        End If
-    End Sub
-
-    Private Sub LoadCachedFolderIntegrityInfoResults()
-
-        Dim fsInFile As FileStream
-        Dim srInFile As StreamReader
-
-        Dim strLineIn As String
-        Dim strSplitLine() As String
-        Dim strSepChars() As Char
-
-        Dim intFolderID As Integer
-        Dim strFolderPath As String
-        Dim udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType
-        Dim dtInfoLastModified As DateTime
-
-        Dim objNewRow As DataRow
-
-        strSepChars = New Char() {ControlChars.Tab}
-
-        ' Clear the Folder Integrity Info Table
-        ClearCachedFolderIntegrityInfoResults()
-
-        clsMSFileInfoScanner.ValidateDataFilePath(mFolderIntegrityInfoFilePath, MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo)
-
-        RaiseEvent StatusEvent("Loading cached folder integrity info from: " & Path.GetFileName(mFolderIntegrityInfoFilePath))
-
-        If File.Exists(mFolderIntegrityInfoFilePath) Then
-            ' Read the entries from mFolderIntegrityInfoFilePath, populating mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE)
-
-            If clsMSFileInfoScanner.USE_XML_OUTPUT_FILE Then
-                fsInFile = New FileStream(mFolderIntegrityInfoFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read)
-                mFolderIntegrityInfoDataset.ReadXml(fsInFile)
-                fsInFile.Close()
-            Else
-                srInFile = New StreamReader(mFolderIntegrityInfoFilePath)
-                Do While srInFile.Peek() >= 0
-                    strLineIn = srInFile.ReadLine()
-
-                    If Not strLineIn Is Nothing Then
-                        strSplitLine = strLineIn.Split(strSepChars)
-
-                        If strSplitLine.Length >= 5 Then
-                            strFolderPath = strSplitLine(eFolderIntegrityInfoFileColumns.FolderPath)
-
-                            If IsNumber(strSplitLine(eFolderIntegrityInfoFileColumns.FolderID)) Then
-                                If Not CachedFolderIntegrityInfoContainsFolder(strFolderPath, intFolderID) Then
-                                    Try
-                                        objNewRow = mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).NewRow()
-
-                                        With udtFolderStats
-                                            intFolderID = CType(strSplitLine(eFolderIntegrityInfoFileColumns.FolderID), Integer)
-                                            .FolderPath = strFolderPath
-                                            .FileCount = CType(strSplitLine(eFolderIntegrityInfoFileColumns.FileCount), Integer)
-                                            .FileCountFailIntegrity = CType(strSplitLine(eFolderIntegrityInfoFileColumns.FileCountFailedIntegrity), Integer)
-                                            dtInfoLastModified = CType(strSplitLine(eFolderIntegrityInfoFileColumns.InfoLastModified), DateTime)
-                                        End With
-
-                                        PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objNewRow, dtInfoLastModified)
-                                        mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).Rows.Add(objNewRow)
-
-                                    Catch ex As Exception
-                                        ' Do not add this entry
-                                    End Try
-                                End If
-                            End If
-
-                        End If
-                    End If
-                Loop
-                srInFile.Close()
-
-            End If
-        End If
-
-        mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.InitializedButUnmodified
-
-    End Sub
-
-    Private Sub LoadCachedMSFileInfoResults()
-
-        Dim fsInFile As FileStream
-        Dim srInFile As StreamReader
-
-        Dim strLineIn As String
-        Dim strSplitLine() As String
-        Dim strSepChars() As Char
-
-        Dim strDatasetName As String
-        Dim udtFileInfo As iMSFileInfoProcessor.udtFileInfoType
-        Dim dtInfoLastModified As DateTime
-
-        Dim objNewRow As DataRow
-
-        strSepChars = New Char() {ControlChars.Tab}
-
-        ' Clear the MS Info Table
-        ClearCachedMSInfoResults()
-
-        clsMSFileInfoScanner.ValidateDataFilePath(mAcquisitionTimeFilePath, MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo)
-
-        RaiseEvent StatusEvent("Loading cached acquisition time file data from: " & Path.GetFileName(mAcquisitionTimeFilePath))
-
-        If File.Exists(mAcquisitionTimeFilePath) Then
-            ' Read the entries from mAcquisitionTimeFilePath, populating mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE)
-
-            If clsMSFileInfoScanner.USE_XML_OUTPUT_FILE Then
-                fsInFile = New FileStream(mAcquisitionTimeFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read)
-                mMSFileInfoDataset.ReadXml(fsInFile)
-                fsInFile.Close()
-            Else
-                srInFile = New StreamReader(mAcquisitionTimeFilePath)
-                Do While srInFile.Peek() >= 0
-                    strLineIn = srInFile.ReadLine()
-
-                    If Not strLineIn Is Nothing Then
-                        strSplitLine = strLineIn.Split(strSepChars)
-
-                        If strSplitLine.Length >= 8 Then
-                            strDatasetName = strSplitLine(eMSFileInfoResultsFileColumns.DatasetName)
-
-                            If IsNumber(strSplitLine(eMSFileInfoResultsFileColumns.DatasetID)) Then
-                                If Not CachedMSInfoContainsDataset(strDatasetName) Then
-                                    Try
-                                        objNewRow = mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).NewRow()
-
-                                        With udtFileInfo
-                                            .DatasetID = CType(strSplitLine(eMSFileInfoResultsFileColumns.DatasetID), Integer)
-                                            .DatasetName = String.Copy(strDatasetName)
-                                            .FileExtension = String.Copy(strSplitLine(eMSFileInfoResultsFileColumns.FileExtension))
-                                            .AcqTimeStart = CType(strSplitLine(eMSFileInfoResultsFileColumns.AcqTimeStart), DateTime)
-                                            .AcqTimeEnd = CType(strSplitLine(eMSFileInfoResultsFileColumns.AcqTimeEnd), DateTime)
-                                            .ScanCount = CType(strSplitLine(eMSFileInfoResultsFileColumns.ScanCount), Integer)
-                                            .FileSizeBytes = CType(strSplitLine(eMSFileInfoResultsFileColumns.FileSizeBytes), Long)
-                                            dtInfoLastModified = CType(strSplitLine(eMSFileInfoResultsFileColumns.InfoLastModified), DateTime)
-
-                                            If strSplitLine.Length >= 9 Then
-                                                .FileSystemModificationTime = CType(strSplitLine(eMSFileInfoResultsFileColumns.FileModificationDate), DateTime)
-                                            End If
-                                        End With
-
-                                        PopulateMSInfoDataRow(udtFileInfo, objNewRow, dtInfoLastModified)
-                                        mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).Rows.Add(objNewRow)
-
-                                    Catch ex As Exception
-                                        ' Do not add this entry
-                                    End Try
-                                End If
-                            End If
-
-                        End If
-                    End If
-                Loop
-                srInFile.Close()
-
-            End If
-        End If
-
-        mMSFileInfoCachedResultsState = eCachedResultsStateConstants.InitializedButUnmodified
-
-    End Sub
-
-    Private Sub PopulateMSInfoDataRow(ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, ByRef objRow As DataRow)
-        PopulateMSInfoDataRow(udtFileInfo, objRow, DateTime.Now())
-    End Sub
-
-    Private Sub PopulateMSInfoDataRow(ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, ByRef objRow As DataRow, dtInfoLastModified As DateTime)
-
-        ' ToDo: Update udtFileInfo to include some overall quality scores
-
-        With objRow
-            .Item(COL_NAME_DATASET_ID) = udtFileInfo.DatasetID
-            .Item(COL_NAME_DATASET_NAME) = udtFileInfo.DatasetName
-            .Item(COL_NAME_FILE_EXTENSION) = udtFileInfo.FileExtension
-            .Item(COL_NAME_ACQ_TIME_START) = AssureMinimumDate(udtFileInfo.AcqTimeStart, MINIMUM_DATETIME)
-            .Item(COL_NAME_ACQ_TIME_END) = AssureMinimumDate(udtFileInfo.AcqTimeEnd, MINIMUM_DATETIME)
-            .Item(COL_NAME_SCAN_COUNT) = udtFileInfo.ScanCount
-            .Item(COL_NAME_FILE_SIZE_BYTES) = udtFileInfo.FileSizeBytes
-            .Item(COL_NAME_INFO_LAST_MODIFIED) = AssureMinimumDate(dtInfoLastModified, MINIMUM_DATETIME)
-            .Item(COL_NAME_FILE_MODIFICATION_DATE) = AssureMinimumDate(udtFileInfo.FileSystemModificationTime, MINIMUM_DATETIME)
-            '.Item(COL_NAME_QUALITY_SCORE) = udtFileInfo.OverallQualityScore
-        End With
-    End Sub
-
-    Private Sub PopulateFolderIntegrityInfoDataRow(intFolderID As Integer, ByRef udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType, ByRef objRow As DataRow)
-        PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow, DateTime.Now())
-    End Sub
-
-    Private Sub PopulateFolderIntegrityInfoDataRow(intFolderID As Integer, ByRef udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType, ByRef objRow As DataRow, dtInfoLastModified As DateTime)
-
-        With objRow
-            .Item(COL_NAME_FOLDER_ID) = intFolderID
-            .Item(COL_NAME_FOLDER_PATH) = udtFolderStats.FolderPath
-            .Item(COL_NAME_FILE_COUNT) = udtFolderStats.FileCount
-            .Item(COL_NAME_COUNT_FAIL_INTEGRITY) = udtFolderStats.FileCountFailIntegrity
-            .Item(COL_NAME_INFO_LAST_MODIFIED) = AssureMinimumDate(dtInfoLastModified, MINIMUM_DATETIME)
-        End With
-
-        If intFolderID > mMaximumFolderIntegrityInfoFolderID Then
-            mMaximumFolderIntegrityInfoFolderID = intFolderID
-        End If
-    End Sub
-
-    ''' <summary>
-    ''' Writes out the cache files immediately
-    ''' </summary>
-    ''' <returns></returns>
-    ''' <remarks></remarks>
-    Public Function SaveCachedResults() As Boolean
-        Return SaveCachedResults(True)
-    End Function
-
-    Public Function SaveCachedResults(blnClearCachedData As Boolean) As Boolean
-        Dim blnSuccess1 As Boolean
-        Dim blnSuccess2 As Boolean
-
-        blnSuccess1 = SaveCachedMSInfoResults(blnClearCachedData)
-        blnSuccess2 = SaveCachedFolderIntegrityInfoResults(blnClearCachedData)
-
-        Return blnSuccess1 And blnSuccess2
-
-    End Function
-
-    Public Function SaveCachedFolderIntegrityInfoResults(blnClearCachedData As Boolean) As Boolean
-
-        Dim fsOutfile As FileStream
-        Dim srOutFile As StreamWriter
-
-        Dim objRow As DataRow
-        Dim blnSuccess As Boolean
-
-        If Not mFolderIntegrityInfoDataset Is Nothing AndAlso
-           mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).Rows.Count > 0 AndAlso
-           mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.Modified Then
-
-            RaiseEvent StatusEvent("Saving cached folder integrity info to: " & Path.GetFileName(mFolderIntegrityInfoFilePath))
-
-            Try
-                ' Write all of mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE) to the results file
-                If clsMSFileInfoScanner.USE_XML_OUTPUT_FILE Then
-                    fsOutfile = New FileStream(mFolderIntegrityInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)
-                    mFolderIntegrityInfoDataset.WriteXml(fsOutfile)
-                    fsOutfile.Close()
-                Else
-                    fsOutfile = New FileStream(mFolderIntegrityInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)
-                    srOutFile = New StreamWriter(fsOutfile)
-
-                    srOutFile.WriteLine(ConstructHeaderLine(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo))
-
-                    For Each objRow In mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).Rows
-                        WriteFolderIntegrityInfoDataLine(srOutFile, objRow)
-                    Next objRow
-
-                    srOutFile.Close()
-                End If
-
-                mCachedFolderIntegrityInfoLastSaveTime = DateTime.UtcNow
-
-                If blnClearCachedData Then
-                    ' Clear the data table
-                    ClearCachedFolderIntegrityInfoResults()
-                Else
-                    mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.InitializedButUnmodified
-                End If
-
-                blnSuccess = True
-
-            Catch ex As Exception
-                RaiseEvent ErrorEvent("Error in SaveCachedFolderIntegrityInfoResults: " & ex.Message)
-                blnSuccess = False
-            Finally
-                If clsMSFileInfoScanner.USE_XML_OUTPUT_FILE Then
-                    fsOutfile = Nothing
-                Else
-                    fsOutfile = Nothing
-                    srOutFile = Nothing
-                End If
-            End Try
-        End If
-
-        Return blnSuccess
-
-    End Function
-
-    Public Function SaveCachedMSInfoResults(blnClearCachedData As Boolean) As Boolean
-
-        Dim fsOutfile As FileStream
-        Dim srOutFile As StreamWriter
-
-        Dim objRow As DataRow
-        Dim blnSuccess As Boolean
-
-        If Not mMSFileInfoDataset Is Nothing AndAlso
-           mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).Rows.Count > 0 AndAlso
-           mMSFileInfoCachedResultsState = eCachedResultsStateConstants.Modified Then
-
-            RaiseEvent StatusEvent("Saving cached acquisition time file data to: " & Path.GetFileName(mAcquisitionTimeFilePath))
-
-            Try
-                ' Write all of mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE) to the results file
-                If clsMSFileInfoScanner.USE_XML_OUTPUT_FILE Then
-                    fsOutfile = New FileStream(mAcquisitionTimeFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)
-                    mMSFileInfoDataset.WriteXml(fsOutfile)
-                    fsOutfile.Close()
-                Else
-                    fsOutfile = New FileStream(mAcquisitionTimeFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)
-                    srOutFile = New StreamWriter(fsOutfile)
-
-                    srOutFile.WriteLine(ConstructHeaderLine(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo))
-
-                    For Each objRow In mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).Rows
-                        WriteMSInfoDataLine(srOutFile, objRow)
-                    Next objRow
-
-                    srOutFile.Close()
-                End If
-
-                mCachedMSInfoResultsLastSaveTime = DateTime.UtcNow
-
-                If blnClearCachedData Then
-                    ' Clear the data table
-                    ClearCachedMSInfoResults()
-                Else
-                    mMSFileInfoCachedResultsState = eCachedResultsStateConstants.InitializedButUnmodified
-                End If
-
-                blnSuccess = True
-
-            Catch ex As Exception
-                RaiseEvent ErrorEvent("Error in SaveCachedMSInfoResults: " & ex.Message)
-                blnSuccess = False
-            Finally
-                If clsMSFileInfoScanner.USE_XML_OUTPUT_FILE Then
-                    fsOutfile = Nothing
-                Else
-                    fsOutfile = Nothing
-                    srOutFile = Nothing
-                End If
-            End Try
-        End If
-
-        Return blnSuccess
-
-    End Function
-
-    Public Function UpdateCachedMSFileInfo(udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        ' Update the entry for this dataset in mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE)
-
-        Dim objRow As DataRow = Nothing
-
-        Dim blnSuccess As Boolean
-
-        Try
-            ' Examine the data in memory and add or update the data for strDataset
-            If CachedMSInfoContainsDataset(udtFileInfo.DatasetName, objRow) Then
-                ' Item already present; update it
-                Try
-                    PopulateMSInfoDataRow(udtFileInfo, objRow)
-                Catch ex As Exception
-                    ' Ignore errors updating the entry
-                End Try
-            Else
-                ' Item not present; add it
-                objRow = mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).NewRow
-                PopulateMSInfoDataRow(udtFileInfo, objRow)
-                mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE).Rows.Add(objRow)
-            End If
-
-            mMSFileInfoCachedResultsState = eCachedResultsStateConstants.Modified
-
-            blnSuccess = True
-        Catch ex As Exception
-            RaiseEvent ErrorEvent("Error in UpdateCachedMSFileInfo: " & ex.Message)
-            blnSuccess = False
-        End Try
-
-        Return blnSuccess
-
-    End Function
-
-    Public Function UpdateCachedFolderIntegrityInfo(udtFolderStats As clsFileIntegrityChecker.udtFolderStatsType, ByRef intFolderID As Integer) As Boolean
-        ' Update the entry for this dataset in mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE)
-
-        Dim objRow As DataRow = Nothing
-
-        Dim blnSuccess As Boolean
-
-        Try
-            If mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized Then
-                ' Coding error; this shouldn't be the case
-                RaiseEvent ErrorEvent("mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized in UpdateCachedFolderIntegrityInfo; unable to continue")
-                Return False
-            End If
-
-            intFolderID = -1
-
-            ' Examine the data in memory and add or update the data for strDataset
-            If CachedFolderIntegrityInfoContainsFolder(udtFolderStats.FolderPath, intFolderID, objRow) Then
-                ' Item already present; update it
-                Try
-                    PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow)
-                Catch ex As Exception
-                    ' Ignore errors updating the entry
-                End Try
-            Else
-                ' Item not present; add it
-
-                ' Auto-assign the next available FolderID value
-                intFolderID = mMaximumFolderIntegrityInfoFolderID + 1
-
-                objRow = mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).NewRow
-                PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow)
-                mFolderIntegrityInfoDataset.Tables(FOLDER_INTEGRITY_INFO_DATATABLE).Rows.Add(objRow)
-            End If
-
-            mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.Modified
-
-            blnSuccess = True
-        Catch ex As Exception
-            RaiseEvent ErrorEvent("Error in UpdateCachedFolderIntegrityInfo: " & ex.Message)
-            blnSuccess = False
-        End Try
-
-        Return blnSuccess
-
-    End Function
-
-    Private Sub WriteMSInfoDataLine(srOutFile As StreamWriter, objRow As DataRow)
-        With objRow
-            ' Note: HH:mm:ss corresponds to time in 24 hour format
-            srOutFile.WriteLine(.Item(COL_NAME_DATASET_ID).ToString & ControlChars.Tab &
-                 .Item(COL_NAME_DATASET_NAME).ToString & ControlChars.Tab &
-                 .Item(COL_NAME_FILE_EXTENSION).ToString & ControlChars.Tab &
-                 CType(.Item(COL_NAME_ACQ_TIME_START), DateTime).ToString("yyyy-MM-dd HH:mm:ss") & ControlChars.Tab &
-                 CType(.Item(COL_NAME_ACQ_TIME_END), DateTime).ToString("yyyy-MM-dd HH:mm:ss") & ControlChars.Tab &
-                 .Item(COL_NAME_SCAN_COUNT).ToString & ControlChars.Tab &
-                 .Item(COL_NAME_FILE_SIZE_BYTES).ToString & ControlChars.Tab &
-                 .Item(COL_NAME_INFO_LAST_MODIFIED).ToString & ControlChars.Tab &
-                 CType(.Item(COL_NAME_FILE_MODIFICATION_DATE), DateTime).ToString("yyyy-MM-dd HH:mm:ss"))
-
-        End With
-    End Sub
-
-    Private Sub WriteFolderIntegrityInfoDataLine(srOutFile As StreamWriter, objRow As DataRow)
-
-        With objRow
-            srOutFile.WriteLine(.Item(COL_NAME_FOLDER_ID).ToString & ControlChars.Tab &
-                 .Item(COL_NAME_FOLDER_PATH).ToString & ControlChars.Tab &
-                 .Item(COL_NAME_FILE_COUNT).ToString & ControlChars.Tab &
-                 .Item(COL_NAME_COUNT_FAIL_INTEGRITY).ToString & ControlChars.Tab &
-                 .Item(COL_NAME_INFO_LAST_MODIFIED).ToString)
-        End With
-    End Sub
-
-    Protected Overrides Sub Finalize()
-        Me.SaveCachedResults()
-        MyBase.Finalize()
-    End Sub
-
-End Class
+﻿using System;
+using System.Data;
+using System.IO;
+
+namespace MSFileInfoScanner
+{
+    public class clsMSFileInfoDataCache
+    {
+
+        #region "Constants and Enums"
+        private const string MS_FILEINFO_DATATABLE = "MSFileInfoTable";
+        public const string COL_NAME_DATASET_ID = "DatasetID";
+        public const string COL_NAME_DATASET_NAME = "DatasetName";
+        public const string COL_NAME_FILE_EXTENSION = "FileExtension";
+        public const string COL_NAME_ACQ_TIME_START = "AcqTimeStart";
+        public const string COL_NAME_ACQ_TIME_END = "AcqTimeEnd";
+        public const string COL_NAME_SCAN_COUNT = "ScanCount";
+        public const string COL_NAME_FILE_SIZE_BYTES = "FileSizeBytes";
+        public const string COL_NAME_INFO_LAST_MODIFIED = "InfoLastModified";
+
+        public const string COL_NAME_FILE_MODIFICATION_DATE = "FileModificationDate";
+        private const string FOLDER_INTEGRITY_INFO_DATATABLE = "FolderIntegrityInfoTable";
+        public const string COL_NAME_FOLDER_ID = "FolderID";
+        public const string COL_NAME_FOLDER_PATH = "FolderPath";
+        public const string COL_NAME_FILE_COUNT = "FileCount";
+
+        public const string COL_NAME_COUNT_FAIL_INTEGRITY = "FileCountFailedIntegrity";
+        public const string COL_NAME_FILE_NAME = "FileName";
+        public const string COL_NAME_FAILED_INTEGRITY_CHECK = "FailedIntegrityCheck";
+
+        public const string COL_NAME_SHA1_HASH = "Sha1Hash";
+
+        public enum eMSFileInfoResultsFileColumns
+        {
+            DatasetID = 0,
+            DatasetName = 1,
+            FileExtension = 2,
+            AcqTimeStart = 3,
+            AcqTimeEnd = 4,
+            ScanCount = 5,
+            FileSizeBytes = 6,
+            InfoLastModified = 7,
+            FileModificationDate = 8
+        }
+
+        public enum eFolderIntegrityInfoFileColumns
+        {
+            FolderID = 0,
+            FolderPath = 1,
+            FileCount = 2,
+            FileCountFailedIntegrity = 3,
+            InfoLastModified = 4
+        }
+
+        public enum eFileIntegrityDetailsFileColumns
+        {
+            FolderID = 0,
+            FileName = 1,
+            FileSizeBytes = 2,
+            FileModified = 3,
+            FailedIntegrityCheck = 4,
+            Sha1Hash = 5,
+            InfoLastModified = 6
+        }
+        #endregion
+
+
+        private enum eCachedResultsStateConstants
+        {
+            NotInitialized = 0,
+            InitializedButUnmodified = 1,
+            Modified = 2
+        }
+
+        #region "Classwide Variables"
+        private string mAcquisitionTimeFilePath;
+
+        private string mFolderIntegrityInfoFilePath;
+        private int mCachedResultsAutoSaveIntervalMinutes;
+        private DateTime mCachedMSInfoResultsLastSaveTime;
+
+        private DateTime mCachedFolderIntegrityInfoLastSaveTime;
+        private DataSet mMSFileInfoDataset;
+
+        private eCachedResultsStateConstants mMSFileInfoCachedResultsState;
+        private DataSet mFolderIntegrityInfoDataset;
+        private eCachedResultsStateConstants mFolderIntegrityInfoResultsState;
+
+        private int mMaximumFolderIntegrityInfoFolderID;
+        public event ErrorEventEventHandler ErrorEvent;
+        public delegate void ErrorEventEventHandler(string Message);
+        public event StatusEventEventHandler StatusEvent;
+        public delegate void StatusEventEventHandler(string Message);
+        #endregion
+
+        #region "Properties"
+
+        public string AcquisitionTimeFilePath
+        {
+            get { return mAcquisitionTimeFilePath; }
+            set { mAcquisitionTimeFilePath = value; }
+        }
+
+        public string FolderIntegrityInfoFilePath
+        {
+            get { return mFolderIntegrityInfoFilePath; }
+            set { mFolderIntegrityInfoFilePath = value; }
+        }
+
+        #endregion
+
+        private DateTime AssureMinimumDate(DateTime dtDate, DateTime dtMinimumDate)
+        {
+            // Assures that dtDate is >= dtMinimumDate
+
+            if (dtDate < dtMinimumDate)
+            {
+                return dtMinimumDate;
+            }
+            else
+            {
+                return dtDate;
+            }
+
+        }
+
+
+        public void AutosaveCachedResults()
+        {
+            if (mCachedResultsAutoSaveIntervalMinutes > 0)
+            {
+                if (mMSFileInfoCachedResultsState == eCachedResultsStateConstants.Modified)
+                {
+                    if (DateTime.UtcNow.Subtract(mCachedMSInfoResultsLastSaveTime).TotalMinutes >= mCachedResultsAutoSaveIntervalMinutes)
+                    {
+                        // Auto save the cached results
+                        SaveCachedMSInfoResults(false);
+                    }
+                }
+
+                if (mFolderIntegrityInfoResultsState == eCachedResultsStateConstants.Modified)
+                {
+                    if (DateTime.UtcNow.Subtract(mCachedFolderIntegrityInfoLastSaveTime).TotalMinutes >= mCachedResultsAutoSaveIntervalMinutes)
+                    {
+                        // Auto save the cached results
+                        SaveCachedFolderIntegrityInfoResults(false);
+                    }
+                }
+            }
+
+        }
+
+        public bool CachedMSInfoContainsDataset(string strDatasetName)
+        {
+            DataRow objRowMatch;
+            return CachedMSInfoContainsDataset(strDatasetName, out objRowMatch);
+        }
+
+        public bool CachedMSInfoContainsDataset(string strDatasetName, out DataRow objRowMatch)
+        {
+            return DatasetTableContainsPrimaryKeyValue(mMSFileInfoDataset, MS_FILEINFO_DATATABLE, strDatasetName, out objRowMatch);
+        }
+
+
+        public bool CachedFolderIntegrityInfoContainsFolder(string strFolderPath, out int intFolderID)
+        {
+            DataRow objRowMatch;
+            return CachedFolderIntegrityInfoContainsFolder(strFolderPath, out intFolderID, out objRowMatch);
+        }
+
+        public bool CachedFolderIntegrityInfoContainsFolder(
+            string strFolderPath, 
+            out int intFolderID, 
+            out DataRow objRowMatch)
+        {
+            if (DatasetTableContainsPrimaryKeyValue(mFolderIntegrityInfoDataset, FOLDER_INTEGRITY_INFO_DATATABLE, strFolderPath, out objRowMatch))
+            {
+                intFolderID = Convert.ToInt32(objRowMatch[COL_NAME_FOLDER_ID]);
+                return true;
+            }
+
+            intFolderID = 0;
+            objRowMatch = null;
+            return false;
+        }
+
+        private void ClearCachedMSInfoResults()
+        {
+            mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].Clear();
+            mMSFileInfoCachedResultsState = eCachedResultsStateConstants.NotInitialized;
+        }
+
+        private void ClearCachedFolderIntegrityInfoResults()
+        {
+            mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].Clear();
+            mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized;
+            mMaximumFolderIntegrityInfoFolderID = 0;
+        }
+
+        public string ConstructHeaderLine(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants eDataFileType)
+        {
+            switch (eDataFileType)
+            {
+                case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo:
+                    // Note: The order of the output should match eMSFileInfoResultsFileColumns
+
+                    return COL_NAME_DATASET_ID + '\t' + COL_NAME_DATASET_NAME + '\t' + COL_NAME_FILE_EXTENSION + '\t' + COL_NAME_ACQ_TIME_START + '\t' + COL_NAME_ACQ_TIME_END + '\t' + COL_NAME_SCAN_COUNT + '\t' + COL_NAME_FILE_SIZE_BYTES + '\t' + COL_NAME_INFO_LAST_MODIFIED + '\t' + COL_NAME_FILE_MODIFICATION_DATE;
+                case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo:
+                    // Note: The order of the output should match eFolderIntegrityInfoFileColumns
+
+                    return COL_NAME_FOLDER_ID + '\t' + COL_NAME_FOLDER_PATH + '\t' + COL_NAME_FILE_COUNT + '\t' + COL_NAME_COUNT_FAIL_INTEGRITY + '\t' + COL_NAME_INFO_LAST_MODIFIED;
+                case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails:
+                    // Note: The order of the output should match eFileIntegrityDetailsFileColumns
+
+                    return COL_NAME_FOLDER_ID + '\t' + COL_NAME_FILE_NAME + '\t' + COL_NAME_FILE_SIZE_BYTES + '\t' + COL_NAME_FILE_MODIFICATION_DATE + '\t' + COL_NAME_FAILED_INTEGRITY_CHECK + '\t' + COL_NAME_SHA1_HASH + '\t' + COL_NAME_INFO_LAST_MODIFIED;
+                case MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityErrors:
+                    return "File_Path" + '\t' + "Error_Message" + '\t' + COL_NAME_INFO_LAST_MODIFIED;
+                default:
+                    return "Unknown_File_Type";
+            }
+        }
+
+        private bool DatasetTableContainsPrimaryKeyValue(
+            DataSet dsDataset, string strTableName, string strValueToFind)
+        {
+            DataRow objRowMatch;
+            return DatasetTableContainsPrimaryKeyValue(dsDataset, strTableName, strValueToFind, out objRowMatch);
+        }
+
+        private bool DatasetTableContainsPrimaryKeyValue(
+            DataSet dsDataset, string strTableName, string strValueToFind, out DataRow objRowMatch)
+        {
+
+            try
+            {
+                if (dsDataset == null || dsDataset.Tables[strTableName].Rows.Count == 0)
+                {
+                    objRowMatch = null;
+                    return false;
+                }
+
+                // Look for strValueToFind in dsDataset
+                try
+                {
+                    objRowMatch = dsDataset.Tables[strTableName].Rows.Find(strValueToFind);
+
+                    if (objRowMatch == null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                catch (Exception)
+                {
+                    objRowMatch = null;
+                    return false;
+                }
+
+            }
+            catch (Exception)
+            {
+                objRowMatch = null;
+                return false;
+            }
+
+        }
+
+        public void InitializeVariables()
+        {
+            mCachedResultsAutoSaveIntervalMinutes = 5;
+            mCachedMSInfoResultsLastSaveTime = DateTime.UtcNow;
+            mCachedFolderIntegrityInfoLastSaveTime = DateTime.UtcNow;
+
+            mFolderIntegrityInfoFilePath = Path.Combine(clsMSFileInfoScanner.GetAppFolderPath(), clsMSFileInfoScanner.DefaultDataFileName(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo));
+
+            mAcquisitionTimeFilePath = Path.Combine(clsMSFileInfoScanner.GetAppFolderPath(), clsMSFileInfoScanner.DefaultDataFileName(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo));
+            clsMSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo);
+
+            InitializeDatasets();
+        }
+
+        private bool IsNumber(string strValue)
+        {
+            try
+            {
+                double value;
+                return double.TryParse(strValue, out value);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+
+        private void InitializeDatasets()
+        {
+            var dtDefaultDate = DateTime.Now;
+
+            // Make the MSFileInfo datatable
+            var dtMSFileInfo = new DataTable(MS_FILEINFO_DATATABLE);
+
+            // Add the columns to the datatable
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(ref dtMSFileInfo, COL_NAME_DATASET_ID);
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnStringToTable(ref dtMSFileInfo, COL_NAME_DATASET_NAME);
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnStringToTable(ref dtMSFileInfo, COL_NAME_FILE_EXTENSION);
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(ref dtMSFileInfo, COL_NAME_ACQ_TIME_START, dtDefaultDate);
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(ref dtMSFileInfo, COL_NAME_ACQ_TIME_END, dtDefaultDate);
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(ref dtMSFileInfo, COL_NAME_SCAN_COUNT);
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnLongToTable(ref dtMSFileInfo, COL_NAME_FILE_SIZE_BYTES);
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(ref dtMSFileInfo, COL_NAME_INFO_LAST_MODIFIED, dtDefaultDate);
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(ref dtMSFileInfo, COL_NAME_FILE_MODIFICATION_DATE, dtDefaultDate);
+
+            // Use the dataset name as the primary key since we won't always know Dataset_ID
+            var MSInfoPrimaryKeyColumn = new[] { dtMSFileInfo.Columns[COL_NAME_DATASET_NAME] };
+            dtMSFileInfo.PrimaryKey = MSInfoPrimaryKeyColumn;
+
+
+            // Make the Folder Integrity Info datatable
+            var dtFolderIntegrityInfo = new DataTable(FOLDER_INTEGRITY_INFO_DATATABLE);
+
+            // Add the columns to the datatable
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(ref dtFolderIntegrityInfo, COL_NAME_FOLDER_ID);
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnStringToTable(ref dtFolderIntegrityInfo, COL_NAME_FOLDER_PATH);
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(ref dtFolderIntegrityInfo, COL_NAME_FILE_COUNT);
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(ref dtFolderIntegrityInfo, COL_NAME_COUNT_FAIL_INTEGRITY);
+            SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(ref dtFolderIntegrityInfo, COL_NAME_INFO_LAST_MODIFIED, dtDefaultDate);
+
+            // Use the folder path as the primary key
+            var FolderInfoPrimaryKeyColumn = new[] { 
+                dtFolderIntegrityInfo.Columns[COL_NAME_FOLDER_PATH] 
+            };
+            dtFolderIntegrityInfo.PrimaryKey = FolderInfoPrimaryKeyColumn;
+
+            // Instantiate the datasets
+            mMSFileInfoDataset = new DataSet("MSFileInfoDataset");
+            mFolderIntegrityInfoDataset = new DataSet("FolderIntegrityInfoDataset");
+
+            // Add the new DataTable to each DataSet
+            mMSFileInfoDataset.Tables.Add(dtMSFileInfo);
+            mFolderIntegrityInfoDataset.Tables.Add(dtFolderIntegrityInfo);
+
+            mMSFileInfoCachedResultsState = eCachedResultsStateConstants.NotInitialized;
+            mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized;
+        }
+
+        public void LoadCachedResults(bool blnForceLoad)
+        {
+            if (blnForceLoad || mMSFileInfoCachedResultsState == eCachedResultsStateConstants.NotInitialized)
+            {
+                LoadCachedMSFileInfoResults();
+                LoadCachedFolderIntegrityInfoResults();
+            }
+        }
+
+
+        private void LoadCachedFolderIntegrityInfoResults()
+        {
+            var udtFolderStats = default(clsFileIntegrityChecker.udtFolderStatsType);
+
+            var strSepChars = new[] { '\t' };
+
+            // Clear the Folder Integrity Info Table
+            ClearCachedFolderIntegrityInfoResults();
+
+            clsMSFileInfoScanner.ValidateDataFilePath(ref mFolderIntegrityInfoFilePath, MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo);
+
+            if (StatusEvent != null)
+            {
+                StatusEvent("Loading cached folder integrity info from: " + Path.GetFileName(mFolderIntegrityInfoFilePath));
+            }
+
+            if (File.Exists(mFolderIntegrityInfoFilePath))
+            {
+                // Read the entries from mFolderIntegrityInfoFilePath, populating mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE)
+
+                if (clsMSFileInfoScanner.USE_XML_OUTPUT_FILE)
+                {
+                    var fsInFile = new FileStream(mFolderIntegrityInfoFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                    mFolderIntegrityInfoDataset.ReadXml(fsInFile);
+                    fsInFile.Close();
+                }
+                else
+                {
+                    var srInFile = new StreamReader(mFolderIntegrityInfoFilePath);
+                    while (!srInFile.EndOfStream)
+                    {
+                        var strLineIn = srInFile.ReadLine();
+
+                        if ((strLineIn != null))
+                        {
+                            var strSplitLine = strLineIn.Split(strSepChars);
+
+                            if (strSplitLine.Length >= 5)
+                            {
+                                var strFolderPath = strSplitLine[(int)eFolderIntegrityInfoFileColumns.FolderPath];
+
+                                if (IsNumber(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FolderID]))
+                                {
+                                    int intFolderID;
+                                    if (!CachedFolderIntegrityInfoContainsFolder(strFolderPath, out intFolderID))
+                                    {
+                                        try
+                                        {
+                                            var objNewRow = mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].NewRow();
+
+                                            intFolderID = Convert.ToInt32(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FolderID]);
+                                            udtFolderStats.FolderPath = strFolderPath;
+                                            udtFolderStats.FileCount = Convert.ToInt32(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FileCount]);
+                                            udtFolderStats.FileCountFailIntegrity = Convert.ToInt32(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FileCountFailedIntegrity]);
+
+                                            var dtInfoLastModified = ParseDate(strSplitLine[(int)eFolderIntegrityInfoFileColumns.InfoLastModified]);
+
+                                            PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objNewRow, dtInfoLastModified);
+                                            mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].Rows.Add(objNewRow);
+
+                                        }
+                                        catch (Exception)
+                                        {
+                                            // Do not add this entry
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    srInFile.Close();
+
+                }
+            }
+
+            mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
+
+        }
+
+
+        private void LoadCachedMSFileInfoResults()
+        {
+            var strSepChars = new[] { '\t' };
+
+            // Clear the MS Info Table
+            ClearCachedMSInfoResults();
+
+            clsMSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo);
+
+            if (StatusEvent != null)
+            {
+                StatusEvent("Loading cached acquisition time file data from: " + Path.GetFileName(mAcquisitionTimeFilePath));
+            }
+
+            if (File.Exists(mAcquisitionTimeFilePath))
+            {
+                // Read the entries from mAcquisitionTimeFilePath, populating mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE)
+
+                if (clsMSFileInfoScanner.USE_XML_OUTPUT_FILE)
+                {
+                    using (var fsInFile = new FileStream(mAcquisitionTimeFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
+                    {
+                        mMSFileInfoDataset.ReadXml(fsInFile);
+                    }
+                }
+                else
+                {
+                    var srInFile = new StreamReader(mAcquisitionTimeFilePath);
+                    while (!srInFile.EndOfStream)
+                    {
+                        var strLineIn = srInFile.ReadLine();
+
+                        if ((strLineIn == null))
+                        {
+                            continue;
+                        }
+                        var strSplitLine = strLineIn.Split(strSepChars);
+
+                        if (strSplitLine.Length < 8)
+                        {
+                            continue;
+                        }
+
+                        var strDatasetName = strSplitLine[(int)eMSFileInfoResultsFileColumns.DatasetName];
+
+                        if (!IsNumber(strSplitLine[(int)eMSFileInfoResultsFileColumns.DatasetID]))
+                        {
+                            continue;
+                        }
+
+                        if (CachedMSInfoContainsDataset(strDatasetName))
+                        {
+                            continue;
+                        }
+
+                        try
+                        {
+                            var objNewRow = mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].NewRow();
+
+                            var datasetId = Convert.ToInt32(strSplitLine[(int)eMSFileInfoResultsFileColumns.DatasetID]);
+                            var datasetFileInfo = new clsDatasetFileInfo(datasetId, strDatasetName)
+                            {
+                                FileExtension = string.Copy(strSplitLine[(int)eMSFileInfoResultsFileColumns.FileExtension]),
+                                AcqTimeStart = ParseDate(strSplitLine[(int)eMSFileInfoResultsFileColumns.AcqTimeStart]),
+                                AcqTimeEnd = ParseDate(strSplitLine[(int)eMSFileInfoResultsFileColumns.AcqTimeEnd]),
+                                ScanCount = Convert.ToInt32(strSplitLine[(int)eMSFileInfoResultsFileColumns.ScanCount]),
+                                FileSizeBytes = Convert.ToInt64(strSplitLine[(int)eMSFileInfoResultsFileColumns.FileSizeBytes])
+                            };
+
+                            var dtInfoLastModified = ParseDate(strSplitLine[(int)eMSFileInfoResultsFileColumns.InfoLastModified]);
+
+                            if (strSplitLine.Length >= 9)
+                            {
+                                datasetFileInfo.FileSystemModificationTime = ParseDate(strSplitLine[(int)eMSFileInfoResultsFileColumns.FileModificationDate]);
+                            }
+
+                            PopulateMSInfoDataRow(datasetFileInfo, objNewRow, dtInfoLastModified);
+                            mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].Rows.Add(objNewRow);
+
+                        }
+                        catch (Exception)
+                        {
+                            // Do not add this entry
+                        }
+                    }
+                    srInFile.Close();
+
+                }
+            }
+
+            mMSFileInfoCachedResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
+
+        }
+
+        private DateTime ParseDate(string dateText)
+        {
+            DateTime parsedDate;
+            if (DateTime.TryParse(dateText, out parsedDate))
+                return parsedDate;
+
+            return DateTime.MinValue;
+        }
+
+        private void PopulateMSInfoDataRow(clsDatasetFileInfo datasetFileInfo, DataRow objRow)
+        {
+            PopulateMSInfoDataRow(datasetFileInfo, objRow, DateTime.Now);
+        }
+
+
+        private void PopulateMSInfoDataRow(clsDatasetFileInfo datasetFileInfo, DataRow objRow, DateTime dtInfoLastModified)
+        {
+            // ToDo: Update datasetFileInfo to include some overall quality scores
+
+            objRow[COL_NAME_DATASET_ID] = datasetFileInfo.DatasetID;
+            objRow[COL_NAME_DATASET_NAME] = datasetFileInfo.DatasetName;
+            objRow[COL_NAME_FILE_EXTENSION] = datasetFileInfo.FileExtension;
+            objRow[COL_NAME_ACQ_TIME_START] = AssureMinimumDate(datasetFileInfo.AcqTimeStart, DateTime.MinValue);
+            objRow[COL_NAME_ACQ_TIME_END] = AssureMinimumDate(datasetFileInfo.AcqTimeEnd, DateTime.MinValue);
+            objRow[COL_NAME_SCAN_COUNT] = datasetFileInfo.ScanCount;
+            objRow[COL_NAME_FILE_SIZE_BYTES] = datasetFileInfo.FileSizeBytes;
+            objRow[COL_NAME_INFO_LAST_MODIFIED] = AssureMinimumDate(dtInfoLastModified, DateTime.MinValue);
+            objRow[COL_NAME_FILE_MODIFICATION_DATE] = AssureMinimumDate(datasetFileInfo.FileSystemModificationTime, DateTime.MinValue);
+            //[COL_NAME_QUALITY_SCORE] = datasetFileInfo.OverallQualityScore
+        }
+
+        private void PopulateFolderIntegrityInfoDataRow(
+            int intFolderID, 
+            clsFileIntegrityChecker.udtFolderStatsType udtFolderStats, 
+            DataRow objRow)
+        {
+            PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow, DateTime.Now);
+        }
+
+
+        private void PopulateFolderIntegrityInfoDataRow(
+            int intFolderID,
+            clsFileIntegrityChecker.udtFolderStatsType udtFolderStats,
+            DataRow objRow,
+            DateTime dtInfoLastModified)
+        {
+            objRow[COL_NAME_FOLDER_ID] = intFolderID;
+            objRow[COL_NAME_FOLDER_PATH] = udtFolderStats.FolderPath;
+            objRow[COL_NAME_FILE_COUNT] = udtFolderStats.FileCount;
+            objRow[COL_NAME_COUNT_FAIL_INTEGRITY] = udtFolderStats.FileCountFailIntegrity;
+            objRow[COL_NAME_INFO_LAST_MODIFIED] = AssureMinimumDate(dtInfoLastModified, DateTime.MinValue);
+
+            if (intFolderID > mMaximumFolderIntegrityInfoFolderID)
+            {
+                mMaximumFolderIntegrityInfoFolderID = intFolderID;
+            }
+        }
+
+        /// <summary>
+        /// Writes out the cache files immediately
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks></remarks>
+        public bool SaveCachedResults()
+        {
+            return SaveCachedResults(true);
+        }
+
+        public bool SaveCachedResults(bool blnClearCachedData)
+        {
+            var blnSuccess1 = SaveCachedMSInfoResults(blnClearCachedData);
+            var blnSuccess2 = SaveCachedFolderIntegrityInfoResults(blnClearCachedData);
+
+            return blnSuccess1 & blnSuccess2;
+
+        }
+
+        public bool SaveCachedFolderIntegrityInfoResults(bool blnClearCachedData)
+        {
+            bool blnSuccess;
+
+            if ((mFolderIntegrityInfoDataset == null) ||
+                mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].Rows.Count <= 0 ||
+                mFolderIntegrityInfoResultsState != eCachedResultsStateConstants.Modified)
+            {
+                return false;
+            }
+
+            if (StatusEvent != null)
+            {
+                StatusEvent("Saving cached folder integrity info to: " + Path.GetFileName(mFolderIntegrityInfoFilePath));
+            }
+
+            try
+            {
+                // Write all of mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE) to the results file
+                if (clsMSFileInfoScanner.USE_XML_OUTPUT_FILE)
+                {
+                    using (var fsOutfile = new FileStream(mFolderIntegrityInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    {
+                        mFolderIntegrityInfoDataset.WriteXml(fsOutfile);
+                    }
+                }
+                else
+                {
+                    using (var srOutFile = new StreamWriter(new FileStream(mFolderIntegrityInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                    {
+
+                        srOutFile.WriteLine(ConstructHeaderLine(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo));
+
+                        foreach (DataRow objRow in mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].Rows)
+                        {
+                            WriteFolderIntegrityInfoDataLine(srOutFile, objRow);
+                        }
+
+                    }
+                }
+
+                mCachedFolderIntegrityInfoLastSaveTime = DateTime.UtcNow;
+
+                if (blnClearCachedData)
+                {
+                    // Clear the data table
+                    ClearCachedFolderIntegrityInfoResults();
+                }
+                else
+                {
+                    mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
+                }
+
+                blnSuccess = true;
+
+            }
+            catch (Exception ex)
+            {
+                if (ErrorEvent != null)
+                {
+                    ErrorEvent("Error in SaveCachedFolderIntegrityInfoResults: " + ex.Message);
+                }
+                blnSuccess = false;
+            }
+
+            return blnSuccess;
+
+        }
+
+        public bool SaveCachedMSInfoResults(bool blnClearCachedData)
+        {
+
+            var blnSuccess = false;
+
+            if ((mMSFileInfoDataset != null) && 
+                mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].Rows.Count > 0 && 
+                mMSFileInfoCachedResultsState == eCachedResultsStateConstants.Modified) {
+                    if (StatusEvent != null) {
+                        StatusEvent("Saving cached acquisition time file data to: " + Path.GetFileName(mAcquisitionTimeFilePath));
+                    }
+
+                    try {
+                        // Write all of mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE) to the results file
+                        if (clsMSFileInfoScanner.USE_XML_OUTPUT_FILE) {
+                            using (var fsOutfile = new FileStream(mAcquisitionTimeFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                            {
+                                mMSFileInfoDataset.WriteXml(fsOutfile);
+                            }
+                        } else {
+                            using (var srOutFile = new StreamWriter(new FileStream(mAcquisitionTimeFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                            {
+
+                                srOutFile.WriteLine(ConstructHeaderLine(MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo));
+
+                                foreach (DataRow objRow in mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].Rows)
+                                {
+                                    WriteMSInfoDataLine(srOutFile, objRow);
+                                }
+
+                            }
+                        }
+
+                        mCachedMSInfoResultsLastSaveTime = DateTime.UtcNow;
+
+                        if (blnClearCachedData) {
+                            // Clear the data table
+                            ClearCachedMSInfoResults();
+                        } else {
+                            mMSFileInfoCachedResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
+                        }
+
+                        blnSuccess = true;
+
+                    } catch (Exception ex) {
+                        if (ErrorEvent != null) {
+                            ErrorEvent("Error in SaveCachedMSInfoResults: " + ex.Message);
+                        }
+                        blnSuccess = false;
+                    }
+                }
+
+            return blnSuccess;
+
+        }
+
+        public bool UpdateCachedMSFileInfo(clsDatasetFileInfo datasetFileInfo)
+        {
+            // Update the entry for this dataset in mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE)
+
+            bool blnSuccess;
+
+            try
+            {
+                // Examine the data in memory and add or update the data for strDataset
+                DataRow objRow;
+                if (CachedMSInfoContainsDataset(datasetFileInfo.DatasetName, out objRow))
+                {
+                    // Item already present; update it
+                    try
+                    {
+                        PopulateMSInfoDataRow(datasetFileInfo, objRow);
+                    }
+                    catch (Exception)
+                    {
+                        // Ignore errors updating the entry
+                    }
+                }
+                else
+                {
+                    // Item not present; add it
+                    objRow = mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].NewRow();
+                    PopulateMSInfoDataRow(datasetFileInfo, objRow);
+                    mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].Rows.Add(objRow);
+                }
+
+                mMSFileInfoCachedResultsState = eCachedResultsStateConstants.Modified;
+
+                blnSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                if (ErrorEvent != null)
+                {
+                    ErrorEvent("Error in UpdateCachedMSFileInfo: " + ex.Message);
+                }
+                blnSuccess = false;
+            }
+
+            return blnSuccess;
+
+        }
+
+        public bool UpdateCachedFolderIntegrityInfo(
+            clsFileIntegrityChecker.udtFolderStatsType udtFolderStats, 
+            out int intFolderID)
+        {
+            // Update the entry for this dataset in mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE)
+
+            bool blnSuccess;
+
+            intFolderID = -1;
+
+            try
+            {
+                if (mFolderIntegrityInfoResultsState == eCachedResultsStateConstants.NotInitialized)
+                {
+                    // Coding error; this shouldn't be the case
+                    if (ErrorEvent != null)
+                    {
+                        ErrorEvent("mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized in UpdateCachedFolderIntegrityInfo; unable to continue");
+                    }
+                    return false;
+                }
+
+                // Examine the data in memory and add or update the data for strDataset
+                DataRow objRow;
+                if (CachedFolderIntegrityInfoContainsFolder(udtFolderStats.FolderPath, out intFolderID, out objRow))
+                {
+                    // Item already present; update it
+                    try
+                    {
+                        PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow);
+                    }
+                    catch (Exception)
+                    {
+                        // Ignore errors updating the entry
+                    }
+                }
+                else
+                {
+                    // Item not present; add it
+
+                    // Auto-assign the next available FolderID value
+                    intFolderID = mMaximumFolderIntegrityInfoFolderID + 1;
+
+                    objRow = mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].NewRow();
+                    PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow);
+                    mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].Rows.Add(objRow);
+                }
+
+                mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.Modified;
+
+                blnSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                if (ErrorEvent != null)
+                {
+                    ErrorEvent("Error in UpdateCachedFolderIntegrityInfo: " + ex.Message);
+                }
+                blnSuccess = false;
+            }
+
+            return blnSuccess;
+
+        }
+
+        private void WriteMSInfoDataLine(StreamWriter srOutFile, DataRow objRow)
+        {
+            // Note: HH:mm:ss corresponds to time in 24 hour format
+            srOutFile.WriteLine(
+                objRow[COL_NAME_DATASET_ID].ToString() + '\t' + 
+                objRow[COL_NAME_DATASET_NAME] + '\t' + 
+                objRow[COL_NAME_FILE_EXTENSION] + '\t' + 
+                ((DateTime)objRow[COL_NAME_ACQ_TIME_START]).ToString("yyyy-MM-dd HH:mm:ss") + '\t' + 
+                ((DateTime)objRow[COL_NAME_ACQ_TIME_END]).ToString("yyyy-MM-dd HH:mm:ss") + '\t' +
+                objRow[COL_NAME_SCAN_COUNT] + '\t' + 
+                objRow[COL_NAME_FILE_SIZE_BYTES] + '\t' + 
+                objRow[COL_NAME_INFO_LAST_MODIFIED] + '\t' + 
+                ((DateTime)objRow[COL_NAME_FILE_MODIFICATION_DATE]).ToString("yyyy-MM-dd HH:mm:ss"));
+
+        }
+
+
+        private void WriteFolderIntegrityInfoDataLine(StreamWriter srOutFile, DataRow objRow)
+        {
+            srOutFile.WriteLine(
+                objRow[COL_NAME_FOLDER_ID].ToString() + '\t' +
+                objRow[COL_NAME_FOLDER_PATH] + '\t' +
+                objRow[COL_NAME_FILE_COUNT] + '\t' +
+                objRow[COL_NAME_COUNT_FAIL_INTEGRITY] + '\t' +
+                objRow[COL_NAME_INFO_LAST_MODIFIED]);
+        }
+
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~clsMSFileInfoDataCache()
+        {
+            SaveCachedResults();
+        }
+    }
+}
+

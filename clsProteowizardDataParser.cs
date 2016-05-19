@@ -1,688 +1,695 @@
-﻿Option Strict On
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+
+using PNNLOmics.Utilities;
+using System.Text.RegularExpressions;
+using MSFileInfoScanner;
+
+[CLSCompliant(false)]
+public class clsProteowizardDataParser
+{
+
+
+	public event ErrorEventEventHandler ErrorEvent;
+	public delegate void ErrorEventEventHandler(string Message);
+	public event MessageEventEventHandler MessageEvent;
+	public delegate void MessageEventEventHandler(string Message);
+
+	private pwiz.ProteowizardWrapper.MSDataFileReader mPWiz;
+
+	private DSSummarizer.clsDatasetStatsSummarizer mDatasetStatsSummarizer;
+	private clsTICandBPIPlotter mTICandBPIPlot;
+
+	private clsLCMSDataPlotter mLCMS2DPlot;
+	private bool mSaveLCMS2DPlots;
+	private bool mSaveTICAndBPI;
+
+	private bool mCheckCentroidingStatus;
+	private bool mHighResMS1;
+
+    private readonly Regex mGetQ1MZ;
+    private readonly Regex mGetQ3MZ;
+
+	private bool mHighResMS2;
+	public bool HighResMS1 {
+		get { return mHighResMS1; }
+		set { mHighResMS1 = value; }
+	}
+
+	public bool HighResMS2 {
+		get { return mHighResMS2; }
+		set { mHighResMS2 = value; }
+	}
+
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="objPWiz"></param>
+    /// <param name="objDatasetStatsSummarizer"></param>
+    /// <param name="objTICandBPIPlot"></param>
+    /// <param name="objLCMS2DPlot"></param>
+    /// <param name="blnSaveLCMS2DPlots"></param>
+    /// <param name="blnSaveTICandBPI"></param>
+    /// <param name="blnCheckCentroidingStatus"></param>
+	public clsProteowizardDataParser(ref pwiz.ProteowizardWrapper.MSDataFileReader objPWiz, ref DSSummarizer.clsDatasetStatsSummarizer objDatasetStatsSummarizer, ref clsTICandBPIPlotter objTICandBPIPlot, ref clsLCMSDataPlotter objLCMS2DPlot, bool blnSaveLCMS2DPlots, bool blnSaveTICandBPI, bool blnCheckCentroidingStatus)
+	{
+		mPWiz = objPWiz;
+		mDatasetStatsSummarizer = objDatasetStatsSummarizer;
+		mTICandBPIPlot = objTICandBPIPlot;
+		mLCMS2DPlot = objLCMS2DPlot;
+
+		mSaveLCMS2DPlots = blnSaveLCMS2DPlots;
+		mSaveTICAndBPI = blnSaveTICandBPI;
+		mCheckCentroidingStatus = blnCheckCentroidingStatus;
+
+        const string Q_REGEX = "Q[0-9]=([0-9.]+)";
+        mGetQ1MZ = new Regex(Q_REGEX, RegexOptions.Compiled);
+
+        const string Q1_Q3_REGEX = "Q1=[0-9.]+ Q3=([0-9.]+)";
+        mGetQ3MZ = new Regex(Q1_Q3_REGEX, RegexOptions.Compiled);
+
+	}
+
+    private bool ExtractQ1MZ(string strChromID, out double dblMZ)
+	{
+        return ExtractQMZ(mGetQ1MZ, strChromID, out dblMZ);
+
+	}
+
+    private bool ExtractQ3MZ(string strChromID, out double dblMZ)
+	{
+
+        return ExtractQMZ(mGetQ3MZ, strChromID, out dblMZ);
+
+	}
+
+	private bool ExtractQMZ(Regex reGetMZ, string strChromID, out double dblMZ)
+	{
+		var reMatch = reGetMZ.Match(strChromID);
+		if (reMatch.Success) {
+			if (double.TryParse(reMatch.Groups[1].Value, out dblMZ)) {
+				return true;
+			}
+		}
+
+	    dblMZ = 0;
+		return false;
+	}
+
+	private int FindNearestInList(ref List<float> lstItems, float sngValToFind)
+	{
+
+		int intIndexMatch = 0;
+
+		intIndexMatch = lstItems.BinarySearch(sngValToFind);
+		if (intIndexMatch >= 0) {
+			// Exact match found			
+		} else {
+			// Find the nearest match
+			intIndexMatch = intIndexMatch ^ -1;
+			if (intIndexMatch == lstItems.Count) {
+				intIndexMatch -= 1;
+			}
 
-Imports PNNLOmics.Utilities
-Imports System.Text.RegularExpressions
+			if (intIndexMatch > 0) {
+				// Possibly decrement intIndexMatch
+				if (Math.Abs(lstItems[intIndexMatch - 1] - sngValToFind) < Math.Abs(lstItems[intIndexMatch] - sngValToFind)) {
+					intIndexMatch -= 1;
+				}
+			}
 
-<CLSCompliant(False)> Public Class clsProteowizardDataParser
+			if (intIndexMatch < lstItems.Count) {
+				// Possible increment intIndexMatch
+				if (Math.Abs(lstItems[intIndexMatch + 1] - sngValToFind) < Math.Abs(lstItems[intIndexMatch] - sngValToFind)) {
+					intIndexMatch += 1;
+				}
+			}
 
+			if (intIndexMatch < 0) {
+				intIndexMatch = 0;
+			} else if (intIndexMatch == lstItems.Count) {
+				intIndexMatch = lstItems.Count - 1;
+			}
 
-    Public Event ErrorEvent(Message As String)
-    Public Event MessageEvent(Message As String)
+		}
 
-    Protected mPWiz As pwiz.ProteowizardWrapper.MSDataFileReader
-    Protected mDatasetStatsSummarizer As DSSummarizer.clsDatasetStatsSummarizer
+		return intIndexMatch;
+	}
 
-    Protected mTICandBPIPlot As clsTICandBPIPlotter
-    Protected mLCMS2DPlot As clsLCMSDataPlotter
 
-    Protected mSaveLCMS2DPlots As Boolean
-    Protected mSaveTICAndBPI As Boolean
-    Protected mCheckCentroidingStatus As Boolean
+	public void PossiblyUpdateAcqTimeStart(clsDatasetFileInfo datasetFileInfo, double dblRuntimeMinutes)
+	{
+		if (dblRuntimeMinutes > 0) {
+			var dtAcqTimeStartAlt = default(DateTime);
+			dtAcqTimeStartAlt = datasetFileInfo.AcqTimeEnd.AddMinutes(-dblRuntimeMinutes);
 
-    Protected mHighResMS1 As Boolean
-    Protected mHighResMS2 As Boolean
-
-    Public Property HighResMS1() As Boolean
-        Get
-            Return mHighResMS1
-        End Get
-        Set(value As Boolean)
-            mHighResMS1 = value
-        End Set
-    End Property
+			if (dtAcqTimeStartAlt < datasetFileInfo.AcqTimeStart && datasetFileInfo.AcqTimeStart.Subtract(dtAcqTimeStartAlt).TotalDays < 1) {
+				datasetFileInfo.AcqTimeStart = dtAcqTimeStartAlt;
+			}
+		}
 
-    Public Property HighResMS2() As Boolean
-        Get
-            Return mHighResMS2
-        End Get
-        Set(value As Boolean)
-            mHighResMS2 = value
-        End Set
-    End Property
-
-    Public Sub New(
-      ByRef objPWiz As pwiz.ProteowizardWrapper.MSDataFileReader,
-      ByRef objDatasetStatsSummarizer As DSSummarizer.clsDatasetStatsSummarizer,
-      ByRef objTICandBPIPlot As clsTICandBPIPlotter,
-      ByRef objLCMS2DPlot As clsLCMSDataPlotter,
-       blnSaveLCMS2DPlots As Boolean,
-       blnSaveTICandBPI As Boolean,
-       blnCheckCentroidingStatus As Boolean)
-
-        mPWiz = objPWiz
-        mDatasetStatsSummarizer = objDatasetStatsSummarizer
-        mTICandBPIPlot = objTICandBPIPlot
-        mLCMS2DPlot = objLCMS2DPlot
-
-        mSaveLCMS2DPlots = blnSaveLCMS2DPlots
-        mSaveTICAndBPI = blnSaveTICandBPI
-        mCheckCentroidingStatus = blnCheckCentroidingStatus
-    End Sub
-
-    Private Function ExtractQ1MZ(strChromID As String, ByRef dblMZ As Double) As Boolean
-
-        Const Q_REGEX = "Q[0-9]=([0-9.]+)"
-        Static reGetQ1MZ As Regex = New Regex(Q_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
-
-        Return ExtractQMZ(reGetQ1MZ, strChromID, dblMZ)
-
-    End Function
-
-    Private Function ExtractQ3MZ(strChromID As String, ByRef dblMZ As Double) As Boolean
+	}
 
-        Const Q1_Q3_REGEX = "Q1=[0-9.]+ Q3=([0-9.]+)"
-        Static reGetQ3MZ As Regex = New Regex(Q1_Q3_REGEX, Text.RegularExpressions.RegexOptions.Compiled)
 
-        Return ExtractQMZ(reGetQ3MZ, strChromID, dblMZ)
+	private void ProcessSRM(string strChromID, ref float[] sngTimes, ref float[] sngIntensities, ref List<float> lstTICScanTimes, ref List<int> lstTICScanNumbers, ref double dblRuntimeMinutes, ref Dictionary<int, Dictionary<double, double>> dct2DDataParent, ref Dictionary<int, Dictionary<double, double>> dct2DDataProduct, ref Dictionary<int, float> dct2DDataScanTimes)
+	{
+		bool blnParentMZFound = false;
+		bool blnProductMZFound = false;
 
-    End Function
-
-    Private Function ExtractQMZ(ByRef reGetMZ As Regex, strChromID As String, ByRef dblMZ As Double) As Boolean
-        Dim reMatch As Match
+		double dblParentMZ = 0;
+		double dblProductMZ = 0;
 
-        reMatch = reGetMZ.Match(strChromID)
-        If reMatch.Success Then
-            If Double.TryParse(reMatch.Groups(1).Value, dblMZ) Then
-                Return True
-            End If
-        End If
+		// Attempt to parse out the product m/z
+		blnParentMZFound = ExtractQ1MZ(strChromID, out dblParentMZ);
+        blnProductMZFound = ExtractQ3MZ(strChromID, out dblProductMZ);
 
-        Return False
-    End Function
 
-    Private Function FindNearestInList(ByRef lstItems As List(Of Single), sngValToFind As Single) As Integer
+		for (var intIndex = 0; intIndex <= sngTimes.Length - 1; intIndex++) {
+			// Find the ScanNumber in the TIC nearest to sngTimes[intIndex]
+			var intIndexMatch = FindNearestInList(ref lstTICScanTimes, sngTimes[intIndex]);
+			var intScanNumber = lstTICScanNumbers[intIndexMatch];
 
-        Dim intIndexMatch As Integer
+			// Bump up dblRuntimeMinutes if necessary
+			if (sngTimes[intIndex] > dblRuntimeMinutes) {
+				dblRuntimeMinutes = sngTimes[intIndex];
+			}
 
-        intIndexMatch = lstItems.BinarySearch(sngValToFind)
-        If intIndexMatch >= 0 Then
-            ' Exact match found			
-        Else
-            ' Find the nearest match
-            intIndexMatch = intIndexMatch Xor -1
-            If intIndexMatch = lstItems.Count Then
-                intIndexMatch -= 1
-            End If
-
-            If intIndexMatch > 0 Then
-                ' Possibly decrement intIndexMatch
-                If Math.Abs(lstItems.Item(intIndexMatch - 1) - sngValToFind) < Math.Abs(lstItems.Item(intIndexMatch) - sngValToFind) Then
-                    intIndexMatch -= 1
-                End If
-            End If
 
-            If intIndexMatch < lstItems.Count Then
-                ' Possible increment intIndexMatch
-                If Math.Abs(lstItems.Item(intIndexMatch + 1) - sngValToFind) < Math.Abs(lstItems.Item(intIndexMatch) - sngValToFind) Then
-                    intIndexMatch += 1
-                End If
-            End If
+		    var objScanStatsEntry = new DSSummarizer.clsScanStatsEntry
+		    {
+		        ScanNumber = intScanNumber,
+		        ScanType = 1,
+		        ScanTypeName = "SRM",
+		        ScanFilterText = StripExtraFromChromID(strChromID),
+		        ElutionTime = sngTimes[intIndex].ToString("0.0000"),
+		        TotalIonIntensity = sngIntensities[intIndex].ToString("0.0"),
+		        BasePeakIntensity = sngIntensities[intIndex].ToString("0.0")
+		    };
 
-            If intIndexMatch < 0 Then
-                intIndexMatch = 0
-            ElseIf intIndexMatch = lstItems.Count Then
-                intIndexMatch = lstItems.Count - 1
-            End If
 
-        End If
+		    if (blnParentMZFound) {
+				objScanStatsEntry.BasePeakMZ = dblParentMZ.ToString("0.000");
+			} else if (blnProductMZFound) {
+				objScanStatsEntry.BasePeakMZ = dblProductMZ.ToString("0.000");
+			} else {
+				objScanStatsEntry.BasePeakMZ = "0";
+			}
 
-        Return intIndexMatch
-    End Function
+			// Base peak signal to noise ratio
+			objScanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
-    Public Sub PossiblyUpdateAcqTimeStart(ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, dblRuntimeMinutes As Double)
+			objScanStatsEntry.IonCount = 1;
+			objScanStatsEntry.IonCountRaw = 1;
 
-        If dblRuntimeMinutes > 0 Then
-            Dim dtAcqTimeStartAlt As DateTime
-            dtAcqTimeStartAlt = udtFileInfo.AcqTimeEnd.AddMinutes(-dblRuntimeMinutes)
+			mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
-            If dtAcqTimeStartAlt < udtFileInfo.AcqTimeStart AndAlso udtFileInfo.AcqTimeStart.Subtract(dtAcqTimeStartAlt).TotalDays < 1 Then
-                udtFileInfo.AcqTimeStart = dtAcqTimeStartAlt
-            End If
-        End If
 
-    End Sub
+			if (mSaveLCMS2DPlots && sngIntensities[intIndex] > 0) {
+				// Store the m/z and intensity values in dct2DDataParent and dct2DDataProduct
 
-    Private Sub ProcessSRM(
-       strChromID As String,
-      ByRef sngTimes() As Single,
-      ByRef sngIntensities() As Single,
-      ByRef lstTICScanTimes As List(Of Single),
-      ByRef lstTICScanNumbers As List(Of Integer),
-      ByRef dblRuntimeMinutes As Double,
-      ByRef dct2DDataParent As Dictionary(Of Integer, Dictionary(Of Double, Double)),
-      ByRef dct2DDataProduct As Dictionary(Of Integer, Dictionary(Of Double, Double)),
-      ByRef dct2DDataScanTimes As Dictionary(Of Integer, Single))
+				if (blnParentMZFound) {
+					Store2DPlotDataPoint(ref dct2DDataParent, intScanNumber, dblParentMZ, sngIntensities[intIndex]);
+				}
 
-        Dim intScanNumber = 0
-        Dim intIndexMatch As Integer
+				if (blnProductMZFound) {
+					Store2DPlotDataPoint(ref dct2DDataProduct, intScanNumber, dblProductMZ, sngIntensities[intIndex]);
+				}
 
-        Dim blnParentMZFound As Boolean
-        Dim blnProductMZFound As Boolean
 
-        Dim dblParentMZ As Double
-        Dim dblProductMZ As Double
+				if (!dct2DDataScanTimes.ContainsKey(intScanNumber)) {
+					dct2DDataScanTimes[intScanNumber] = sngTimes[intIndex];
+				}
 
-        ' Attempt to parse out the product m/z
-        blnParentMZFound = ExtractQ1MZ(strChromID, dblParentMZ)
-        blnProductMZFound = ExtractQ3MZ(strChromID, dblProductMZ)
+			}
 
-        For intIndex = 0 To sngTimes.Length - 1
+		}
 
-            ' Find the ScanNumber in the TIC nearest to sngTimes(intIndex)
-            intIndexMatch = FindNearestInList(lstTICScanTimes, sngTimes(intIndex))
-            intScanNumber = lstTICScanNumbers(intIndexMatch)
+	}
 
-            ' Bump up dblRuntimeMinutes if necessary
-            If sngTimes(intIndex) > dblRuntimeMinutes Then
-                dblRuntimeMinutes = sngTimes(intIndex)
-            End If
 
+	private void ProcessTIC(string strChromID, ref float[] sngTimes, ref float[] sngIntensities, ref List<float> lstTICScanTimes, ref List<int> lstTICScanNumbers, ref double dblRuntimeMinutes, bool blnStoreInTICandBPIPlot)
+	{
+		for (var intIndex = 0; intIndex <= sngTimes.Length - 1; intIndex++) {
+			lstTICScanTimes.Add(sngTimes[intIndex]);
+			lstTICScanNumbers.Add(intIndex + 1);
 
-            Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
+			// Bump up dblRuntimeMinutes if necessary
+			if (sngTimes[intIndex] > dblRuntimeMinutes) {
+				dblRuntimeMinutes = sngTimes[intIndex];
+			}
 
-            objScanStatsEntry.ScanNumber = intScanNumber
-            objScanStatsEntry.ScanType = 1
+			if (blnStoreInTICandBPIPlot) {
+				// Use this TIC chromatogram for this dataset since there are no normal Mass Spectra
+				mTICandBPIPlot.AddDataTICOnly(intIndex + 1, 1, sngTimes[intIndex], sngIntensities[intIndex]);
 
-            objScanStatsEntry.ScanTypeName = "SRM"
-            objScanStatsEntry.ScanFilterText = StripExtraFromChromID(strChromID)
+			}
 
-            objScanStatsEntry.ElutionTime = sngTimes(intIndex).ToString("0.0000")
-            objScanStatsEntry.TotalIonIntensity = sngIntensities(intIndex).ToString("0.0")
-            objScanStatsEntry.BasePeakIntensity = sngIntensities(intIndex).ToString("0.0")
+		}
 
-            If blnParentMZFound Then
-                objScanStatsEntry.BasePeakMZ = dblParentMZ.ToString("0.000")
-            ElseIf blnProductMZFound Then
-                objScanStatsEntry.BasePeakMZ = dblProductMZ.ToString("0.000")
-            Else
-                objScanStatsEntry.BasePeakMZ = "0"
-            End If
+		// Make sure lstTICScanTimes is sorted
+		object blnNeedToSort = false;
+		for (intIndex = 1; intIndex <= lstTICScanTimes.Count - 1; intIndex++) {
+			if (lstTICScanTimes[intIndex] < lstTICScanTimes(intIndex - 1)) {
+				blnNeedToSort = true;
+				break; // TODO: might not be correct. Was : Exit For
+			}
+		}
 
-            ' Base peak signal to noise ratio
-            objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
+		if (blnNeedToSort) {
+			float[] sngTICScanTimes = null;
+			int[] intTICScanNumbers = null;
+			sngTICScanTimes = new float[lstTICScanTimes.Count];
+			intTICScanNumbers = new int[lstTICScanTimes.Count];
 
-            objScanStatsEntry.IonCount = 1
-            objScanStatsEntry.IonCountRaw = 1
+			lstTICScanTimes.CopyTo(sngTICScanTimes);
+			lstTICScanNumbers.CopyTo(intTICScanNumbers);
 
-            mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
+			Array.Sort(sngTICScanTimes, intTICScanNumbers);
 
+			lstTICScanTimes.Clear();
+			lstTICScanNumbers.Clear();
 
-            If mSaveLCMS2DPlots AndAlso sngIntensities(intIndex) > 0 Then
-                ' Store the m/z and intensity values in dct2DDataParent and dct2DDataProduct
+			for (intIndex = 0; intIndex <= sngTICScanTimes.Length - 1; intIndex++) {
+				lstTICScanTimes.Add(sngTICScanTimes[intIndex]);
+				lstTICScanNumbers.Add(intTICScanNumbers[intIndex]);
+			}
 
-                If blnParentMZFound Then
-                    Store2DPlotDataPoint(dct2DDataParent, intScanNumber, dblParentMZ, sngIntensities(intIndex))
-                End If
 
-                If blnProductMZFound Then
-                    Store2DPlotDataPoint(dct2DDataProduct, intScanNumber, dblProductMZ, sngIntensities(intIndex))
-                End If
+		}
 
+	}
 
-                If Not dct2DDataScanTimes.ContainsKey(intScanNumber) Then
-                    dct2DDataScanTimes(intScanNumber) = sngTimes(intIndex)
-                End If
+	private void ReportMessage(string strMessage)
+	{
+		if (MessageEvent != null) {
+			MessageEvent(strMessage);
+		}
+	}
 
-            End If
+	private void ReportError(string strError)
+	{
+		if (ErrorEvent != null) {
+			ErrorEvent(strError);
+		}
+	}
 
-        Next
 
-    End Sub
+	public void StoreChromatogramInfo(clsDatasetFileInfo datasetFileInfo, ref bool blnTICStored, ref bool blnSRMDataCached, ref double dblRuntimeMinutes)
+	{
+		string strChromID = string.Empty;
+		float[] sngTimes = null;
+		float[] sngIntensities = null;
+		sngTimes = new float[1];
+		sngIntensities = new float[1];
 
-    Private Sub ProcessTIC(
-       strChromID As String,
-      ByRef sngTimes() As Single,
-      ByRef sngIntensities() As Single,
-      ByRef lstTICScanTimes As List(Of Single),
-      ByRef lstTICScanNumbers As List(Of Integer),
-      ByRef dblRuntimeMinutes As Double,
-       blnStoreInTICandBPIPlot As Boolean)
+		object lstTICScanTimes = new List<float>();
+		object lstTICScanNumbers = new List<int>();
 
-        For intIndex = 0 To sngTimes.Length - 1
-            lstTICScanTimes.Add(sngTimes(intIndex))
-            lstTICScanNumbers.Add(intIndex + 1)
+		// This dictionary tracks the m/z and intensity values for parent (Q1) ions of each scan
+		// Key is ScanNumber; Value is a dictionary holding m/z and intensity values for that scan
+		Dictionary<int, Dictionary<double, double>> dct2DDataParent = default(Dictionary<int, Dictionary<double, double>>);
+		dct2DDataParent = new Dictionary<int, Dictionary<double, double>>();
 
-            ' Bump up dblRuntimeMinutes if necessary
-            If sngTimes(intIndex) > dblRuntimeMinutes Then
-                dblRuntimeMinutes = sngTimes(intIndex)
-            End If
+		// This dictionary tracks the m/z and intensity values for product (Q3) ions of each scan
+		Dictionary<int, Dictionary<double, double>> dct2DDataProduct = default(Dictionary<int, Dictionary<double, double>>);
+		dct2DDataProduct = new Dictionary<int, Dictionary<double, double>>();
 
-            If blnStoreInTICandBPIPlot Then
-                ' Use this TIC chromatogram for this dataset since there are no normal Mass Spectra
-                mTICandBPIPlot.AddDataTICOnly(intIndex + 1, 1, sngTimes(intIndex), sngIntensities(intIndex))
+		// This dictionary tracks the scan times for each scan number tracked by dct2DDataParent and/or dct2DDataProduct
+		Dictionary<int, float> dct2DDataScanTimes = default(Dictionary<int, float>);
+		dct2DDataScanTimes = new Dictionary<int, float>();
 
-            End If
+		// Note that even for a small .Wiff file (1.5 MB), obtaining the first chromatogram will take some time (20 to 60 seconds)
+		// The chromatogram at index 0 should be the TIC
+		// The chromatogram at index >=1 will be each SRM
 
-        Next
+		dblRuntimeMinutes = 0;
 
-        ' Make sure lstTICScanTimes is sorted
-        Dim blnNeedToSort = False
-        For intIndex = 1 To lstTICScanTimes.Count - 1
-            If lstTICScanTimes(intIndex) < lstTICScanTimes(intIndex - 1) Then
-                blnNeedToSort = True
-                Exit For
-            End If
-        Next
 
-        If blnNeedToSort Then
-            Dim sngTICScanTimes() As Single
-            Dim intTICScanNumbers() As Integer
-            ReDim sngTICScanTimes(lstTICScanTimes.Count - 1)
-            ReDim intTICScanNumbers(lstTICScanTimes.Count - 1)
+		for (intChromIndex = 0; intChromIndex <= mPWiz.ChromatogramCount - 1; intChromIndex++) {
+			try {
+				if (intChromIndex == 0) {
+					ReportMessage("Obtaining chromatograms (this could take as long as 60 seconds)");
+				}
+				mPWiz.GetChromatogram(intChromIndex, strChromID, sngTimes, sngIntensities);
 
-            lstTICScanTimes.CopyTo(sngTICScanTimes)
-            lstTICScanNumbers.CopyTo(intTICScanNumbers)
+				if (strChromID == null)
+					strChromID = string.Empty;
 
-            Array.Sort(sngTICScanTimes, intTICScanNumbers)
+				pwiz.CLI.data.CVParamList oCVParams = default(pwiz.CLI.data.CVParamList);
+				pwiz.CLI.data.CVParam param = null;
+				oCVParams = mPWiz.GetChromatogramCVParams(intChromIndex);
 
-            lstTICScanTimes.Clear()
-            lstTICScanNumbers.Clear()
+				if (TryGetCVParam(ref oCVParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, ref param)) {
+					// This chromatogram is the TIC
 
-            For intIndex = 0 To sngTICScanTimes.Length - 1
-                lstTICScanTimes.Add(sngTICScanTimes(intIndex))
-                lstTICScanNumbers.Add(intTICScanNumbers(intIndex))
-            Next
+					object blnStoreInTICandBPIPlot = false;
+					if (mSaveTICAndBPI && mPWiz.SpectrumCount == 0) {
+						blnStoreInTICandBPIPlot = true;
+					}
 
+					ProcessTIC(strChromID, ref sngTimes, ref sngIntensities, ref lstTICScanTimes, ref lstTICScanNumbers, ref dblRuntimeMinutes, blnStoreInTICandBPIPlot);
 
-        End If
+					blnTICStored = blnStoreInTICandBPIPlot;
 
-    End Sub
+					datasetFileInfo.ScanCount = sngTimes.Length;
 
-    Protected Sub ReportMessage(strMessage As String)
-        RaiseEvent MessageEvent(strMessage)
-    End Sub
+				}
 
-    Protected Sub ReportError(strError As String)
-        RaiseEvent ErrorEvent(strError)
-    End Sub
+				if (TryGetCVParam(ref oCVParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, ref param)) {
+					// This chromatogram is an SRM scan
 
-    Public Sub StoreChromatogramInfo(
-      ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType,
-      ByRef blnTICStored As Boolean,
-      ByRef blnSRMDataCached As Boolean,
-      ByRef dblRuntimeMinutes As Double)
+					ProcessSRM(strChromID, ref sngTimes, ref sngIntensities, ref lstTICScanTimes, ref lstTICScanNumbers, ref dblRuntimeMinutes, ref dct2DDataParent, ref dct2DDataProduct, ref dct2DDataScanTimes);
 
-        Dim strChromID As String = String.Empty
-        Dim sngTimes() As Single
-        Dim sngIntensities() As Single
-        ReDim sngTimes(0)
-        ReDim sngIntensities(0)
+					blnSRMDataCached = true;
+				}
 
-        Dim lstTICScanTimes = New List(Of Single)
-        Dim lstTICScanNumbers = New List(Of Integer)
 
-        ' This dictionary tracks the m/z and intensity values for parent (Q1) ions of each scan
-        ' Key is ScanNumber; Value is a dictionary holding m/z and intensity values for that scan
-        Dim dct2DDataParent As Dictionary(Of Integer, Dictionary(Of Double, Double))
-        dct2DDataParent = New Dictionary(Of Integer, Dictionary(Of Double, Double))
+			} catch (Exception ex) {
+				ReportError("Error processing chromatogram " + intChromIndex + ": " + ex.Message);
+			}
 
-        ' This dictionary tracks the m/z and intensity values for product (Q3) ions of each scan
-        Dim dct2DDataProduct As Dictionary(Of Integer, Dictionary(Of Double, Double))
-        dct2DDataProduct = New Dictionary(Of Integer, Dictionary(Of Double, Double))
+		}
 
-        ' This dictionary tracks the scan times for each scan number tracked by dct2DDataParent and/or dct2DDataProduct
-        Dim dct2DDataScanTimes As Dictionary(Of Integer, Single)
-        dct2DDataScanTimes = New Dictionary(Of Integer, Single)
 
-        ' Note that even for a small .Wiff file (1.5 MB), obtaining the first chromatogram will take some time (20 to 60 seconds)
-        ' The chromatogram at index 0 should be the TIC
-        ' The chromatogram at index >=1 will be each SRM
+		if (mSaveLCMS2DPlots) {
+			// Now that all of the chromatograms have been processed, transfer data from dct2DDataParent and dct2DDataProduct into mLCMS2DPlot
 
-        dblRuntimeMinutes = 0
+			if (dct2DDataParent.Count > 0 || dct2DDataProduct.Count > 0) {
+				mLCMS2DPlot.Options.MS1PlotTitle = "Q1 m/z";
+				mLCMS2DPlot.Options.MS2PlotTitle = "Q3 m/z";
 
-        For intChromIndex = 0 To mPWiz.ChromatogramCount - 1
+				Store2DPlotData(ref dct2DDataScanTimes, ref dct2DDataParent, ref dct2DDataProduct);
+			}
 
-            Try
-                If intChromIndex = 0 Then
-                    ReportMessage("Obtaining chromatograms (this could take as long as 60 seconds)")
-                End If
-                mPWiz.GetChromatogram(intChromIndex, strChromID, sngTimes, sngIntensities)
+		}
 
-                If strChromID Is Nothing Then strChromID = String.Empty
 
-                Dim oCVParams As pwiz.CLI.data.CVParamList
-                Dim param As pwiz.CLI.data.CVParam = Nothing
-                oCVParams = mPWiz.GetChromatogramCVParams(intChromIndex)
+	}
 
-                If TryGetCVParam(oCVParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, param) Then
-                    ' This chromatogram is the TIC
 
-                    Dim blnStoreInTICandBPIPlot = False
-                    If mSaveTICAndBPI AndAlso mPWiz.SpectrumCount = 0 Then
-                        blnStoreInTICandBPIPlot = True
-                    End If
+	public void StoreMSSpectraInfo(clsDatasetFileInfo datasetFileInfo, bool blnTICStored, ref double dblRuntimeMinutes)
+	{
+		try {
+			double[] dblScanTimes = null;
+			byte[] intMSLevels = null;
 
-                    ProcessTIC(strChromID, sngTimes, sngIntensities, lstTICScanTimes, lstTICScanNumbers, dblRuntimeMinutes, blnStoreInTICandBPIPlot)
+			dblScanTimes = new double[1];
+			intMSLevels = new byte[1];
+			double dblTIC = 0;
+			double dblBPI = 0;
 
-                    blnTICStored = blnStoreInTICandBPIPlot
+			DateTime dtLastProgressTime = default(DateTime);
 
-                    udtFileInfo.ScanCount = sngTimes.Length
+			ReportMessage("Obtaining scan times and MSLevels (this could take several minutes)");
 
-                End If
+			mPWiz.GetScanTimesAndMsLevels(dblScanTimes, intMSLevels);
 
-                If TryGetCVParam(oCVParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, param) Then
-                    ' This chromatogram is an SRM scan
+			// The scan times returned by .GetScanTimesAndMsLevels() are the acquisition time in seconds from the start of the analysis
+			// Convert these to minutes
+			for (int intScanIndex = 0; intScanIndex <= dblScanTimes.Length - 1; intScanIndex++) {
+				dblScanTimes(intScanIndex) /= 60.0;
+			}
 
-                    ProcessSRM(strChromID, sngTimes, sngIntensities, lstTICScanTimes, lstTICScanNumbers, dblRuntimeMinutes, dct2DDataParent, dct2DDataProduct, dct2DDataScanTimes)
+			ReportMessage("Reading spectra");
+			dtLastProgressTime = DateTime.UtcNow;
 
-                    blnSRMDataCached = True
-                End If
 
+			for (int intScanIndex = 0; intScanIndex <= dblScanTimes.Length - 1; intScanIndex++) {
 
-            Catch ex As Exception
-                ReportError("Error processing chromatogram " & intChromIndex & ": " & ex.Message)
-            End Try
+				try {
+					object blnComputeTIC = true;
+					object blnComputeBPI = true;
 
-        Next intChromIndex
+					// Obtain the raw mass spectrum
+					pwiz.ProteowizardWrapper.MsDataSpectrum oMSDataSpectrum = default(pwiz.ProteowizardWrapper.MsDataSpectrum);
+					oMSDataSpectrum = mPWiz.GetSpectrum(intScanIndex);
 
+					DSSummarizer.clsScanStatsEntry objScanStatsEntry = new DSSummarizer.clsScanStatsEntry();
 
-        If mSaveLCMS2DPlots Then
-            ' Now that all of the chromatograms have been processed, transfer data from dct2DDataParent and dct2DDataProduct into mLCMS2DPlot
+					objScanStatsEntry.ScanNumber = intScanIndex + 1;
+					objScanStatsEntry.ScanType = oMSDataSpectrum.Level;
 
-            If dct2DDataParent.Count > 0 OrElse dct2DDataProduct.Count > 0 Then
-                mLCMS2DPlot.Options.MS1PlotTitle = "Q1 m/z"
-                mLCMS2DPlot.Options.MS2PlotTitle = "Q3 m/z"
+					// Might be able to determine scan type info from oMSDataSpectrum.Precursors(0)
+					// Alternatively, use .GetSpectrumPWiz
+					pwiz.CLI.msdata.Spectrum oSpectrum = default(pwiz.CLI.msdata.Spectrum);
+					pwiz.CLI.data.CVParam param = null;
+					oSpectrum = mPWiz.GetSpectrumObject(intScanIndex);
 
-                Store2DPlotData(dct2DDataScanTimes, dct2DDataParent, dct2DDataProduct)
-            End If
+					if (intMSLevels(intScanIndex) > 1) {
+						if (mHighResMS2) {
+							objScanStatsEntry.ScanTypeName = "HMSn";
+						} else {
+							objScanStatsEntry.ScanTypeName = "MSn";
+						}
+					} else {
+						if (mHighResMS1) {
+							objScanStatsEntry.ScanTypeName = "HMS";
+						} else {
+							objScanStatsEntry.ScanTypeName = "MS";
+						}
 
-        End If
+					}
 
 
-    End Sub
+					objScanStatsEntry.ScanFilterText = "";
+					objScanStatsEntry.ElutionTime = dblScanTimes(intScanIndex).ToString("0.0000");
 
-    Public Sub StoreMSSpectraInfo(ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, blnTICStored As Boolean, ByRef dblRuntimeMinutes As Double)
+					// Bump up dblRuntimeMinutes if necessary
+					if (dblScanTimes(intScanIndex) > dblRuntimeMinutes) {
+						dblRuntimeMinutes = dblScanTimes(intScanIndex);
+					}
 
-        Try
-            Dim dblScanTimes() As Double
-            Dim intMSLevels() As Byte
+					if (TryGetCVParam(ref oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, ref param)) {
+						dblTIC = param.value;
+						objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5);
+						blnComputeTIC = false;
+					}
 
-            ReDim dblScanTimes(0)
-            ReDim intMSLevels(0)
-            Dim dblTIC As Double = 0
-            Dim dblBPI As Double = 0
+					if (TryGetCVParam(ref oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, ref param)) {
+						dblBPI = param.value;
+						objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5);
 
-            Dim dtLastProgressTime As DateTime
+						if (TryGetCVParam(ref oSpectrum.scanList.scans(0).cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, ref param)) {
+							objScanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(param.value, 5);
+							blnComputeBPI = false;
+						}
+					}
 
-            ReportMessage("Obtaining scan times and MSLevels (this could take several minutes)")
+					// Base peak signal to noise ratio
+					objScanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
-            mPWiz.GetScanTimesAndMsLevels(dblScanTimes, intMSLevels)
+					objScanStatsEntry.IonCount = oMSDataSpectrum.Mzs.Length;
+					objScanStatsEntry.IonCountRaw = objScanStatsEntry.IonCount;
 
-            ' The scan times returned by .GetScanTimesAndMsLevels() are the acquisition time in seconds from the start of the analysis
-            ' Convert these to minutes
-            For intScanIndex As Integer = 0 To dblScanTimes.Length - 1
-                dblScanTimes(intScanIndex) /= 60.0
-            Next
+					if (blnComputeBPI | blnComputeTIC) {
+						// Step through the raw data to compute the BPI and TIC
 
-            ReportMessage("Reading spectra")
-            dtLastProgressTime = DateTime.UtcNow
+						double[] dblMZs = oMSDataSpectrum.Mzs;
+						double[] dblIntensities = oMSDataSpectrum.Intensities;
+						double dblBasePeakMZ = 0;
 
-            For intScanIndex As Integer = 0 To dblScanTimes.Length - 1
+						dblTIC = 0;
+						dblBPI = 0;
+						dblBasePeakMZ = 0;
 
-                Try
+						for (intIndex = 0; intIndex <= dblMZs.Length - 1; intIndex++) {
+							dblTIC += dblIntensities[intIndex];
+							if (dblIntensities[intIndex] > dblBPI) {
+								dblBPI = dblIntensities[intIndex];
+								dblBasePeakMZ = dblMZs[intIndex];
+							}
+						}
 
-                    Dim blnComputeTIC = True
-                    Dim blnComputeBPI = True
+						objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5);
+						objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5);
+						objScanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(dblBasePeakMZ, 5);
 
-                    ' Obtain the raw mass spectrum
-                    Dim oMSDataSpectrum As pwiz.ProteowizardWrapper.MsDataSpectrum
-                    oMSDataSpectrum = mPWiz.GetSpectrum(intScanIndex)
+					}
 
-                    Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
+					mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
-                    objScanStatsEntry.ScanNumber = intScanIndex + 1
-                    objScanStatsEntry.ScanType = oMSDataSpectrum.Level
+					if (mSaveTICAndBPI & !blnTICStored) {
+						mTICandBPIPlot.AddData(intScanIndex + 1, intMSLevels(intScanIndex), Convert.ToSingle(dblScanTimes(intScanIndex)), dblBPI, dblTIC);
+					}
 
-                    ' Might be able to determine scan type info from oMSDataSpectrum.Precursors(0)
-                    ' Alternatively, use .GetSpectrumPWiz
-                    Dim oSpectrum As pwiz.CLI.msdata.Spectrum
-                    Dim param As pwiz.CLI.data.CVParam = Nothing
-                    oSpectrum = mPWiz.GetSpectrumObject(intScanIndex)
+					if (mSaveLCMS2DPlots) {
+						mLCMS2DPlot.AddScan(intScanIndex + 1, intMSLevels(intScanIndex), Convert.ToSingle(dblScanTimes(intScanIndex)), oMSDataSpectrum.Mzs.Length, oMSDataSpectrum.Mzs, oMSDataSpectrum.Intensities);
+					}
 
-                    If intMSLevels(intScanIndex) > 1 Then
-                        If mHighResMS2 Then
-                            objScanStatsEntry.ScanTypeName = "HMSn"
-                        Else
-                            objScanStatsEntry.ScanTypeName = "MSn"
-                        End If
-                    Else
-                        If mHighResMS1 Then
-                            objScanStatsEntry.ScanTypeName = "HMS"
-                        Else
-                            objScanStatsEntry.ScanTypeName = "MS"
-                        End If
+					if (mCheckCentroidingStatus) {
+						mDatasetStatsSummarizer.ClassifySpectrum(oMSDataSpectrum.Mzs, intMSLevels(intScanIndex));
+					}
 
-                    End If
+				} catch (Exception ex) {
+					ReportError("Error loading header info for scan " + intScanIndex + 1 + ": " + ex.Message);
+				}
 
+				if (DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 60) {
+					ReportMessage(" ... " + ((intScanIndex + 1) / Convert.ToDouble(dblScanTimes.Length) * 100).ToString("0.0") + "% complete");
+					dtLastProgressTime = DateTime.UtcNow;
+				}
 
-                    objScanStatsEntry.ScanFilterText = ""
-                    objScanStatsEntry.ElutionTime = dblScanTimes(intScanIndex).ToString("0.0000")
+			}
 
-                    ' Bump up dblRuntimeMinutes if necessary
-                    If dblScanTimes(intScanIndex) > dblRuntimeMinutes Then
-                        dblRuntimeMinutes = dblScanTimes(intScanIndex)
-                    End If
+		} catch (Exception ex) {
+			ReportError("Error obtaining scan times and MSLevels using GetScanTimesAndMsLevels: " + ex.Message);
+		}
 
-                    If TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, param) Then
-                        dblTIC = param.value
-                        objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5)
-                        blnComputeTIC = False
-                    End If
+	}
 
-                    If TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, param) Then
-                        dblBPI = param.value
-                        objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5)
 
-                        If TryGetCVParam(oSpectrum.scanList.scans(0).cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, param) Then
-                            objScanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(param.value, 5)
-                            blnComputeBPI = False
-                        End If
-                    End If
+	private void Store2DPlotData(ref Dictionary<int, float> dct2DDataScanTimes, ref Dictionary<int, Dictionary<double, double>> dct2DDataParent, ref Dictionary<int, Dictionary<double, double>> dct2DDataProduct)
+	{
+		// This variable keeps track of the length of the largest Dictionary(Of Double, Double) object in dct2DData
+		object intMax2DDataCount = 1;
 
-                    ' Base peak signal to noise ratio
-                    objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
+		int int2DScanNumMin = int.MaxValue;
+		object int2DScanNumMax = 0;
 
-                    objScanStatsEntry.IonCount = oMSDataSpectrum.Mzs.Length
-                    objScanStatsEntry.IonCountRaw = objScanStatsEntry.IonCount
+		// Determine the min/max scan numbers in dct2DDataParent
+		// Also determine intMax2DDataCount
 
-                    If blnComputeBPI Or blnComputeTIC Then
-                        ' Step through the raw data to compute the BPI and TIC
+		UpdateDataRanges(ref dct2DDataParent, ref intMax2DDataCount, ref int2DScanNumMin, ref int2DScanNumMax);
+		UpdateDataRanges(ref dct2DDataProduct, ref intMax2DDataCount, ref int2DScanNumMin, ref int2DScanNumMax);
 
-                        Dim dblMZs() As Double = oMSDataSpectrum.Mzs
-                        Dim dblIntensities() As Double = oMSDataSpectrum.Intensities
-                        Dim dblBasePeakMZ As Double
+		Store2DPlotDataWork(ref dct2DDataParent, ref dct2DDataScanTimes, 1, intMax2DDataCount, int2DScanNumMin, int2DScanNumMax);
+		Store2DPlotDataWork(ref dct2DDataProduct, ref dct2DDataScanTimes, 2, intMax2DDataCount, int2DScanNumMin, int2DScanNumMax);
 
-                        dblTIC = 0
-                        dblBPI = 0
-                        dblBasePeakMZ = 0
 
-                        For intIndex = 0 To dblMZs.Length - 1
-                            dblTIC += dblIntensities(intIndex)
-                            If dblIntensities(intIndex) > dblBPI Then
-                                dblBPI = dblIntensities(intIndex)
-                                dblBasePeakMZ = dblMZs(intIndex)
-                            End If
-                        Next
+	}
 
-                        objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5)
-                        objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5)
-                        objScanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(dblBasePeakMZ, 5)
 
-                    End If
+	private void Store2DPlotDataPoint(ref Dictionary<int, Dictionary<double, double>> dct2DData, int intScanNumber, double dblMZ, double dblIntensity)
+	{
+		Dictionary<double, double> obj2DMzAndIntensity = null;
 
-                    mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
+		if (dct2DData.TryGetValue(intScanNumber, obj2DMzAndIntensity)) {
+			double dblCurrentIntensity = 0;
+			if (obj2DMzAndIntensity.TryGetValue(dblMZ, dblCurrentIntensity)) {
+				// Bump up the stored intensity at dblProductMZ
+				obj2DMzAndIntensity(dblMZ) = dblCurrentIntensity + dblIntensity;
+			} else {
+				obj2DMzAndIntensity.Add(dblMZ, dblIntensity);
+			}
+		} else {
+			obj2DMzAndIntensity = new Dictionary<double, double>();
+			obj2DMzAndIntensity.Add(dblMZ, dblIntensity);
+		}
 
-                    If mSaveTICAndBPI And Not blnTICStored Then
-                        mTICandBPIPlot.AddData(intScanIndex + 1, intMSLevels(intScanIndex), CSng(dblScanTimes(intScanIndex)), dblBPI, dblTIC)
-                    End If
+		// Store the data for this scan
+		dct2DData(intScanNumber) = obj2DMzAndIntensity;
 
-                    If mSaveLCMS2DPlots Then
-                        mLCMS2DPlot.AddScan(intScanIndex + 1, intMSLevels(intScanIndex), CSng(dblScanTimes(intScanIndex)), oMSDataSpectrum.Mzs.Length, oMSDataSpectrum.Mzs, oMSDataSpectrum.Intensities)
-                    End If
+	}
 
-                    If mCheckCentroidingStatus Then
-                        mDatasetStatsSummarizer.ClassifySpectrum(oMSDataSpectrum.Mzs, intMSLevels(intScanIndex))
-                    End If
 
-                Catch ex As Exception
-                    ReportError("Error loading header info for scan " & intScanIndex + 1 & ": " & ex.Message)
-                End Try
+	private void Store2DPlotDataWork(ref Dictionary<int, Dictionary<double, double>> dct2DData, ref Dictionary<int, float> dct2DDataScanTimes, int intMSLevel, int intMax2DDataCount, int int2DScanNumMin, int int2DScanNumMax)
+	{
+		double[] dblMZList = null;
+		double[] dblIntensityList = null;
+		dblMZList = new double[intMax2DDataCount];
+		dblIntensityList = new double[intMax2DDataCount];
 
-                If DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 60 Then
-                    ReportMessage(" ... " & ((intScanIndex + 1) / CDbl(dblScanTimes.Length) * 100).ToString("0.0") & "% complete")
-                    dtLastProgressTime = DateTime.UtcNow
-                End If
+		Dictionary<int, Dictionary<double, double>>.Enumerator dct2DEnum = default(Dictionary<int, Dictionary<double, double>>.Enumerator);
+		dct2DEnum = dct2DData.GetEnumerator();
+		while (dct2DEnum.MoveNext()) {
+			int int2DPlotScanNum = 0;
+			int2DPlotScanNum = dct2DEnum.Current.Key;
 
-            Next intScanIndex
+			Dictionary<double, double> obj2DMzAndIntensity = default(Dictionary<double, double>);
+			obj2DMzAndIntensity = dct2DEnum.Current.Value;
 
-        Catch ex As Exception
-            ReportError("Error obtaining scan times and MSLevels using GetScanTimesAndMsLevels: " & ex.Message)
-        End Try
+			obj2DMzAndIntensity.Keys.CopyTo(dblMZList, 0);
+			obj2DMzAndIntensity.Values.CopyTo(dblIntensityList, 0);
 
-    End Sub
+			// Make sure the data is sorted
+			Array.Sort(dblMZList, dblIntensityList, 0, obj2DMzAndIntensity.Count);
 
-    Private Sub Store2DPlotData(
-      ByRef dct2DDataScanTimes As Dictionary(Of Integer, Single),
-      ByRef dct2DDataParent As Dictionary(Of Integer, Dictionary(Of Double, Double)),
-      ByRef dct2DDataProduct As Dictionary(Of Integer, Dictionary(Of Double, Double)))
+			// Store the data
+			mLCMS2DPlot.AddScan(dct2DEnum.Current.Key, intMSLevel, dct2DDataScanTimes(int2DPlotScanNum), obj2DMzAndIntensity.Count, dblMZList, dblIntensityList);
 
-        ' This variable keeps track of the length of the largest Dictionary(Of Double, Double) object in dct2DData
-        Dim intMax2DDataCount = 1
+		}
 
-        Dim int2DScanNumMin As Integer = Integer.MaxValue
-        Dim int2DScanNumMax = 0
 
-        ' Determine the min/max scan numbers in dct2DDataParent
-        ' Also determine intMax2DDataCount
+		if (int2DScanNumMin / Convert.ToDouble(int2DScanNumMax) > 0.5) {
+			// Zoom in the 2D plot to prevent all of the the data from being scrunched to the right
+			mLCMS2DPlot.Options.UseObservedMinScan = true;
+		}
 
-        UpdateDataRanges(dct2DDataParent, intMax2DDataCount, int2DScanNumMin, int2DScanNumMax)
-        UpdateDataRanges(dct2DDataProduct, intMax2DDataCount, int2DScanNumMin, int2DScanNumMax)
+	}
 
-        Store2DPlotDataWork(dct2DDataParent, dct2DDataScanTimes, 1, intMax2DDataCount, int2DScanNumMin, int2DScanNumMax)
-        Store2DPlotDataWork(dct2DDataProduct, dct2DDataScanTimes, 2, intMax2DDataCount, int2DScanNumMin, int2DScanNumMax)
+	private string StripExtraFromChromID(string strText)
+	{
 
+		// If strText looks like:
+		// SRM SIC Q1=506.6 Q3=132.1 sample=1 period=1 experiment=1 transition=0
 
-    End Sub
+		// then remove text from sample= on
 
-    Private Sub Store2DPlotDataPoint(ByRef dct2DData As Dictionary(Of Integer, Dictionary(Of Double, Double)), intScanNumber As Integer, dblMZ As Double, dblIntensity As Double)
+		int intCharIndex = 0;
 
-        Dim obj2DMzAndIntensity As Dictionary(Of Double, Double) = Nothing
+		intCharIndex = strText.IndexOf("sample=");
+		if (intCharIndex > 0) {
+			strText = strText.Substring(0, intCharIndex).TrimEnd();
+		}
 
-        If dct2DData.TryGetValue(intScanNumber, obj2DMzAndIntensity) Then
-            Dim dblCurrentIntensity As Double
-            If obj2DMzAndIntensity.TryGetValue(dblMZ, dblCurrentIntensity) Then
-                ' Bump up the stored intensity at dblProductMZ
-                obj2DMzAndIntensity(dblMZ) = dblCurrentIntensity + dblIntensity
-            Else
-                obj2DMzAndIntensity.Add(dblMZ, dblIntensity)
-            End If
-        Else
-            obj2DMzAndIntensity = New Dictionary(Of Double, Double)
-            obj2DMzAndIntensity.Add(dblMZ, dblIntensity)
-        End If
+		return strText;
 
-        ' Store the data for this scan
-        dct2DData(intScanNumber) = obj2DMzAndIntensity
+	}
 
-    End Sub
+	public static bool TryGetCVParam(ref pwiz.CLI.data.CVParamList oCVParams, pwiz.CLI.cv.CVID cvidToFind, ref pwiz.CLI.data.CVParam paramMatch)
+	{
 
-    Private Sub Store2DPlotDataWork(
-      ByRef dct2DData As Dictionary(Of Integer, Dictionary(Of Double, Double)),
-      ByRef dct2DDataScanTimes As Dictionary(Of Integer, Single),
-       intMSLevel As Integer, intMax2DDataCount As Integer, int2DScanNumMin As Integer, int2DScanNumMax As Integer)
+		foreach (pwiz.CLI.data.CVParam param in oCVParams) {
+			if (param.cvid == cvidToFind) {
+				if (!param.empty()) {
+					paramMatch = param;
+					return true;
+				}
+			}
+		}
 
-        Dim dblMZList() As Double
-        Dim dblIntensityList() As Double
-        ReDim dblMZList(intMax2DDataCount - 1)
-        ReDim dblIntensityList(intMax2DDataCount - 1)
+		return false;
+	}
 
-        Dim dct2DEnum As Dictionary(Of Integer, Dictionary(Of Double, Double)).Enumerator
-        dct2DEnum = dct2DData.GetEnumerator()
-        Do While dct2DEnum.MoveNext()
-            Dim int2DPlotScanNum As Integer
-            int2DPlotScanNum = dct2DEnum.Current.Key
 
-            Dim obj2DMzAndIntensity As Dictionary(Of Double, Double)
-            obj2DMzAndIntensity = dct2DEnum.Current.Value
+	private void UpdateDataRanges(ref Dictionary<int, Dictionary<double, double>> dct2DData, ref int intMax2DDataCount, ref int int2DScanNumMin, ref int int2DScanNumMax)
+	{
+		Dictionary<int, Dictionary<double, double>>.Enumerator dct2DEnum = default(Dictionary<int, Dictionary<double, double>>.Enumerator);
+		int int2DPlotScanNum = 0;
 
-            obj2DMzAndIntensity.Keys.CopyTo(dblMZList, 0)
-            obj2DMzAndIntensity.Values.CopyTo(dblIntensityList, 0)
+		dct2DEnum = dct2DData.GetEnumerator();
 
-            ' Make sure the data is sorted
-            Array.Sort(dblMZList, dblIntensityList, 0, obj2DMzAndIntensity.Count)
+		while (dct2DEnum.MoveNext()) {
+			int2DPlotScanNum = dct2DEnum.Current.Key;
 
-            ' Store the data
-            mLCMS2DPlot.AddScan(dct2DEnum.Current.Key, intMSLevel, dct2DDataScanTimes(int2DPlotScanNum), obj2DMzAndIntensity.Count, dblMZList, dblIntensityList)
+			if (dct2DEnum.Current.Value.Count > intMax2DDataCount) {
+				intMax2DDataCount = dct2DEnum.Current.Value.Count;
+			}
 
-        Loop
+			if (int2DPlotScanNum < int2DScanNumMin) {
+				int2DScanNumMin = int2DPlotScanNum;
+			}
 
+			if (int2DPlotScanNum > int2DScanNumMax) {
+				int2DScanNumMax = int2DPlotScanNum;
+			}
+		}
 
-        If int2DScanNumMin / CDbl(int2DScanNumMax) > 0.5 Then
-            ' Zoom in the 2D plot to prevent all of the the data from being scrunched to the right
-            mLCMS2DPlot.Options.UseObservedMinScan = True
-        End If
+	}
+	static bool InitStaticVariableHelper(Microsoft.VisualBasic.CompilerServices.StaticLocalInitFlag flag)
+	{
+		if (flag.State == 0) {
+			flag.State = 2;
+			return true;
+		} else if (flag.State == 2) {
+			throw new Microsoft.VisualBasic.CompilerServices.IncompleteInitialization();
+		} else {
+			return false;
+		}
+	}
 
-    End Sub
+}
 
-    Private Function StripExtraFromChromID(strText As String) As String
-
-        ' If strText looks like:
-        ' SRM SIC Q1=506.6 Q3=132.1 sample=1 period=1 experiment=1 transition=0
-
-        ' then remove text from sample= on
-
-        Dim intCharIndex As Integer
-
-        intCharIndex = strText.IndexOf("sample=")
-        If intCharIndex > 0 Then
-            strText = strText.Substring(0, intCharIndex).TrimEnd()
-        End If
-
-        Return strText
-
-    End Function
-
-    Public Shared Function TryGetCVParam(ByRef oCVParams As pwiz.CLI.data.CVParamList, cvidToFind As pwiz.CLI.cv.CVID, ByRef paramMatch As pwiz.CLI.data.CVParam) As Boolean
-
-        For Each param As pwiz.CLI.data.CVParam In oCVParams
-            If param.cvid = cvidToFind Then
-                If Not param.empty() Then
-                    paramMatch = param
-                    Return True
-                End If
-            End If
-        Next
-
-        Return False
-    End Function
-
-    Private Sub UpdateDataRanges(
-      ByRef dct2DData As Dictionary(Of Integer, Dictionary(Of Double, Double)),
-      ByRef intMax2DDataCount As Integer,
-      ByRef int2DScanNumMin As Integer,
-      ByRef int2DScanNumMax As Integer)
-
-        Dim dct2DEnum As Dictionary(Of Integer, Dictionary(Of Double, Double)).Enumerator
-        Dim int2DPlotScanNum As Integer
-
-        dct2DEnum = dct2DData.GetEnumerator()
-        Do While dct2DEnum.MoveNext()
-
-            int2DPlotScanNum = dct2DEnum.Current.Key
-
-            If dct2DEnum.Current.Value.Count > intMax2DDataCount Then
-                intMax2DDataCount = dct2DEnum.Current.Value.Count
-            End If
-
-            If int2DPlotScanNum < int2DScanNumMin Then
-                int2DScanNumMin = int2DPlotScanNum
-            End If
-
-            If int2DPlotScanNum > int2DScanNumMax Then
-                int2DScanNumMax = int2DPlotScanNum
-            End If
-        Loop
-
-    End Sub
-
-End Class

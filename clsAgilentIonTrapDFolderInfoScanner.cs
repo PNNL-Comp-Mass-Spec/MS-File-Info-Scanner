@@ -1,247 +1,257 @@
-Option Strict On
+using System;
 
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Started in 2005
-'
-' Last modified September 17, 2005
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Started in 2005
+//
+// Last modified September 17, 2005
 
-Public Class clsAgilentIonTrapDFolderInfoScanner
-    Inherits clsMSFileInfoProcessorBaseClass
+namespace MSFileInfoScanner
+{
+    public class clsAgilentIonTrapDFolderInfoScanner : clsMSFileInfoProcessorBaseClass
+    {
 
-    ' Note: The extension must be in all caps
-    Public Const AGILENT_ION_TRAP_D_EXTENSION As String = ".D"
+        // Note: The extension must be in all caps
 
-    Private Const AGILENT_YEP_FILE As String = "Analysis.yep"
-    Private Const AGILENT_RUN_LOG_FILE As String = "RUN.LOG"
-    Private Const AGILENT_ANALYSIS_CDF_FILE As String = "Analysis.cdf"
+        public const string AGILENT_ION_TRAP_D_EXTENSION = ".D";
+        private const string AGILENT_YEP_FILE = "Analysis.yep";
+        private const string AGILENT_RUN_LOG_FILE = "RUN.LOG";
 
-    Private Const RUN_LOG_FILE_METHOD_LINE_START As String = "Method"
-    Private Const RUN_LOG_FILE_INSTRUMENT_RUNNING As String = "Instrument running sample"
-    Private Const RUN_LOG_INSTRUMENT_RUN_COMPLETED As String = "Instrument run completed"
+        private const string AGILENT_ANALYSIS_CDF_FILE = "Analysis.cdf";
+        private const string RUN_LOG_FILE_METHOD_LINE_START = "Method";
+        private const string RUN_LOG_FILE_INSTRUMENT_RUNNING = "Instrument running sample";
 
-    Private Function ExtractMethodLineDate(strLineIn As String, ByRef dtDate As DateTime) As Boolean
+        private const string RUN_LOG_INSTRUMENT_RUN_COMPLETED = "Instrument run completed";
+        private bool ExtractMethodLineDate(string strLineIn, ref DateTime dtDate)
+        {
 
-        Dim strSplitLine() As String
-        Dim blnSuccess As Boolean
+            string[] strSplitLine[ = null;
+            bool blnSuccess = false;
 
-        blnSuccess = False
-        Try
-            strSplitLine = strLineIn.Trim.Split(" "c)
-            If strSplitLine.Length >= 2 Then
-                dtDate = Date.Parse(strSplitLine(strSplitLine.Length - 1) & " " & strSplitLine(strSplitLine.Length - 2))
-                blnSuccess = True
-            End If
-        Catch ex As Exception
-            ' Ignore errors
-        End Try
+            blnSuccess = false;
+            try {
+                strSplitLine[ = strLineIn.Trim.Split(' ');
+                if (strSplitLine[.Length >= 2) {
+                    dtDate = System.DateTime.Parse(strSplitLine[strSplitLine[.Length - 1) + " " + strSplitLine[strSplitLine[.Length - 2));
+                    blnSuccess = true;
+                }
+            } catch (Exception ex) {
+                // Ignore errors
+            }
 
-        Return blnSuccess
-    End Function
+            return blnSuccess;
+        }
 
-    Public Overrides Function GetDatasetNameViaPath(strDataFilePath As String) As String
-        ' The dataset name is simply the folder name without .D
-        Try
-            Return Path.GetFileNameWithoutExtension(strDataFilePath)
-        Catch ex As Exception
-            Return String.Empty
-        End Try
-    End Function
+        public override string GetDatasetNameViaPath(string strDataFilePath)
+        {
+            // The dataset name is simply the folder name without .D
+            try {
+                return Path.GetFileNameWithoutExtension(strDataFilePath);
+            } catch (Exception ex) {
+                return string.Empty;
+            }
+        }
 
-    Private Function SecondsToTimeSpan(dblSeconds As Double) As TimeSpan
+        private TimeSpan SecondsToTimeSpan(double dblSeconds)
+        {
 
-        Dim dtTimeSpan As TimeSpan
+            TimeSpan dtTimeSpan = default(TimeSpan);
 
-        Try
-            dtTimeSpan = New TimeSpan(0, 0, CInt(dblSeconds))
-        Catch ex As Exception
-            dtTimeSpan = New TimeSpan(0, 0, 0)
-        End Try
+            try {
+                dtTimeSpan = new TimeSpan(0, 0, Convert.ToInt32(dblSeconds));
+            } catch (Exception ex) {
+                dtTimeSpan = new TimeSpan(0, 0, 0);
+            }
 
-        Return dtTimeSpan
+            return dtTimeSpan;
 
-    End Function
+        }
 
-    Private Function ParseRunLogFile(strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        Dim strLineIn As String
-        Dim strMostRecentMethodLine As String = String.Empty
+        private bool ParseRunLogFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo)
+        {
+            string strLineIn = null;
+            string strMostRecentMethodLine = string.Empty;
 
-        Dim intCharLoc As Integer
-        Dim dtMethodDate As DateTime
+            int intCharLoc = 0;
+            DateTime dtMethodDate = default(DateTime);
 
-        Dim blnProcessedFirstMethodLine As Boolean
-        Dim blnEndDateFound As Boolean
-        Dim blnSuccess As Boolean
+            bool blnProcessedFirstMethodLine = false;
+            bool blnEndDateFound = false;
+            bool blnSuccess = false;
 
-        Try
-            ' Try to open the Run.Log file
-            Using srInFile = New StreamReader(Path.Combine(strFolderPath, AGILENT_RUN_LOG_FILE))
+            try {
+                // Try to open the Run.Log file
+                using (var srInFile = new StreamReader(Path.Combine(strFolderPath, AGILENT_RUN_LOG_FILE))) {
 
-                blnProcessedFirstMethodLine = False
-                blnEndDateFound = False
-                Do While srInFile.Peek() >= 0
-                    strLineIn = srInFile.ReadLine()
+                    blnProcessedFirstMethodLine = false;
+                    blnEndDateFound = false;
+                    while (!srInFile.EndOfStream) {
+                        strLineIn = srInFile.ReadLine();
 
-                    If Not strLineIn Is Nothing Then
-                        If strLineIn.StartsWith(RUN_LOG_FILE_METHOD_LINE_START) Then
-                            strMostRecentMethodLine = String.Copy(strLineIn)
+                        if ((strLineIn != null)) {
+                            if (strLineIn.StartsWith(RUN_LOG_FILE_METHOD_LINE_START)) {
+                                strMostRecentMethodLine = string.Copy(strLineIn);
 
-                            ' Method line found
-                            ' See if the line contains a key phrase
-                            intCharLoc = strLineIn.IndexOf(RUN_LOG_FILE_INSTRUMENT_RUNNING)
-                            If intCharLoc > 0 Then
-                                If ExtractMethodLineDate(strLineIn, dtMethodDate) Then
-                                    udtFileInfo.AcqTimeStart = dtMethodDate
-                                End If
-                                blnProcessedFirstMethodLine = True
-                            Else
-                                intCharLoc = strLineIn.IndexOf(RUN_LOG_INSTRUMENT_RUN_COMPLETED)
-                                If intCharLoc > 0 Then
-                                    If ExtractMethodLineDate(strLineIn, dtMethodDate) Then
-                                        udtFileInfo.AcqTimeEnd = dtMethodDate
-                                        blnEndDateFound = True
-                                    End If
-                                End If
-                            End If
+                                // Method line found
+                                // See if the line contains a key phrase
+                                intCharLoc = strLineIn.IndexOf(RUN_LOG_FILE_INSTRUMENT_RUNNING);
+                                if (intCharLoc > 0) {
+                                    if (ExtractMethodLineDate(strLineIn, ref dtMethodDate)) {
+                                        datasetFileInfo.AcqTimeStart = dtMethodDate;
+                                    }
+                                    blnProcessedFirstMethodLine = true;
+                                } else {
+                                    intCharLoc = strLineIn.IndexOf(RUN_LOG_INSTRUMENT_RUN_COMPLETED);
+                                    if (intCharLoc > 0) {
+                                        if (ExtractMethodLineDate(strLineIn, ref dtMethodDate)) {
+                                            datasetFileInfo.AcqTimeEnd = dtMethodDate;
+                                            blnEndDateFound = true;
+                                        }
+                                    }
+                                }
 
-                            ' If this is the first method line, then parse out the date and store in .AcqTimeStart
-                            If Not blnProcessedFirstMethodLine Then
-                                If ExtractMethodLineDate(strLineIn, dtMethodDate) Then
-                                    udtFileInfo.AcqTimeStart = dtMethodDate
-                                End If
-                            End If
-                        End If
-                    End If
-                Loop
-            End Using
+                                // If this is the first method line, then parse out the date and store in .AcqTimeStart
+                                if (!blnProcessedFirstMethodLine) {
+                                    if (ExtractMethodLineDate(strLineIn, ref dtMethodDate)) {
+                                        datasetFileInfo.AcqTimeStart = dtMethodDate;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
-            If blnProcessedFirstMethodLine And Not blnEndDateFound Then
-                ' Use the last time in the file as the .AcqTimeEnd value
-                If ExtractMethodLineDate(strMostRecentMethodLine, dtMethodDate) Then
-                    udtFileInfo.AcqTimeEnd = dtMethodDate
-                End If
-            End If
+                if (blnProcessedFirstMethodLine & !blnEndDateFound) {
+                    // Use the last time in the file as the .AcqTimeEnd value
+                    if (ExtractMethodLineDate(strMostRecentMethodLine, ref dtMethodDate)) {
+                        datasetFileInfo.AcqTimeEnd = dtMethodDate;
+                    }
+                }
 
-            blnSuccess = blnProcessedFirstMethodLine
+                blnSuccess = blnProcessedFirstMethodLine;
 
-        Catch ex As Exception
-            ' Run.log file not found
-            blnSuccess = False
-        End Try
+            } catch (Exception ex) {
+                // Run.log file not found
+                blnSuccess = false;
+            }
 
-        Return blnSuccess
+            return blnSuccess;
 
-    End Function
+        }
 
-    Private Function ParseAnalysisCDFFile(strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        Dim objNETCDFReader As NetCDFReader.clsMSNetCdf = Nothing
+        private bool ParseAnalysisCDFFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo)
+        {
+            NetCDFReader.clsMSNetCdf objNETCDFReader = null;
 
-        Dim intScanCount As Integer, intScanNumber As Integer
-        Dim dblScanTotalIntensity As Double, dblScanTime As Double
-        Dim dblMassMin As Double, dblMassMax As Double
+            int intScanCount = 0;
+            int intScanNumber = 0;
+            double dblScanTotalIntensity = 0;
+            double dblScanTime = 0;
+            double dblMassMin = 0;
+            double dblMassMax = 0;
 
-        Dim blnSuccess As Boolean
+            bool blnSuccess = false;
 
-        Try
-            objNETCDFReader = New NetCDFReader.clsMSNetCdf
-            blnSuccess = objNETCDFReader.OpenMSCdfFile(Path.Combine(strFolderPath, AGILENT_ANALYSIS_CDF_FILE))
-            If blnSuccess Then
-                intScanCount = objNETCDFReader.GetScanCount()
+            try {
+                objNETCDFReader = new NetCDFReader.clsMSNetCdf();
+                blnSuccess = objNETCDFReader.OpenMSCdfFile(Path.Combine(strFolderPath, AGILENT_ANALYSIS_CDF_FILE));
+                if (blnSuccess) {
+                    intScanCount = objNETCDFReader.GetScanCount();
 
-                If intScanCount > 0 Then
-                    ' Lookup the scan time of the final scan
-                    If objNETCDFReader.GetScanInfo(intScanCount - 1, intScanNumber, dblScanTotalIntensity, dblScanTime, dblMassMin, dblMassMax) Then
-                        With udtFileInfo
-                            ' Add 1 to intScanNumber since the scan number is off by one in the CDF file
-                            .ScanCount = intScanNumber + 1
-                            .AcqTimeEnd = udtFileInfo.AcqTimeStart.Add(SecondsToTimeSpan(dblScanTime))
-                        End With
-                    End If
-                Else
-                    udtFileInfo.ScanCount = 0
-                End If
-            End If
-        Catch ex As Exception
-            blnSuccess = False
-        Finally
-            If Not objNETCDFReader Is Nothing Then
-                objNETCDFReader.CloseMSCdfFile()
-            End If
-        End Try
+                    if (intScanCount > 0) {
+                        // Lookup the scan time of the final scan
+                        if (objNETCDFReader.GetScanInfo(intScanCount - 1, intScanNumber, dblScanTotalIntensity, dblScanTime, dblMassMin, dblMassMax)) {
+                            var _with1 = datasetFileInfo;
+                            // Add 1 to intScanNumber since the scan number is off by one in the CDF file
+                            _with1.ScanCount = intScanNumber + 1;
+                            _with1.AcqTimeEnd = datasetFileInfo.AcqTimeStart.Add(SecondsToTimeSpan(dblScanTime));
+                        }
+                    } else {
+                        datasetFileInfo.ScanCount = 0;
+                    }
+                }
+            } catch (Exception ex) {
+                blnSuccess = false;
+            } finally {
+                if ((objNETCDFReader != null)) {
+                    objNETCDFReader.CloseMSCdfFile();
+                }
+            }
 
-        Return blnSuccess
+            return blnSuccess;
 
-    End Function
+        }
 
-    Public Overrides Function ProcessDataFile(strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        ' Returns True if success, False if an error
+        public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
+        {
+            // Returns True if success, False if an error
 
-        Dim blnSuccess As Boolean
-        Dim ioFolderInfo As DirectoryInfo
-        Dim ioFileInfo As FileInfo
+            bool blnSuccess = false;
+            DirectoryInfo ioFolderInfo = default(DirectoryInfo);
+            FileInfo ioFileInfo = default(FileInfo);
 
-        Try
-            blnSuccess = False
-            ioFolderInfo = New DirectoryInfo(strDataFilePath)
+            try {
+                blnSuccess = false;
+                ioFolderInfo = new DirectoryInfo(strDataFilePath);
 
-            With udtFileInfo
-                .FileSystemCreationTime = ioFolderInfo.CreationTime
-                .FileSystemModificationTime = ioFolderInfo.LastWriteTime
+                var _with2 = datasetFileInfo;
+                _with2.FileSystemCreationTime = ioFolderInfo.CreationTime;
+                _with2.FileSystemModificationTime = ioFolderInfo.LastWriteTime;
 
-                ' The acquisition times will get updated below to more accurate values
-                .AcqTimeStart = .FileSystemModificationTime
-                .AcqTimeEnd = .FileSystemModificationTime
+                // The acquisition times will get updated below to more accurate values
+                _with2.AcqTimeStart = _with2.FileSystemModificationTime;
+                _with2.AcqTimeEnd = _with2.FileSystemModificationTime;
 
-                .DatasetName = GetDatasetNameViaPath(ioFolderInfo.Name)
-                .FileExtension = ioFolderInfo.Extension
+                _with2.DatasetName = GetDatasetNameViaPath(ioFolderInfo.Name);
+                _with2.FileExtension = ioFolderInfo.Extension;
 
-                ' Look for the Analysis.yep file
-                ' Use its modification time to get an initial estimate for the acquisition time
-                ' Assign the .Yep file's size to .FileSizeBytes
-                ioFileInfo = New FileInfo(Path.Combine(ioFolderInfo.FullName, AGILENT_YEP_FILE))
-                If ioFileInfo.Exists Then
-                    .FileSizeBytes = ioFileInfo.Length
-                    .AcqTimeStart = ioFileInfo.LastWriteTime
-                    .AcqTimeEnd = ioFileInfo.LastWriteTime
-                    blnSuccess = True
-                Else
-                    ' Analysis.yep not found; look for Run.log
-                    ioFileInfo = New FileInfo(Path.Combine(ioFolderInfo.FullName, AGILENT_RUN_LOG_FILE))
-                    If ioFileInfo.Exists Then
-                        .AcqTimeStart = ioFileInfo.LastWriteTime
-                        .AcqTimeEnd = ioFileInfo.LastWriteTime
-                        blnSuccess = True
+                // Look for the Analysis.yep file
+                // Use its modification time to get an initial estimate for the acquisition time
+                // Assign the .Yep file's size to .FileSizeBytes
+                ioFileInfo = new FileInfo(Path.Combine(ioFolderInfo.FullName, AGILENT_YEP_FILE));
+                if (ioFileInfo.Exists) {
+                    _with2.FileSizeBytes = ioFileInfo.Length;
+                    _with2.AcqTimeStart = ioFileInfo.LastWriteTime;
+                    _with2.AcqTimeEnd = ioFileInfo.LastWriteTime;
+                    blnSuccess = true;
+                } else {
+                    // Analysis.yep not found; look for Run.log
+                    ioFileInfo = new FileInfo(Path.Combine(ioFolderInfo.FullName, AGILENT_RUN_LOG_FILE));
+                    if (ioFileInfo.Exists) {
+                        _with2.AcqTimeStart = ioFileInfo.LastWriteTime;
+                        _with2.AcqTimeEnd = ioFileInfo.LastWriteTime;
+                        blnSuccess = true;
 
-                        ' Sum up the sizes of all of the files in this folder
-                        .FileSizeBytes = 0
-                        For Each ioFileInfo In ioFolderInfo.GetFiles()
-                            .FileSizeBytes += ioFileInfo.Length
-                        Next ioFileInfo
-                    End If
-                End If
+                        // Sum up the sizes of all of the files in this folder
+                        _with2.FileSizeBytes = 0;
+                        foreach ( ioFileInfo in ioFolderInfo.GetFiles()) {
+                            _with2.FileSizeBytes += ioFileInfo.Length;
+                        }
+                    }
+                }
 
-                .ScanCount = 0
-            End With
+                _with2.ScanCount = 0;
 
-            If blnSuccess Then
-                Try
-                    ' Parse the Run Log file to determine the actual values for .AcqTimeStart and .AcqTimeEnd
-                    blnSuccess = ParseRunLogFile(strDataFilePath, udtFileInfo)
+                if (blnSuccess) {
+                    try {
+                        // Parse the Run Log file to determine the actual values for .AcqTimeStart and .AcqTimeEnd
+                        blnSuccess = ParseRunLogFile(strDataFilePath, ref datasetFileInfo);
 
-                    ' Parse the Analysis.cdf file to determine the scan count and to further refine .AcqTimeStart
-                    blnSuccess = ParseAnalysisCDFFile(strDataFilePath, udtFileInfo)
-                Catch ex As Exception
-                    ' Error parsing the Run Log file or the Analysis.cdf file; do not abort
+                        // Parse the Analysis.cdf file to determine the scan count and to further refine .AcqTimeStart
+                        blnSuccess = ParseAnalysisCDFFile(strDataFilePath, ref datasetFileInfo);
+                    } catch (Exception ex) {
+                        // Error parsing the Run Log file or the Analysis.cdf file; do not abort
 
-                End Try
+                    }
 
-                blnSuccess = True
-            End If
+                    blnSuccess = true;
+                }
 
-        Catch ex As Exception
-            blnSuccess = False
-        End Try
+            } catch (Exception ex) {
+                blnSuccess = false;
+            }
 
-        Return blnSuccess
-    End Function
+            return blnSuccess;
+        }
 
-End Class
+    }
+}

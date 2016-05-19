@@ -1,473 +1,484 @@
-﻿Option Strict On
-
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Started in 2013
-'
-' Last modified April 29, 2016
-
-Imports ThermoRawFileReaderDLL.FinniganFileIO
-Imports PNNLOmics.Utilities
-Imports System.IO
-
-Public Class clsDeconToolsIsosInfoScanner
-	Inherits clsMSFileInfoProcessorBaseClass
-
-	''' <summary>
-	''' Constructor
-	''' </summary>
-	''' <remarks></remarks>
-	Public Sub New()
-		MaxFit = DEFAUT_MAX_FIT
-	End Sub
-
-	' Note: The extension must be in all caps
-	Public Const DECONTOOLS_CSV_FILE_EXTENSION As String = ".CSV"
-	Public Const DECONTOOLS_ISOS_FILE_SUFFIX As String = "_ISOS.CSV"
-	Public Const DECONTOOLS_SCANS_FILE_SUFFIX As String = "_SCANS.CSV"
-
-	Public Const DEFAUT_MAX_FIT As Double = 0.15
-
-	Protected Structure udtIsosDataType
-		Public Scan As Integer
-		Public Charge As Byte
-		Public Abundance As Double
-		Public MZ As Double
-		Public Fit As Single
-		Public MonoMass As Double
-	End Structure
-
-	Protected Structure udtScansDataType
-		Public Scan As Integer
-		Public ElutionTime As Single
-		Public MSLevel As Integer
-		Public BasePeakIntensity As Double		' BPI
-		Public BasePeakMZ As Double
-		Public TotalIonCurrent As Double		' TIC
-		Public NumPeaks As Integer
-		Public NumDeisotoped As Integer
-		Public FilterText As String
-	End Structure
-
-	Public Property MaxFit As Single
-
-	''' <summary>
-	''' Returns the dataset name for the given file
-	''' </summary>
-	''' <param name="strDataFilePath"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Overrides Function GetDatasetNameViaPath(strDataFilePath As String) As String
-
-		Try
-			If strDataFilePath.ToUpper().EndsWith(DECONTOOLS_ISOS_FILE_SUFFIX) Then
-				' The dataset name is simply the file name without _isos.csv
-				Dim datasetName = Path.GetFileName(strDataFilePath)
-				Return datasetName.Substring(0, datasetName.Length - DECONTOOLS_ISOS_FILE_SUFFIX.Length)
-			Else
-				Return String.Empty
-			End If
-		Catch ex As Exception
-			Return String.Empty
-		End Try
-	End Function
-
-    Private Function GetScanOrFrameColIndex(lstData As List(Of String), strFileDescription As String) As Integer
-        Dim intColIndexScanOrFrameNum As Integer
-
-        intColIndexScanOrFrameNum = lstData.IndexOf("frame_num")
-        If intColIndexScanOrFrameNum < 0 Then
-            intColIndexScanOrFrameNum = lstData.IndexOf("scan_num")
-        End If
-
-        If intColIndexScanOrFrameNum < 0 Then
-            Throw New InvalidDataException("Required column not found in the " & strFileDescription & " file; must have scan_num or frame_num")
-        End If
-
-        Return intColIndexScanOrFrameNum
-
-    End Function
-
-    Private Sub LoadData(fiIsosFile As FileInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType)
-
-        ' Cache the data in the _isos.csv and _scans.csv files
-
-        If mSaveTICAndBPI Then
-            ' Initialize the TIC and BPI arrays
-            MyBase.InitializeTICAndBPI()
-        End If
-
-        If mSaveLCMS2DPlots Then
-            MyBase.InitializeLCMS2DPlot()
-        End If
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using PNNLOmics.Utilities;
+using ThermoRawFileReaderDLL.FinniganFileIO;
+
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Started in 2013
+//
+// Last modified April 29, 2016
+
+namespace MSFileInfoScanner
+{
+    public class clsDeconToolsIsosInfoScanner : clsMSFileInfoProcessorBaseClass
+    {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <remarks></remarks>
+        public clsDeconToolsIsosInfoScanner()
+        {
+            MaxFit = DEFAUT_MAX_FIT;
+        }
+
+        // Note: The extension must be in all caps
+        public const string DECONTOOLS_CSV_FILE_EXTENSION = ".CSV";
+        public const string DECONTOOLS_ISOS_FILE_SUFFIX = "_ISOS.CSV";
+
+        public const string DECONTOOLS_SCANS_FILE_SUFFIX = "_SCANS.CSV";
+
+        public const float DEFAUT_MAX_FIT = 0.15f;
+
+        protected struct udtIsosDataType
+        {
+            public int Scan;
+            public byte Charge;
+            public double Abundance;
+            public double MZ;
+            public float Fit;
+            public double MonoMass;
+        }
+
+        protected struct udtScansDataType
+        {
+            public int Scan;
+            public float ElutionTime;
+            public int MSLevel;
+            // BPI
+            public double BasePeakIntensity;
+            public double BasePeakMZ;
+            // TIC
+            public double TotalIonCurrent;
+            public int NumPeaks;
+            public int NumDeisotoped;
+            public string FilterText;
+        }
+
+        public float MaxFit { get; set; }
+
+        /// <summary>
+        /// Returns the dataset name for the given file
+        /// </summary>
+        /// <param name="strDataFilePath"></param>
+        /// <returns></returns>
+        /// <remarks></remarks>
+        public override string GetDatasetNameViaPath(string strDataFilePath)
+        {
+
+            try {
+                if (strDataFilePath.ToUpper().EndsWith(DECONTOOLS_ISOS_FILE_SUFFIX)) {
+                    // The dataset name is simply the file name without _isos.csv
+                    object datasetName = Path.GetFileName(strDataFilePath);
+                    return datasetName.Substring(0, datasetName.Length - DECONTOOLS_ISOS_FILE_SUFFIX.Length);
+                } else {
+                    return string.Empty;
+                }
+            } catch (Exception ex) {
+                return string.Empty;
+            }
+        }
+
+        private int GetScanOrFrameColIndex(List<string> lstData, string strFileDescription)
+        {
+            int intColIndexScanOrFrameNum = 0;
+
+            intColIndexScanOrFrameNum = lstData.IndexOf("frame_num");
+            if (intColIndexScanOrFrameNum < 0) {
+                intColIndexScanOrFrameNum = lstData.IndexOf("scan_num");
+            }
+
+            if (intColIndexScanOrFrameNum < 0) {
+                throw new InvalidDataException("Required column not found in the " + strFileDescription + " file; must have scan_num or frame_num");
+            }
+
+            return intColIndexScanOrFrameNum;
+
+        }
+
+
+        private void LoadData(FileInfo fiIsosFile, clsDatasetFileInfo datasetFileInfo)
+        {
+            // Cache the data in the _isos.csv and _scans.csv files
 
-        Dim lstIsosData = LoadIsosFile(fiIsosFile.FullName, Me.MaxFit)
+            if (mSaveTICAndBPI) {
+                // Initialize the TIC and BPI arrays
+                base.InitializeTICAndBPI();
+            }
 
-        If lstIsosData.Count = 0 Then
-            ReportError("No data found in the _isos.csv file: " & fiIsosFile.FullName)
-            Return
-        End If
+            if (mSaveLCMS2DPlots) {
+                base.InitializeLCMS2DPlot();
+            }
 
-        Dim strScansFilePath = GetDatasetNameViaPath(fiIsosFile.Name) & DECONTOOLS_SCANS_FILE_SUFFIX
-        strScansFilePath = Path.Combine(fiIsosFile.Directory.FullName, strScansFilePath)
+            object lstIsosData = LoadIsosFile(fiIsosFile.FullName, this.MaxFit);
 
-        Dim lstScanData = LoadScansFile(strScansFilePath)
-        Dim scansFileIsMissing = False
+            if (lstIsosData.Count == 0) {
+                ReportError("No data found in the _isos.csv file: " + fiIsosFile.FullName);
+                return;
+            }
 
-        If lstScanData.Count > 0 Then
-            udtFileInfo.AcqTimeEnd = udtFileInfo.AcqTimeStart.AddMinutes(lstScanData.Last.ElutionTime)
-            udtFileInfo.ScanCount = lstScanData.Last.Scan
-        Else
-            scansFileIsMissing = True
+            object strScansFilePath = GetDatasetNameViaPath(fiIsosFile.Name) + DECONTOOLS_SCANS_FILE_SUFFIX;
+            strScansFilePath = Path.Combine(fiIsosFile.Directory.FullName, strScansFilePath);
 
-            udtFileInfo.ScanCount = (From item In lstIsosData Select item.Scan).Max
+            object lstScanData = LoadScansFile(strScansFilePath);
+            object scansFileIsMissing = false;
 
-            For intScanIndex = 1 To udtFileInfo.ScanCount
-                Dim udtScanData = New udtScansDataType
-                udtScanData.Scan = intScanIndex
-                udtScanData.ElutionTime = intScanIndex
-                udtScanData.MSLevel = 1
+            if (lstScanData.Count > 0) {
+                datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(lstScanData.Last.ElutionTime);
+                datasetFileInfo.ScanCount = lstScanData.Last.Scan;
+            } else {
+                scansFileIsMissing = true;
 
-                lstScanData.Add(udtScanData)
-            Next
-        End If
+                datasetFileInfo.ScanCount = (from item in lstIsosDataitem.Scan).Max;
 
-        ' Step through the isos data and call mLCMS2DPlot.AddScan() for each scan
+                for (intScanIndex = 1; intScanIndex <= datasetFileInfo.ScanCount; intScanIndex++) {
+                    object udtScanData = new udtScansDataType();
+                    udtScanData.Scan = intScanIndex;
+                    udtScanData.ElutionTime = intScanIndex;
+                    udtScanData.MSLevel = 1;
 
-        Dim lstIons As New List(Of clsLCMSDataPlotter.udtMSIonType)
-        Dim intCurrentScan = 0
+                    lstScanData.Add(udtScanData);
+                }
+            }
 
-        ' Note: we only need to update mLCMS2DPlot
-        ' The options for mLCMS2DPlotOverview will be cloned from mLCMS2DPlot.Options
-        mLCMS2DPlot.Options.PlottingDeisotopedData = True
+            // Step through the isos data and call mLCMS2DPlot.AddScan() for each scan
 
-        Dim dblMaxMonoMass = mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot
+            List<clsLCMSDataPlotter.udtMSIonType> lstIons = new List<clsLCMSDataPlotter.udtMSIonType>();
+            object intCurrentScan = 0;
 
-        For intIndex = 0 To lstIsosData.Count - 1
+            // Note: we only need to update mLCMS2DPlot
+            // The options for mLCMS2DPlotOverview will be cloned from mLCMS2DPlot.Options
+            mLCMS2DPlot.Options.PlottingDeisotopedData = true;
 
-            If lstIsosData(intIndex).Scan > intCurrentScan OrElse intIndex = lstIsosData.Count - 1 Then
-                ' Store the cached values
-                If lstIons.Count > 0 Then
+            object dblMaxMonoMass = mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot;
 
-                    Dim udtCurrentScan = (From item In lstScanData Where item.Scan = intCurrentScan).ToList().FirstOrDefault
 
-                    lstIons.Sort(New clsLCMSDataPlotter.udtMSIonTypeComparer)
-                    mLCMS2DPlot.AddScan(intCurrentScan, udtCurrentScan.MSLevel, CSng(udtCurrentScan.ElutionTime), lstIons)
+            for (intIndex = 0; intIndex <= lstIsosData.Count - 1; intIndex++) {
+                if (lstIsosData[intIndex].Scan > intCurrentScan || intIndex == lstIsosData.Count - 1) {
+                    // Store the cached values
 
-                    If scansFileIsMissing AndAlso mSaveTICAndBPI Then
-                        ' Determine the TIC and BPI values using the data from the .isos file
-                        Dim tic As Double = 0
-                        Dim bpi As Double = 0
+                    if (lstIons.Count > 0) {
+                        object udtCurrentScan = (from item in lstScanDatawhere item.Scan == intCurrentScan).ToList().FirstOrDefault;
 
-                        For dataIndex = 0 To lstIons.Count - 1
-                            tic += lstIons(dataIndex).Intensity
-                            If lstIons(dataIndex).Intensity > bpi Then
-                                bpi = lstIons(dataIndex).Intensity
-                            End If
-                        Next
+                        lstIons.Sort(new clsLCMSDataPlotter.udtMSIonTypeComparer());
+                        mLCMS2DPlot.AddScan(intCurrentScan, udtCurrentScan.MSLevel, Convert.ToSingle(udtCurrentScan.ElutionTime), lstIons);
 
-                        mTICandBPIPlot.AddData(intCurrentScan, udtCurrentScan.MSLevel, udtCurrentScan.ElutionTime, bpi, tic)
-                    End If
+                        if (scansFileIsMissing && mSaveTICAndBPI) {
+                            // Determine the TIC and BPI values using the data from the .isos file
+                            double tic = 0;
+                            double bpi = 0;
 
-                End If
+                            for (dataIndex = 0; dataIndex <= lstIons.Count - 1; dataIndex++) {
+                                tic += lstIons(dataIndex).Intensity;
+                                if (lstIons(dataIndex).Intensity > bpi) {
+                                    bpi = lstIons(dataIndex).Intensity;
+                                }
+                            }
 
-                intCurrentScan = lstIsosData(intIndex).Scan
-                lstIons.Clear()
-            End If
+                            mTICandBPIPlot.AddData(intCurrentScan, udtCurrentScan.MSLevel, udtCurrentScan.ElutionTime, bpi, tic);
+                        }
 
-            If lstIsosData(intIndex).MonoMass <= dblMaxMonoMass Then
-                Dim udtIon = New clsLCMSDataPlotter.udtMSIonType
-                udtIon.MZ = lstIsosData(intIndex).MonoMass          ' Note that we store .MonoMass in a field called .mz; we'll still be plotting monoisotopic mass
-                udtIon.Intensity = lstIsosData(intIndex).Abundance
-                udtIon.Charge = lstIsosData(intIndex).Charge
+                    }
 
-                lstIons.Add(udtIon)
-            End If
-        Next
+                    intCurrentScan = lstIsosData[intIndex].Scan;
+                    lstIons.Clear();
+                }
 
-    End Sub
+                if (lstIsosData[intIndex].MonoMass <= dblMaxMonoMass) {
+                    object udtIon = new clsLCMSDataPlotter.udtMSIonType();
+                    udtIon.MZ = lstIsosData[intIndex].MonoMass;
+                    // Note that we store .MonoMass in a field called .mz; we'll still be plotting monoisotopic mass
+                    udtIon.Intensity = lstIsosData[intIndex].Abundance;
+                    udtIon.Charge = lstIsosData[intIndex].Charge;
 
-    Private Function LoadIsosFile(strIsosFilePath As String, sngMaxFit As Single) As List(Of udtIsosDataType)
+                    lstIons.Add(udtIon);
+                }
+            }
 
-        Dim dctColumnInfo As New Dictionary(Of String, Integer)
-        dctColumnInfo.Add("charge", -1)
-        dctColumnInfo.Add("abundance", -1)
-        dctColumnInfo.Add("mz", -1)
-        dctColumnInfo.Add("fit", -1)
-        dctColumnInfo.Add("monoisotopic_mw", -1)
+        }
 
-        Dim intColIndexScanOrFrameNum As Integer = -1
+        private List<udtIsosDataType> LoadIsosFile(string strIsosFilePath, float sngMaxFit)
+        {
 
-        Dim lstIsosData = New List(Of udtIsosDataType)
-        Dim intRowNumber = 0
+            var dctColumnInfo = new Dictionary<string, int>
+            {
+                {"charge", -1},
+                {"abundance", -1},
+                {"mz", -1},
+                {"fit", -1},
+                {"monoisotopic_mw", -1}
+            };
 
-        Dim intLastScan = 0
-        Dim intLastScanParseErrors = 0
+            int intColIndexScanOrFrameNum = -1;
 
-        Console.WriteLine("  Reading the _isos.csv file")
+            object lstIsosData = new List<udtIsosDataType>();
+            object intRowNumber = 0;
 
-        Using srIsosFile = New StreamReader(New FileStream(strIsosFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            While srIsosFile.Peek > -1
-                intRowNumber += 1
-                Dim strLineIn = srIsosFile.ReadLine()
-                Dim lstData = strLineIn.Split(","c).ToList()
+            object intLastScan = 0;
+            object intLastScanParseErrors = 0;
 
-                If intRowNumber = 1 Then
-                    ' Parse the header row
-                    ParseColumnHeaders(dctColumnInfo, lstData, "_isos.csv")
+            Console.WriteLine("  Reading the _isos.csv file");
 
-                    intColIndexScanOrFrameNum = GetScanOrFrameColIndex(lstData, "_isos.csv")
+            using (var srIsosFile = new StreamReader(new FileStream(strIsosFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
+                while (!srIsosFile.EndOfStream) {
+                    intRowNumber += 1;
+                    object strLineIn = srIsosFile.ReadLine();
+                    object lstData = strLineIn.Split(',').ToList();
 
-                    Continue While
-                End If
+                    if (intRowNumber == 1) {
+                        // Parse the header row
+                        ParseColumnHeaders(dctColumnInfo, lstData, "_isos.csv");
 
-                Dim blnParseError = False
-                Dim intCurrentScan = 0
+                        intColIndexScanOrFrameNum = GetScanOrFrameColIndex(lstData, "_isos.csv");
 
-                Try
-                    Dim udtIsosData = New udtIsosDataType
-                    With udtIsosData
-                        Integer.TryParse(lstData(intColIndexScanOrFrameNum), .Scan)
-                        intCurrentScan = .Scan
+                        continue;
+                    }
 
-                        Byte.TryParse(lstData(dctColumnInfo("charge")), .Charge)
-                        Double.TryParse(lstData(dctColumnInfo("abundance")), .Abundance)
-                        Double.TryParse(lstData(dctColumnInfo("mz")), .MZ)
-                        Single.TryParse(lstData(dctColumnInfo("fit")), .Fit)
-                        Double.TryParse(lstData(dctColumnInfo("monoisotopic_mw")), .MonoMass)
-                    End With
+                    object blnParseError = false;
+                    object intCurrentScan = 0;
 
-                    If udtIsosData.Charge > 1 Then
-                        'Console.WriteLine("Found it")
-                    End If
+                    try {
+                        var udtIsosData = new udtIsosDataType();
+                        int.TryParse(lstData[intColIndexScanOrFrameNum], out udtIsosData.Scan);
+                        intCurrentScan = udtIsosData.Scan;
 
-                    If udtIsosData.Fit <= sngMaxFit Then
-                        lstIsosData.Add(udtIsosData)
-                    End If
+                        byte.TryParse(lstData[dctColumnInfo["charge"]], out udtIsosData.Charge);
+                        double.TryParse(lstData[dctColumnInfo["abundance"]], out udtIsosData.Abundance);
+                        double.TryParse(lstData[dctColumnInfo["mz"]], out udtIsosData.MZ);
+                        float.TryParse(lstData[dctColumnInfo["fit"]], out udtIsosData.Fit);
+                        double.TryParse(lstData[dctColumnInfo["monoisotopic_mw"]], out udtIsosData.MonoMass);
 
-                Catch ex As Exception
-                    blnParseError = True
-                End Try
+                        if (udtIsosData.Charge > 1) {
+                            //Console.WriteLine("Found it")
+                        }
 
-                If intCurrentScan > intLastScan Then
+                        if (udtIsosData.Fit <= sngMaxFit) {
+                            lstIsosData.Add(udtIsosData);
+                        }
 
-                    If intLastScanParseErrors > 0 Then
-                        ShowMessage("Warning: Skipped " & intLastScanParseErrors & " data points in scan " & intLastScan & " due to data conversion errors")
-                    End If
+                    } catch (Exception ex) {
+                        blnParseError = true;
+                    }
 
-                    intLastScan = intCurrentScan
-                    intLastScanParseErrors = 0
-                End If
 
-                If blnParseError Then
-                    intLastScanParseErrors += 1
-                End If
+                    if (intCurrentScan > intLastScan) {
+                        if (intLastScanParseErrors > 0) {
+                            ShowMessage("Warning: Skipped " + intLastScanParseErrors + " data points in scan " + intLastScan + " due to data conversion errors");
+                        }
 
-            End While
-        End Using
+                        intLastScan = intCurrentScan;
+                        intLastScanParseErrors = 0;
+                    }
 
-        Return lstIsosData
+                    if (blnParseError) {
+                        intLastScanParseErrors += 1;
+                    }
 
-    End Function
+                }
+            }
 
-    Private Function LoadScansFile(strScansFilePath As String) As List(Of udtScansDataType)
+            return lstIsosData;
 
-        Const FILTERED_SCANS_SUFFIX = "_filtered_scans.csv"
+        }
 
-        Dim dctColumnInfo As New Dictionary(Of String, Integer)
-        dctColumnInfo.Add("type", -1)
-        dctColumnInfo.Add("bpi", -1)
-        dctColumnInfo.Add("bpi_mz", -1)
-        dctColumnInfo.Add("tic", -1)
-        dctColumnInfo.Add("num_peaks", -1)
-        dctColumnInfo.Add("num_deisotoped", -1)
+        private List<udtScansDataType> LoadScansFile(string strScansFilePath)
+        {
 
-        Dim intColIndexScanOrFrameNum As Integer = -1
-        Dim intColIndexScanOrFrameTime As Integer = -1
+            const object FILTERED_SCANS_SUFFIX = "_filtered_scans.csv";
+
+            Dictionary<string, int> dctColumnInfo = new Dictionary<string, int>();
+            dctColumnInfo.Add("type", -1);
+            dctColumnInfo.Add("bpi", -1);
+            dctColumnInfo.Add("bpi_mz", -1);
+            dctColumnInfo.Add("tic", -1);
+            dctColumnInfo.Add("num_peaks", -1);
+            dctColumnInfo.Add("num_deisotoped", -1);
 
-        Dim lstScanData = New List(Of udtScansDataType)
-        Dim intRowNumber = 0
-        Dim intColIndexScanInfo As Integer = -1
+            int intColIndexScanOrFrameNum = -1;
+            int intColIndexScanOrFrameTime = -1;
 
-        If Not File.Exists(strScansFilePath) AndAlso strScansFilePath.ToLower().EndsWith(FILTERED_SCANS_SUFFIX) Then
-            strScansFilePath = strScansFilePath.Substring(0, strScansFilePath.Length - FILTERED_SCANS_SUFFIX.Length) & "_scans.csv"
-        End If
+            var lstScanData = new List<udtScansDataType>();
+            var intRowNumber = 0;
+            int intColIndexScanInfo = -1;
 
-        If Not File.Exists(strScansFilePath) Then
-            ShowMessage("Warning: _scans.csv file is missing; will plot vs. scan number instead of vs. elution time")
-            Return lstScanData
-        End If
+            if (!File.Exists(strScansFilePath) && strScansFilePath.ToLower().EndsWith(FILTERED_SCANS_SUFFIX)) {
+                strScansFilePath = strScansFilePath.Substring(0, strScansFilePath.Length - FILTERED_SCANS_SUFFIX.Length) + "_scans.csv";
+            }
 
-        Console.WriteLine("  Reading the _scans.csv file")
+            if (!File.Exists(strScansFilePath)) {
+                ShowMessage("Warning: _scans.csv file is missing; will plot vs. scan number instead of vs. elution time");
+                return lstScanData;
+            }
 
-        Using srIsosFile = New StreamReader(New FileStream(strScansFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-            While srIsosFile.Peek > -1
-                intRowNumber += 1
-                Dim strLineIn = srIsosFile.ReadLine()
-                Dim lstData = strLineIn.Split(","c).ToList()
+            Console.WriteLine("  Reading the _scans.csv file");
 
-                If intRowNumber = 1 Then
-                    ' Parse the header row
-                    ParseColumnHeaders(dctColumnInfo, lstData, "_scans.csv")
+            using (var srIsosFile = new StreamReader(new FileStream(strScansFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
+                while (!srIsosFile.EndOfStream) {
+                    intRowNumber += 1;
+                    var strLineIn = srIsosFile.ReadLine();
+                    var lstData = strLineIn.Split(',').ToList();
+
+                    if (intRowNumber == 1) {
+                        // Parse the header row
+                        ParseColumnHeaders(dctColumnInfo, lstData, "_scans.csv");
+
+                        intColIndexScanOrFrameNum = GetScanOrFrameColIndex(lstData, "_scans.csv");
+
+                        intColIndexScanOrFrameTime = lstData.IndexOf("frame_time");
+                        if (intColIndexScanOrFrameTime < 0) {
+                            intColIndexScanOrFrameTime = lstData.IndexOf("scan_time");
+                        }
+
+                        // The info column will have data of the form "FTMS + p NSI Full ms [400.00-2000.00]" for Thermo datasets
+                        // For .mzXML files, this fill will simply have an integer (and thus isn't useful)
+                        // It may not be present in older _scancs.csv files and is thus optional
+                        intColIndexScanInfo = lstData.IndexOf("info");
+
+                        continue;
+                    }
+
+                    try {
+                        var udtScanData = new udtScansDataType();
+
+                        int.TryParse(lstData[intColIndexScanOrFrameNum], out udtScanData.Scan);
+                        float.TryParse(lstData[intColIndexScanOrFrameTime], out udtScanData.ElutionTime);
+                        int.TryParse(lstData[dctColumnInfo["type"]], out udtScanData.MSLevel);
+                        double.TryParse(lstData[dctColumnInfo["bpi"]], out udtScanData.BasePeakIntensity);
+                        double.TryParse(lstData[dctColumnInfo["bpi_mz"]], out udtScanData.BasePeakMZ);
+                        double.TryParse(lstData[dctColumnInfo["tic"]], out udtScanData.TotalIonCurrent);
+                        int.TryParse(lstData[dctColumnInfo["num_peaks"]], out udtScanData.NumPeaks);
+                        int.TryParse(lstData[dctColumnInfo["num_deisotoped"]], out udtScanData.NumDeisotoped);
 
-                    intColIndexScanOrFrameNum = GetScanOrFrameColIndex(lstData, "_scans.csv")
+                        if (intColIndexScanInfo > 0) {
+                            var infoText = lstData[intColIndexScanInfo];
+                            int infoValue;
 
-                    intColIndexScanOrFrameTime = lstData.IndexOf("frame_time")
-                    If intColIndexScanOrFrameTime < 0 Then
-                        intColIndexScanOrFrameTime = lstData.IndexOf("scan_time")
-                    End If
+                            // Only store infoText in .FilterText if infoText is not simply an integer
+                            if (!int.TryParse(infoText, out infoValue)) {
+                                udtScanData.FilterText = infoText;
+                            }
 
-                    ' The info column will have data of the form "FTMS + p NSI Full ms [400.00-2000.00]" for Thermo datasets
-                    ' For .mzXML files, this fill will simply have an integer (and thus isn't useful)
-                    ' It may not be present in older _scancs.csv files and is thus optional
-                    intColIndexScanInfo = lstData.IndexOf("info")
+                        }
 
-                    Continue While
-                End If
+                        lstScanData.Add(udtScanData);
 
-                Try
-                    Dim udtScanData = New udtScansDataType
-                    With udtScanData
-                        Integer.TryParse(lstData(intColIndexScanOrFrameNum), .Scan)
-                        Single.TryParse(lstData(intColIndexScanOrFrameTime), .ElutionTime)
-                        Integer.TryParse(lstData(dctColumnInfo("type")), .MSLevel)
-                        Double.TryParse(lstData(dctColumnInfo("bpi")), .BasePeakIntensity)
-                        Double.TryParse(lstData(dctColumnInfo("bpi_mz")), .BasePeakMZ)
-                        Double.TryParse(lstData(dctColumnInfo("tic")), .TotalIonCurrent)
-                        Integer.TryParse(lstData(dctColumnInfo("num_peaks")), .NumPeaks)
-                        Integer.TryParse(lstData(dctColumnInfo("num_deisotoped")), .NumDeisotoped)
-                        If intColIndexScanInfo > 0 Then
-                            Dim infoText = lstData(intColIndexScanInfo)
-                            Dim infoValue As Integer
+                        if (mSaveTICAndBPI) {
+                            var _with3 = udtScanData;
+                            mTICandBPIPlot.AddData(_with3.Scan, _with3.MSLevel, _with3.ElutionTime, _with3.BasePeakIntensity, _with3.TotalIonCurrent);
+                        }
+
+                        var objScanStatsEntry = new clsScanStatsEntry
+                        {
+                            ScanNumber = udtScanData.Scan,
+                            ScanType = udtScanData.MSLevel,
+                            ScanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(udtScanData.FilterText),
+                            ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(udtScanData.FilterText),
+                            ElutionTime = udtScanData.ElutionTime.ToString("0.0000"),
+                            TotalIonIntensity = StringUtilities.ValueToString(udtScanData.TotalIonCurrent, 5),
+                            BasePeakIntensity = StringUtilities.ValueToString(udtScanData.BasePeakIntensity, 5),
+                            BasePeakMZ = StringUtilities.DblToString(udtScanData.BasePeakMZ, 4),
+                            BasePeakSignalToNoiseRatio = "0",
+                            IonCount = udtScanData.NumDeisotoped,
+                            IonCountRaw = udtScanData.NumPeaks,
+                            ExtendedScanInfo =
+                            {
+                                CollisionMode = string.Empty,
+                                ScanFilterText = udtScanData.FilterText
+                            }
+                        };
 
-                            ' Only store infoText in .FilterText if infoText is not simply an integer
-                            If Not Integer.TryParse(infoText, infoValue) Then
-                                .FilterText = infoText
-                            End If
+                        mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
-                        End If
+                    } catch (Exception ex) {
+                        ShowMessage("Warning: Ignoring scan " + lstData[dctColumnInfo["scan_num"]] + " since data conversion error: " + ex.Message);
+                    }
 
-                    End With
-                    lstScanData.Add(udtScanData)
+                }
+            }
 
-                    If mSaveTICAndBPI Then
-                        With udtScanData
-                            mTICandBPIPlot.AddData(.Scan, .MSLevel, .ElutionTime, .BasePeakIntensity, .TotalIonCurrent)
-                        End With
-                    End If
+            return lstScanData;
 
-                    Dim objScanStatsEntry As New DSSummarizer.clsScanStatsEntry
+        }
 
-                    With udtScanData
-                        objScanStatsEntry.ScanNumber = .Scan
-                        objScanStatsEntry.ScanType = .MSLevel
 
-                        objScanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(.FilterText)
-                        objScanStatsEntry.ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(.FilterText)
+        private void ParseColumnHeaders(Dictionary<string, int> dctColumnInfo, List<string> lstData, string strFileDescription)
+        {
+            foreach (var columnName in dctColumnInfo.Keys.ToList()) {
+                var intcolIndex = lstData.IndexOf(columnName);
+                if (intcolIndex >= 0) {
+                    dctColumnInfo[columnName] = intcolIndex;
+                } else {
+                    throw new InvalidDataException("Required column not found in the " + strFileDescription + " file: " + columnName);
+                }
+            }
+        }
 
-                        objScanStatsEntry.ElutionTime = .ElutionTime.ToString("0.0000")
-                        objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(.TotalIonCurrent, 5)
-                        objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(.BasePeakIntensity, 5)
-                        objScanStatsEntry.BasePeakMZ = Math.Round(.BasePeakMZ, 4).ToString
+        /// <summary>
+        /// Process the DeconTools results
+        /// </summary>
+        /// <param name="strDataFilePath">Isos file path</param>
+        /// <param name="datasetFileInfo"></param>
+        /// <returns>True if success, False if an error</returns>
+        /// <remarks>Will also read the _scans.csv file if present (to determine ElutionTime and MSLevel</remarks>
+        public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
+        {
 
-                        ' Base peak signal to noise ratio
-                        objScanStatsEntry.BasePeakSignalToNoiseRatio = "0"
+            object fiIsosFile = new FileInfo(strDataFilePath);
 
-                        objScanStatsEntry.IonCount = .NumDeisotoped
-                        objScanStatsEntry.IonCountRaw = .NumPeaks
+            if (!fiIsosFile.Exists) {
+                ShowMessage("_isos.csv file not found: " + strDataFilePath);
+                return false;
+            }
 
-                        ' Store the collision mode and the scan filter text
-                        objScanStatsEntry.ExtendedScanInfo.CollisionMode = String.Empty
-                        objScanStatsEntry.ExtendedScanInfo.ScanFilterText = .FilterText
+            int intDatasetID = base.DatasetID;
 
-                    End With
-                    mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry)
+            // Record the file size and Dataset ID
+            var _with5 = datasetFileInfo;
+            _with5.FileSystemCreationTime = fiIsosFile.CreationTime;
+            _with5.FileSystemModificationTime = fiIsosFile.LastWriteTime;
 
-                Catch ex As Exception
-                    ShowMessage("Warning: Ignoring scan " & lstData(dctColumnInfo("scan_num")) & " since data conversion error: " & ex.Message)
-                End Try
+            // The acquisition times will get updated below to more accurate values
+            _with5.AcqTimeStart = _with5.FileSystemModificationTime;
+            _with5.AcqTimeEnd = _with5.FileSystemModificationTime;
 
-            End While
-        End Using
+            _with5.DatasetID = intDatasetID;
+            _with5.DatasetName = GetDatasetNameViaPath(fiIsosFile.Name);
+            _with5.FileExtension = fiIsosFile.Extension;
+            _with5.FileSizeBytes = fiIsosFile.Length;
 
-        Return lstScanData
+            _with5.ScanCount = 0;
 
-    End Function
 
-    Private Sub ParseColumnHeaders(dctColumnInfo As Dictionary(Of String, Integer), lstData As List(Of String), strFileDescription As String)
+            mDatasetStatsSummarizer.ClearCachedData();
 
-        For Each columnName In dctColumnInfo.Keys.ToList()
-            Dim intcolIndex = lstData.IndexOf(columnName)
-            If intcolIndex >= 0 Then
-                dctColumnInfo(columnName) = intcolIndex
-            Else
-                Throw New InvalidDataException("Required column not found in the " & strFileDescription & " file: " & columnName)
-            End If
-        Next
-    End Sub
+            if (mSaveTICAndBPI || mCreateDatasetInfoFile || mCreateScanStatsFile || mSaveLCMS2DPlots) {
+                // Load data from each scan
+                // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
+                LoadData(fiIsosFile, ref datasetFileInfo);
+            }
 
-    ''' <summary>
-    ''' Process the DeconTools results
-    ''' </summary>
-    ''' <param name="strDataFilePath">Isos file path</param>
-    ''' <param name="udtFileInfo"></param>
-    ''' <returns>True if success, False if an error</returns>
-    ''' <remarks>Will also read the _scans.csv file if present (to determine ElutionTime and MSLevel</remarks>
-    Public Overrides Function ProcessDataFile(strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
+            // Read the file info from the file system
+            // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
+            UpdateDatasetFileStats(fiIsosFile, intDatasetID);
 
-        Dim fiIsosFile = New FileInfo(strDataFilePath)
+            // Copy over the updated filetime info from datasetFileInfo to mDatasetFileInfo
+            var _with6 = mDatasetStatsSummarizer.DatasetFileInfo;
+            _with6.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
+            _with6.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
+            _with6.DatasetID = datasetFileInfo.DatasetID;
+            _with6.DatasetName = string.Copy(datasetFileInfo.DatasetName);
+            _with6.FileExtension = string.Copy(datasetFileInfo.FileExtension);
+            _with6.AcqTimeStart = datasetFileInfo.AcqTimeStart;
+            _with6.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
+            _with6.ScanCount = datasetFileInfo.ScanCount;
+            _with6.FileSizeBytes = datasetFileInfo.FileSizeBytes;
 
-        If Not fiIsosFile.Exists Then
-            ShowMessage("_isos.csv file not found: " + strDataFilePath)
-            Return False
-        End If
+            return true;
 
-        Dim intDatasetID As Integer = MyBase.DatasetID
+        }
 
-        ' Record the file size and Dataset ID
-        With udtFileInfo
-            .FileSystemCreationTime = fiIsosFile.CreationTime
-            .FileSystemModificationTime = fiIsosFile.LastWriteTime
+    }
+}
 
-            ' The acquisition times will get updated below to more accurate values
-            .AcqTimeStart = .FileSystemModificationTime
-            .AcqTimeEnd = .FileSystemModificationTime
-
-            .DatasetID = intDatasetID
-            .DatasetName = GetDatasetNameViaPath(fiIsosFile.Name)
-            .FileExtension = fiIsosFile.Extension
-            .FileSizeBytes = fiIsosFile.Length
-
-            .ScanCount = 0
-        End With
-
-
-        mDatasetStatsSummarizer.ClearCachedData()
-
-        If mSaveTICAndBPI OrElse mCreateDatasetInfoFile OrElse mCreateScanStatsFile OrElse mSaveLCMS2DPlots Then
-            ' Load data from each scan
-            ' This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
-            LoadData(fiIsosFile, udtFileInfo)
-        End If
-
-        ' Read the file info from the file system
-        ' (much of this is already in udtFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
-        UpdateDatasetFileStats(fiIsosFile, intDatasetID)
-
-        ' Copy over the updated filetime info from udtFileInfo to mDatasetFileInfo
-        With mDatasetStatsSummarizer.DatasetFileInfo
-            .FileSystemCreationTime = udtFileInfo.FileSystemCreationTime
-            .FileSystemModificationTime = udtFileInfo.FileSystemModificationTime
-            .DatasetID = udtFileInfo.DatasetID
-            .DatasetName = String.Copy(udtFileInfo.DatasetName)
-            .FileExtension = String.Copy(udtFileInfo.FileExtension)
-            .AcqTimeStart = udtFileInfo.AcqTimeStart
-            .AcqTimeEnd = udtFileInfo.AcqTimeEnd
-            .ScanCount = udtFileInfo.ScanCount
-            .FileSizeBytes = udtFileInfo.FileSizeBytes
-        End With
-
-        Return True
-
-    End Function
-
-End Class

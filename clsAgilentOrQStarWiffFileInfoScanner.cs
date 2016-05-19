@@ -1,300 +1,317 @@
-Option Strict On
+using System;
+using System.IO;
+
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Started in 2005
+//
+// Updated in March 2012 to use Proteowizard to read data from QTrap .Wiff files
+// (cannot read MS data or TIC values from Agilent .Wiff files)
+
+namespace MSFileInfoScanner
+{
+    [CLSCompliant(false)]
+    public class clsAgilentTOFOrQStarWiffFileInfoScanner : clsMSFileInfoProcessorBaseClass
+    {
+
+        // Note: The extension must be in all caps
+
+        public const string AGILENT_TOF_OR_QSTAR_FILE_EXTENSION = ".WIFF";
+        private clsProteowizardDataParser withEventsField_mPWizParser;
+        protected clsProteowizardDataParser mPWizParser {
+            get { return withEventsField_mPWizParser; }
+            set {
+                if (withEventsField_mPWizParser != null) {
+                    withEventsField_mPWizParser.ErrorEvent -= mPWizParser_ErrorEvent;
+                    withEventsField_mPWizParser.MessageEvent -= mPWizParser_MessageEvent;
+                }
+                withEventsField_mPWizParser = value;
+                if (withEventsField_mPWizParser != null) {
+                    withEventsField_mPWizParser.ErrorEvent += mPWizParser_ErrorEvent;
+                    withEventsField_mPWizParser.MessageEvent += mPWizParser_MessageEvent;
+                }
+            }
+
+        }
+        public override string GetDatasetNameViaPath(string strDataFilePath)
+        {
+            // The dataset name is simply the file name without .wiff
+            try {
+                return Path.GetFileNameWithoutExtension(strDataFilePath);
+            } catch (Exception ex) {
+                return string.Empty;
+            }
+        }
 
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Started in 2005
-'
-' Updated in March 2012 to use Proteowizard to read data from QTrap .Wiff files
-' (cannot read MS data or TIC values from Agilent .Wiff files)
+        public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
+        {
+            // Returns True if success, False if an error
+
+            FileInfo ioFileInfo = default(FileInfo);
+            bool blnSuccess = false;
+
+            bool blnTICStored = false;
+            bool blnSRMDataCached = false;
+
+            // Override strDataFilePath here, if needed
+            strDataFilePath = strDataFilePath;
 
-<CLSCompliant(False)>
-Public Class clsAgilentTOFOrQStarWiffFileInfoScanner
-	Inherits clsMSFileInfoProcessorBaseClass
+            // Obtain the full path to the file
+            ioFileInfo = new FileInfo(strDataFilePath);
 
-	' Note: The extension must be in all caps
-	Public Const AGILENT_TOF_OR_QSTAR_FILE_EXTENSION As String = ".WIFF"
 
-	Protected WithEvents mPWizParser As clsProteowizardDataParser
+            bool blnTest = false;
+            blnTest = false;
+            if (blnTest) {
+                TestPWiz(ioFileInfo.FullName);
+            }
 
-    Public Overrides Function GetDatasetNameViaPath(strDataFilePath As String) As String
-        ' The dataset name is simply the file name without .wiff
-        Try
-            Return Path.GetFileNameWithoutExtension(strDataFilePath)
-        Catch ex As Exception
-            Return String.Empty
-        End Try
-    End Function
 
-    Public Overrides Function ProcessDataFile(strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        ' Returns True if success, False if an error
+            datasetFileInfo.FileSystemCreationTime = ioFileInfo.CreationTime;
+            datasetFileInfo.FileSystemModificationTime = ioFileInfo.LastWriteTime;
 
-        Dim ioFileInfo As FileInfo
-        Dim blnSuccess As Boolean = False
+            // Using the file system modification time as the acquisition end time
+            datasetFileInfo.AcqTimeStart = datasetFileInfo.FileSystemModificationTime;
+            datasetFileInfo.AcqTimeEnd = datasetFileInfo.FileSystemModificationTime;
 
-        Dim blnTICStored As Boolean = False
-        Dim blnSRMDataCached As Boolean = False
+            datasetFileInfo.DatasetID = 0;
+            datasetFileInfo.DatasetName = GetDatasetNameViaPath(ioFileInfo.Name);
+            datasetFileInfo.FileExtension = ioFileInfo.Extension;
+            datasetFileInfo.FileSizeBytes = ioFileInfo.Length;
 
-        ' Override strDataFilePath here, if needed
-        strDataFilePath = strDataFilePath
+            datasetFileInfo.ScanCount = 0;
 
-        ' Obtain the full path to the file
-        ioFileInfo = New FileInfo(strDataFilePath)
+            mDatasetStatsSummarizer.ClearCachedData();
+            mLCMS2DPlot.Options.UseObservedMinScan = false;
 
+            try {
+                // Open the .Wiff file using the ProteoWizardWrapper
 
-        Dim blnTest As Boolean
-        blnTest = False
-        If blnTest Then
-            TestPWiz(ioFileInfo.FullName)
-        End If
+                var objPWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(ioFileInfo.FullName);
 
+                try {
+                    DateTime dtRunStartTime = datasetFileInfo.AcqTimeStart;
+                    dtRunStartTime = Convert.ToDateTime(objPWiz.RunStartTime());
 
-        With udtFileInfo
-            .FileSystemCreationTime = ioFileInfo.CreationTime
-            .FileSystemModificationTime = ioFileInfo.LastWriteTime
+                    // Update AcqTimeEnd if possible
+                    // Found out by trial and error that we need to use .ToUniversalTime() to adjust the time reported by ProteoWizard
+                    dtRunStartTime = dtRunStartTime.ToUniversalTime();
+                    if (dtRunStartTime < datasetFileInfo.AcqTimeEnd) {
+                        if (datasetFileInfo.AcqTimeEnd.Subtract(dtRunStartTime).TotalDays < 1) {
+                            datasetFileInfo.AcqTimeStart = dtRunStartTime;
+                        }
+                    }
 
-            ' Using the file system modification time as the acquisition end time
-            .AcqTimeStart = .FileSystemModificationTime
-            .AcqTimeEnd = .FileSystemModificationTime
+                } catch (Exception ex) {
+                    datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd;
+                }
 
-            .DatasetID = 0
-            .DatasetName = GetDatasetNameViaPath(ioFileInfo.Name)
-            .FileExtension = ioFileInfo.Extension
-            .FileSizeBytes = ioFileInfo.Length
+                // Instantiate the Proteowizard Data Parser class
+                mPWizParser = new clsProteowizardDataParser(objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot, mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus);
 
-            .ScanCount = 0
-        End With
+                mPWizParser.HighResMS1 = true;
+                mPWizParser.HighResMS2 = true;
 
-        mDatasetStatsSummarizer.ClearCachedData()
-        mLCMS2DPlot.Options.UseObservedMinScan = False
+                double dblRuntimeMinutes = 0;
 
-        Try
-            ' Open the .Wiff file using the ProteoWizardWrapper
+                // Note that SRM .Wiff files will only have chromatograms, and no spectra
 
-            Dim objPWiz = New pwiz.ProteowizardWrapper.MSDataFileReader(ioFileInfo.FullName)
+                if (objPWiz.ChromatogramCount > 0) {
+                    // Process the chromatograms
+                    mPWizParser.StoreChromatogramInfo(datasetFileInfo, blnTICStored, blnSRMDataCached, dblRuntimeMinutes);
+                    mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
 
-            Try
-                Dim dtRunStartTime As DateTime = udtFileInfo.AcqTimeStart
-                dtRunStartTime = CDate(objPWiz.RunStartTime())
+                }
 
-                ' Update AcqTimeEnd if possible
-                ' Found out by trial and error that we need to use .ToUniversalTime() to adjust the time reported by ProteoWizard
-                dtRunStartTime = dtRunStartTime.ToUniversalTime()
-                If dtRunStartTime < udtFileInfo.AcqTimeEnd Then
-                    If udtFileInfo.AcqTimeEnd.Subtract(dtRunStartTime).TotalDays < 1 Then
-                        udtFileInfo.AcqTimeStart = dtRunStartTime
-                    End If
-                End If
 
-            Catch ex As Exception
-                udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd
-            End Try
+                if (objPWiz.SpectrumCount > 0 & !blnSRMDataCached) {
+                    // Process the spectral data (though only if we did not process SRM data)
+                    mPWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, dblRuntimeMinutes);
+                    mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
+                }
 
-            ' Instantiate the Proteowizard Data Parser class
-            mPWizParser = New clsProteowizardDataParser(
-              objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot,
-              mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus)
+                objPWiz.Dispose();
+                PRISM.Processes.clsProgRunner.GarbageCollectNow();
 
-            mPWizParser.HighResMS1 = True
-            mPWizParser.HighResMS2 = True
+            } catch (Exception ex) {
+                ReportError("Error using ProteoWizard reader: " + ex.Message);
+            }
 
-            Dim dblRuntimeMinutes As Double = 0
 
-            ' Note that SRM .Wiff files will only have chromatograms, and no spectra
-            If objPWiz.ChromatogramCount > 0 Then
+            // Read the file info from the file system
+            // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
+            UpdateDatasetFileStats(ioFileInfo, datasetFileInfo.DatasetID);
 
-                ' Process the chromatograms
-                mPWizParser.StoreChromatogramInfo(udtFileInfo, blnTICStored, blnSRMDataCached, dblRuntimeMinutes)
-                mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
+            // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
+            mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
+            mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
+            mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
+            mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
+            mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
+            mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
 
-            End If
+            blnSuccess = true;
 
+            return blnSuccess;
 
-            If objPWiz.SpectrumCount > 0 And Not blnSRMDataCached Then
-                ' Process the spectral data (though only if we did not process SRM data)
-                mPWizParser.StoreMSSpectraInfo(udtFileInfo, blnTICStored, dblRuntimeMinutes)
-                mPWizParser.PossiblyUpdateAcqTimeStart(udtFileInfo, dblRuntimeMinutes)
-            End If
+        }
 
-            objPWiz.Dispose()
-            PRISM.Processes.clsProgRunner.GarbageCollectNow()
 
-        Catch ex As Exception
-            ReportError("Error using ProteoWizard reader: " & ex.Message)
-        End Try
+        private void TestPWiz(string strFilePath)
+        {
+            const bool RUN_BENCHMARKS = false;
 
+            try {
+                pwiz.CLI.msdata.MSDataFile objPWiz2 = default(pwiz.CLI.msdata.MSDataFile);
+                objPWiz2 = new pwiz.CLI.msdata.MSDataFile(strFilePath);
 
-        ' Read the file info from the file system
-        ' (much of this is already in udtFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
-        UpdateDatasetFileStats(ioFileInfo, udtFileInfo.DatasetID)
 
-        ' Copy over the updated filetime info and scan info from udtFileInfo to mDatasetFileInfo
-        With mDatasetStatsSummarizer.DatasetFileInfo
-            .DatasetName = String.Copy(udtFileInfo.DatasetName)
-            .FileExtension = String.Copy(udtFileInfo.FileExtension)
-            .FileSizeBytes = udtFileInfo.FileSizeBytes
-            .AcqTimeStart = udtFileInfo.AcqTimeStart
-            .AcqTimeEnd = udtFileInfo.AcqTimeEnd
-            .ScanCount = udtFileInfo.ScanCount
-        End With
+                Console.WriteLine("Spectrum count: " + objPWiz2.run.spectrumList.size);
+                Console.WriteLine();
 
-        blnSuccess = True
+                if (objPWiz2.run.spectrumList.size() > 0) {
+                    int intSpectrumIndex = 0;
+                    pwiz.CLI.data.CVParam param = null;
 
-        Return blnSuccess
 
-    End Function
+                    do {
+                        pwiz.CLI.msdata.Spectrum oSpectrum = default(pwiz.CLI.msdata.Spectrum);
+                        oSpectrum = objPWiz2.run.spectrumList.spectrum(intSpectrumIndex, getBinaryData: true);
 
-    Private Sub TestPWiz(strFilePath As String)
+                        int intMSLevel = 0;
+                        double dblStartTimeMinutes = 0;
 
-        Const RUN_BENCHMARKS As Boolean = False
 
-        Try
-            Dim objPWiz2 As pwiz.CLI.msdata.MSDataFile
-            objPWiz2 = New pwiz.CLI.msdata.MSDataFile(strFilePath)
+                        if (oSpectrum.scanList.scans.Count > 0) {
+                            if (clsProteowizardDataParser.TryGetCVParam(oSpectrum.scanList.scans(0).cvParams, pwiz.CLI.cv.CVID.MS_scan_start_time, param)) {
+                                int intScanNum = intSpectrumIndex + 1;
+                                dblStartTimeMinutes = param.timeInSeconds() / 60.0;
 
+                                Console.WriteLine("ScanIndex " + intSpectrumIndex + ", Scan " + intScanNum + ", Elution Time " + dblStartTimeMinutes + " minutes");
+                            }
 
-            Console.WriteLine("Spectrum count: " & objPWiz2.run.spectrumList.size)
-            Console.WriteLine()
+                        }
 
-            If objPWiz2.run.spectrumList.size() > 0 Then
-                Dim intSpectrumIndex As Integer = 0
-                Dim param As pwiz.CLI.data.CVParam = Nothing
+                        // Use the following to determine info on this spectrum
+                        if (clsProteowizardDataParser.TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_ms_level, param)) {
+                            Int32.TryParse(param.value, intMSLevel);
+                        }
 
-                Do
+                        // Use the following to get the MZs and Intensities
+                        pwiz.CLI.msdata.BinaryDataArray oMZs = default(pwiz.CLI.msdata.BinaryDataArray);
+                        pwiz.CLI.msdata.BinaryDataArray oIntensities = default(pwiz.CLI.msdata.BinaryDataArray);
 
-                    Dim oSpectrum As pwiz.CLI.msdata.Spectrum
-                    oSpectrum = objPWiz2.run.spectrumList.spectrum(intSpectrumIndex, getBinaryData:=True)
+                        oMZs = oSpectrum.getMZArray;
+                        oIntensities = oSpectrum.getIntensityArray();
 
-                    Dim intMSLevel As Integer = 0
-                    Dim dblStartTimeMinutes As Double = 0
 
-                    If oSpectrum.scanList.scans.Count > 0 Then
+                        if (oMZs.data.Count > 0) {
+                            Console.WriteLine("  Data count: " + oMZs.data.Count);
 
-                        If clsProteowizardDataParser.TryGetCVParam(oSpectrum.scanList.scans(0).cvParams, pwiz.CLI.cv.CVID.MS_scan_start_time, param) Then
-                            Dim intScanNum As Integer = intSpectrumIndex + 1
-                            dblStartTimeMinutes = param.timeInSeconds() / 60.0
 
-                            Console.WriteLine("ScanIndex " & intSpectrumIndex & ", Scan " & intScanNum & ", Elution Time " & dblStartTimeMinutes & " minutes")
-                        End If
+                            if (RUN_BENCHMARKS) {
+                                double dblTIC1 = 0;
+                                double dblTIC2 = 0;
+                                DateTime dtStartTime = default(DateTime);
+                                DateTime dtEndTime = default(DateTime);
+                                double dtRunTimeSeconds1 = 0;
+                                double dtRunTimeSeconds2 = 0;
+                                const int LOOP_ITERATIONS = 2000;
 
-                    End If
+                                // Note from Matt Chambers (matt.chambers42@gmail.com) 
+                                // Repeatedly accessing items directly via oMZs.data() can be very slow
+                                // With 700 points and 2000 iterations, it takes anywhere from 0.6 to 1.1 seconds to run from dtStartTime to dtEndTime
+                                dtStartTime = DateTime.Now;
+                                for (int j = 1; j <= LOOP_ITERATIONS; j++) {
+                                    for (int intIndex = 0; intIndex <= oMZs.data.Count - 1; intIndex++) {
+                                        dblTIC1 += oMZs.data[intIndex];
+                                    }
+                                }
+                                dtEndTime = DateTime.Now;
+                                dtRunTimeSeconds1 = dtEndTime.Subtract(dtStartTime).TotalSeconds;
 
-                    ' Use the following to determine info on this spectrum
-                    If clsProteowizardDataParser.TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_ms_level, param) Then
-                        Int32.TryParse(param.value, intMSLevel)
-                    End If
+                                // The preferred method is to copy the data from .data to a locally-stored mzArray object
+                                // With 700 points and 2000 iterations, it takes 0.016 seconds to run from dtStartTime to dtEndTime
+                                dtStartTime = DateTime.Now;
+                                for (int j = 1; j <= LOOP_ITERATIONS; j++) {
+                                    pwiz.CLI.msdata.BinaryData oMzArray = oMZs.data;
+                                    for (int intIndex = 0; intIndex <= oMzArray.Count - 1; intIndex++) {
+                                        dblTIC2 += oMzArray[intIndex];
+                                    }
+                                }
+                                dtEndTime = DateTime.Now;
+                                dtRunTimeSeconds2 = dtEndTime.Subtract(dtStartTime).TotalSeconds;
 
-                    ' Use the following to get the MZs and Intensities
-                    Dim oMZs As pwiz.CLI.msdata.BinaryDataArray
-                    Dim oIntensities As pwiz.CLI.msdata.BinaryDataArray
+                                Console.WriteLine("  " + oMZs.data.Count + " points with " + LOOP_ITERATIONS + " iterations gives Runtime1=" + dtRunTimeSeconds1.ToString("0.000") + " sec. vs. Runtime2=" + dtRunTimeSeconds2.ToString("0.000") + " sec.");
 
-                    oMZs = oSpectrum.getMZArray
-                    oIntensities = oSpectrum.getIntensityArray()
+                                if (dblTIC1 != dblTIC2) {
+                                    Console.WriteLine("  TIC values don't agree; this is unexpected");
+                                }
+                            }
 
-                    If oMZs.data.Count > 0 Then
+                        }
 
-                        Console.WriteLine("  Data count: " & oMZs.data.Count)
+                        if (intSpectrumIndex < 25) {
+                            intSpectrumIndex += 1;
+                        } else {
+                            intSpectrumIndex += 50;
+                        }
 
-                        If RUN_BENCHMARKS Then
+                    } while (intSpectrumIndex < objPWiz2.run.spectrumList.size());
+                }
 
-                            Dim dblTIC1 As Double = 0
-                            Dim dblTIC2 As Double = 0
-                            Dim dtStartTime As DateTime
-                            Dim dtEndTime As DateTime
-                            Dim dtRunTimeSeconds1 As Double
-                            Dim dtRunTimeSeconds2 As Double
-                            Const LOOP_ITERATIONS As Integer = 2000
 
-                            ' Note from Matt Chambers (matt.chambers42@gmail.com) 
-                            ' Repeatedly accessing items directly via oMZs.data() can be very slow
-                            ' With 700 points and 2000 iterations, it takes anywhere from 0.6 to 1.1 seconds to run from dtStartTime to dtEndTime
-                            dtStartTime = DateTime.Now()
-                            For j As Integer = 1 To LOOP_ITERATIONS
-                                For intIndex As Integer = 0 To oMZs.data.Count - 1
-                                    dblTIC1 += oMZs.data(intIndex)
-                                Next
-                            Next j
-                            dtEndTime = DateTime.Now()
-                            dtRunTimeSeconds1 = dtEndTime.Subtract(dtStartTime).TotalSeconds
+                if (objPWiz2.run.chromatogramList.size() > 0) {
+                    int intChromIndex = 0;
 
-                            ' The preferred method is to copy the data from .data to a locally-stored mzArray object
-                            ' With 700 points and 2000 iterations, it takes 0.016 seconds to run from dtStartTime to dtEndTime
-                            dtStartTime = DateTime.Now()
-                            For j As Integer = 1 To LOOP_ITERATIONS
-                                Dim oMzArray As pwiz.CLI.msdata.BinaryData = oMZs.data
-                                For intIndex As Integer = 0 To oMzArray.Count - 1
-                                    dblTIC2 += oMzArray(intIndex)
-                                Next
-                            Next j
-                            dtEndTime = DateTime.Now()
-                            dtRunTimeSeconds2 = dtEndTime.Subtract(dtStartTime).TotalSeconds
 
-                            Console.WriteLine("  " & oMZs.data.Count & " points with " & LOOP_ITERATIONS & " iterations gives Runtime1=" & dtRunTimeSeconds1.ToString("0.000") & " sec. vs. Runtime2=" & dtRunTimeSeconds2.ToString("0.000") & " sec.")
+                    do {
+                        pwiz.CLI.msdata.Chromatogram oChromatogram = default(pwiz.CLI.msdata.Chromatogram);
+                        string strChromDescription = "";
+                        pwiz.CLI.msdata.TimeIntensityPairList oTimeIntensityPairList = new pwiz.CLI.msdata.TimeIntensityPairList();
 
-                            If dblTIC1 <> dblTIC2 Then
-                                Console.WriteLine("  TIC values don't agree; this is unexpected")
-                            End If
-                        End If
 
-                    End If
+                        // Note that even for a small .Wiff file (1.5 MB), obtaining the Chromatogram list will take some time (20 to 60 seconds)
+                        // The chromatogram at index 0 should be the TIC
+                        // The chromatogram at index >=1 will be each SRM
 
-                    If intSpectrumIndex < 25 Then
-                        intSpectrumIndex += 1
-                    Else
-                        intSpectrumIndex += 50
-                    End If
+                        oChromatogram = objPWiz2.run.chromatogramList.chromatogram(intChromIndex, getBinaryData: true);
 
-                Loop While intSpectrumIndex < objPWiz2.run.spectrumList.size()
-            End If
+                        // Determine the chromatogram type
+                        pwiz.CLI.data.CVParam param = null;
 
+                        if (clsProteowizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, param)) {
+                            strChromDescription = oChromatogram.id;
 
-            If objPWiz2.run.chromatogramList.size() > 0 Then
-                Dim intChromIndex As Integer = 0
+                            // Obtain the data
+                            oChromatogram.getTimeIntensityPairs(oTimeIntensityPairList);
+                        }
 
-                Do
 
-                    Dim oChromatogram As pwiz.CLI.msdata.Chromatogram
-                    Dim strChromDescription As String = ""
-                    Dim oTimeIntensityPairList As pwiz.CLI.msdata.TimeIntensityPairList = New pwiz.CLI.msdata.TimeIntensityPairList
+                        if (clsProteowizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, param)) {
+                            strChromDescription = oChromatogram.id;
 
+                            // Store the SRM scan
+                            oChromatogram.getTimeIntensityPairs(oTimeIntensityPairList);
+                        }
 
-                    ' Note that even for a small .Wiff file (1.5 MB), obtaining the Chromatogram list will take some time (20 to 60 seconds)
-                    ' The chromatogram at index 0 should be the TIC
-                    ' The chromatogram at index >=1 will be each SRM
+                        intChromIndex += 1;
+                    } while (intChromIndex < 50 && intChromIndex < objPWiz2.run.chromatogramList.size());
+                }
 
-                    oChromatogram = objPWiz2.run.chromatogramList.chromatogram(intChromIndex, getBinaryData:=True)
+            } catch (Exception ex) {
+                ReportError("Error using ProteoWizard reader: " + ex.Message);
+            }
 
-                    ' Determine the chromatogram type
-                    Dim param As pwiz.CLI.data.CVParam = Nothing
+        }
 
-                    If clsProteowizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, param) Then
-                        strChromDescription = oChromatogram.id
+        private void mPWizParser_ErrorEvent(string Message)
+        {
+            ReportError(Message);
+        }
 
-                        ' Obtain the data
-                        oChromatogram.getTimeIntensityPairs(oTimeIntensityPairList)
-                    End If
-
-                    If clsProteowizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, param) Then
-
-                        strChromDescription = oChromatogram.id
-
-                        ' Store the SRM scan
-                        oChromatogram.getTimeIntensityPairs(oTimeIntensityPairList)
-                    End If
-
-                    intChromIndex += 1
-                Loop While intChromIndex < 50 AndAlso intChromIndex < objPWiz2.run.chromatogramList.size()
-            End If
-
-        Catch ex As Exception
-            ReportError("Error using ProteoWizard reader: " & ex.Message)
-        End Try
-
-    End Sub
-
-	Private Sub mPWizParser_ErrorEvent(Message As String) Handles mPWizParser.ErrorEvent
-		ReportError(Message)
-	End Sub
-
-	Private Sub mPWizParser_MessageEvent(Message As String) Handles mPWizParser.MessageEvent
-		ShowMessage(Message)
-	End Sub
-End Class
+        private void mPWizParser_MessageEvent(string Message)
+        {
+            ShowMessage(Message);
+        }
+    }
+}

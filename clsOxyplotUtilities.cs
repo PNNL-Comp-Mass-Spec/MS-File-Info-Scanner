@@ -1,142 +1,154 @@
-﻿Imports OxyPlot
-Imports OxyPlot.Axes
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+using OxyPlot;
+using OxyPlot.Axes;
 
-Public Class clsOxyplotUtilities
+public class clsOxyplotUtilities
+{
 
-    Public Const EXPONENTIAL_FORMAT As String = "0.00E+00"
-    
-    Public Const FONT_SIZE_BASE As Integer = 16
+	public const string EXPONENTIAL_FORMAT = "0.00E+00";
 
-    Protected Const DEFAULT_AXIS_LABEL_FORMAT As String = "#,##0"
 
-    Public Shared Function GetBasicPlotModel(strTitle As String, xAxisLabel As String, yAxisLabel As String) As PlotModel
+	public const int FONT_SIZE_BASE = 16;
 
-        Dim myPlot As New PlotModel
-        
-        ' Set the titles and axis labels
-        myPlot.Title = String.Copy(strTitle)
-        myPlot.TitleFont = "Arial"
-        myPlot.TitleFontSize = FONT_SIZE_BASE + 4
-        myPlot.TitleFontWeight = OxyPlot.FontWeights.Normal
+	protected const string DEFAULT_AXIS_LABEL_FORMAT = "#,##0";
+	public static PlotModel GetBasicPlotModel(string strTitle, string xAxisLabel, string yAxisLabel)
+	{
 
-        myPlot.Padding = New OxyThickness(myPlot.Padding.Left, myPlot.Padding.Top, 30, myPlot.Padding.Bottom)
+		PlotModel myPlot = new PlotModel();
 
-        myPlot.Axes.Add(MakeLinearAxis(AxisPosition.Bottom, xAxisLabel, FONT_SIZE_BASE))
-        myPlot.Axes(0).Minimum = 0
+		// Set the titles and axis labels
+		myPlot.Title = string.Copy(strTitle);
+		myPlot.TitleFont = "Arial";
+		myPlot.TitleFontSize = FONT_SIZE_BASE + 4;
+		myPlot.TitleFontWeight = OxyPlot.FontWeights.Normal;
 
-        myPlot.Axes.Add(MakeLinearAxis(AxisPosition.Left, yAxisLabel, FONT_SIZE_BASE))
+		myPlot.Padding = new OxyThickness(myPlot.Padding.Left, myPlot.Padding.Top, 30, myPlot.Padding.Bottom);
 
-        ' Adjust the font sizes
-        myPlot.Axes(0).FontSize = FONT_SIZE_BASE
-        myPlot.Axes(1).FontSize = FONT_SIZE_BASE
+		myPlot.Axes.Add(MakeLinearAxis(AxisPosition.Bottom, xAxisLabel, FONT_SIZE_BASE));
+		myPlot.Axes(0).Minimum = 0;
 
-        ' Set the background color
-        myPlot.PlotAreaBackground = OxyColor.FromRgb(243, 243, 243)
+		myPlot.Axes.Add(MakeLinearAxis(AxisPosition.Left, yAxisLabel, FONT_SIZE_BASE));
 
-        Return myPlot
+		// Adjust the font sizes
+		myPlot.Axes(0).FontSize = FONT_SIZE_BASE;
+		myPlot.Axes(1).FontSize = FONT_SIZE_BASE;
 
-    End Function
+		// Set the background color
+		myPlot.PlotAreaBackground = OxyColor.FromRgb(243, 243, 243);
 
-    Public Shared Function MakeLinearAxis(position As AxisPosition, axisTitle As String, baseFontSize As Integer) As LinearAxis
-        Dim axis = New LinearAxis()
+		return myPlot;
 
-        axis.Position = position
+	}
 
-        axis.Title = axisTitle
-        axis.TitleFontSize = baseFontSize + 2
-        axis.TitleFontWeight = OxyPlot.FontWeights.Normal
-        axis.TitleFont = "Arial"
+	public static LinearAxis MakeLinearAxis(AxisPosition position, string axisTitle, int baseFontSize)
+	{
+		dynamic axis = new LinearAxis();
 
-        axis.AxisTitleDistance = 15
-        axis.TickStyle = TickStyle.Crossing
+		axis.Position = position;
 
-        axis.AxislineColor = OxyColors.Black
-        axis.AxislineStyle = LineStyle.Solid
-        axis.MajorTickSize = 8
+		axis.Title = axisTitle;
+		axis.TitleFontSize = baseFontSize + 2;
+		axis.TitleFontWeight = OxyPlot.FontWeights.Normal;
+		axis.TitleFont = "Arial";
 
-        axis.MajorGridlineStyle = LineStyle.None
-        axis.MinorGridlineStyle = LineStyle.None
+		axis.AxisTitleDistance = 15;
+		axis.TickStyle = TickStyle.Crossing;
 
-        axis.StringFormat = DEFAULT_AXIS_LABEL_FORMAT
-        axis.Font = "Arial"
+		axis.AxislineColor = OxyColors.Black;
+		axis.AxislineStyle = LineStyle.Solid;
+		axis.MajorTickSize = 8;
 
-        Return axis
+		axis.MajorGridlineStyle = LineStyle.None;
+		axis.MinorGridlineStyle = LineStyle.None;
 
-    End Function
+		axis.StringFormat = DEFAULT_AXIS_LABEL_FORMAT;
+		axis.Font = "Arial";
 
-    ''' <summary>
-    ''' Examine the values in dataPoints to see if they are all less than 10 (or all less than 1)
-    ''' If they are, change the axis format code from the default of "#,##0" (see DEFAULT_AXIS_LABEL_FORMAT)
-    ''' </summary>
-    ''' <param name="currentAxis"></param>
-    ''' <param name="dataPoints"></param>
-    ''' <remarks></remarks>
-    Public Shared Sub UpdateAxisFormatCodeIfSmallValues(currentAxis As Axis, dataPoints As IEnumerable(Of Double), integerData As Boolean)
+		return axis;
 
-        If Not dataPoints.Any Then Return
+	}
 
-        Dim minValue = Math.Abs(dataPoints(0))
-        Dim maxValue = minValue
+	/// <summary>
+	/// Examine the values in dataPoints to see if they are all less than 10 (or all less than 1)
+	/// If they are, change the axis format code from the default of "#,##0" (see DEFAULT_AXIS_LABEL_FORMAT)
+	/// </summary>
+	/// <param name="currentAxis"></param>
+	/// <param name="dataPoints"></param>
+	/// <remarks></remarks>
 
-        For Each currentValAbs In From value In dataPoints Select Math.Abs(value)
-            minValue = Math.Min(minValue, currentValAbs)
-            maxValue = Math.Max(maxValue, currentValAbs)
-        Next
+	public static void UpdateAxisFormatCodeIfSmallValues(Axis currentAxis, IEnumerable<double> dataPoints, bool integerData)
+	{
+		if (!dataPoints.Any)
+			return;
 
-        If Math.Abs(minValue - 0) < Single.Epsilon And Math.Abs(maxValue - 0) < Single.Epsilon Then
-            currentAxis.StringFormat = "0"
-            currentAxis.MinorGridlineThickness = 0
-            currentAxis.MajorStep = 1
-            Return
-        End If
+		dynamic minValue = Math.Abs(dataPoints(0));
+		dynamic maxValue = minValue;
 
-        If integerData Then
-            If maxValue >= 1000000 Then
-                currentAxis.StringFormat = EXPONENTIAL_FORMAT
-            End If
-            Return
-        End If
+		foreach (void currentValAbs_loopVariable in from value in dataPointsMath.Abs(value)) {
+			currentValAbs = currentValAbs_loopVariable;
+			minValue = Math.Min(minValue, currentValAbs);
+			maxValue = Math.Max(maxValue, currentValAbs);
+		}
 
-        Dim minDigitsPrecision = 0
+		if (Math.Abs(minValue - 0) < float.Epsilon & Math.Abs(maxValue - 0) < float.Epsilon) {
+			currentAxis.StringFormat = "0";
+			currentAxis.MinorGridlineThickness = 0;
+			currentAxis.MajorStep = 1;
+			return;
+		}
 
-        If maxValue < 0.02 Then
-            currentAxis.StringFormat = EXPONENTIAL_FORMAT
-        ElseIf maxValue < 0.2 Then
-            minDigitsPrecision = 2
-            currentAxis.StringFormat = "0.00"
-        ElseIf maxValue < 2 Then
-            minDigitsPrecision = 1
-            currentAxis.StringFormat = "0.0"
-        ElseIf maxValue >= 1000000 Then
-            currentAxis.StringFormat = EXPONENTIAL_FORMAT
-        End If
+		if (integerData) {
+			if (maxValue >= 1000000) {
+				currentAxis.StringFormat = EXPONENTIAL_FORMAT;
+			}
+			return;
+		}
 
-        If maxValue - minValue < 0.00001 Then
-            If Not currentAxis.StringFormat.Contains(".") Then
-                currentAxis.StringFormat = "0.00"
-            End If
-        Else
-            ' Examine the range of values between the minimum and the maximum
-            ' If the range is small, e.g. between 3.95 and 3.98, then we need to guarantee that we have at least 2 digits of precision
-            ' The following combination of Log10 and ceiling determins the minimum needed
-            Dim minDigitsRangeBased = CInt(Math.Ceiling(-(Math.Log10(maxValue - minValue))))
+		dynamic minDigitsPrecision = 0;
 
-            If minDigitsRangeBased > minDigitsPrecision Then
-                minDigitsPrecision = minDigitsRangeBased
-            End If
+		if (maxValue < 0.02) {
+			currentAxis.StringFormat = EXPONENTIAL_FORMAT;
+		} else if (maxValue < 0.2) {
+			minDigitsPrecision = 2;
+			currentAxis.StringFormat = "0.00";
+		} else if (maxValue < 2) {
+			minDigitsPrecision = 1;
+			currentAxis.StringFormat = "0.0";
+		} else if (maxValue >= 1000000) {
+			currentAxis.StringFormat = EXPONENTIAL_FORMAT;
+		}
 
-            If minDigitsPrecision > 0 Then
-                currentAxis.StringFormat = "0." & New String("0"c, minDigitsPrecision)
-            End If
-        End If
+		if (maxValue - minValue < 1E-05) {
+			if (!currentAxis.StringFormat.Contains(".")) {
+				currentAxis.StringFormat = "0.00";
+			}
+		} else {
+			// Examine the range of values between the minimum and the maximum
+			// If the range is small, e.g. between 3.95 and 3.98, then we need to guarantee that we have at least 2 digits of precision
+			// The following combination of Log10 and ceiling determins the minimum needed
+			dynamic minDigitsRangeBased = Convert.ToInt32(Math.Ceiling(-(Math.Log10(maxValue - minValue))));
 
-    End Sub
+			if (minDigitsRangeBased > minDigitsPrecision) {
+				minDigitsPrecision = minDigitsRangeBased;
+			}
 
-    Public Shared Sub ValidateMajorStep(currentAxis As Axis)
-        If Math.Abs(currentAxis.ActualMajorStep) > Single.Epsilon AndAlso currentAxis.ActualMajorStep < 1 Then
-            currentAxis.MinorGridlineThickness = 0
-            currentAxis.MajorStep = 1
-        End If
-    End Sub
-       
-End Class
+			if (minDigitsPrecision > 0) {
+				currentAxis.StringFormat = "0." + new string('0', minDigitsPrecision);
+			}
+		}
+
+	}
+
+	public static void ValidateMajorStep(Axis currentAxis)
+	{
+		if (Math.Abs(currentAxis.ActualMajorStep) > float.Epsilon && currentAxis.ActualMajorStep < 1) {
+			currentAxis.MinorGridlineThickness = 0;
+			currentAxis.MajorStep = 1;
+		}
+	}
+
+}

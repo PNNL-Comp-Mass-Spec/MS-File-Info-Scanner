@@ -1,111 +1,117 @@
-﻿<Assembly: CLSCompliant(True)> 
-Public Interface iMSFileInfoScanner
+﻿using System;
 
-#Region "Constants and Enums"
+[assembly: CLSCompliant(true)]
+namespace MSFileInfoScannerInterfaces
+{
+    public abstract class iMSFileInfoScanner
+    {
+        public enum eMSFileScannerErrorCodes
+        {
+            NoError = 0,
+            InvalidInputFilePath = 1,
+            InvalidOutputFolderPath = 2,
+            ParameterFileNotFound = 4,
+            FilePathError = 8,
 
-	Enum eMSFileScannerErrorCodes
-		NoError = 0
-		InvalidInputFilePath = 1
-		InvalidOutputFolderPath = 2
-		ParameterFileNotFound = 4
-		FilePathError = 8
+            ParameterFileReadError = 16,
+            UnknownFileExtension = 32,
+            InputFileAccessError = 64,
+            InputFileReadError = 128,
+            OutputFileWriteError = 256,
+            FileIntegrityCheckError = 512,
 
-		ParameterFileReadError = 16
-		UnknownFileExtension = 32
-		InputFileAccessError = 64
-		InputFileReadError = 128
-		OutputFileWriteError = 256
-		FileIntegrityCheckError = 512
+            DatabasePostingError = 1024,
 
-		DatabasePostingError = 1024
+            UnspecifiedError = -1
+        }
 
-		UnspecifiedError = -1
-	End Enum
+        public enum eMSFileProcessingStateConstants
+        {
+            NotProcessed = 0,
+            SkippedSinceFoundInCache = 1,
+            FailedProcessing = 2,
+            ProcessedSuccessfully = 3
+        }
 
-	Enum eMSFileProcessingStateConstants
-		NotProcessed = 0
-		SkippedSinceFoundInCache = 1
-		FailedProcessing = 2
-		ProcessedSuccessfully = 3
-	End Enum
+        public enum eDataFileTypeConstants
+        {
+            MSFileInfo = 0,
+            FolderIntegrityInfo = 1,
+            FileIntegrityDetails = 2,
+            FileIntegrityErrors = 3
+        }
 
-	Enum eDataFileTypeConstants
-		MSFileInfo = 0
-		FolderIntegrityInfo = 1
-		FileIntegrityDetails = 2
-		FileIntegrityErrors = 3
-	End Enum
+        public abstract event MessageEventEventHandler MessageEvent;
+        public delegate void MessageEventEventHandler(string Message);
 
-#End Region
+        public abstract event ErrorEventEventHandler ErrorEvent;
+        public delegate void ErrorEventEventHandler(string Message);
 
-	Event MessageEvent(ByVal Message As String)
-	Event ErrorEvent(ByVal Message As String)
+        public abstract bool AbortProcessing { get; set; }
+        public abstract string AcquisitionTimeFilename { get; set; }
+        public abstract bool CheckFileIntegrity { get; set; }
+        public abstract bool ComputeOverallQualityScores { get; set; }
+        public abstract string DatasetInfoXML { get; }
+        public abstract string GetDataFileFilename(eDataFileTypeConstants eDataFileType);
+        public abstract void SetDataFileFilename(string strFilePath, eDataFileTypeConstants eDataFileType);
+        public abstract bool CheckCentroidingStatus { get; set; }
+        public abstract bool ComputeFileHashes { get; set; }
+        public abstract bool CopyFileLocalOnReadError { get; set; }
+        public abstract bool CreateDatasetInfoFile { get; set; }
+        public abstract bool CreateScanStatsFile { get; set; }
+        public abstract int DatasetIDOverride { get; set; }
+        public abstract string DatasetStatsTextFileName { get; set; }
+        public abstract string DSInfoConnectionString { get; set; }
+        public abstract bool DSInfoDBPostingEnabled { get; set; }
+        public abstract string DSInfoStoredProcedure { get; set; }
+        public abstract eMSFileScannerErrorCodes ErrorCode { get; }
+        public abstract bool IgnoreErrorsWhenRecursing { get; set; }
+        public abstract float LCMS2DPlotMZResolution { get; set; }
+        public abstract int LCMS2DPlotMaxPointsToPlot { get; set; }
+        public abstract int LCMS2DOverviewPlotDivisor { get; set; }
+        public abstract int LCMS2DPlotMinPointsPerSpectrum { get; set; }
+        public abstract float LCMS2DPlotMinIntensity { get; set; }
+        public abstract bool LogMessagesToFile { get; set; }
+        public abstract string LogFilePath { get; set; }
+        public abstract string LogFolderPath { get; set; }
+        public abstract int MaximumTextFileLinesToCheck { get; set; }
+        public abstract int MaximumXMLElementNodesToCheck { get; set; }
+        public abstract bool RecheckFileIntegrityForExistingFolders { get; set; }
+        public abstract bool ReprocessExistingFiles { get; set; }
+        public abstract bool ReprocessIfCachedSizeIsZero { get; set; }
+        public abstract bool SaveTICAndBPIPlots { get; set; }
+        public abstract bool SaveLCMS2DPlots { get; set; }
+        public abstract int ScanStart { get; set; }
+        public abstract int ScanEnd { get; set; }
+        public abstract bool ShowDebugInfo { get; set; }
+        public abstract bool UpdateDatasetStatsTextFile { get; set; }
+        public abstract bool UseCacheFiles { get; set; }
+        public abstract bool ZipFileCheckAllData { get; set; }
+        public abstract string[] GetKnownFileExtensions();
+        public abstract string[] GetKnownFolderExtensions();
+        public abstract string GetErrorMessage();
+        public abstract bool LoadParameterFileSettings(string strParameterFilePath);
+        public abstract bool PostDatasetInfoToDB();
+        public abstract bool PostDatasetInfoToDB(string strDatasetInfoXML);
+        public abstract bool PostDatasetInfoToDB(string strConnectionString, string strStoredProcedure);
+        public abstract bool PostDatasetInfoToDB(string strDatasetInfoXML, string strConnectionString, string strStoredProcedure);
+        public abstract bool PostDatasetInfoUseDatasetID(int intDatasetID, string strConnectionString, string strStoredProcedure);
 
-	Property AbortProcessing() As Boolean
-	Property AcquisitionTimeFilename() As String
-	Property CheckFileIntegrity() As Boolean
-	Property ComputeOverallQualityScores() As Boolean
-	ReadOnly Property DatasetInfoXML() As String
+        public abstract bool PostDatasetInfoUseDatasetID(int intDatasetID, string strDatasetInfoXML, string strConnectionString,
+                                                         string strStoredProcedure);
 
-	Function GetDataFileFilename(ByVal eDataFileType As eDataFileTypeConstants) As String
-	Sub SetDataFileFilename(ByVal strFilePath As String, ByVal eDataFileType As eDataFileTypeConstants)
+        public abstract bool ProcessMSFileOrFolder(string strInputFileOrFolderPath, string strOutputFolderPath);
 
-	Property CheckCentroidingStatus() As Boolean
-	Property ComputeFileHashes() As Boolean
-	Property CopyFileLocalOnReadError() As Boolean
-	Property CreateDatasetInfoFile() As Boolean
-	Property CreateScanStatsFile() As Boolean
-	Property DatasetIDOverride() As Integer
-	Property DatasetStatsTextFileName() As String
-	Property DSInfoConnectionString() As String
-	Property DSInfoDBPostingEnabled() As Boolean
-	Property DSInfoStoredProcedure() As String
-	ReadOnly Property ErrorCode() As eMSFileScannerErrorCodes
-	Property IgnoreErrorsWhenRecursing() As Boolean
-	Property LCMS2DPlotMZResolution() As Single
-	Property LCMS2DPlotMaxPointsToPlot() As Integer
-	Property LCMS2DOverviewPlotDivisor() As Integer
-	Property LCMS2DPlotMinPointsPerSpectrum() As Integer
-	Property LCMS2DPlotMinIntensity() As Single
-	Property LogMessagesToFile() As Boolean
-	Property LogFilePath() As String
-	Property LogFolderPath() As String
-	Property MaximumTextFileLinesToCheck() As Integer
-	Property MaximumXMLElementNodesToCheck() As Integer
-	Property RecheckFileIntegrityForExistingFolders() As Boolean
-	Property ReprocessExistingFiles() As Boolean
-	Property ReprocessIfCachedSizeIsZero() As Boolean
-	Property SaveTICAndBPIPlots() As Boolean
-	Property SaveLCMS2DPlots() As Boolean
-	Property ScanStart() As Integer
-	Property ScanEnd() As Integer
-	Property ShowDebugInfo() As Boolean
-	Property UpdateDatasetStatsTextFile() As Boolean
-	Property UseCacheFiles() As Boolean
-	Property ZipFileCheckAllData() As Boolean
+        public abstract bool ProcessMSFileOrFolder(string strInputFileOrFolderPath, string strOutputFolderPath, bool blnResetErrorCode,
+                                                   ref eMSFileProcessingStateConstants eMSFileProcessingState);
 
-	Function GetKnownFileExtensions() As String()
-	Function GetKnownFolderExtensions() As String()
-	Function GetErrorMessage() As String
-	Function LoadParameterFileSettings(ByVal strParameterFilePath As String) As Boolean
+        public abstract bool ProcessMSFileOrFolderWildcard(string strInputFileOrFolderPath, string strOutputFolderPath, bool blnResetErrorCode);
 
-	Function PostDatasetInfoToDB() As Boolean
-	Function PostDatasetInfoToDB(ByVal strDatasetInfoXML As String) As Boolean
-	Function PostDatasetInfoToDB(ByVal strConnectionString As String, ByVal strStoredProcedure As String) As Boolean
-	Function PostDatasetInfoToDB(ByVal strDatasetInfoXML As String, ByVal strConnectionString As String, ByVal strStoredProcedure As String) As Boolean
+        public abstract bool ProcessMSFilesAndRecurseFolders(string strInputFilePathOrFolder, string strOutputFolderPath,
+                                                             int intRecurseFoldersMaxLevels);
 
-	Function PostDatasetInfoUseDatasetID(ByVal intDatasetID As Integer, ByVal strConnectionString As String, ByVal strStoredProcedure As String) As Boolean
-	Function PostDatasetInfoUseDatasetID(ByVal intDatasetID As Integer, ByVal strDatasetInfoXML As String, ByVal strConnectionString As String, ByVal strStoredProcedure As String) As Boolean
-
-	Function ProcessMSFileOrFolder(ByVal strInputFileOrFolderPath As String, ByVal strOutputFolderPath As String) As Boolean
-	Function ProcessMSFileOrFolder(ByVal strInputFileOrFolderPath As String, ByVal strOutputFolderPath As String, ByVal blnResetErrorCode As Boolean, ByRef eMSFileProcessingState As eMSFileProcessingStateConstants) As Boolean
-
-	Function ProcessMSFileOrFolderWildcard(ByVal strInputFileOrFolderPath As String, ByVal strOutputFolderPath As String, ByVal blnResetErrorCode As Boolean) As Boolean
-	Function ProcessMSFilesAndRecurseFolders(ByVal strInputFilePathOrFolder As String, ByVal strOutputFolderPath As String, ByVal intRecurseFoldersMaxLevels As Integer) As Boolean
-
-	Function SaveCachedResults() As Boolean
-	Function SaveCachedResults(ByVal blnClearCachedData As Boolean) As Boolean
-
-	Function SaveParameterFileSettings(ByVal strParameterFilePath As String) As Boolean
-
-End Interface
+        public abstract bool SaveCachedResults();
+        public abstract bool SaveCachedResults(bool blnClearCachedData);
+        public abstract bool SaveParameterFileSettings(string strParameterFilePath);
+    }
+}

@@ -1,63 +1,47 @@
-Option Strict On
+using System;
+using MSFileInfoScannerInterfaces;
 
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Started in 2005
-'
-' Last modified May 20, 2015
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Started in 2005
+//
+// Last modified May 20, 2015
 
-Public Interface iMSFileInfoProcessor
+namespace MSFileInfoScanner
+{
+    public abstract class iMSFileInfoProcessor
+    {
+        public enum ProcessingOptions
+        {
+            CreateTICAndBPI = 0,
+            ComputeOverallQualityScores = 1,
+            CreateDatasetInfoFile = 2,
+            CreateLCMS2DPlots = 3,
+            CopyFileLocalOnReadError = 4,
+            UpdateDatasetStatsTextFile = 5,
+            CreateScanStatsFile = 6,
+            CheckCentroidingStatus = 7
+        }
 
-    Enum ProcessingOptions
-        CreateTICAndBPI = 0
-        ComputeOverallQualityScores = 1
-        CreateDatasetInfoFile = 2
-        CreateLCMS2DPlots = 3
-        CopyFileLocalOnReadError = 4
-		UpdateDatasetStatsTextFile = 5
-		CreateScanStatsFile = 6
-		CheckCentroidingStatus = 7
-    End Enum
+        public abstract bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo);
+        public abstract bool CreateOutputFiles(string strInputFileName, string strOutputFolderPath);
+        public abstract string GetDatasetInfoXML();
+        public abstract string GetDatasetNameViaPath(string strDataFilePath);
+        public abstract clsLCMSDataPlotterOptions LCMS2DPlotOptions { get; set; }
+        public abstract int LCMS2DOverviewPlotDivisor { get; set; }
+        public abstract string DatasetStatsTextFileName { get; set; }
+        public abstract int DatasetID { get; set; }
+        public abstract int ScanStart { get; set; }
+        public abstract int ScanEnd { get; set; }
+        public abstract bool ShowDebugInfo { get; set; }
+        public abstract bool GetOption(ProcessingOptions eOption);
+        public abstract void SetOption(ProcessingOptions eOption, bool blnValue);
+        public abstract event clsMSFileInfoProcessorBaseClass.ErrorEventEventHandler ErrorEvent;
 
-    ' ToDo: Update udtFileInfo to include some overall quality scores
+        public delegate void ErrorEventEventHandler(string Message);
 
-    Structure udtFileInfoType
-        Public FileSystemCreationTime As DateTime
-        Public FileSystemModificationTime As DateTime
-        Public DatasetID As Integer
-        Public DatasetName As String
-        Public FileExtension As String
-        Public AcqTimeStart As DateTime
-        Public AcqTimeEnd As DateTime
-        Public ScanCount As Integer
-        Public FileSizeBytes As Long
-        Public OverallQualityScore As Single
-    End Structure
+        public abstract event MessageEventEventHandler MessageEvent;
 
-    Function ProcessDataFile(strDataFilePath As String, ByRef udtFileInfo As udtFileInfoType) As Boolean
-    Function CreateOutputFiles(strInputFileName As String, strOutputFolderPath As String) As Boolean
-
-    Function GetDatasetInfoXML() As String
-    Function GetDatasetNameViaPath(strDataFilePath As String) As String
-
-    'ReadOnly Property BPI() As udtChromatogramInfoType
-    'ReadOnly Property TIC() As udtChromatogramInfoType
-
-    Property LCMS2DPlotOptions() As MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions
-    Property LCMS2DOverviewPlotDivisor() As Integer
-
-    Property DatasetStatsTextFileName() As String
-    Property DatasetID As Integer
-
-    Property ScanStart() As Integer
-    Property ScanEnd() As Integer
-    Property ShowDebugInfo() As Boolean
-
-    Function GetOption(eOption As ProcessingOptions) As Boolean
-    Sub SetOption(eOption As ProcessingOptions, blnValue As Boolean)
-
-    Event ErrorEvent(Message As String)
-
-    Event MessageEvent(message As String)
-
-End Interface
+        public delegate void MessageEventEventHandler(string message);
+    }
+}
 

@@ -1,1568 +1,1692 @@
-Option Strict On
-
-' This class is used to read or write settings in an Xml settings file
-' Based on a class from the DMS Analysis Manager software written by Dave Clark and Gary Kiebel (PNNL, Richland, WA)
-' Additional features added by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in October 2003
-' Copyright 2005, Battelle Memorial Institute
-'
-' Updated in October 2004 to truly be case-insensitive if IsCaseSensitive = False when calling LoadSettings()
-' Updated in August 2007 to remove the PRISM.Logging functionality and to include class XMLFileReader inside class XmlSettingsFileAccessor
-' Updated in December 2010 to rename objects from Ini to XML
-
-Public Class XmlSettingsFileAccessor
-
-    Public Sub New()
-        mCaseSensitive = False
-        htSectionNames = New Hashtable
-
-        With mCachedSection
-            .SectionName = String.Empty
-            .htKeys = New Hashtable
-        End With
-    End Sub
-
-    Private Structure udtRecentSectionType
-        Public SectionName As String            ' Stores the section name whose keys are cached; the section name is capitalized identically to that actually present in the Xml file
-        Public htKeys As Hashtable
-    End Structure
-
-    ' XML file reader
-    ' Call LoadSettings to initialize, even if simply saving settings
-    Private m_XMLFilePath As String = ""
-    Private WithEvents m_XMLFileAccessor As XMLFileReader
-
-    Private mCaseSensitive As Boolean
-
-    ' When mCaseSensitive = False, then htSectionNames stores mapping between lowercase section name and actual section name stored in file
-    '   If section is present more than once in file, then only grabs the last occurence of the section
-    ' When mCaseSensitive = True, then the mappings in htSectionNames are effectively not used
-    Private htSectionNames As Hashtable
-    Private mCachedSection As udtRecentSectionType
-
-    Public Event InformationMessage(msg As String)
-
-    ''' <summary>
-    ''' Loads the settings for the defined Xml Settings File.  Assumes names are not case sensitive
-    ''' </summary>
-    ''' <return>The function returns a boolean that shows if the file was successfully loaded.</return>
-    Public Function LoadSettings() As Boolean
-        Return LoadSettings(m_XMLFilePath, False)
-    End Function
-
-    ''' <summary>
-    ''' Loads the settings for the defined Xml Settings File.   Assumes names are not case sensitive
-    ''' </summary>
-    ''' <param name="XmlSettingsFilePath">The path to the XML settings file.</param>
-    ''' <return>The function returns a boolean that shows if the file was successfully loaded.</return>
-    Public Function LoadSettings(XmlSettingsFilePath As String) As Boolean
-        Return LoadSettings(XmlSettingsFilePath, False)
-    End Function
-
-    ''' <summary>
-    ''' Loads the settings for the defined Xml Settings File
-    ''' </summary>
-    ''' <param name="XmlSettingsFilePath">The path to the XML settings file.</param>
-    ''' <param name="IsCaseSensitive">Case sensitive names if True.  Non-case sensitive if false.</param>
-    Public Function LoadSettings(XmlSettingsFilePath As String, IsCaseSensitive As Boolean) As Boolean
-        mCaseSensitive = IsCaseSensitive
-
-        m_XMLFilePath = XmlSettingsFilePath
-
-        ' Note: Always set IsCaseSensitive = True for XMLFileReader's constructor since this class handles 
-        '       case sensitivity mapping internally
-        m_XMLFileAccessor = New XMLFileReader(m_XMLFilePath, True)
-        If m_XMLFileAccessor Is Nothing Then
-            Return False
-        ElseIf m_XMLFileAccessor.Initialized Then
-            CacheSectionNames()
-            Return True
-        Else
-            Return False
-        End If
-
-    End Function
-
-    Public Function ManualParseXmlOrIniFile(strFilePath As String) As Boolean
-        m_XMLFilePath = strFilePath
-
-        ' Note: Always set IsCaseSensitive = True for XMLFileReader's constructor since this class handles 
-        '       case sensitivity mapping internally
-        m_XMLFileAccessor = New XMLFileReader(String.Empty, True)
-
-        If m_XMLFileAccessor Is Nothing Then
-            Return False
-        ElseIf m_XMLFileAccessor.ManualParseXmlOrIniFile(strFilePath) Then
-            If m_XMLFileAccessor.Initialized Then
-                CacheSectionNames()
-                Return True
-            End If
-        End If
-
-        Return False
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace FileProcessor
+{
+    // This class can be used to read or write settings in an Xml settings file
+    // Based on a class from the DMS Analysis Manager software written by Dave Clark and Gary Kiebel (PNNL, Richland, WA)
+    // Additional features added by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in October 2003
+    // Copyright 2005, Battelle Memorial Institute
+    //
+    // Updated in October 2004 to truly be case-insensitive if IsCaseSensitive = False when calling LoadSettings()
+    // Updated in August 2007 to remove the PRISM.Logging functionality and to include class XMLFileReader inside class XmlSettingsFileAccessor
+    // Updated in December 2010 to rename objects from Ini to XML
+            
+
+    public class XmlSettingsFileAccessor
+    {
+
+	    public XmlSettingsFileAccessor()
+	    {
+		    mCaseSensitive = false;
+		    dtSectionNames = new Dictionary<string, string>();
+
+		    {
+			    mCachedSection.SectionName = string.Empty;
+			    mCachedSection.dtKeys = new Dictionary<string, string>();
+		    }
+	    }
+
+	    private struct udtRecentSectionType
+	    {
+			// Stores the section name whose keys are cached; the section name is capitalized identically to that actually present in the Xml file
+		    public string SectionName;
+		    public Dictionary<string, string> dtKeys;
+	    }
+
+	    // XML file reader
+	    // Call LoadSettings to initialize, even if simply saving settings
+	    private string m_XMLFilePath = "";
+
+	    private XMLFileReader m_XMLFileAccessor;
+
+	    private bool mCaseSensitive;
+	    // When mCaseSensitive = False, then dtSectionNames stores mapping between lowercase section name and actual section name stored in file
+	    //   If section is present more than once in file, then only grabs the last occurence of the section
+	    // When mCaseSensitive = True, then the mappings in dtSectionNames are effectively not used
+	    private Dictionary<string, string> dtSectionNames;
+
+	    private udtRecentSectionType mCachedSection;
+	    public event InformationMessageEventHandler InformationMessage;
+	    public delegate void InformationMessageEventHandler(string msg);
+
+	    /// <summary>
+	    /// Loads the settings for the defined Xml Settings File.  Assumes names are not case sensitive
+	    /// </summary>
+	    /// <return>The function returns a boolean that shows if the file was successfully loaded.</return>
+	    public bool LoadSettings()
+	    {
+		    return LoadSettings(m_XMLFilePath, false);
+	    }
+
+	    /// <summary>
+	    /// Loads the settings for the defined Xml Settings File.   Assumes names are not case sensitive
+	    /// </summary>
+	    /// <param name="XmlSettingsFilePath">The path to the XML settings file.</param>
+	    /// <return>The function returns a boolean that shows if the file was successfully loaded.</return>
+	    public bool LoadSettings(string XmlSettingsFilePath)
+	    {
+		    return LoadSettings(XmlSettingsFilePath, false);
+	    }
+
+	    /// <summary>
+	    /// Loads the settings for the defined Xml Settings File
+	    /// </summary>
+	    /// <param name="XmlSettingsFilePath">The path to the XML settings file.</param>
+	    /// <param name="IsCaseSensitive">Case sensitive names if True.  Non-case sensitive if false.</param>
+	    public bool LoadSettings(string XmlSettingsFilePath, bool IsCaseSensitive)
+	    {
+		    mCaseSensitive = IsCaseSensitive;
+
+		    m_XMLFilePath = XmlSettingsFilePath;
+
+		    // Note: Always set IsCaseSensitive = True for XMLFileReader's constructor since this class handles 
+		    //       case sensitivity mapping internally
+		    m_XMLFileAccessor = new XMLFileReader(m_XMLFilePath, true);
+		    if (m_XMLFileAccessor == null) {
+			    return false;
+		    } else if (m_XMLFileAccessor.Initialized) {
+			    CacheSectionNames();
+			    return true;
+		    } else {
+			    return false;
+		    }
+
+	    }
+
+	    public bool ManualParseXmlOrIniFile(string strFilePath)
+	    {
+		    m_XMLFilePath = strFilePath;
+
+		    // Note: Always set IsCaseSensitive = True for XMLFileReader's constructor since this class handles 
+		    //       case sensitivity mapping internally
+		    m_XMLFileAccessor = new XMLFileReader(string.Empty, true);
+
+		    if (m_XMLFileAccessor == null) {
+			    return false;
+		    } else if (m_XMLFileAccessor.ManualParseXmlOrIniFile(strFilePath)) {
+			    if (m_XMLFileAccessor.Initialized) {
+				    CacheSectionNames();
+				    return true;
+			    }
+		    }
+
+		    return false;
+
+	    }
+
+	    /// <summary>
+	    /// Saves the settings for the defined Xml Settings File.  Note that you must call LoadSettings to initialize the class prior to setting any values.
+	    /// </summary>
+	    /// <return>The function returns a boolean that shows if the file was successfully saved.</return>
+	    public bool SaveSettings()
+	    {
+
+		    if (m_XMLFileAccessor == null) {
+			    return false;
+		    } else if (m_XMLFileAccessor.Initialized) {
+			    m_XMLFileAccessor.OutputFilename = m_XMLFilePath;
+			    m_XMLFileAccessor.Save();
+			    return true;
+		    } else {
+			    return false;
+		    }
+
+	    }
 
-    End Function
-
-    ''' <summary>
-    ''' Saves the settings for the defined Xml Settings File.  Note that you must call LoadSettings to initialize the class prior to setting any values.
-    ''' </summary>
-    ''' <return>The function returns a boolean that shows if the file was successfully saved.</return>
-    Public Function SaveSettings() As Boolean
-
-        If m_XMLFileAccessor Is Nothing Then
-            Return False
-        ElseIf m_XMLFileAccessor.Initialized Then
-            m_XMLFileAccessor.OutputFilename = m_XMLFilePath
-            m_XMLFileAccessor.Save()
-            Return True
-        Else
-            Return False
-        End If
-
-    End Function
-
-    ''' <summary>Checks if a section is present in the settings file.</summary>
-    ''' <param name="sectionName">The name of the section to look for.</param>
-    ''' <return>The function returns a boolean that shows if the section is present.</return>
-    Public Function SectionPresent(sectionName As String) As Boolean
-        Dim strSections As System.Collections.Specialized.StringCollection
-        Dim intIndex As Integer
-
-        strSections = m_XMLFileAccessor.AllSections
-
-        For intIndex = 0 To strSections.Count - 1
-            If SetNameCase(strSections.Item(intIndex)) = SetNameCase(sectionName) Then Return True
-        Next intIndex
-
-        Return False
-
-    End Function
-
-    Private Function CacheKeyNames(sectionName As String) As Boolean
-        ' Looks up the Key Names for the given section, storing them in mCachedSection
-        ' This is done so that this class will know the correct capitalization for the key names
-
-        Dim strKeys As System.Collections.Specialized.StringCollection
-        Dim intIndex As Integer
-
-        Dim sectionNameInFile As String
-        Dim strKeyNameToStore As String
-
-        ' Lookup the correct capitalization for sectionName (only truly important if mCaseSensitive = False)
-        sectionNameInFile = GetCachedSectionName(sectionName)
-        If String.IsNullOrWhiteSpace(sectionNameInFile) Then Return False
-
-        Try
-            ' Grab the keys for sectionName
-            strKeys = m_XMLFileAccessor.AllKeysInSection(sectionNameInFile)
-        Catch ex As System.Exception
-            ' Invalid section name; do not update anything
-            Return False
-        End Try
-
-        If strKeys Is Nothing Then
-            Return False
-        End If
-
-        ' Update mCachedSection with the key names for the given section
-        With mCachedSection
-            .SectionName = sectionNameInFile
-            .htKeys.Clear()
-
-            For intIndex = 0 To strKeys.Count - 1
-                If mCaseSensitive Then
-                    strKeyNameToStore = String.Copy(strKeys.Item(intIndex))
-                Else
-                    strKeyNameToStore = String.Copy(strKeys.Item(intIndex).ToLower)
-                End If
-
-                If Not .htKeys.Contains(strKeyNameToStore) Then
-                    .htKeys.Add(strKeyNameToStore, strKeys.Item(intIndex))
-                End If
-
-            Next intIndex
-        End With
-
-        Return True
-
-    End Function
-
-    Private Sub CacheSectionNames()
-        ' Looks up the Section Names in the XML file
-        ' This is done so that this class will know the correct capitalization for the section names
-
-        Dim strSections As System.Collections.Specialized.StringCollection
-        Dim strSectionNameToStore As String
-
-        Dim intIndex As Integer
-
-        strSections = m_XMLFileAccessor.AllSections
-
-        htSectionNames.Clear()
-
-        For intIndex = 0 To strSections.Count - 1
-            If mCaseSensitive Then
-                strSectionNameToStore = String.Copy(strSections.Item(intIndex))
-            Else
-                strSectionNameToStore = String.Copy(strSections.Item(intIndex).ToLower)
-            End If
-
-            If Not htSectionNames.Contains(strSectionNameToStore) Then
-                htSectionNames.Add(strSectionNameToStore, strSections.Item(intIndex))
-            End If
-
-        Next intIndex
-
-    End Sub
-
-    Private Function GetCachedKeyName(sectionName As String, keyName As String) As String
-        ' Looks up the correct capitalization for key keyName in section sectionName
-        ' Returns String.Empty if not found
-
-        Dim blnSuccess As Boolean
-        Dim sectionNameInFile As String
-        Dim keyNameToFind As String
-
-        ' Lookup the correct capitalization for sectionName (only truly important if mCaseSensitive = False)
-        sectionNameInFile = GetCachedSectionName(sectionName)
-        If String.IsNullOrWhiteSpace(sectionNameInFile) Then Return String.Empty
-
-        If mCachedSection.SectionName = sectionNameInFile Then
-            blnSuccess = True
-        Else
-            ' Update the keys for sectionName
-            blnSuccess = CacheKeyNames(sectionName)
-        End If
-
-        If blnSuccess Then
-            With mCachedSection
-                keyNameToFind = SetNameCase(keyName)
-                If .htKeys.ContainsKey(keyNameToFind) Then
-                    Return CStr(.htKeys(keyNameToFind))
-                Else
-                    Return String.Empty
-                End If
-            End With
-        Else
-            Return String.Empty
-        End If
-    End Function
-
-    Private Function GetCachedSectionName(sectionName As String) As String
-        ' Looks up the correct capitalization for sectionName
-        ' Returns String.Empty if not found
-
-        Dim sectionNameToFind As String
-
-        sectionNameToFind = SetNameCase(sectionName)
-        If htSectionNames.ContainsKey(sectionNameToFind) Then
-            Return CStr(htSectionNames(sectionNameToFind))
-        Else
-            Return String.Empty
-        End If
-
-    End Function
-
-    Private Function SetNameCase(aName As String) As String
-        ' Changes aName to lowercase if mCaseSensitive = False
-
-        If mCaseSensitive Then
-            Return aName
-        Else
-            Return aName.ToLower()
-        End If
-    End Function
-
-    ''' <summary>
-    ''' The function gets the name of the "value" attribute in section "sectionName".
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
-    ''' <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
-    ''' <return>The function returns the name of the "value" attribute as a String.</return>
-    Public Function GetParam(sectionName As String, keyName As String, valueIfMissing As String, Optional ByRef valueNotPresent As Boolean = False) As String
-        Dim strResult As String = String.Empty
-        Dim sectionNameInFile As String
-        Dim keyNameInFile As String
-        Dim blnValueFound As Boolean
-
-        If mCaseSensitive Then
-            strResult = m_XMLFileAccessor.GetXMLValue(sectionName, keyName)
-            If Not strResult Is Nothing Then blnValueFound = True
-        Else
-            sectionNameInFile = GetCachedSectionName(sectionName)
-            If sectionNameInFile.Length > 0 Then
-                keyNameInFile = GetCachedKeyName(sectionName, keyName)
-                If keyNameInFile.Length > 0 Then
-                    strResult = m_XMLFileAccessor.GetXMLValue(sectionNameInFile, keyNameInFile)
-                    If Not strResult Is Nothing Then blnValueFound = True
-                End If
-            End If
-        End If
-
-        If strResult Is Nothing OrElse Not blnValueFound Then
-            valueNotPresent = True
-            Return valueIfMissing
-        Else
-            valueNotPresent = False
-            Return strResult
-        End If
-    End Function
-
-    ''' <summary>
-    ''' The function gets the name of the "value" attribute in section "sectionName".
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
-    ''' <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
-    ''' <return>The function returns boolean True if the "value" attribute is "true".  Otherwise, returns boolean False.</return>
-    Public Function GetParam(sectionName As String, keyName As String, valueIfMissing As Boolean, Optional ByRef valueNotPresent As Boolean = False) As Boolean
-        Dim strResult As String
-        Dim blnNotFound As Boolean = False
-
-        strResult = Me.GetParam(sectionName, keyName, valueIfMissing.ToString, blnNotFound)
-        If strResult Is Nothing OrElse blnNotFound Then
-            valueNotPresent = True
-            Return valueIfMissing
-        Else
-            valueNotPresent = False
-            If strResult.ToLower = "true" Then
-                Return True
-            Else
-                Return False
-            End If
-        End If
-    End Function
-
-    ''' <summary>
-    ''' The function gets the name of the "value" attribute in section "sectionName".
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
-    ''' <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
-    ''' <return>The function returns the name of the "value" attribute as a Short.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
-    Public Function GetParam(sectionName As String, keyName As String, valueIfMissing As Short, Optional ByRef valueNotPresent As Boolean = False) As Short
-        Dim strResult As String
-        Dim blnNotFound As Boolean = False
-        Dim intValue As Short
-
-        strResult = Me.GetParam(sectionName, keyName, valueIfMissing.ToString, blnNotFound)
-        If strResult Is Nothing OrElse blnNotFound Then
-            valueNotPresent = True
-            Return valueIfMissing
-        Else
-            valueNotPresent = False
-            Try
-                If Short.TryParse(strResult, intValue) Then
-                    Return intValue
-                ElseIf strResult.ToLower = "true" Then
-                    Return -1
-                ElseIf strResult.ToLower = "false" Then
-                    Return 0
-                Else
-                    valueNotPresent = True
-                    Return valueIfMissing
-                End If
-            Catch ex As System.Exception
-                valueNotPresent = True
-                Return valueIfMissing
-            End Try
-        End If
-
-    End Function
-
-    ''' <summary>
-    ''' The function gets the name of the "value" attribute in section "sectionName".
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
-    ''' <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
-    ''' <return>The function returns the name of the "value" attribute as an Integer.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
-    Public Function GetParam(sectionName As String, keyName As String, valueIfMissing As Integer, Optional ByRef valueNotPresent As Boolean = False) As Integer
-        Dim strResult As String
-        Dim blnNotFound As Boolean = False
-        Dim intValue As Integer
-
-        strResult = Me.GetParam(sectionName, keyName, valueIfMissing.ToString, blnNotFound)
-        If strResult Is Nothing OrElse blnNotFound Then
-            valueNotPresent = True
-            Return valueIfMissing
-        Else
-            valueNotPresent = False
-            Try
-                If Integer.TryParse(strResult, intValue) Then
-                    Return intValue
-                ElseIf strResult.ToLower = "true" Then
-                    Return -1
-                ElseIf strResult.ToLower = "false" Then
-                    Return 0
-                Else
-                    valueNotPresent = True
-                    Return valueIfMissing
-                End If
-            Catch ex As System.Exception
-                valueNotPresent = True
-                Return valueIfMissing
-            End Try
-        End If
-
-    End Function
-
-    ''' <summary>
-    ''' The function gets the name of the "value" attribute in section "sectionName".
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
-    ''' <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
-    ''' <return>The function returns the name of the "value" attribute as a Long.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
-    Public Function GetParam(sectionName As String, keyName As String, valueIfMissing As Long, Optional ByRef valueNotPresent As Boolean = False) As Int64
-        Dim strResult As String
-        Dim blnNotFound As Boolean = False
-        Dim intValue As Int64
-
-        strResult = Me.GetParam(sectionName, keyName, valueIfMissing.ToString, blnNotFound)
-        If strResult Is Nothing OrElse blnNotFound Then
-            valueNotPresent = True
-            Return valueIfMissing
-        Else
-            valueNotPresent = False
-            Try
-                If Int64.TryParse(strResult, intValue) Then
-                    Return intValue
-                ElseIf strResult.ToLower = "true" Then
-                    Return -1
-                ElseIf strResult.ToLower = "false" Then
-                    Return 0
-                Else
-                    valueNotPresent = True
-                    Return valueIfMissing
-                End If
-            Catch ex As System.Exception
-                valueNotPresent = True
-                Return valueIfMissing
-            End Try
-        End If
-
-    End Function
-
-    ''' <summary>
-    ''' The function gets the name of the "value" attribute in section "sectionName".
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
-    ''' <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
-    ''' <return>The function returns the name of the "value" attribute as a Single.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
-    Public Function GetParam(sectionName As String, keyName As String, valueIfMissing As Single, Optional ByRef valueNotPresent As Boolean = False) As Single
-        Dim strResult As String
-        Dim blnNotFound As Boolean = False
-        Dim sngValue As Single
-
-        strResult = Me.GetParam(sectionName, keyName, valueIfMissing.ToString, blnNotFound)
-        If strResult Is Nothing OrElse blnNotFound Then
-            valueNotPresent = True
-            Return valueIfMissing
-        Else
-            valueNotPresent = False
-            Try
-                If Single.TryParse(strResult, sngValue) Then
-                    Return sngValue
-                ElseIf strResult.ToLower = "true" Then
-                    Return -1
-                ElseIf strResult.ToLower = "false" Then
-                    Return 0
-                Else
-                    valueNotPresent = True
-                    Return valueIfMissing
-                End If
-            Catch ex As System.Exception
-                valueNotPresent = True
-                Return valueIfMissing
-            End Try
-        End If
-
-    End Function
-
-    ''' <summary>
-    ''' The function gets the name of the "value" attribute in section "sectionName".
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
-    ''' <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
-    ''' <return>The function returns the name of the "value" attribute as a Double.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
-    Public Function GetParam(sectionName As String, keyName As String, valueIfMissing As Double, Optional ByRef valueNotPresent As Boolean = False) As Double
-        Dim strResult As String
-        Dim blnNotFound As Boolean = False
-        Dim dblValue As Double
-
-        strResult = Me.GetParam(sectionName, keyName, valueIfMissing.ToString, blnNotFound)
-        If strResult Is Nothing OrElse blnNotFound Then
-            valueNotPresent = True
-            Return valueIfMissing
-        Else
-            valueNotPresent = False
-            Try
-                If Double.TryParse(strResult, dblValue) Then
-                    Return dblValue
-                ElseIf strResult.ToLower = "true" Then
-                    Return -1
-                ElseIf strResult.ToLower = "false" Then
-                    Return 0
-                Else
-                    valueNotPresent = True
-                    Return valueIfMissing
-                End If
-            Catch ex As System.Exception
-                valueNotPresent = True
-                Return valueIfMissing
-            End Try
-        End If
-
-    End Function
-
-    ''' <summary>
-    ''' Legacy function name; calls SetXMLFilePath
-    ''' </summary>
-    Public Sub SetIniFilePath(XmlSettingsFilePath As String)
-        SetXMLFilePath(XmlSettingsFilePath)
-    End Sub
-
-    ''' <summary>
-    ''' The function sets the path to the Xml Settings File.
-    ''' </summary>
-    ''' <param name="XmlSettingsFilePath">The path to the XML settings file.</param>
-    Public Sub SetXMLFilePath(XmlSettingsFilePath As String)
-        m_XMLFilePath = XmlSettingsFilePath
-    End Sub
-
-    ''' <summary>
-    ''' The function sets a new String value for the "value" attribute.
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="newValue">The new value for the "value".</param>
-    ''' <return>The function returns a boolean that shows if the change was done.</return>
-    Public Function SetParam(sectionName As String, keyName As String, newValue As String) As Boolean
-        Dim sectionNameInFile As String
-        Dim keyNameInFile As String
-
-        If Not mCaseSensitive Then
-            sectionNameInFile = GetCachedSectionName(sectionName)
-            If sectionNameInFile.Length > 0 Then
-                keyNameInFile = GetCachedKeyName(sectionName, keyName)
-                If keyNameInFile.Length > 0 Then
-                    ' Section and Key are present; update them
-                    Return m_XMLFileAccessor.SetXMLValue(sectionNameInFile, keyNameInFile, newValue)
-                Else
-                    ' Section is present, but the Key isn't; add teh key
-                    Return m_XMLFileAccessor.SetXMLValue(sectionNameInFile, keyName, newValue)
-                End If
-            End If
-        End If
-
-        ' If we get here, then either mCaseSensitive = True or the section and key weren't found
-        Return m_XMLFileAccessor.SetXMLValue(sectionName, keyName, newValue)
-
-    End Function
-
-    ''' <summary>
-    ''' The function sets a new Boolean value for the "value" attribute.
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="newValue">The new value for the "value".</param>
-    ''' <return>The function returns a boolean that shows if the change was done.</return>
-    Public Function SetParam(sectionName As String, keyName As String, newValue As Boolean) As Boolean
-        Return Me.SetParam(sectionName, keyName, CStr(newValue))
-    End Function
-
-    ''' <summary>
-    ''' The function sets a new Short value for the "value" attribute.
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="newValue">The new value for the "value".</param>
-    ''' <return>The function returns a boolean that shows if the change was done.</return>
-    Public Function SetParam(sectionName As String, keyName As String, newValue As Short) As Boolean
-        Return Me.SetParam(sectionName, keyName, CStr(newValue))
-    End Function
-
-    ''' <summary>
-    ''' The function sets a new Integer value for the "value" attribute.
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="newValue">The new value for the "value".</param>
-    ''' <return>The function returns a boolean that shows if the change was done.</return>
-    Public Function SetParam(sectionName As String, keyName As String, newValue As Integer) As Boolean
-        Return Me.SetParam(sectionName, keyName, CStr(newValue))
-    End Function
-
-    ''' <summary>
-    ''' The function sets a new Long value for the "value" attribute.
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="newValue">The new value for the "value".</param>
-    ''' <return>The function returns a boolean that shows if the change was done.</return>
-    Public Function SetParam(sectionName As String, keyName As String, newValue As Long) As Boolean
-        Return Me.SetParam(sectionName, keyName, CStr(newValue))
-    End Function
-
-    ''' <summary>
-    ''' The function sets a new Single value for the "value" attribute.
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="newValue">The new value for the "value".</param>
-    ''' <return>The function returns a boolean that shows if the change was done.</return>
-    Public Function SetParam(sectionName As String, keyName As String, newValue As Single) As Boolean
-        Return Me.SetParam(sectionName, keyName, CStr(newValue))
-    End Function
-
-    ''' <summary>
-    ''' The function sets a new Double value for the "value" attribute.
-    ''' </summary>
-    ''' <param name="sectionName">The name of the section.</param>
-    ''' <param name="keyName">The name of the key.</param>
-    ''' <param name="newValue">The new value for the "value".</param>
-    ''' <return>The function returns a boolean that shows if the change was done.</return>
-    Public Function SetParam(sectionName As String, keyName As String, newValue As Double) As Boolean
-        Return Me.SetParam(sectionName, keyName, CStr(newValue))
-    End Function
-
-    ''' <summary>
-    ''' The function renames a section.
-    ''' </summary>
-    ''' <param name="sectionNameOld">The name of the old XML section name.</param>
-    ''' <param name="sectionNameNew">The new name for the XML section.</param>
-    ''' <return>The function returns a boolean that shows if the change was done.</return>
-    Public Function RenameSection(sectionNameOld As String, sectionNameNew As String) As Boolean
-
-        Dim strSectionName As String
-
-        If Not mCaseSensitive Then
-            strSectionName = GetCachedSectionName(sectionNameOld)
-            If strSectionName.Length > 0 Then
-                Return m_XMLFileAccessor.SetXMLSection(strSectionName, sectionNameNew)
-            End If
-        End If
-
-        ' If we get here, then either mCaseSensitive = True or the section wasn't found using GetCachedSectionName
-        Return m_XMLFileAccessor.SetXMLSection(sectionNameOld, sectionNameNew)
-
-    End Function
-
-    Private Sub FileAccessorInfoMessageEvent(msg As String) Handles m_XMLFileAccessor.InformationMessage
-        RaiseEvent InformationMessage(msg)
-    End Sub
-
-
-    ''' <summary>
-    ''' Tools to manipulates XML Settings files.
-    ''' </summary>
-    Protected Class XMLFileReader
-
-        Enum XMLItemTypeEnum
-            GetKeys = 0
-            GetValues = 1
-            GetKeysAndValues = 2
-        End Enum
-
-        Private m_XmlFilename As String
-        Private m_XmlDoc As System.Xml.XmlDocument
-
-        Private unattachedComments As ArrayList = New ArrayList
-
-        Private sections As System.Collections.Specialized.StringCollection = New System.Collections.Specialized.StringCollection
-        Private m_CaseSensitive As Boolean = False
-        Private m_SaveFilename As String
-        Private m_initialized As Boolean = False
-
-        Public NotifyOnEvent As Boolean
-        Public NotifyOnException As Boolean
-
-        Public Event InformationMessage(msg As String)
-
-        ''' <summary>Initializes a new instance of the XMLFileReader (non case-sensitive)</summary>
-        ''' <param name="XmlFilename">The name of the XML file.</param>
-        Public Sub New(XmlFilename As String)
-            NotifyOnException = False
-            InitXMLFileReader(XmlFilename, False)
-        End Sub
-
-        ''' <summary>Initializes a new instance of the XMLFileReader.</summary>
-        ''' <param name="XmlFilename">The name of the XML file.</param>
-        ''' <param name="IsCaseSensitive">Case sensitive as boolean.</param>
-        Public Sub New(XmlFilename As String, IsCaseSensitive As Boolean)
-            NotifyOnException = True
-            InitXMLFileReader(XmlFilename, IsCaseSensitive)
-        End Sub
-
-        ''' <summary>
-        ''' This routine is called by each of the constructors to make the actual assignments.
-        ''' </summary>
-        Private Sub InitXMLFileReader(strXmlFilename As String, IsCaseSensitive As Boolean)
-            m_CaseSensitive = IsCaseSensitive
-            m_XmlDoc = New System.Xml.XmlDocument
-
-            If String.IsNullOrEmpty(strXmlFilename) Then
-                Return
-            End If
-
-            ' Try to load the file as an XML file
-            Try
-                m_XmlDoc.Load(strXmlFilename)
-                UpdateSections()
-                m_XmlFilename = strXmlFilename
-                m_initialized = True
-
-            Catch
-                ' Exception occurred parsing XmlFilename 
-                ' Manually parse the file line-by-line
-                ManualParseXmlOrIniFile(strXmlFilename)
-            End Try
-        End Sub
-
-        ''' <summary>
-        ''' Legacy property; calls XmlFilename
-        ''' </summary>
-        Public ReadOnly Property IniFilename() As String
-            Get
-                Return XmlFilename()
-            End Get
-        End Property
-
-        ''' <summary>
-        ''' This routine returns the name of the ini file.
-        ''' </summary>
-        ''' <return>The function returns the name of ini file.</return>
-        Public ReadOnly Property XmlFilename() As String
-            Get
-                If Not Initialized Then
-                    Return String.Empty
-                Else
-                    Return (m_XmlFilename)
-                End If
-            End Get
-        End Property
-
-        ''' <summary>
-        ''' This routine returns a boolean showing if the file was initialized or not.
-        ''' </summary>
-        ''' <return>The function returns a Boolean.</return>
-        Public ReadOnly Property Initialized() As Boolean
-            Get
-                Return m_initialized
-            End Get
-        End Property
-
-        ''' <summary>
-        ''' This routine returns a boolean showing if the name is case sensitive or not.
-        ''' </summary>
-        ''' <return>The function returns a Boolean.</return>
-        Public ReadOnly Property CaseSensitive() As Boolean
-            Get
-                Return m_CaseSensitive
-            End Get
-        End Property
-
-        ''' <summary>
-        ''' This routine sets a name.
-        ''' </summary>
-        ''' <param name="aName">The name to be set.</param>
-        ''' <return>The function returns a string.</return>
-        Private Function SetNameCase(aName As String) As String
-            If (CaseSensitive) Then
-                Return aName
-            Else
-                Return aName.ToLower()
-            End If
-        End Function
-
-        ''' <summary>
-        ''' Returns the root element of the XML document
-        ''' </summary>
-        Private Function GetRoot() As System.Xml.XmlElement
-            Return m_XmlDoc.DocumentElement
-        End Function
-
-        ''' <summary>
-        ''' The function gets the last section.
-        ''' </summary>
-        ''' <return>The function returns the last section as System.Xml.XmlElement.</return>
-        Private Function GetLastSection() As System.Xml.XmlElement
-            If sections.Count = 0 Then
-                Return GetRoot()
-            Else
-                Return GetSection(sections(sections.Count - 1))
-            End If
-        End Function
-
-        ''' <summary>
-        ''' The function gets a section as System.Xml.XmlElement.
-        ''' </summary>
-        ''' <param name="sectionName">The name of a section.</param>
-        ''' <return>The function returns a section as System.Xml.XmlElement.</return>
-        Private Function GetSection(sectionName As String) As System.Xml.XmlElement
-            If (Not (sectionName = Nothing)) AndAlso (sectionName <> "") Then
-                sectionName = SetNameCase(sectionName)
-                Return CType(m_XmlDoc.SelectSingleNode("//section[@name='" & sectionName & "']"), System.Xml.XmlElement)
-            End If
-            Return Nothing
-        End Function
-
-        ''' <summary>
-        ''' The function gets an item.
-        ''' </summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <param name="keyName">The name of the key.</param>
-        ''' <return>The function returns a XML element.</return>
-        Private Function GetItem(sectionName As String, keyName As String) As System.Xml.XmlElement
-            Dim section As System.Xml.XmlElement
-            If (Not keyName Is Nothing) AndAlso (keyName <> "") Then
-                keyName = SetNameCase(keyName)
-                section = GetSection(sectionName)
-                If (Not section Is Nothing) Then
-                    Return CType(section.SelectSingleNode("item[@key='" + keyName + "']"), System.Xml.XmlElement)
-                End If
-            End If
-            Return Nothing
-        End Function
-
-        ''' <summary>
-        ''' Legacy function name; calls SetXMLSection
-        ''' </summary>
-        Public Function SetIniSection(oldSection As String, newSection As String) As Boolean
-            Return SetXMLSection(oldSection, newSection)
-        End Function
-
-        ''' <summary>
-        ''' The function sets the ini section name.
-        ''' </summary>
-        ''' <param name="oldSection">The name of the old ini section name.</param>
-        ''' <param name="newSection">The new name for the ini section.</param>
-        ''' <return>The function returns a boolean that shows if the change was done.</return>
-        Public Function SetXMLSection(oldSection As String, newSection As String) As Boolean
-            Dim section As System.Xml.XmlElement
-            If Not Initialized Then
-                Throw New XMLFileReaderNotInitializedException
-            End If
-            If (Not newSection Is Nothing) AndAlso (newSection <> "") Then
-                section = GetSection(oldSection)
-                If (Not (section Is Nothing)) Then
-                    section.SetAttribute("name", SetNameCase(newSection))
-                    UpdateSections()
-                    Return True
-                End If
-            End If
-            Return False
-        End Function
-
-        ''' <summary>
-        ''' Legacy function name; calls SetXMLValue
-        ''' </summary>
-        Public Function SetIniValue(sectionName As String, keyName As String, newValue As String) As Boolean
-            Return SetXMLValue(sectionName, keyName, newValue)
-        End Function
-
-        ''' <summary>
-        ''' The function sets a new value for the "value" attribute.
-        ''' </summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <param name="keyName">The name of the key.</param>
-        ''' <param name="newValue">The new value for the "value".</param>
-        ''' <return>The function returns a boolean that shows if the change was done.</return>
-        Public Function SetXMLValue(sectionName As String, keyName As String, newValue As String) As Boolean
-            Dim item As System.Xml.XmlElement
-            Dim section As System.Xml.XmlElement
-            If Not Initialized Then Throw New XMLFileReaderNotInitializedException
-            section = GetSection(sectionName)
-            If section Is Nothing Then
-                If CreateSection(sectionName) Then
-                    section = GetSection(sectionName)
-                    ' exit if keyName is Nothing or blank
-                    If (keyName Is Nothing) OrElse (keyName = "") Then
-                        Return True
-                    End If
-                Else
-                    ' can't create section
-                    Return False
-                End If
-            End If
-            If keyName Is Nothing Then
-                ' delete the section
-                Return DeleteSection(sectionName)
-            End If
-
-            item = GetItem(sectionName, keyName)
-            If Not item Is Nothing Then
-                If newValue Is Nothing Then
-                    ' delete this item
-                    Return DeleteItem(sectionName, keyName)
-                Else
-                    ' add or update the value attribute
-                    item.SetAttribute("value", newValue)
-                    Return True
-                End If
-            Else
-                ' try to create the item
-                If (keyName <> "") AndAlso (Not newValue Is Nothing) Then
-                    ' construct a new item (blank values are OK)
-                    item = m_XmlDoc.CreateElement("item")
-                    item.SetAttribute("key", SetNameCase(keyName))
-                    item.SetAttribute("value", newValue)
-                    section.AppendChild(item)
-                    Return True
-                End If
-            End If
-            Return False
-        End Function
-
-        ''' <summary>
-        ''' The function deletes a section in the file.
-        ''' </summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <return>The function returns a boolean that shows if the delete was completed.</return>
-        Private Function DeleteSection(sectionName As String) As Boolean
-            Dim section As System.Xml.XmlElement = GetSection(sectionName)
-            If Not section Is Nothing Then
-                section.ParentNode.RemoveChild(section)
-                UpdateSections()
-                Return True
-            End If
-            Return False
-        End Function
-
-        ''' <summary>
-        ''' The function deletes a item in a specific section.
-        ''' </summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <param name="keyName">The name of the key.</param>
-        ''' <return>The function returns a boolean that shows if the delete was completed.</return>
-        Private Function DeleteItem(sectionName As String, keyName As String) As Boolean
-            Dim item As System.Xml.XmlElement = GetItem(sectionName, keyName)
-            If Not item Is Nothing Then
-                item.ParentNode.RemoveChild(item)
-                Return True
-            End If
-            Return False
-        End Function
-
-        ''' <summary>
-        ''' Legacy function name; calls SetXmlKey
-        ''' </summary>
-        Public Function SetIniKey(sectionName As String, keyName As String, newValue As String) As Boolean
-            Return SetXmlKey(sectionName, keyName, newValue)
-        End Function
-
-        ''' <summary>
-        ''' The function sets a new value for the "key" attribute.
-        ''' </summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <param name="keyName">The name of the key.</param>
-        ''' <param name="newValue">The new value for the "key".</param>
-        ''' <return>The function returns a boolean that shows if the change was done.</return>
-        Public Function SetXmlKey(sectionName As String, keyName As String, newValue As String) As Boolean
-            If Not Initialized Then Throw New XMLFileReaderNotInitializedException
-            Dim item As System.Xml.XmlElement = GetItem(sectionName, keyName)
-            If Not item Is Nothing Then
-                item.SetAttribute("key", SetNameCase(newValue))
-                Return True
-            End If
-            Return False
-        End Function
-
-        ''' <summary>
-        ''' Legacy function name; calls GetXMLValue
-        ''' </summary>
-        Public Function GetIniValue(sectionName As String, keyName As String) As String
-            Return GetXMLValue(sectionName, keyName)
-        End Function
-
-        ''' <summary>
-        ''' The function gets the name of the "value" attribute.
-        ''' </summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <param name="keyName">The name of the key.</param>
-        '''<return>The function returns the name of the "value" attribute.</return>
-        Public Function GetXMLValue(sectionName As String, keyName As String) As String
-            If Not Initialized Then Throw New XMLFileReaderNotInitializedException
-            Dim N As System.Xml.XmlNode = GetItem(sectionName, keyName)
-            If Not N Is Nothing Then
-                Return (N.Attributes.GetNamedItem("value").Value)
-            End If
-            Return Nothing
-        End Function
-
-        ''' <summary>
-        ''' Legacy function name; calls GetXmlSectionComments
-        ''' </summary>
-        Public Function GetIniComments(sectionName As String) As System.Collections.Specialized.StringCollection
-            Return GetXmlSectionComments(sectionName)
-        End Function
-
-        ''' <summary>
-        ''' The function gets the comments for a section name.
-        ''' </summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        '''<return>The function returns a string collection with comments</return>
-        Public Function GetXmlSectionComments(sectionName As String) As System.Collections.Specialized.StringCollection
-            If Not Initialized Then Throw New XMLFileReaderNotInitializedException
-            Dim sc As System.Collections.Specialized.StringCollection = New System.Collections.Specialized.StringCollection
-            Dim target As System.Xml.XmlNode
-            Dim nodes As System.Xml.XmlNodeList
-            Dim N As System.Xml.XmlNode
-            If sectionName Is Nothing Then
-                target = m_XmlDoc.DocumentElement
-            Else
-                target = GetSection(sectionName)
-            End If
-            If Not target Is Nothing Then
-                nodes = target.SelectNodes("comment")
-                If nodes.Count > 0 Then
-                    For Each N In nodes
-                        sc.Add(N.InnerText)
-                    Next
-                End If
-            End If
-            Return sc
-        End Function
-
-        ''' <summary>
-        ''' Legacy function name; calls SetXMLComments
-        ''' </summary>
-        Public Function SetIniComments(sectionName As String, comments As System.Collections.Specialized.StringCollection) As Boolean
-            Return SetXMLComments(sectionName, comments)
-        End Function
-
-        ''' <summary>
-        ''' The function sets a the comments for a section name.
-        ''' </summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <param name="comments">A string collection.</param>
-        '''<return>The function returns a Boolean that shows if the change was done.</return>
-        Public Function SetXMLComments(sectionName As String, comments As System.Collections.Specialized.StringCollection) As Boolean
-            If Not Initialized Then Throw New XMLFileReaderNotInitializedException
-            Dim target As System.Xml.XmlNode
-            Dim nodes As System.Xml.XmlNodeList
-            Dim N As System.Xml.XmlNode
-            Dim s As String
-            Dim NLastComment As System.Xml.XmlElement
-            If sectionName Is Nothing Then
-                target = m_XmlDoc.DocumentElement
-            Else
-                target = GetSection(sectionName)
-            End If
-            If Not target Is Nothing Then
-                nodes = target.SelectNodes("comment")
-                For Each N In nodes
-                    target.RemoveChild(N)
-                Next
-                For Each s In comments
-                    N = m_XmlDoc.CreateElement("comment")
-                    N.InnerText = s
-                    NLastComment = CType(target.SelectSingleNode("comment[last()]"), System.Xml.XmlElement)
-                    If NLastComment Is Nothing Then
-                        target.PrependChild(N)
-                    Else
-                        target.InsertAfter(N, NLastComment)
-                    End If
-                Next
-                Return True
-            End If
-            Return False
-        End Function
-
-        ''' <summary>
-        ''' The subroutine updades the sections.
-        ''' </summary>
-        Private Sub UpdateSections()
-            sections = New System.Collections.Specialized.StringCollection
-            Dim N As System.Xml.XmlElement
-            For Each N In m_XmlDoc.SelectNodes("sections/section")
-                sections.Add(N.GetAttribute("name"))
-            Next
-        End Sub
-        ''' <summary>
-        ''' The subroutine gets the sections.
-        ''' </summary>
-        ''' <return>The subroutine returns a strin collection of sections.</return>
-        Public ReadOnly Property AllSections() As System.Collections.Specialized.StringCollection
-            Get
-                If Not Initialized Then
-                    Return New Collections.Specialized.StringCollection()
-                Else
-                    Return sections
-                End If
-            End Get
-        End Property
-
-        ''' <summary>
-        ''' The function gets a collection of items for a section name.
-        ''' </summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <param name="itemType">Item type.</param>
-        ''' <return>The function returns a string colection of items in a section.</return>
-        Private Function GetItemsInSection(sectionName As String, itemType As XMLItemTypeEnum) As System.Collections.Specialized.StringCollection
-            Dim nodes As System.Xml.XmlNodeList
-            Dim items As System.Collections.Specialized.StringCollection = New System.Collections.Specialized.StringCollection
-            Dim section As System.Xml.XmlNode = GetSection(sectionName)
-            Dim N As System.Xml.XmlNode
-            If section Is Nothing Then
-                Return Nothing
-            Else
-                nodes = section.SelectNodes("item")
-                If nodes.Count > 0 Then
-                    For Each N In nodes
-                        Select Case itemType
-                            Case XMLItemTypeEnum.GetKeys
-                                items.Add(N.Attributes.GetNamedItem("key").Value)
-                            Case XMLItemTypeEnum.GetValues
-                                items.Add(N.Attributes.GetNamedItem("value").Value)
-                            Case XMLItemTypeEnum.GetKeysAndValues
-                                items.Add(N.Attributes.GetNamedItem("key").Value & "=" &
-                                N.Attributes.GetNamedItem("value").Value)
-                        End Select
-                    Next
-                End If
-                Return items
-            End If
-        End Function
-
-        ''' <summary>The funtions gets a collection of keys in a section.</summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <return>The function returns a string colection of all the keys in a section.</return>
-        Public Function AllKeysInSection(sectionName As String) As System.Collections.Specialized.StringCollection
-            If Not Initialized Then Throw New XMLFileReaderNotInitializedException
-            Return GetItemsInSection(sectionName, XMLItemTypeEnum.GetKeys)
-        End Function
-
-        ''' <summary>The funtions gets a collection of values in a section.</summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <return>The function returns a string colection of all the values in a section.</return>
-        Public Function AllValuesInSection(sectionName As String) As System.Collections.Specialized.StringCollection
-            If Not Initialized Then Throw New XMLFileReaderNotInitializedException
-            Return GetItemsInSection(sectionName, XMLItemTypeEnum.GetValues)
-        End Function
-
-        ''' <summary>The funtions gets a collection of items in a section.</summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <return>The function returns a string colection of all the items in a section.</return>
-        Public Function AllItemsInSection(sectionName As String) As System.Collections.Specialized.StringCollection
-            If Not Initialized Then Throw New XMLFileReaderNotInitializedException
-            Return (GetItemsInSection(sectionName, XMLItemTypeEnum.GetKeysAndValues))
-        End Function
-
-        ''' <summary>The funtions gets a custom attribute name.</summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <param name="keyName">The name of the key.</param>
-        ''' <param name="attributeName">The name of the attribute.</param>
-        ''' <return>The function returns a string.</return>
-        Public Function GetCustomIniAttribute(sectionName As String, keyName As String, attributeName As String) As String
-            Dim N As System.Xml.XmlElement
-            If Not Initialized Then Throw New XMLFileReaderNotInitializedException
-            If (Not attributeName Is Nothing) AndAlso (attributeName <> "") Then
-                N = GetItem(sectionName, keyName)
-                If Not N Is Nothing Then
-                    attributeName = SetNameCase(attributeName)
-                    Return N.GetAttribute(attributeName)
-                End If
-            End If
-            Return Nothing
-        End Function
-
-        ''' <summary>The funtions sets a custom attribute name.</summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <param name="keyName">The name of the key.</param>
-        ''' <param name="attributeName">The name of the attribute.</param>
-        ''' <param name="attributeValue">The value of the attribute.</param>
-        ''' <return>The function returns a Boolean.</return>
-        Public Function SetCustomIniAttribute(sectionName As String, keyName As String, attributeName As String, attributeValue As String) As Boolean
-            Dim N As System.Xml.XmlElement
-            If Not Initialized Then Throw New XMLFileReaderNotInitializedException
-            If attributeName <> "" Then
-                N = GetItem(sectionName, keyName)
-                If Not N Is Nothing Then
-                    Try
-                        If attributeValue Is Nothing Then
-                            ' delete the attribute
-                            N.RemoveAttribute(attributeName)
-                            Return True
-                        Else
-                            attributeName = SetNameCase(attributeName)
-                            N.SetAttribute(attributeName, attributeValue)
-                            Return True
-                        End If
-
-                    Catch e As System.Exception
-                        If NotifyOnException Then
-                            Throw New System.Exception("Failed to create item.")
-                        End If
-                    End Try
-                End If
-                Return False
-            End If
-            Return False
-        End Function
-
-        ''' <summary>The funtions creates a section name.</summary>
-        ''' <param name="sectionName">The name of the section to be created.</param>
-        ''' <return>The function returns a Boolean.</return>
-        Private Function CreateSection(sectionName As String) As Boolean
-            Dim N As System.Xml.XmlElement
-            Dim Natt As System.Xml.XmlAttribute
-            If (Not sectionName Is Nothing) AndAlso (sectionName <> "") Then
-                sectionName = SetNameCase(sectionName)
-                Try
-                    N = m_XmlDoc.CreateElement("section")
-                    Natt = m_XmlDoc.CreateAttribute("name")
-                    Natt.Value = SetNameCase(sectionName)
-                    N.Attributes.SetNamedItem(Natt)
-                    m_XmlDoc.DocumentElement.AppendChild(N)
-                    sections.Add(Natt.Value)
-                    Return True
-                Catch e As System.Exception
-                    If NotifyOnException Then
-                        Throw New System.Exception("Failed to create item.")
-                    End If
-                    Return False
-                End Try
-            End If
-            Return False
-        End Function
-
-        ''' <summary>The funtions creates a section name.</summary>
-        ''' <param name="sectionName">The name of the section.</param>
-        ''' <param name="keyName">The name of the key.</param>
-        ''' <param name="newValue">The new value to be created.</param>
-        ''' <return>The function returns a Boolean.</return>
-        Private Function CreateItem(sectionName As String, keyName As String, newValue As String) As Boolean
-            Dim item As System.Xml.XmlElement
-            Dim section As System.Xml.XmlElement
-            Try
-                section = GetSection(sectionName)
-                If Not section Is Nothing Then
-                    item = m_XmlDoc.CreateElement("item")
-                    item.SetAttribute("key", keyName)
-                    item.SetAttribute("newValue", newValue)
-                    section.AppendChild(item)
-                    Return True
-                End If
-                Return False
-            Catch e As System.Exception
-                If NotifyOnException Then
-                    Throw New System.Exception("Failed to create item.")
-                End If
-                Return False
-            End Try
-        End Function
-
-        ''' <summary>
-        ''' Manually read a XML or .INI settings file line-by-line, extracting out any settings in the expected format
-        ''' </summary>
-        ''' <param name="strFilePath"></param>
-        ''' <returns></returns>
-        ''' <remarks></remarks>
-        Public Function ManualParseXmlOrIniFile(strFilePath As String) As Boolean
-
-            ' Create a new, blank XML document
-            m_XmlDoc.LoadXml("<?xml version=""1.0"" encoding=""UTF-8""?><sections></sections>")
-
-            Try
-                Dim fi As System.IO.FileInfo
-                Dim s As String
-
-                fi = New System.IO.FileInfo(strFilePath)
-                If (fi.Exists) Then
-                    ' Read strFilePath line-by-line to see if it has any .Ini style settings
-                    ' For example:
-                    '   [SectionName]
-                    '   Setting1=ValueA
-                    '   Setting2=ValueB
-
-                    ' Also look for XML-style entries
-                    ' For example:
-                    '   <section name="SectionName">
-                    '     <item key="Setting1" value="ValueA" />
-                    '   </section>
-
-                    Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(fi.FullName, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
-
-                        Do While srInFile.Peek() > -1
-                            s = srInFile.ReadLine()
-
-                            ' Try to manually parse this line
-                            ParseLineManual(s, m_XmlDoc)
-                        Loop
-
-                        m_XmlFilename = strFilePath
-                        m_initialized = True
-
-                    End Using
-
-                Else
-                    ' File doesn't exist; create a new, blank .XML file
-                    m_XmlFilename = strFilePath
-                    m_XmlDoc.Save(m_XmlFilename)
-                    m_initialized = True
-                End If
-
-                Return True
-
-            Catch e As System.Exception
-                If NotifyOnException Then
-                    Throw New System.Exception("Failed to read XML file.")
-                End If
-            End Try
-
-            Return False
-
-        End Function
-
-        ''' <summary>Manually parses a line to extract the settings information
-        ''' Supports the traditional .Ini file format
-        ''' Also supports the 'key="KeyName" value="Value"' method used in XML settings files
-        ''' If success, then adds attributes to the doc object</summary>
-        ''' <param name="strLine">The name of the string to be parse.</param>
-        ''' <param name="doc">The name of the System.Xml.XmlDocument.</param>
-        ''' <returns>True if success, false if not a recognized line format</returns>
-        ''' <remarks>Returns True for blank lines</remarks>
-        Private Function ParseLineManual(strLine As String, ByRef doc As System.Xml.XmlDocument) As Boolean
-            Const SECTION_NAME_TAG As String = "<section name="
-            Const KEY_TAG As String = "key="
-            Const VALUE_TAG As String = "value="
-
-            Dim strKey As String = String.Empty
-            Dim strValue As String = String.Empty
-            Dim blnAddSetting As Boolean
-
-            Dim N As System.Xml.XmlElement
-            Dim Natt As System.Xml.XmlAttribute
-            Dim parts() As String
-
-            strLine = strLine.TrimStart()
-            If String.IsNullOrWhiteSpace(strLine) Then
-                Return True
-            End If
-
-            Select Case (strLine.Substring(0, 1))
-                Case "["
-                    ' this is a section
-                    ' trim the first and last characters
-                    strLine = strLine.TrimStart("["c)
-                    strLine = strLine.TrimEnd("]"c)
-                    ' create a new section element
-                    CreateSection(strLine)
-                    Return True
-                Case ";"
-                    ' new comment
-                    N = doc.CreateElement("comment")
-                    N.InnerText = strLine.Substring(1)
-                    GetLastSection().AppendChild(N)
-                    Return True
-                Case Else
-                    ' Look for typical XML settings file elements
-
-                    If ParseLineManualCheckTag(strLine, SECTION_NAME_TAG, strKey) Then
-                        ' This is an XML-style section
-
-                        ' Create a new section element
-                        CreateSection(strKey)
-                        Return True
-                    Else
-                        If ParseLineManualCheckTag(strLine, KEY_TAG, strKey) Then
-                            ' This is an XML-style key
-
-                            ParseLineManualCheckTag(strLine, VALUE_TAG, strValue)
-
-                        Else
-                            ' split the string on the "=" sign, if present
-                            If (strLine.IndexOf("=") > 0) Then
-                                parts = strLine.Split("="c)
-                                strKey = parts(0).Trim()
-                                strValue = parts(1).Trim()
-                            Else
-                                strKey = strLine
-                                strValue = String.Empty
-                            End If
-                        End If
-
-                        If String.IsNullOrEmpty(strKey) Then
-                            strKey = String.Empty
-                        End If
-
-                        If String.IsNullOrEmpty(strValue) Then
-                            strValue = String.Empty
-                        End If
-
-                        If String.IsNullOrWhiteSpace(strKey) Then
-                            Return False
-
-                        Else
-
-                            blnAddSetting = True
-
-                            Select Case strKey.ToLower().Trim()
-
-                                Case "<sections>", "</section>", "</sections>"
-                                    ' Do not add a new key
-                                    If String.IsNullOrEmpty(strValue) Then
-                                        blnAddSetting = False
-                                    End If
-
-                            End Select
-
-                            If blnAddSetting Then
-                                N = doc.CreateElement("item")
-                                Natt = doc.CreateAttribute("key")
-                                Natt.Value = SetNameCase(strKey)
-                                N.Attributes.SetNamedItem(Natt)
-
-                                Natt = doc.CreateAttribute("value")
-                                Natt.Value = strValue
-                                N.Attributes.SetNamedItem(Natt)
-
-                                GetLastSection().AppendChild(N)
-
-                            End If
-
-                            Return True
-                        End If
-
-                    End If
-
-            End Select
-
-        End Function
-
-        Private Function ParseLineManualCheckTag(
-          strLine As String,
-          strTagTofind As String,
-          ByRef strTagValue As String) As Boolean
-
-            Dim intMatchIndex As Integer
-            Dim intNextMatchIndex As Integer
-
-            strTagValue = String.Empty
-
-            intMatchIndex = strLine.ToLower().IndexOf(strTagTofind)
-
-            If intMatchIndex >= 0 Then
-                strTagValue = strLine.Substring(intMatchIndex + strTagTofind.Length)
-
-                If strTagValue.StartsWith(""""c) Then
-                    strTagValue = strTagValue.Substring(1)
-                End If
-
-                intNextMatchIndex = strTagValue.IndexOf(""""c)
-                If intNextMatchIndex >= 0 Then
-                    strTagValue = strTagValue.Substring(0, intNextMatchIndex)
-                End If
-
-                Return True
-            Else
-                Return False
-            End If
-
-        End Function
-
-        ''' <summary>It Sets or Gets the output file name.</summary>
-        Public Property OutputFilename() As String
-            Get
-                If Not Initialized Then
-                    Return String.Empty
-                Else
-                    Return m_SaveFilename
-                End If
-            End Get
-            Set(Value As String)
-                Dim fi As System.IO.FileInfo
-                If Not Initialized Then Throw New XMLFileReaderNotInitializedException
-                fi = New System.IO.FileInfo(Value)
-                If Not fi.Directory.Exists Then
-                    If NotifyOnException Then
-                        Throw New System.Exception("Invalid path for output file.")
-                    End If
-                Else
-                    m_SaveFilename = Value
-                End If
-            End Set
-        End Property
-        ''' <summary>It saves the data to the Xml output file.</summary>
-        Public Sub Save()
-            If Not Initialized Then Throw New XMLFileReaderNotInitializedException
-            If Not OutputFilename Is Nothing AndAlso Not m_XmlDoc Is Nothing Then
-                Dim fi As System.IO.FileInfo = New System.IO.FileInfo(OutputFilename)
-                If Not fi.Directory.Exists Then
-                    If NotifyOnException Then
-                        Throw New System.Exception("Invalid path.")
-                    End If
-                    Return
-                End If
-                If fi.Exists Then
-                    fi.Delete()
-                    m_XmlDoc.Save(OutputFilename)
-                Else
-                    m_XmlDoc.Save(OutputFilename)
-                End If
-                If NotifyOnEvent Then
-                    RaiseEvent InformationMessage("File save complete.")
-                End If
-            Else
-                If NotifyOnException Then
-                    Throw New System.Exception("Not Output File name specified.")
-                End If
-            End If
-        End Sub
-
-        ''' <summary>It gets the System.Xml.XmlDocument.</summary>
-        Public ReadOnly Property XmlDoc() As System.Xml.XmlDocument
-            Get
-                If Not Initialized Then
-                    Return New System.Xml.XmlDocument
-                Else
-                    Return m_XmlDoc
-                End If
-            End Get
-        End Property
-
-        ''' <summary>Converts an XML document to a string.</summary>
-        ''' <return>It returns the XML document formatted as a string.</return>
-        Public ReadOnly Property XML() As String
-            Get
-                If Not Initialized Then
-                    Return String.Empty
-                End If
-
-                Dim sb As System.Text.StringBuilder = New System.Text.StringBuilder
-                Using sw As System.IO.StringWriter = New System.IO.StringWriter(sb)
-                    Using xw As System.Xml.XmlTextWriter = New System.Xml.XmlTextWriter(sw)
-                        xw.Indentation = 3
-                        xw.Formatting = System.Xml.Formatting.Indented
-                        m_XmlDoc.WriteContentTo(xw)
-                    End Using
-                End Using
-
-                Return sb.ToString()
-            End Get
-        End Property
-
-    End Class
-
-    Public Class XMLFileReaderNotInitializedException
-        Inherits System.ApplicationException
-        Public Overrides ReadOnly Property Message() As String
-            Get
-                Return "The XMLFileReader instance has not been properly initialized."
-            End Get
-        End Property
-    End Class
-
-End Class
-
+	    /// <summary>Checks if a section is present in the settings file.</summary>
+	    /// <param name="sectionName">The name of the section to look for.</param>
+	    /// <return>The function returns a boolean that shows if the section is present.</return>
+	    public bool SectionPresent(string sectionName)
+	    {
+		    System.Collections.Specialized.StringCollection strSections = default(System.Collections.Specialized.StringCollection);
+		    int intIndex = 0;
+
+		    strSections = m_XMLFileAccessor.AllSections;
+
+		    for (intIndex = 0; intIndex <= strSections.Count - 1; intIndex++) {
+			    if (SetNameCase(strSections[intIndex]) == SetNameCase(sectionName))
+				    return true;
+		    }
+
+		    return false;
+
+	    }
+
+	    private bool CacheKeyNames(string sectionName)
+	    {
+		    // Looks up the Key Names for the given section, storing them in mCachedSection
+		    // This is done so that this class will know the correct capitalization for the key names
+
+		    System.Collections.Specialized.StringCollection strKeys = default(System.Collections.Specialized.StringCollection);
+		    int intIndex = 0;
+
+		    string sectionNameInFile = null;
+		    string strKeyNameToStore = null;
+
+		    // Lookup the correct capitalization for sectionName (only truly important if mCaseSensitive = False)
+		    sectionNameInFile = GetCachedSectionName(sectionName);
+		    if (sectionNameInFile.Length == 0)
+			    return false;
+
+		    try {
+			    // Grab the keys for sectionName
+			    strKeys = m_XMLFileAccessor.AllKeysInSection(sectionNameInFile);
+		    } catch {
+			    // Invalid section name; do not update anything
+			    return false;
+		    }
+
+		    if (strKeys == null) {
+			    return false;
+		    }
+
+		    // Update mCachedSection with the key names for the given section
+		    {
+			    mCachedSection.SectionName = sectionNameInFile;
+			    mCachedSection.dtKeys.Clear();
+
+			    for (intIndex = 0; intIndex <= strKeys.Count - 1; intIndex++) {
+				    if (mCaseSensitive) {
+					    strKeyNameToStore = string.Copy(strKeys[intIndex]);
+				    } else {
+					    strKeyNameToStore = string.Copy(strKeys[intIndex].ToLower());
+				    }
+
+				    if (!mCachedSection.dtKeys.ContainsKey(strKeyNameToStore)) {
+					    mCachedSection.dtKeys.Add(strKeyNameToStore, strKeys[intIndex]);
+				    }
+
+			    }
+		    }
+
+		    return true;
+
+	    }
+
+	    private void CacheSectionNames()
+	    {
+		    // Looks up the Section Names in the XML file
+		    // This is done so that this class will know the correct capitalization for the section names
+
+		    System.Collections.Specialized.StringCollection strSections = default(System.Collections.Specialized.StringCollection);
+		    string strSectionNameToStore = null;
+
+		    int intIndex = 0;
+
+		    strSections = m_XMLFileAccessor.AllSections;
+
+		    dtSectionNames.Clear();
+
+		    for (intIndex = 0; intIndex <= strSections.Count - 1; intIndex++) {
+			    if (mCaseSensitive) {
+				    strSectionNameToStore = string.Copy(strSections[intIndex]);
+			    } else {
+				    strSectionNameToStore = string.Copy(strSections[intIndex].ToLower());
+			    }
+
+			    if (!dtSectionNames.ContainsKey(strSectionNameToStore)) {
+				    dtSectionNames.Add(strSectionNameToStore, strSections[intIndex]);
+			    }
+
+		    }
+
+	    }
+
+	    private string GetCachedKeyName(string sectionName, string keyName)
+	    {
+		    // Looks up the correct capitalization for key keyName in section sectionName
+		    // Returns string.Empty if not found
+
+		    bool blnSuccess = false;
+		    string sectionNameInFile = null;
+		    string keyNameToFind = null;
+
+		    // Lookup the correct capitalization for sectionName (only truly important if mCaseSensitive = False)
+		    sectionNameInFile = GetCachedSectionName(sectionName);
+		    if (sectionNameInFile.Length == 0)
+			    return string.Empty;
+
+		    if (mCachedSection.SectionName == sectionNameInFile) {
+			    blnSuccess = true;
+		    } else {
+			    // Update the keys for sectionName
+			    blnSuccess = CacheKeyNames(sectionName);
+		    }
+
+		    if (blnSuccess) {
+			    {
+				    keyNameToFind = SetNameCase(keyName);
+				    if (mCachedSection.dtKeys.ContainsKey(keyNameToFind)) {
+					    return mCachedSection.dtKeys[keyNameToFind];
+				    } else {
+					    return string.Empty;
+				    }
+			    }
+		    } else {
+			    return string.Empty;
+		    }
+	    }
+
+	    private string GetCachedSectionName(string sectionName)
+	    {
+		    // Looks up the correct capitalization for sectionName
+		    // Returns string.Empty if not found
+
+		    string sectionNameToFind = null;
+
+		    sectionNameToFind = SetNameCase(sectionName);
+		    if (dtSectionNames.ContainsKey(sectionNameToFind)) {
+			    return dtSectionNames[sectionNameToFind];
+		    } else {
+			    return string.Empty;
+		    }
+
+	    }
+
+	    private string SetNameCase(string aName)
+	    {
+		    // Changes aName to lowercase if mCaseSensitive = False
+
+		    if (mCaseSensitive) {
+			    return aName;
+		    } else {
+			    return aName.ToLower();
+		    }
+	    }
+
+	    /// <summary>
+	    /// The function gets the name of the "value" attribute in section "sectionName".
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
+	    /// <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
+	    /// <return>The function returns the name of the "value" attribute as a String.</return>
+	    public string GetParam(string sectionName, string keyName, string valueIfMissing, ref bool valueNotPresent)
+	    {
+		    string strResult = string.Empty;
+		    string sectionNameInFile = null;
+		    string keyNameInFile = null;
+		    bool blnValueFound = false;
+
+		    if (mCaseSensitive) {
+			    strResult = m_XMLFileAccessor.GetXMLValue(sectionName, keyName);
+			    if ((strResult != null))
+				    blnValueFound = true;
+		    } else {
+			    sectionNameInFile = GetCachedSectionName(sectionName);
+			    if (sectionNameInFile.Length > 0) {
+				    keyNameInFile = GetCachedKeyName(sectionName, keyName);
+				    if (keyNameInFile.Length > 0) {
+					    strResult = m_XMLFileAccessor.GetXMLValue(sectionNameInFile, keyNameInFile);
+					    if ((strResult != null))
+						    blnValueFound = true;
+				    }
+			    }
+		    }
+
+		    if (strResult == null || !blnValueFound) {
+			    valueNotPresent = true;
+			    return valueIfMissing;
+		    } else {
+			    valueNotPresent = false;
+			    return strResult;
+		    }
+	    }
+
+	    /// <summary>
+	    /// The function gets the name of the "value" attribute in section "sectionName".
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
+	    /// <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
+	    /// <return>The function returns boolean True if the "value" attribute is "true".  Otherwise, returns boolean False.</return>
+        public bool GetParam(string sectionName, string keyName, bool valueIfMissing, ref bool valueNotPresent)
+	    {
+		    string strResult = null;
+		    bool blnNotFound = false;
+
+		    strResult = this.GetParam(sectionName, keyName, valueIfMissing.ToString(), ref blnNotFound);
+		    if (strResult == null || blnNotFound) {
+			    valueNotPresent = true;
+			    return valueIfMissing;
+		    } else {
+			    valueNotPresent = false;
+			    if (strResult.ToLower() == "true") {
+				    return true;
+			    } else {
+				    return false;
+			    }
+		    }
+	    }
+
+        public short GetParam(string sectionName, string keyName, short valueIfMissing)
+        {
+            bool valueNotPresent = false;
+            return GetParam(sectionName, keyName, valueIfMissing, ref valueNotPresent);
+        }
+
+        public int GetParam(string sectionName, string keyName, int valueIfMissing)
+        {
+            bool valueNotPresent = false;
+            return GetParam(sectionName, keyName, valueIfMissing, ref valueNotPresent);
+        }
+
+        public long GetParam(string sectionName, string keyName, long valueIfMissing)
+        {
+            bool valueNotPresent = false;
+            return GetParam(sectionName, keyName, valueIfMissing, ref valueNotPresent);
+        }
+
+        public float GetParam(string sectionName, string keyName, float valueIfMissing)
+        {
+            bool valueNotPresent = false;
+            return GetParam(sectionName, keyName, valueIfMissing, ref valueNotPresent);
+        }
+
+        public double GetParam(string sectionName, string keyName, double valueIfMissing)
+        {
+            bool valueNotPresent = false;
+            return GetParam(sectionName, keyName, valueIfMissing, ref valueNotPresent);
+        }
+
+        public string GetParam(string sectionName, string keyName, string valueIfMissing)
+        {
+            bool valueNotPresent = false;
+            return GetParam(sectionName, keyName, valueIfMissing, ref valueNotPresent);
+        }
+
+        public bool GetParam(string sectionName, string keyName, bool valueIfMissing)
+        {
+            bool valueNotPresent = false;
+            return GetParam(sectionName, keyName, valueIfMissing, ref valueNotPresent);
+        }
+
+	    /// <summary>
+	    /// The function gets the name of the "value" attribute in section "sectionName".
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
+	    /// <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
+	    /// <return>The function returns the name of the "value" attribute as a Short.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
+	    public short GetParam(string sectionName, string keyName, short valueIfMissing, ref bool valueNotPresent)
+	    {
+		    string strResult = null;
+            short result = 0;
+		    bool blnNotFound = false;
+
+		    strResult = this.GetParam(sectionName, keyName, valueIfMissing.ToString(), ref blnNotFound);
+		    if (strResult == null || blnNotFound) {
+			    valueNotPresent = true;
+			    return valueIfMissing;
+		    } else {
+			    valueNotPresent = false;
+			    try {
+				    if (short.TryParse(strResult, out result)) {
+                        return result;
+				    } else if (strResult.ToLower() == "true") {
+					    return -1;
+				    } else if (strResult.ToLower() == "false") {
+					    return 0;
+				    } else {
+					    valueNotPresent = true;
+					    return valueIfMissing;
+				    }
+			    } catch {
+				    valueNotPresent = true;
+				    return valueIfMissing;
+			    }
+		    }
+
+	    }
+
+	    /// <summary>
+	    /// The function gets the name of the "value" attribute in section "sectionName".
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
+	    /// <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
+	    /// <return>The function returns the name of the "value" attribute as an Integer.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
+	    public int GetParam(string sectionName, string keyName, int valueIfMissing, ref bool valueNotPresent)
+	    {
+		    string strResult = null;
+		    bool blnNotFound = false;
+            int result = 0;
+
+            strResult = this.GetParam(sectionName, keyName, valueIfMissing.ToString(), ref blnNotFound);
+		    if (strResult == null || blnNotFound) {
+			    valueNotPresent = true;
+			    return valueIfMissing;
+		    } else {
+			    valueNotPresent = false;
+			    try {
+                    if (int.TryParse(strResult, out result)) {
+                        return result;
+				    } else if (strResult.ToLower() == "true") {
+					    return -1;
+				    } else if (strResult.ToLower() == "false") {
+					    return 0;
+				    } else {
+					    valueNotPresent = true;
+					    return valueIfMissing;
+				    }
+			    } catch {
+				    valueNotPresent = true;
+				    return valueIfMissing;
+			    }
+		    }
+
+	    }
+
+	    /// <summary>
+	    /// The function gets the name of the "value" attribute in section "sectionName".
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
+	    /// <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
+	    /// <return>The function returns the name of the "value" attribute as a Long.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
+	    public long GetParam(string sectionName, string keyName, long valueIfMissing, ref bool valueNotPresent)
+	    {
+		    string strResult = null;
+		    bool blnNotFound = false;
+            long result = 0;
+
+            strResult = this.GetParam(sectionName, keyName, valueIfMissing.ToString(), ref blnNotFound);
+		    if (strResult == null || blnNotFound) {
+			    valueNotPresent = true;
+			    return valueIfMissing;
+		    } else {
+			    valueNotPresent = false;
+			    try {
+                    if (long.TryParse(strResult, out result)) {
+                        return result;
+				    } else if (strResult.ToLower() == "true") {
+					    return -1;
+				    } else if (strResult.ToLower() == "false") {
+					    return 0;
+				    } else {
+					    valueNotPresent = true;
+					    return valueIfMissing;
+				    }
+			    } catch {
+				    valueNotPresent = true;
+				    return valueIfMissing;
+			    }
+		    }
+
+	    }
+
+	    /// <summary>
+	    /// The function gets the name of the "value" attribute in section "sectionName".
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
+	    /// <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
+	    /// <return>The function returns the name of the "value" attribute as a Single.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
+	    public float GetParam(string sectionName, string keyName, float valueIfMissing, ref bool valueNotPresent)
+	    {
+		    string strResult = null;
+		    bool blnNotFound = false;
+            float result = 0;
+
+            strResult = this.GetParam(sectionName, keyName, valueIfMissing.ToString(), ref blnNotFound);
+		    if (strResult == null || blnNotFound) {
+			    valueNotPresent = true;
+			    return valueIfMissing;
+		    } else {
+			    valueNotPresent = false;
+			    try {
+                    if (float.TryParse(strResult, out result)) {
+                        return result;
+				    } else if (strResult.ToLower() == "true") {
+					    return -1;
+				    } else if (strResult.ToLower() == "false") {
+					    return 0;
+				    } else {
+					    valueNotPresent = true;
+					    return valueIfMissing;
+				    }
+			    } catch {
+				    valueNotPresent = true;
+				    return valueIfMissing;
+			    }
+		    }
+
+	    }
+
+	    /// <summary>
+	    /// The function gets the name of the "value" attribute in section "sectionName".
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="valueIfMissing">Value to return if "sectionName" or "keyName" is missing.</param>
+	    /// <param name="valueNotPresent">Set to True if "sectionName" or "keyName" is missing.  Returned ByRef.</param>
+	    /// <return>The function returns the name of the "value" attribute as a Double.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
+	    public double GetParam(string sectionName, string keyName, double valueIfMissing, ref bool valueNotPresent)
+	    {
+		    string strResult = null;
+		    bool blnNotFound = false;
+            double result = 0;
+
+            strResult = this.GetParam(sectionName, keyName, valueIfMissing.ToString(), ref blnNotFound);
+		    if (strResult == null || blnNotFound) {
+			    valueNotPresent = true;
+			    return valueIfMissing;
+		    } else {
+			    valueNotPresent = false;
+			    try {
+                    if (double.TryParse(strResult, out result)) {
+                        return result;
+				    } else if (strResult.ToLower() == "true") {
+					    return -1;
+				    } else if (strResult.ToLower() == "false") {
+					    return 0;				   
+				    } else {
+					    valueNotPresent = true;
+					    return valueIfMissing;
+				    }
+			    } catch {
+				    valueNotPresent = true;
+				    return valueIfMissing;
+			    }
+		    }
+
+	    }
+
+	    /// <summary>
+	    /// Legacy function name; calls SetXMLFilePath
+	    /// </summary>
+	    public void SetIniFilePath(string XmlSettingsFilePath)
+	    {
+		    SetXMLFilePath(XmlSettingsFilePath);
+	    }
+
+	    /// <summary>
+	    /// The function sets the path to the Xml Settings File.
+	    /// </summary>
+	    /// <param name="XmlSettingsFilePath">The path to the XML settings file.</param>
+	    public void SetXMLFilePath(string XmlSettingsFilePath)
+	    {
+		    m_XMLFilePath = XmlSettingsFilePath;
+	    }
+
+	    /// <summary>
+	    /// The function sets a new String value for the "value" attribute.
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="newValue">The new value for the "value".</param>
+	    /// <return>The function returns a boolean that shows if the change was done.</return>
+	    public bool SetParam(string sectionName, string keyName, string newValue)
+	    {
+		    string sectionNameInFile = null;
+		    string keyNameInFile = null;
+
+		    if (!mCaseSensitive) {
+			    sectionNameInFile = GetCachedSectionName(sectionName);
+			    if (sectionNameInFile.Length > 0) {
+				    keyNameInFile = GetCachedKeyName(sectionName, keyName);
+				    if (keyNameInFile.Length > 0) {
+					    // Section and Key are present; update them
+					    return m_XMLFileAccessor.SetXMLValue(sectionNameInFile, keyNameInFile, newValue);
+				    } else {
+					    // Section is present, but the Key isn't; add teh key
+					    return m_XMLFileAccessor.SetXMLValue(sectionNameInFile, keyName, newValue);
+				    }
+			    }
+		    }
+
+		    // If we get here, then either mCaseSensitive = True or the section and key weren't found
+		    return m_XMLFileAccessor.SetXMLValue(sectionName, keyName, newValue);
+
+	    }
+
+	    /// <summary>
+	    /// The function sets a new Boolean value for the "value" attribute.
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="newValue">The new value for the "value".</param>
+	    /// <return>The function returns a boolean that shows if the change was done.</return>
+	    public bool SetParam(string sectionName, string keyName, bool newValue)
+	    {
+		    return this.SetParam(sectionName, keyName, Convert.ToString(newValue));
+	    }
+
+	    /// <summary>
+	    /// The function sets a new Short value for the "value" attribute.
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="newValue">The new value for the "value".</param>
+	    /// <return>The function returns a boolean that shows if the change was done.</return>
+	    public bool SetParam(string sectionName, string keyName, short newValue)
+	    {
+		    return this.SetParam(sectionName, keyName, Convert.ToString(newValue));
+	    }
+
+	    /// <summary>
+	    /// The function sets a new Integer value for the "value" attribute.
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="newValue">The new value for the "value".</param>
+	    /// <return>The function returns a boolean that shows if the change was done.</return>
+	    public bool SetParam(string sectionName, string keyName, int newValue)
+	    {
+		    return this.SetParam(sectionName, keyName, Convert.ToString(newValue));
+	    }
+
+	    /// <summary>
+	    /// The function sets a new Long value for the "value" attribute.
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="newValue">The new value for the "value".</param>
+	    /// <return>The function returns a boolean that shows if the change was done.</return>
+	    public bool SetParam(string sectionName, string keyName, long newValue)
+	    {
+		    return this.SetParam(sectionName, keyName, Convert.ToString(newValue));
+	    }
+
+	    /// <summary>
+	    /// The function sets a new Single value for the "value" attribute.
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="newValue">The new value for the "value".</param>
+	    /// <return>The function returns a boolean that shows if the change was done.</return>
+	    public bool SetParam(string sectionName, string keyName, float newValue)
+	    {
+		    return this.SetParam(sectionName, keyName, Convert.ToString(newValue));
+	    }
+
+	    /// <summary>
+	    /// The function sets a new Double value for the "value" attribute.
+	    /// </summary>
+	    /// <param name="sectionName">The name of the section.</param>
+	    /// <param name="keyName">The name of the key.</param>
+	    /// <param name="newValue">The new value for the "value".</param>
+	    /// <return>The function returns a boolean that shows if the change was done.</return>
+	    public bool SetParam(string sectionName, string keyName, double newValue)
+	    {
+		    return this.SetParam(sectionName, keyName, Convert.ToString(newValue));
+	    }
+
+	    /// <summary>
+	    /// The function renames a section.
+	    /// </summary>
+	    /// <param name="sectionNameOld">The name of the old XML section name.</param>
+	    /// <param name="sectionNameNew">The new name for the XML section.</param>
+	    /// <return>The function returns a boolean that shows if the change was done.</return>
+	    public bool RenameSection(string sectionNameOld, string sectionNameNew)
+	    {
+
+		    string strSectionName = null;
+
+		    if (!mCaseSensitive) {
+			    strSectionName = GetCachedSectionName(sectionNameOld);
+			    if (strSectionName.Length > 0) {
+				    return m_XMLFileAccessor.SetXMLSection(strSectionName, sectionNameNew);
+			    }
+		    }
+
+		    // If we get here, then either mCaseSensitive = True or the section wasn't found using GetCachedSectionName
+		    return m_XMLFileAccessor.SetXMLSection(sectionNameOld, sectionNameNew);
+
+	    }
+
+	    private void  // ERROR: Handles clauses are not supported in C#
+    FileAccessorInfoMessageEvent(string msg)
+	    {
+		    if (InformationMessage != null) {
+			    InformationMessage(msg);
+		    }
+	    }
+
+
+	    /// <summary>
+	    /// Tools to manipulates XML Settings files.
+	    /// </summary>
+	    protected class XMLFileReader
+	    {
+
+		    public enum XMLItemTypeEnum
+		    {
+			    GetKeys = 0,
+			    GetValues = 1,
+			    GetKeysAndValues = 2
+		    }
+
+		    private string m_XmlFilename;
+
+		    private System.Xml.XmlDocument m_XmlDoc;
+
+            private System.Collections.ArrayList unattachedComments = new System.Collections.ArrayList();
+		    private System.Collections.Specialized.StringCollection sections = new System.Collections.Specialized.StringCollection();
+		    private bool m_CaseSensitive = false;
+		    private string m_SaveFilename;
+
+		    private bool m_initialized = false;
+		    public bool NotifyOnEvent;
+
+		    public bool NotifyOnException;
+		    public event InformationMessageEventHandler InformationMessage;
+		    public delegate void InformationMessageEventHandler(string msg);
+
+		    /// <summary>Initializes a new instance of the XMLFileReader (non case-sensitive)</summary>
+		    /// <param name="XmlFilename">The name of the XML file.</param>
+		    public XMLFileReader(string XmlFilename)
+		    {
+			    NotifyOnException = false;
+			    InitXMLFileReader(XmlFilename, false);
+		    }
+
+		    /// <summary>Initializes a new instance of the XMLFileReader.</summary>
+		    /// <param name="XmlFilename">The name of the XML file.</param>
+		    /// <param name="IsCaseSensitive">Case sensitive as boolean.</param>
+		    public XMLFileReader(string XmlFilename, bool IsCaseSensitive)
+		    {
+			    NotifyOnException = true;
+			    InitXMLFileReader(XmlFilename, IsCaseSensitive);
+		    }
+
+		    /// <summary>
+		    /// This routine is called by each of the constructors to make the actual assignments.
+		    /// </summary>
+		    private void InitXMLFileReader(string strXmlFilename, bool IsCaseSensitive)
+		    {
+			    m_CaseSensitive = IsCaseSensitive;
+			    m_XmlDoc = new System.Xml.XmlDocument();
+
+			    if (string.IsNullOrEmpty(strXmlFilename)) {
+				    return;
+			    }
+
+			    // Try to load the file as an XML file
+			    try {
+				    m_XmlDoc.Load(strXmlFilename);
+				    UpdateSections();
+				    m_XmlFilename = strXmlFilename;
+				    m_initialized = true;
+
+			    } catch {
+				    // Exception occurred parsing XmlFilename 
+				    // Manually parse the file line-by-line
+				    ManualParseXmlOrIniFile(strXmlFilename);
+			    }
+		    }
+
+		    /// <summary>
+		    /// Legacy property; calls XmlFilename
+		    /// </summary>
+		    public string IniFilename {
+                get { return this.XmlFilename; }
+		    }
+
+		    /// <summary>
+		    /// This routine returns the name of the ini file.
+		    /// </summary>
+		    /// <return>The function returns the name of ini file.</return>
+		    public string XmlFilename {
+			    get {
+				    if (!Initialized)
+					    throw new XMLFileReaderNotInitializedException();
+				    return (m_XmlFilename);
+			    }
+		    }
+
+		    /// <summary>
+		    /// This routine returns a boolean showing if the file was initialized or not.
+		    /// </summary>
+		    /// <return>The function returns a Boolean.</return>
+		    public bool Initialized {
+			    get { return m_initialized; }
+		    }
+
+		    /// <summary>
+		    /// This routine returns a boolean showing if the name is case sensitive or not.
+		    /// </summary>
+		    /// <return>The function returns a Boolean.</return>
+		    public bool CaseSensitive {
+			    get { return m_CaseSensitive; }
+		    }
+
+		    /// <summary>
+		    /// This routine sets a name.
+		    /// </summary>
+		    /// <param name="aName">The name to be set.</param>
+		    /// <return>The function returns a string.</return>
+		    private string SetNameCase(string aName)
+		    {
+			    if ((CaseSensitive)) {
+				    return aName;
+			    } else {
+				    return aName.ToLower();
+			    }
+		    }
+
+		    /// <summary>
+		    /// Returns the root element of the XML document
+		    /// </summary>
+		    private System.Xml.XmlElement GetRoot()
+		    {
+			    return m_XmlDoc.DocumentElement;
+		    }
+
+		    /// <summary>
+		    /// The function gets the last section.
+		    /// </summary>
+		    /// <return>The function returns the last section as System.Xml.XmlElement.</return>
+		    private System.Xml.XmlElement GetLastSection()
+		    {
+			    if (sections.Count == 0) {
+				    return GetRoot();
+			    } else {
+				    return GetSection(sections[sections.Count - 1]);
+			    }
+		    }
+
+		    /// <summary>
+		    /// The function gets a section as System.Xml.XmlElement.
+		    /// </summary>
+		    /// <param name="sectionName">The name of a section.</param>
+		    /// <return>The function returns a section as System.Xml.XmlElement.</return>
+		    private System.Xml.XmlElement GetSection(string sectionName)
+		    {
+			    if ((!(sectionName == null)) && (!string.IsNullOrEmpty(sectionName))) {
+				    sectionName = SetNameCase(sectionName);
+				    return (System.Xml.XmlElement)m_XmlDoc.SelectSingleNode("//section[@name='" + sectionName + "']");
+			    }
+			    return null;
+		    }
+
+		    /// <summary>
+		    /// The function gets an item.
+		    /// </summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <param name="keyName">The name of the key.</param>
+		    /// <return>The function returns a XML element.</return>
+		    private System.Xml.XmlElement GetItem(string sectionName, string keyName)
+		    {
+			    System.Xml.XmlElement section = default(System.Xml.XmlElement);
+			    if (((keyName != null)) && (!string.IsNullOrEmpty(keyName))) {
+				    keyName = SetNameCase(keyName);
+				    section = GetSection(sectionName);
+				    if (((section != null))) {
+					    return (System.Xml.XmlElement)section.SelectSingleNode("item[@key='" + keyName + "']");
+				    }
+			    }
+			    return null;
+		    }
+
+		    /// <summary>
+		    /// Legacy function name; calls SetXMLSection
+		    /// </summary>
+		    public bool SetIniSection(string oldSection, string newSection)
+		    {
+			    return SetXMLSection(oldSection, newSection);
+		    }
+
+		    /// <summary>
+		    /// The function sets the ini section name.
+		    /// </summary>
+		    /// <param name="oldSection">The name of the old ini section name.</param>
+		    /// <param name="newSection">The new name for the ini section.</param>
+		    /// <return>The function returns a boolean that shows if the change was done.</return>
+		    public bool SetXMLSection(string oldSection, string newSection)
+		    {
+			    System.Xml.XmlElement section = default(System.Xml.XmlElement);
+			    if (!Initialized) {
+				    throw new XMLFileReaderNotInitializedException();
+			    }
+			    if (((newSection != null)) && (!string.IsNullOrEmpty(newSection))) {
+				    section = GetSection(oldSection);
+				    if (((section != null))) {
+					    section.SetAttribute("name", SetNameCase(newSection));
+					    UpdateSections();
+					    return true;
+				    }
+			    }
+			    return false;
+		    }
+
+		    /// <summary>
+		    /// Legacy function name; calls SetXMLValue
+		    /// </summary>
+		    public bool SetIniValue(string sectionName, string keyName, string newValue)
+		    {
+			    return SetXMLValue(sectionName, keyName, newValue);
+		    }
+
+		    /// <summary>
+		    /// The function sets a new value for the "value" attribute.
+		    /// </summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <param name="keyName">The name of the key.</param>
+		    /// <param name="newValue">The new value for the "value".</param>
+		    /// <return>The function returns a boolean that shows if the change was done.</return>
+		    public bool SetXMLValue(string sectionName, string keyName, string newValue)
+		    {
+			    System.Xml.XmlElement item = default(System.Xml.XmlElement);
+			    System.Xml.XmlElement section = default(System.Xml.XmlElement);
+			    if (!Initialized)
+				    throw new XMLFileReaderNotInitializedException();
+			    section = GetSection(sectionName);
+			    if (section == null) {
+				    if (CreateSection(sectionName)) {
+					    section = GetSection(sectionName);
+					    // exit if keyName is Nothing or blank
+					    if ((keyName == null) || (string.IsNullOrEmpty(keyName))) {
+						    return true;
+					    }
+				    } else {
+					    // can't create section
+					    return false;
+				    }
+			    }
+			    if (keyName == null) {
+				    // delete the section
+				    return DeleteSection(sectionName);
+			    }
+
+			    item = GetItem(sectionName, keyName);
+			    if ((item != null)) {
+				    if (newValue == null) {
+					    // delete this item
+					    return DeleteItem(sectionName, keyName);
+				    } else {
+					    // add or update the value attribute
+					    item.SetAttribute("value", newValue);
+					    return true;
+				    }
+			    } else {
+				    // try to create the item
+				    if ((!string.IsNullOrEmpty(keyName)) && ((newValue != null))) {
+					    // construct a new item (blank values are OK)
+					    item = m_XmlDoc.CreateElement("item");
+					    item.SetAttribute("key", SetNameCase(keyName));
+					    item.SetAttribute("value", newValue);
+					    section.AppendChild(item);
+					    return true;
+				    }
+			    }
+			    return false;
+		    }
+
+		    /// <summary>
+		    /// The function deletes a section in the file.
+		    /// </summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <return>The function returns a boolean that shows if the delete was completed.</return>
+		    private bool DeleteSection(string sectionName)
+		    {
+			    System.Xml.XmlElement section = GetSection(sectionName);
+			    if ((section != null)) {
+				    section.ParentNode.RemoveChild(section);
+				    UpdateSections();
+				    return true;
+			    }
+			    return false;
+		    }
+
+		    /// <summary>
+		    /// The function deletes a item in a specific section.
+		    /// </summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <param name="keyName">The name of the key.</param>
+		    /// <return>The function returns a boolean that shows if the delete was completed.</return>
+		    private bool DeleteItem(string sectionName, string keyName)
+		    {
+			    System.Xml.XmlElement item = GetItem(sectionName, keyName);
+			    if ((item != null)) {
+				    item.ParentNode.RemoveChild(item);
+				    return true;
+			    }
+			    return false;
+		    }
+
+		    /// <summary>
+		    /// Legacy function name; calls SetXmlKey
+		    /// </summary>
+		    public bool SetIniKey(string sectionName, string keyName, string newValue)
+		    {
+			    return SetXmlKey(sectionName, keyName, newValue);
+		    }
+
+		    /// <summary>
+		    /// The function sets a new value for the "key" attribute.
+		    /// </summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <param name="keyName">The name of the key.</param>
+		    /// <param name="newValue">The new value for the "key".</param>
+		    /// <return>The function returns a boolean that shows if the change was done.</return>
+		    public bool SetXmlKey(string sectionName, string keyName, string newValue)
+		    {
+			    if (!Initialized)
+				    throw new XMLFileReaderNotInitializedException();
+			    System.Xml.XmlElement item = GetItem(sectionName, keyName);
+			    if ((item != null)) {
+				    item.SetAttribute("key", SetNameCase(newValue));
+				    return true;
+			    }
+			    return false;
+		    }
+
+		    /// <summary>
+		    /// Legacy function name; calls GetXMLValue
+		    /// </summary>
+		    public string GetIniValue(string sectionName, string keyName)
+		    {
+			    return GetXMLValue(sectionName, keyName);
+		    }
+
+		    /// <summary>
+		    /// The function gets the name of the "value" attribute.
+		    /// </summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <param name="keyName">The name of the key.</param>
+		    ///<return>The function returns the name of the "value" attribute.</return>
+		    public string GetXMLValue(string sectionName, string keyName)
+		    {
+			    if (!Initialized)
+				    throw new XMLFileReaderNotInitializedException();
+			    System.Xml.XmlNode N = GetItem(sectionName, keyName);
+			    if ((N != null)) {
+				    return (N.Attributes.GetNamedItem("value").Value);
+			    }
+			    return null;
+		    }
+
+		    /// <summary>
+		    /// Legacy function name; calls GetXmlSectionComments
+		    /// </summary>
+		    public System.Collections.Specialized.StringCollection GetIniComments(string sectionName)
+		    {
+			    return GetXmlSectionComments(sectionName);
+		    }
+
+		    /// <summary>
+		    /// The function gets the comments for a section name.
+		    /// </summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    ///<return>The function returns a string collection with comments</return>
+		    public System.Collections.Specialized.StringCollection GetXmlSectionComments(string sectionName)
+		    {
+			    if (!Initialized)
+				    throw new XMLFileReaderNotInitializedException();
+			    System.Collections.Specialized.StringCollection sc = new System.Collections.Specialized.StringCollection();
+			    System.Xml.XmlNode target = default(System.Xml.XmlNode);
+			    System.Xml.XmlNodeList nodes = default(System.Xml.XmlNodeList);
+			    
+			    if (sectionName == null) {
+				    target = m_XmlDoc.DocumentElement;
+			    } else {
+				    target = GetSection(sectionName);
+			    }
+			    if ((target != null)) {
+				    nodes = target.SelectNodes("comment");
+				    if (nodes.Count > 0) {
+					    foreach ( System.Xml.XmlElement N in nodes) {
+						    sc.Add(N.InnerText);
+					    }
+				    }
+			    }
+			    return sc;
+		    }
+
+		    /// <summary>
+		    /// Legacy function name; calls SetXMLComments
+		    /// </summary>
+		    public bool SetIniComments(string sectionName, System.Collections.Specialized.StringCollection comments)
+		    {
+			    return SetXMLComments(sectionName, comments);
+		    }
+
+		    /// <summary>
+		    /// The function sets a the comments for a section name.
+		    /// </summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <param name="comments">A string collection.</param>
+		    ///<return>The function returns a Boolean that shows if the change was done.</return>
+		    public bool SetXMLComments(string sectionName, System.Collections.Specialized.StringCollection comments)
+		    {
+			    if (!Initialized)
+				    throw new XMLFileReaderNotInitializedException();
+			    System.Xml.XmlNode target = default(System.Xml.XmlNode);
+			    System.Xml.XmlNodeList nodes = default(System.Xml.XmlNodeList);
+			    
+			    System.Xml.XmlElement NLastComment = default(System.Xml.XmlElement);
+			    if (sectionName == null) {
+				    target = m_XmlDoc.DocumentElement;
+			    } else {
+				    target = GetSection(sectionName);
+			    }
+			    if ((target != null)) {
+				    nodes = target.SelectNodes("comment");
+				    foreach ( System.Xml.XmlNode N in nodes) {
+					    target.RemoveChild(N);
+				    }
+				    foreach ( string s in comments) {
+                        System.Xml.XmlNode N = m_XmlDoc.CreateElement("comment");
+					    N.InnerText = s;
+					    NLastComment = (System.Xml.XmlElement)target.SelectSingleNode("comment[last()]");
+					    if (NLastComment == null) {
+						    target.PrependChild(N);
+					    } else {
+						    target.InsertAfter(N, NLastComment);
+					    }
+				    }
+				    return true;
+			    }
+			    return false;
+		    }
+
+		    /// <summary>
+		    /// The subroutine updades the sections.
+		    /// </summary>
+		    private void UpdateSections()
+		    {
+			    sections = new System.Collections.Specialized.StringCollection();			    
+			    foreach ( System.Xml.XmlElement N in m_XmlDoc.SelectNodes("sections/section")) {
+				    sections.Add(N.GetAttribute("name"));
+			    }
+		    }
+		    /// <summary>
+		    /// The subroutine gets the sections.
+		    /// </summary>
+		    /// <return>The subroutine returns a strin collection of sections.</return>
+		    public System.Collections.Specialized.StringCollection AllSections {
+			    get {
+				    if (!Initialized) {
+					    throw new XMLFileReaderNotInitializedException();
+				    }
+				    return sections;
+			    }
+		    }
+
+		    /// <summary>
+		    /// The function gets a collection of items for a section name.
+		    /// </summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <param name="itemType">Item type.</param>
+		    /// <return>The function returns a string colection of items in a section.</return>
+		    private System.Collections.Specialized.StringCollection GetItemsInSection(string sectionName, XMLItemTypeEnum itemType)
+		    {
+			    System.Xml.XmlNodeList nodes = default(System.Xml.XmlNodeList);
+			    System.Collections.Specialized.StringCollection items = new System.Collections.Specialized.StringCollection();
+			    System.Xml.XmlNode section = GetSection(sectionName);
+			    
+			    if (section == null) {
+				    return null;
+			    } else {
+				    nodes = section.SelectNodes("item");
+				    if (nodes.Count > 0) {
+					    foreach ( System.Xml.XmlElement N in nodes) {
+						    switch (itemType) {
+							    case XMLItemTypeEnum.GetKeys:
+								    items.Add(N.Attributes.GetNamedItem("key").Value);
+								    break;
+							    case XMLItemTypeEnum.GetValues:
+								    items.Add(N.Attributes.GetNamedItem("value").Value);
+								    break;
+							    case XMLItemTypeEnum.GetKeysAndValues:
+								    items.Add(N.Attributes.GetNamedItem("key").Value + "=" + N.Attributes.GetNamedItem("value").Value);
+								    break;
+						    }
+					    }
+				    }
+				    return items;
+			    }
+		    }
+
+		    /// <summary>The funtions gets a collection of keys in a section.</summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <return>The function returns a string colection of all the keys in a section.</return>
+		    public System.Collections.Specialized.StringCollection AllKeysInSection(string sectionName)
+		    {
+			    if (!Initialized)
+				    throw new XMLFileReaderNotInitializedException();
+			    return GetItemsInSection(sectionName, XMLItemTypeEnum.GetKeys);
+		    }
+
+		    /// <summary>The funtions gets a collection of values in a section.</summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <return>The function returns a string colection of all the values in a section.</return>
+		    public System.Collections.Specialized.StringCollection AllValuesInSection(string sectionName)
+		    {
+			    if (!Initialized)
+				    throw new XMLFileReaderNotInitializedException();
+			    return GetItemsInSection(sectionName, XMLItemTypeEnum.GetValues);
+		    }
+
+		    /// <summary>The funtions gets a collection of items in a section.</summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <return>The function returns a string colection of all the items in a section.</return>
+		    public System.Collections.Specialized.StringCollection AllItemsInSection(string sectionName)
+		    {
+			    if (!Initialized)
+				    throw new XMLFileReaderNotInitializedException();
+			    return (GetItemsInSection(sectionName, XMLItemTypeEnum.GetKeysAndValues));
+		    }
+
+		    /// <summary>The funtions gets a custom attribute name.</summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <param name="keyName">The name of the key.</param>
+		    /// <param name="attributeName">The name of the attribute.</param>
+		    /// <return>The function returns a string.</return>
+		    public string GetCustomIniAttribute(string sectionName, string keyName, string attributeName)
+		    {
+			    System.Xml.XmlElement N = default(System.Xml.XmlElement);
+			    if (!Initialized)
+				    throw new XMLFileReaderNotInitializedException();
+			    if (((attributeName != null)) && (!string.IsNullOrEmpty(attributeName))) {
+				    N = GetItem(sectionName, keyName);
+				    if ((N != null)) {
+					    attributeName = SetNameCase(attributeName);
+					    return N.GetAttribute(attributeName);
+				    }
+			    }
+			    return null;
+		    }
+
+		    /// <summary>The funtions sets a custom attribute name.</summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <param name="keyName">The name of the key.</param>
+		    /// <param name="attributeName">The name of the attribute.</param>
+		    /// <param name="attributeValue">The value of the attribute.</param>
+		    /// <return>The function returns a Boolean.</return>
+		    public bool SetCustomIniAttribute(string sectionName, string keyName, string attributeName, string attributeValue)
+		    {
+			    System.Xml.XmlElement N = default(System.Xml.XmlElement);
+			    if (!Initialized)
+				    throw new XMLFileReaderNotInitializedException();
+			    if (!string.IsNullOrEmpty(attributeName)) {
+				    N = GetItem(sectionName, keyName);
+				    if ((N != null)) {
+					    try {
+						    if (attributeValue == null) {
+							    // delete the attribute
+							    N.RemoveAttribute(attributeName);
+							    return true;
+						    } else {
+							    attributeName = SetNameCase(attributeName);
+							    N.SetAttribute(attributeName, attributeValue);
+							    return true;
+						    }
+
+					    } catch (System.Exception e) {
+						    if (NotifyOnException) {
+							    throw new System.Exception("Failed to create item: " + e.Message);
+						    }
+					    }
+				    }
+				    return false;
+			    }
+
+                return false;
+		    }
+
+		    /// <summary>The funtions creates a section name.</summary>
+		    /// <param name="sectionName">The name of the section to be created.</param>
+		    /// <return>The function returns a Boolean.</return>
+		    private bool CreateSection(string sectionName)
+		    {
+			    System.Xml.XmlElement N = default(System.Xml.XmlElement);
+			    System.Xml.XmlAttribute Natt = default(System.Xml.XmlAttribute);
+			    if (((sectionName != null)) && (!string.IsNullOrEmpty(sectionName))) {
+				    sectionName = SetNameCase(sectionName);
+				    try {
+					    N = m_XmlDoc.CreateElement("section");
+					    Natt = m_XmlDoc.CreateAttribute("name");
+					    Natt.Value = SetNameCase(sectionName);
+					    N.Attributes.SetNamedItem(Natt);
+					    m_XmlDoc.DocumentElement.AppendChild(N);
+					    sections.Add(Natt.Value);
+					    return true;
+				    } catch (System.Exception e) {
+					    if (NotifyOnException) {
+                            throw new System.Exception("Failed to create item: " + e.Message);
+					    }
+					    return false;
+				    }
+			    }
+			    return false;
+		    }
+
+		    /// <summary>The funtions creates a section name.</summary>
+		    /// <param name="sectionName">The name of the section.</param>
+		    /// <param name="keyName">The name of the key.</param>
+		    /// <param name="newValue">The new value to be created.</param>
+		    /// <return>The function returns a Boolean.</return>
+		    private bool CreateItem(string sectionName, string keyName, string newValue)
+		    {
+			    System.Xml.XmlElement item = default(System.Xml.XmlElement);
+			    System.Xml.XmlElement section = default(System.Xml.XmlElement);
+			    try {
+				    section = GetSection(sectionName);
+				    if ((section != null)) {
+					    item = m_XmlDoc.CreateElement("item");
+					    item.SetAttribute("key", keyName);
+					    item.SetAttribute("newValue", newValue);
+					    section.AppendChild(item);
+					    return true;
+				    }
+				    return false;
+			    } catch (System.Exception e) {
+				    if (NotifyOnException) {
+                        throw new System.Exception("Failed to create item: " + e.Message);
+				    }
+				    return false;
+			    }
+		    }
+
+		    /// <summary>
+		    /// Manually read a XML or .INI settings file line-by-line, extracting out any settings in the expected format
+		    /// </summary>
+		    /// <param name="strFilePath"></param>
+		    /// <returns></returns>
+		    /// <remarks></remarks>
+		    public bool ManualParseXmlOrIniFile(string strFilePath)
+		    {
+
+			    // Create a new, blank XML document
+			    m_XmlDoc.LoadXml("<?xml version=\"1.0\" encoding=\"UTF-8\"?><sections></sections>");
+
+			    try {
+				    System.IO.FileInfo fi = default(System.IO.FileInfo);
+				    string s = null;
+				    System.IO.StreamReader srInFile = default(System.IO.StreamReader);
+
+				    fi = new System.IO.FileInfo(strFilePath);
+				    if ((fi.Exists)) {
+					    // Read strFilePath line-by-line to see if it has any .Ini style settings
+					    // For example:
+					    //   [SectionName]
+					    //   Setting1=ValueA
+					    //   Setting2=ValueB
+
+					    // Also look for XML-style entries
+					    // For example:
+					    //   <section name="SectionName">
+					    //     <item key="Setting1" value="ValueA" />
+					    //   </section>
+
+                        srInFile = new System.IO.StreamReader(new System.IO.FileStream(fi.FullName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite));
+
+					    while (!srInFile.EndOfStream) {
+						    s = srInFile.ReadLine();
+
+						    // Try to manually parse this line
+						    ParseLineManual(s, ref m_XmlDoc);
+					    }
+
+					    m_XmlFilename = strFilePath;
+					    m_initialized = true;
+
+					    srInFile.Close();
+				    } else {
+					    // File doesn't exist; create a new, blank .XML file
+					    m_XmlFilename = strFilePath;
+					    m_XmlDoc.Save(m_XmlFilename);
+					    m_initialized = true;
+				    }
+
+				    return true;
+
+			    } catch (System.Exception e) {
+				    if (NotifyOnException) {
+                        throw new System.Exception("Failed to read XML file: " + e.Message);
+				    }
+			    }
+
+			    return false;
+
+		    }
+
+		    /// <summary>Manually parses a line to extract the settings information
+		    /// Supports the traditional .Ini file format
+		    /// Also supports the 'key="KeyName" value="Value"' method used in XML settings files
+		    /// If success, then adds attributes to the doc object</summary>
+		    /// <param name="strLine">The name of the string to be parse.</param>
+		    /// <param name="doc">The name of the System.Xml.XmlDocument.</param>
+		    /// <returns>True if success, false if not a recognized line format</returns>
+		    private bool ParseLineManual(string strLine, ref System.Xml.XmlDocument doc)
+		    {
+			    const string SECTION_NAME_TAG = "<section name=";
+			    const string KEY_TAG = "key=";
+			    const string VALUE_TAG = "value=";
+
+			    string strKey = string.Empty;
+			    string strValue = string.Empty;
+			    bool blnAddSetting = false;
+
+			    System.Xml.XmlElement N = default(System.Xml.XmlElement);
+			    System.Xml.XmlAttribute Natt = default(System.Xml.XmlAttribute);
+			    string[] parts = null;
+
+			    strLine = strLine.TrimStart();
+			    if (strLine.Length == 0) {
+				    return true;
+			    }
+
+			    switch ((strLine.Substring(0, 1))) {
+				    case "[":
+					    // this is a section
+					    // trim the first and last characters
+					    strLine = strLine.TrimStart('[');
+					    strLine = strLine.TrimEnd(']');
+					    // create a new section element
+					    CreateSection(strLine);
+					    break;
+				    case ";":
+					    // new comment
+					    N = doc.CreateElement("comment");
+					    N.InnerText = strLine.Substring(1);
+					    GetLastSection().AppendChild(N);
+					    break;
+				    default:
+					    // Look for typical XML settings file elements
+
+					    if (ParseLineManualCheckTag(strLine, SECTION_NAME_TAG, ref strKey)) {
+						    // This is an XML-style section
+
+						    // Create a new section element
+						    CreateSection(strKey);
+
+					    } else {
+                            if (ParseLineManualCheckTag(strLine, KEY_TAG, ref strKey))
+                            {
+							    // This is an XML-style key
+
+                                ParseLineManualCheckTag(strLine, VALUE_TAG, ref strValue);
+
+						    } else {
+							    // split the string on the "=" sign, if present
+							    if ((strLine.IndexOf("=") > 0)) {
+								    parts = strLine.Split('=');
+								    strKey = parts[0].Trim();
+								    strValue = parts[1].Trim();
+							    } else {
+								    strKey = strLine;
+								    strValue = string.Empty;
+							    }
+						    }
+
+						    if (string.IsNullOrEmpty(strKey)) {
+							    strKey = string.Empty;
+						    }
+
+						    if (string.IsNullOrEmpty(strValue)) {
+							    strValue = string.Empty;
+						    }
+
+						    if (strKey.Length > 0) {
+							    blnAddSetting = true;
+
+							    switch (strKey.ToLower().Trim()) {
+
+								    case "<sections>":
+								    case "</section>":
+								    case "</sections>":
+									    // Do not add a new key
+									    if (string.IsNullOrEmpty(strValue)) {
+										    blnAddSetting = false;
+									    }
+
+									    break;
+							    }
+
+						    } else {
+							    blnAddSetting = false;
+						    }
+
+						    if (blnAddSetting) {
+							    N = doc.CreateElement("item");
+							    Natt = doc.CreateAttribute("key");
+							    Natt.Value = SetNameCase(strKey);
+							    N.Attributes.SetNamedItem(Natt);
+
+							    Natt = doc.CreateAttribute("value");
+							    Natt.Value = strValue;
+							    N.Attributes.SetNamedItem(Natt);
+
+							    GetLastSection().AppendChild(N);
+
+						    }
+
+					    }
+
+					    break;
+			    }
+
+                return false;
+		    }
+
+		    private bool ParseLineManualCheckTag(string strLine, string strTagTofind, ref string strTagValue)
+		    {
+
+			    int intMatchIndex = 0;
+			    int intNextMatchIndex = 0;
+
+			    strTagValue = string.Empty;
+
+			    intMatchIndex = strLine.ToLower().IndexOf(strTagTofind);
+
+			    if (intMatchIndex >= 0) {
+				    strTagValue = strLine.Substring(intMatchIndex + strTagTofind.Length);
+
+				    if (strTagValue.StartsWith('"'.ToString())) {
+					    strTagValue = strTagValue.Substring(1);
+				    }
+
+				    intNextMatchIndex = strTagValue.IndexOf('"');
+				    if (intNextMatchIndex >= 0) {
+					    strTagValue = strTagValue.Substring(0, intNextMatchIndex);
+				    }
+
+				    return true;
+			    } else {
+				    return false;
+			    }
+
+		    }
+
+		    /// <summary>It Sets or Gets the output file name.</summary>
+		    public string OutputFilename {
+			    get {
+				    if (!Initialized)
+					    throw new XMLFileReaderNotInitializedException();
+				    return m_SaveFilename;
+			    }
+			    set {
+				    System.IO.FileInfo fi = default(System.IO.FileInfo);
+				    if (!Initialized)
+					    throw new XMLFileReaderNotInitializedException();
+				    fi = new System.IO.FileInfo(value);
+				    if (!fi.Directory.Exists) {
+					    if (NotifyOnException) {
+						    throw new System.Exception("Invalid path for output file.");
+					    }
+				    } else {
+					    m_SaveFilename = value;
+				    }
+			    }
+		    }
+		    /// <summary>It saves the data to the Xml output file.</summary>
+		    public void Save()
+		    {
+			    if (!Initialized)
+				    throw new XMLFileReaderNotInitializedException();
+			    if ((OutputFilename != null) && (m_XmlDoc != null)) {
+				    System.IO.FileInfo fi = new System.IO.FileInfo(OutputFilename);
+				    if (!fi.Directory.Exists) {
+					    if (NotifyOnException) {
+						    throw new System.Exception("Invalid path.");
+					    }
+					    return;
+				    }
+				    if (fi.Exists) {
+					    fi.Delete();
+					    m_XmlDoc.Save(OutputFilename);
+				    } else {
+					    m_XmlDoc.Save(OutputFilename);
+				    }
+				    if (NotifyOnEvent) {
+					    if (InformationMessage != null) {
+						    InformationMessage("File save complete.");
+					    }
+				    }
+			    } else {
+				    if (NotifyOnException) {
+					    throw new System.Exception("Not Output File name specified.");
+				    }
+			    }
+		    }
+
+		    /// <summary>It gets the System.Xml.XmlDocument.</summary>
+		    public System.Xml.XmlDocument XmlDoc {
+			    get {
+				    if (!Initialized)
+					    throw new XMLFileReaderNotInitializedException();
+				    return m_XmlDoc;
+			    }
+		    }
+
+		    /// <summary>Converts an XML document to a string.</summary>
+		    /// <return>It returns the XML document formatted as a string.</return>
+		    public string XML {
+			    get {
+				    if (!Initialized)
+					    throw new XMLFileReaderNotInitializedException();
+				    System.Text.StringBuilder sb = new System.Text.StringBuilder();
+				    System.IO.StringWriter sw = new System.IO.StringWriter(sb);
+				    System.Xml.XmlTextWriter xw = new System.Xml.XmlTextWriter(sw);
+				    xw.Indentation = 3;
+				    xw.Formatting = System.Xml.Formatting.Indented;
+				    m_XmlDoc.WriteContentTo(xw);
+				    xw.Close();
+				    sw.Close();
+				    return sb.ToString();
+			    }
+		    }
+
+	    }
+
+	    public class XMLFileReaderNotInitializedException : System.ApplicationException
+	    {
+		    public override string Message {
+			    get { return "The XMLFileReader instance has not been properly initialized."; }
+		    }
+	    }
+
+    }
+
+}

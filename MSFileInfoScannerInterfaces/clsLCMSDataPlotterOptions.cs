@@ -1,157 +1,149 @@
-﻿''' <summary>
-''' Options class for clsLCMSDatPlotter
-''' </summary>
-''' <remarks></remarks>
-Public Class clsLCMSDataPlotterOptions
+﻿
+namespace MSFileInfoScannerInterfaces
+{
+    /// <summary>
+    /// Options class for clsLCMSDatPlotter
+    /// </summary>
+    /// <remarks></remarks>
+    public class clsLCMSDataPlotterOptions
+    {
 
-    Public Const DEFAULT_MAX_POINTS_TO_PLOT As Integer = 200000
-    Public Const DEFAULT_MIN_POINTS_PER_SPECTRUM As Integer = 2
+        public const int DEFAULT_MAX_POINTS_TO_PLOT = 200000;
 
-    Public Const DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR As Integer = 10
+        public const int DEFAULT_MIN_POINTS_PER_SPECTRUM = 2;
 
-    Public Const DEFAULT_MZ_RESOLUTION As Single = 0.4
-    Public Const DEFAULT_MIN_INTENSITY As Single = 0
+        public const int DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR = 10;
+        public const float DEFAULT_MZ_RESOLUTION = 0.4f;
 
-    Protected Const DEFAULT_MS1_PLOT_TITLE As String = "MS Spectra"
-    Protected Const DEFAULT_MS2_PLOT_TITLE As String = "MS2 Spectra"
+        public const float DEFAULT_MIN_INTENSITY = 0;
+        protected const string DEFAULT_MS1_PLOT_TITLE = "MS Spectra";
 
-    Public Const DEFAULT_MAX_MONO_MASS_FOR_DEISOTOPED_PLOT As Double = 12000
-    Public Const DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT As Double = 4000
+        protected const string DEFAULT_MS2_PLOT_TITLE = "MS2 Spectra";
+        public const double DEFAULT_MAX_MONO_MASS_FOR_DEISOTOPED_PLOT = 12000;
 
-    Protected mMaxPointsToPlot As Integer
-    Protected mMinPointsPerSpectrum As Integer
+        public const double DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT = 4000;
+        protected int mMaxPointsToPlot;
 
-    Protected mMZResolution As Single
-    Protected mMinIntensity As Single
+        protected int mMinPointsPerSpectrum;
+        protected float mMZResolution;
 
-    Protected mMS1PlotTitle As String
-    Protected mMS2PlotTitle As String
+        protected float mMinIntensity;
+        protected string mMS1PlotTitle;
 
-    ' The following is only used when PlottingDeisotopedData is true
-    Protected mMaxMonoMass As Double
+        protected string mMS2PlotTitle;
+        // The following is only used when PlottingDeisotopedData is true
 
-    Public Property MaxPointsToPlot() As Integer
-        Get
-            Return mMaxPointsToPlot
-        End Get
-        Set(ByVal value As Integer)
-            If value < 10 Then value = 10
-            mMaxPointsToPlot = value
-        End Set
-    End Property
+        protected double mMaxMonoMass;
+        public int MaxPointsToPlot {
+            get { return mMaxPointsToPlot; }
+            set {
+                if (value < 10)
+                    value = 10;
+                mMaxPointsToPlot = value;
+            }
+        }
 
-    Public Property MinPointsPerSpectrum() As Integer
-        Get
-            Return mMinPointsPerSpectrum
-        End Get
-        Set(ByVal value As Integer)
-            If value < 0 Then value = 0
-            mMinPointsPerSpectrum = value
-        End Set
-    End Property
+        public int MinPointsPerSpectrum {
+            get { return mMinPointsPerSpectrum; }
+            set {
+                if (value < 0)
+                    value = 0;
+                mMinPointsPerSpectrum = value;
+            }
+        }
 
-    Public Property MS1PlotTitle() As String
-        Get
-            Return mMS1PlotTitle
-        End Get
-        Set(value As String)
-            If String.IsNullOrEmpty(value) Then
-                value = DEFAULT_MS1_PLOT_TITLE
-            End If
-            mMS1PlotTitle = value
-        End Set
-    End Property
+        public string MS1PlotTitle {
+            get { return mMS1PlotTitle; }
+            set {
+                if (string.IsNullOrEmpty(value)) {
+                    value = DEFAULT_MS1_PLOT_TITLE;
+                }
+                mMS1PlotTitle = value;
+            }
+        }
 
-    Public Property MS2PlotTitle() As String
-        Get
-            Return mMS2PlotTitle
-        End Get
-        Set(value As String)
-            If String.IsNullOrEmpty(value) Then
-                value = DEFAULT_MS2_PLOT_TITLE
-            End If
-            mMS2PlotTitle = value
-        End Set
-    End Property
+        public string MS2PlotTitle {
+            get { return mMS2PlotTitle; }
+            set {
+                if (string.IsNullOrEmpty(value)) {
+                    value = DEFAULT_MS2_PLOT_TITLE;
+                }
+                mMS2PlotTitle = value;
+            }
+        }
 
-    Public Property MZResolution() As Single
-        Get
-            Return mMZResolution
-        End Get
-        Set(ByVal value As Single)
-            If value < 0 Then value = 0
-            mMZResolution = value
-        End Set
-    End Property
+        public float MZResolution {
+            get { return mMZResolution; }
+            set {
+                if (value < 0)
+                    value = 0;
+                mMZResolution = value;
+            }
+        }
 
-    Public Property MinIntensity() As Single
-        Get
-            Return mMinIntensity
-        End Get
-        Set(ByVal value As Single)
-            If value < 0 Then value = 0
-            mMinIntensity = value
-        End Set
-    End Property
+        public float MinIntensity {
+            get { return mMinIntensity; }
+            set {
+                if (value < 0)
+                    value = 0;
+                mMinIntensity = value;
+            }
+        }
 
-    Public Property MaxMonoMassForDeisotopedPlot() As Double
-        Get
-            Return mMaxMonoMass
-        End Get
-        Set(value As Double)
-            If value < 100 Then value = 100
-            mMaxMonoMass = value
-        End Set
-    End Property
+        public double MaxMonoMassForDeisotopedPlot {
+            get { return mMaxMonoMass; }
+            set {
+                if (value < 100)
+                    value = 100;
+                mMaxMonoMass = value;
+            }
+        }
 
-    Public Property PlottingDeisotopedData() As Boolean
+        public bool PlottingDeisotopedData { get; set; }
 
-    ''' <summary>
-    ''' Set to True to print out a series of 2D plots, each using a different color scheme
-    ''' </summary>
-    Public Property TestGradientColorSchemes As Boolean     
+        /// <summary>
+        /// Set to True to print out a series of 2D plots, each using a different color scheme
+        /// </summary>
+        public bool TestGradientColorSchemes { get; set; }
 
-    Public Property UseObservedMinScan() As Boolean
+        public bool UseObservedMinScan { get; set; }
 
 
-    Public Function Clone() As clsLCMSDataPlotterOptions
-        Dim objClone As New clsLCMSDataPlotterOptions
+        public clsLCMSDataPlotterOptions Clone()
+        {
+            var objClone = new clsLCMSDataPlotterOptions
+            {
+                MaxPointsToPlot = MaxPointsToPlot,
+                MinPointsPerSpectrum = MinPointsPerSpectrum,
+                MZResolution = MZResolution,
+                MinIntensity = MinIntensity,
+                MS1PlotTitle = MS1PlotTitle,
+                MS2PlotTitle = MS2PlotTitle,
+                PlottingDeisotopedData = PlottingDeisotopedData,
+                UseObservedMinScan = UseObservedMinScan,
+                MaxMonoMassForDeisotopedPlot = MaxMonoMassForDeisotopedPlot
+            };
 
-        With objClone
-            .MaxPointsToPlot = MaxPointsToPlot
-            .MinPointsPerSpectrum = MinPointsPerSpectrum
+            return objClone;
 
-            .MZResolution = MZResolution
-            .MinIntensity = MinIntensity
+        }
 
-            .MS1PlotTitle = MS1PlotTitle
-            .MS2PlotTitle = MS2PlotTitle
+        public clsLCMSDataPlotterOptions()
+        {
+            mMaxPointsToPlot = DEFAULT_MAX_POINTS_TO_PLOT;
+            mMinPointsPerSpectrum = DEFAULT_MIN_POINTS_PER_SPECTRUM;
 
-            .PlottingDeisotopedData = PlottingDeisotopedData
-            .UseObservedMinScan = UseObservedMinScan
+            mMZResolution = DEFAULT_MZ_RESOLUTION;
+            mMinIntensity = DEFAULT_MIN_INTENSITY;
 
-            .MaxMonoMassForDeisotopedPlot = MaxMonoMassForDeisotopedPlot
-        End With
+            mMS1PlotTitle = DEFAULT_MS1_PLOT_TITLE;
+            mMS2PlotTitle = DEFAULT_MS2_PLOT_TITLE;
 
-        Return objClone
+            mMaxMonoMass = DEFAULT_MAX_MONO_MASS_FOR_DEISOTOPED_PLOT;
 
-    End Function
+            PlottingDeisotopedData = false;
+            UseObservedMinScan = false;
+        }
 
-    Public Sub New()
-        mMaxPointsToPlot = DEFAULT_MAX_POINTS_TO_PLOT
-        mMinPointsPerSpectrum = DEFAULT_MIN_POINTS_PER_SPECTRUM
-
-        mMZResolution = DEFAULT_MZ_RESOLUTION
-        mMinIntensity = DEFAULT_MIN_INTENSITY
-
-        mMS1PlotTitle = DEFAULT_MS1_PLOT_TITLE
-        mMS2PlotTitle = DEFAULT_MS2_PLOT_TITLE
-
-        mMaxMonoMass = DEFAULT_MAX_MONO_MASS_FOR_DEISOTOPED_PLOT
-
-        PlottingDeisotopedData = False
-        UseObservedMinScan = False
-    End Sub
-
-
-End Class
+    }
+}

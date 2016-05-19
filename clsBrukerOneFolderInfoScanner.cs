@@ -1,487 +1,492 @@
-Option Strict On
-
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Started in 2005
-'
-' Last modified September 17, 2005
-
-Imports System.IO
-Imports System.Text.RegularExpressions
-
-Public Class clsBrukerOneFolderInfoScanner
-    Inherits clsMSFileInfoProcessorBaseClass
-
-    Public Const BRUKER_ONE_FOLDER_NAME As String = "1"
-
-    Private Const BRUKER_LOCK_FILE As String = "LOCK"
-    Private Const BRUKER_ACQU_FILE As String = "acqu"
-    Private Const BRUKER_ACQU_FILE_ACQ_LINE_START As String = "##$AQ_DATE= <"
-    Private Const BRUKER_ACQU_FILE_ACQ_LINE_END As Char = ">"c
-
-    Private Const TIC_FILE_NUMBER_OF_FILES_LINE_START As String = "Number of files :"
-
-    Private Const TIC_FILE_TIC_FILE_LIST_START As String = "TIC file list:"
-    Private Const TIC_FILE_TIC_FILE_LIST_END As String = "TIC end of file list"
-    Private Const TIC_FILE_COMMENT_SECTION_END As String = "CommentEnd"
-
-    Private Const PEK_FILE_FILENAME_LINE As String = "Filename:"
-
-    Private Const MINIMUM_ACCEPTABLE_ACQ_START_TIME As DateTime = #1/1/1975#
-
-    Public Overrides Function GetDatasetNameViaPath(strDataFilePath As String) As String
-        Dim ioFolderInfo As DirectoryInfo
-        Dim strDatasetName As String = String.Empty
-
-        Try
-            ' The dataset name for a Bruker 1 folder or zipped S folder is the name of the parent directory
-            ioFolderInfo = New DirectoryInfo(strDataFilePath)
-            strDatasetName = ioFolderInfo.Parent.Name
-        Catch ex As Exception
-            ' Ignore errors
-        End Try
-
-        If strDatasetName Is Nothing Then strDatasetName = String.Empty
-        Return strDatasetName
-
-    End Function
-
-    Public Shared Function IsZippedSFolder(strFilePath As String) As Boolean
-
-        Static reCheckFile As Regex = New Regex("s[0-9]+\.zip", Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
-
-        Return reCheckFile.Match(strFilePath).Success
-
-    End Function
-
-    Private Function ParseBrukerDateFromArray(ByRef strLineIn As String, ByRef dtDate As DateTime) As Boolean
-        Dim strDate As String
-        Dim blnSuccess As Boolean
-
-        Dim intStartIndex As Integer
-        Dim intIndexCheck As Integer
-        Dim intIndexCompare As Integer
-
-        Dim strSplitLine() As String
-
-        Try
-            strSplitLine = strLineIn.Split(" "c)
-
-            ' Remove any entries from strSplitLine() that are blank
-            intIndexCheck = intStartIndex
-            Do While intIndexCheck < strSplitLine.Length AndAlso strSplitLine.Length > 0
-                If strSplitLine(intIndexCheck).Length = 0 Then
-                    For intIndexCompare = intIndexCheck To strSplitLine.Length - 2
-                        strSplitLine(intIndexCompare) = strSplitLine(intIndexCompare + 1)
-                    Next intIndexCompare
-                    ReDim Preserve strSplitLine(strSplitLine.Length - 2)
-                Else
-                    intIndexCheck += 1
-                End If
-            Loop
-
-            If strSplitLine.Length >= 5 Then
-                intStartIndex = strSplitLine.Length - 5
-                strDate = strSplitLine(4 + intStartIndex) & "-" & strSplitLine(1 + intStartIndex) & "-" & strSplitLine(2 + intStartIndex) & " " & strSplitLine(3 + intStartIndex)
-                dtDate = DateTime.Parse(strDate)
-                blnSuccess = True
-            Else
-                blnSuccess = False
-            End If
-        Catch ex As Exception
-            ' Date parse failed
-            blnSuccess = False
-        End Try
-
-        Return blnSuccess
-
-    End Function
-
-    Private Function ParseBrukerAcquFile(strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        Dim strLineIn As String
-
-        Dim blnSuccess As Boolean
-
-        Try
-            ' Try to open the acqu file
-            blnSuccess = False
-            Using srInFile = New StreamReader(Path.Combine(strFolderPath, BRUKER_ACQU_FILE))
-                Do While srInFile.Peek() >= 0
-                    strLineIn = srInFile.ReadLine()
-
-                    If Not strLineIn Is Nothing Then
-                        If strLineIn.StartsWith(BRUKER_ACQU_FILE_ACQ_LINE_START) Then
-                            ' Date line found
-                            ' It is of the form: ##$AQ_DATE= <Sat Aug 20 07:56:55 2005> 
-                            strLineIn = strLineIn.Substring(BRUKER_ACQU_FILE_ACQ_LINE_START.Length).Trim
-                            strLineIn = strLineIn.TrimEnd(BRUKER_ACQU_FILE_ACQ_LINE_END)
-
-                            blnSuccess = ParseBrukerDateFromArray(strLineIn, udtFileInfo.AcqTimeEnd)
-                            Exit Do
-                        End If
-                    End If
-                Loop
-            End Using
-
-        Catch ex As Exception
-            ' Error opening the acqu file
-            blnSuccess = False
-        End Try
-
-        Return blnSuccess
-
-    End Function
-
-    Private Function ParseBrukerLockFile(strFolderPath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        Dim strLineIn As String
-        Dim strSplitLine() As String
-
-        Dim blnSuccess As Boolean
-
-        Try
-            ' Try to open the Lock file
-            ' The date line is the first (and only) line in the file
-            blnSuccess = False
-            Using srInFile = New StreamReader(Path.Combine(strFolderPath, BRUKER_LOCK_FILE))
-                If srInFile.Peek() >= 0 Then
-                    strLineIn = srInFile.ReadLine()
-                    If Not strLineIn Is Nothing Then
-                        ' Date line found
-                        ' It is of the form: wd37119 2208 WD37119\9TOperator Sat Aug 20 06:10:31 2005
-                        strSplitLine = strLineIn.Trim.Split(" "c)
-
-                        blnSuccess = ParseBrukerDateFromArray(strLineIn, udtFileInfo.AcqTimeStart)
-                    End If
-                End If
-            End Using
-
-        Catch ex As Exception
-            ' Error opening the Lock file
-            blnSuccess = False
-        End Try
-
-        Return blnSuccess
-
-    End Function
-
-    Private Function ParseBrukerZippedSFolders(ByRef ioFolderInfo As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        ' Looks through the s*.zip files to determine the total file size (uncompressed) of all files in all the matching .Zip files
-        ' Updates udtFileInfo.FileSizeBytes with this info, while also updating udtFileInfo.ScanCount with the total number of files found
-        ' Returns True if success and also if no matching Zip files were found; returns False if error
-
-        Dim blnSuccess As Boolean = False
-
-        udtFileInfo.FileSizeBytes = 0
-        udtFileInfo.ScanCount = 0
-
-        Try
-            For Each ioFileMatch As FileInfo In ioFolderInfo.GetFiles("s*.zip")
-                ' Get the info on each zip file
-
-                Using objZipFile As Ionic.Zip.ZipFile = New Ionic.Zip.ZipFile(ioFileMatch.FullName)
-                    For Each objZipEntry As Ionic.Zip.ZipEntry In objZipFile.Entries
-                        udtFileInfo.FileSizeBytes += objZipEntry.UncompressedSize
-                        udtFileInfo.ScanCount += 1
-                    Next
-                End Using
-
-            Next ioFileMatch
-            blnSuccess = True
-
-        Catch ex As Exception
-            blnSuccess = False
-        End Try
-
-        Return blnSuccess
-
-    End Function
-
-    Private Function ParseICRFolder(ByRef ioFolderInfo As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        ' Look for and open the .Pek file in ioFolderInfo
-        ' Count the number of PEK_FILE_FILENAME_LINE lines
-
-        Dim ioFileMatch As FileInfo
-        Dim strLineIn As String
-
-        Dim intFileListCount As Integer
-        Dim blnSuccess As Boolean
-
-        For Each ioFileMatch In ioFolderInfo.GetFiles("*.pek")
-            Try
-                ' Try to open the PEK file
-                blnSuccess = False
-                intFileListCount = 0
-                Using srInFile = New StreamReader(ioFileMatch.OpenRead())
-                    Do While srInFile.Peek() >= 0
-                        strLineIn = srInFile.ReadLine()
-
-                        If Not strLineIn Is Nothing Then
-                            If strLineIn.StartsWith(PEK_FILE_FILENAME_LINE) Then
-                                intFileListCount += 1
-                            End If
-                        End If
-                    Loop
-                End Using
-                blnSuccess = True
-
-            Catch ex As Exception
-                ' Error opening or parsing the PEK file
-                blnSuccess = False
-            End Try
-
-            If intFileListCount > udtFileInfo.ScanCount Then
-                udtFileInfo.ScanCount = intFileListCount
-            End If
-
-            ' Only parse the first .Pek file found
-            Exit For
-        Next ioFileMatch
-
-        Return blnSuccess
-
-    End Function
-
-    Private Function ParseTICFolder(ByRef ioFolderInfo As DirectoryInfo, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType, ByRef dtTICModificationDate As DateTime) As Boolean
-        ' Look for and open the .Tic file in ioFolderInfo and look for the line listing the number of files
-        ' As a second validation, count the number of lines between TIC_FILE_TIC_FILE_LIST_START and TIC_FILE_TIC_FILE_LIST_END
-
-        Dim ioFileMatch As FileInfo
-        Dim strLineIn As String
-
-        Dim intFileListCount As Integer
-        Dim blnParsingTICFileList As Boolean
-        Dim blnSuccess As Boolean
-
-        For Each ioFileMatch In ioFolderInfo.GetFiles("*.tic")
-            Try
-                ' Try to open the TIC file
-                blnSuccess = False
-                intFileListCount = 0
-                Using srInFile = New StreamReader(ioFileMatch.OpenRead())
-                    Do While srInFile.Peek() >= 0
-                        strLineIn = srInFile.ReadLine()
-
-                        If Not strLineIn Is Nothing Then
-                            If blnParsingTICFileList Then
-                                If strLineIn.StartsWith(TIC_FILE_TIC_FILE_LIST_END) Then
-                                    blnParsingTICFileList = False
-                                    Exit Do
-                                ElseIf strLineIn = TIC_FILE_COMMENT_SECTION_END Then
-                                    ' Found the end of the text section; exit the loop
-                                    Exit Do
-                                Else
-                                    intFileListCount += 1
-                                End If
-                            Else
-                                If strLineIn.StartsWith(TIC_FILE_NUMBER_OF_FILES_LINE_START) Then
-                                    ' Number of files line found
-                                    ' Parse out the file count
-                                    udtFileInfo.ScanCount = Integer.Parse(strLineIn.Substring(TIC_FILE_NUMBER_OF_FILES_LINE_START.Length).Trim)
-                                ElseIf strLineIn.StartsWith(TIC_FILE_TIC_FILE_LIST_START) Then
-                                    blnParsingTICFileList = True
-                                ElseIf strLineIn = TIC_FILE_COMMENT_SECTION_END Then
-                                    ' Found the end of the text section; exit the loop
-                                    Exit Do
-                                End If
-                            End If
-                        End If
-                    Loop
-                End Using
-                blnSuccess = True
-
-                dtTICModificationDate = ioFileMatch.LastWriteTime
-
-            Catch ex As Exception
-                ' Error opening or parsing the TIC file
-                blnSuccess = False
-            End Try
-
-            If intFileListCount > udtFileInfo.ScanCount Then
-                udtFileInfo.ScanCount = intFileListCount
-            End If
-
-            ' Only parse the first .Tic file found
-            Exit For
-        Next ioFileMatch
-
-        Return blnSuccess
-
-    End Function
-
-    Public Overrides Function ProcessDataFile(strDataFilePath As String, ByRef udtFileInfo As iMSFileInfoProcessor.udtFileInfoType) As Boolean
-        ' Process a Bruker 1 folder or Bruker s001.zip file, specified by strDataFilePath
-        ' If a Bruker 1 folder, then it must contain file acqu and typically contains file LOCK
-
-        Dim ioFileInfo As FileInfo
-        Dim ioZippedSFilesFolderInfo As DirectoryInfo = Nothing
-        Dim ioSubFolder As DirectoryInfo
-
-        Dim intScanCountSaved As Integer
-        Dim dtTICModificationDate As DateTime
-
-        Dim blnParsingBrukerOneFolder As Boolean
-        Dim blnSuccess As Boolean
-
-        Try
-            ' Determine whether strDataFilePath points to a file or a folder
-            ' See if strFileOrFolderPath points to a valid file
-            ioFileInfo = New FileInfo(strDataFilePath)
-
-            If ioFileInfo.Exists() Then
-                ' Parsing a zipped S folder
-                blnParsingBrukerOneFolder = False
-
-                ' The dataset name is equivalent to the name of the folder containing strDataFilePath
-                ioZippedSFilesFolderInfo = ioFileInfo.Directory
-                blnSuccess = True
-
-                ' Cannot determine accurate acqusition start or end times
-                ' We have to assign a date, so we'll assign the date for the zipped s-folder
-                With udtFileInfo
-                    .AcqTimeStart = ioFileInfo.LastWriteTime
-                    .AcqTimeEnd = ioFileInfo.LastWriteTime
-                End With
-
-            Else
-                ' Assuming it's a "1" folder
-                blnParsingBrukerOneFolder = True
-
-                ioZippedSFilesFolderInfo = New DirectoryInfo(strDataFilePath)
-                If ioZippedSFilesFolderInfo.Exists Then
-                    ' Determine the dataset name by looking up the name of the parent folder of strDataFilePath
-                    ioZippedSFilesFolderInfo = ioZippedSFilesFolderInfo.Parent
-                    blnSuccess = True
-                Else
-                    blnSuccess = False
-                End If
-            End If
-
-            If blnSuccess Then
-                With udtFileInfo
-                    .FileSystemCreationTime = ioZippedSFilesFolderInfo.CreationTime
-                    .FileSystemModificationTime = ioZippedSFilesFolderInfo.LastWriteTime
-
-                    ' The acquisition times will get updated below to more accurate values
-                    .AcqTimeStart = .FileSystemModificationTime
-                    .AcqTimeEnd = .FileSystemModificationTime
-
-                    .DatasetName = ioZippedSFilesFolderInfo.Name
-                    .FileExtension = String.Empty
-                    .FileSizeBytes = 0
-                    .ScanCount = 0
-                End With
-            End If
-        Catch ex As Exception
-            blnSuccess = False
-        End Try
-
-        If blnSuccess AndAlso blnParsingBrukerOneFolder Then
-            ' Parse the Acqu File to populate .AcqTimeEnd
-            blnSuccess = ParseBrukerAcquFile(strDataFilePath, udtFileInfo)
-
-            If blnSuccess Then
-                ' Parse the Lock file to populate.AcqTimeStart
-                blnSuccess = ParseBrukerLockFile(strDataFilePath, udtFileInfo)
-
-                If Not blnSuccess Then
-                    ' Use the end time as the start time
-                    udtFileInfo.AcqTimeStart = udtFileInfo.AcqTimeEnd
-                    blnSuccess = True
-                End If
-            End If
-        End If
-
-        If blnSuccess Then
-            ' Look for the zipped S folders in ioZippedSFilesFolderInfo
-            Try
-                blnSuccess = ParseBrukerZippedSFolders(ioZippedSFilesFolderInfo, udtFileInfo)
-                intScanCountSaved = udtFileInfo.ScanCount
-            Catch ex As Exception
-                ' Error parsing zipped S Folders; do not abort
-            End Try
-
-            Try
-                blnSuccess = False
-
-                ' Look for the TIC* folder to obtain the scan count from a .Tic file
-                ' If the Scan Count in the TIC is larger than the scan count from ParseBrukerZippedSFolders,
-                '  then we'll use that instead
-                For Each ioSubFolder In ioZippedSFilesFolderInfo.GetDirectories("TIC*")
-                    blnSuccess = ParseTICFolder(ioSubFolder, udtFileInfo, dtTICModificationDate)
-
-                    If blnSuccess Then
-                        ' Successfully parsed a TIC folder; do not parse any others
-                        Exit For
-                    End If
-                Next ioSubFolder
-
-                If Not blnSuccess Then
-                    ' TIC folder not found; see if a .TIC file is present in ioZippedSFilesFolderInfo
-                    blnSuccess = ParseTICFolder(ioZippedSFilesFolderInfo, udtFileInfo, dtTICModificationDate)
-                End If
-
-                If blnSuccess And Not blnParsingBrukerOneFolder AndAlso dtTICModificationDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME Then
-                    ' If dtTICModificationDate is earlier than .AcqTimeStart then update to dtTICMOdificationDate
-                    With udtFileInfo
-                        If dtTICModificationDate < .AcqTimeStart Then
-                            .AcqTimeStart = dtTICModificationDate
-                            .AcqTimeEnd = dtTICModificationDate
-                        End If
-                    End With
-                End If
-
-                If Not blnSuccess Then
-                    ' .Tic file not found in ioZippedSFilesFolderInfo
-                    ' Look for an ICR* folder to obtain the scan count from a .Pek file
-                    For Each ioSubFolder In ioZippedSFilesFolderInfo.GetDirectories("ICR*")
-                        blnSuccess = ParseICRFolder(ioSubFolder, udtFileInfo)
-
-                        If blnSuccess Then
-                            ' Successfully parsed an ICR folder; do not parse any others
-                            Exit For
-                        End If
-                    Next ioSubFolder
-                End If
-
-                If blnSuccess = True Then
-                    If intScanCountSaved > udtFileInfo.ScanCount Then
-                        udtFileInfo.ScanCount = intScanCountSaved
-                    End If
-                Else
-                    ' Set success to true anyway since we do have enough information to save the MS file info
-                    blnSuccess = True
-                End If
-
-            Catch ex As Exception
-                ' Error parsing the TIC* or ICR* folders; do not abort
-            End Try
-
-            ' Validate udtFileInfo.AcqTimeStart vs. udtFileInfo.AcqTimeEnd
-            With udtFileInfo
-                If udtFileInfo.AcqTimeEnd >= MINIMUM_ACCEPTABLE_ACQ_START_TIME Then
-                    If .AcqTimeStart > .AcqTimeEnd Then
-                        ' Start time cannot be greater than the end time
-                        .AcqTimeStart = .AcqTimeEnd
-                    ElseIf .AcqTimeStart < MINIMUM_ACCEPTABLE_ACQ_START_TIME Then
-                        .AcqTimeStart = .AcqTimeEnd
-                    Else
-                        ''Dim dtDateCompare As DateTime
-                        ''If .ScanCount > 0 Then
-                        ''    ' Make sure the start time is greater than the end time minus the scan count times 30 seconds per scan
-                        ''    dtDateCompare = .AcqTimeEnd.Subtract(New TimeSpan(0, 0, .ScanCount * 30))
-                        ''Else
-                        ''    dtDateCompare = .AcqTimeEnd - 
-                        ''End If
-
-                        ''If .AcqTimeStart < dtDateCompare Then
-                        ''    .AcqTimeStart = .AcqTimeEnd
-                        ''End If
-                    End If
-                End If
-            End With
-        End If
-
-        Return blnSuccess
-
-    End Function
-
-End Class
+using System;
+using System.IO;
+using System.Text.RegularExpressions;
+
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Started in 2005
+//
+// Last modified September 17, 2005
+
+namespace MSFileInfoScanner
+{
+    public class clsBrukerOneFolderInfoScanner : clsMSFileInfoProcessorBaseClass
+    {
+
+
+        public const string BRUKER_ONE_FOLDER_NAME = "1";
+        private const string BRUKER_LOCK_FILE = "LOCK";
+        private const string BRUKER_ACQU_FILE = "acqu";
+        private const string BRUKER_ACQU_FILE_ACQ_LINE_START = "##$AQ_DATE= <";
+
+        private const char BRUKER_ACQU_FILE_ACQ_LINE_END = '>';
+
+        private const string TIC_FILE_NUMBER_OF_FILES_LINE_START = "Number of files :";
+        private const string TIC_FILE_TIC_FILE_LIST_START = "TIC file list:";
+        private const string TIC_FILE_TIC_FILE_LIST_END = "TIC end of file list";
+
+        private const string TIC_FILE_COMMENT_SECTION_END = "CommentEnd";
+
+        private const string PEK_FILE_FILENAME_LINE = "Filename:";
+
+        private const DateTime MINIMUM_ACCEPTABLE_ACQ_START_TIME = 1/1/1975 12:00:00 AM;
+        public override string GetDatasetNameViaPath(string strDataFilePath)
+        {
+            DirectoryInfo ioFolderInfo = default(DirectoryInfo);
+            string strDatasetName = string.Empty;
+
+            try {
+                // The dataset name for a Bruker 1 folder or zipped S folder is the name of the parent directory
+                ioFolderInfo = new DirectoryInfo(strDataFilePath);
+                strDatasetName = ioFolderInfo.Parent.Name;
+            } catch (Exception ex) {
+                // Ignore errors
+            }
+
+            if (strDatasetName == null)
+                strDatasetName = string.Empty;
+            return strDatasetName;
+
+        }
+
+        public static bool IsZippedSFolder(string strFilePath)
+        {
+            var reIsZippedSFolder = new Regex("s[0-9]+\\.zip", Text.RegularExpressions.RegexOptions.IgnoreCase);
+            return reIsZippedSFolder.Match(strFilePath).Success;
+        }
+
+        private bool ParseBrukerDateFromArray(ref string strLineIn, ref DateTime dtDate)
+        {
+            string strDate = null;
+            bool blnSuccess = false;
+
+            int intStartIndex = 0;
+            int intIndexCheck = 0;
+            int intIndexCompare = 0;
+
+            string[] strSplitLine[ = null;
+
+            try {
+                strSplitLine[ = strLineIn.Split(' ');
+
+                // Remove any entries from strSplitLine[) that are blank
+                intIndexCheck = intStartIndex;
+                while (intIndexCheck < strSplitLine[.Length && strSplitLine[.Length > 0) {
+                    if (strSplitLine[intIndexCheck).Length == 0) {
+                        for (intIndexCompare = intIndexCheck; intIndexCompare <= strSplitLine[.Length - 2; intIndexCompare++) {
+                            strSplitLine[intIndexCompare) = strSplitLine[intIndexCompare + 1);
+                        }
+                        Array.Resize(ref strSplitLine[, strSplitLine[.Length - 1);
+                    } else {
+                        intIndexCheck += 1;
+                    }
+                }
+
+                if (strSplitLine[.Length >= 5) {
+                    intStartIndex = strSplitLine[.Length - 5;
+                    strDate = strSplitLine[4 + intStartIndex) + "-" + strSplitLine[1 + intStartIndex) + "-" + strSplitLine[2 + intStartIndex) + " " + strSplitLine[3 + intStartIndex);
+                    dtDate = DateTime.Parse(strDate);
+                    blnSuccess = true;
+                } else {
+                    blnSuccess = false;
+                }
+            } catch (Exception ex) {
+                // Date parse failed
+                blnSuccess = false;
+            }
+
+            return blnSuccess;
+
+        }
+
+        private bool ParseBrukerAcquFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo)
+        {
+            string strLineIn = null;
+
+            bool blnSuccess = false;
+
+            try {
+                // Try to open the acqu file
+                blnSuccess = false;
+                using (var srInFile = new StreamReader(Path.Combine(strFolderPath, BRUKER_ACQU_FILE))) {
+                    while (!srInFile.EndOfStream) {
+                        strLineIn = srInFile.ReadLine();
+
+                        if ((strLineIn != null)) {
+                            if (strLineIn.StartsWith(BRUKER_ACQU_FILE_ACQ_LINE_START)) {
+                                // Date line found
+                                // It is of the form: ##$AQ_DATE= <Sat Aug 20 07:56:55 2005> 
+                                strLineIn = strLineIn.Substring(BRUKER_ACQU_FILE_ACQ_LINE_START.Length).Trim;
+                                strLineIn = strLineIn.TrimEnd(BRUKER_ACQU_FILE_ACQ_LINE_END);
+
+                                blnSuccess = ParseBrukerDateFromArray(ref strLineIn, ref datasetFileInfo.AcqTimeEnd);
+                                break; // TODO: might not be correct. Was : Exit Do
+                            }
+                        }
+                    }
+                }
+
+            } catch (Exception ex) {
+                // Error opening the acqu file
+                blnSuccess = false;
+            }
+
+            return blnSuccess;
+
+        }
+
+        private bool ParseBrukerLockFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo)
+        {
+            string strLineIn = null;
+            string[] strSplitLine[ = null;
+
+            bool blnSuccess = false;
+
+            try {
+                // Try to open the Lock file
+                // The date line is the first (and only) line in the file
+                blnSuccess = false;
+                using (var srInFile = new StreamReader(Path.Combine(strFolderPath, BRUKER_LOCK_FILE))) {
+                    if (!srInFile.EndOfStream) {
+                        strLineIn = srInFile.ReadLine();
+                        if ((strLineIn != null)) {
+                            // Date line found
+                            // It is of the form: wd37119 2208 WD37119\9TOperator Sat Aug 20 06:10:31 2005
+                            strSplitLine[ = strLineIn.Trim.Split(' ');
+
+                            blnSuccess = ParseBrukerDateFromArray(ref strLineIn, ref datasetFileInfo.AcqTimeStart);
+                        }
+                    }
+                }
+
+            } catch (Exception ex) {
+                // Error opening the Lock file
+                blnSuccess = false;
+            }
+
+            return blnSuccess;
+
+        }
+
+        private bool ParseBrukerZippedSFolders(ref DirectoryInfo ioFolderInfo, clsDatasetFileInfo datasetFileInfo)
+        {
+            // Looks through the s*.zip files to determine the total file size (uncompressed) of all files in all the matching .Zip files
+            // Updates datasetFileInfo.FileSizeBytes with this info, while also updating datasetFileInfo.ScanCount with the total number of files found
+            // Returns True if success and also if no matching Zip files were found; returns False if error
+
+            bool blnSuccess = false;
+
+            datasetFileInfo.FileSizeBytes = 0;
+            datasetFileInfo.ScanCount = 0;
+
+            try {
+                foreach (FileInfo ioFileMatch in ioFolderInfo.GetFiles("s*.zip")) {
+                    // Get the info on each zip file
+
+                    using (Ionic.Zip.ZipFile objZipFile = new Ionic.Zip.ZipFile(ioFileMatch.FullName)) {
+                        foreach (Ionic.Zip.ZipEntry objZipEntry in objZipFile.Entries) {
+                            datasetFileInfo.FileSizeBytes += objZipEntry.UncompressedSize;
+                            datasetFileInfo.ScanCount += 1;
+                        }
+                    }
+
+                }
+                blnSuccess = true;
+
+            } catch (Exception ex) {
+                blnSuccess = false;
+            }
+
+            return blnSuccess;
+
+        }
+
+        private bool ParseICRFolder(ref DirectoryInfo ioFolderInfo, clsDatasetFileInfo datasetFileInfo)
+        {
+            // Look for and open the .Pek file in ioFolderInfo
+            // Count the number of PEK_FILE_FILENAME_LINE lines
+
+            FileInfo ioFileMatch = default(FileInfo);
+            string strLineIn = null;
+
+            int intFileListCount = 0;
+            bool blnSuccess = false;
+
+            foreach ( ioFileMatch in ioFolderInfo.GetFiles("*.pek")) {
+                try {
+                    // Try to open the PEK file
+                    blnSuccess = false;
+                    intFileListCount = 0;
+                    using (var srInFile = new StreamReader(ioFileMatch.OpenRead())) {
+                        while (!srInFile.EndOfStream) {
+                            strLineIn = srInFile.ReadLine();
+
+                            if ((strLineIn != null)) {
+                                if (strLineIn.StartsWith(PEK_FILE_FILENAME_LINE)) {
+                                    intFileListCount += 1;
+                                }
+                            }
+                        }
+                    }
+                    blnSuccess = true;
+
+                } catch (Exception ex) {
+                    // Error opening or parsing the PEK file
+                    blnSuccess = false;
+                }
+
+                if (intFileListCount > datasetFileInfo.ScanCount) {
+                    datasetFileInfo.ScanCount = intFileListCount;
+                }
+
+                // Only parse the first .Pek file found
+                break; // TODO: might not be correct. Was : Exit For
+            }
+
+            return blnSuccess;
+
+        }
+
+        private bool ParseTICFolder(ref DirectoryInfo ioFolderInfo, clsDatasetFileInfo datasetFileInfo, ref DateTime dtTICModificationDate)
+        {
+            // Look for and open the .Tic file in ioFolderInfo and look for the line listing the number of files
+            // As a second validation, count the number of lines between TIC_FILE_TIC_FILE_LIST_START and TIC_FILE_TIC_FILE_LIST_END
+
+            FileInfo ioFileMatch = default(FileInfo);
+            string strLineIn = null;
+
+            int intFileListCount = 0;
+            bool blnParsingTICFileList = false;
+            bool blnSuccess = false;
+
+            foreach ( ioFileMatch in ioFolderInfo.GetFiles("*.tic")) {
+                try {
+                    // Try to open the TIC file
+                    blnSuccess = false;
+                    intFileListCount = 0;
+                    using (var srInFile = new StreamReader(ioFileMatch.OpenRead())) {
+                        while (!srInFile.EndOfStream) {
+                            strLineIn = srInFile.ReadLine();
+
+                            if ((strLineIn != null)) {
+                                if (blnParsingTICFileList) {
+                                    if (strLineIn.StartsWith(TIC_FILE_TIC_FILE_LIST_END)) {
+                                        blnParsingTICFileList = false;
+                                        break; // TODO: might not be correct. Was : Exit Do
+                                    } else if (strLineIn == TIC_FILE_COMMENT_SECTION_END) {
+                                        // Found the end of the text section; exit the loop
+                                        break; // TODO: might not be correct. Was : Exit Do
+                                    } else {
+                                        intFileListCount += 1;
+                                    }
+                                } else {
+                                    if (strLineIn.StartsWith(TIC_FILE_NUMBER_OF_FILES_LINE_START)) {
+                                        // Number of files line found
+                                        // Parse out the file count
+                                        datasetFileInfo.ScanCount = int.Parse(strLineIn.Substring(TIC_FILE_NUMBER_OF_FILES_LINE_START.Length).Trim);
+                                    } else if (strLineIn.StartsWith(TIC_FILE_TIC_FILE_LIST_START)) {
+                                        blnParsingTICFileList = true;
+                                    } else if (strLineIn == TIC_FILE_COMMENT_SECTION_END) {
+                                        // Found the end of the text section; exit the loop
+                                        break; // TODO: might not be correct. Was : Exit Do
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    blnSuccess = true;
+
+                    dtTICModificationDate = ioFileMatch.LastWriteTime;
+
+                } catch (Exception ex) {
+                    // Error opening or parsing the TIC file
+                    blnSuccess = false;
+                }
+
+                if (intFileListCount > datasetFileInfo.ScanCount) {
+                    datasetFileInfo.ScanCount = intFileListCount;
+                }
+
+                // Only parse the first .Tic file found
+                break; // TODO: might not be correct. Was : Exit For
+            }
+
+            return blnSuccess;
+
+        }
+
+        public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
+        {
+            // Process a Bruker 1 folder or Bruker s001.zip file, specified by strDataFilePath
+            // If a Bruker 1 folder, then it must contain file acqu and typically contains file LOCK
+
+            FileInfo ioFileInfo = default(FileInfo);
+            DirectoryInfo ioZippedSFilesFolderInfo = null;
+            DirectoryInfo ioSubFolder = default(DirectoryInfo);
+
+            int intScanCountSaved = 0;
+            DateTime dtTICModificationDate = default(DateTime);
+
+            bool blnParsingBrukerOneFolder = false;
+            bool blnSuccess = false;
+
+            try {
+                // Determine whether strDataFilePath points to a file or a folder
+                // See if strFileOrFolderPath points to a valid file
+                ioFileInfo = new FileInfo(strDataFilePath);
+
+                if (ioFileInfo.Exists()) {
+                    // Parsing a zipped S folder
+                    blnParsingBrukerOneFolder = false;
+
+                    // The dataset name is equivalent to the name of the folder containing strDataFilePath
+                    ioZippedSFilesFolderInfo = ioFileInfo.Directory;
+                    blnSuccess = true;
+
+                    // Cannot determine accurate acqusition start or end times
+                    // We have to assign a date, so we'll assign the date for the zipped s-folder
+                    var _with1 = datasetFileInfo;
+                    _with1.AcqTimeStart = ioFileInfo.LastWriteTime;
+                    _with1.AcqTimeEnd = ioFileInfo.LastWriteTime;
+
+                } else {
+                    // Assuming it's a "1" folder
+                    blnParsingBrukerOneFolder = true;
+
+                    ioZippedSFilesFolderInfo = new DirectoryInfo(strDataFilePath);
+                    if (ioZippedSFilesFolderInfo.Exists) {
+                        // Determine the dataset name by looking up the name of the parent folder of strDataFilePath
+                        ioZippedSFilesFolderInfo = ioZippedSFilesFolderInfo.Parent;
+                        blnSuccess = true;
+                    } else {
+                        blnSuccess = false;
+                    }
+                }
+
+                if (blnSuccess) {
+                    var _with2 = datasetFileInfo;
+                    _with2.FileSystemCreationTime = ioZippedSFilesFolderInfo.CreationTime;
+                    _with2.FileSystemModificationTime = ioZippedSFilesFolderInfo.LastWriteTime;
+
+                    // The acquisition times will get updated below to more accurate values
+                    _with2.AcqTimeStart = _with2.FileSystemModificationTime;
+                    _with2.AcqTimeEnd = _with2.FileSystemModificationTime;
+
+                    _with2.DatasetName = ioZippedSFilesFolderInfo.Name;
+                    _with2.FileExtension = string.Empty;
+                    _with2.FileSizeBytes = 0;
+                    _with2.ScanCount = 0;
+                }
+            } catch (Exception ex) {
+                blnSuccess = false;
+            }
+
+            if (blnSuccess && blnParsingBrukerOneFolder) {
+                // Parse the Acqu File to populate .AcqTimeEnd
+                blnSuccess = ParseBrukerAcquFile(strDataFilePath, ref datasetFileInfo);
+
+                if (blnSuccess) {
+                    // Parse the Lock file to populate.AcqTimeStart
+                    blnSuccess = ParseBrukerLockFile(strDataFilePath, ref datasetFileInfo);
+
+                    if (!blnSuccess) {
+                        // Use the end time as the start time
+                        datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd;
+                        blnSuccess = true;
+                    }
+                }
+            }
+
+            if (blnSuccess) {
+                // Look for the zipped S folders in ioZippedSFilesFolderInfo
+                try {
+                    blnSuccess = ParseBrukerZippedSFolders(ref ioZippedSFilesFolderInfo, ref datasetFileInfo);
+                    intScanCountSaved = datasetFileInfo.ScanCount;
+                } catch (Exception ex) {
+                    // Error parsing zipped S Folders; do not abort
+                }
+
+                try {
+                    blnSuccess = false;
+
+                    // Look for the TIC* folder to obtain the scan count from a .Tic file
+                    // If the Scan Count in the TIC is larger than the scan count from ParseBrukerZippedSFolders,
+                    //  then we'll use that instead
+                    foreach ( ioSubFolder in ioZippedSFilesFolderInfo.GetDirectories("TIC*")) {
+                        blnSuccess = ParseTICFolder(ref ioSubFolder, ref datasetFileInfo, ref dtTICModificationDate);
+
+                        if (blnSuccess) {
+                            // Successfully parsed a TIC folder; do not parse any others
+                            break; // TODO: might not be correct. Was : Exit For
+                        }
+                    }
+
+                    if (!blnSuccess) {
+                        // TIC folder not found; see if a .TIC file is present in ioZippedSFilesFolderInfo
+                        blnSuccess = ParseTICFolder(ref ioZippedSFilesFolderInfo, ref datasetFileInfo, ref dtTICModificationDate);
+                    }
+
+                    if (blnSuccess & !blnParsingBrukerOneFolder && dtTICModificationDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME) {
+                        // If dtTICModificationDate is earlier than .AcqTimeStart then update to dtTICMOdificationDate
+                        var _with3 = datasetFileInfo;
+                        if (dtTICModificationDate < _with3.AcqTimeStart) {
+                            _with3.AcqTimeStart = dtTICModificationDate;
+                            _with3.AcqTimeEnd = dtTICModificationDate;
+                        }
+                    }
+
+                    if (!blnSuccess) {
+                        // .Tic file not found in ioZippedSFilesFolderInfo
+                        // Look for an ICR* folder to obtain the scan count from a .Pek file
+                        foreach ( ioSubFolder in ioZippedSFilesFolderInfo.GetDirectories("ICR*")) {
+                            blnSuccess = ParseICRFolder(ref ioSubFolder, ref datasetFileInfo);
+
+                            if (blnSuccess) {
+                                // Successfully parsed an ICR folder; do not parse any others
+                                break; // TODO: might not be correct. Was : Exit For
+                            }
+                        }
+                    }
+
+                    if (blnSuccess == true) {
+                        if (intScanCountSaved > datasetFileInfo.ScanCount) {
+                            datasetFileInfo.ScanCount = intScanCountSaved;
+                        }
+                    } else {
+                        // Set success to true anyway since we do have enough information to save the MS file info
+                        blnSuccess = true;
+                    }
+
+                } catch (Exception ex) {
+                    // Error parsing the TIC* or ICR* folders; do not abort
+                }
+
+                // Validate datasetFileInfo.AcqTimeStart vs. datasetFileInfo.AcqTimeEnd
+                var _with4 = datasetFileInfo;
+                if (datasetFileInfo.AcqTimeEnd >= MINIMUM_ACCEPTABLE_ACQ_START_TIME) {
+                    if (_with4.AcqTimeStart > _with4.AcqTimeEnd) {
+                        // Start time cannot be greater than the end time
+                        _with4.AcqTimeStart = _with4.AcqTimeEnd;
+                    } else if (_with4.AcqTimeStart < MINIMUM_ACCEPTABLE_ACQ_START_TIME) {
+                        _with4.AcqTimeStart = _with4.AcqTimeEnd;
+                    } else {
+                        //'Dim dtDateCompare As DateTime
+                        //'If .ScanCount > 0 Then
+                        //'    ' Make sure the start time is greater than the end time minus the scan count times 30 seconds per scan
+                        //'    dtDateCompare = .AcqTimeEnd.Subtract(New TimeSpan(0, 0, .ScanCount * 30))
+                        //'Else
+                        //'    dtDateCompare = .AcqTimeEnd - 
+                        //'End If
+
+                        //'If .AcqTimeStart < dtDateCompare Then
+                        //'    .AcqTimeStart = .AcqTimeEnd
+                        //'End If
+                    }
+                }
+            }
+
+            return blnSuccess;
+
+        }
+
+    }
+}
