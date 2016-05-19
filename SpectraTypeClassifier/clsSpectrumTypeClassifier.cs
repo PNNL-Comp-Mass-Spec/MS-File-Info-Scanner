@@ -165,7 +165,7 @@ namespace SpectraTypeClassifier
 
             var dtLastStatusTime = DateTime.UtcNow;
 
-            var splitChars = new char[] { ' ' };
+            var splitChars = new[] { ' ' };
 
             try {
                 if (!File.Exists(strCDTAPath)) {
@@ -209,14 +209,17 @@ namespace SpectraTypeClassifier
                             } else {
                                 var dataColumns = strLineIn.Split(splitChars, 3);
 
-                                double dblMZ = 0;
-                                if (double.TryParse(dataColumns[0], out dblMZ)) {
-                                    if (dblPreviousMZ > 0 && dblMZ > dblPreviousMZ) {
-                                        var delMPPM = 1000000.0 * (dblMZ - dblPreviousMZ) / dblMZ;
-                                        lstPpmDiffs.Add(delMPPM);
-                                    }
-                                    dblPreviousMZ = dblMZ;
+                                double dblMZ;
+                                if (!double.TryParse(dataColumns[0], out dblMZ))
+                                {
+                                    continue;
                                 }
+
+                                if (dblPreviousMZ > 0 && dblMZ > dblPreviousMZ) {
+                                    var delMPPM = 1000000.0 * (dblMZ - dblPreviousMZ) / dblMZ;
+                                    lstPpmDiffs.Add(delMPPM);
+                                }
+                                dblPreviousMZ = dblMZ;
                             }
 
                         }
@@ -249,8 +252,8 @@ namespace SpectraTypeClassifier
         /// </summary>
         /// <param name="lstPpmDiffs"></param>
         /// <param name="msLevel">1 for MS1, 2 for MS2, etc.</param>
+        /// <param name="centroidingStatus"></param>
         /// <remarks>Increments class property TotalSpectra if lstPpmDiffs is not empty; increments class property CentroidedSpectra if the data is centroided</remarks>
-
         protected void CheckPPMDiffs(List<double> lstPpmDiffs, int msLevel, eCentroidStatusConstants centroidingStatus)
         {
             if (lstPpmDiffs.Count > 0) {
@@ -304,10 +307,10 @@ namespace SpectraTypeClassifier
         {
             if (!assumeSorted) {
                 // Check whether sorting is required
-                for (int i = 1; i <= lstMZs.Count - 1; i++) {
+                for (var i = 1; i <= lstMZs.Count - 1; i++) {
                     if (lstMZs[i] < lstMZs[i - 1]) {
                         lstMZs.Sort();
-                        break; // TODO: might not be correct. Was : Exit For
+                        break;
                     }
                 }
             }
@@ -354,7 +357,7 @@ namespace SpectraTypeClassifier
             }
 
             // Possibly sort dblMZs
-            for (int i = 1; i <= ionCount - 1; i++) {
+            for (var i = 1; i <= ionCount - 1; i++) {
                 if (dblMZs[i] < dblMZs[i - 1]) {
                     // Sort required
                     Array.Sort(dblMZs);

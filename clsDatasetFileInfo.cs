@@ -20,23 +20,28 @@ namespace MSFileInfoScanner
         /// </summary>
         public clsDatasetFileInfo()
         {
-           DatasetID = 0;
-           DatasetName = string.Empty;
-           FileExtension = string.Empty;
-           ScanCount = 0;
-           FileSizeBytes = 0;
-           OverallQualityScore = 0;
+            Clear();
         }
 
         public clsDatasetFileInfo(int datasetId, string datasetName)
         {
+            Clear();
             DatasetID = datasetId;
             DatasetName = datasetName;
+        }
+
+        public void Clear()
+        {
+            FileSystemCreationTime = DateTime.MinValue;
+            FileSystemModificationTime = DateTime.MinValue;
+            DatasetID = 0;
+            DatasetName = string.Empty;
             FileExtension = string.Empty;
+            AcqTimeStart = DateTime.MinValue;
+            AcqTimeEnd  = DateTime.MinValue;
             ScanCount = 0;
             FileSizeBytes = 0;
             OverallQualityScore = 0;
         }
-
     }
 }

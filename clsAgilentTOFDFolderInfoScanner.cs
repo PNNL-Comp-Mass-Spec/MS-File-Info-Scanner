@@ -250,12 +250,12 @@ namespace MSFileInfoScanner
                     // The AcqData folder exists
 
                     // Parse the Contents.xml file to determine the acquisition start time
-                    object blnAcqStartTimeDetermined = ProcessContentsXMLFile(diAcqDataFolder.FullName, ref datasetFileInfo);
+                    var blnAcqStartTimeDetermined = ProcessContentsXMLFile(diAcqDataFolder.FullName, ref datasetFileInfo);
 
                     double dblAcquisitionLengthMinutes = 0;
 
                     // Parse the MSTS.xml file to determine the acquisition length and number of scans
-                    object blnValidMSTS = ProcessTimeSegmentFile(diAcqDataFolder.FullName, ref datasetFileInfo, ref dblAcquisitionLengthMinutes);
+                    var blnValidMSTS = ProcessTimeSegmentFile(diAcqDataFolder.FullName, ref datasetFileInfo, ref dblAcquisitionLengthMinutes);
 
                     if (!blnAcqStartTimeDetermined && blnValidMSTS) {
                         // Compute the start time from .AcqTimeEnd minus dblAcquisitionLengthMinutes
@@ -298,18 +298,18 @@ namespace MSFileInfoScanner
         protected bool ReadBinaryData(string strDataFolderPath, clsDatasetFileInfo datasetFileInfo)
         {
 
-            object blnTICStored = false;
-            object blnSRMDataCached = false;
+            var blnTICStored = false;
+            var blnSRMDataCached = false;
 
             bool blnSuccess = false;
 
             try {
                 // Open the data folder using the ProteoWizardWrapper
 
-                object objPWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(strDataFolderPath);
+                var objPWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(strDataFolderPath);
 
                 try {
-                    object dtRunStartTime = Convert.ToDateTime(objPWiz.RunStartTime());
+                    var dtRunStartTime = Convert.ToDateTime(objPWiz.RunStartTime());
 
                     // Update AcqTimeEnd if possible
                     if (dtRunStartTime < datasetFileInfo.AcqTimeEnd) {

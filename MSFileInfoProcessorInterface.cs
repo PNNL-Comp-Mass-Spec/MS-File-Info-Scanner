@@ -35,12 +35,11 @@ namespace MSFileInfoScanner
         public abstract bool ShowDebugInfo { get; set; }
         public abstract bool GetOption(ProcessingOptions eOption);
         public abstract void SetOption(ProcessingOptions eOption, bool blnValue);
-        public abstract event clsMSFileInfoProcessorBaseClass.ErrorEventEventHandler ErrorEvent;
 
+        public abstract event ErrorEventEventHandler ErrorEvent;
         public delegate void ErrorEventEventHandler(string Message);
 
         public abstract event MessageEventEventHandler MessageEvent;
-
         public delegate void MessageEventEventHandler(string message);
     }
 }

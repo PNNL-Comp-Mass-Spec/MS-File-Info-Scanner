@@ -92,8 +92,8 @@ namespace MSFileInfoScanner
             }
 
         }
-        public override event ErrorEventEventHandler ErrorEvent;
-        public override event iMSFileInfoProcessor.MessageEventEventHandler MessageEvent;
+        public sealed override event ErrorEventEventHandler ErrorEvent;
+        public sealed override event MessageEventEventHandler MessageEvent;
 
         //Public Event ProgressUpdate( Progress As Single)
         #endregion
@@ -152,59 +152,59 @@ namespace MSFileInfoScanner
 
         #endregion
 
-        public override bool GetOption(iMSFileInfoProcessor.ProcessingOptions eOption)
+        public override bool GetOption(ProcessingOptions eOption)
         {
             switch (eOption) {
-                case iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI:
+                case ProcessingOptions.CreateTICAndBPI:
                     return mSaveTICAndBPI;
-                case iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores:
+                case ProcessingOptions.ComputeOverallQualityScores:
                     return mComputeOverallQualityScores;
-                case iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile:
+                case ProcessingOptions.CreateDatasetInfoFile:
                     return mCreateDatasetInfoFile;
-                case iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots:
+                case ProcessingOptions.CreateLCMS2DPlots:
                     return mSaveLCMS2DPlots;
-                case iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError:
+                case ProcessingOptions.CopyFileLocalOnReadError:
                     return mCopyFileLocalOnReadError;
-                case iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile:
+                case ProcessingOptions.UpdateDatasetStatsTextFile:
                     return mUpdateDatasetStatsTextFile;
-                case iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile:
+                case ProcessingOptions.CreateScanStatsFile:
                     return mCreateScanStatsFile;
-                case iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus:
+                case ProcessingOptions.CheckCentroidingStatus:
                     return mCheckCentroidingStatus;
             }
 
-            throw new Exception("Unrecognized option, " + eOption.ToString);
+            throw new Exception("Unrecognized option, " + eOption);
         }
 
-        public override void SetOption(iMSFileInfoProcessor.ProcessingOptions eOption, bool blnValue)
+        public override void SetOption(ProcessingOptions eOption, bool blnValue)
         {
             switch (eOption) {
-                case iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI:
+                case ProcessingOptions.CreateTICAndBPI:
                     mSaveTICAndBPI = blnValue;
                     break;
-                case iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores:
+                case ProcessingOptions.ComputeOverallQualityScores:
                     mComputeOverallQualityScores = blnValue;
                     break;
-                case iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile:
+                case ProcessingOptions.CreateDatasetInfoFile:
                     mCreateDatasetInfoFile = blnValue;
                     break;
-                case iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots:
+                case ProcessingOptions.CreateLCMS2DPlots:
                     mSaveLCMS2DPlots = blnValue;
                     break;
-                case iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError:
+                case ProcessingOptions.CopyFileLocalOnReadError:
                     mCopyFileLocalOnReadError = blnValue;
                     break;
-                case iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile:
+                case ProcessingOptions.UpdateDatasetStatsTextFile:
                     mUpdateDatasetStatsTextFile = blnValue;
                     break;
-                case iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile:
+                case ProcessingOptions.CreateScanStatsFile:
                     mCreateScanStatsFile = blnValue;
                     break;
-                case iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus:
+                case ProcessingOptions.CheckCentroidingStatus:
                     mCheckCentroidingStatus = blnValue;
                     break;
                 default:
-                    throw new Exception("Unrecognized option, " + eOption.ToString);
+                    throw new Exception("Unrecognized option, " + eOption);
             }
 
         }
@@ -212,11 +212,11 @@ namespace MSFileInfoScanner
         protected bool CreateDatasetInfoFile(string strInputFileName, string strOutputFolderPath)
         {
 
-            bool blnSuccess = false;
+            bool blnSuccess;
 
             try {
-                object strDatasetName = GetDatasetNameViaPath(strInputFileName);
-                object strDatasetInfoFilePath = Path.Combine(strOutputFolderPath, strDatasetName);
+                var strDatasetName = GetDatasetNameViaPath(strInputFileName);
+                var strDatasetInfoFilePath = Path.Combine(strOutputFolderPath, strDatasetName);
                 strDatasetInfoFilePath += clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
 
                 if (mDatasetStatsSummarizer.DatasetFileInfo.DatasetID == 0 && mDatasetID > 0) {
@@ -241,13 +241,11 @@ namespace MSFileInfoScanner
         public bool CreateDatasetScanStatsFile(string strInputFileName, string strOutputFolderPath)
         {
 
-            bool blnSuccess = false;
-
-            string strDatasetName = null;
+            bool blnSuccess;
 
             try {
-                strDatasetName = GetDatasetNameViaPath(strInputFileName);
-                object strScanStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetName) + "_ScanStats.txt";
+                var strDatasetName = GetDatasetNameViaPath(strInputFileName);
+                var strScanStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetName) + "_ScanStats.txt";
 
                 if (mDatasetStatsSummarizer.DatasetFileInfo.DatasetID == 0 && mDatasetID > 0) {
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID;
@@ -278,14 +276,12 @@ namespace MSFileInfoScanner
         public bool UpdateDatasetStatsTextFile(string strInputFileName, string strOutputFolderPath, string strDatasetStatsFilename)
         {
 
-            bool blnSuccess = false;
-
-            string strDatasetName = null;
+            bool blnSuccess;
 
             try {
-                strDatasetName = GetDatasetNameViaPath(strInputFileName);
+                var strDatasetName = GetDatasetNameViaPath(strInputFileName);
 
-                object strDatasetStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetStatsFilename);
+                var strDatasetStatsFilePath = Path.Combine(strOutputFolderPath, strDatasetStatsFilename);
 
                 blnSuccess = mDatasetStatsSummarizer.UpdateDatasetStatsTextFile(strDatasetName, strDatasetStatsFilePath);
 
@@ -400,7 +396,7 @@ namespace MSFileInfoScanner
 
         protected void InitializeLCMS2DPlot()
         {
-            // Initialize object that tracks m/z vs. time
+            // Initialize var that tracks m/z vs. time
             mLCMS2DPlot.Reset();
             mLCMS2DPlotOverview.Reset();
         }
@@ -427,29 +423,36 @@ namespace MSFileInfoScanner
             if (detailedUpdateIntervalSeconds < 5)
                 detailedUpdateIntervalSeconds = 15;
 
-            if (scanNumber % modulusValue == 0) {
-                if (!mShowDebugInfo) {
-                    Console.Write(".");
-                }
-
-                if (scanCount > 0) {
-                    object sngProgress = Convert.ToSingle(scanNumber / scanCount * 100);
-
-                    if (DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > detailedUpdateIntervalSeconds) {
-                        dtLastProgressTime = DateTime.UtcNow;
-                        string strPercentComplete = sngProgress.ToString("0.0") + "% ";
-
-                        if (mShowDebugInfo) {
-                            Console.WriteLine(strPercentComplete);
-                        } else {
-                            Console.WriteLine();
-                            Console.Write(strPercentComplete);
-                        }
-                    }
-                }
-
+            if (scanNumber % modulusValue != 0)
+            {
+                return;
             }
 
+            if (!mShowDebugInfo) {
+                Console.Write(".");
+            }
+
+            if (scanCount <= 0)
+            {
+                return;
+            }
+
+            var sngProgress = Convert.ToSingle(scanNumber / scanCount * 100);
+
+            if (!(DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > detailedUpdateIntervalSeconds))
+            {
+                return;
+            }
+
+            dtLastProgressTime = DateTime.UtcNow;
+            var strPercentComplete = sngProgress.ToString("0.0") + "% ";
+
+            if (mShowDebugInfo) {
+                Console.WriteLine(strPercentComplete);
+            } else {
+                Console.WriteLine();
+                Console.Write(strPercentComplete);
+            }
         }
 
         protected bool UpdateDatasetFileStats(FileInfo fiFileInfo, int intDatasetID)
@@ -473,7 +476,7 @@ namespace MSFileInfoScanner
 
                 mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
 
-            } catch (Exception ex) {
+            } catch (Exception) {
                 return false;
             }
 
@@ -505,7 +508,7 @@ namespace MSFileInfoScanner
 
                 mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
 
-            } catch (Exception ex) {
+            } catch (Exception) {
                 return false;
             }
 
@@ -522,12 +525,6 @@ namespace MSFileInfoScanner
 
         protected bool CreateOverview2DPlots(string strDatasetName, string strOutputFolderPath, int intLCMS2DOverviewPlotDivisor, string strScanModeSuffixAddon)
         {
-
-            clsLCMSDataPlotter.clsScanData objScan = default(clsLCMSDataPlotter.clsScanData);
-
-            bool blnSuccess = false;
-            int intIndex = 0;
-
             if (intLCMS2DOverviewPlotDivisor <= 1) {
                 // Nothing to do; just return True
                 return true;
@@ -539,19 +536,20 @@ namespace MSFileInfoScanner
 
             // Set MaxPointsToPlot in mLCMS2DPlotOverview to be intLCMS2DOverviewPlotDivisor times smaller 
             // than the MaxPointsToPlot value in mLCMS2DPlot
-            mLCMS2DPlotOverview.Options.MaxPointsToPlot = Convert.ToInt32(Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / intLCMS2DOverviewPlotDivisor, 0));
+            mLCMS2DPlotOverview.Options.MaxPointsToPlot = Convert.ToInt32(Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / (double)intLCMS2DOverviewPlotDivisor, 0));
 
             // Copy the data from mLCMS2DPlot to mLCMS2DPlotOverview
             // mLCMS2DPlotOverview will auto-filter the data to track, at most, mLCMS2DPlotOverview.Options.MaxPointsToPlot points
-            for (intIndex = 0; intIndex <= mLCMS2DPlot.ScanCountCached - 1; intIndex++) {
-                objScan = mLCMS2DPlot.GetCachedScanByIndex[intIndex];
+            for (var intIndex = 0; intIndex <= mLCMS2DPlot.ScanCountCached - 1; intIndex++)
+            {
+                var objScan = mLCMS2DPlot.GetCachedScanByIndex(intIndex);
 
                 mLCMS2DPlotOverview.AddScanSkipFilters(objScan);
             }
 
             // Write out the Overview 2D plot of m/z vs. intensity
             // Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-            blnSuccess = mLCMS2DPlotOverview.Save2DPlots(strDatasetName, strOutputFolderPath, "HighAbu_", strScanModeSuffixAddon);
+            var blnSuccess = mLCMS2DPlotOverview.Save2DPlots(strDatasetName, strOutputFolderPath, "HighAbu_", strScanModeSuffixAddon);
 
             return blnSuccess;
 
@@ -559,26 +557,17 @@ namespace MSFileInfoScanner
 
         public override bool CreateOutputFiles(string strInputFileName, string strOutputFolderPath)
         {
-
-            bool blnSuccess = false;
-            bool blnSuccessOverall = false;
-
-            string strErrorMessage = null;
-            string strDatasetName = null;
-
-            bool blnCreateQCPlotHtmlFile = false;
-
-            DirectoryInfo diFolderInfo = default(DirectoryInfo);
-
+            bool blnSuccessOverall;
 
             try {
-                strDatasetName = this.GetDatasetNameViaPath(strInputFileName);
+                var strDatasetName = GetDatasetNameViaPath(strInputFileName);
                 blnSuccessOverall = true;
-                blnCreateQCPlotHtmlFile = false;
+                var blnCreateQCPlotHtmlFile = false;
 
                 if (strOutputFolderPath == null)
                     strOutputFolderPath = string.Empty;
 
+                DirectoryInfo diFolderInfo;
                 if (strOutputFolderPath.Length > 0) {
                     // Make sure the output folder exists
                     diFolderInfo = new DirectoryInfo(strOutputFolderPath);
@@ -590,17 +579,18 @@ namespace MSFileInfoScanner
                     diFolderInfo = new DirectoryInfo(".");
                 }
 
+                bool blnSuccess;
                 if (mSaveTICAndBPI) {
                     // Write out the TIC and BPI plots
-                    strErrorMessage = string.Empty;
-                    blnSuccess = mTICandBPIPlot.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, strErrorMessage);
+                    string strErrorMessage;
+                    blnSuccess = mTICandBPIPlot.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, out strErrorMessage);
                     if (!blnSuccess) {
                         ReportError("Error calling mTICandBPIPlot.SaveTICAndBPIPlotFiles: " + strErrorMessage);
                         blnSuccessOverall = false;
                     }
 
                     // Write out any instrument-specific plots
-                    blnSuccess = mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, strErrorMessage);
+                    blnSuccess = mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, out strErrorMessage);
                     if (!blnSuccess) {
                         ReportError("Error calling mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles: " + strErrorMessage);
                         blnSuccessOverall = false;
@@ -643,7 +633,7 @@ namespace MSFileInfoScanner
 
                 if (mCreateDatasetInfoFile) {
                     // Create the _DatasetInfo.xml file
-                    blnSuccess = this.CreateDatasetInfoFile(strInputFileName, diFolderInfo.FullName);
+                    blnSuccess = CreateDatasetInfoFile(strInputFileName, diFolderInfo.FullName);
                     if (!blnSuccess) {
                         blnSuccessOverall = false;
                     }
@@ -652,7 +642,7 @@ namespace MSFileInfoScanner
 
                 if (mCreateScanStatsFile) {
                     // Create the _ScanStats.txt file
-                    blnSuccess = this.CreateDatasetScanStatsFile(strInputFileName, diFolderInfo.FullName);
+                    blnSuccess = CreateDatasetScanStatsFile(strInputFileName, diFolderInfo.FullName);
                     if (!blnSuccess) {
                         blnSuccessOverall = false;
                     }
@@ -660,7 +650,7 @@ namespace MSFileInfoScanner
 
                 if (mUpdateDatasetStatsTextFile) {
                     // Add a new row to the MSFileInfo_DatasetStats.txt file
-                    blnSuccess = this.UpdateDatasetStatsTextFile(strInputFileName, diFolderInfo.FullName, mDatasetStatsTextFileName);
+                    blnSuccess = UpdateDatasetStatsTextFile(strInputFileName, diFolderInfo.FullName, mDatasetStatsTextFileName);
                     if (!blnSuccess) {
                         blnSuccessOverall = false;
                     }
@@ -684,24 +674,13 @@ namespace MSFileInfoScanner
 
         protected bool CreateQCPlotHTMLFile(string strDatasetName, string strOutputFolderPath)
         {
-
-            string strHTMLFilePath = null;
-            string strFile1 = null;
-            string strFile2 = null;
-            string strFile3 = null;
-
-            string strTop = null;
-
-            string strDSInfoFileName = null;
-
-
             try {
                 // Obtain the dataset summary stats (they will be auto-computed if not up to date)
-                object objSummaryStats = mDatasetStatsSummarizer.GetDatasetSummaryStats;
+                var objSummaryStats = mDatasetStatsSummarizer.GetDatasetSummaryStats();
 
-                strHTMLFilePath = Path.Combine(strOutputFolderPath, "index.html");
+                var strHTMLFilePath = Path.Combine(strOutputFolderPath, "index.html");
 
-                using (swOutFile == new StreamWriter(new FileStream(strHTMLFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))) {
+                using (var swOutFile = new StreamWriter(new FileStream(strHTMLFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))) {
 
                     swOutFile.WriteLine("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 3.2//EN\">");
                     swOutFile.WriteLine("<html>");
@@ -715,15 +694,16 @@ namespace MSFileInfoScanner
                     swOutFile.WriteLine("  <table>");
 
                     // First the plots with the top 50,000 points
-                    strFile1 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS);
+                    var strFile1 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS);
 
+                    string strFile2;
                     if (mLCMS2DPlotOverview.Options.PlottingDeisotopedData) {
                         strFile2 = strFile1.Replace("_zoom.png", ".png");
                     } else {
                         strFile2 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn);
                     }
 
-                    strTop = IntToEngineeringNotation(mLCMS2DPlotOverview.Options.MaxPointsToPlot);
+                    var strTop = IntToEngineeringNotation(mLCMS2DPlotOverview.Options.MaxPointsToPlot);
 
                     if (strFile1.Length > 0 || strFile2.Length > 0) {
                         swOutFile.WriteLine("    <tr>");
@@ -767,7 +747,7 @@ namespace MSFileInfoScanner
 
                     strFile1 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC);
                     strFile2 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS);
-                    strFile3 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn);
+                    var strFile3 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn);
 
                     if (strFile1.Length > 0 || strFile2.Length > 0 || strFile3.Length > 0) {
                         swOutFile.WriteLine("    <tr>");
@@ -802,7 +782,7 @@ namespace MSFileInfoScanner
                     swOutFile.WriteLine("      <td>&nbsp;</td>");
                     swOutFile.WriteLine("      <td align=\"center\">DMS <a href=\"http://dms2.pnl.gov/dataset/show/" + strDatasetName + "\">Dataset Detail Report</a></td>");
 
-                    strDSInfoFileName = strDatasetName + clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
+                    var strDSInfoFileName = strDatasetName + clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
                     if (mCreateDatasetInfoFile || File.Exists(Path.Combine(strOutputFolderPath, strDSInfoFileName))) {
                         swOutFile.WriteLine("      <td align=\"center\"><a href=\"" + strDSInfoFileName + "\">Dataset Info XML file</a></td>");
                     } else {
@@ -831,24 +811,16 @@ namespace MSFileInfoScanner
 
         private string GenerateQCFigureHTML(string strFilename, int intWidthPixels)
         {
-
-            if (strFilename == null || strFilename.Length == 0) {
+            if (string.IsNullOrEmpty(strFilename)) {
                 return "&nbsp;";
-            } else {
-                return "<a href=\"" + strFilename + "\">" + "<img src=\"" + strFilename + "\" width=\"" + intWidthPixels.ToString + "\" border=\"0\"></a>";
             }
 
+            return "<a href=\"" + strFilename + "\">" + "<img src=\"" + strFilename + "\" width=\"" + intWidthPixels + "\" border=\"0\"></a>";
         }
 
 
         private void GenerateQCScanTypeSummaryHTML(StreamWriter swOutFile, clsDatasetSummaryStats objDatasetSummaryStats, string strIndent)
         {
-            string strScanType = null;
-            int intIndexMatch = 0;
-
-            string strScanFilterText = null;
-            int intScanCount = 0;
-
             if (strIndent == null)
                 strIndent = string.Empty;
 
@@ -856,11 +828,11 @@ namespace MSFileInfoScanner
             swOutFile.WriteLine(strIndent + "  <tr><th>Scan Type</th><th>Scan Count</th><th>Scan Filter Text</th></tr>");
 
 
-            foreach (void scanTypeEntry_loopVariable in objDatasetSummaryStats.objScanTypeStats) {
-                scanTypeEntry = scanTypeEntry_loopVariable;
-                strScanType = scanTypeEntry.Key;
-                intIndexMatch = strScanType.IndexOf(clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR, StringComparison.Ordinal);
+            foreach (var scanTypeEntry in objDatasetSummaryStats.objScanTypeStats) {                
+                var strScanType = scanTypeEntry.Key;
+                var intIndexMatch = strScanType.IndexOf(clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR, StringComparison.Ordinal);
 
+                string strScanFilterText;
                 if (intIndexMatch >= 0) {
                     strScanFilterText = strScanType.Substring(intIndexMatch + clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR.Length);
                     if (intIndexMatch > 0) {
@@ -871,8 +843,7 @@ namespace MSFileInfoScanner
                 } else {
                     strScanFilterText = string.Empty;
                 }
-                intScanCount = scanTypeEntry.Value;
-
+                var intScanCount = scanTypeEntry.Value;
 
                 swOutFile.WriteLine(strIndent + "  <tr><td>" + strScanType + "</td>" + "<td align=\"center\">" + intScanCount + "</td>" + "<td>" + strScanFilterText + "</td></tr>");
 
@@ -893,11 +864,11 @@ namespace MSFileInfoScanner
         {
 
             if (intValue < 1000) {
-                return intValue.ToString;
+                return intValue.ToString();
             } else if (intValue < 1000000.0) {
-                return Convert.ToInt32(Math.Round(intValue / 1000, 0)).ToString + "K";
+                return Convert.ToInt32(Math.Round(intValue / 1000.0, 0)) + "K";
             } else {
-                return Convert.ToInt32(Math.Round(intValue / 1000 / 1000, 0)).ToString + "M";
+                return Convert.ToInt32(Math.Round(intValue / 1000.0 / 1000, 0)) + "M";
             }
 
         }

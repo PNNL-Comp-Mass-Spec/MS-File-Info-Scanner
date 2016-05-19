@@ -28,7 +28,8 @@ namespace MSFileInfoScanner
 
         private const string PEK_FILE_FILENAME_LINE = "Filename:";
 
-        private const DateTime MINIMUM_ACCEPTABLE_ACQ_START_TIME = 1/1/1975 12:00:00 AM;
+        private readonly DateTime MINIMUM_ACCEPTABLE_ACQ_START_TIME = new DateTime(1975,1,1);
+
         public override string GetDatasetNameViaPath(string strDataFilePath)
         {
             DirectoryInfo ioFolderInfo = default(DirectoryInfo);
@@ -50,7 +51,7 @@ namespace MSFileInfoScanner
 
         public static bool IsZippedSFolder(string strFilePath)
         {
-            var reIsZippedSFolder = new Regex("s[0-9]+\\.zip", Text.RegularExpressions.RegexOptions.IgnoreCase);
+            var reIsZippedSFolder = new Regex("s[0-9]+\\.zip", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
             return reIsZippedSFolder.Match(strFilePath).Success;
         }
 

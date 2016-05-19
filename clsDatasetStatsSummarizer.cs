@@ -36,32 +36,6 @@ namespace MSFileInfoScanner
 
 		#region "Structures"
 
-		public struct udtDatasetFileInfoType
-		{
-			public DateTime FileSystemCreationTime;
-			public DateTime FileSystemModificationTime;
-			public int DatasetID;
-			public string DatasetName;
-			public string FileExtension;
-			public DateTime AcqTimeStart;
-			public DateTime AcqTimeEnd;
-			public int ScanCount;
-
-			public long FileSizeBytes;
-			public void Clear()
-			{
-				FileSystemCreationTime = DateTime.MinValue;
-				FileSystemModificationTime = DateTime.MinValue;
-				DatasetID = 0;
-				DatasetName = string.Empty;
-				FileExtension = string.Empty;
-				AcqTimeStart = DateTime.MinValue;
-				AcqTimeEnd = DateTime.MinValue;
-				ScanCount = 0;
-				FileSizeBytes = 0;
-			}
-		}
-
 		public struct udtSampleInfoType
 		{
 			public string SampleName;
@@ -77,11 +51,11 @@ namespace MSFileInfoScanner
 
 			public bool HasData()
 			{
-				if (!string.IsNullOrEmpty(SampleName) || !string.IsNullOrEmpty(Comment1) || !string.IsNullOrEmpty(Comment2)) {
+			    if (!string.IsNullOrEmpty(SampleName) || !string.IsNullOrEmpty(Comment1) || !string.IsNullOrEmpty(Comment2)) {
 					return true;
-				} else {
-					return false;
 				}
+
+			    return false;
 			}
 		}
 
@@ -93,7 +67,6 @@ namespace MSFileInfoScanner
 
 		protected string mErrorMessage = string.Empty;
 		protected List<clsScanStatsEntry> mDatasetScanStats;
-		public udtDatasetFileInfoType DatasetFileInfo;
 
 		public udtSampleInfoType SampleInfo;
 		private clsSpectrumTypeClassifier mSpectraTypeClassifier;
@@ -126,6 +99,8 @@ namespace MSFileInfoScanner
 		#endregion
 
 		#region "Properties"
+
+        public clsDatasetFileInfo DatasetFileInfo { get; set; }
 
 		public string DatasetStatsSummaryFileName {
 			get { return mDatasetStatsSummaryFileName; }
@@ -200,8 +175,8 @@ namespace MSFileInfoScanner
 				mDatasetSummaryStats.Clear();
 			}
 
-			this.DatasetFileInfo.Clear();
-			this.SampleInfo.Clear();
+			DatasetFileInfo.Clear();
+			SampleInfo.Clear();
 
 			mDatasetSummaryStatsUpToDate = false;
 
@@ -216,12 +191,15 @@ namespace MSFileInfoScanner
 		/// <param name="objSummaryStats">Stats output</param>
 		/// <returns>>True if success, false if error</returns>
 		/// <remarks></remarks>
-		public bool ComputeScanStatsSummary(ref List<clsScanStatsEntry> objScanStats, ref clsDatasetSummaryStats objSummaryStats)
+		public bool ComputeScanStatsSummary(List<clsScanStatsEntry> objScanStats, out clsDatasetSummaryStats objSummaryStats)
 		{
             var intTICListMSCount = 0;
             var intTICListMSnCount = 0;
             var intBPIListMSCount = 0;
             var intBPIListMSnCount = 0;
+
+            // Initialize objSummaryStats
+            objSummaryStats = new clsDatasetSummaryStats();
 
 			try {
 				if (objScanStats == null) {
@@ -232,13 +210,6 @@ namespace MSFileInfoScanner
 				}
 
 				var intScanStatsCount = objScanStats.Count;
-
-				// Initialize objSummaryStats
-				if (objSummaryStats == null) {
-					objSummaryStats = new clsDatasetSummaryStats();
-				} else {
-					objSummaryStats.Clear();
-				}
 
 				// Initialize the TIC and BPI List arrays
 				var dblTICListMS = new double[intScanStatsCount];
@@ -266,11 +237,11 @@ namespace MSFileInfoScanner
 					}
 				}
 
-				objSummaryStats.MSStats.TICMedian = ComputeMedian(ref dblTICListMS, intTICListMSCount);
-				objSummaryStats.MSStats.BPIMedian = ComputeMedian(ref dblBPIListMS, intBPIListMSCount);
+				objSummaryStats.MSStats.TICMedian = ComputeMedian(dblTICListMS, intTICListMSCount);
+				objSummaryStats.MSStats.BPIMedian = ComputeMedian(dblBPIListMS, intBPIListMSCount);
 
-				objSummaryStats.MSnStats.TICMedian = ComputeMedian(ref dblTICListMSn, intTICListMSnCount);
-				objSummaryStats.MSnStats.BPIMedian = ComputeMedian(ref dblBPIListMSn, intBPIListMSnCount);
+				objSummaryStats.MSnStats.TICMedian = ComputeMedian(dblTICListMSn, intTICListMSnCount);
+				objSummaryStats.MSnStats.BPIMedian = ComputeMedian(dblBPIListMSn, intBPIListMSnCount);
 
 				return true;
 
@@ -291,12 +262,12 @@ namespace MSFileInfoScanner
             double[] dblBPIList, 
             ref int intBPIListCount)
 		{
-		    double dblTIC = 0;
-			double dblBPI = 0;
+		    double dblTIC;
+			double dblBPI;
 
 			if (!string.IsNullOrEmpty(objScanStats.ElutionTime))
 			{
-			    double dblElutionTime = 0;
+			    double dblElutionTime;
 			    if (double.TryParse(objScanStats.ElutionTime, out dblElutionTime)) {
 					if (dblElutionTime > dblElutionTimeMax) {
 						dblElutionTimeMax = dblElutionTime;
@@ -350,16 +321,16 @@ namespace MSFileInfoScanner
 		public bool CreateDatasetInfoFile(string strDatasetName, string strDatasetInfoFilePath)
 		{
 
-			return CreateDatasetInfoFile(strDatasetName, strDatasetInfoFilePath, mDatasetScanStats, this.DatasetFileInfo, this.SampleInfo);
+			return CreateDatasetInfoFile(strDatasetName, strDatasetInfoFilePath, mDatasetScanStats, DatasetFileInfo, SampleInfo);
 		}
 
 		/// <summary>
-		/// Creates an XML file summarizing the data in objScanStats and udtDatasetFileInfo
+		/// Creates an XML file summarizing the data in objScanStats and datasetFileInfo
 		/// </summary>
 		/// <param name="strDatasetName">Dataset Name</param>
 		/// <param name="strDatasetInfoFilePath">File path to write the XML to</param>
 		/// <param name="objScanStats">Scan stats to parse</param>
-		/// <param name="udtDatasetFileInfo">Dataset Info</param>
+		/// <param name="datasetFileInfo">Dataset Info</param>
 		/// <param name="udtSampleInfo">Sample Info</param>
 		/// <returns>True if success; False if failure</returns>
 		/// <remarks></remarks>
@@ -367,11 +338,11 @@ namespace MSFileInfoScanner
             string strDatasetName, 
             string strDatasetInfoFilePath, 
             List<clsScanStatsEntry> objScanStats, 
-            udtDatasetFileInfoType udtDatasetFileInfo, 
+            clsDatasetFileInfo datasetFileInfo, 
             udtSampleInfoType udtSampleInfo)
 		{
 
-			bool blnSuccess = false;
+			bool blnSuccess;
 
 			try {
 				if (objScanStats == null) {
@@ -385,7 +356,7 @@ namespace MSFileInfoScanner
 				// However, CreateDatasetInfoXML() now uses a MemoryStream, so we're able to use UTF8
 				using (var swOutFile = new StreamWriter(new FileStream(strDatasetInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read), Encoding.UTF8)) {
 
-					swOutFile.WriteLine(CreateDatasetInfoXML(strDatasetName, objScanStats, udtDatasetFileInfo, udtSampleInfo));
+					swOutFile.WriteLine(CreateDatasetInfoXML(strDatasetName, objScanStats, datasetFileInfo, udtSampleInfo));
 
 				}
 
@@ -408,7 +379,7 @@ namespace MSFileInfoScanner
 		/// <remarks></remarks>
 		public string CreateDatasetInfoXML()
 		{
-			return CreateDatasetInfoXML(this.DatasetFileInfo.DatasetName, ref mDatasetScanStats, ref this.DatasetFileInfo, ref this.SampleInfo);
+			return CreateDatasetInfoXML(DatasetFileInfo.DatasetName, mDatasetScanStats, DatasetFileInfo, SampleInfo);
 		}
 
 		/// <summary>
@@ -419,69 +390,71 @@ namespace MSFileInfoScanner
 		/// <remarks></remarks>
 		public string CreateDatasetInfoXML(string strDatasetName)
 		{
-			return CreateDatasetInfoXML(strDatasetName, ref mDatasetScanStats, ref this.DatasetFileInfo, ref this.SampleInfo);
+			return CreateDatasetInfoXML(strDatasetName, mDatasetScanStats, DatasetFileInfo, SampleInfo);
 		}
 
 
 		/// <summary>
-		/// Creates XML summarizing the data in objScanStats and udtDatasetFileInfo
-		/// Auto-determines the dataset name using udtDatasetFileInfo.DatasetName
+		/// Creates XML summarizing the data in objScanStats and datasetFileInfo
+		/// Auto-determines the dataset name using datasetFileInfo.DatasetName
 		/// </summary>
 		/// <param name="objScanStats">Scan stats to parse</param>
-		/// <param name="udtDatasetFileInfo">Dataset Info</param>
+		/// <param name="datasetFileInfo">Dataset Info</param>
 		/// <returns>XML (as string)</returns>
 		/// <remarks></remarks>
-		public string CreateDatasetInfoXML(ref List<clsScanStatsEntry> objScanStats, ref udtDatasetFileInfoType udtDatasetFileInfo)
+		public string CreateDatasetInfoXML(List<clsScanStatsEntry> objScanStats, clsDatasetFileInfo datasetFileInfo)
 		{
+		    var udtSampleInfo = new udtSampleInfoType();
+		    udtSampleInfo.Clear();
 
-			return CreateDatasetInfoXML(ref udtDatasetFileInfo.DatasetName, ref objScanStats, ref udtDatasetFileInfo);
+            return CreateDatasetInfoXML(datasetFileInfo.DatasetName, objScanStats, datasetFileInfo, udtSampleInfo);
 		}
 
 		/// <summary>
-		/// Creates XML summarizing the data in objScanStats, udtDatasetFileInfo, and udtSampleInfo
-		/// Auto-determines the dataset name using udtDatasetFileInfo.DatasetName
+		/// Creates XML summarizing the data in objScanStats, datasetFileInfo, and udtSampleInfo
+		/// Auto-determines the dataset name using datasetFileInfo.DatasetName
 		/// </summary>
 		/// <param name="objScanStats">Scan stats to parse</param>
-		/// <param name="udtDatasetFileInfo">Dataset Info</param>
+		/// <param name="datasetFileInfo">Dataset Info</param>
 		/// <param name="udtSampleInfo">Sample Info</param>
 		/// <returns>XML (as string)</returns>
 		/// <remarks></remarks>
-		public string CreateDatasetInfoXML(ref List<clsScanStatsEntry> objScanStats, ref udtDatasetFileInfoType udtDatasetFileInfo, ref udtSampleInfoType udtSampleInfo)
+        public string CreateDatasetInfoXML(List<clsScanStatsEntry> objScanStats, clsDatasetFileInfo datasetFileInfo, udtSampleInfoType udtSampleInfo)
 		{
 
-			return CreateDatasetInfoXML(udtDatasetFileInfo.DatasetName, ref objScanStats, ref udtDatasetFileInfo, ref udtSampleInfo);
+			return CreateDatasetInfoXML(datasetFileInfo.DatasetName, objScanStats, datasetFileInfo, udtSampleInfo);
 		}
 
 		/// <summary>
-		/// Creates XML summarizing the data in objScanStats and udtDatasetFileInfo
+		/// Creates XML summarizing the data in objScanStats and datasetFileInfo
 		/// </summary>
 		/// <param name="strDatasetName">Dataset Name</param>
 		/// <param name="objScanStats">Scan stats to parse</param>
-		/// <param name="udtDatasetFileInfo">Dataset Info</param>
+		/// <param name="datasetFileInfo">Dataset Info</param>
 		/// <returns>XML (as string)</returns>
 		/// <remarks></remarks>
-		public string CreateDatasetInfoXML(string strDatasetName, ref List<clsScanStatsEntry> objScanStats, ref udtDatasetFileInfoType udtDatasetFileInfo)
+		public string CreateDatasetInfoXML(string strDatasetName, ref List<clsScanStatsEntry> objScanStats, clsDatasetFileInfo datasetFileInfo)
 		{
 
 			var udtSampleInfo = new udtSampleInfoType();
 			udtSampleInfo.Clear();
 
-			return CreateDatasetInfoXML(strDatasetName, ref objScanStats, ref udtDatasetFileInfo, ref udtSampleInfo);
+			return CreateDatasetInfoXML(strDatasetName, objScanStats, datasetFileInfo, udtSampleInfo);
 		}
 
 	    /// <summary>
-	    /// Creates XML summarizing the data in objScanStats and udtDatasetFileInfo
+	    /// Creates XML summarizing the data in objScanStats and datasetFileInfo
 	    /// </summary>
 	    /// <param name="strDatasetName">Dataset Name</param>
 	    /// <param name="objScanStats">Scan stats to parse</param>
-	    /// <param name="udtDatasetFileInfo">Dataset Info</param>
+	    /// <param name="datasetFileInfo">Dataset Info</param>
 	    /// <param name="udtSampleInfo"></param>
 	    /// <returns>XML (as string)</returns>
 	    /// <remarks></remarks>
 	    public string CreateDatasetInfoXML(
             string strDatasetName, 
             List<clsScanStatsEntry> objScanStats, 
-            udtDatasetFileInfoType udtDatasetFileInfo, 
+            clsDatasetFileInfo datasetFileInfo, 
             udtSampleInfoType udtSampleInfo)
 		{
 
@@ -496,7 +469,7 @@ namespace MSFileInfoScanner
 				}
 
 			    clsDatasetSummaryStats objSummaryStats;
-			    if (object.ReferenceEquals(objScanStats, mDatasetScanStats)) {
+			    if (objScanStats == mDatasetScanStats) {
 					objSummaryStats = GetDatasetSummaryStats();
 
 					if (mSpectraTypeClassifier.TotalSpectra() > 0) {
@@ -504,12 +477,15 @@ namespace MSFileInfoScanner
 					}
 
 				} else {
-					objSummaryStats = new clsDatasetSummaryStats();
 
 					// Parse the data in objScanStats to compute the bulk values
-					this.ComputeScanStatsSummary(ref objScanStats, ref objSummaryStats);
-
-					includeCentroidStats = false;
+					var success = ComputeScanStatsSummary(objScanStats, out objSummaryStats);
+				    if (!success)
+				    {
+                        ReportError("ComputeScanStatsSummary returned false; unable to continue in CreateDatasetInfoXML");
+				        return string.Empty;
+				    }
+				    includeCentroidStats = false;
 				}
 
 			    var objXMLSettings = new XmlWriterSettings
@@ -538,8 +514,8 @@ namespace MSFileInfoScanner
 				//  and so you see the attribute encoding="utf-8" in the opening XML declaration encoding 
 				//  (since we used objXMLSettings.Encoding = Encoding.UTF8)
 				//
-				var objMemStream = new MemoryStream();
-				var objDSInfo = XmlWriter.Create(objMemStream, objXMLSettings);
+			    var objMemStream = new MemoryStream();
+                var objDSInfo = XmlWriter.Create(objMemStream, objXMLSettings);
 
 				objDSInfo.WriteStartDocument(true);
 
@@ -556,7 +532,7 @@ namespace MSFileInfoScanner
 					var strScanType = scanTypeEntry.Key;
 					var intIndexMatch = strScanType.IndexOf(SCANTYPE_STATS_SEPCHAR, StringComparison.Ordinal);
 
-                    string strScanFilterText = null;
+                    string strScanFilterText;
                     if (intIndexMatch >= 0) {
 						strScanFilterText = strScanType.Substring(intIndexMatch + SCANTYPE_STATS_SEPCHAR.Length);
 						if (intIndexMatch > 0) {
@@ -582,31 +558,31 @@ namespace MSFileInfoScanner
 				objDSInfo.WriteStartElement("AcquisitionInfo");
 
 				var scanCountTotal = objSummaryStats.MSStats.ScanCount + objSummaryStats.MSnStats.ScanCount;
-				if (scanCountTotal == 0 & udtDatasetFileInfo.ScanCount > 0) {
-					scanCountTotal = udtDatasetFileInfo.ScanCount;
+				if (scanCountTotal == 0 & datasetFileInfo.ScanCount > 0) {
+					scanCountTotal = datasetFileInfo.ScanCount;
 				}
 
 				objDSInfo.WriteElementString("ScanCount", scanCountTotal.ToString());
 
 				objDSInfo.WriteElementString("ScanCountMS", objSummaryStats.MSStats.ScanCount.ToString());
 				objDSInfo.WriteElementString("ScanCountMSn", objSummaryStats.MSnStats.ScanCount.ToString());
-				objDSInfo.WriteElementString("Elution_Time_Max", objSummaryStats.ElutionTimeMax.ToString());
+				objDSInfo.WriteElementString("Elution_Time_Max", objSummaryStats.ElutionTimeMax.ToString("0.00"));
 
-				objDSInfo.WriteElementString("AcqTimeMinutes", udtDatasetFileInfo.AcqTimeEnd.Subtract(udtDatasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00"));
-				objDSInfo.WriteElementString("StartTime", udtDatasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt"));
-				objDSInfo.WriteElementString("EndTime", udtDatasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt"));
+				objDSInfo.WriteElementString("AcqTimeMinutes", datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00"));
+				objDSInfo.WriteElementString("StartTime", datasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt"));
+				objDSInfo.WriteElementString("EndTime", datasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt"));
 
-				objDSInfo.WriteElementString("FileSizeBytes", udtDatasetFileInfo.FileSizeBytes.ToString());
+				objDSInfo.WriteElementString("FileSizeBytes", datasetFileInfo.FileSizeBytes.ToString());
 
 				if (includeCentroidStats) {
-					var centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedMS1Spectra;
-                    var centroidedMSnSpectra = mSpectraTypeClassifier.CentroidedMSnSpectra;
+					var centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedMS1Spectra();
+                    var centroidedMSnSpectra = mSpectraTypeClassifier.CentroidedMSnSpectra();
 
-                    var centroidedMS1SpectraClassifiedAsProfile = mSpectraTypeClassifier.CentroidedMS1SpectraClassifiedAsProfile;
-                    var centroidedMSnSpectraClassifiedAsProfile = mSpectraTypeClassifier.CentroidedMSnSpectraClassifiedAsProfile;
+                    var centroidedMS1SpectraClassifiedAsProfile = mSpectraTypeClassifier.CentroidedMS1SpectraClassifiedAsProfile();
+                    var centroidedMSnSpectraClassifiedAsProfile = mSpectraTypeClassifier.CentroidedMSnSpectraClassifiedAsProfile();
 
-                    var totalMS1Spectra = mSpectraTypeClassifier.TotalMS1Spectra;
-                    var totalMSnSpectra = mSpectraTypeClassifier.TotalMSnSpectra;
+                    var totalMS1Spectra = mSpectraTypeClassifier.TotalMS1Spectra();
+                    var totalMSnSpectra = mSpectraTypeClassifier.TotalMSnSpectra();
 
 					if (totalMS1Spectra + totalMSnSpectra == 0) {
 						// None of the spectra had MSLevel 1 or MSLevel 2
@@ -687,7 +663,7 @@ namespace MSFileInfoScanner
 		public bool CreateScanStatsFile(string strDatasetName, string strScanStatsFilePath)
 		{
 
-			return CreateScanStatsFile(strDatasetName, strScanStatsFilePath, ref mDatasetScanStats, ref this.DatasetFileInfo, ref this.SampleInfo);
+			return CreateScanStatsFile(strDatasetName, strScanStatsFilePath, mDatasetScanStats, this.DatasetFileInfo);
 		}
 
 		/// <summary>
@@ -696,16 +672,19 @@ namespace MSFileInfoScanner
 		/// <param name="strDatasetName">Dataset Name</param>
 		/// <param name="strScanStatsFilePath">File path to write the text file to</param>
 		/// <param name="objScanStats">Scan stats to parse</param>
-		/// <param name="udtDatasetFileInfo">Dataset Info</param>
-		/// <param name="udtSampleInfo">Sample Info</param>
+		/// <param name="datasetFileInfo">Dataset Info</param>
 		/// <returns>True if success; False if failure</returns>
 		/// <remarks></remarks>
-		public bool CreateScanStatsFile(string strDatasetName, string strScanStatsFilePath, ref List<clsScanStatsEntry> objScanStats, ref udtDatasetFileInfoType udtDatasetFileInfo, ref udtSampleInfoType udtSampleInfo)
+		public bool CreateScanStatsFile(
+            string strDatasetName, 
+            string strScanStatsFilePath, 
+            List<clsScanStatsEntry> objScanStats, 
+            clsDatasetFileInfo datasetFileInfo)
 		{
-		    int intDatasetID = udtDatasetFileInfo.DatasetID;
+		    var intDatasetID = datasetFileInfo.DatasetID;
 			var sbLineOut = new StringBuilder();
 
-			var blnSuccess = false;
+			bool blnSuccess;
 
 			try {
 				if (objScanStats == null) {
@@ -799,18 +778,18 @@ namespace MSFileInfoScanner
 
 		protected string FixNull(string strText)
 		{
-			if (string.IsNullOrEmpty(strText)) {
+		    if (string.IsNullOrEmpty(strText)) {
 				return string.Empty;
-			} else {
-				return strText;
 			}
+
+		    return strText;
 		}
 
-		public clsDatasetSummaryStats GetDatasetSummaryStats()
+	    public clsDatasetSummaryStats GetDatasetSummaryStats()
 		{
 
 			if (!mDatasetSummaryStatsUpToDate) {
-				ComputeScanStatsSummary(ref mDatasetScanStats, ref mDatasetSummaryStats);
+				ComputeScanStatsSummary(mDatasetScanStats, out mDatasetSummaryStats);
 				mDatasetSummaryStatsUpToDate = true;
 			}
 
@@ -847,11 +826,10 @@ namespace MSFileInfoScanner
 		public bool UpdateDatasetScanType(int intScanNumber, int intScanType, string strScanTypeName)
 		{
 
-			int intIndex = 0;
-			bool blnMatchFound = false;
+			var blnMatchFound = false;
 
 			// Look for scan intScanNumber in mDatasetScanStats
-			for (intIndex = 0; intIndex <= mDatasetScanStats.Count - 1; intIndex++) {
+			for (var intIndex = 0; intIndex <= mDatasetScanStats.Count - 1; intIndex++) {
 				if (mDatasetScanStats[intIndex].ScanNumber == intScanNumber) {
 					mDatasetScanStats[intIndex].ScanType = intScanType;
 					mDatasetScanStats[intIndex].ScanTypeName = strScanTypeName;
@@ -876,46 +854,51 @@ namespace MSFileInfoScanner
 		public bool UpdateDatasetStatsTextFile(string strDatasetName, string strDatasetInfoFilePath)
 		{
 
-			return UpdateDatasetStatsTextFile(strDatasetName, strDatasetInfoFilePath, ref mDatasetScanStats, ref this.DatasetFileInfo, ref this.SampleInfo);
+			return UpdateDatasetStatsTextFile(strDatasetName, strDatasetInfoFilePath, mDatasetScanStats, DatasetFileInfo, this.SampleInfo);
 		}
 
 		/// <summary>
-		/// Updates a tab-delimited text file, adding a new line summarizing the data in objScanStats and udtDatasetFileInfo
+		/// Updates a tab-delimited text file, adding a new line summarizing the data in objScanStats and datasetFileInfo
 		/// </summary>
 		/// <param name="strDatasetName">Dataset Name</param>
 		/// <param name="strDatasetStatsFilePath">Tab-delimited file to create/update</param>
 		/// <param name="objScanStats">Scan stats to parse</param>
-		/// <param name="udtDatasetFileInfo">Dataset Info</param>
+		/// <param name="datasetFileInfo">Dataset Info</param>
 		/// <param name="udtSampleInfo">Sample Info</param>
 		/// <returns>True if success; False if failure</returns>
 		/// <remarks></remarks>
-		public bool UpdateDatasetStatsTextFile(string strDatasetName, string strDatasetStatsFilePath, ref List<clsScanStatsEntry> objScanStats, ref udtDatasetFileInfoType udtDatasetFileInfo, ref udtSampleInfoType udtSampleInfo)
+		public bool UpdateDatasetStatsTextFile(
+            string strDatasetName, 
+            string strDatasetStatsFilePath, 
+            List<clsScanStatsEntry> objScanStats, 
+            clsDatasetFileInfo datasetFileInfo, 
+            udtSampleInfoType udtSampleInfo)
 		{
 
-			bool blnWriteHeaders = false;
+			var blnWriteHeaders = false;
 
-			string strLineOut = null;
-
-			clsDatasetSummaryStats objSummaryStats = null;
-
-			bool blnSuccess = false;
+		    bool blnSuccess;
 
 
 			try {
 				if (objScanStats == null) {
 					ReportError("objScanStats is Nothing; unable to continue in UpdateDatasetStatsTextFile");
 					return false;
-				} else {
-					mErrorMessage = "";
 				}
 
-				if (object.ReferenceEquals(objScanStats, mDatasetScanStats)) {
+			    mErrorMessage = "";
+
+			    clsDatasetSummaryStats objSummaryStats;
+			    if (objScanStats == mDatasetScanStats) {
 					objSummaryStats = GetDatasetSummaryStats();
 				} else {
-					objSummaryStats = new clsDatasetSummaryStats();
-
 					// Parse the data in objScanStats to compute the bulk values
-					this.ComputeScanStatsSummary(ref objScanStats, ref objSummaryStats);
+					var success = ComputeScanStatsSummary(objScanStats, out objSummaryStats);
+				    if (!success)
+				    {
+                        ReportError("ComputeScanStatsSummary returned false; unable to continue in UpdateDatasetStatsTextFile");
+                        return false;
+				    }
 				}
 
 				if (!File.Exists(strDatasetStatsFilePath)) {
@@ -924,15 +907,27 @@ namespace MSFileInfoScanner
 
 				// Create or open the output file
 				using (var swOutFile = new StreamWriter(new FileStream(strDatasetStatsFilePath, FileMode.Append, FileAccess.Write, FileShare.Read))) {
-
-					if (blnWriteHeaders) {
+				    string strLineOut;
+				    if (blnWriteHeaders) {
 						// Write the header line
 						strLineOut = "Dataset" + '\t' + "ScanCount" + '\t' + "ScanCountMS" + '\t' + "ScanCountMSn" + '\t' + "Elution_Time_Max" + '\t' + "AcqTimeMinutes" + '\t' + "StartTime" + '\t' + "EndTime" + '\t' + "FileSizeBytes" + '\t' + "SampleName" + '\t' + "Comment1" + '\t' + "Comment2";
 
 						swOutFile.WriteLine(strLineOut);
 					}
 
-					strLineOut = strDatasetName + '\t' + (objSummaryStats.MSStats.ScanCount + objSummaryStats.MSnStats.ScanCount).ToString + '\t' + objSummaryStats.MSStats.ScanCount.ToString + '\t' + objSummaryStats.MSnStats.ScanCount.ToString + '\t' + objSummaryStats.ElutionTimeMax.ToString + '\t' + udtDatasetFileInfo.AcqTimeEnd.Subtract(udtDatasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00") + '\t' + udtDatasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt") + '\t' + udtDatasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt") + '\t' + udtDatasetFileInfo.FileSizeBytes.ToString + '\t' + FixNull(udtSampleInfo.SampleName) + '\t' + FixNull(udtSampleInfo.Comment1) + '\t' + FixNull(udtSampleInfo.Comment2);
+					strLineOut = 
+                        strDatasetName + '\t' + 
+                        (objSummaryStats.MSStats.ScanCount + objSummaryStats.MSnStats.ScanCount) + '\t' 
+                        + objSummaryStats.MSStats.ScanCount + '\t'
+                        + objSummaryStats.MSnStats.ScanCount + '\t' 
+                        + objSummaryStats.ElutionTimeMax.ToString("0.00") + '\t' 
+                        + datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00") + '\t' + 
+                        datasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt") + '\t' + 
+                        datasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt") + '\t' + 
+                        datasetFileInfo.FileSizeBytes + '\t' + 
+                        FixNull(udtSampleInfo.SampleName) + '\t' + 
+                        FixNull(udtSampleInfo.Comment1) + '\t' + 
+                        FixNull(udtSampleInfo.Comment2);
 
 					swOutFile.WriteLine(strLineOut);
 

@@ -1802,7 +1802,7 @@ namespace MSFileInfoScanner
             // hash contents of this stream
             arrHash = objMD5.ComputeHash(objReader);
 
-            // Cleanup the objects
+            // Cleanup the vars
             objReader.Close();
 
             // Return the hash, formatted as a string
@@ -1823,7 +1823,7 @@ namespace MSFileInfoScanner
             // hash contents of this stream
             arrHash = objSha1.ComputeHash(objReader);
 
-            // Cleanup the objects
+            // Cleanup the vars
             objReader.Close();
 
             // Return the hash, formatted as a string

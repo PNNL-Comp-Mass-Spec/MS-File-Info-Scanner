@@ -474,8 +474,8 @@ namespace MSFileInfoScanner
                     base.InitializeLCMS2DPlot();
                 }
 
-                object strMetadataFile = Path.Combine(diDatasetFolder.FullName, BRUKER_SQLITE_INDEX_FILE_NAME);
-                object fiFileInfo = new FileInfo(strMetadataFile);
+                var strMetadataFile = Path.Combine(diDatasetFolder.FullName, BRUKER_SQLITE_INDEX_FILE_NAME);
+                var fiFileInfo = new FileInfo(strMetadataFile);
 
                 if (!fiFileInfo.Exists) {
                     // Storage.mcf_idx not found
@@ -483,22 +483,22 @@ namespace MSFileInfoScanner
                     return false;
                 }
 
-                object strConnectionString = "Data Source = " + fiFileInfo.FullName + "; Version=3; DateTimeFormat=Ticks;";
+                var strConnectionString = "Data Source = " + fiFileInfo.FullName + "; Version=3; DateTimeFormat=Ticks;";
 
                 // Open the Storage.mcf_idx file to lookup the metadata name to ID mapping
                 using (cnDB == new SQLite.SQLiteConnection(strConnectionString, true)) {
                     cnDB.Open();
 
-                    object cmd = new SQLite.SQLiteCommand(cnDB);
+                    var cmd = new SQLite.SQLiteCommand(cnDB);
 
                     cmd.CommandText = "SELECT metadataId, permanentName, displayName FROM MetadataId";
 
                     using (SQLite.SQLiteDataReader drReader = cmd.ExecuteReader()) {
 
                         while (drReader.Read()) {
-                            object intMetadataId = ReadDbInt(drReader, "metadataId");
-                            object strMetadataName = ReadDbString(drReader, "permanentName");
-                            object strMetadataDescription = ReadDbString(drReader, "displayName");
+                            var intMetadataId = ReadDbInt(drReader, "metadataId");
+                            var strMetadataName = ReadDbString(drReader, "permanentName");
+                            var strMetadataDescription = ReadDbString(drReader, "displayName");
 
                             if (intMetadataId > 0) {
                                 lstMetadataNameToID.Add(strMetadataName, intMetadataId);
@@ -510,7 +510,7 @@ namespace MSFileInfoScanner
                     cnDB.Close();
                 }
 
-                object fiFiles = diDatasetFolder.GetFiles("*_1.mcf_idx").ToList();
+                var fiFiles = diDatasetFolder.GetFiles("*_1.mcf_idx").ToList();
 
                 if (fiFiles.Count == 0) {
                     // Storage.mcf_idx not found
@@ -632,9 +632,9 @@ namespace MSFileInfoScanner
                     return false;
                 }
 
-                object intScanCount = 0;
+                var intScanCount = 0;
                 double dblMaxRunTimeMinutes = 0;
-                object validFile = false;
+                var validFile = false;
 
                 using (var srReader = new System.Xml.XmlTextReader(new FileStream(fiFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))) {
 
@@ -740,7 +740,7 @@ namespace MSFileInfoScanner
         {
 
             // First see if strFileOrFolderPath points to a valid file
-            object fiFileInfo = new FileInfo(strDataFilePath);
+            var fiFileInfo = new FileInfo(strDataFilePath);
 
             if (fiFileInfo.Exists()) {
                 // User specified a file; assume the parent folder of this file is the dataset folder
@@ -759,7 +759,7 @@ namespace MSFileInfoScanner
             try {
                 // The dataset name for a Bruker Xmass folder is the name of the parent directory
                 // However, strDataFilePath could be a file or a folder path, so use GetDatasetFolder to get the dataset folder
-                object diDatasetFolder = GetDatasetFolder(strDataFilePath);
+                var diDatasetFolder = GetDatasetFolder(strDataFilePath);
                 strDatasetName = diDatasetFolder.Name;
 
                 if (strDatasetName.ToLower().EndsWith(".d")) {
@@ -805,13 +805,13 @@ namespace MSFileInfoScanner
                 // Use its modification time as the AcqTime start and End values
                 // If we cannot find the anslysis.baf file, then look for a ser file or a fid file
 
-                object lstInstrumentDataFiles = new List<string> {
+                var lstInstrumentDataFiles = new List<string> {
                     BRUKER_BAF_FILE_NAME,
                     BRUKER_SER_FILE_NAME,
                     BRUKER_FID_FILE_NAME,
                     BRUKER_EXTENSION_BAF_FILE_NAME
                 };
-                object fiFiles = new List<FileInfo>();
+                var fiFiles = new List<FileInfo>();
 
                 foreach (void instrumentDataFile_loopVariable in lstInstrumentDataFiles) {
                     instrumentDataFile = instrumentDataFile_loopVariable;
@@ -902,7 +902,7 @@ namespace MSFileInfoScanner
                         if (mSaveTICAndBPI & mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC == 0 || mSaveLCMS2DPlots & mLCMS2DPlot.ScanCountCached == 0) {
                             // If a ser or fid file exists, we can read the data from it to create the TIC and BPI plots, plus also the 2D plot
 
-                            object serOrFidParsed = ParseSerOrFidFile(fiFileInfo.Directory, scanElutionTimeMap);
+                            var serOrFidParsed = ParseSerOrFidFile(fiFileInfo.Directory, scanElutionTimeMap);
 
                             if (!serOrFidParsed & !bafFileParsed) {
                                 // Look for an analysis.baf file
@@ -939,7 +939,7 @@ namespace MSFileInfoScanner
 
 
             try {
-                object fiSerOrFidFile = new FileInfo(Path.Combine(diDotDFolder.FullName, "ser"));
+                var fiSerOrFidFile = new FileInfo(Path.Combine(diDotDFolder.FullName, "ser"));
 
                 if (!fiSerOrFidFile.Exists) {
                     fiSerOrFidFile = new FileInfo(Path.Combine(diDotDFolder.FullName, "fid"));
@@ -963,12 +963,12 @@ namespace MSFileInfoScanner
                     fiSettingsFile = fiAcqusFile;
                 }
 
-                object needToSaveTICAndBPI = (mSaveTICAndBPI && mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC == 0);
-                object dtLastProgressTime = DateTime.UtcNow;
+                var needToSaveTICAndBPI = (mSaveTICAndBPI && mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC == 0);
+                var dtLastProgressTime = DateTime.UtcNow;
 
-                object serReader = new BrukerDataReader.DataReader(fiSerOrFidFile.FullName, fiSettingsFile.FullName);
+                var serReader = new BrukerDataReader.DataReader(fiSerOrFidFile.FullName, fiSettingsFile.FullName);
 
-                object scanCount = serReader.GetNumMSScans();
+                var scanCount = serReader.GetNumMSScans();
                 float[] mzValues = null;
                 float[] intensities = null;
 
@@ -995,7 +995,7 @@ namespace MSFileInfoScanner
                         continue;
                     }
 
-                    const object msLevel = 1;
+                    const var msLevel = 1;
                     float elutionTime = 0;
                     if (!scanElutionTimeMap.TryGetValue(scanNumber, elutionTime)) {
                         elutionTime = scanNumber / 60f;

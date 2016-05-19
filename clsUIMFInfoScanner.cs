@@ -233,7 +233,7 @@ namespace MSFileInfoScanner
 
             dtLastProgressTime = DateTime.UtcNow;
 
-            object objGlobalParams = objUIMFReader.GetGlobalParams();
+            var objGlobalParams = objUIMFReader.GetGlobalParams();
 
             intGlobalMaxBins = objGlobalParams.Bins;
 
@@ -262,7 +262,7 @@ namespace MSFileInfoScanner
                 DataReader.FrameType eFrameType = default(DataReader.FrameType);
                 intFrameNumber = intMasterFrameNumList(intMasterFrameNumIndex);
                 eFrameType = dctMasterFrameList(intFrameNumber);
-                object intMSLevel = 1;
+                var intMSLevel = 1;
 
                 // Check whether the frame number is within the desired range
                 if (intFrameNumber < intFrameStart || intFrameNumber > intFrameEnd) {

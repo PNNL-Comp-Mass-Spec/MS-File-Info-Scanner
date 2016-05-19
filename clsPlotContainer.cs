@@ -3,10 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-
 using System.IO;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using OxyPlot;
 using OxyPlot.Axes;
+using Brushes = System.Drawing.Brushes;
+using Color = System.Drawing.Color;
 
 public class clsPlotContainer
 {
@@ -97,12 +101,10 @@ public class clsPlotContainer
 			return;
 		}
 
-		foreach (void colorGradient_loopVariable in mColorGradients) {
-			colorGradient = colorGradient_loopVariable;
-			bool matchFound = false;
+		foreach (var colorGradient in mColorGradients) {
+			var matchFound = false;
 
-			foreach (void axis_loopVariable in mPlot.Axes) {
-				axis = axis_loopVariable;
+			foreach (var axis in mPlot.Axes) {
 				dynamic newAxis = axis as LinearColorAxis;
 
 				if (newAxis == null) {
@@ -286,7 +288,7 @@ public class clsPlotContainer
 
 	public static Color GetColorByCharge(int charge)
 	{
-		Color seriesColor = default(Color);
+		var seriesColor = default(Color);
 		switch (charge) {
 			case 1:
 				seriesColor = Colors.MediumBlue;

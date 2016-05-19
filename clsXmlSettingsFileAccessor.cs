@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace FileProcessor
+namespace MSFileInfoScanner
 {
     // This class can be used to read or write settings in an Xml settings file
     // Based on a class from the DMS Analysis Manager software written by Dave Clark and Gary Kiebel (PNNL, Richland, WA)
@@ -11,7 +10,7 @@ namespace FileProcessor
     //
     // Updated in October 2004 to truly be case-insensitive if IsCaseSensitive = False when calling LoadSettings()
     // Updated in August 2007 to remove the PRISM.Logging functionality and to include class XMLFileReader inside class XmlSettingsFileAccessor
-    // Updated in December 2010 to rename objects from Ini to XML
+    // Updated in December 2010 to rename vars from Ini to XML
             
 
     public class XmlSettingsFileAccessor
@@ -1454,7 +1453,7 @@ namespace FileProcessor
 		    /// <summary>Manually parses a line to extract the settings information
 		    /// Supports the traditional .Ini file format
 		    /// Also supports the 'key="KeyName" value="Value"' method used in XML settings files
-		    /// If success, then adds attributes to the doc object</summary>
+		    /// If success, then adds attributes to the doc var</summary>
 		    /// <param name="strLine">The name of the string to be parse.</param>
 		    /// <param name="doc">The name of the System.Xml.XmlDocument.</param>
 		    /// <returns>True if success, false if not a recognized line format</returns>

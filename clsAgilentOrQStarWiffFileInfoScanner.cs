@@ -46,17 +46,14 @@ namespace MSFileInfoScanner
         {
             // Returns True if success, False if an error
 
-            FileInfo ioFileInfo = default(FileInfo);
-            bool blnSuccess = false;
-
-            bool blnTICStored = false;
-            bool blnSRMDataCached = false;
+            var blnTICStored = false;
+            var blnSRMDataCached = false;
 
             // Override strDataFilePath here, if needed
             strDataFilePath = strDataFilePath;
 
             // Obtain the full path to the file
-            ioFileInfo = new FileInfo(strDataFilePath);
+            var ioFileInfo = new FileInfo(strDataFilePath);
 
 
             bool blnTest = false;
@@ -89,8 +86,7 @@ namespace MSFileInfoScanner
                 var objPWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(ioFileInfo.FullName);
 
                 try {
-                    DateTime dtRunStartTime = datasetFileInfo.AcqTimeStart;
-                    dtRunStartTime = Convert.ToDateTime(objPWiz.RunStartTime());
+                    var dtRunStartTime = Convert.ToDateTime(objPWiz.RunStartTime);
 
                     // Update AcqTimeEnd if possible
                     // Found out by trial and error that we need to use .ToUniversalTime() to adjust the time reported by ProteoWizard
@@ -149,9 +145,7 @@ namespace MSFileInfoScanner
             mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
             mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
 
-            blnSuccess = true;
-
-            return blnSuccess;
+            return true;
 
         }
 
@@ -229,7 +223,7 @@ namespace MSFileInfoScanner
                                 dtEndTime = DateTime.Now;
                                 dtRunTimeSeconds1 = dtEndTime.Subtract(dtStartTime).TotalSeconds;
 
-                                // The preferred method is to copy the data from .data to a locally-stored mzArray object
+                                // The preferred method is to copy the data from .data to a locally-stored mzArray var
                                 // With 700 points and 2000 iterations, it takes 0.016 seconds to run from dtStartTime to dtEndTime
                                 dtStartTime = DateTime.Now;
                                 for (int j = 1; j <= LOOP_ITERATIONS; j++) {

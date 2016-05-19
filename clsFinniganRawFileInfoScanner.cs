@@ -162,7 +162,7 @@ namespace MSFileInfoScanner
                 base.InitializeLCMS2DPlot();
             }
 
-            object dtLastProgressTime = DateTime.UtcNow;
+            var dtLastProgressTime = DateTime.UtcNow;
 
             var intScanCount = objXcaliburAccessor.GetNumScans();
             base.GetStartAndEndScans(intScanCount, intScanStart, intScanEnd);
@@ -238,7 +238,7 @@ namespace MSFileInfoScanner
                             if (mCheckCentroidingStatus) {
                                 int mzCount = dblMassIntensityPairs.GetLength(1);
 
-                                object lstMZs = new List<double>(mzCount);
+                                var lstMZs = new List<double>(mzCount);
 
                                 for (int i = 0; i <= mzCount - 1; i++) {
                                     lstMZs.Add(dblMassIntensityPairs(0, i));

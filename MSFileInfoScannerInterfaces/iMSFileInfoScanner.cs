@@ -42,10 +42,10 @@ namespace MSFileInfoScannerInterfaces
         }
 
         public abstract event MessageEventEventHandler MessageEvent;
-        public delegate void MessageEventEventHandler(string Message);
+        public delegate void MessageEventEventHandler(string message);
 
         public abstract event ErrorEventEventHandler ErrorEvent;
-        public delegate void ErrorEventEventHandler(string Message);
+        public delegate void ErrorEventEventHandler(string message);
 
         public abstract bool AbortProcessing { get; set; }
         public abstract string AcquisitionTimeFilename { get; set; }
@@ -103,7 +103,7 @@ namespace MSFileInfoScannerInterfaces
         public abstract bool ProcessMSFileOrFolder(string strInputFileOrFolderPath, string strOutputFolderPath);
 
         public abstract bool ProcessMSFileOrFolder(string strInputFileOrFolderPath, string strOutputFolderPath, bool blnResetErrorCode,
-                                                   ref eMSFileProcessingStateConstants eMSFileProcessingState);
+                                                   out eMSFileProcessingStateConstants eMSFileProcessingState);
 
         public abstract bool ProcessMSFileOrFolderWildcard(string strInputFileOrFolderPath, string strOutputFolderPath, bool blnResetErrorCode);
 

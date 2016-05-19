@@ -58,6 +58,7 @@
     <Reference Include="PNNLOmics">
       <HintPath>Lib\PNNLOmics.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="PRISM">
       <HintPath>Lib\PRISM.dll</HintPath>
     </Reference>
@@ -72,6 +73,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />

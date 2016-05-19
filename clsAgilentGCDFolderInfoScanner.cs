@@ -91,7 +91,7 @@ namespace MSFileInfoScanner
                     return false;
                 }
 
-                // Populate a dictionary object with the text strings for finding lines with runtime information
+                // Populate a dictionary var with the text strings for finding lines with runtime information
                 // Note that "Post Run" occurs twice in the file, so we use clsLineMatchSearchInfo.Matched to track whether or not the text has been matched
                 var dctRunTimeText = new Dictionary<string, clsLineMatchSearchInfo>
                 {

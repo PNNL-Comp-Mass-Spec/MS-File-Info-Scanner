@@ -71,7 +71,7 @@ namespace MSFileInfoScanner
             try {
                 if (strDataFilePath.ToUpper().EndsWith(DECONTOOLS_ISOS_FILE_SUFFIX)) {
                     // The dataset name is simply the file name without _isos.csv
-                    object datasetName = Path.GetFileName(strDataFilePath);
+                    var datasetName = Path.GetFileName(strDataFilePath);
                     return datasetName.Substring(0, datasetName.Length - DECONTOOLS_ISOS_FILE_SUFFIX.Length);
                 } else {
                     return string.Empty;
@@ -112,18 +112,18 @@ namespace MSFileInfoScanner
                 base.InitializeLCMS2DPlot();
             }
 
-            object lstIsosData = LoadIsosFile(fiIsosFile.FullName, this.MaxFit);
+            var lstIsosData = LoadIsosFile(fiIsosFile.FullName, this.MaxFit);
 
             if (lstIsosData.Count == 0) {
                 ReportError("No data found in the _isos.csv file: " + fiIsosFile.FullName);
                 return;
             }
 
-            object strScansFilePath = GetDatasetNameViaPath(fiIsosFile.Name) + DECONTOOLS_SCANS_FILE_SUFFIX;
+            var strScansFilePath = GetDatasetNameViaPath(fiIsosFile.Name) + DECONTOOLS_SCANS_FILE_SUFFIX;
             strScansFilePath = Path.Combine(fiIsosFile.Directory.FullName, strScansFilePath);
 
-            object lstScanData = LoadScansFile(strScansFilePath);
-            object scansFileIsMissing = false;
+            var lstScanData = LoadScansFile(strScansFilePath);
+            var scansFileIsMissing = false;
 
             if (lstScanData.Count > 0) {
                 datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(lstScanData.Last.ElutionTime);
@@ -134,7 +134,7 @@ namespace MSFileInfoScanner
                 datasetFileInfo.ScanCount = (from item in lstIsosDataitem.Scan).Max;
 
                 for (intScanIndex = 1; intScanIndex <= datasetFileInfo.ScanCount; intScanIndex++) {
-                    object udtScanData = new udtScansDataType();
+                    var udtScanData = new udtScansDataType();
                     udtScanData.Scan = intScanIndex;
                     udtScanData.ElutionTime = intScanIndex;
                     udtScanData.MSLevel = 1;
@@ -146,13 +146,13 @@ namespace MSFileInfoScanner
             // Step through the isos data and call mLCMS2DPlot.AddScan() for each scan
 
             List<clsLCMSDataPlotter.udtMSIonType> lstIons = new List<clsLCMSDataPlotter.udtMSIonType>();
-            object intCurrentScan = 0;
+            var intCurrentScan = 0;
 
             // Note: we only need to update mLCMS2DPlot
             // The options for mLCMS2DPlotOverview will be cloned from mLCMS2DPlot.Options
             mLCMS2DPlot.Options.PlottingDeisotopedData = true;
 
-            object dblMaxMonoMass = mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot;
+            var dblMaxMonoMass = mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot;
 
 
             for (intIndex = 0; intIndex <= lstIsosData.Count - 1; intIndex++) {
@@ -160,7 +160,7 @@ namespace MSFileInfoScanner
                     // Store the cached values
 
                     if (lstIons.Count > 0) {
-                        object udtCurrentScan = (from item in lstScanDatawhere item.Scan == intCurrentScan).ToList().FirstOrDefault;
+                        var udtCurrentScan = (from item in lstScanDatawhere item.Scan == intCurrentScan).ToList().FirstOrDefault;
 
                         lstIons.Sort(new clsLCMSDataPlotter.udtMSIonTypeComparer());
                         mLCMS2DPlot.AddScan(intCurrentScan, udtCurrentScan.MSLevel, Convert.ToSingle(udtCurrentScan.ElutionTime), lstIons);
@@ -187,7 +187,7 @@ namespace MSFileInfoScanner
                 }
 
                 if (lstIsosData[intIndex].MonoMass <= dblMaxMonoMass) {
-                    object udtIon = new clsLCMSDataPlotter.udtMSIonType();
+                    var udtIon = new clsLCMSDataPlotter.udtMSIonType();
                     udtIon.MZ = lstIsosData[intIndex].MonoMass;
                     // Note that we store .MonoMass in a field called .mz; we'll still be plotting monoisotopic mass
                     udtIon.Intensity = lstIsosData[intIndex].Abundance;
@@ -213,19 +213,19 @@ namespace MSFileInfoScanner
 
             int intColIndexScanOrFrameNum = -1;
 
-            object lstIsosData = new List<udtIsosDataType>();
-            object intRowNumber = 0;
+            var lstIsosData = new List<udtIsosDataType>();
+            var intRowNumber = 0;
 
-            object intLastScan = 0;
-            object intLastScanParseErrors = 0;
+            var intLastScan = 0;
+            var intLastScanParseErrors = 0;
 
             Console.WriteLine("  Reading the _isos.csv file");
 
             using (var srIsosFile = new StreamReader(new FileStream(strIsosFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
                 while (!srIsosFile.EndOfStream) {
                     intRowNumber += 1;
-                    object strLineIn = srIsosFile.ReadLine();
-                    object lstData = strLineIn.Split(',').ToList();
+                    var strLineIn = srIsosFile.ReadLine();
+                    var lstData = strLineIn.Split(',').ToList();
 
                     if (intRowNumber == 1) {
                         // Parse the header row
@@ -236,8 +236,8 @@ namespace MSFileInfoScanner
                         continue;
                     }
 
-                    object blnParseError = false;
-                    object intCurrentScan = 0;
+                    var blnParseError = false;
+                    var intCurrentScan = 0;
 
                     try {
                         var udtIsosData = new udtIsosDataType();
@@ -286,7 +286,7 @@ namespace MSFileInfoScanner
         private List<udtScansDataType> LoadScansFile(string strScansFilePath)
         {
 
-            const object FILTERED_SCANS_SUFFIX = "_filtered_scans.csv";
+            const var FILTERED_SCANS_SUFFIX = "_filtered_scans.csv";
 
             Dictionary<string, int> dctColumnInfo = new Dictionary<string, int>();
             dctColumnInfo.Add("type", -1);
@@ -425,7 +425,7 @@ namespace MSFileInfoScanner
         public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
 
-            object fiIsosFile = new FileInfo(strDataFilePath);
+            var fiIsosFile = new FileInfo(strDataFilePath);
 
             if (!fiIsosFile.Exists) {
                 ShowMessage("_isos.csv file not found: " + strDataFilePath);

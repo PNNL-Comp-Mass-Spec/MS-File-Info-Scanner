@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 //
@@ -26,16 +27,16 @@ namespace MSFileInfoScanner
         protected bool DetermineAcqStartEndTime(FileInfo fiZipFile, clsDatasetFileInfo datasetFileInfo)
         {
 
-            bool blnSuccess = false;
+            var blnSuccess = false;
 
             try {
                 // Bump up the file size
                 datasetFileInfo.FileSizeBytes += fiZipFile.Length;
 
-                var lstFileNamesToFind = new List<string>();
-                lstFileNamesToFind.Add("analysis.baf");
-                lstFileNamesToFind.Add("apexAcquisition.method");
-                lstFileNamesToFind.Add("submethods.xml");
+                var lstFileNamesToFind = new List<string> {
+                    "analysis.baf", 
+                    "apexAcquisition.method", 
+                    "submethods.xml"};
 
                 var oZipFile = new Ionic.Zip.ZipFile(fiZipFile.FullName);
 
@@ -65,24 +66,26 @@ namespace MSFileInfoScanner
                                     datasetFileInfo.ScanCount += 1;
 
                                     // Add a Scan Stats entry
-                                    DSSummarizer.clsScanStatsEntry objScanStatsEntry = new DSSummarizer.clsScanStatsEntry();
+                                    var objScanStatsEntry = new clsScanStatsEntry
+                                    {
+                                        ScanNumber = datasetFileInfo.ScanCount,
+                                        ScanType = 1,
+                                        ScanTypeName = "MALDI-HMS",
+                                        ScanFilterText = "",
+                                        ElutionTime = "0",
+                                        TotalIonIntensity = "0",
+                                        BasePeakIntensity = "0",
+                                        BasePeakMZ = "0",
+                                        BasePeakSignalToNoiseRatio = "0",
+                                        IonCount = 0,
+                                        IonCountRaw = 0
+                                    };
 
-                                    objScanStatsEntry.ScanNumber = datasetFileInfo.ScanCount;
-                                    objScanStatsEntry.ScanType = 1;
 
-                                    objScanStatsEntry.ScanTypeName = "MALDI-HMS";
-                                    objScanStatsEntry.ScanFilterText = "";
 
-                                    objScanStatsEntry.ElutionTime = "0";
-                                    objScanStatsEntry.TotalIonIntensity = "0";
-                                    objScanStatsEntry.BasePeakIntensity = "0";
-                                    objScanStatsEntry.BasePeakMZ = "0";
 
                                     // Base peak signal to noise ratio
-                                    objScanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
-                                    objScanStatsEntry.IonCount = 0;
-                                    objScanStatsEntry.IonCountRaw = 0;
 
                                     mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
@@ -111,38 +114,35 @@ namespace MSFileInfoScanner
         {
 
             // First see if strFileOrFolderPath points to a valid file
-            object fiFileInfo = new FileInfo(strDataFilePath);
+            var fiFileInfo = new FileInfo(strDataFilePath);
 
-            if (fiFileInfo.Exists()) {
+            if (fiFileInfo.Exists) {
                 // User specified a file; assume the parent folder of this file is the dataset folder
                 return fiFileInfo.Directory;
-            } else {
-                // Assume this is the path to the dataset folder
-                return new DirectoryInfo(strDataFilePath);
             }
 
+            // Assume this is the path to the dataset folder
+            return new DirectoryInfo(strDataFilePath);
         }
 
         public override string GetDatasetNameViaPath(string strDataFilePath)
         {
-            string strDatasetName = string.Empty;
+            var strDatasetName = string.Empty;
 
             try {
                 // The dataset name for a dataset with zipped imaging files is the name of the parent directory
                 // However, strDataFilePath could be a file or a folder path, so use GetDatasetFolder to get the dataset folder
-                object diDatasetFolder = GetDatasetFolder(strDataFilePath);
+                var diDatasetFolder = GetDatasetFolder(strDataFilePath);
                 strDatasetName = diDatasetFolder.Name;
 
                 if (strDatasetName.ToLower().EndsWith(".d")) {
                     strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - 2);
                 }
 
-            } catch (Exception ex) {
+            } catch (Exception) {
                 // Ignore errors
             }
 
-            if (strDatasetName == null)
-                strDatasetName = string.Empty;
             return strDatasetName;
 
         }
@@ -150,7 +150,7 @@ namespace MSFileInfoScanner
         public static bool IsZippedImagingFile(string strFileName)
         {
 
-            object fiFileInfo = new FileInfo(strFileName);
+            var fiFileInfo = new FileInfo(strFileName);
 
             if (string.IsNullOrWhiteSpace(strFileName)) {
                 return false;
@@ -168,16 +168,16 @@ namespace MSFileInfoScanner
         {
             // Process a Bruker Xmass folder, specified by strDataFilePath (which can either point to the dataset folder containing the XMass files, or any of the Zip files in the dataset folder)
 
-            bool blnSuccess = false;
+            bool blnSuccess;
 
             try {
                 // Determine whether strDataFilePath points to a file or a folder
 
-                object diDatasetFolder = GetDatasetFolder(strDataFilePath);
+                var diDatasetFolder = GetDatasetFolder(strDataFilePath);
 
                 // Validate that we have selected a valid folder
                 if (!diDatasetFolder.Exists) {
-                    base.ReportError("File/folder not found: " + strDataFilePath);
+                    ReportError("File/folder not found: " + strDataFilePath);
                     return false;
                 }
 
@@ -189,14 +189,14 @@ namespace MSFileInfoScanner
                 // Look for the 0_R*.zip files
                 // If we cannot find any zip files, return false
 
-                object lstFiles = diDatasetFolder.GetFiles(ZIPPED_IMAGING_FILE_SEARCH_SPEC).ToList();
-                if (lstFiles == null || lstFiles.Count == 0) {
+                var lstFiles = diDatasetFolder.GetFiles(ZIPPED_IMAGING_FILE_SEARCH_SPEC).ToList();
+                if (lstFiles.Count == 0) {
                     // 0_R*.zip files not found
-                    base.ReportError(ZIPPED_IMAGING_FILE_SEARCH_SPEC + "files not found in " + diDatasetFolder.FullName);
+                    ReportError(ZIPPED_IMAGING_FILE_SEARCH_SPEC + "files not found in " + diDatasetFolder.FullName);
                     blnSuccess = false;
 
                 } else {
-                    object fiFirstImagingFile = lstFiles.First;
+                    var fiFirstImagingFile = lstFiles.First();
 
                     // Initialize the .DatasetFileInfo
                     var _with2 = mDatasetStatsSummarizer.DatasetFileInfo;
@@ -223,10 +223,9 @@ namespace MSFileInfoScanner
 
                     // Process each zip file
 
-                    foreach (FileInfo fiFileInfo in lstFiles) {
+                    foreach (var fiFileInfo in lstFiles) {
                         // Examine all of the apexAcquisition.method files in this zip file
-                        blnSuccess = DetermineAcqStartEndTime(fiFileInfo, ref datasetFileInfo);
-
+                        DetermineAcqStartEndTime(fiFileInfo, datasetFileInfo);
                     }
 
                     if (datasetFileInfo.AcqTimeEnd == DateTime.MinValue || datasetFileInfo.AcqTimeStart == DateTime.MaxValue) {
@@ -238,13 +237,12 @@ namespace MSFileInfoScanner
 
 
                     // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
-                    var _with3 = mDatasetStatsSummarizer.DatasetFileInfo;
-                    _with3.DatasetName = string.Copy(datasetFileInfo.DatasetName);
-                    _with3.FileExtension = string.Copy(datasetFileInfo.FileExtension);
-                    _with3.AcqTimeStart = datasetFileInfo.AcqTimeStart;
-                    _with3.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
-                    _with3.ScanCount = datasetFileInfo.ScanCount;
-                    _with3.FileSizeBytes = datasetFileInfo.FileSizeBytes;
+                    mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
+                    mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
+                    mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
+                    mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
+                    mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
+                    mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
 
                     blnSuccess = true;
                 }
