@@ -6,11 +6,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using OxyPlot;
 using OxyPlot.Axes;
-using Brushes = System.Drawing.Brushes;
-using Color = System.Drawing.Color;
 
 namespace MSFileInfoScanner
 {
+    using System.Globalization;
+
     public class clsPlotContainer
     {
 
@@ -153,11 +153,11 @@ namespace MSFileInfoScanner
                 drawContext.DrawRectangle(null, rectPen, myCanvas);
 
                 if (!string.IsNullOrWhiteSpace(AnnotationBottomLeft)) {
-                    AddText(AnnotationBottomLeft, drawContext, width, height, Windows.HorizontalAlignment.Left, Windows.VerticalAlignment.Bottom, 5);
+                    AddText(AnnotationBottomLeft, drawContext, width, height, HorizontalAlignment.Left, VerticalAlignment.Bottom, 5);
                 }
 
                 if (!string.IsNullOrWhiteSpace(AnnotationBottomRight)) {
-                    AddText(AnnotationBottomRight, drawContext, width, height, Windows.HorizontalAlignment.Right, Windows.VerticalAlignment.Bottom, 5);
+                    AddText(AnnotationBottomRight, drawContext, width, height, HorizontalAlignment.Right, VerticalAlignment.Bottom, 5);
                 }
 
                 if (PlottingDeisotopedData) {
@@ -165,7 +165,7 @@ namespace MSFileInfoScanner
                 }
             }
 
-            const var DPI = 96;
+            const int DPI = 96;
 
             var target = new RenderTargetBitmap(width, height, DPI, DPI, PixelFormats.Default);
             target.Render(drawVisual);
@@ -181,13 +181,14 @@ namespace MSFileInfoScanner
                     encoder = new JpegBitmapEncoder();
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(fileFormat, "Unrecognized value: " + fileFormat.ToString());
+                    throw new ArgumentOutOfRangeException(fileFormat.ToString(), "Unrecognized value: " + fileFormat.ToString());
             }
 
             if (encoder != null) {
                 encoder.Frames.Add(BitmapFrame.Create(target));
 
-                using (outputStream == new FileStream(imageFilePath, FileMode.Create, FileAccess.Write)) {
+                using (var outputStream = new FileStream(imageFilePath, FileMode.Create, FileAccess.Write))
+                {
                     encoder.Save(outputStream);
                 }
             }
@@ -202,10 +203,10 @@ namespace MSFileInfoScanner
 
         protected void AddDeisotopedDataLegend(DrawingContext drawContext, int canvasWidth, int canvasHeight, int offsetLeft, int offsetTop, int spacing)
         {
-            const var CHARGE_START = 1;
-            const var CHARGE_END = 6;
+            const int CHARGE_START = 1;
+            const int CHARGE_END = 6;
 
-            var usCulture = Globalization.CultureInfo.GetCultureInfo("en-us");
+            var usCulture = CultureInfo.GetCultureInfo("en-us");
             // Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
             var fontTypeface = new Typeface("Arial");
 
@@ -219,7 +220,7 @@ namespace MSFileInfoScanner
             rectPen.Thickness = 1;
 
 
-            for (chargeState = CHARGE_START; chargeState <= CHARGE_END; chargeState++) {
+            for (int chargeState = CHARGE_START; chargeState <= CHARGE_END; chargeState++) {
                 var newBrush = new SolidColorBrush(GetColorByCharge(chargeState));
 
                 var newText = new FormattedText(chargeState + "+", usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, newBrush);
@@ -241,9 +242,9 @@ namespace MSFileInfoScanner
         }
 
 
-        protected void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, Windows.HorizontalAlignment hAlign, Windows.VerticalAlignment vAlign, int padding)
+        protected void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, HorizontalAlignment hAlign, VerticalAlignment vAlign, int padding)
         {
-            var usCulture = Globalization.CultureInfo.GetCultureInfo("en-us");
+            var usCulture = CultureInfo.GetCultureInfo("en-us");
             // Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
             var fontTypeface = new Typeface("Arial");
 
@@ -255,29 +256,29 @@ namespace MSFileInfoScanner
             var position = textRect.Location;
 
             switch (hAlign) {
-                case Windows.HorizontalAlignment.Left:
+                case HorizontalAlignment.Left:
                     position.X += padding;
 
                     break;
-                case Windows.HorizontalAlignment.Center:
+                case HorizontalAlignment.Center:
                     position.X += (textRect.Width - newText.Width) / 2;
 
                     break;
-                case Windows.HorizontalAlignment.Right:
+                case HorizontalAlignment.Right:
                     position.X += textRect.Width - newText.Width - padding;
                     break;
             }
 
             switch (vAlign) {
-                case Windows.VerticalAlignment.Top:
+                case VerticalAlignment.Top:
                     position.Y += padding;
 
                     break;
-                case Windows.VerticalAlignment.Center:
+                case VerticalAlignment.Middle:
                     position.Y += (textRect.Height - newText.Height) / 2;
 
                     break;
-                case Windows.VerticalAlignment.Bottom:
+                case VerticalAlignment.Bottom:
                     position.Y += textRect.Height - newText.Height - padding;
                     break;
             }
