@@ -7,6 +7,7 @@ lib/DigitalRune*
 lib/Compressor_*
 lib/Clearcore2*
 lib/boost*
+packages/*
 
 /32bit_Exe_2015-05-11
 /32bit_DLL_2015-05-11
