@@ -50,8 +50,8 @@ namespace MSFileInfoScanner
 
         protected bool mRemoveZeroesFromEnds;
         #endregion
-        protected List<udtOutputFileInfoType> mRecentFiles;
 
+        protected List<udtOutputFileInfoType> mRecentFiles;
 
         public bool BPIAutoMinMaxY {
             get { return mBPIAutoMinMaxY; }
@@ -188,7 +188,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="eFileType">File type to find</param>
         /// <returns>File name if found; empty string if this file type was not saved</returns>
-        /// <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
+        /// <remarks>The list of recent files gets cleared each time you call SaveTICAndBPIPlotFiles() or Reset()</remarks>
         public string GetRecentFileInfo(eOutputFileTypes eFileType)
         {
             for (var intIndex = 0; intIndex <= mRecentFiles.Count - 1; intIndex++) {
@@ -206,16 +206,22 @@ namespace MSFileInfoScanner
         /// <param name="strFileName">File name (output)</param>
         /// <param name="strFilePath">File Path (output)</param>
         /// <returns>True if a match was found; otherwise returns false</returns>
-        /// <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
-        public bool GetRecentFileInfo(eOutputFileTypes eFileType, ref string strFileName, ref string strFilePath)
+        /// <remarks>The list of recent files gets cleared each time you call SaveTICAndBPIPlotFiles() or Reset()</remarks>
+        public bool GetRecentFileInfo(eOutputFileTypes eFileType, out string strFileName, out string strFilePath)
         {
-            for (var intIndex = 0; intIndex <= mRecentFiles.Count - 1; intIndex++) {
-                if (mRecentFiles[intIndex].FileType == eFileType) {
+            for (var intIndex = 0; intIndex <= mRecentFiles.Count - 1; intIndex++) 
+            {
+                if (mRecentFiles[intIndex].FileType == eFileType) 
+                {
                     strFileName = mRecentFiles[intIndex].FileName;
                     strFilePath = mRecentFiles[intIndex].FilePath;
                     return true;
                 }
             }
+
+            strFileName = string.Empty;
+            strFilePath = string.Empty;
+
             return false;
         }
 
@@ -279,7 +285,7 @@ namespace MSFileInfoScanner
 
             if (objPoints.Count == 0) {
                 // Nothing to plot
-                return new ClsPlotContainer(new PlotModel());
+                return new clsPlotContainer(new PlotModel());
             }
 
             // Round intMaxScan down to the nearest multiple of 10
@@ -303,7 +309,7 @@ namespace MSFileInfoScanner
             var yVals = (from item in objPoints select item.Y);
             clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
 
-            var plotContainer = new ClsPlotContainer(myPlot) {
+            var plotContainer = new clsPlotContainer(myPlot) {
                 FontSizeBase = clsOxyplotUtilities.FONT_SIZE_BASE
             };
 
@@ -395,13 +401,13 @@ namespace MSFileInfoScanner
 
                 // Check whether all of the spectra have .MSLevel = 0
                 // If they do, change the level to 1
-                ValidateMSLevel(ref mBPI);
-                ValidateMSLevel(ref mTIC);
+                ValidateMSLevel(mBPI);
+                ValidateMSLevel(mTIC);
 
                 if (mRemoveZeroesFromEnds) {
                     // Check whether the last few scans have values if 0; if they do, remove them
-                    RemoveZeroesAtFrontAndBack(ref mBPI);
-                    RemoveZeroesAtFrontAndBack(ref mTIC);
+                    RemoveZeroesAtFrontAndBack(mBPI);
+                    RemoveZeroesAtFrontAndBack(mTIC);
                 }
 
                 var plotContainer = InitializePlot(mBPI, strDatasetName + " - " + mBPIPlotAbbrev + " - MS Spectra", 1, mBPIXAxisLabel, mBPIYAxisLabel, mBPIAutoMinMaxY, mBPIYAxisExponentialNotation);
@@ -436,7 +442,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected void RemoveZeroesAtFrontAndBack(ref clsChromatogramInfo objChrom)
+        protected void RemoveZeroesAtFrontAndBack(clsChromatogramInfo objChrom)
         {
             const int MAX_POINTS_TO_CHECK = 100;
             int intIndex;
@@ -452,11 +458,11 @@ namespace MSFileInfoScanner
                     intZeroPointCount += 1;
                 } else {
                     intIndexNonZeroValue = intIndex;
-                    break; // TODO: might not be correct. Was : Exit For
+                    break;
                 }
                 intPointsChecked += 1;
                 if (intPointsChecked >= MAX_POINTS_TO_CHECK)
-                    break; // TODO: might not be correct. Was : Exit For
+                    break;
             }
 
             if (intZeroPointCount > 0 && intIndexNonZeroValue >= 0) {
@@ -485,7 +491,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected void ValidateMSLevel(ref clsChromatogramInfo objChrom)
+        protected void ValidateMSLevel(clsChromatogramInfo objChrom)
         {
             int intIndex;
             var blnMSLevelDefined = false;
@@ -493,7 +499,7 @@ namespace MSFileInfoScanner
             for (intIndex = 0; intIndex <= objChrom.ScanCount - 1; intIndex++) {
                 if (objChrom.GetDataPoint(intIndex).MSLevel > 0) {
                     blnMSLevelDefined = true;
-                    break; // TODO: might not be correct. Was : Exit For
+                    break;
                 }
             }
 

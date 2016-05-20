@@ -46,33 +46,30 @@ namespace MSFileInfoScanner
         {
             // Returns True if success, False if an error
 
-            var blnTICStored = false;
-            var blnSRMDataCached = false;
-
             // Override strDataFilePath here, if needed
             // strDataFilePath = strDataFilePath;
 
             // Obtain the full path to the file
-            var ioFileInfo = new FileInfo(strDataFilePath);
+            var fiDatasetFile = new FileInfo(strDataFilePath);
 
 
             var blnTest = false;
             if (blnTest) {
-                TestPWiz(ioFileInfo.FullName);
+                TestPWiz(fiDatasetFile.FullName);
             }
 
 
-            datasetFileInfo.FileSystemCreationTime = ioFileInfo.CreationTime;
-            datasetFileInfo.FileSystemModificationTime = ioFileInfo.LastWriteTime;
+            datasetFileInfo.FileSystemCreationTime = fiDatasetFile.CreationTime;
+            datasetFileInfo.FileSystemModificationTime = fiDatasetFile.LastWriteTime;
 
             // Using the file system modification time as the acquisition end time
             datasetFileInfo.AcqTimeStart = datasetFileInfo.FileSystemModificationTime;
             datasetFileInfo.AcqTimeEnd = datasetFileInfo.FileSystemModificationTime;
 
             datasetFileInfo.DatasetID = 0;
-            datasetFileInfo.DatasetName = GetDatasetNameViaPath(ioFileInfo.Name);
-            datasetFileInfo.FileExtension = ioFileInfo.Extension;
-            datasetFileInfo.FileSizeBytes = ioFileInfo.Length;
+            datasetFileInfo.DatasetName = GetDatasetNameViaPath(fiDatasetFile.Name);
+            datasetFileInfo.FileExtension = fiDatasetFile.Extension;
+            datasetFileInfo.FileSizeBytes = fiDatasetFile.Length;
 
             datasetFileInfo.ScanCount = 0;
 
@@ -82,7 +79,7 @@ namespace MSFileInfoScanner
             try {
                 // Open the .Wiff file using the ProteoWizardWrapper
 
-                var objPWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(ioFileInfo.FullName);
+                var objPWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(fiDatasetFile.FullName);
 
                 try {
                     var dtRunStartTime = Convert.ToDateTime(objPWiz.RunStartTime);
@@ -110,13 +107,15 @@ namespace MSFileInfoScanner
                 };
 
 
+                var blnTICStored = false;
+                var blnSRMDataCached = false;
                 double dblRuntimeMinutes = 0;
 
                 // Note that SRM .Wiff files will only have chromatograms, and no spectra
 
                 if (objPWiz.ChromatogramCount > 0) {
                     // Process the chromatograms
-                    mPWizParser.StoreChromatogramInfo(datasetFileInfo, ref blnTICStored, ref blnSRMDataCached, out dblRuntimeMinutes);
+                    mPWizParser.StoreChromatogramInfo(datasetFileInfo, out blnTICStored, out blnSRMDataCached, out dblRuntimeMinutes);
                     mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
 
                 }
@@ -137,7 +136,7 @@ namespace MSFileInfoScanner
 
             // Read the file info from the file system
             // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
-            UpdateDatasetFileStats(ioFileInfo, datasetFileInfo.DatasetID);
+            UpdateDatasetFileStats(fiDatasetFile, datasetFileInfo.DatasetID);
 
             // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
             mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);

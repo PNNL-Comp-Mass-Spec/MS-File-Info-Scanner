@@ -104,7 +104,7 @@ namespace MSFileInfoScanner
             return false;
         }
 
-        private int FindNearestInList(ref List<float> lstItems, float sngValToFind)
+        private int FindNearestInList(List<float> lstItems, float sngValToFind)
         {
             var intIndexMatch = lstItems.BinarySearch(sngValToFind);
             if (intIndexMatch >= 0) {
@@ -155,7 +155,16 @@ namespace MSFileInfoScanner
         }
 
 
-        private void ProcessSRM(string strChromID, ref float[] sngTimes, ref float[] sngIntensities, ref List<float> lstTICScanTimes, ref List<int> lstTICScanNumbers, ref double dblRuntimeMinutes, ref Dictionary<int, Dictionary<double, double>> dct2DDataParent, ref Dictionary<int, Dictionary<double, double>> dct2DDataProduct, ref Dictionary<int, float> dct2DDataScanTimes)
+        private void ProcessSRM(
+            string strChromID, 
+            float[] sngTimes, 
+            float[] sngIntensities, 
+            List<float> lstTICScanTimes, 
+            List<int> lstTICScanNumbers, 
+            ref double dblRuntimeMinutes,
+            Dictionary<int, Dictionary<double, double>> dct2DDataParent, 
+            Dictionary<int, Dictionary<double, double>> dct2DDataProduct, 
+            Dictionary<int, float> dct2DDataScanTimes)
         {
             double dblParentMZ;
             double dblProductMZ;
@@ -166,7 +175,7 @@ namespace MSFileInfoScanner
 
             for (var intIndex = 0; intIndex <= sngTimes.Length - 1; intIndex++) {
                 // Find the ScanNumber in the TIC nearest to sngTimes[intIndex]
-                var intIndexMatch = FindNearestInList(ref lstTICScanTimes, sngTimes[intIndex]);
+                var intIndexMatch = FindNearestInList(lstTICScanTimes, sngTimes[intIndex]);
                 var intScanNumber = lstTICScanNumbers[intIndexMatch];
 
                 // Bump up dblRuntimeMinutes if necessary
@@ -208,11 +217,11 @@ namespace MSFileInfoScanner
                     // Store the m/z and intensity values in dct2DDataParent and dct2DDataProduct
 
                     if (blnParentMZFound) {
-                        Store2DPlotDataPoint(ref dct2DDataParent, intScanNumber, dblParentMZ, sngIntensities[intIndex]);
+                        Store2DPlotDataPoint(dct2DDataParent, intScanNumber, dblParentMZ, sngIntensities[intIndex]);
                     }
 
                     if (blnProductMZFound) {
-                        Store2DPlotDataPoint(ref dct2DDataProduct, intScanNumber, dblProductMZ, sngIntensities[intIndex]);
+                        Store2DPlotDataPoint(dct2DDataProduct, intScanNumber, dblProductMZ, sngIntensities[intIndex]);
                     }
 
 
@@ -297,7 +306,7 @@ namespace MSFileInfoScanner
             }
         }
 
-        public void StoreChromatogramInfo(clsDatasetFileInfo datasetFileInfo, ref bool blnTICStored, ref bool blnSRMDataCached, out double dblRuntimeMinutes)
+        public void StoreChromatogramInfo(clsDatasetFileInfo datasetFileInfo, out bool blnTICStored, out bool blnSRMDataCached, out double dblRuntimeMinutes)
         {
             var lstTICScanTimes = new List<float>();
             var lstTICScanNumbers = new List<int>();
@@ -317,6 +326,8 @@ namespace MSFileInfoScanner
             // The chromatogram at index >=1 will be each SRM
 
             dblRuntimeMinutes = 0;
+            blnTICStored = false;
+            blnSRMDataCached = false;
 
             for (var intChromIndex = 0; intChromIndex <= mPWiz.ChromatogramCount - 1; intChromIndex++) {
                 try {
@@ -350,7 +361,7 @@ namespace MSFileInfoScanner
                     if (TryGetCVParam(oCVParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out param)) {
                         // This chromatogram is an SRM scan
 
-                        ProcessSRM(strChromID, ref sngTimes, ref sngIntensities, ref lstTICScanTimes, ref lstTICScanNumbers, ref dblRuntimeMinutes, ref dct2DDataParent, ref dct2DDataProduct, ref dct2DDataScanTimes);
+                        ProcessSRM(strChromID, sngTimes, sngIntensities, lstTICScanTimes, lstTICScanNumbers, ref dblRuntimeMinutes, dct2DDataParent, dct2DDataProduct, dct2DDataScanTimes);
 
                         blnSRMDataCached = true;
                     }
@@ -377,7 +388,7 @@ namespace MSFileInfoScanner
             mLCMS2DPlot.Options.MS1PlotTitle = "Q1 m/z";
             mLCMS2DPlot.Options.MS2PlotTitle = "Q3 m/z";
 
-            Store2DPlotData(ref dct2DDataScanTimes, ref dct2DDataParent, ref dct2DDataProduct);
+            Store2DPlotData(dct2DDataScanTimes, dct2DDataParent, dct2DDataProduct);
         }
 
 
@@ -525,7 +536,10 @@ namespace MSFileInfoScanner
         }
 
 
-        private void Store2DPlotData(ref Dictionary<int, float> dct2DDataScanTimes, ref Dictionary<int, Dictionary<double, double>> dct2DDataParent, ref Dictionary<int, Dictionary<double, double>> dct2DDataProduct)
+        private void Store2DPlotData(
+            Dictionary<int, float> dct2DDataScanTimes, 
+            Dictionary<int, Dictionary<double, double>> dct2DDataParent, 
+            Dictionary<int, Dictionary<double, double>> dct2DDataProduct)
         {
             // This variable keeps track of the length of the largest Dictionary(Of Double, Double) var in dct2DData
             var intMax2DDataCount = 1;
@@ -546,7 +560,7 @@ namespace MSFileInfoScanner
         }
 
 
-        private void Store2DPlotDataPoint(ref Dictionary<int, Dictionary<double, double>> dct2DData, int intScanNumber, double dblMZ, double dblIntensity)
+        private void Store2DPlotDataPoint(Dictionary<int, Dictionary<double, double>> dct2DData, int intScanNumber, double dblMZ, double dblIntensity)
         {
             Dictionary<double, double> obj2DMzAndIntensity;
 

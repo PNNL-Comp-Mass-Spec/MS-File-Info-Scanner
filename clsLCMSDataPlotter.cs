@@ -397,7 +397,7 @@ namespace MSFileInfoScanner
             if (blnCentroidRequired)
             {
                 // Consolidate any points closer than mOptions.MZResolution m/z units
-                CentroidMSData(mOptions.MZResolution, ref intIonCount, ref dblIonsMZFiltered, ref sngIonsIntensityFiltered, ref bytChargeFiltered);
+                CentroidMSData(mOptions.MZResolution, ref intIonCount, dblIonsMZFiltered, sngIonsIntensityFiltered, bytChargeFiltered);
             }
 
             // Instantiate a new ScanData var for this scan
@@ -543,7 +543,7 @@ namespace MSFileInfoScanner
         }
 
 
-        private void CentroidMSData(float sngMZResolution, ref int intIonCount, ref double[] dblIonsMZ, ref float[] sngIonsIntensity, ref byte[] bytChargeFiltered)
+        private void CentroidMSData(float sngMZResolution, ref int intIonCount, double[] dblIonsMZ, float[] sngIonsIntensity, byte[] bytChargeFiltered)
         {
             if (sngMZResolution <= 0)
             {
@@ -680,7 +680,7 @@ namespace MSFileInfoScanner
                 int intIonIndex;
                 if (objMSSpectrum.IonCount > intMaxIonCountToRetain)
                 {
-                    var objFilterDataArray = new clsFilterDataArrayMaxCount(objMSSpectrum.IonCount)
+                    var objFilterDataArray = new clsFilterDataArrayMaxCount()
                     {
                         MaximumDataCountToLoad = intMaxIonCountToRetain,
                         TotalIntensityPercentageFilterEnabled = false
@@ -810,7 +810,7 @@ namespace MSFileInfoScanner
         /// <param name="strFilePath">File Path (output)</param>
         /// <returns>True if a match was found; otherwise returns false</returns>
         /// <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
-        public bool GetRecentFileInfo(eOutputFileTypes eFileType, ref string strFileName, ref string strFilePath)
+        public bool GetRecentFileInfo(eOutputFileTypes eFileType, out string strFileName, out string strFilePath)
         {
             for (var intIndex = 0; intIndex <= mRecentFiles.Count - 1; intIndex++)
             {
@@ -821,6 +821,10 @@ namespace MSFileInfoScanner
                     return true;
                 }
             }
+
+            strFileName = string.Empty;
+            strFilePath = string.Empty;
+
             return false;
         }
 
@@ -1084,7 +1088,7 @@ namespace MSFileInfoScanner
 
                 var strTitle = intCharge + "+";
 
-                var seriesColor = ClsPlotContainer.GetColorByCharge(intCharge);
+                var seriesColor = clsPlotContainer.GetColorByCharge(intCharge);
 
                 var series = new ScatterSeries
                 {
@@ -1170,7 +1174,7 @@ namespace MSFileInfoScanner
             myPlot.Series.Add(series);
         }
 
-        private float ComputeMedian(ref float[] sngList, int intItemCount)
+        private float ComputeMedian(float[] sngList, int intItemCount)
         {
             var blnAverage = false;
 
@@ -1318,7 +1322,7 @@ namespace MSFileInfoScanner
                             Array.Resize(ref sngSortedIntensityList, sngSortedIntensityList.Length * 2);
                         }
 
-                        sngSortedIntensityList[intSortedIntensityListCount] =  mScans[intScanIndex].IonsIntensity[intIonIndex];
+                        sngSortedIntensityList[intSortedIntensityListCount] = mScans[intScanIndex].IonsIntensity[intIonIndex];
                         dblIntensitySum += sngSortedIntensityList[intSortedIntensityListCount];
 
                         var dataPoint = new ScatterPoint(mScans[intScanIndex].ScanNumber,
@@ -1357,7 +1361,7 @@ namespace MSFileInfoScanner
                 // Compute median and average intensity values
                 if (intSortedIntensityListCount > 0) {
                     Array.Sort(sngSortedIntensityList, 0, intSortedIntensityListCount);
-                    var sngMedianIntensity = ComputeMedian(ref sngSortedIntensityList, intSortedIntensityListCount);
+                    var sngMedianIntensity = ComputeMedian(sngSortedIntensityList, intSortedIntensityListCount);
 
                     // Set the minimum color intensity to the median
                     sngColorScaleMinIntensity = sngMedianIntensity;
@@ -1377,7 +1381,7 @@ namespace MSFileInfoScanner
         /// <param name="blnSkipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for intMSLevelFilter, set blnSkipTrimCachedData to False on the first call and True on subsequent calls)</param>
         /// <returns>OxyPlot PlotContainer</returns>
         /// <remarks></remarks>
-        private ClsPlotContainer InitializePlot(string strTitle, int intMSLevelFilter, bool blnSkipTrimCachedData)
+        private clsPlotContainer InitializePlot(string strTitle, int intMSLevelFilter, bool blnSkipTrimCachedData)
         {
             int intMinScan;
             int intMaxScan;
@@ -1446,7 +1450,7 @@ namespace MSFileInfoScanner
 
             if (intPointsToPlot == 0) {
                 // Nothing to plot
-                return new ClsPlotContainer(new PlotModel());
+                return new clsPlotContainer(new PlotModel());
             }
 
             // Round intMinScan down to the nearest multiple of 10
@@ -1486,7 +1490,7 @@ namespace MSFileInfoScanner
             var yVals = (from item in lstPointsByCharge.First() select item.Y);
             clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
 
-            var plotContainer = new ClsPlotContainer(myPlot)
+            var plotContainer = new clsPlotContainer(myPlot)
             {
                 FontSizeBase = clsOxyplotUtilities.FONT_SIZE_BASE,
                 AnnotationBottomLeft = intPointsToPlot.ToString("0,000") + " points plotted"

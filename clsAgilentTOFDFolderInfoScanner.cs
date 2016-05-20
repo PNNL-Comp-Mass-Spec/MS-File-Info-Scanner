@@ -295,9 +295,6 @@ namespace MSFileInfoScanner
         protected bool ReadBinaryData(string strDataFolderPath, clsDatasetFileInfo datasetFileInfo)
         {
 
-            var blnTICStored = false;
-            var blnSRMDataCached = false;
-
             bool blnSuccess;
 
             try {
@@ -329,11 +326,13 @@ namespace MSFileInfoScanner
                 };
 
 
+                var blnTICStored = false;
                 double dblRuntimeMinutes = 0;
 
                 if (objPWiz.ChromatogramCount > 0) {
                     // Process the chromatograms
-                    mPWizParser.StoreChromatogramInfo(datasetFileInfo, ref blnTICStored, ref blnSRMDataCached, out dblRuntimeMinutes);
+                    bool blnSRMDataCached;
+                    mPWizParser.StoreChromatogramInfo(datasetFileInfo, out blnTICStored, out blnSRMDataCached, out dblRuntimeMinutes);
                     mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
 
                 }
