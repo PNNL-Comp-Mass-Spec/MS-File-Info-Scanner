@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using pwiz.CLI.data;
-using pwiz.CLI.msdata;
-using pwiz.ProteowizardWrapper;
 using PNNLOmics.Utilities;
 
 namespace MSFileInfoScanner
@@ -230,7 +228,6 @@ namespace MSFileInfoScanner
 
 
         private void ProcessTIC(
-            string strChromID, 
             float[] sngTimes, 
             float[] sngIntensities, 
             List<float> lstTICScanTimes, 
@@ -300,8 +297,7 @@ namespace MSFileInfoScanner
             }
         }
 
-
-        public void StoreChromatogramInfo(clsDatasetFileInfo datasetFileInfo, ref bool blnTICStored, ref bool blnSRMDataCached, ref double dblRuntimeMinutes)
+        public void StoreChromatogramInfo(clsDatasetFileInfo datasetFileInfo, ref bool blnTICStored, ref bool blnSRMDataCached, out double dblRuntimeMinutes)
         {
             var lstTICScanTimes = new List<float>();
             var lstTICScanNumbers = new List<int>();
@@ -321,7 +317,6 @@ namespace MSFileInfoScanner
             // The chromatogram at index >=1 will be each SRM
 
             dblRuntimeMinutes = 0;
-
 
             for (var intChromIndex = 0; intChromIndex <= mPWiz.ChromatogramCount - 1; intChromIndex++) {
                 try {
@@ -344,7 +339,7 @@ namespace MSFileInfoScanner
 
                         var blnStoreInTICandBPIPlot = (mSaveTICAndBPI && mPWiz.SpectrumCount == 0);
 
-                        ProcessTIC(strChromID, sngTimes, sngIntensities, lstTICScanTimes, lstTICScanNumbers, ref dblRuntimeMinutes, blnStoreInTICandBPIPlot);
+                        ProcessTIC(sngTimes, sngIntensities, lstTICScanTimes, lstTICScanNumbers, ref dblRuntimeMinutes, blnStoreInTICandBPIPlot);
 
                         blnTICStored = blnStoreInTICandBPIPlot;
 
@@ -368,19 +363,21 @@ namespace MSFileInfoScanner
             }
 
 
-            if (mSaveLCMS2DPlots) {
-                // Now that all of the chromatograms have been processed, transfer data from dct2DDataParent and dct2DDataProduct into mLCMS2DPlot
-
-                if (dct2DDataParent.Count > 0 || dct2DDataProduct.Count > 0) {
-                    mLCMS2DPlot.Options.MS1PlotTitle = "Q1 m/z";
-                    mLCMS2DPlot.Options.MS2PlotTitle = "Q3 m/z";
-
-                    Store2DPlotData(ref dct2DDataScanTimes, ref dct2DDataParent, ref dct2DDataProduct);
-                }
-
+            if (!mSaveLCMS2DPlots)
+            {
+                return;
             }
 
+            if (dct2DDataParent.Count <= 0 && dct2DDataProduct.Count <= 0)
+            {
+                return;
+            }
 
+            // Now that all of the chromatograms have been processed, transfer data from dct2DDataParent and dct2DDataProduct into mLCMS2DPlot
+            mLCMS2DPlot.Options.MS1PlotTitle = "Q1 m/z";
+            mLCMS2DPlot.Options.MS2PlotTitle = "Q3 m/z";
+
+            Store2DPlotData(ref dct2DDataScanTimes, ref dct2DDataParent, ref dct2DDataProduct);
         }
 
 
@@ -421,11 +418,6 @@ namespace MSFileInfoScanner
                             ScanType = oMSDataSpectrum.Level
                         };
 
-
-                        // Might be able to determine scan type info from oMSDataSpectrum.Precursors(0)
-                        // Alternatively, use .GetSpectrumPWiz
-                        var oSpectrum = mPWiz.GetSpectrum(intScanIndex);
-
                         if (intMSLevels[intScanIndex] > 1) {
                             if (mHighResMS2) {
                                 objScanStatsEntry.ScanTypeName = "HMSn";
@@ -450,6 +442,8 @@ namespace MSFileInfoScanner
                             dblRuntimeMinutes = dblScanTimes[intScanIndex];
                         }
 
+                        var oSpectrum = mPWiz.GetSpectrumObject(intScanIndex);
+
                         CVParam param;
                         if (TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out param)) {
                             dblTIC = param.value;
@@ -462,7 +456,7 @@ namespace MSFileInfoScanner
                             dblBPI = param.value;
                             objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5);
 
-                            if (TryGetCVParam(oSpectrum.scanList.scans(0).cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, out param))
+                            if (TryGetCVParam(oSpectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, out param))
                             {
                                 objScanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(param.value, 5);
                                 blnComputeBPI = false;
@@ -627,7 +621,7 @@ namespace MSFileInfoScanner
 
         }
 
-        public static bool TryGetCVParam(pwiz.CLI.data.CVParamList oCVParams, pwiz.CLI.cv.CVID cvidToFind, out CVParam paramMatch)
+        public static bool TryGetCVParam(CVParamList oCVParams, pwiz.CLI.cv.CVID cvidToFind, out CVParam paramMatch)
         {
             foreach (var param in oCVParams) {
                 if (param.cvid == cvidToFind) {

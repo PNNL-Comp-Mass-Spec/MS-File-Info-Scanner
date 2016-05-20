@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Data.SQLite;
 using PNNLOmics.Utilities;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -55,6 +55,7 @@ namespace MSFileInfoScanner
             public double BPI;
             public double TIC;
             public DateTime AcqTime;
+
             // Only used with MALDI imaging
             public string SpotNumber;
         }
@@ -77,26 +78,28 @@ namespace MSFileInfoScanner
                 mTICandBPIPlot.AddData(intScanNumber, intMSLevel, sngElutionTime, dblBPI, dblTIC);
             }
 
-            DSSummarizer.clsScanStatsEntry objScanStatsEntry = new DSSummarizer.clsScanStatsEntry();
-            objScanStatsEntry.ScanNumber = intScanNumber;
-            objScanStatsEntry.ScanType = intMSLevel;
+            var objScanStatsEntry = new clsScanStatsEntry
+            {
+                ScanNumber = intScanNumber,
+                ScanType = intMSLevel,
+                ScanTypeName = strScanTypeName,
+                ScanFilterText = "",
+                ElutionTime = sngElutionTime.ToString("0.0000"),
+                TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5),
+                BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5),
+                BasePeakMZ = "0",
+                BasePeakSignalToNoiseRatio = "0",
+                IonCount = 0,
+                IonCountRaw = 0
+            };
 
-            objScanStatsEntry.ScanTypeName = strScanTypeName;
-            objScanStatsEntry.ScanFilterText = "";
 
-            objScanStatsEntry.ElutionTime = sngElutionTime.ToString("0.0000");
-            objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5);
-            objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5);
-            objScanStatsEntry.BasePeakMZ = "0";
 
             // Base peak signal to noise ratio
-            objScanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
-            objScanStatsEntry.IonCount = 0;
-            objScanStatsEntry.IonCountRaw = 0;
 
-            double dblElutionTime = 0;
-            if (double.TryParse(objScanStatsEntry.ElutionTime, dblElutionTime)) {
+            double dblElutionTime;
+            if (double.TryParse(objScanStatsEntry.ElutionTime, out dblElutionTime)) {
                 if (dblElutionTime > dblMaxRunTimeMinutes) {
                     dblMaxRunTimeMinutes = dblElutionTime;
                 }
@@ -118,13 +121,11 @@ namespace MSFileInfoScanner
         protected bool DetermineAcqStartTime(DirectoryInfo diDatasetFolder, clsDatasetFileInfo datasetFileInfo)
         {
 
-            bool blnSuccess = false;
-
-            List<DirectoryInfo> diSubFolders = default(List<DirectoryInfo>);
+            var blnSuccess = false;
 
             try {
                 // Look for the method folder (folder name should end in .m)
-                diSubFolders = diDatasetFolder.GetDirectories("*.m").ToList();
+                var diSubFolders = diDatasetFolder.GetDirectories("*.m").ToList();
 
                 if (diSubFolders.Count == 0) {
                     // Match not found
@@ -139,30 +140,26 @@ namespace MSFileInfoScanner
 
                     // Note that the submethods.xml file sometimes gets modified after the run starts, so it should not be used to determine run start time
 
-                    foreach (void diSubFolder_loopVariable in diSubFolders) {
-                        diSubFolder = diSubFolder_loopVariable;
-                        foreach (void fiFile_loopVariable in diSubFolder.GetFiles("apexAcquisition.method")) {
-                            fiFile = fiFile_loopVariable;
+                    foreach (var diSubFolder in diSubFolders) {
+                        foreach (var fiFile in diSubFolder.GetFiles("apexAcquisition.method")) {
                             datasetFileInfo.AcqTimeStart = fiFile.LastWriteTime;
                             blnSuccess = true;
-                            break; // TODO: might not be correct. Was : Exit For
+                            break;
                         }
                         if (blnSuccess)
-                            break; // TODO: might not be correct. Was : Exit For
+                            break;
                     }
 
                     if (!blnSuccess) {
                         // apexAcquisition.method not found; try submethods.xml instead
-                        foreach (void diSubFolder_loopVariable in diSubFolders) {
-                            diSubFolder = diSubFolder_loopVariable;
-                            foreach (void fiFile_loopVariable in diSubFolder.GetFiles("submethods.xml")) {
-                                fiFile = fiFile_loopVariable;
+                        foreach (var diSubFolder in diSubFolders) {
+                            foreach (var fiFile in diSubFolder.GetFiles("submethods.xml")) {
                                 datasetFileInfo.AcqTimeStart = fiFile.LastWriteTime;
                                 blnSuccess = true;
-                                break; // TODO: might not be correct. Was : Exit For
+                                break;
                             }
                             if (blnSuccess)
-                                break; // TODO: might not be correct. Was : Exit For
+                                break;
                         }
                     }
 
@@ -171,14 +168,13 @@ namespace MSFileInfoScanner
                 // Also look for the .hdx file
                 // Its file modification time typically also matches the run start time
 
-                foreach (void fiFile_loopVariable in diDatasetFolder.GetFiles("*.hdx")) {
-                    fiFile = fiFile_loopVariable;
+                foreach (var fiFile in diDatasetFolder.GetFiles("*.hdx")) {
                     if (!blnSuccess || fiFile.LastWriteTime < datasetFileInfo.AcqTimeStart) {
                         datasetFileInfo.AcqTimeStart = fiFile.LastWriteTime;
                     }
 
                     blnSuccess = true;
-                    break; // TODO: might not be correct. Was : Exit For
+                    break;
                 }
 
                 // Make sure AcqTimeEnd and AcqTimeStart match
@@ -198,7 +194,7 @@ namespace MSFileInfoScanner
 
             var dotMethodFiles = diDotDFolder.GetFiles("*.method", SearchOption.AllDirectories);
 
-            if (dotMethodFiles == null || dotMethodFiles.Length == 0) {
+            if (dotMethodFiles.Length == 0) {
                 return null;
             }
 
@@ -209,7 +205,7 @@ namespace MSFileInfoScanner
             }
 
             if (acquistionMethodFiles.Count == 1) {
-                return acquistionMethodFiles.First;
+                return acquistionMethodFiles.First();
             }
 
             ReportError("Multiple 'apexAcquisition.method' files were found in the .D folder; not sure which to use");
@@ -222,12 +218,12 @@ namespace MSFileInfoScanner
 
             var acqusFiles = diDotDFolder.GetFiles("acqus", SearchOption.AllDirectories);
 
-            if (acqusFiles == null || acqusFiles.Length == 0) {
+            if (acqusFiles.Length == 0) {
                 return null;
             }
 
             if (acqusFiles.Length == 1) {
-                return acqusFiles.First;
+                return acqusFiles.First();
             }
 
             // Often the Bruker file structures contain multiple Acqus files. I will select 
@@ -235,9 +231,8 @@ namespace MSFileInfoScanner
             // the same folder as the 'fid' file. Otherwise, throw errors
 
 
-            foreach (void acquFile_loopVariable in acqusFiles) {
-                acquFile = acquFile_loopVariable;
-                if (acquFile.Directory.Name.Equals(diDotDFolder.Name, StringComparison.OrdinalIgnoreCase)) {
+            foreach (var acquFile in acqusFiles) {
+                if (acquFile.Directory != null && acquFile.Directory.Name.Equals(diDotDFolder.Name, StringComparison.OrdinalIgnoreCase)) {
                     return acquFile;
                 }
             }
@@ -247,7 +242,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected bool GetMetaDataFieldAndTable(eMcfMetadataFields eMcfMetadataField, ref string strField, ref string strTable)
+        protected bool GetMetaDataFieldAndTable(eMcfMetadataFields eMcfMetadataField, out string strField, out string strTable)
         {
 
             switch (eMcfMetadataField) {
@@ -428,7 +423,7 @@ namespace MSFileInfoScanner
 
                 if (objPWiz.ChromatogramCount > 0) {
                     // Process the chromatograms
-                    mPWizParser.StoreChromatogramInfo(datasetFileInfo, blnTICStored, blnSRMDataCached, dblRuntimeMinutes);
+                    mPWizParser.StoreChromatogramInfo(datasetFileInfo, ref blnTICStored, ref blnSRMDataCached, out dblRuntimeMinutes);
                     mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
 
                     datasetFileInfo.ScanCount = objPWiz.ChromatogramCount;
@@ -437,7 +432,7 @@ namespace MSFileInfoScanner
 
                 if (objPWiz.SpectrumCount > 0 & !blnSRMDataCached) {
                     // Process the spectral data (though only if we did not process SRM data)
-                    mPWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, dblRuntimeMinutes);
+                    mPWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, ref dblRuntimeMinutes);
                     mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
 
                     datasetFileInfo.ScanCount = objPWiz.SpectrumCount;
@@ -486,14 +481,17 @@ namespace MSFileInfoScanner
                 var strConnectionString = "Data Source = " + fiFileInfo.FullName + "; Version=3; DateTimeFormat=Ticks;";
 
                 // Open the Storage.mcf_idx file to lookup the metadata name to ID mapping
-                using (cnDB == new SQLite.SQLiteConnection(strConnectionString, true)) {
+                using (var cnDB = new SQLiteConnection(strConnectionString, true))
+                {
                     cnDB.Open();
 
-                    var cmd = new SQLite.SQLiteCommand(cnDB);
+                    var cmd = new SQLiteCommand(cnDB)
+                    {
+                        CommandText = "SELECT metadataId, permanentName, displayName FROM MetadataId"
+                    };
 
-                    cmd.CommandText = "SELECT metadataId, permanentName, displayName FROM MetadataId";
 
-                    using (SQLite.SQLiteDataReader drReader = cmd.ExecuteReader()) {
+                    using (var drReader = cmd.ExecuteReader()) {
 
                         while (drReader.Read()) {
                             var intMetadataId = ReadDbInt(drReader, "metadataId");
@@ -518,10 +516,10 @@ namespace MSFileInfoScanner
                     return false;
                 }
 
-                strConnectionString = "Data Source = " + fiFiles.First.FullName + "; Version=3; DateTimeFormat=Ticks;";
+                strConnectionString = "Data Source = " + fiFiles.First().FullName + "; Version=3; DateTimeFormat=Ticks;";
 
                 // Open the .mcf file to read the scan info
-                using (cnDB == new SQLite.SQLiteConnection(strConnectionString, true)) {
+                using (var cnDB = new SQLiteConnection(strConnectionString, true)) {
                     cnDB.Open();
 
                     ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, ref lstScanData, eMcfMetadataFields.AcqTime);
@@ -813,15 +811,14 @@ namespace MSFileInfoScanner
                 };
                 var fiFiles = new List<FileInfo>();
 
-                foreach (void instrumentDataFile_loopVariable in lstInstrumentDataFiles) {
-                    instrumentDataFile = instrumentDataFile_loopVariable;
+                foreach (var instrumentDataFile in lstInstrumentDataFiles) {
                     fiFiles = diDatasetFolder.GetFiles(instrumentDataFile).ToList();
-                    if ((fiFiles != null) && fiFiles.Count > 0) {
-                        break; // TODO: might not be correct. Was : Exit For
+                    if (fiFiles.Count > 0) {
+                        break;
                     }
                 }
 
-                if (fiFiles == null || fiFiles.Count == 0) {
+                if (fiFiles.Count == 0) {
                     //.baf files not found; look for any .mcf files
                     fiFiles = diDatasetFolder.GetFiles("*" + BRUKER_MCF_FILE_EXTENSION).ToList();
 
@@ -829,7 +826,7 @@ namespace MSFileInfoScanner
                         // Find the largest .mcf file (not .mcf_idx file)
                         FileInfo fiLargestMCF = null;
 
-                        foreach (FileInfo fiMCFFile in fiFiles) {
+                        foreach (var fiMCFFile in fiFiles) {
                             if (fiMCFFile.Extension.ToUpper() == BRUKER_MCF_FILE_EXTENSION) {
                                 if (fiLargestMCF == null) {
                                     fiLargestMCF = fiMCFFile;
@@ -1040,11 +1037,14 @@ namespace MSFileInfoScanner
 
         }
 
-        protected bool ReadAndStoreMcfIndexData(SQLite.SQLiteConnection cnDB, Dictionary<string, int> lstMetadataNameToID, ref Dictionary<string, udtMCFScanInfoType> lstScanData, eMcfMetadataFields eMcfMetadataField)
+        protected bool ReadAndStoreMcfIndexData(
+            SQLiteConnection cnDB, 
+            Dictionary<string, int> lstMetadataNameToID, 
+            Dictionary<string, udtMCFScanInfoType> lstScanData, 
+            eMcfMetadataFields eMcfMetadataField)
         {
 
-            SQLite.SQLiteCommand cmd = default(SQLite.SQLiteCommand);
-            cmd = new SQLite.SQLiteCommand(cnDB);
+            var cmd = new SQLiteCommand(cnDB);
 
             string strTable = string.Empty;
             string strField = string.Empty;
@@ -1055,22 +1055,23 @@ namespace MSFileInfoScanner
 
             bool blnNewEntry = false;
 
-            if (!GetMetaDataFieldAndTable(eMcfMetadataField, ref strField, ref strTable)) {
+            if (!GetMetaDataFieldAndTable(eMcfMetadataField, out strField, out strTable))
+            {
                 return false;
             }
 
 
-            if (lstMetadataNameToID.TryGetValue(strField, intMetadataId)) {
+            if (lstMetadataNameToID.TryGetValue(strField, out intMetadataId)) {
                 cmd.CommandText = "SELECT GuidA, MetaDataId, Value FROM " + strTable + " WHERE MetaDataId = " + intMetadataId;
 
-                using (SQLite.SQLiteDataReader drReader = cmd.ExecuteReader()) {
+                using (var drReader = cmd.ExecuteReader()) {
 
                     while (drReader.Read()) {
                         strGuid = ReadDbString(drReader, "GuidA");
                         strValue = ReadDbString(drReader, "Value");
 
-                        udtMCFScanInfoType udtScanInfo = null;
-                        if (lstScanData.TryGetValue(strGuid, udtScanInfo)) {
+                        udtMCFScanInfoType udtScanInfo;
+                        if (lstScanData.TryGetValue(strGuid, out udtScanInfo)) {
                             blnNewEntry = false;
                         } else {
                             udtScanInfo = new udtMCFScanInfoType();
@@ -1082,7 +1083,7 @@ namespace MSFileInfoScanner
                         if (blnNewEntry) {
                             lstScanData.Add(strGuid, udtScanInfo);
                         } else {
-                            lstScanData(strGuid) = udtScanInfo;
+                            lstScanData[strGuid] = udtScanInfo;
                         }
 
                     }
@@ -1094,17 +1095,17 @@ namespace MSFileInfoScanner
 
         }
 
-        protected string ReadDbString(SQLite.SQLiteDataReader drReader, string strColumnName)
+        protected string ReadDbString(SQLiteDataReader drReader, string strColumnName)
         {
             return ReadDbString(drReader, strColumnName, strValueIfNotFound: string.Empty);
         }
 
-        protected string ReadDbString(SQLite.SQLiteDataReader drReader, string strColumnName, string strValueIfNotFound)
+        protected string ReadDbString(SQLiteDataReader drReader, string strColumnName, string strValueIfNotFound)
         {
             string strValue = null;
 
             try {
-                strValue = drReader(strColumnName).ToString();
+                strValue = drReader[strColumnName].ToString();
                 if (strValue == null) {
                     strValue = strValueIfNotFound;
                 }
@@ -1116,20 +1117,20 @@ namespace MSFileInfoScanner
             return strValue;
         }
 
-        protected int ReadDbInt(SQLite.SQLiteDataReader drReader, string strColumnName)
+        protected int ReadDbInt(SQLiteDataReader drReader, string strColumnName)
         {
-            int intValue = 0;
-            string strValue = null;
-
-            try {
-                strValue = drReader(strColumnName).ToString();
-                if (!string.IsNullOrEmpty(strValue)) {
-                    if (int.TryParse(strValue, intValue)) {
+            try
+            {
+                var strValue = drReader[strColumnName].ToString();
+                if (!string.IsNullOrEmpty(strValue))
+                {
+                    var intValue = 0;
+                    if (int.TryParse(strValue, out intValue)) {
                         return intValue;
                     }
                 }
-
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 // Ignore errors here
             }
 
@@ -1223,14 +1224,9 @@ namespace MSFileInfoScanner
                     } else {
                         if (string.IsNullOrEmpty(x.SpotNumber) || string.IsNullOrEmpty(y.SpotNumber)) {
                             return 0;
-                        } else {
-                            if (x.SpotNumber < y.SpotNumber) {
-                                return -1;
-                            } else if (x.SpotNumber > y.SpotNumber) {
-                                return 1;
-                            } else {
-                                return 0;
-                            }
+                        } else
+                        {
+                            return String.CompareOrdinal(x.SpotNumber, y.SpotNumber);
                         }
 
                     }

@@ -337,10 +337,12 @@ namespace MSFileInfoScanner
                     }
 
 
-                    DSSummarizer.clsScanStatsEntry objScanStatsEntry = new DSSummarizer.clsScanStatsEntry();
+                    var objScanStatsEntry = new clsScanStatsEntry
+                    {
+                        ScanNumber = intFrameNumber,
+                        ScanType = intMSLevel
+                    };
 
-                    objScanStatsEntry.ScanNumber = intFrameNumber;
-                    objScanStatsEntry.ScanType = intMSLevel;
 
                     if (intMSLevel <= 1) {
                         objScanStatsEntry.ScanTypeName = "HMS";
@@ -378,9 +380,6 @@ namespace MSFileInfoScanner
                         try {
                             // Also need to load the raw data
 
-                            int intIonCount = 0;
-                            int intTargetIndex = 0;
-
                             // We have to clear the m/z and intensity arrays before calling GetSpectrum
 
                             Array.Clear(dblMZList, 0, dblMZList.Length);
@@ -392,7 +391,7 @@ namespace MSFileInfoScanner
                             // In UIMF files from IMS08, prior to December 1, 2014, if Frame_Parameters.Scans = 374 then Frame_Scans will have scans 0 through 373
                             // in UIMF files from IMS08, after December 1, 2014     if Frame_Parameters.Scans = 374 then Frame_Scans will have scans 1 through 374
 
-                            intIonCount = objUIMFReader.GetSpectrum(intFrameNumber, intFrameNumber, eFrameType, 0, objFrameParams.Scans, dblMZList, intIntensityList);
+                            var intIonCount = objUIMFReader.GetSpectrum(intFrameNumber, intFrameNumber, eFrameType, 0, objFrameParams.Scans, out dblMZList, out intIntensityList);
 
                             if (intIonCount > 0) {
                                 // The m/z and intensity arrays might contain entries with m/z values of 0; 
@@ -407,7 +406,7 @@ namespace MSFileInfoScanner
                                     Array.Resize(ref dblIonsIntensity, intIonCount);
                                 }
 
-                                intTargetIndex = 0;
+                                var intTargetIndex = 0;
                                 for (int intIonIndex = 0; intIonIndex <= intIonCount - 1; intIonIndex++) {
                                     if (dblMZList(intIonIndex) > 0) {
                                         dblMZList(intTargetIndex) = dblMZList(intIonIndex);
@@ -687,12 +686,12 @@ namespace MSFileInfoScanner
 
                             // Some datasets erroneously have zeroes stored in the .UIMF file for the StartTime of the last two frames; example: Sarc_MS2_26_2Apr11_Cheetah_11-02-18_inverse
                             // Check for this and remove them
-                            int intFrameCountRemoved = 0;
-                            while ((Math.Abs(lstStartTimes(lstStartTimes.Count - 1)) < float.Epsilon)) {
+                            var intFrameCountRemoved = 0;
+                            while ((Math.Abs(lstStartTimes[lstStartTimes.Count - 1]) < float.Epsilon)) {
                                 lstStartTimes.RemoveAt(lstStartTimes.Count - 1);
                                 intFrameCountRemoved += 1;
                                 if (lstStartTimes.Count == 0)
-                                    break; // TODO: might not be correct. Was : Exit Do
+                                    break;
                             }
 
                             if (intFrameCountRemoved > 0) {

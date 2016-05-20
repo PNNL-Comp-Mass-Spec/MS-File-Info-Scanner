@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -12,328 +9,331 @@ using OxyPlot.Axes;
 using Brushes = System.Drawing.Brushes;
 using Color = System.Drawing.Color;
 
-public class clsPlotContainer
+namespace MSFileInfoScanner
 {
+    public class clsPlotContainer
+    {
+
+        protected enum ImageFileFormat
+        {
+            PNG,
+            JPG
+        }
 
-	protected enum ImageFileFormat
-	{
-		PNG,
-		JPG
-	}
+        public string AnnotationBottomLeft { get; set; }
+
+        public string AnnotationBottomRight { get; set; }
 
-	public string AnnotationBottomLeft { get; set; }
+        public OxyPlot.PlotModel Plot {
+            get { return mPlot; }
+        }
+
+        public int FontSizeBase { get; set; }
+
+        public int SeriesCount {
+            get {
+                if (mPlot == null) {
+                    return 0;
+                }
+                return mPlot.Series.Count;
+            }
+        }
 
-	public string AnnotationBottomRight { get; set; }
+        public bool PlottingDeisotopedData { get; set; }
 
-	public OxyPlot.PlotModel Plot {
-		get { return mPlot; }
-	}
-
-	public int FontSizeBase { get; set; }
 
-	public int SeriesCount {
-		get {
-			if (mPlot == null) {
-				return 0;
-			}
-			return mPlot.Series.Count;
-		}
-	}
+        protected OxyPlot.PlotModel mPlot;
 
-	public bool PlottingDeisotopedData { get; set; }
+        protected Dictionary<string, OxyPalette> mColorGradients;
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="thePlot"></param>
+        /// <remarks></remarks>
+        public clsPlotContainer(OxyPlot.PlotModel thePlot)
+        {
+            mPlot = thePlot;
+            FontSizeBase = 16;
+        }
 
+        /// <summary>
+        /// Save the plot, along with any defined annotations, to a png file
+        /// </summary>
+        /// <param name="pngFilePath">Output file path</param>
+        /// <param name="width">PNG file width, in pixels</param>
+        /// <param name="height">PNG file height, in pixels</param>
+        /// <param name="resolution">Image resolution, in dots per inch</param>
+        /// <remarks></remarks>
+        public void SaveToPNG(string pngFilePath, int width, int height, int resolution)
+        {
+            if (string.IsNullOrWhiteSpace(pngFilePath)) {
+                throw new ArgumentOutOfRangeException(pngFilePath, "Filename cannot be empty");
+            }
 
-	protected OxyPlot.PlotModel mPlot;
+            if (Path.GetExtension(pngFilePath).ToLower() != ".png") {
+                pngFilePath += ".png";
+            }
 
-	protected Dictionary<string, OxyPalette> mColorGradients;
-	/// <summary>
-	/// Constructor
-	/// </summary>
-	/// <param name="thePlot"></param>
-	/// <remarks></remarks>
-	public clsPlotContainer(OxyPlot.PlotModel thePlot)
-	{
-		mPlot = thePlot;
-		FontSizeBase = 16;
-	}
+            SaveToFileLoop(pngFilePath, ImageFileFormat.PNG, width, height, resolution);
 
-	/// <summary>
-	/// Save the plot, along with any defined annotations, to a png file
-	/// </summary>
-	/// <param name="pngFilePath">Output file path</param>
-	/// <param name="width">PNG file width, in pixels</param>
-	/// <param name="height">PNG file height, in pixels</param>
-	/// <param name="resolution">Image resolution, in dots per inch</param>
-	/// <remarks></remarks>
-	public void SaveToPNG(string pngFilePath, int width, int height, int resolution)
-	{
-		if (string.IsNullOrWhiteSpace(pngFilePath)) {
-			throw new ArgumentOutOfRangeException(pngFilePath, "Filename cannot be empty");
-		}
+        }
 
-		if (Path.GetExtension(pngFilePath).ToLower() != ".png") {
-			pngFilePath += ".png";
-		}
+        public void SaveToJPG(string jpgFilePath, int width, int height, int resolution)
+        {
+            if (string.IsNullOrWhiteSpace(jpgFilePath)) {
+                throw new ArgumentOutOfRangeException(jpgFilePath, "Filename cannot be empty");
+            }
 
-		SaveToFileLoop(pngFilePath, ImageFileFormat.PNG, width, height, resolution);
+            if (Path.GetExtension(jpgFilePath).ToLower() != ".png") {
+                jpgFilePath += ".jpg";
+            }
 
-	}
+            SaveToFileLoop(jpgFilePath, ImageFileFormat.JPG, width, height, resolution);
 
-	public void SaveToJPG(string jpgFilePath, int width, int height, int resolution)
-	{
-		if (string.IsNullOrWhiteSpace(jpgFilePath)) {
-			throw new ArgumentOutOfRangeException(jpgFilePath, "Filename cannot be empty");
-		}
+        }
 
-		if (Path.GetExtension(jpgFilePath).ToLower() != ".png") {
-			jpgFilePath += ".jpg";
-		}
 
-		SaveToFileLoop(jpgFilePath, ImageFileFormat.JPG, width, height, resolution);
+        protected void SaveToFileLoop(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
+        {
+            if (mColorGradients == null || mColorGradients.Count == 0) {
+                SaveToFile(imageFilePath, fileFormat, width, height, resolution);
+                return;
+            }
 
-	}
+            foreach (var colorGradient in mColorGradients) {
+                var matchFound = false;
 
+                foreach (var axis in mPlot.Axes) {
+                    var newAxis = axis as LinearColorAxis;
 
-	protected void SaveToFileLoop(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
-	{
-		if (mColorGradients == null || mColorGradients.Count == 0) {
-			SaveToFile(imageFilePath, fileFormat, width, height, resolution);
-			return;
-		}
+                    if (newAxis == null) {
+                        continue;
+                    }
 
-		foreach (var colorGradient in mColorGradients) {
-			var matchFound = false;
+                    matchFound = true;
+                    newAxis.Palette = colorGradient.Value;
+                    newAxis.IsAxisVisible = true;
 
-			foreach (var axis in mPlot.Axes) {
-				dynamic newAxis = axis as LinearColorAxis;
+                    var fiBaseImageFile = new FileInfo(imageFilePath);
 
-				if (newAxis == null) {
-					continue;
-				}
+                    var newFileName = Path.GetFileNameWithoutExtension(fiBaseImageFile.Name) + "_Gradient_" + colorGradient.Key + fiBaseImageFile.Extension;
+                    newFileName = Path.Combine(fiBaseImageFile.DirectoryName, newFileName);
 
-				matchFound = true;
-				newAxis.Palette = colorGradient.Value;
-				newAxis.IsAxisVisible = true;
+                    SaveToFile(newFileName, fileFormat, width, height, resolution);
+                }
 
-				dynamic fiBaseImageFile = new FileInfo(imageFilePath);
+                if (!matchFound) {
+                    SaveToFile(imageFilePath, fileFormat, width, height, resolution);
+                    return;
+                }
+            }
 
-				dynamic newFileName = Path.GetFileNameWithoutExtension(fiBaseImageFile.Name) + "_Gradient_" + colorGradient.Key + fiBaseImageFile.Extension;
-				newFileName = Path.Combine(fiBaseImageFile.DirectoryName, newFileName);
+        }
 
-				SaveToFile(newFileName, fileFormat, width, height, resolution);
-			}
 
-			if (!matchFound) {
-				SaveToFile(imageFilePath, fileFormat, width, height, resolution);
-				return;
-			}
-		}
+        protected void SaveToFile(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
+        {
+            Console.WriteLine("Saving " + Path.GetFileName(imageFilePath));
 
-	}
+            // Note that this operation can be slow if there are over 100,000 data points
+            var plotBitmap = OxyPlot.Wpf.PngExporter.ExportToBitmap(mPlot, width, height, OxyPlot.OxyColors.White, resolution);
 
+            var drawVisual = new DrawingVisual();
+            using (var drawContext = drawVisual.RenderOpen()) {
 
-	protected void SaveToFile(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
-	{
-		Console.WriteLine("Saving " + Path.GetFileName(imageFilePath));
+                var myCanvas = new Rect(0, 0, width, height);
 
-		// Note that this operation can be slow if there are over 100,000 data points
-		dynamic plotBitmap = OxyPlot.Wpf.PngExporter.ExportToBitmap(mPlot, width, height, OxyPlot.OxyColors.White, resolution);
+                drawContext.DrawImage(plotBitmap, myCanvas);
 
-		dynamic drawVisual = new DrawingVisual();
-		using (drawContext == drawVisual.RenderOpen()) {
+                // Add a frame
+                var rectPen = new System.Windows.Media.Pen();
+                rectPen.Brush = new SolidColorBrush(Colors.Black);
+                rectPen.Thickness = 2;
 
-			dynamic myCanvas = new Rect(0, 0, width, height);
+                drawContext.DrawRectangle(null, rectPen, myCanvas);
 
-			drawContext.DrawImage(plotBitmap, myCanvas);
+                if (!string.IsNullOrWhiteSpace(AnnotationBottomLeft)) {
+                    AddText(AnnotationBottomLeft, drawContext, width, height, Windows.HorizontalAlignment.Left, Windows.VerticalAlignment.Bottom, 5);
+                }
 
-			// Add a frame
-			dynamic rectPen = new System.Windows.Media.Pen();
-			rectPen.Brush = new SolidColorBrush(Colors.Black);
-			rectPen.Thickness = 2;
+                if (!string.IsNullOrWhiteSpace(AnnotationBottomRight)) {
+                    AddText(AnnotationBottomRight, drawContext, width, height, Windows.HorizontalAlignment.Right, Windows.VerticalAlignment.Bottom, 5);
+                }
 
-			drawContext.DrawRectangle(null, rectPen, myCanvas);
+                if (PlottingDeisotopedData) {
+                    AddDeisotopedDataLegend(drawContext, width, height, 10, -30, 25);
+                }
+            }
 
-			if (!string.IsNullOrWhiteSpace(AnnotationBottomLeft)) {
-				AddText(AnnotationBottomLeft, drawContext, width, height, Windows.HorizontalAlignment.Left, Windows.VerticalAlignment.Bottom, 5);
-			}
+            const var DPI = 96;
 
-			if (!string.IsNullOrWhiteSpace(AnnotationBottomRight)) {
-				AddText(AnnotationBottomRight, drawContext, width, height, Windows.HorizontalAlignment.Right, Windows.VerticalAlignment.Bottom, 5);
-			}
+            var target = new RenderTargetBitmap(width, height, DPI, DPI, PixelFormats.Default);
+            target.Render(drawVisual);
 
-			if (PlottingDeisotopedData) {
-				AddDeisotopedDataLegend(drawContext, width, height, 10, -30, 25);
-			}
-		}
+            BitmapEncoder encoder = null;
 
-		const dynamic DPI = 96;
+            switch (fileFormat) {
+                case ImageFileFormat.PNG:
+                    encoder = new PngBitmapEncoder();
 
-		dynamic target = new RenderTargetBitmap(width, height, DPI, DPI, PixelFormats.Default);
-		target.Render(drawVisual);
+                    break;
+                case ImageFileFormat.JPG:
+                    encoder = new JpegBitmapEncoder();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(fileFormat, "Unrecognized value: " + fileFormat.ToString());
+            }
 
-		BitmapEncoder encoder = null;
+            if (encoder != null) {
+                encoder.Frames.Add(BitmapFrame.Create(target));
 
-		switch (fileFormat) {
-			case ImageFileFormat.PNG:
-				encoder = new PngBitmapEncoder();
+                using (outputStream == new FileStream(imageFilePath, FileMode.Create, FileAccess.Write)) {
+                    encoder.Save(outputStream);
+                }
+            }
 
-				break;
-			case ImageFileFormat.JPG:
-				encoder = new JpegBitmapEncoder();
-				break;
-			default:
-				throw new ArgumentOutOfRangeException(fileFormat, "Unrecognized value: " + fileFormat.ToString());
-		}
+        }
 
-		if (encoder != null) {
-			encoder.Frames.Add(BitmapFrame.Create(target));
+        public void AddGradients(Dictionary<string, OxyPalette> colorGradients)
+        {
+            mColorGradients = colorGradients;
+        }
 
-			using (outputStream == new FileStream(imageFilePath, FileMode.Create, FileAccess.Write)) {
-				encoder.Save(outputStream);
-			}
-		}
 
-	}
+        protected void AddDeisotopedDataLegend(DrawingContext drawContext, int canvasWidth, int canvasHeight, int offsetLeft, int offsetTop, int spacing)
+        {
+            const var CHARGE_START = 1;
+            const var CHARGE_END = 6;
 
-	public void AddGradients(Dictionary<string, OxyPalette> colorGradients)
-	{
-		mColorGradients = colorGradients;
-	}
+            var usCulture = Globalization.CultureInfo.GetCultureInfo("en-us");
+            // Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
+            var fontTypeface = new Typeface("Arial");
 
+            var fontSizeEm = FontSizeBase + 3;
 
-	protected void AddDeisotopedDataLegend(DrawingContext drawContext, int canvasWidth, int canvasHeight, int offsetLeft, int offsetTop, int spacing)
-	{
-		const dynamic CHARGE_START = 1;
-		const dynamic CHARGE_END = 6;
+            // Write out the text 1+  2+  3+  4+  5+  6+  
 
-		dynamic usCulture = Globalization.CultureInfo.GetCultureInfo("en-us");
-		// Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
-		dynamic fontTypeface = new Typeface("Arial");
+            // Create a box for the legend
+            var rectPen = new System.Windows.Media.Pen();
+            rectPen.Brush = new SolidColorBrush(Colors.Black);
+            rectPen.Thickness = 1;
 
-		dynamic fontSizeEm = FontSizeBase + 3;
 
-		// Write out the text 1+  2+  3+  4+  5+  6+  
+            for (chargeState = CHARGE_START; chargeState <= CHARGE_END; chargeState++) {
+                var newBrush = new SolidColorBrush(GetColorByCharge(chargeState));
 
-		// Create a box for the legend
-		dynamic rectPen = new System.Windows.Media.Pen();
-		rectPen.Brush = new SolidColorBrush(Colors.Black);
-		rectPen.Thickness = 1;
+                var newText = new FormattedText(chargeState + "+", usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, newBrush);
 
+                var textRect = new Rect(0, 0, canvasWidth, canvasHeight);
+                var position = textRect.Location;
 
-		for (chargeState = CHARGE_START; chargeState <= CHARGE_END; chargeState++) {
-			dynamic newBrush = new SolidColorBrush(GetColorByCharge(chargeState));
+                position.X = mPlot.PlotArea.Left + offsetLeft + (chargeState - 1) * (newText.Width + spacing);
+                position.Y = mPlot.PlotArea.Top + offsetTop;
 
-			dynamic newText = new FormattedText(chargeState + "+", usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, newBrush);
+                if (chargeState == CHARGE_START) {
+                    var legendBox = new Rect(position.X - 10, position.Y, CHARGE_END * (newText.Width + spacing) - spacing / 4, newText.Height);
+                    drawContext.DrawRectangle(null, rectPen, legendBox);
+                }
 
-			dynamic textRect = new Rect(0, 0, canvasWidth, canvasHeight);
-			dynamic position = textRect.Location;
+                drawContext.DrawText(newText, position);
+            }
 
-			position.X = mPlot.PlotArea.Left + offsetLeft + (chargeState - 1) * (newText.Width + spacing);
-			position.Y = mPlot.PlotArea.Top + offsetTop;
+        }
 
-			if (chargeState == CHARGE_START) {
-				dynamic legendBox = new Rect(position.X - 10, position.Y, CHARGE_END * (newText.Width + spacing) - spacing / 4, newText.Height);
-				drawContext.DrawRectangle(null, rectPen, legendBox);
-			}
 
-			drawContext.DrawText(newText, position);
-		}
+        protected void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, Windows.HorizontalAlignment hAlign, Windows.VerticalAlignment vAlign, int padding)
+        {
+            var usCulture = Globalization.CultureInfo.GetCultureInfo("en-us");
+            // Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
+            var fontTypeface = new Typeface("Arial");
 
-	}
+            var fontSizeEm = FontSizeBase + 1;
 
+            var newText = new FormattedText(textToAdd, usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, Brushes.Black);
 
-	protected void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, Windows.HorizontalAlignment hAlign, Windows.VerticalAlignment vAlign, int padding)
-	{
-		dynamic usCulture = Globalization.CultureInfo.GetCultureInfo("en-us");
-		// Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
-		dynamic fontTypeface = new Typeface("Arial");
+            var textRect = new Rect(0, 0, canvasWidth, canvasHeight);
+            var position = textRect.Location;
 
-		dynamic fontSizeEm = FontSizeBase + 1;
+            switch (hAlign) {
+                case Windows.HorizontalAlignment.Left:
+                    position.X += padding;
 
-		dynamic newText = new FormattedText(textToAdd, usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, Brushes.Black);
+                    break;
+                case Windows.HorizontalAlignment.Center:
+                    position.X += (textRect.Width - newText.Width) / 2;
 
-		dynamic textRect = new Rect(0, 0, canvasWidth, canvasHeight);
-		dynamic position = textRect.Location;
+                    break;
+                case Windows.HorizontalAlignment.Right:
+                    position.X += textRect.Width - newText.Width - padding;
+                    break;
+            }
 
-		switch (hAlign) {
-			case Windows.HorizontalAlignment.Left:
-				position.X += padding;
+            switch (vAlign) {
+                case Windows.VerticalAlignment.Top:
+                    position.Y += padding;
 
-				break;
-			case Windows.HorizontalAlignment.Center:
-				position.X += (textRect.Width - newText.Width) / 2;
+                    break;
+                case Windows.VerticalAlignment.Center:
+                    position.Y += (textRect.Height - newText.Height) / 2;
 
-				break;
-			case Windows.HorizontalAlignment.Right:
-				position.X += textRect.Width - newText.Width - padding;
-				break;
-		}
+                    break;
+                case Windows.VerticalAlignment.Bottom:
+                    position.Y += textRect.Height - newText.Height - padding;
+                    break;
+            }
 
-		switch (vAlign) {
-			case Windows.VerticalAlignment.Top:
-				position.Y += padding;
+            drawContext.DrawText(newText, position);
+        }
 
-				break;
-			case Windows.VerticalAlignment.Center:
-				position.Y += (textRect.Height - newText.Height) / 2;
+        public static Color GetColorByCharge(int charge)
+        {
+            var seriesColor = default(Color);
+            switch (charge) {
+                case 1:
+                    seriesColor = Colors.MediumBlue;
+                    break;
+                case 2:
+                    seriesColor = Colors.Red;
+                    break;
+                case 3:
+                    seriesColor = Colors.Green;
+                    break;
+                case 4:
+                    seriesColor = Colors.Magenta;
+                    break;
+                case 5:
+                    seriesColor = Colors.SaddleBrown;
+                    break;
+                case 6:
+                    seriesColor = Colors.Indigo;
+                    break;
+                case 7:
+                    seriesColor = Colors.LimeGreen;
+                    break;
+                case 8:
+                    seriesColor = Colors.CornflowerBlue;
+                    break;
+                default:
+                    seriesColor = Colors.Gray;
+                    break;
+            }
 
-				break;
-			case Windows.VerticalAlignment.Bottom:
-				position.Y += textRect.Height - newText.Height - padding;
-				break;
-		}
+            return seriesColor;
 
-		drawContext.DrawText(newText, position);
-	}
+        }
 
-	public static Color GetColorByCharge(int charge)
-	{
-		var seriesColor = default(Color);
-		switch (charge) {
-			case 1:
-				seriesColor = Colors.MediumBlue;
-				break;
-			case 2:
-				seriesColor = Colors.Red;
-				break;
-			case 3:
-				seriesColor = Colors.Green;
-				break;
-			case 4:
-				seriesColor = Colors.Magenta;
-				break;
-			case 5:
-				seriesColor = Colors.SaddleBrown;
-				break;
-			case 6:
-				seriesColor = Colors.Indigo;
-				break;
-			case 7:
-				seriesColor = Colors.LimeGreen;
-				break;
-			case 8:
-				seriesColor = Colors.CornflowerBlue;
-				break;
-			default:
-				seriesColor = Colors.Gray;
-				break;
-		}
+        protected double PointSizeToEm(int fontSizePoints)
+        {
+            var fontSizeEm = fontSizePoints / 12;
+            return fontSizeEm;
+        }
 
-		return seriesColor;
+        protected int PointSizeToPixels(int fontSizePoints)
+        {
+            var fontSizePixels = fontSizePoints * 1.33;
+            return Convert.ToInt32(Math.Round(fontSizePixels, 0));
+        }
 
-	}
-
-	protected double PointSizeToEm(int fontSizePoints)
-	{
-		dynamic fontSizeEm = fontSizePoints / 12;
-		return fontSizeEm;
-	}
-
-	protected int PointSizeToPixels(int fontSizePoints)
-	{
-		dynamic fontSizePixels = fontSizePoints * 1.33;
-		return Convert.ToInt32(Math.Round(fontSizePixels, 0));
-	}
-
+    }
 }
 

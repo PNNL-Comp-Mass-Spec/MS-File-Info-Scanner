@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.InteropServices;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
 //
@@ -41,7 +40,7 @@ namespace MSFileInfoScanner
             // The dataset name is simply the folder name without .D
             try {
                 return Path.GetFileNameWithoutExtension(strDataFilePath);
-            } catch (Exception ex) {
+            } catch (Exception) {
                 return string.Empty;
             }
         }
@@ -55,10 +54,9 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         private bool ProcessContentsXMLFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo)
         {
-            bool blnSuccess = false;
+            var blnSuccess = false;
 
             try {
-                blnSuccess = false;
 
                 // Open the Contents.xml file
                 var strFilePath = Path.Combine(strFolderPath, AGILENT_XML_CONTENTS_FILE);
@@ -87,7 +85,7 @@ namespace MSFileInfoScanner
                                             blnSuccess = true;
                                         }
 
-                                    } catch (Exception ex) {
+                                    } catch (Exception) {
                                         // Ignore errors here
                                     }
 
@@ -122,16 +120,16 @@ namespace MSFileInfoScanner
         protected bool ProcessTimeSegmentFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo, out double dblTotalAcqTimeMinutes)
         {
 
-            bool blnSuccess = false;
+            var blnSuccess = false;
 
             double dblStartTime = 0;
             double dblEndTime = 0;
 
+            dblTotalAcqTimeMinutes = 0;
 
-            try {
-                blnSuccess = false;
+            try
+            {
                 datasetFileInfo.ScanCount = 0;
-                dblTotalAcqTimeMinutes = 0;
 
                 // Open the Contents.xml file
                 var strFilePath = Path.Combine(strFolderPath, AGILENT_TIME_SEGMENT_FILE);
@@ -200,10 +198,9 @@ namespace MSFileInfoScanner
         {
             // Returns True if success, False if an error
 
-            bool blnSuccess = false;
+            var blnSuccess = false;
 
             try {
-                blnSuccess = false;
                 var diRootFolder = new DirectoryInfo(strDataFilePath);
                 var diAcqDataFolder = new DirectoryInfo(Path.Combine(diRootFolder.FullName, AGILENT_ACQDATA_FOLDER_NAME));
 
@@ -250,12 +247,12 @@ namespace MSFileInfoScanner
                     // The AcqData folder exists
 
                     // Parse the Contents.xml file to determine the acquisition start time
-                    var blnAcqStartTimeDetermined = ProcessContentsXMLFile(diAcqDataFolder.FullName, ref datasetFileInfo);
+                    var blnAcqStartTimeDetermined = ProcessContentsXMLFile(diAcqDataFolder.FullName, datasetFileInfo);
 
-                    double dblAcquisitionLengthMinutes = 0;
+                    double dblAcquisitionLengthMinutes;
 
                     // Parse the MSTS.xml file to determine the acquisition length and number of scans
-                    var blnValidMSTS = ProcessTimeSegmentFile(diAcqDataFolder.FullName, ref datasetFileInfo, ref dblAcquisitionLengthMinutes);
+                    var blnValidMSTS = ProcessTimeSegmentFile(diAcqDataFolder.FullName, datasetFileInfo, out dblAcquisitionLengthMinutes);
 
                     if (!blnAcqStartTimeDetermined && blnValidMSTS) {
                         // Compute the start time from .AcqTimeEnd minus dblAcquisitionLengthMinutes
@@ -270,7 +267,7 @@ namespace MSFileInfoScanner
                     //	        <AcqMode>TargetedMS2</AcqMode>
 
                     // Read the raw data to create the TIC and BPI
-                    ReadBinaryData(diRootFolder.FullName, ref datasetFileInfo);
+                    ReadBinaryData(diRootFolder.FullName, datasetFileInfo);
 
                 }
 
@@ -301,7 +298,7 @@ namespace MSFileInfoScanner
             var blnTICStored = false;
             var blnSRMDataCached = false;
 
-            bool blnSuccess = false;
+            bool blnSuccess;
 
             try {
                 // Open the data folder using the ProteoWizardWrapper
@@ -309,7 +306,7 @@ namespace MSFileInfoScanner
                 var objPWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(strDataFolderPath);
 
                 try {
-                    var dtRunStartTime = Convert.ToDateTime(objPWiz.RunStartTime());
+                    var dtRunStartTime = Convert.ToDateTime(objPWiz.RunStartTime);
 
                     // Update AcqTimeEnd if possible
                     if (dtRunStartTime < datasetFileInfo.AcqTimeEnd) {
@@ -318,29 +315,32 @@ namespace MSFileInfoScanner
                         }
                     }
 
-                } catch (Exception ex) {
+                } catch (Exception) {
                     // Leave the times unchanged
                 }
 
                 // Instantiate the Proteowizard Data Parser class
-                mPWizParser = new clsProteowizardDataParser(objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot, mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus);
+                mPWizParser = new clsProteowizardDataParser(objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot,
+                                                            mLCMS2DPlot, mSaveLCMS2DPlots, mSaveTICAndBPI,
+                                                            mCheckCentroidingStatus)
+                {
+                    HighResMS1 = true,
+                    HighResMS2 = true
+                };
 
-                mPWizParser.HighResMS1 = true;
-                mPWizParser.HighResMS2 = true;
 
                 double dblRuntimeMinutes = 0;
 
-
                 if (objPWiz.ChromatogramCount > 0) {
                     // Process the chromatograms
-                    mPWizParser.StoreChromatogramInfo(datasetFileInfo, blnTICStored, blnSRMDataCached, dblRuntimeMinutes);
+                    mPWizParser.StoreChromatogramInfo(datasetFileInfo, ref blnTICStored, ref blnSRMDataCached, out dblRuntimeMinutes);
                     mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
 
                 }
 
                 if (objPWiz.SpectrumCount > 0) {
                     // Process the spectral data
-                    mPWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, dblRuntimeMinutes);
+                    mPWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, ref dblRuntimeMinutes);
                     mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
                 }
 

@@ -279,7 +279,7 @@ namespace MSFileInfoScanner
 
             if (objPoints.Count == 0) {
                 // Nothing to plot
-                return new clsPlotContainer(new PlotModel());
+                return new ClsPlotContainer(new PlotModel());
             }
 
             // Round intMaxScan down to the nearest multiple of 10
@@ -303,7 +303,7 @@ namespace MSFileInfoScanner
             var yVals = (from item in objPoints select item.Y);
             clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
 
-            var plotContainer = new clsPlotContainer(myPlot) {
+            var plotContainer = new ClsPlotContainer(myPlot) {
                 FontSizeBase = clsOxyplotUtilities.FONT_SIZE_BASE
             };
 

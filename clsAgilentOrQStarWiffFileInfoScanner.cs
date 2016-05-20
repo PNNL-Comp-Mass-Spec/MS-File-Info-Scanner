@@ -37,7 +37,7 @@ namespace MSFileInfoScanner
             // The dataset name is simply the file name without .wiff
             try {
                 return Path.GetFileNameWithoutExtension(strDataFilePath);
-            } catch (Exception ex) {
+            } catch (Exception) {
                 return string.Empty;
             }
         }
@@ -50,14 +50,13 @@ namespace MSFileInfoScanner
             var blnSRMDataCached = false;
 
             // Override strDataFilePath here, if needed
-            strDataFilePath = strDataFilePath;
+            // strDataFilePath = strDataFilePath;
 
             // Obtain the full path to the file
             var ioFileInfo = new FileInfo(strDataFilePath);
 
 
-            bool blnTest = false;
-            blnTest = false;
+            var blnTest = false;
             if (blnTest) {
                 TestPWiz(ioFileInfo.FullName);
             }
@@ -97,15 +96,19 @@ namespace MSFileInfoScanner
                         }
                     }
 
-                } catch (Exception ex) {
+                } catch (Exception) {
                     datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd;
                 }
 
                 // Instantiate the Proteowizard Data Parser class
-                mPWizParser = new clsProteowizardDataParser(objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot, mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus);
+                mPWizParser = new clsProteowizardDataParser(objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot,
+                                                            mLCMS2DPlot, mSaveLCMS2DPlots, mSaveTICAndBPI,
+                                                            mCheckCentroidingStatus)
+                {
+                    HighResMS1 = true,
+                    HighResMS2 = true
+                };
 
-                mPWizParser.HighResMS1 = true;
-                mPWizParser.HighResMS2 = true;
 
                 double dblRuntimeMinutes = 0;
 
@@ -113,15 +116,14 @@ namespace MSFileInfoScanner
 
                 if (objPWiz.ChromatogramCount > 0) {
                     // Process the chromatograms
-                    mPWizParser.StoreChromatogramInfo(datasetFileInfo, blnTICStored, blnSRMDataCached, dblRuntimeMinutes);
+                    mPWizParser.StoreChromatogramInfo(datasetFileInfo, ref blnTICStored, ref blnSRMDataCached, out dblRuntimeMinutes);
                     mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
 
                 }
 
-
                 if (objPWiz.SpectrumCount > 0 & !blnSRMDataCached) {
                     // Process the spectral data (though only if we did not process SRM data)
-                    mPWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, dblRuntimeMinutes);
+                    mPWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, ref dblRuntimeMinutes);
                     mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
                 }
 

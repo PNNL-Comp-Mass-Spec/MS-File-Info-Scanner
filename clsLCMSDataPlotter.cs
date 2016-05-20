@@ -1084,7 +1084,7 @@ namespace MSFileInfoScanner
 
                 var strTitle = intCharge + "+";
 
-                var seriesColor = clsPlotContainer.GetColorByCharge(intCharge);
+                var seriesColor = ClsPlotContainer.GetColorByCharge(intCharge);
 
                 var series = new ScatterSeries
                 {
@@ -1377,7 +1377,7 @@ namespace MSFileInfoScanner
         /// <param name="blnSkipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for intMSLevelFilter, set blnSkipTrimCachedData to False on the first call and True on subsequent calls)</param>
         /// <returns>OxyPlot PlotContainer</returns>
         /// <remarks></remarks>
-        private clsPlotContainer InitializePlot(string strTitle, int intMSLevelFilter, bool blnSkipTrimCachedData)
+        private ClsPlotContainer InitializePlot(string strTitle, int intMSLevelFilter, bool blnSkipTrimCachedData)
         {
             int intMinScan;
             int intMaxScan;
@@ -1446,7 +1446,7 @@ namespace MSFileInfoScanner
 
             if (intPointsToPlot == 0) {
                 // Nothing to plot
-                return new clsPlotContainer(new PlotModel());
+                return new ClsPlotContainer(new PlotModel());
             }
 
             // Round intMinScan down to the nearest multiple of 10
@@ -1486,7 +1486,7 @@ namespace MSFileInfoScanner
             var yVals = (from item in lstPointsByCharge.First() select item.Y);
             clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
 
-            var plotContainer = new clsPlotContainer(myPlot)
+            var plotContainer = new ClsPlotContainer(myPlot)
             {
                 FontSizeBase = clsOxyplotUtilities.FONT_SIZE_BASE,
                 AnnotationBottomLeft = intPointsToPlot.ToString("0,000") + " points plotted"
