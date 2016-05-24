@@ -46,27 +46,23 @@ namespace MSFileInfoScanner
 
         public static LinearAxis MakeLinearAxis(AxisPosition position, string axisTitle, int baseFontSize)
         {
-            var axis = new LinearAxis();
-
-            axis.Position = position;
-
-            axis.Title = axisTitle;
-            axis.TitleFontSize = baseFontSize + 2;
-            axis.TitleFontWeight = FontWeights.Normal;
-            axis.TitleFont = "Arial";
-
-            axis.AxisTitleDistance = 15;
-            axis.TickStyle = TickStyle.Crossing;
-
-            axis.AxislineColor = OxyColors.Black;
-            axis.AxislineStyle = LineStyle.Solid;
-            axis.MajorTickSize = 8;
-
-            axis.MajorGridlineStyle = LineStyle.None;
-            axis.MinorGridlineStyle = LineStyle.None;
-
-            axis.StringFormat = DEFAULT_AXIS_LABEL_FORMAT;
-            axis.Font = "Arial";
+            var axis = new LinearAxis
+            {
+                Position = position,
+                Title = axisTitle,
+                TitleFontSize = baseFontSize + 2,
+                TitleFontWeight = FontWeights.Normal,
+                TitleFont = "Arial",
+                AxisTitleDistance = 15,
+                TickStyle = TickStyle.Crossing,
+                AxislineColor = OxyColors.Black,
+                AxislineStyle = LineStyle.Solid,
+                MajorTickSize = 8,
+                MajorGridlineStyle = LineStyle.None,
+                MinorGridlineStyle = LineStyle.None,
+                StringFormat = DEFAULT_AXIS_LABEL_FORMAT,
+                Font = "Arial"
+            };
 
             return axis;
 

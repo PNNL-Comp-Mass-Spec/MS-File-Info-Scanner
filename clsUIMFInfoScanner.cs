@@ -17,29 +17,23 @@ namespace MSFileInfoScanner
 
         public const string UIMF_FILE_EXTENSION = ".UIMF";
 
-        private void ComputeQualityScores(ref DataReader objUIMFReader, clsDatasetFileInfo datasetFileInfo, ref Dictionary<int, DataReader.FrameType> dctMasterFrameList, ref int[] intMasterFrameNumList)
+        /// <summary>
+        /// This function is used to determine one or more overall quality scores
+        /// </summary>
+        /// <param name="objUIMFReader"></param>
+        /// <param name="datasetFileInfo"></param>
+        /// <param name="dctMasterFrameList"></param>
+        /// <param name="intMasterFrameNumList"></param>
+        private void ComputeQualityScores(
+            DataReader objUIMFReader, 
+            clsDatasetFileInfo datasetFileInfo, 
+            Dictionary<int, DataReader.FrameType> dctMasterFrameList, 
+            int[] intMasterFrameNumList)
         {
-            // This function is used to determine one or more overall quality scores
+            float sngOverallScore;
 
-            FrameParams objFrameParams = default(FrameParams);
-            GlobalParams objGlobalParams = default(GlobalParams);
-
-            int intFrameStart = 0;
-            int intFrameEnd = 0;
-
-            int intGlobalMaxBins = 0;
-
-            double[] dblMZList = null;
-            int[] intIntensityList = null;
-
-            float sngOverallScore = 0;
-
-            double dblIntensitySum = 0;
             double dblOverallAvgIntensitySum = 0;
-            int intOverallAvgCount = 0;
-
-            dblOverallAvgIntensitySum = 0;
-            intOverallAvgCount = 0;
+            var intOverallAvgCount = 0;
 
             if (mLCMS2DPlot.ScanCountCached > 0) {
                 // Obtain the overall average intensity value using the data cached in mLCMS2DPlot
@@ -48,33 +42,33 @@ namespace MSFileInfoScanner
                 sngOverallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(intMSLevelFilter);
 
             } else {
-                objGlobalParams = objUIMFReader.GetGlobalParams();
+                var objGlobalParams = objUIMFReader.GetGlobalParams();
 
-                intGlobalMaxBins = objGlobalParams.Bins;
+                var intGlobalMaxBins = objGlobalParams.Bins;
 
 
-                dblMZList = new double[intGlobalMaxBins + 1];
-                intIntensityList = new int[intGlobalMaxBins + 1];
+                var dblMZList = new double[intGlobalMaxBins + 1];
+                var intIntensityList = new int[intGlobalMaxBins + 1];
 
                 // Call .GetStartAndEndScans to get the start and end Frames
-                base.GetStartAndEndScans(objGlobalParams.NumFrames, intFrameStart, intFrameEnd);
+                int intFrameStart;
+                int intFrameEnd;
+                GetStartAndEndScans(objGlobalParams.NumFrames, out intFrameStart, out intFrameEnd);
 
 
-                for (int intMasterFrameNumIndex = 0; intMasterFrameNumIndex <= intMasterFrameNumList.Length - 1; intMasterFrameNumIndex++) {
-                    int intFrameNumber = 0;
-                    DataReader.FrameType eFrameType = default(DataReader.FrameType);
-                    intFrameNumber = intMasterFrameNumList(intMasterFrameNumIndex);
-                    eFrameType = dctMasterFrameList(intFrameNumber);
-
+                for (var intMasterFrameNumIndex = 0; intMasterFrameNumIndex <= intMasterFrameNumList.Length - 1; intMasterFrameNumIndex++) {
+                    var intFrameNumber = intMasterFrameNumList[intMasterFrameNumIndex];
+                    var eFrameType = dctMasterFrameList[intFrameNumber];
 
                     // Check whether the frame number is within the desired range
                     if (intFrameNumber < intFrameStart || intFrameNumber > intFrameEnd) {
                         continue;
                     }
 
+                    FrameParams objFrameParams;
                     try {
                         objFrameParams = objUIMFReader.GetFrameParams(intFrameNumber);
-                    } catch (Exception ex) {
+                    } catch (Exception) {
                         Console.WriteLine("Exception obtaining frame parameters for frame " + intFrameNumber + "; will skip this frame");
                         objFrameParams = null;
                     }
@@ -83,9 +77,6 @@ namespace MSFileInfoScanner
                         continue;
                     }
 
-                    int intIonCount = 0;
-                    int intTargetIndex = 0;
-
                     // We have to clear the m/z and intensity arrays before calling GetSpectrum
 
                     Array.Clear(dblMZList, 0, dblMZList.Length);
@@ -93,7 +84,7 @@ namespace MSFileInfoScanner
 
                     // Process all of the IMS scans in this Frame to compute a summed spectrum representative of the frame
                     // Scans likely range from 0 to objFrameParams.Scans-1, but we'll use objFrameParams.Scans just to be safe
-                    intIonCount = objUIMFReader.GetSpectrum(intFrameNumber, intFrameNumber, eFrameType, 0, objFrameParams.Scans, dblMZList, intIntensityList);
+                    var intIonCount = objUIMFReader.GetSpectrum(intFrameNumber, intFrameNumber, eFrameType, 0, objFrameParams.Scans, out dblMZList, out intIntensityList);
 
                     if (intIonCount <= 0) {
                         continue;
@@ -106,12 +97,12 @@ namespace MSFileInfoScanner
                         intIonCount = dblMZList.Length;
                     }
 
-                    intTargetIndex = 0;
-                    for (int intIonIndex = 0; intIonIndex <= intIonCount - 1; intIonIndex++) {
-                        if (dblMZList(intIonIndex) > 0) {
+                    var intTargetIndex = 0;
+                    for (var intIonIndex = 0; intIonIndex <= intIonCount - 1; intIonIndex++) {
+                        if (dblMZList[intIonIndex] > 0) {
                             if (intTargetIndex != intIonIndex) {
-                                dblMZList(intTargetIndex) = dblMZList(intIonIndex);
-                                intIntensityList(intTargetIndex) = intIntensityList(intIonIndex);
+                                dblMZList[intTargetIndex] = dblMZList[intIonIndex];
+                                intIntensityList[intTargetIndex] = intIntensityList[intIonIndex];
                             }
                             intTargetIndex += 1;
                         }
@@ -125,9 +116,9 @@ namespace MSFileInfoScanner
                         // Keep track of the quality scores and then store one or more overall quality scores in datasetFileInfo.OverallQualityScore
                         // For now, this just computes the average intensity for each scan and then computes and overall average intensity value
 
-                        dblIntensitySum = 0;
-                        for (int intIonIndex = 0; intIonIndex <= intIonCount - 1; intIonIndex++) {
-                            dblIntensitySum += intIntensityList(intIonIndex);
+                        double dblIntensitySum = 0;
+                        for (var intIonIndex = 0; intIonIndex <= intIonCount - 1; intIonIndex++) {
+                            dblIntensitySum += intIntensityList[intIonIndex];
                         }
 
                         dblOverallAvgIntensitySum += dblIntensitySum / intIonCount;
@@ -150,8 +141,12 @@ namespace MSFileInfoScanner
 
         }
 
-
-        private void ConstructTICandBPI(ref DataReader objUIMFReader, int intFrameStart, int intFrameEnd, ref Dictionary<int, double> dctTIC, ref Dictionary<int, double> dctBPI)
+        private void ConstructTICandBPI(
+            DataReader objUIMFReader, 
+            int intFrameStart, 
+            int intFrameEnd, 
+            out Dictionary<int, double> dctTIC,
+            out Dictionary<int, double> dctBPI)
         {
             try {
                 // Obtain the TIC and BPI for each MS frame
@@ -164,6 +159,8 @@ namespace MSFileInfoScanner
 
             } catch (Exception ex) {
                 ReportError("Error obtaining TIC and BPI for overall dataset: " + ex.Message);
+                dctTIC = new Dictionary<int, double>();
+                dctBPI = new Dictionary<int, double>();
             }
 
         }
@@ -173,46 +170,28 @@ namespace MSFileInfoScanner
             // The dataset name is simply the file name without .UIMF
             try {
                 return Path.GetFileNameWithoutExtension(strDataFilePath);
-            } catch (Exception ex) {
+            } catch (Exception) {
                 return string.Empty;
             }
         }
 
 
-        private void LoadFrameDetails(ref DataReader objUIMFReader, ref Dictionary<int, DataReader.FrameType> dctMasterFrameList, ref int[] intMasterFrameNumList)
+        private void LoadFrameDetails(DataReader objUIMFReader, Dictionary<int, DataReader.FrameType> dctMasterFrameList, int[] intMasterFrameNumList)
         {
             const int BAD_TIC_OR_BPI = int.MinValue;
 
-            DateTime dtLastProgressTime = default(DateTime);
+            Dictionary<int, double> dctTIC;
+            Dictionary<int, double> dctBPI;
 
-            Dictionary<int, double> dctTIC = new Dictionary<int, double>();
-            Dictionary<int, double> dctBPI = new Dictionary<int, double>();
-
-            int intFrameStart = 0;
-            int intFrameEnd = 0;
+            int intFrameStart;
+            int intFrameEnd;
 
             // The StartTime value for each frame is the number of minutes since 12:00 am
             // If acquiring data from 11:59 pm through 12:00 am, then the StartTime will reset to zero
-            double dblFrameStartTimeInitial = 0;
-            double dblFrameStartTimeAddon = 0;
-
-            double dblFrameStartTimePrevious = 0;
-            double dblFrameStartTimeCurrent = 0;
-
-            double dblElutionTime = 0;
-            int intNonZeroPointsInFrame = 0;
-
-            int intGlobalMaxBins = 0;
-
-            double[] dblMZList = null;
-            int[] intIntensityList = null;
-            double[] dblIonsIntensity = null;
-
-            double dblPressure = 0;
 
             if (mSaveTICAndBPI) {
                 // Initialize the TIC and BPI arrays
-                base.InitializeTICAndBPI();
+                InitializeTICAndBPI();
                 mTICandBPIPlot.BPIXAxisLabel = "Frame number";
                 mTICandBPIPlot.TICXAxisLabel = "Frame number";
 
@@ -228,41 +207,38 @@ namespace MSFileInfoScanner
             }
 
             if (mSaveLCMS2DPlots) {
-                base.InitializeLCMS2DPlot();
+                InitializeLCMS2DPlot();
             }
 
-            dtLastProgressTime = DateTime.UtcNow;
+            var dtLastProgressTime = DateTime.UtcNow;
 
             var objGlobalParams = objUIMFReader.GetGlobalParams();
 
-            intGlobalMaxBins = objGlobalParams.Bins;
+            var intGlobalMaxBins = objGlobalParams.Bins;
 
-            dblMZList = new double[intGlobalMaxBins + 1];
-            intIntensityList = new int[intGlobalMaxBins + 1];
-            dblIonsIntensity = new double[intGlobalMaxBins + 1];
+            var dblMZList = new double[intGlobalMaxBins + 1];
+            var intIntensityList = new int[intGlobalMaxBins + 1];
+            var dblIonsIntensity = new double[intGlobalMaxBins + 1];
 
             // Call .GetStartAndEndScans to get the start and end Frames
-            base.GetStartAndEndScans(objGlobalParams.NumFrames, intFrameStart, intFrameEnd);
+            GetStartAndEndScans(objGlobalParams.NumFrames, out intFrameStart, out intFrameEnd);
 
             // Construct the TIC and BPI (of all frames)
-            ConstructTICandBPI(ref objUIMFReader, intFrameStart, intFrameEnd, ref dctTIC, ref dctBPI);
+            ConstructTICandBPI(objUIMFReader, intFrameStart, intFrameEnd, out dctTIC, out dctBPI);
 
             Console.Write("  Loading frame details");
 
             // Initialize the frame starttime variables
-            dblFrameStartTimeInitial = -1;
-            dblFrameStartTimeAddon = 0;
+            double dblFrameStartTimeInitial = -1;
+            double dblFrameStartTimeAddon = 0;
 
-            dblFrameStartTimePrevious = -1;
-            dblFrameStartTimeCurrent = 0;
+            double dblFrameStartTimePrevious = -1;
+            double dblFrameStartTimeCurrent = 0;
 
 
-            for (int intMasterFrameNumIndex = 0; intMasterFrameNumIndex <= intMasterFrameNumList.Length - 1; intMasterFrameNumIndex++) {
-                int intFrameNumber = 0;
-                DataReader.FrameType eFrameType = default(DataReader.FrameType);
-                intFrameNumber = intMasterFrameNumList(intMasterFrameNumIndex);
-                eFrameType = dctMasterFrameList(intFrameNumber);
-                var intMSLevel = 1;
+            for (var intMasterFrameNumIndex = 0; intMasterFrameNumIndex <= intMasterFrameNumList.Length - 1; intMasterFrameNumIndex++) {
+                var intFrameNumber = intMasterFrameNumList[intMasterFrameNumIndex];
+                var eFrameType = dctMasterFrameList[intFrameNumber];
 
                 // Check whether the frame number is within the desired range
                 if (intFrameNumber < intFrameStart || intFrameNumber > intFrameEnd) {
@@ -271,11 +247,11 @@ namespace MSFileInfoScanner
 
 
                 try {
-                    FrameParams objFrameParams = default(FrameParams);
+                    FrameParams objFrameParams;
 
                     try {
                         objFrameParams = objUIMFReader.GetFrameParams(intFrameNumber);
-                    } catch (Exception ex) {
+                    } catch (Exception) {
                         Console.WriteLine("Exception obtaining frame parameters for frame " + intFrameNumber + "; will skip this frame");
                         objFrameParams = null;
                     }
@@ -284,8 +260,9 @@ namespace MSFileInfoScanner
                         continue;
                     }
 
-                    intNonZeroPointsInFrame = objUIMFReader.GetCountPerFrame(intFrameNumber);
+                    var intNonZeroPointsInFrame = objUIMFReader.GetCountPerFrame(intFrameNumber);
 
+                    int intMSLevel;
                     if (objFrameParams.FrameType == DataReader.FrameType.MS2) {
                         intMSLevel = 2;
                     } else {
@@ -306,16 +283,17 @@ namespace MSFileInfoScanner
                     }
 
                     // Compute the elution time (in minutes) of this frame                    
-                    dblElutionTime = dblFrameStartTimeCurrent + dblFrameStartTimeAddon - dblFrameStartTimeInitial;
+                    var dblElutionTime = dblFrameStartTimeCurrent + dblFrameStartTimeAddon - dblFrameStartTimeInitial;
 
-                    double dblTIC = 0;
-                    double dblBPI = 0;
+                    double dblBPI;
+                    double dblTIC;
 
-                    if (!dctBPI.TryGetValue(intFrameNumber, dblBPI)) {
+                    if (!dctBPI.TryGetValue(intFrameNumber, out dblBPI)) {
                         dblBPI = BAD_TIC_OR_BPI;
                     }
 
-                    if (!dctTIC.TryGetValue(intFrameNumber, dblTIC)) {
+                    if (!dctTIC.TryGetValue(intFrameNumber, out dblTIC))
+                    {
                         dblTIC = BAD_TIC_OR_BPI;
                     }
 
@@ -325,7 +303,7 @@ namespace MSFileInfoScanner
                             mTICandBPIPlot.AddData(intFrameNumber, intMSLevel, Convert.ToSingle(dblElutionTime), dblBPI, dblTIC);
                         }
 
-                        dblPressure = objFrameParams.GetValueDouble(FrameParamKeyType.PressureBack);
+                        var dblPressure = objFrameParams.GetValueDouble(FrameParamKeyType.PressureBack);
                         if (Math.Abs(dblPressure) < float.Epsilon)
                             dblPressure = objFrameParams.GetValueDouble(FrameParamKeyType.RearIonFunnelPressure);
                         if (Math.Abs(dblPressure) < float.Epsilon)
@@ -407,10 +385,10 @@ namespace MSFileInfoScanner
                                 }
 
                                 var intTargetIndex = 0;
-                                for (int intIonIndex = 0; intIonIndex <= intIonCount - 1; intIonIndex++) {
-                                    if (dblMZList(intIonIndex) > 0) {
-                                        dblMZList(intTargetIndex) = dblMZList(intIonIndex);
-                                        dblIonsIntensity(intTargetIndex) = intIntensityList(intIonIndex);
+                                for (var intIonIndex = 0; intIonIndex <= intIonCount - 1; intIonIndex++) {
+                                    if (dblMZList[intIonIndex] > 0) {
+                                        dblMZList[intTargetIndex] = dblMZList[intIonIndex];
+                                        dblIonsIntensity[intTargetIndex] = intIntensityList[intIonIndex];
                                         intTargetIndex += 1;
                                     }
                                 }
@@ -441,7 +419,7 @@ namespace MSFileInfoScanner
                     ReportError("Error loading header info for frame " + intFrameNumber + ": " + ex.Message);
                 }
 
-                ShowProgress(intMasterFrameNumIndex, intMasterFrameNumList.Length, dtLastProgressTime);
+                ShowProgress(intMasterFrameNumIndex, intMasterFrameNumList.Length, ref dtLastProgressTime);
 
                 dblFrameStartTimePrevious = dblFrameStartTimeCurrent;
 
@@ -457,16 +435,8 @@ namespace MSFileInfoScanner
 
             DataReader objUIMFReader = null;
             GlobalParams objGlobalParams = null;
-            FrameParams objFrameParams = default(FrameParams);
 
-            int intDatasetID = 0;
-            int intIndex = 0;
-
-            bool blnReadError = false;
-            bool blnInaccurateStartTime = false;
-
-            int[] intMasterFrameNumList = null;
-            intMasterFrameNumList = new int[1];
+            var intMasterFrameNumList = new int[1];
 
             // Obtain the full path to the file
             var fiFileInfo = new FileInfo(strDataFilePath);
@@ -478,7 +448,7 @@ namespace MSFileInfoScanner
             // Future, optional: Determine the DatasetID
             // Unfortunately, this is not present in metadata.txt
             // intDatasetID = LookupDatasetID(strDatasetName)
-            intDatasetID = 0;
+            var intDatasetID = 0;
 
             datasetFileInfo.FileSystemCreationTime = fiFileInfo.CreationTime;
             datasetFileInfo.FileSystemModificationTime = fiFileInfo.LastWriteTime;
@@ -496,8 +466,8 @@ namespace MSFileInfoScanner
 
             mDatasetStatsSummarizer.ClearCachedData();
 
-            blnReadError = false;
-            blnInaccurateStartTime = false;
+            var blnReadError = false;
+            var blnInaccurateStartTime = false;
 
             try {
                 // Use the UIMFLibrary to read the .UIMF file
@@ -512,7 +482,7 @@ namespace MSFileInfoScanner
                 try {
                     // First obtain the global parameters
                     objGlobalParams = objUIMFReader.GetGlobalParams();
-                } catch (Exception ex) {
+                } catch (Exception) {
                     // Read error
                     blnReadError = true;
                 }
@@ -521,8 +491,7 @@ namespace MSFileInfoScanner
             if (!blnReadError) {
                 // Read the file info
 
-                Dictionary<int, DataReader.FrameType> dctMasterFrameList = default(Dictionary<int, DataReader.FrameType>);
-                dctMasterFrameList = new Dictionary<int, DataReader.FrameType>();
+                var dctMasterFrameList = new Dictionary<int, DataReader.FrameType>();
 
 
                 try {
@@ -556,21 +525,16 @@ namespace MSFileInfoScanner
                     //   A positive integer representing number of minutes since the start of the run
                     //      Theoretically, this will be the case for IMS_TOF_4 acquired after 12/14/2011
 
-                    double dblStartTime = 0;
-                    double dblEndTime = 0;
                     double dblRunTime = 0;
 
                     // First examine objGlobalParams.DateStarted
                     try {
-                        string strReportedDateStarted = null;
-                        DateTime dtReportedDateStarted = default(DateTime);
+                        DateTime dtReportedDateStarted;
 
-                        bool blnValidStartTime = false;
+                        var blnValidStartTime = false;
+                        var strReportedDateStarted = objGlobalParams.GetValue(GlobalParamKeyType.DateStarted);
 
-                        blnValidStartTime = false;
-                        strReportedDateStarted = objGlobalParams.GetValue(GlobalParamKeyType.DateStarted);
-
-                        if (!DateTime.TryParse(strReportedDateStarted, dtReportedDateStarted)) {
+                        if (!DateTime.TryParse(strReportedDateStarted, out dtReportedDateStarted)) {
                             // Invalid date; log a message
                             ShowMessage(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + strReportedDateStarted + "; will use the time the datafile was last modified");
                             blnInaccurateStartTime = true;
@@ -588,7 +552,7 @@ namespace MSFileInfoScanner
 
                             } else if (dtReportedDateStarted.Year < 2000 | dtReportedDateStarted.Year > DateTime.Now.Year + 1) {
                                 // Invalid date; log a message
-                                ShowMessage(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + dtReportedDateStarted.ToString + "; will use the time the datafile was last modified");
+                                ShowMessage(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + strReportedDateStarted + "; will use the time the datafile was last modified");
                                 blnInaccurateStartTime = true;
 
                             } else {
@@ -621,37 +585,36 @@ namespace MSFileInfoScanner
 
                         // Get the start time of the first frame
                         // See above for the various numbers that could be stored in the StartTime column
-                        objFrameParams = objUIMFReader.GetFrameParams(intMasterFrameNumList(0));
-                        dblStartTime = objFrameParams.GetValueDouble(FrameParamKeyType.StartTimeMinutes);
+                        var objFrameParams = objUIMFReader.GetFrameParams(intMasterFrameNumList[0]);
+                        var dblStartTime = objFrameParams.GetValueDouble(FrameParamKeyType.StartTimeMinutes);
 
                         // Get the start time of the last frame
                         // If the reported start time is zero, then step back until a non-zero start time is reported
 
-                        intIndex = intMasterFrameNumList.Length - 1;
+                        var frameIndex = intMasterFrameNumList.Length - 1;
+                        double dblEndTime;
                         do {
-                            objFrameParams = objUIMFReader.GetFrameParams(intMasterFrameNumList[intIndex]);
+                            objFrameParams = objUIMFReader.GetFrameParams(intMasterFrameNumList[frameIndex]);
                             dblEndTime = objFrameParams.GetValueDouble(FrameParamKeyType.StartTimeMinutes);
 
                             if (Math.Abs(dblEndTime) < float.Epsilon) {
-                                intIndex -= 1;
+                                frameIndex -= 1;
                             }
-                        } while (Math.Abs(dblEndTime) < float.Epsilon && intIndex >= 0);
+                        } while (Math.Abs(dblEndTime) < float.Epsilon && frameIndex >= 0);
 
                         // Check whether the StartTime and EndTime values are based on ticks
                         if (dblStartTime >= 1E+17 & dblEndTime > 1E+17) {
                             // StartTime and Endtime were stored as the number of ticks (where each tick is 100 ns)
                             // Tick start date is either 1 January 1601 or 1 January 0001
 
-                            DateTime dtRunTime = default(DateTime);
-                            dtRunTime = DateTime.MinValue.AddTicks(Convert.ToInt64(dblEndTime - dblStartTime));
+                            var dtRunTime = DateTime.MinValue.AddTicks(Convert.ToInt64(dblEndTime - dblStartTime));
 
                             dblRunTime = dtRunTime.Subtract(DateTime.MinValue).TotalMinutes;
 
                             // In some .UIMF files, the DateStarted column in Global_Parameters is simply the date, and not a specific time of day
                             // If that's the case, then update datasetFileInfo.AcqTimeStart to be based on dblRunTime
                             if (datasetFileInfo.AcqTimeStart.Date == datasetFileInfo.AcqTimeStart) {
-                                DateTime dtReportedDateStarted = default(DateTime);
-                                dtReportedDateStarted = DateTime.MinValue.AddTicks(Convert.ToInt64(dblStartTime));
+                                var dtReportedDateStarted = DateTime.MinValue.AddTicks(Convert.ToInt64(dblStartTime));
 
                                 if (dtReportedDateStarted.Year < 500) {
                                     dtReportedDateStarted = dtReportedDateStarted.AddYears(1600);
@@ -676,10 +639,10 @@ namespace MSFileInfoScanner
                             // Ideally, we'd just compute RunTime like this: dblRunTime = dblEndTime - dblStartTime
                             // But, given the idiosyncracies that can occur, we need to construct a full list of start times
 
-                            List<double> lstStartTimes = new List<double>();
+                            var lstStartTimes = new List<double>();
                             double dblEndTimeAddon = 0;
 
-                            for (intIndex = 0; intIndex <= intMasterFrameNumList.Length - 1; intIndex++) {
+                            for (var intIndex = 0; intIndex <= intMasterFrameNumList.Length - 1; intIndex++) {
                                 objFrameParams = objUIMFReader.GetFrameParams(intMasterFrameNumList[intIndex]);
                                 lstStartTimes.Add(objFrameParams.GetValueDouble(FrameParamKeyType.StartTimeMinutes));
                             }
@@ -698,18 +661,18 @@ namespace MSFileInfoScanner
                                 if (lstStartTimes.Count > 2) {
                                     // Compute the amount of time (in minutes) to addon to the total run time
                                     // We're computing the time between two frames, and multiplying that by intFrameCountRemoved
-                                    dblEndTimeAddon += intFrameCountRemoved * (lstStartTimes(lstStartTimes.Count - 1) - lstStartTimes(lstStartTimes.Count - 2));
+                                    dblEndTimeAddon += intFrameCountRemoved * (lstStartTimes[lstStartTimes.Count - 1] - lstStartTimes[lstStartTimes.Count - 2]);
                                 }
                             }
 
                             // Now check for the StartTime changing to a smaller number from one frame to the next
                             // This could happen if the StartTime changed from 1439 to 0 as the system clock hits midnight
                             // Or if the StartTime changes from 59.9 to 0 as the system clock hits the top of a new hour
-                            for (intIndex = 1; intIndex <= lstStartTimes.Count - 1; intIndex++) {
-                                if (lstStartTimes[intIndex] < lstStartTimes(intIndex - 1)) {
-                                    if (lstStartTimes(intIndex - 1) > 1439) {
+                            for (var intIndex = 1; intIndex <= lstStartTimes.Count - 1; intIndex++) {
+                                if (lstStartTimes[intIndex] < lstStartTimes[intIndex - 1]) {
+                                    if (lstStartTimes[intIndex - 1] > 1439) {
                                         dblEndTimeAddon += 1440;
-                                    } else if (lstStartTimes(intIndex - 1) > 59.7) {
+                                    } else if (lstStartTimes[intIndex - 1] > 59.7) {
                                         dblEndTimeAddon += 60;
                                     }
                                 }
@@ -718,7 +681,7 @@ namespace MSFileInfoScanner
                             if (lstStartTimes.Count > 0) {
                                 // Compute the runtime
                                 // Luckily, even if dblStartTime is -479.993 and dblEntTime is -417.509, this works out to a positive, accurate runtime
-                                dblEndTime = lstStartTimes(lstStartTimes.Count - 1);
+                                dblEndTime = lstStartTimes[lstStartTimes.Count - 1];
                                 dblRunTime = dblEndTime + dblEndTimeAddon - dblStartTime;
                             }
 
@@ -747,12 +710,12 @@ namespace MSFileInfoScanner
                 if (mSaveTICAndBPI || mCreateDatasetInfoFile || mCreateScanStatsFile || mSaveLCMS2DPlots) {
                     // Load data from each frame
                     // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
-                    LoadFrameDetails(ref objUIMFReader, ref dctMasterFrameList, ref intMasterFrameNumList);
+                    LoadFrameDetails(objUIMFReader, dctMasterFrameList, intMasterFrameNumList);
                 }
 
                 if (mComputeOverallQualityScores) {
                     // Note that this call will also create the TICs and BPIs
-                    ComputeQualityScores(ref objUIMFReader, ref datasetFileInfo, ref dctMasterFrameList, ref intMasterFrameNumList);
+                    ComputeQualityScores(objUIMFReader, datasetFileInfo, dctMasterFrameList, intMasterFrameNumList);
                 }
             }
 

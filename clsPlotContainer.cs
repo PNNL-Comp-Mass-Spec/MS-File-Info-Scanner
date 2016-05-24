@@ -117,7 +117,10 @@ namespace MSFileInfoScanner
                     var fiBaseImageFile = new FileInfo(imageFilePath);
 
                     var newFileName = Path.GetFileNameWithoutExtension(fiBaseImageFile.Name) + "_Gradient_" + colorGradient.Key + fiBaseImageFile.Extension;
-                    newFileName = Path.Combine(fiBaseImageFile.DirectoryName, newFileName);
+                    if (fiBaseImageFile.DirectoryName != null)
+                    {
+                        newFileName = Path.Combine(fiBaseImageFile.DirectoryName, newFileName);
+                    }
 
                     SaveToFile(newFileName, fileFormat, width, height, resolution);
                 }
@@ -146,9 +149,11 @@ namespace MSFileInfoScanner
                 drawContext.DrawImage(plotBitmap, myCanvas);
 
                 // Add a frame
-                var rectPen = new System.Windows.Media.Pen();
-                rectPen.Brush = new SolidColorBrush(Colors.Black);
-                rectPen.Thickness = 2;
+                var rectPen = new Pen
+                {
+                    Brush = new SolidColorBrush(Colors.Black),
+                    Thickness = 2
+                };
 
                 drawContext.DrawRectangle(null, rectPen, myCanvas);
 
@@ -170,7 +175,7 @@ namespace MSFileInfoScanner
             var target = new RenderTargetBitmap(width, height, DPI, DPI, PixelFormats.Default);
             target.Render(drawVisual);
 
-            BitmapEncoder encoder = null;
+            BitmapEncoder encoder;
 
             switch (fileFormat) {
                 case ImageFileFormat.PNG:
@@ -184,15 +189,12 @@ namespace MSFileInfoScanner
                     throw new ArgumentOutOfRangeException(fileFormat.ToString(), "Unrecognized value: " + fileFormat.ToString());
             }
 
-            if (encoder != null) {
-                encoder.Frames.Add(BitmapFrame.Create(target));
+            encoder.Frames.Add(BitmapFrame.Create(target));
 
-                using (var outputStream = new FileStream(imageFilePath, FileMode.Create, FileAccess.Write))
-                {
-                    encoder.Save(outputStream);
-                }
+            using (var outputStream = new FileStream(imageFilePath, FileMode.Create, FileAccess.Write))
+            {
+                encoder.Save(outputStream);
             }
-
         }
 
         public void AddGradients(Dictionary<string, OxyPalette> colorGradients)
@@ -215,12 +217,14 @@ namespace MSFileInfoScanner
             // Write out the text 1+  2+  3+  4+  5+  6+  
 
             // Create a box for the legend
-            var rectPen = new System.Windows.Media.Pen();
-            rectPen.Brush = new SolidColorBrush(Colors.Black);
-            rectPen.Thickness = 1;
+            var rectPen = new Pen
+            {
+                Brush = new SolidColorBrush(Colors.Black),
+                Thickness = 1
+            };
 
 
-            for (int chargeState = CHARGE_START; chargeState <= CHARGE_END; chargeState++) {
+            for (var chargeState = CHARGE_START; chargeState <= CHARGE_END; chargeState++) {
                 var newBrush = new SolidColorBrush(GetColorByCharge(chargeState));
 
                 var newText = new FormattedText(chargeState + "+", usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, newBrush);
@@ -232,7 +236,7 @@ namespace MSFileInfoScanner
                 position.Y = mPlot.PlotArea.Top + offsetTop;
 
                 if (chargeState == CHARGE_START) {
-                    var legendBox = new Rect(position.X - 10, position.Y, CHARGE_END * (newText.Width + spacing) - spacing / 4, newText.Height);
+                    var legendBox = new Rect(position.X - 10, position.Y, CHARGE_END * (newText.Width + spacing) - spacing / 4.0, newText.Height);
                     drawContext.DrawRectangle(null, rectPen, legendBox);
                 }
 
@@ -288,7 +292,7 @@ namespace MSFileInfoScanner
 
         public static Color GetColorByCharge(int charge)
         {
-            var seriesColor = default(Color);
+            Color seriesColor;
             switch (charge) {
                 case 1:
                     seriesColor = Colors.MediumBlue;

@@ -323,7 +323,7 @@ namespace MSFileInfoScanner
                             continue;
                         }
 
-                        var intScanNumber = 0;
+                        int intScanNumber;
                         if (!int.TryParse(strSplitLine[0], out intScanNumber))
                         {
                             continue;
@@ -334,7 +334,7 @@ namespace MSFileInfoScanner
 
                         var intMSLevel = 0;
 
-                        string strScanTypeName = null;
+                        string strScanTypeName;
                         switch (strSplitLine[1]) {
                             case "MS":
                                 strScanTypeName = "HMS";
@@ -371,7 +371,7 @@ namespace MSFileInfoScanner
             // Override strDataFilePath here, if needed
             var blnOverride = false;
             if (blnOverride) {
-                string strNewDataFilePath = "c:\\temp\\analysis.baf";
+                var strNewDataFilePath = "c:\\temp\\analysis.baf";
                 fiBAFFileInfo = new FileInfo(strNewDataFilePath);
             }
 
@@ -410,7 +410,7 @@ namespace MSFileInfoScanner
                         }
                     }
 
-                } catch (Exception ex) {
+                } catch (Exception) {
                     datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd;
                 }
 
@@ -550,8 +550,8 @@ namespace MSFileInfoScanner
                 var oScanDataSortComparer = new clsScanDataSortComparer();
                 Array.Sort(oScanDataSorted, oScanDataSortComparer);
 
-                DateTime dtAcqTimeStart = DateTime.MaxValue;
-                DateTime dtAcqTimeEnd = DateTime.MinValue;
+                var dtAcqTimeStart = DateTime.MaxValue;
+                var dtAcqTimeEnd = DateTime.MinValue;
 
                 var intScanCount = 0;
                 double dblMaxRunTimeMinutes = 0;
@@ -575,7 +575,7 @@ namespace MSFileInfoScanner
                     if (oScanDataSorted[intIndex].MSLevel == 0)
                         oScanDataSorted[intIndex].MSLevel = 1;
                     var sngElutionTime = Convert.ToSingle(oScanDataSorted[intIndex].RT / 60.0);
-                    string strScanTypeName = null;
+                    string strScanTypeName;
 
                     if (string.IsNullOrEmpty(oScanDataSorted[intIndex].SpotNumber)) {
                         strScanTypeName = "HMS";
@@ -775,7 +775,7 @@ namespace MSFileInfoScanner
                     strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - 2);
                 }
 
-            } catch (Exception ex) {
+            } catch (Exception) {
                 // Ignore errors
             }
 
@@ -856,7 +856,7 @@ namespace MSFileInfoScanner
                     ReportError(string.Join(" or ", lstInstrumentDataFiles) + " or " + BRUKER_MCF_FILE_EXTENSION + " or " + BRUKER_SQLITE_INDEX_EXTENSION + " file not found in " + diDatasetFolder.FullName);
                     blnSuccess = false;
                 } else {
-                    FileInfo fiFileInfo = fiFiles.First();
+                    var fiFileInfo = fiFiles.First();
 
                     // Read the file info from the file system
                     // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
@@ -952,11 +952,11 @@ namespace MSFileInfoScanner
 
 
                 // Look for the apexAcquisition.method
-                FileInfo fiSettingsFile = FindBrukerSettingsFile(diDotDFolder);
+                var fiSettingsFile = FindBrukerSettingsFile(diDotDFolder);
 
                 if (fiSettingsFile == null) {
                     // Not found; look for an acqus file
-                    FileInfo fiAcqusFile = FindBrukerAcqusFile(diDotDFolder);
+                    var fiAcqusFile = FindBrukerAcqusFile(diDotDFolder);
 
                     if (fiAcqusFile == null) {
                         // Not found; cannot parse the ser file
@@ -1000,7 +1000,7 @@ namespace MSFileInfoScanner
                     }
 
                     const int msLevel = 1;
-                    float elutionTime = 0;
+                    float elutionTime;
                     if (!scanElutionTimeMap.TryGetValue(scanNumber, out elutionTime)) {
                         elutionTime = scanNumber / 60f;
                     }
@@ -1019,8 +1019,7 @@ namespace MSFileInfoScanner
 
                     if (mzValues.Length > 0) {
                         if (mSaveLCMS2DPlots) {
-                            double[,] dblMassIntensityPairs = null;
-                            dblMassIntensityPairs = new double[2, mzValues.Length + 1];
+                            var dblMassIntensityPairs = new double[2, mzValues.Length + 1];
 
                             for (var i = 0; i <= mzValues.Length - 1; i++) {
                                 dblMassIntensityPairs[0, i] = mzValues[i];
@@ -1056,7 +1055,7 @@ namespace MSFileInfoScanner
             string strTable;
             string strField;
 
-            var intMetadataId = 0;
+            int intMetadataId;
 
             if (!GetMetaDataFieldAndTable(eMcfMetadataField, out strField, out strTable))
             {
@@ -1074,7 +1073,7 @@ namespace MSFileInfoScanner
                         var strValue = ReadDbString(drReader, "Value");
 
                         udtMCFScanInfoType udtScanInfo;
-                        var blnNewEntry = false;
+                        bool blnNewEntry;
                         if (lstScanData.TryGetValue(strGuid, out udtScanInfo)) {
                             blnNewEntry = false;
                         } else {
@@ -1106,7 +1105,7 @@ namespace MSFileInfoScanner
 
         protected string ReadDbString(SQLiteDataReader drReader, string strColumnName, string strValueIfNotFound)
         {
-            string strValue = null;
+            string strValue;
 
             try {
                 strValue = drReader[strColumnName].ToString();
@@ -1124,13 +1123,13 @@ namespace MSFileInfoScanner
                 var strValue = drReader[strColumnName].ToString();
                 if (!string.IsNullOrEmpty(strValue))
                 {
-                    var intValue = 0;
+                    int intValue;
                     if (int.TryParse(strValue, out intValue)) {
                         return intValue;
                     }
                 }
             }
-            catch (Exception ex) {
+            catch (Exception) {
                 // Ignore errors here
             }
 

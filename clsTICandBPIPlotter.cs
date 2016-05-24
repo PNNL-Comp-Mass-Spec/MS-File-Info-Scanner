@@ -119,7 +119,7 @@ namespace MSFileInfoScanner
         public clsTICandBPIPlotter()
         {
             mRecentFiles = new List<udtOutputFileInfoType>();
-            this.Reset();
+            Reset();
         }
 
 
@@ -303,10 +303,10 @@ namespace MSFileInfoScanner
             AddSeries(myPlot, objPoints);
 
             // Update the axis format codes if the data values are small or the range of data is small
-            var xVals = (from item in objPoints select item.X);
+            var xVals = (from item in objPoints select item.X).ToList();
             clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[0], xVals, true);
 
-            var yVals = (from item in objPoints select item.Y);
+            var yVals = (from item in objPoints select item.Y).ToList();
             clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
 
             var plotContainer = new clsPlotContainer(myPlot) {
@@ -445,7 +445,6 @@ namespace MSFileInfoScanner
         protected void RemoveZeroesAtFrontAndBack(clsChromatogramInfo objChrom)
         {
             const int MAX_POINTS_TO_CHECK = 100;
-            int intIndex;
             var intPointsChecked = 0;
 
             // See if the last few values are zero, but the data before them is non-zero
@@ -453,7 +452,7 @@ namespace MSFileInfoScanner
 
             var intIndexNonZeroValue = -1;
             var intZeroPointCount = 0;
-            for (intIndex = objChrom.ScanCount - 1; intIndex >= 0; intIndex += -1) {
+            for (var intIndex = objChrom.ScanCount - 1; intIndex >= 0; intIndex += -1) {
                 if (Math.Abs(objChrom.GetDataPoint(intIndex).Intensity) < float.Epsilon) {
                     intZeroPointCount += 1;
                 } else {
@@ -473,7 +472,7 @@ namespace MSFileInfoScanner
             // Now check the first few values
             intIndexNonZeroValue = -1;
             intZeroPointCount = 0;
-            for (intIndex = 0; intIndex <= objChrom.ScanCount - 1; intIndex++) {
+            for (var intIndex = 0; intIndex <= objChrom.ScanCount - 1; intIndex++) {
                 if (Math.Abs(objChrom.GetDataPoint(intIndex).Intensity) < float.Epsilon) {
                     intZeroPointCount += 1;
                 } else {
@@ -493,10 +492,9 @@ namespace MSFileInfoScanner
 
         protected void ValidateMSLevel(clsChromatogramInfo objChrom)
         {
-            int intIndex;
             var blnMSLevelDefined = false;
 
-            for (intIndex = 0; intIndex <= objChrom.ScanCount - 1; intIndex++) {
+            for (var intIndex = 0; intIndex <= objChrom.ScanCount - 1; intIndex++) {
                 if (objChrom.GetDataPoint(intIndex).MSLevel > 0) {
                     blnMSLevelDefined = true;
                     break;
@@ -505,7 +503,7 @@ namespace MSFileInfoScanner
 
             if (!blnMSLevelDefined) {
                 // Set the MSLevel to 1 for all scans
-                for (intIndex = 0; intIndex <= objChrom.ScanCount - 1; intIndex++) {
+                for (var intIndex = 0; intIndex <= objChrom.ScanCount - 1; intIndex++) {
                     objChrom.GetDataPoint(intIndex).MSLevel = 1;
                 }
             }
@@ -535,7 +533,7 @@ namespace MSFileInfoScanner
             protected List<clsChromatogramDataPoint> mScans;
             public clsChromatogramInfo()
             {
-                this.Initialize();
+                Initialize();
             }
 
 

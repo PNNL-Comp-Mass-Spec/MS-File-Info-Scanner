@@ -41,15 +41,10 @@ namespace MSFileInfoScanner
 
         protected void ComputeQualityScores(XRawFileIO objXcaliburAccessor, clsDatasetFileInfo datasetFileInfo)
         {
-            float sngOverallScore = 0;
-
-            double[,] dblMassIntensityPairs = null;
+            float sngOverallScore;
 
             double dblOverallAvgIntensitySum = 0;
             var intOverallAvgCount = 0;
-
-            dblOverallAvgIntensitySum = 0;
-            intOverallAvgCount = 0;
 
             if (mLCMS2DPlot.ScanCountCached > 0) {
                 // Obtain the overall average intensity value using the data cached in mLCMS2DPlot
@@ -61,12 +56,12 @@ namespace MSFileInfoScanner
                 var intScanCount = objXcaliburAccessor.GetNumScans();
                 int intScanStart;
                 int intScanEnd;
-                base.GetStartAndEndScans(intScanCount, out intScanStart, out intScanEnd);
+                GetStartAndEndScans(intScanCount, out intScanStart, out intScanEnd);
 
-                var intScanNumber = 0;
-                for (intScanNumber = intScanStart; intScanNumber <= intScanEnd; intScanNumber++)
+                for (var intScanNumber = intScanStart; intScanNumber <= intScanEnd; intScanNumber++)
                 {
                     // This function returns the number of points in dblMassIntensityPairs()
+                    double[,] dblMassIntensityPairs;
                     var intReturnCode = objXcaliburAccessor.GetScanData2D(intScanNumber, out dblMassIntensityPairs);
 
 
@@ -84,8 +79,7 @@ namespace MSFileInfoScanner
                     // For now, this just computes the average intensity for each scan and then computes and overall average intensity value
 
                     double dblIntensitySum = 0;
-                    var intIonIndex = 0;
-                    for (intIonIndex = 0; intIonIndex <= dblMassIntensityPairs.GetUpperBound(1); intIonIndex++) {
+                    for (var intIonIndex = 0; intIonIndex <= dblMassIntensityPairs.GetUpperBound(1); intIonIndex++) {
                         dblIntensitySum += dblMassIntensityPairs[1, intIonIndex];
                     }
 
@@ -136,7 +130,7 @@ namespace MSFileInfoScanner
             try {
                 // The dataset name is simply the file name without .Raw
                 return Path.GetFileNameWithoutExtension(strDataFilePath);
-            } catch (Exception ex) {
+            } catch (Exception) {
                 return string.Empty;
             }
         }
@@ -144,37 +138,35 @@ namespace MSFileInfoScanner
 
         protected void LoadScanDetails(XRawFileIO objXcaliburAccessor)
         {
-            int intScanNumber = 0;
-
             var udtScanHeaderInfo = new FinniganFileReaderBaseClass.udtScanHeaderInfoType();
 
-            int intScanStart = 0;
-            int intScanEnd = 0;
+            int intScanStart;
+            int intScanEnd;
 
             Console.Write("  Loading scan details");
 
             if (mSaveTICAndBPI) {
                 // Initialize the TIC and BPI arrays
-                base.InitializeTICAndBPI();
+                InitializeTICAndBPI();
             }
 
             if (mSaveLCMS2DPlots) {
-                base.InitializeLCMS2DPlot();
+                InitializeLCMS2DPlot();
             }
 
             var dtLastProgressTime = DateTime.UtcNow;
 
             var intScanCount = objXcaliburAccessor.GetNumScans();
-            base.GetStartAndEndScans(intScanCount, intScanStart, intScanEnd);
+            GetStartAndEndScans(intScanCount, out intScanStart, out intScanEnd);
 
-            for (intScanNumber = intScanStart; intScanNumber <= intScanEnd; intScanNumber++) {
+            for (var intScanNumber = intScanStart; intScanNumber <= intScanEnd; intScanNumber++) {
 
                 try {
                     if (mShowDebugInfo) {
                         Console.WriteLine(" ... scan " + intScanNumber);
                     }
 
-                    bool blnSuccess = objXcaliburAccessor.GetScanInfo(intScanNumber, udtScanHeaderInfo);
+                    var blnSuccess = objXcaliburAccessor.GetScanInfo(intScanNumber, out udtScanHeaderInfo);
 
                     if (blnSuccess) {
                         if (mSaveTICAndBPI) {
@@ -186,24 +178,21 @@ namespace MSFileInfoScanner
                                 udtScanHeaderInfo.TotalIonCurrent);
                         }
 
-                        clsScanStatsEntry objScanStatsEntry = new clsScanStatsEntry();
+                        var objScanStatsEntry = new clsScanStatsEntry
+                        {
+                            ScanNumber = intScanNumber,
+                            ScanType = udtScanHeaderInfo.MSLevel,
+                            ScanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(udtScanHeaderInfo.FilterText),
+                            ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(udtScanHeaderInfo.FilterText),
+                            ElutionTime = udtScanHeaderInfo.RetentionTime.ToString("0.0000"),
+                            TotalIonIntensity = StringUtilities.ValueToString(udtScanHeaderInfo.TotalIonCurrent, 5),
+                            BasePeakIntensity = StringUtilities.ValueToString(udtScanHeaderInfo.BasePeakIntensity, 5),
+                            BasePeakMZ = StringUtilities.DblToString(udtScanHeaderInfo.BasePeakMZ, 4),
+                            BasePeakSignalToNoiseRatio = "0",
+                            IonCount = udtScanHeaderInfo.NumPeaks,
+                            IonCountRaw = udtScanHeaderInfo.NumPeaks
+                        };
 
-                        objScanStatsEntry.ScanNumber = intScanNumber;
-                        objScanStatsEntry.ScanType = udtScanHeaderInfo.MSLevel;
-
-                        objScanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(udtScanHeaderInfo.FilterText);
-                        objScanStatsEntry.ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(udtScanHeaderInfo.FilterText);
-
-                        objScanStatsEntry.ElutionTime = udtScanHeaderInfo.RetentionTime.ToString("0.0000");
-                        objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(udtScanHeaderInfo.TotalIonCurrent, 5);
-                        objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(udtScanHeaderInfo.BasePeakIntensity, 5);
-                        objScanStatsEntry.BasePeakMZ = StringUtilities.DblToString(udtScanHeaderInfo.BasePeakMZ, 4);
-
-                        // Base peak signal to noise ratio
-                        objScanStatsEntry.BasePeakSignalToNoiseRatio = "0";
-
-                        objScanStatsEntry.IonCount = udtScanHeaderInfo.NumPeaks;
-                        objScanStatsEntry.IonCountRaw = udtScanHeaderInfo.NumPeaks;
 
                         // Store the ScanEvent values in .ExtendedScanInfo
                         StoreExtendedScanInfo(ref objScanStatsEntry.ExtendedScanInfo, udtScanHeaderInfo.ScanEventNames, udtScanHeaderInfo.ScanEventValues);
@@ -224,11 +213,10 @@ namespace MSFileInfoScanner
                     if (mSaveLCMS2DPlots | mCheckCentroidingStatus) {
                         // Also need to load the raw data
 
-                        int intIonCount = 0;
-                        double[,] dblMassIntensityPairs = null;
+                        double[,] dblMassIntensityPairs;
 
                         // Load the ions for this scan
-                        intIonCount = objXcaliburAccessor.GetScanData2D(intScanNumber, dblMassIntensityPairs);
+                        var intIonCount = objXcaliburAccessor.GetScanData2D(intScanNumber, out dblMassIntensityPairs);
 
                         if (intIonCount > 0) {
                             if (mSaveLCMS2DPlots) {
@@ -236,15 +224,15 @@ namespace MSFileInfoScanner
                             }
 
                             if (mCheckCentroidingStatus) {
-                                int mzCount = dblMassIntensityPairs.GetLength(1);
+                                var mzCount = dblMassIntensityPairs.GetLength(1);
 
                                 var lstMZs = new List<double>(mzCount);
 
-                                for (int i = 0; i <= mzCount - 1; i++) {
-                                    lstMZs.Add(dblMassIntensityPairs(0, i));
+                                for (var i = 0; i <= mzCount - 1; i++) {
+                                    lstMZs.Add(dblMassIntensityPairs[0, i]);
                                 }
 
-                                clsSpectrumTypeClassifier.eCentroidStatusConstants centroidingStatus = GetCentroidStatus(intScanNumber, udtScanHeaderInfo);
+                                var centroidingStatus = GetCentroidStatus(intScanNumber, udtScanHeaderInfo);
 
                                 mDatasetStatsSummarizer.ClassifySpectrum(lstMZs, udtScanHeaderInfo.MSLevel, centroidingStatus);
                             }
@@ -256,7 +244,7 @@ namespace MSFileInfoScanner
                     ReportError("Error loading m/z and intensity values for scan " + intScanNumber + ": " + ex.Message);
                 }
 
-                ShowProgress(intScanNumber, intScanCount, dtLastProgressTime);
+                ShowProgress(intScanNumber, intScanCount, ref dtLastProgressTime);
 
             }
 
@@ -275,9 +263,6 @@ namespace MSFileInfoScanner
         {
             var strDataFilePathLocal = string.Empty;
 
-            bool blnReadError = false;
-            bool blnDeleteLocalFile = false;
-
             // Obtain the full path to the file
             var fiRawFile = new FileInfo(strDataFilePath);
 
@@ -289,7 +274,7 @@ namespace MSFileInfoScanner
             // Future, optional: Determine the DatasetID
             // Unfortunately, this is not present in metadata.txt
             // intDatasetID = LookupDatasetID(strDatasetName)
-            int intDatasetID = base.DatasetID;
+            var intDatasetID = DatasetID;
 
             // Record the file size and Dataset ID
             datasetFileInfo.FileSystemCreationTime = fiRawFile.CreationTime;
@@ -308,8 +293,8 @@ namespace MSFileInfoScanner
 
             mDatasetStatsSummarizer.ClearCachedData();
 
-            blnDeleteLocalFile = false;
-            blnReadError = false;
+            var blnDeleteLocalFile = false;
+            var blnReadError = false;
 
             // Use Xraw to read the .Raw file
             // If reading from a SAMBA-mounted network share, and if the current user has 
@@ -349,7 +334,7 @@ namespace MSFileInfoScanner
                                     blnReadError = false;
                                 }
                             }
-                        } catch (Exception ex) {
+                        } catch (Exception) {
                             blnReadError = true;
                         }
                     }
@@ -362,7 +347,7 @@ namespace MSFileInfoScanner
                 // Read the file info
                 try {
                     datasetFileInfo.AcqTimeStart = objXcaliburAccessor.FileInfo.CreationDate;
-                } catch (Exception ex) {
+                } catch (Exception) {
                     // Read error
                     blnReadError = true;
                 }
@@ -376,7 +361,7 @@ namespace MSFileInfoScanner
 
                         datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(udtScanHeaderInfo.RetentionTime);
                         datasetFileInfo.ScanCount = objXcaliburAccessor.GetNumScans();
-                    } catch (Exception ex) {
+                    } catch (Exception) {
                         // Error; use default values
                         var _with5 = datasetFileInfo;
                         _with5.AcqTimeEnd = _with5.AcqTimeStart;
@@ -391,7 +376,7 @@ namespace MSFileInfoScanner
 
                     if (mComputeOverallQualityScores) {
                         // Note that this call will also create the TICs and BPIs
-                        ComputeQualityScores(objXcaliburAccessor, ref datasetFileInfo);
+                        ComputeQualityScores(objXcaliburAccessor, datasetFileInfo);
                     }
                 }
             }
@@ -439,7 +424,7 @@ namespace MSFileInfoScanner
             if (blnDeleteLocalFile) {
                 try {
                     File.Delete(strDataFilePathLocal);
-                } catch (Exception ex) {
+                } catch (Exception) {
                     // Deletion failed
                     ReportError("Deletion failed for: " + Path.GetFileName(strDataFilePathLocal));
                 }
@@ -466,7 +451,7 @@ namespace MSFileInfoScanner
 
             // This command is equivalent to the above series of commands
             // It converts strEntryName to an array and strEntryValue to a separate array and passes those arrays to StoreExtendedScanInfo()
-            StoreExtendedScanInfo(ref udtExtendedScanInfo, new string[] { strEntryName }, new string[] { strEntryValue });
+            StoreExtendedScanInfo(ref udtExtendedScanInfo, new[] { strEntryName }, new[] { strEntryValue });
 
         }
 
@@ -484,8 +469,7 @@ namespace MSFileInfoScanner
                     return;
                 }
 
-                var intIndex = 0;
-                for (intIndex = 0; intIndex <= strEntryNames.Length - 1; intIndex++) {
+                for (var intIndex = 0; intIndex <= strEntryNames.Length - 1; intIndex++) {
                     if (strEntryNames[intIndex] == null || strEntryNames[intIndex].Trim().Length == 0) {
                         // Empty entry name; do not add
                         continue;
@@ -543,7 +527,7 @@ namespace MSFileInfoScanner
                         break;
                     }
                 }
-            } catch (Exception ex) {
+            } catch (Exception) {
                 // Ignore any errors here
             }
 

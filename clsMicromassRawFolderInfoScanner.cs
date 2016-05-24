@@ -22,24 +22,21 @@ namespace MSFileInfoScanner
             // The dataset name is simply the folder name without .Raw
             try {
                 return Path.GetFileNameWithoutExtension(strDataFilePath);
-            } catch (Exception ex) {
+            } catch (Exception) {
                 return string.Empty;
             }
         }
 
         private TimeSpan MinutesToTimeSpan(double dblMinutes)
         {
-
-            int intMinutes = 0;
-            int intSeconds = 0;
-            TimeSpan dtTimeSpan = default(TimeSpan);
+            TimeSpan dtTimeSpan;
 
             try {
-                intMinutes = Convert.ToInt32(Math.Floor(dblMinutes));
-                intSeconds = Convert.ToInt32(Math.Round((dblMinutes - intMinutes) * 60, 0));
+                var intMinutes = Convert.ToInt32(Math.Floor(dblMinutes));
+                var intSeconds = Convert.ToInt32(Math.Round((dblMinutes - intMinutes) * 60, 0));
 
                 dtTimeSpan = new TimeSpan(0, intMinutes, intSeconds);
-            } catch (Exception ex) {
+            } catch (Exception) {
                 dtTimeSpan = new TimeSpan(0, 0, 0);
             }
 
@@ -50,11 +47,6 @@ namespace MSFileInfoScanner
         public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
             // Returns True if success, False if an error
-
-            var blnSuccess = false;
-
-            var udtHeaderInfo = new clsMassLynxNativeIO.udtMSHeaderInfoType();
-            var udtFunctionInfo = new clsMassLynxNativeIO.udtMSFunctionInfoType();
 
             try {
                 var ioFolderInfo = new DirectoryInfo(strDataFilePath);
@@ -94,12 +86,11 @@ namespace MSFileInfoScanner
 
                 datasetFileInfo.ScanCount = 0;
 
-                blnSuccess = true;
-
                 var objNativeFileIO = new clsMassLynxNativeIO();
 
-                if (objNativeFileIO.GetFileInfo(ioFolderInfo.FullName, ref udtHeaderInfo)) {
-                    var dtNewStartDate = System.DateTime.Parse(udtHeaderInfo.AcquDate + " " + udtHeaderInfo.AcquTime);
+                clsMassLynxNativeIO.udtMSHeaderInfoType udtHeaderInfo;
+                if (objNativeFileIO.GetFileInfo(ioFolderInfo.FullName, out udtHeaderInfo)) {
+                    var dtNewStartDate = DateTime.Parse(udtHeaderInfo.AcquDate + " " + udtHeaderInfo.AcquTime);
 
                     var intFunctionCount = objNativeFileIO.GetFunctionCount(ioFolderInfo.FullName);
 
@@ -107,9 +98,10 @@ namespace MSFileInfoScanner
                         // Sum up the scan count of all of the functions
                         // Additionally, find the largest EndRT value in all of the functions
                         float sngEndRT = 0;
-                        var intFunctionNumber = 0;
-                        for (intFunctionNumber = 1; intFunctionNumber <= intFunctionCount; intFunctionNumber++) {
-                            if (objNativeFileIO.GetFunctionInfo(ioFolderInfo.FullName, 1, ref udtFunctionInfo)) {
+                        for (var intFunctionNumber = 1; intFunctionNumber <= intFunctionCount; intFunctionNumber++)
+                        {
+                            clsMassLynxNativeIO.udtMSFunctionInfoType udtFunctionInfo;
+                            if (objNativeFileIO.GetFunctionInfo(ioFolderInfo.FullName, 1, out udtFunctionInfo)) {
                                 datasetFileInfo.ScanCount += udtFunctionInfo.ScanCount;
                                 if (udtFunctionInfo.EndRT > sngEndRT) {
                                     sngEndRT = udtFunctionInfo.EndRT;
@@ -145,13 +137,11 @@ namespace MSFileInfoScanner
                     // Continue anyway since we've populated some of the values
                 }
 
-                blnSuccess = true;
+                return true;
 
-            } catch (Exception ex) {
-                blnSuccess = false;
+            } catch (Exception) {
+                return false;
             }
-
-            return blnSuccess;
         }
 
     }

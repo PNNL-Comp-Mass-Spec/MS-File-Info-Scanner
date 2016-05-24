@@ -37,7 +37,7 @@ namespace MSFileInfoScanner
                     blnSuccess = DateTime.TryParse(strSplitLine[strSplitLine.Length - 1] + " " + strSplitLine[strSplitLine.Length - 2], out dtDate);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Ignore errors
             }
@@ -52,7 +52,7 @@ namespace MSFileInfoScanner
             {
                 return Path.GetFileNameWithoutExtension(strDataFilePath);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return string.Empty;
             }
@@ -67,7 +67,7 @@ namespace MSFileInfoScanner
             {
                 dtTimeSpan = new TimeSpan(0, 0, Convert.ToInt32(dblSeconds));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 dtTimeSpan = new TimeSpan(0, 0, 0);
             }
@@ -157,7 +157,7 @@ namespace MSFileInfoScanner
                 blnSuccess = blnProcessedFirstMethodLine;
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Run.log file not found
                 blnSuccess = false;
@@ -204,7 +204,7 @@ namespace MSFileInfoScanner
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 blnSuccess = false;
             }
@@ -281,7 +281,7 @@ namespace MSFileInfoScanner
 
                         // Parse the Analysis.cdf file to determine the scan count and to further refine .AcqTimeStart
                         blnSuccess = ParseAnalysisCDFFile(strDataFilePath, datasetFileInfo);
-                    } catch (Exception ex) {
+                    } catch (Exception) {
                         // Error parsing the Run Log file or the Analysis.cdf file; do not abort
 
                     }
@@ -289,7 +289,7 @@ namespace MSFileInfoScanner
                     blnSuccess = true;
                 }
 
-            } catch (Exception ex) {
+            } catch (Exception) {
                 blnSuccess = false;
             }
 

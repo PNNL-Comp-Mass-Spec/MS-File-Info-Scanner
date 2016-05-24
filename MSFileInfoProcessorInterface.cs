@@ -1,4 +1,3 @@
-using System;
 using MSFileInfoScannerInterfaces;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -37,7 +36,7 @@ namespace MSFileInfoScanner
         public abstract void SetOption(ProcessingOptions eOption, bool blnValue);
 
         public abstract event ErrorEventEventHandler ErrorEvent;
-        public delegate void ErrorEventEventHandler(string Message);
+        public delegate void ErrorEventEventHandler(string message);
 
         public abstract event MessageEventEventHandler MessageEvent;
         public delegate void MessageEventEventHandler(string message);

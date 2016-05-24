@@ -12,9 +12,9 @@ namespace MSFileInfoScanner
 
 
         public event ErrorEventEventHandler ErrorEvent;
-        public delegate void ErrorEventEventHandler(string Message);
+        public delegate void ErrorEventEventHandler(string message);
         public event MessageEventEventHandler MessageEvent;
-        public delegate void MessageEventEventHandler(string Message);
+        public delegate void MessageEventEventHandler(string message);
 
         private readonly pwiz.ProteowizardWrapper.MSDataFileReader mPWiz;
 

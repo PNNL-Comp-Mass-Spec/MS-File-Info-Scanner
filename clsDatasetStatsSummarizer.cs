@@ -663,7 +663,7 @@ namespace MSFileInfoScanner
 		public bool CreateScanStatsFile(string strDatasetName, string strScanStatsFilePath)
 		{
 
-			return CreateScanStatsFile(strDatasetName, strScanStatsFilePath, mDatasetScanStats, this.DatasetFileInfo);
+			return CreateScanStatsFile(strDatasetName, strScanStatsFilePath, mDatasetScanStats, DatasetFileInfo);
 		}
 
 		/// <summary>
@@ -684,19 +684,23 @@ namespace MSFileInfoScanner
 		    var intDatasetID = datasetFileInfo.DatasetID;
 			var sbLineOut = new StringBuilder();
 
-			bool blnSuccess;
-
 			try {
 				if (objScanStats == null) {
 					ReportError("objScanStats is Nothing; unable to continue in CreateScanStatsFile");
 					return false;
-				} else {
-					mErrorMessage = "";
 				}
 
-				// Define the path to the extended scan stats file
+			    mErrorMessage = "";
+
+			    // Define the path to the extended scan stats file
 				var fiScanStatsFile = new FileInfo(strScanStatsFilePath);
-				var strScanStatsExFilePath = Path.Combine(fiScanStatsFile.DirectoryName, Path.GetFileNameWithoutExtension(fiScanStatsFile.Name) + "Ex.txt");
+			    if (fiScanStatsFile.DirectoryName == null)
+			    {
+                    ReportError("Unable to determine the parent directory for " + strScanStatsFilePath);
+                    return false;
+			    }
+
+			    var strScanStatsExFilePath = Path.Combine(fiScanStatsFile.DirectoryName, Path.GetFileNameWithoutExtension(fiScanStatsFile.Name) + "Ex.txt");
 
 				// Open the output files
 				using (var swOutFile = new StreamWriter(new FileStream(fiScanStatsFile.FullName, FileMode.Create, FileAccess.Write, FileShare.Read)))
@@ -765,14 +769,12 @@ namespace MSFileInfoScanner
 
 				}
 
-				blnSuccess = true;
+				return true;
 
 			} catch (Exception ex) {
 				ReportError("Error in CreateScanStatsFile: " + ex.Message);
-				blnSuccess = false;
+                return false;
 			}
-
-			return blnSuccess;
 
 		}
 
@@ -854,7 +856,7 @@ namespace MSFileInfoScanner
 		public bool UpdateDatasetStatsTextFile(string strDatasetName, string strDatasetInfoFilePath)
 		{
 
-			return UpdateDatasetStatsTextFile(strDatasetName, strDatasetInfoFilePath, mDatasetScanStats, DatasetFileInfo, this.SampleInfo);
+			return UpdateDatasetStatsTextFile(strDatasetName, strDatasetInfoFilePath, mDatasetScanStats, DatasetFileInfo, SampleInfo);
 		}
 
 		/// <summary>
@@ -1028,7 +1030,7 @@ namespace MSFileInfoScanner
 
 		public clsScanStatsEntry()
 		{
-			this.Clear();
+			Clear();
 		}
 	}
 
@@ -1079,7 +1081,7 @@ namespace MSFileInfoScanner
 
 		public clsDatasetSummaryStats()
 		{
-			this.Clear();
+			Clear();
 		}
 
 	}

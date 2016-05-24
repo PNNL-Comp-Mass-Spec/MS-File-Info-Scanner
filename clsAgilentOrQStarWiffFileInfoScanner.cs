@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using pwiz.CLI.msdata;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2005
@@ -150,36 +151,29 @@ namespace MSFileInfoScanner
 
         }
 
-
         private void TestPWiz(string strFilePath)
         {
             const bool RUN_BENCHMARKS = false;
 
             try {
-                pwiz.CLI.msdata.MSDataFile objPWiz2 = default(pwiz.CLI.msdata.MSDataFile);
-                objPWiz2 = new pwiz.CLI.msdata.MSDataFile(strFilePath);
+                var objPWiz2 = new MSDataFile(strFilePath);
 
 
-                Console.WriteLine("Spectrum count: " + objPWiz2.run.spectrumList.size);
+                Console.WriteLine("Spectrum count: " + objPWiz2.run.spectrumList.size());
                 Console.WriteLine();
 
                 if (objPWiz2.run.spectrumList.size() > 0) {
-                    int intSpectrumIndex = 0;
-                    pwiz.CLI.data.CVParam param = null;
+                    var intSpectrumIndex = 0;
 
 
                     do {
-                        pwiz.CLI.msdata.Spectrum oSpectrum = default(pwiz.CLI.msdata.Spectrum);
-                        oSpectrum = objPWiz2.run.spectrumList.spectrum(intSpectrumIndex, getBinaryData: true);
+                        var oSpectrum = objPWiz2.run.spectrumList.spectrum(intSpectrumIndex, getBinaryData: true);
 
-                        int intMSLevel = 0;
-                        double dblStartTimeMinutes = 0;
-
-
+                        pwiz.CLI.data.CVParam param;
                         if (oSpectrum.scanList.scans.Count > 0) {
-                            if (clsProteowizardDataParser.TryGetCVParam(oSpectrum.scanList.scans(0).cvParams, pwiz.CLI.cv.CVID.MS_scan_start_time, param)) {
-                                int intScanNum = intSpectrumIndex + 1;
-                                dblStartTimeMinutes = param.timeInSeconds() / 60.0;
+                            if (clsProteowizardDataParser.TryGetCVParam(oSpectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_scan_start_time, out param)) {
+                                var intScanNum = intSpectrumIndex + 1;
+                                var dblStartTimeMinutes = param.timeInSeconds() / 60.0;
 
                                 Console.WriteLine("ScanIndex " + intSpectrumIndex + ", Scan " + intScanNum + ", Elution Time " + dblStartTimeMinutes + " minutes");
                             }
@@ -187,17 +181,15 @@ namespace MSFileInfoScanner
                         }
 
                         // Use the following to determine info on this spectrum
-                        if (clsProteowizardDataParser.TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_ms_level, param)) {
-                            Int32.TryParse(param.value, intMSLevel);
+                        if (clsProteowizardDataParser.TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_ms_level, out param))
+                        {
+                            int intMSLevel;
+                            int.TryParse(param.value, out intMSLevel);
                         }
 
                         // Use the following to get the MZs and Intensities
-                        pwiz.CLI.msdata.BinaryDataArray oMZs = default(pwiz.CLI.msdata.BinaryDataArray);
-                        pwiz.CLI.msdata.BinaryDataArray oIntensities = default(pwiz.CLI.msdata.BinaryDataArray);
-
-                        oMZs = oSpectrum.getMZArray;
-                        oIntensities = oSpectrum.getIntensityArray();
-
+                        var oMZs = oSpectrum.getMZArray();
+                        oSpectrum.getIntensityArray();
 
                         if (oMZs.data.Count > 0) {
                             Console.WriteLine("  Data count: " + oMZs.data.Count);
@@ -206,8 +198,8 @@ namespace MSFileInfoScanner
                             if (RUN_BENCHMARKS) {
                                 double dblTIC1 = 0;
                                 double dblTIC2 = 0;
-                                DateTime dtStartTime = default(DateTime);
-                                DateTime dtEndTime = default(DateTime);
+                                var dtStartTime = default(DateTime);
+                                var dtEndTime = default(DateTime);
                                 double dtRunTimeSeconds1 = 0;
                                 double dtRunTimeSeconds2 = 0;
                                 const int LOOP_ITERATIONS = 2000;
@@ -216,8 +208,8 @@ namespace MSFileInfoScanner
                                 // Repeatedly accessing items directly via oMZs.data() can be very slow
                                 // With 700 points and 2000 iterations, it takes anywhere from 0.6 to 1.1 seconds to run from dtStartTime to dtEndTime
                                 dtStartTime = DateTime.Now;
-                                for (int j = 1; j <= LOOP_ITERATIONS; j++) {
-                                    for (int intIndex = 0; intIndex <= oMZs.data.Count - 1; intIndex++) {
+                                for (var j = 1; j <= LOOP_ITERATIONS; j++) {
+                                    for (var intIndex = 0; intIndex <= oMZs.data.Count - 1; intIndex++) {
                                         dblTIC1 += oMZs.data[intIndex];
                                     }
                                 }
@@ -227,9 +219,9 @@ namespace MSFileInfoScanner
                                 // The preferred method is to copy the data from .data to a locally-stored mzArray var
                                 // With 700 points and 2000 iterations, it takes 0.016 seconds to run from dtStartTime to dtEndTime
                                 dtStartTime = DateTime.Now;
-                                for (int j = 1; j <= LOOP_ITERATIONS; j++) {
-                                    pwiz.CLI.msdata.BinaryData oMzArray = oMZs.data;
-                                    for (int intIndex = 0; intIndex <= oMzArray.Count - 1; intIndex++) {
+                                for (var j = 1; j <= LOOP_ITERATIONS; j++) {
+                                    var oMzArray = oMZs.data;
+                                    for (var intIndex = 0; intIndex <= oMzArray.Count - 1; intIndex++) {
                                         dblTIC2 += oMzArray[intIndex];
                                     }
                                 }
@@ -238,7 +230,7 @@ namespace MSFileInfoScanner
 
                                 Console.WriteLine("  " + oMZs.data.Count + " points with " + LOOP_ITERATIONS + " iterations gives Runtime1=" + dtRunTimeSeconds1.ToString("0.000") + " sec. vs. Runtime2=" + dtRunTimeSeconds2.ToString("0.000") + " sec.");
 
-                                if (dblTIC1 != dblTIC2) {
+                                if (Math.Abs(dblTIC1 - dblTIC2) > float.Epsilon) {
                                     Console.WriteLine("  TIC values don't agree; this is unexpected");
                                 }
                             }
@@ -256,37 +248,29 @@ namespace MSFileInfoScanner
 
 
                 if (objPWiz2.run.chromatogramList.size() > 0) {
-                    int intChromIndex = 0;
+                    var intChromIndex = 0;
 
 
                     do {
-                        pwiz.CLI.msdata.Chromatogram oChromatogram = default(pwiz.CLI.msdata.Chromatogram);
-                        string strChromDescription = "";
-                        pwiz.CLI.msdata.TimeIntensityPairList oTimeIntensityPairList = new pwiz.CLI.msdata.TimeIntensityPairList();
-
+                        var oTimeIntensityPairList = new TimeIntensityPairList();
 
                         // Note that even for a small .Wiff file (1.5 MB), obtaining the Chromatogram list will take some time (20 to 60 seconds)
                         // The chromatogram at index 0 should be the TIC
                         // The chromatogram at index >=1 will be each SRM
 
-                        oChromatogram = objPWiz2.run.chromatogramList.chromatogram(intChromIndex, getBinaryData: true);
+                        var oChromatogram = objPWiz2.run.chromatogramList.chromatogram(intChromIndex, getBinaryData: true);
 
                         // Determine the chromatogram type
-                        pwiz.CLI.data.CVParam param = null;
+                        pwiz.CLI.data.CVParam param;
 
-                        if (clsProteowizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, param)) {
-                            strChromDescription = oChromatogram.id;
-
+                        if (clsProteowizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out param)) {
                             // Obtain the data
-                            oChromatogram.getTimeIntensityPairs(oTimeIntensityPairList);
+                            oChromatogram.getTimeIntensityPairs(ref oTimeIntensityPairList);
                         }
 
-
-                        if (clsProteowizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, param)) {
-                            strChromDescription = oChromatogram.id;
-
-                            // Store the SRM scan
-                            oChromatogram.getTimeIntensityPairs(oTimeIntensityPairList);
+                        if (clsProteowizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out param)) {
+                            // Obtain the SRM scan
+                            oChromatogram.getTimeIntensityPairs(ref oTimeIntensityPairList);
                         }
 
                         intChromIndex += 1;

@@ -56,7 +56,7 @@ namespace MSFileInfoScanner
             // The dataset name is simply the folder name without .D
             try {
                 return Path.GetFileNameWithoutExtension(strDataFilePath);
-            } catch (Exception ex) {
+            } catch (Exception) {
                 return string.Empty;
             }
         }
@@ -276,10 +276,8 @@ namespace MSFileInfoScanner
                                 mTICandBPIPlot.AddData(objScanStatsEntry.ScanNumber, intMSLevel, oSpectrum.RetentionTimeMinutes, oSpectrum.BasePeakAbundance, oSpectrum.TIC);
 
                                 if (lstMZs.Count > 0) {
-                                    double[] dblIonsMZ = null;
-                                    double[] dblIonsIntensity = null;
-                                    dblIonsMZ = new double[lstMZs.Count];
-                                    dblIonsIntensity = new double[lstMZs.Count];
+                                    var dblIonsMZ = new double[lstMZs.Count];
+                                    var dblIonsIntensity = new double[lstMZs.Count];
 
                                     for (var intIndex = 0; intIndex <= lstMZs.Count - 1; intIndex++) {
                                         dblIonsMZ[intIndex] = lstMZs[intIndex];
@@ -407,7 +405,7 @@ namespace MSFileInfoScanner
                             blnSuccess = ParseGCIniFile(strDataFilePath, datasetFileInfo);
                         }
 
-                    } catch (Exception ex) {
+                    } catch (Exception) {
                         // Error parsing the acqmeth.txt file or GC.in file; do not abort
                     }
 

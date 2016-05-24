@@ -1545,25 +1545,32 @@ namespace MSFileInfoScanner
                             }
                         }
                     } else {
-                        if (String.Equals(objFileSystemInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME, StringComparison.CurrentCultureIgnoreCase)) {
+                        if (string.Equals(objFileSystemInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME, StringComparison.CurrentCultureIgnoreCase)) {
                             mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
                             blnKnownMSDataType = true;
 
-                        } else if (String.Equals(objFileSystemInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME, StringComparison.CurrentCultureIgnoreCase)) {
+                        } else if (string.Equals(objFileSystemInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME, StringComparison.CurrentCultureIgnoreCase)) {
                             mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
                             blnKnownMSDataType = true;
 
-                        } else if (String.Equals(objFileSystemInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME, StringComparison.CurrentCultureIgnoreCase)) {
+                        } else if (string.Equals(objFileSystemInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME, StringComparison.CurrentCultureIgnoreCase)) {
                             mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
                             blnKnownMSDataType = true;
 
-                        } else if (String.Equals(objFileSystemInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
+                        } else if (string.Equals(objFileSystemInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
                         {
                             // If the folder also contains file BRUKER_EXTENSION_BAF_FILE_NAME then this is a Bruker XMass folder
-                            var strPathCheck = Path.Combine(Path.GetDirectoryName(objFileSystemInfo.FullName), clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME);
-                            if (File.Exists(strPathCheck)) {
-                                mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
-                                blnKnownMSDataType = true;
+                            var parentFolder = Path.GetDirectoryName(objFileSystemInfo.FullName);
+                            if (!string.IsNullOrEmpty(parentFolder))
+                            {
+                                var strPathCheck = Path.Combine(parentFolder,
+                                                                clsBrukerXmassFolderInfoScanner
+                                                                    .BRUKER_EXTENSION_BAF_FILE_NAME);
+                                if (File.Exists(strPathCheck))
+                                {
+                                    mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
+                                    blnKnownMSDataType = true;
+                                }
                             }
                         }
 
@@ -1713,12 +1720,15 @@ namespace MSFileInfoScanner
 
                     var fiFileInfo = new FileInfo(strCleanPath);
                     string strInputFolderPath;
-                    if (fiFileInfo.Directory.Exists) {
+                    if (fiFileInfo.Directory != null && fiFileInfo.Directory.Exists) {
                         strInputFolderPath = fiFileInfo.DirectoryName;
                     } else {
                         // Use the current working directory
                         strInputFolderPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                     }
+
+                    if (string.IsNullOrEmpty(strInputFolderPath))
+                        strInputFolderPath = ".";
 
                     var diFolderInfo = new DirectoryInfo(strInputFolderPath);
 
@@ -1837,14 +1847,14 @@ namespace MSFileInfoScanner
 
                     var fiFileInfo = new FileInfo(strCleanPath);
                     if (Path.IsPathRooted(strCleanPath)) {
-                        if (!fiFileInfo.Directory.Exists) {
+                        if (fiFileInfo.Directory != null && !fiFileInfo.Directory.Exists) {
                             ShowErrorMessage("Folder not found: " + fiFileInfo.DirectoryName);
                             SetErrorCode(eMSFileScannerErrorCodes.InvalidInputFilePath);
                             return false;
                         }
                     }
 
-                    if (fiFileInfo.Directory.Exists) {
+                    if (fiFileInfo.Directory != null && fiFileInfo.Directory.Exists) {
                         strInputFolderPath = fiFileInfo.DirectoryName;
                     } else {
                         // Folder not found; use the current working directory
@@ -1854,13 +1864,17 @@ namespace MSFileInfoScanner
                     // Remove any directory information from strInputFilePath
                     strInputFilePathOrFolder = Path.GetFileName(strInputFilePathOrFolder);
 
-                } else {
+                } else
+                {
+                    if (string.IsNullOrEmpty(strInputFilePathOrFolder))
+                        strInputFilePathOrFolder = ".";
+
                     var diFolderInfo = new DirectoryInfo(strInputFilePathOrFolder);
                     if (diFolderInfo.Exists) {
                         strInputFolderPath = diFolderInfo.FullName;
                         strInputFilePathOrFolder = "*";
                     } else {
-                        if (diFolderInfo.Parent.Exists) {
+                        if (diFolderInfo.Parent != null && diFolderInfo.Parent.Exists) {
                             strInputFolderPath = diFolderInfo.Parent.FullName;
                             strInputFilePathOrFolder = Path.GetFileName(strInputFilePathOrFolder);
                         } else {
@@ -2337,7 +2351,7 @@ namespace MSFileInfoScanner
 
                 if (!fiFileInfo.Exists) {
                     // Make sure the folder exists
-                    if (!fiFileInfo.Directory.Exists) {
+                    if (fiFileInfo.Directory != null && !fiFileInfo.Directory.Exists) {
                         fiFileInfo.Directory.Create();
                     }
                 }

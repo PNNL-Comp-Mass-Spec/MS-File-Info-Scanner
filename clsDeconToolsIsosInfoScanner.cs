@@ -76,16 +76,14 @@ namespace MSFileInfoScanner
                 } else {
                     return string.Empty;
                 }
-            } catch (Exception ex) {
+            } catch (Exception) {
                 return string.Empty;
             }
         }
 
         private int GetScanOrFrameColIndex(List<string> lstData, string strFileDescription)
         {
-            int intColIndexScanOrFrameNum = 0;
-
-            intColIndexScanOrFrameNum = lstData.IndexOf("frame_num");
+            var intColIndexScanOrFrameNum = lstData.IndexOf("frame_num");
             if (intColIndexScanOrFrameNum < 0) {
                 intColIndexScanOrFrameNum = lstData.IndexOf("scan_num");
             }
@@ -105,14 +103,14 @@ namespace MSFileInfoScanner
 
             if (mSaveTICAndBPI) {
                 // Initialize the TIC and BPI arrays
-                base.InitializeTICAndBPI();
+                InitializeTICAndBPI();
             }
 
             if (mSaveLCMS2DPlots) {
-                base.InitializeLCMS2DPlot();
+                InitializeLCMS2DPlot();
             }
 
-            var lstIsosData = LoadIsosFile(fiIsosFile.FullName, this.MaxFit);
+            var lstIsosData = LoadIsosFile(fiIsosFile.FullName, MaxFit);
 
             if (lstIsosData.Count == 0) {
                 ReportError("No data found in the _isos.csv file: " + fiIsosFile.FullName);
@@ -120,24 +118,29 @@ namespace MSFileInfoScanner
             }
 
             var strScansFilePath = GetDatasetNameViaPath(fiIsosFile.Name) + DECONTOOLS_SCANS_FILE_SUFFIX;
-            strScansFilePath = Path.Combine(fiIsosFile.Directory.FullName, strScansFilePath);
+            if (fiIsosFile.Directory != null)
+            {
+                strScansFilePath = Path.Combine(fiIsosFile.Directory.FullName, strScansFilePath);
+            }
 
             var lstScanData = LoadScansFile(strScansFilePath);
             var scansFileIsMissing = false;
 
             if (lstScanData.Count > 0) {
-                datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(lstScanData.Last.ElutionTime);
-                datasetFileInfo.ScanCount = lstScanData.Last.Scan;
+                datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(lstScanData.Last().ElutionTime);
+                datasetFileInfo.ScanCount = lstScanData.Last().Scan;
             } else {
                 scansFileIsMissing = true;
 
-                datasetFileInfo.ScanCount = (from item in lstIsosDataitem.Scan).Max;
+                datasetFileInfo.ScanCount = (from item in lstIsosData select item.Scan).Max();
 
-                for (intScanIndex = 1; intScanIndex <= datasetFileInfo.ScanCount; intScanIndex++) {
-                    var udtScanData = new udtScansDataType();
-                    udtScanData.Scan = intScanIndex;
-                    udtScanData.ElutionTime = intScanIndex;
-                    udtScanData.MSLevel = 1;
+                for (var intScanIndex = 1; intScanIndex <= datasetFileInfo.ScanCount; intScanIndex++) {
+                    var udtScanData = new udtScansDataType
+                    {
+                        Scan = intScanIndex,
+                        ElutionTime = intScanIndex,
+                        MSLevel = 1
+                    };
 
                     lstScanData.Add(udtScanData);
                 }
@@ -145,7 +148,7 @@ namespace MSFileInfoScanner
 
             // Step through the isos data and call mLCMS2DPlot.AddScan() for each scan
 
-            List<clsLCMSDataPlotter.udtMSIonType> lstIons = new List<clsLCMSDataPlotter.udtMSIonType>();
+            var lstIons = new List<clsLCMSDataPlotter.udtMSIonType>();
             var intCurrentScan = 0;
 
             // Note: we only need to update mLCMS2DPlot
@@ -155,12 +158,12 @@ namespace MSFileInfoScanner
             var dblMaxMonoMass = mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot;
 
 
-            for (intIndex = 0; intIndex <= lstIsosData.Count - 1; intIndex++) {
+            for (var intIndex = 0; intIndex <= lstIsosData.Count - 1; intIndex++) {
                 if (lstIsosData[intIndex].Scan > intCurrentScan || intIndex == lstIsosData.Count - 1) {
                     // Store the cached values
 
                     if (lstIons.Count > 0) {
-                        var udtCurrentScan = (from item in lstScanDatawhere item.Scan == intCurrentScan).ToList().FirstOrDefault;
+                        var udtCurrentScan = (from item in lstScanData where item.Scan == intCurrentScan select item).ToList().FirstOrDefault();
 
                         lstIons.Sort(new clsLCMSDataPlotter.udtMSIonTypeComparer());
                         mLCMS2DPlot.AddScan(intCurrentScan, udtCurrentScan.MSLevel, Convert.ToSingle(udtCurrentScan.ElutionTime), lstIons);
@@ -170,10 +173,10 @@ namespace MSFileInfoScanner
                             double tic = 0;
                             double bpi = 0;
 
-                            for (dataIndex = 0; dataIndex <= lstIons.Count - 1; dataIndex++) {
-                                tic += lstIons(dataIndex).Intensity;
-                                if (lstIons(dataIndex).Intensity > bpi) {
-                                    bpi = lstIons(dataIndex).Intensity;
+                            for (var dataIndex = 0; dataIndex <= lstIons.Count - 1; dataIndex++) {
+                                tic += lstIons[dataIndex].Intensity;
+                                if (lstIons[dataIndex].Intensity > bpi) {
+                                    bpi = lstIons[dataIndex].Intensity;
                                 }
                             }
 
@@ -187,12 +190,14 @@ namespace MSFileInfoScanner
                 }
 
                 if (lstIsosData[intIndex].MonoMass <= dblMaxMonoMass) {
-                    var udtIon = new clsLCMSDataPlotter.udtMSIonType();
-                    udtIon.MZ = lstIsosData[intIndex].MonoMass;
-                    // Note that we store .MonoMass in a field called .mz; we'll still be plotting monoisotopic mass
-                    udtIon.Intensity = lstIsosData[intIndex].Abundance;
-                    udtIon.Charge = lstIsosData[intIndex].Charge;
-
+                    var udtIon = new clsLCMSDataPlotter.udtMSIonType
+                    {
+                        // Note that we store .MonoMass in a field called .mz; we'll still be plotting monoisotopic mass
+                        MZ = lstIsosData[intIndex].MonoMass,
+                        Intensity = lstIsosData[intIndex].Abundance,
+                        Charge = lstIsosData[intIndex].Charge
+                    };
+                    
                     lstIons.Add(udtIon);
                 }
             }
@@ -211,7 +216,7 @@ namespace MSFileInfoScanner
                 {"monoisotopic_mw", -1}
             };
 
-            int intColIndexScanOrFrameNum = -1;
+            var intColIndexScanOrFrameNum = -1;
 
             var lstIsosData = new List<udtIsosDataType>();
             var intRowNumber = 0;
@@ -225,6 +230,9 @@ namespace MSFileInfoScanner
                 while (!srIsosFile.EndOfStream) {
                     intRowNumber += 1;
                     var strLineIn = srIsosFile.ReadLine();
+                    if (string.IsNullOrWhiteSpace(strLineIn))
+                        continue;
+
                     var lstData = strLineIn.Split(',').ToList();
 
                     if (intRowNumber == 1) {
@@ -258,7 +266,7 @@ namespace MSFileInfoScanner
                             lstIsosData.Add(udtIsosData);
                         }
 
-                    } catch (Exception ex) {
+                    } catch (Exception) {
                         blnParseError = true;
                     }
 
@@ -286,22 +294,24 @@ namespace MSFileInfoScanner
         private List<udtScansDataType> LoadScansFile(string strScansFilePath)
         {
 
-            const var FILTERED_SCANS_SUFFIX = "_filtered_scans.csv";
+            const string FILTERED_SCANS_SUFFIX = "_filtered_scans.csv";
 
-            Dictionary<string, int> dctColumnInfo = new Dictionary<string, int>();
-            dctColumnInfo.Add("type", -1);
-            dctColumnInfo.Add("bpi", -1);
-            dctColumnInfo.Add("bpi_mz", -1);
-            dctColumnInfo.Add("tic", -1);
-            dctColumnInfo.Add("num_peaks", -1);
-            dctColumnInfo.Add("num_deisotoped", -1);
+            var dctColumnInfo = new Dictionary<string, int>
+            {
+                {"type", -1},
+                {"bpi", -1},
+                {"bpi_mz", -1},
+                {"tic", -1},
+                {"num_peaks", -1},
+                {"num_deisotoped", -1}
+            };
 
-            int intColIndexScanOrFrameNum = -1;
-            int intColIndexScanOrFrameTime = -1;
+            var intColIndexScanOrFrameNum = -1;
+            var intColIndexScanOrFrameTime = -1;
 
             var lstScanData = new List<udtScansDataType>();
             var intRowNumber = 0;
-            int intColIndexScanInfo = -1;
+            var intColIndexScanInfo = -1;
 
             if (!File.Exists(strScansFilePath) && strScansFilePath.ToLower().EndsWith(FILTERED_SCANS_SUFFIX)) {
                 strScansFilePath = strScansFilePath.Substring(0, strScansFilePath.Length - FILTERED_SCANS_SUFFIX.Length) + "_scans.csv";
@@ -432,7 +442,7 @@ namespace MSFileInfoScanner
                 return false;
             }
 
-            int intDatasetID = base.DatasetID;
+            var intDatasetID = DatasetID;
 
             // Record the file size and Dataset ID
             var _with5 = datasetFileInfo;
@@ -456,7 +466,7 @@ namespace MSFileInfoScanner
             if (mSaveTICAndBPI || mCreateDatasetInfoFile || mCreateScanStatsFile || mSaveLCMS2DPlots) {
                 // Load data from each scan
                 // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
-                LoadData(fiIsosFile, ref datasetFileInfo);
+                LoadData(fiIsosFile, datasetFileInfo);
             }
 
             // Read the file info from the file system

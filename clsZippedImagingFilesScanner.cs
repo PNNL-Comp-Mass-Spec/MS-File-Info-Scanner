@@ -53,7 +53,7 @@ namespace MSFileInfoScanner
 
 
                             if (strNameParts.Length > 0) {
-                                if (String.Equals(strNameParts[strNameParts.Length - 1], strFileNameToFind, StringComparison.CurrentCultureIgnoreCase)) {
+                                if (string.Equals(strNameParts[strNameParts.Length - 1], strFileNameToFind, StringComparison.CurrentCultureIgnoreCase)) {
                                     if (oZipEntry.Current.LastModified < datasetFileInfo.AcqTimeStart) {
                                         datasetFileInfo.AcqTimeStart = oZipEntry.Current.LastModified;
                                     }

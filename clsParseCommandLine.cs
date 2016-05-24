@@ -276,8 +276,7 @@ namespace FileProcessor
 				// Parse the command line
 				// Note that strParameters(0) is the path to the Executable for the calling program
 
-				int intIndex;
-				for (intIndex = 1; intIndex <= strParameters.Length - 1; intIndex++)
+				for (var intIndex = 1; intIndex <= strParameters.Length - 1; intIndex++)
 				{
 				    if (strParameters[intIndex].Length <= 0)
 				    {

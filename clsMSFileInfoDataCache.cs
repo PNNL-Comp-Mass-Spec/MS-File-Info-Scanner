@@ -88,9 +88,9 @@ namespace MSFileInfoScanner
 
         private int mMaximumFolderIntegrityInfoFolderID;
         public event ErrorEventEventHandler ErrorEvent;
-        public delegate void ErrorEventEventHandler(string Message);
+        public delegate void ErrorEventEventHandler(string message);
         public event StatusEventEventHandler StatusEvent;
-        public delegate void StatusEventEventHandler(string Message);
+        public delegate void StatusEventEventHandler(string message);
         #endregion
 
         #region "Properties"
