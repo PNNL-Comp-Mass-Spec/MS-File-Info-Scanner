@@ -1,7 +1,4 @@
-﻿using System;
-
-[assembly: CLSCompliant(true)]
-namespace MSFileInfoScannerInterfaces
+﻿namespace MSFileInfoScannerInterfaces
 {
     public abstract class iMSFileInfoScanner
     {
