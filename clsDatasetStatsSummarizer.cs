@@ -62,11 +62,12 @@ namespace MSFileInfoScanner
 		#endregion
 
 		#region "Classwide Variables"
+
 		private readonly string mFileDate;
 		private string mDatasetStatsSummaryFileName;
 
-		private string mErrorMessage = string.Empty;
-		private List<clsScanStatsEntry> mDatasetScanStats;
+		private string mErrorMessage;
+		private readonly List<clsScanStatsEntry> mDatasetScanStats;
 
 		public udtSampleInfoType SampleInfo;
 		private clsSpectrumTypeClassifier mSpectraTypeClassifier;
@@ -90,7 +91,8 @@ namespace MSFileInfoScanner
 
 		private clsDatasetSummaryStats mDatasetSummaryStats;
 
-        private clsMedianUtilities mMedianUtils;
+        private readonly clsMedianUtilities mMedianUtils;
+
 		#endregion
 
 		#region "Events"
@@ -121,10 +123,26 @@ namespace MSFileInfoScanner
 
 		#endregion
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
 		public clsDatasetStatsSummarizer()
 		{
-			mFileDate = "January 12, 2016";
-			InitializeLocalVariables();
+			mFileDate = "May 23, 2016";
+
+            mErrorMessage = string.Empty;
+
+            mMedianUtils = new clsMedianUtilities();
+            mSpectraTypeClassifier = new clsSpectrumTypeClassifier();
+
+            mDatasetScanStats = new List<clsScanStatsEntry>();
+            mDatasetSummaryStats = new clsDatasetSummaryStats();
+
+            DatasetFileInfo = new clsDatasetFileInfo();
+            SampleInfo = new udtSampleInfoType();
+
+            ClearCachedData();
+
 		}
 
 
@@ -160,20 +178,10 @@ namespace MSFileInfoScanner
 			mSpectraTypeClassifier.CheckSpectrum(ionCount, dblMZs, msLevel, centroidingStatus);
 		}
 
-
 		public void ClearCachedData()
 		{
-			if (mDatasetScanStats == null) {
-				mDatasetScanStats = new List<clsScanStatsEntry>();
-			} else {
-				mDatasetScanStats.Clear();
-			}
-
-			if (mDatasetSummaryStats == null) {
-				mDatasetSummaryStats = new clsDatasetSummaryStats();
-			} else {
-				mDatasetSummaryStats.Clear();
-			}
+			mDatasetScanStats.Clear();
+			mDatasetSummaryStats.Clear();
 
 			DatasetFileInfo.Clear();
 			SampleInfo.Clear();
@@ -799,16 +807,6 @@ namespace MSFileInfoScanner
 
 		}
 
-		private void InitializeLocalVariables()
-		{
-			mErrorMessage = string.Empty;
-
-			mMedianUtils = new clsMedianUtilities();
-			mSpectraTypeClassifier = new clsSpectrumTypeClassifier();
-
-			ClearCachedData();
-		}
-
 		private void ReportError(string message)
 		{
 			mErrorMessage = string.Copy(message);
@@ -946,9 +944,9 @@ namespace MSFileInfoScanner
 
 		}
 
-		private void mSpectraTypeClassifier_ErrorEvent(string Message)
+        private void mSpectraTypeClassifier_ErrorEvent(string message)
 		{
-			ReportError("Error in SpectraTypeClassifier: " + Message);
+            ReportError("Error in SpectraTypeClassifier: " + message);
 		}
 
 	}
@@ -963,17 +961,17 @@ namespace MSFileInfoScanner
 		public const string SCANSTATS_COL_COLLISION_MODE = "Collision Mode";
 
 		public const string SCANSTATS_COL_SCAN_FILTER_TEXT = "Scan Filter Text";
+
 		public struct udtExtendedStatsInfoType
 		{
 			public string IonInjectionTime;
 			public string ScanSegment;
-			public string ScanEvent;
-				// Only defined for LTQ-Orbitrap datasets and only for fragmentation spectra where the instrument could determine the charge and m/z
-			public string ChargeState;
-				// Only defined for LTQ-Orbitrap datasets and only for fragmentation spectra where the instrument could determine the charge and m/z
+			public string ScanEvent;        // Only defined for LTQ-Orbitrap datasets and only for fragmentation spectra where the instrument could determine the charge and m/z
+			public string ChargeState;      // Only defined for LTQ-Orbitrap datasets and only for fragmentation spectra where the instrument could determine the charge and m/z
 			public string MonoisotopicMZ;
 			public string CollisionMode;
 			public string ScanFilterText;
+
 			public void Clear()
 			{
 				IonInjectionTime = string.Empty;
@@ -987,12 +985,14 @@ namespace MSFileInfoScanner
 		}
 
 		public int ScanNumber;
-			// 1 for MS, 2 for MS2, 3 for MS3
+		
+        // 1 for MS, 2 for MS2, 3 for MS3
 		public int ScanType;
 
-			// Example values: "FTMS + p NSI Full ms [400.00-2000.00]" or "ITMS + c ESI Full ms [300.00-2000.00]" or "ITMS + p ESI d Z ms [1108.00-1118.00]" or "ITMS + c ESI d Full ms2 342.90@cid35.00"
+		// Example values: "FTMS + p NSI Full ms [400.00-2000.00]" or "ITMS + c ESI Full ms [300.00-2000.00]" or "ITMS + p ESI d Z ms [1108.00-1118.00]" or "ITMS + c ESI d Full ms2 342.90@cid35.00"
 		public string ScanFilterText;
-			// Example values: MS, HMS, Zoom, CID-MSn, or PQD-MSn
+		
+        // Example values: MS, HMS, Zoom, CID-MSn, or PQD-MSn
 		public string ScanTypeName;
 
 		// The following are strings to prevent the number formatting from changing
@@ -1005,9 +1005,10 @@ namespace MSFileInfoScanner
 		public int IonCount;
 
 		public int IonCountRaw;
-		// Only used for Thermo data
 
+		// Only used for Thermo data
 		public udtExtendedStatsInfoType ExtendedScanInfo;
+
 		public void Clear()
 		{
 			ScanNumber = 0;
@@ -1028,6 +1029,9 @@ namespace MSFileInfoScanner
 			ExtendedScanInfo.Clear();
 		}
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
 		public clsScanStatsEntry()
 		{
 			Clear();
@@ -1041,11 +1045,12 @@ namespace MSFileInfoScanner
 		public udtSummaryStatDetailsType MSStats;
 
 		public udtSummaryStatDetailsType MSnStats;
+
 		// The following collection keeps track of each ScanType in the dataset, along with the number of scans of this type
 		// Example scan types:  FTMS + p NSI Full ms" or "ITMS + c ESI Full ms" or "ITMS + p ESI d Z ms" or "ITMS + c ESI d Full ms2 @cid35.00"
+		public readonly Dictionary<string, int> objScanTypeStats;
 
-		public Dictionary<string, int> objScanTypeStats;
-		public struct udtSummaryStatDetailsType
+	    public struct udtSummaryStatDetailsType
 		{
 			public int ScanCount;
 			public double TICMax;
@@ -1053,7 +1058,6 @@ namespace MSFileInfoScanner
 			public double TICMedian;
 			public double BPIMedian;
 		}
-
 
 		public void Clear()
 		{
@@ -1071,16 +1075,16 @@ namespace MSFileInfoScanner
             MSnStats.TICMedian = 0;
             MSnStats.BPIMedian = 0;
 
-			if (objScanTypeStats == null) {
-				objScanTypeStats = new Dictionary<string, int>();
-			} else {
-				objScanTypeStats.Clear();
-			}
+            objScanTypeStats.Clear();
 
 		}
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
 		public clsDatasetSummaryStats()
 		{
+            objScanTypeStats = new Dictionary<string, int>();
 			Clear();
 		}
 

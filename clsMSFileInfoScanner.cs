@@ -34,7 +34,57 @@ namespace MSFileInfoScanner
             mMSFileInfoDataCache.ErrorEvent += mMSFileInfoDataCache_ErrorEvent;
             mMSFileInfoDataCache.StatusEvent += mMSFileInfoDataCache_StatusEvent;
 
-            InitializeLocalVariables();
+            mErrorCode = eMSFileScannerErrorCodes.NoError;
+
+            mIgnoreErrorsWhenRecursing = false;
+
+            mUseCacheFiles = false;
+
+            mLogMessagesToFile = false;
+            mLogFilePath = string.Empty;
+            mLogFolderPath = string.Empty;
+
+            mReprocessExistingFiles = false;
+            mReprocessIfCachedSizeIsZero = false;
+            mRecheckFileIntegrityForExistingFolders = false;
+
+            mCreateDatasetInfoFile = false;
+
+            mUpdateDatasetStatsTextFile = false;
+            mDatasetStatsTextFileName = clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME;
+
+            mSaveTICAndBPIPlots = false;
+            mSaveLCMS2DPlots = false;
+            mCheckCentroidingStatus = false;
+
+            mLCMS2DPlotOptions = new clsLCMSDataPlotterOptions();
+            mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR;
+
+            mScanStart = 0;
+            mScanEnd = 0;
+            mShowDebugInfo = false;
+
+            mComputeOverallQualityScores = false;
+
+            mCopyFileLocalOnReadError = false;
+
+            mCheckFileIntegrity = false;
+
+            mDSInfoConnectionString = "Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;";
+            mDSInfoDBPostingEnabled = false;
+            mDSInfoStoredProcedure = "UpdateDatasetFileInfoXML";
+            mDSInfoDatasetIDOverride = 0;
+
+            mFileIntegrityDetailsFilePath = Path.Combine(GetAppFolderPath(), DefaultDataFileName(eDataFileTypeConstants.FileIntegrityDetails));
+            mFileIntegrityErrorsFilePath = Path.Combine(GetAppFolderPath(), DefaultDataFileName(eDataFileTypeConstants.FileIntegrityErrors));
+
+            mMSFileInfoDataCache.InitializeVariables();
+
+            var oneHourAgo = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0));
+            mLastWriteTimeFileIntegrityDetails = oneHourAgo;
+            mLastWriteTimeFileIntegrityFailure = oneHourAgo;
+            mLastCheckForAbortProcessingFile = oneHourAgo;
+
         }
 
         #region "Constants and Enums"
@@ -114,9 +164,10 @@ namespace MSFileInfoScanner
         private eMSFileScannerErrorCodes mErrorCode;
 
         private bool mAbortProcessing;
-        // If the following is false, then data is not loaded/saved from/to the DatasetTimeFile.txt or the FolderIntegrityInfo.txt file
 
+        // If the following is false, data is not loaded/saved from/to the DatasetTimeFile.txt or the FolderIntegrityInfo.txt file
         private bool mUseCacheFiles;
+
         private string mFileIntegrityDetailsFilePath;
 
         private string mFileIntegrityErrorsFilePath;
@@ -147,7 +198,7 @@ namespace MSFileInfoScanner
         private string mDSInfoStoredProcedure;
 
         private int mDSInfoDatasetIDOverride;
-        private clsLCMSDataPlotterOptions mLCMS2DPlotOptions;
+        private readonly clsLCMSDataPlotterOptions mLCMS2DPlotOptions;
 
         private int mLCMS2DOverviewPlotDivisor;
         private int mScanStart;
@@ -161,9 +212,9 @@ namespace MSFileInfoScanner
 
         // This variable is updated in ProcessMSFileOrFolder
         private string mOutputFolderPath;
+
         // If blank, then mOutputFolderPath will be used; if mOutputFolderPath is also blank, then the log is created in the same folder as the executing assembly
         private string mLogFolderPath;
-
 
         private string mDatasetInfoXML = "";
         private readonly clsFileIntegrityChecker mFileIntegrityChecker;
@@ -599,8 +650,8 @@ namespace MSFileInfoScanner
                         DataRow objRow;
                         if (mMSFileInfoDataCache.CachedFolderIntegrityInfoContainsFolder(diFolderInfo.FullName, out intFolderID, out objRow))
                         {
-                            var intCachedFileCount = Convert.ToInt32(objRow[clsMSFileInfoDataCache.COL_NAME_FILE_COUNT]);
-                            var intCachedCountFailIntegrity = Convert.ToInt32(objRow[clsMSFileInfoDataCache.COL_NAME_COUNT_FAIL_INTEGRITY]);
+                            var intCachedFileCount = (int)objRow[clsMSFileInfoDataCache.COL_NAME_FILE_COUNT];
+                            var intCachedCountFailIntegrity = (int)objRow[clsMSFileInfoDataCache.COL_NAME_COUNT_FAIL_INTEGRITY];
 
                             if (intCachedFileCount == intFileCount && intCachedCountFailIntegrity == 0) {
                                 // Folder contains the same number of files as last time, and no files failed the integrity check last time
@@ -867,61 +918,6 @@ namespace MSFileInfoScanner
 
                 mLogFile.WriteLine(DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") + '\t' + strMessageType + '\t' + strMessage);
             }
-
-        }
-
-        private void InitializeLocalVariables()
-        {
-            mErrorCode = eMSFileScannerErrorCodes.NoError;
-
-            mIgnoreErrorsWhenRecursing = false;
-
-            mUseCacheFiles = false;
-
-            mLogMessagesToFile = false;
-            mLogFilePath = string.Empty;
-            mLogFolderPath = string.Empty;
-
-            mReprocessExistingFiles = false;
-            mReprocessIfCachedSizeIsZero = false;
-            mRecheckFileIntegrityForExistingFolders = false;
-
-            mCreateDatasetInfoFile = false;
-
-            mUpdateDatasetStatsTextFile = false;
-            mDatasetStatsTextFileName = clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME;
-
-            mSaveTICAndBPIPlots = false;
-            mSaveLCMS2DPlots = false;
-            mCheckCentroidingStatus = false;
-
-            mLCMS2DPlotOptions = new clsLCMSDataPlotterOptions();
-            mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR;
-
-            mScanStart = 0;
-            mScanEnd = 0;
-            mShowDebugInfo = false;
-
-            mComputeOverallQualityScores = false;
-
-            mCopyFileLocalOnReadError = false;
-
-            mCheckFileIntegrity = false;
-
-            mDSInfoConnectionString = "Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;";
-            mDSInfoDBPostingEnabled = false;
-            mDSInfoStoredProcedure = "UpdateDatasetFileInfoXML";
-            mDSInfoDatasetIDOverride = 0;
-
-            mFileIntegrityDetailsFilePath = Path.Combine(GetAppFolderPath(), DefaultDataFileName(eDataFileTypeConstants.FileIntegrityDetails));
-            mFileIntegrityErrorsFilePath = Path.Combine(GetAppFolderPath(), DefaultDataFileName(eDataFileTypeConstants.FileIntegrityErrors));
-
-            mMSFileInfoDataCache.InitializeVariables();
-
-            var oneHourAgo = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0));
-            mLastWriteTimeFileIntegrityDetails = oneHourAgo;
-            mLastWriteTimeFileIntegrityFailure = oneHourAgo;
-            mLastCheckForAbortProcessingFile = oneHourAgo;
 
         }
 
@@ -1654,7 +1650,7 @@ namespace MSFileInfoScanner
                             if (mReprocessIfCachedSizeIsZero) {
                                 long lngCachedSizeBytes;
                                 try {
-                                    lngCachedSizeBytes = Convert.ToInt64(objRow[clsMSFileInfoDataCache.COL_NAME_FILE_SIZE_BYTES]);
+                                    lngCachedSizeBytes = (long)objRow[clsMSFileInfoDataCache.COL_NAME_FILE_SIZE_BYTES];
                                 } catch (Exception) {
                                     lngCachedSizeBytes = 1;
                                 }
@@ -2470,19 +2466,19 @@ namespace MSFileInfoScanner
             ShowMessage(message, eMessageTypeConstants.Normal);
         }
 
-        private void mMSFileInfoDataCache_ErrorEvent(string Message)
+        private void mMSFileInfoDataCache_ErrorEvent(string message)
         {
-            ShowErrorMessage(Message);
+            ShowErrorMessage(message);
         }
 
-        private void mMSFileInfoDataCache_StatusEvent(string Message)
+        private void mMSFileInfoDataCache_StatusEvent(string message)
         {
-            ShowMessage(Message);
+            ShowMessage(message);
         }
 
-        private void mExecuteSP_DBErrorEvent(string Message)
+        private void mExecuteSP_DBErrorEvent(string message)
         {
-            ShowErrorMessage(Message);
+            ShowErrorMessage(message);
         }
 
         #endregion
