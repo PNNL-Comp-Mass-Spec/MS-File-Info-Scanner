@@ -37,7 +37,7 @@ namespace MSFileInfoScanner
         private float mProgress;
 
         public event ProgressChangedEventHandler ProgressChanged;
-        public delegate void ProgressChangedEventHandler(float Progress);
+        public delegate void ProgressChangedEventHandler(float progress);
 
         #region "Properties"
         public int MaximumDataCountToLoad {
@@ -132,12 +132,7 @@ namespace MSFileInfoScanner
         {
             const int HISTOGRAM_BIN_COUNT = 5000;
 
-            var intBinToSortDataCount = 0;
-
             try {
-                var sngBinToSortAbundances = new float[10];
-                var intBinToSortDataIndices = new int[10];
-
                 UpdateProgress(0);
 
                 var blnUseFullDataSort = false;
@@ -163,7 +158,7 @@ namespace MSFileInfoScanner
                 var sngMaxAbundance = (from item in mDataValues select item.Item1).Max();
 
                 // Round sngMaxAbundance up to the next highest integer
-                sngMaxAbundance = Convert.ToSingle(Math.Ceiling(sngMaxAbundance));
+                sngMaxAbundance = (float)Math.Ceiling(sngMaxAbundance);
 
                 // Now determine the histogram bin size
                 double dblBinSize = sngMaxAbundance / HISTOGRAM_BIN_COUNT;
@@ -171,7 +166,7 @@ namespace MSFileInfoScanner
                     dblBinSize = 1;
 
                 // Initialize intHistogramData
-                var intBinCount = Convert.ToInt32(sngMaxAbundance / dblBinSize) + 1;
+                var intBinCount = (int)(sngMaxAbundance / dblBinSize) + 1;
                 var intHistogramBinCounts = new int[intBinCount];
                 var dblHistogramBinStartIntensity = new double[intBinCount];
 
@@ -187,7 +182,7 @@ namespace MSFileInfoScanner
                     if (dataPoint.Item1 <= 0) {
                         intTargetBin = 0;
                     } else {
-                        intTargetBin = Convert.ToInt32(Math.Floor(dataPoint.Item1 / dblBinSize));
+                        intTargetBin = (int)Math.Floor(dataPoint.Item1 / dblBinSize);
                     }
 
                     if (intTargetBin < intBinCount - 1) {
@@ -211,7 +206,7 @@ namespace MSFileInfoScanner
 
                     if (dataPointIndex % 10000 == 0)
                     {
-                        UpdateProgress(Convert.ToSingle((0 + (dataPointIndex + 1) / Convert.ToDouble(dataPointCount)) / SUBTASK_STEP_COUNT * 100.0));
+                        UpdateProgress(0 + (dataPointIndex + 1) / (float)dataPointCount / SUBTASK_STEP_COUNT * 100.0f);
                     }
                     dataPointIndex++;
                 }
@@ -241,16 +236,16 @@ namespace MSFileInfoScanner
 
                     if (Math.Abs(dblBinToSortAbundanceMaximum - dblBinToSortAbundanceMinimum) < float.Epsilon) {
                         // Is this code ever reached?
-                        // If yes, then the code below won't populate sngBinToSortAbundances() and intBinToSortDataIndices() with any data
+                        // If yes, then the code below won't populate binnedData with any data
                         blnUseFullDataSort = true;
                     }
 
-                    if (!blnUseFullDataSort) {
-                        intBinToSortDataCount = 0;
-                        if (intHistogramBinCounts[intBinToSort] > 0) {
-                            sngBinToSortAbundances = new float[intHistogramBinCounts[intBinToSort]];
-                            intBinToSortDataIndices = new int[intHistogramBinCounts[intBinToSort]];
-                        } else {
+                    var binnedData = new List<Tuple<float, int>>();
+
+                    if (!blnUseFullDataSort)
+                    {
+                        if (intHistogramBinCounts[intBinToSort] <= 0)
+                        {
                             // Is this code ever reached?
                             blnUseFullDataSort = true;
                         }
@@ -262,43 +257,33 @@ namespace MSFileInfoScanner
                         {
                             if (mDataValues[intIndex].Item1 < dblBinToSortAbundanceMinimum)
                             {
-                                // Skip this data point when re-reading the input data file
+                                // Skip this data point
                                 mDataValues[intIndex] = GetSkippedDataPoint(mDataValues[intIndex]);
 
                             } else if (mDataValues[intIndex].Item1 < dblBinToSortAbundanceMaximum) {
                                 // Value is in the bin to sort; add to the BinToSort arrays
 
-                                if (intBinToSortDataCount >= sngBinToSortAbundances.Length) {
-                                    // Need to reserve more space (this is unexpected)
-                                    Array.Resize(ref sngBinToSortAbundances, sngBinToSortAbundances.Length * 2);
-                                    Array.Resize(ref intBinToSortDataIndices, sngBinToSortAbundances.Length);
-                                }
+                                // Replaced with a list: sngBinToSortAbundances[intBinToSortDataCount] = mDataValues[intIndex].Item1;
+                                // Replaced with a list: intBinToSortDataIndices[intBinToSortDataCount] = mDataValues[intIndex].Item2;
+                                // Replaced with a list: intBinToSortDataCount += 1;
 
-                                sngBinToSortAbundances[intBinToSortDataCount] = mDataValues[intIndex].Item1;
-                                intBinToSortDataIndices[intBinToSortDataCount] = mDataValues[intIndex].Item2;
-                                intBinToSortDataCount += 1;
+                                binnedData.Add(mDataValues[intIndex]);
                             } else {
                                 intDataCountImplicitlyIncluded = intDataCountImplicitlyIncluded + 1;
                             }
 
                             if (intIndex % 10000 == 0) {
-                                UpdateProgress(Convert.ToSingle((1 + (intIndex + 1) / Convert.ToDouble(dataPointCount)) / SUBTASK_STEP_COUNT * 100.0));
+                                UpdateProgress(1 + (intIndex + 1) / (float)dataPointCount / SUBTASK_STEP_COUNT * 100.0f);
                             }
                         }
 
-                        if (intBinToSortDataCount > 0) {
-                            if (intBinToSortDataCount < sngBinToSortAbundances.Length) {
-                                Array.Resize(ref sngBinToSortAbundances, intBinToSortDataCount);
-                                Array.Resize(ref intBinToSortDataIndices, intBinToSortDataCount);
-                            }
-                        } else {
-                            // This code shouldn't be reached
-                        }
+                        var binnedDataCount = binnedData.Count;
 
-                        if (mMaximumDataCountToKeep - intDataCountImplicitlyIncluded - intBinToSortDataCount == 0) {
+                        if (mMaximumDataCountToKeep - intDataCountImplicitlyIncluded - binnedDataCount == 0)
+                        {
                             // No need to sort and examine the data for BinToSort since we'll ultimately include all of it
                         } else {
-                            SortAndMarkPointsToSkip(sngBinToSortAbundances, intBinToSortDataIndices, intBinToSortDataCount, mMaximumDataCountToKeep - intDataCountImplicitlyIncluded, SUBTASK_STEP_COUNT);
+                            SortAndMarkPointsToSkip(binnedData, mMaximumDataCountToKeep - intDataCountImplicitlyIncluded, SUBTASK_STEP_COUNT);
                         }
 
                         // Synchronize the data in sngBinToSortAbundances and intBinToSortDataIndices with mDataValues
@@ -306,24 +291,28 @@ namespace MSFileInfoScanner
                         // intBinToSortDataIndices should also currently be sorted ascending on "valid data point index" so the following Do Loop within a For Loop should sync things up
 
                         var intOriginalDataArrayIndex = 0;
-                        for (var intIndex = 0; intIndex <= intBinToSortDataCount - 1; intIndex++) {
-                            while (intBinToSortDataIndices[intIndex] > mDataValues[intOriginalDataArrayIndex].Item2)
+                        for (var intIndex = 0; intIndex <= binnedDataCount - 1; intIndex++)
+                        {
+                            while (binnedData[intIndex].Item2 > mDataValues[intOriginalDataArrayIndex].Item2)
                             {
                                 intOriginalDataArrayIndex += 1;
                             }
 
-                            if (Math.Abs(sngBinToSortAbundances[intIndex] - mSkipDataPointFlag) < float.Epsilon) {
-                                if (mDataValues[intOriginalDataArrayIndex].Item2 == intBinToSortDataIndices[intIndex])
+                            if (Math.Abs(binnedData[intIndex].Item1 - mSkipDataPointFlag) < float.Epsilon)
+                            {
+                                if (mDataValues[intOriginalDataArrayIndex].Item2 == binnedData[intIndex].Item2)
                                 {
                                     mDataValues[intOriginalDataArrayIndex] = GetSkippedDataPoint(mDataValues[intOriginalDataArrayIndex]);
-                                } else {
-                                    // Index mis-match; this code shouldn't be reached
+                                } else
+                                {
+                                    Console.WriteLine("Index mis-match in FilterDataByMaxDataCountToKeep; this code shouldn't be reached");
                                 }
                             }
                             intOriginalDataArrayIndex += 1;
 
-                            if (intBinToSortDataCount < 1000 | intBinToSortDataCount % 100 == 0) {
-                                UpdateProgress(Convert.ToSingle((3 + (intIndex + 1) / Convert.ToDouble(intBinToSortDataCount)) / SUBTASK_STEP_COUNT * 100.0));
+                            if (binnedDataCount < 1000 | intIndex % 100 == 0)
+                            {
+                                UpdateProgress(3 + (intIndex + 1) / (float)binnedDataCount / SUBTASK_STEP_COUNT * 100.0f);
                             }
                         }
                     }
@@ -364,21 +353,21 @@ namespace MSFileInfoScanner
                 // Sort sngAbundances ascending, sorting intDataIndices in parallel
                 Array.Sort(sngAbundances, intDataIndices, 0, intDataCount);
 
-                UpdateProgress(Convert.ToSingle((2.333 / intSubtaskStepCount) * 100.0));
+                UpdateProgress(2.333f / intSubtaskStepCount * 100.0f);
 
                 // Change the abundance values to mSkipDataPointFlag for data up to index intDataCount-intMaximumDataCountInArraysToLoad-1
                 for (var intIndex = 0; intIndex <= intDataCount - intMaximumDataCountInArraysToLoad - 1; intIndex++) {
                     sngAbundances[intIndex] = mSkipDataPointFlag;
                 }
 
-                UpdateProgress(Convert.ToSingle((2.666 / intSubtaskStepCount) * 100.0));
+                UpdateProgress(2.666f / intSubtaskStepCount * 100.0f);
 
                 // Re-sort, this time on intDataIndices with sngAbundances in parallel
                 Array.Sort(intDataIndices, sngAbundances, 0, intDataCount);
 
             }
 
-            UpdateProgress(Convert.ToSingle(3f / intSubtaskStepCount * 100.0f));
+            UpdateProgress(3f / intSubtaskStepCount * 100.0f);
 
         }
 
@@ -392,7 +381,7 @@ namespace MSFileInfoScanner
             {
                 dataValuesAndIndices.Sort();
              
-                UpdateProgress(Convert.ToSingle((2.333 / intSubtaskStepCount) * 100.0));
+                UpdateProgress(2.333f / intSubtaskStepCount * 100.0f);
 
                 // Change the abundance values to mSkipDataPointFlag for data up to index intDataCount-intMaximumDataCountInArraysToLoad-1
                 for (var intIndex = 0; intIndex <= dataCount - intMaximumDataCountInArraysToLoad - 1; intIndex++)
@@ -400,14 +389,14 @@ namespace MSFileInfoScanner
                     dataValuesAndIndices[intIndex] = GetSkippedDataPoint(dataValuesAndIndices[intIndex]);
                 }
 
-                UpdateProgress(Convert.ToSingle((2.666 / intSubtaskStepCount) * 100.0));
+                UpdateProgress(2.666f / intSubtaskStepCount * 100.0f);
 
                 // Re-sort, this time on the data index value (.Item2)
                 dataValuesAndIndices.Sort(new clsSortByIndex());
 
             }
 
-            UpdateProgress(Convert.ToSingle(3f / intSubtaskStepCount * 100.0f));
+            UpdateProgress(3f / intSubtaskStepCount * 100.0f);
 
         }
         private void UpdateProgress(float sngProgress)
