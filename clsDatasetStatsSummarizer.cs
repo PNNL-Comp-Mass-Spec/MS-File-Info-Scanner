@@ -508,14 +508,15 @@ namespace MSFileInfoScanner
 
 			    // We could cache the text using a StringBuilder, like this:
 				//
-				// Dim sbDatasetInfo As New StringBuilder
-				// Dim objStringWriter As StringWriter
-				// objStringWriter = New StringWriter(sbDatasetInfo)
-				// objDSInfo = New Xml.XmlTextWriter(objStringWriter)
-				// objDSInfo.Formatting = Xml.Formatting.Indented
-				// objDSInfo.Indentation = 2
+			    // var sbDatasetInfo = new StringBuilder();
+                // var objStringWriter = new StringWriter(sbDatasetInfo);
+			    // var objDSInfo = new XmlTextWriter(objStringWriter)
+			    // {
+			    //     Formatting = Formatting.Indented,
+			    //     Indentation = 2
+                // };
 
-				// However, when you send the output to a StringBuilder it is always encoded as Unicode (UTF-16) 
+			    // However, when you send the output to a StringBuilder it is always encoded as Unicode (UTF-16) 
 				//  since this is the only character encoding used in the .NET Framework for String values, 
 				//  and thus you'll see the attribute encoding="utf-16" in the opening XML declaration 
 				// The alternative is to use a MemoryStream.  Here, the stream encoding is set by the XmlWriter 

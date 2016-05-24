@@ -554,20 +554,6 @@ namespace MSFileInfoScanner
                     {
                         datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd;
                     }
-                    else
-                    {
-                        //'Dim dtDateCompare As DateTime
-                        //'If .ScanCount > 0 Then
-                        //'    ' Make sure the start time is greater than the end time minus the scan count times 30 seconds per scan
-                        //'    dtDateCompare = .AcqTimeEnd.Subtract(New TimeSpan(0, 0, .ScanCount * 30))
-                        //'Else
-                        //'    dtDateCompare = .AcqTimeEnd - 
-                        //'End If
-
-                        //'If .AcqTimeStart < dtDateCompare Then
-                        //'    .AcqTimeStart = .AcqTimeEnd
-                        //'End If
-                    }
                 }
             }
 

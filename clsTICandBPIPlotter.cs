@@ -51,7 +51,7 @@ namespace MSFileInfoScanner
         private bool mRemoveZeroesFromEnds;
         #endregion
 
-        private List<udtOutputFileInfoType> mRecentFiles;
+        private readonly List<udtOutputFileInfoType> mRecentFiles;
 
         public bool BPIAutoMinMaxY {
             get { return mBPIAutoMinMaxY; }
@@ -122,26 +122,20 @@ namespace MSFileInfoScanner
             Reset();
         }
 
-
         public void AddData(int intScanNumber, int intMSLevel, float sngScanTimeMinutes, double dblBPI, double dblTIC)
         {
             mBPI.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblBPI);
             mTIC.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblTIC);
-
         }
-
 
         public void AddDataBPIOnly(int intScanNumber, int intMSLevel, float sngScanTimeMinutes, double dblBPI)
         {
             mBPI.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblBPI);
-
         }
-
 
         public void AddDataTICOnly(int intScanNumber, int intMSLevel, float sngScanTimeMinutes, double dblTIC)
         {
             mTIC.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblTIC);
-
         }
 
         private void AddRecentFile(string strFilePath, eOutputFileTypes eFileType)
@@ -155,32 +149,33 @@ namespace MSFileInfoScanner
             mRecentFiles.Add(udtOutputFileInfo);
         }
 
-
-        private void AddSeries(PlotModel myplot, List<DataPoint> objPoints)
+        private void AddSeries(PlotModel myplot, IReadOnlyCollection<DataPoint> objPoints)
         {
             // Generate a black curve with no symbols
             var series = new LineSeries();
 
-            if (objPoints.Count > 0) {
-                var eSymbolType = MarkerType.None;
-                if (objPoints.Count == 1) {
-                    eSymbolType = MarkerType.Circle;
-                }
-
-                series.Color = OxyColors.Black;
-                series.StrokeThickness = 1;
-                series.MarkerType = eSymbolType;
-
-                if (objPoints.Count == 1) {
-                    series.MarkerSize = 8;
-                    series.MarkerFill = OxyColors.DarkRed;
-                }
-
-                series.Points.AddRange(objPoints);
-
-                myplot.Series.Add(series);
+            if (objPoints.Count <= 0)
+            {
+                return;
             }
 
+            var eSymbolType = MarkerType.None;
+            if (objPoints.Count == 1) {
+                eSymbolType = MarkerType.Circle;
+            }
+
+            series.Color = OxyColors.Black;
+            series.StrokeThickness = 1;
+            series.MarkerType = eSymbolType;
+
+            if (objPoints.Count == 1) {
+                series.MarkerSize = 8;
+                series.MarkerFill = OxyColors.DarkRed;
+            }
+
+            series.Points.AddRange(objPoints);
+
+            myplot.Series.Add(series);
         }
 
         /// <summary>
@@ -314,7 +309,6 @@ namespace MSFileInfoScanner
             };
 
             // Possibly add a label showing the maximum elution time
-
             if (dblScanTimeMax > 0) {
                 string strCaption;
                 if (dblScanTimeMax < 2) {
@@ -329,17 +323,18 @@ namespace MSFileInfoScanner
 
                 // Alternative method is to add a TextAnnotation, but these are inside the main plot area
                 // and are tied to a data point
-
-                //Dim objScanTimeMaxText = New TextAnnotation() With {
-                //    .TextRotation = 0,
-                //    .Text = strCaption,
-                //    .Stroke = OxyColors.Black,
-                //    .StrokeThickness = 2,
-                //    .FontSize = FONT_SIZE_BASE
-                //}
-
-                //objScanTimeMaxText.TextPosition = New OxyPlot.DataPoint(intMaxScan, 0)
-                //myPlot.Annotations.Add(objScanTimeMaxText)
+                // 
+                // var objScanTimeMaxText = new OxyPlot.Annotations.TextAnnotation
+                // {
+                //     TextRotation = 0,
+                //     Text = strCaption,
+                //     Stroke = OxyColors.Black,
+                //     StrokeThickness = 2,
+                //     FontSize = FONT_SIZE_BASE
+                // };
+                // 
+                // objScanTimeMaxText.TextPosition = new DataPoint(intMaxScan, 0);
+                // myPlot.Annotations.Add(objScanTimeMaxText);
 
             }
 
@@ -387,7 +382,6 @@ namespace MSFileInfoScanner
             }
 
             mRecentFiles.Clear();
-
         }
 
         public bool SaveTICAndBPIPlotFiles(string strDatasetName, string strOutputFolderPath, out string strErrorMessage)
@@ -571,16 +565,17 @@ namespace MSFileInfoScanner
                 mScans = new List<clsChromatogramDataPoint>();
             }
 
-            public void RemoveAt(int Index)
+            public void RemoveAt(int index)
             {
-                RemoveRange(Index, 1);
+                RemoveRange(index, 1);
             }
 
 
-            public void RemoveRange(int Index, int Count)
+            public void RemoveRange(int index, int count)
             {
-                if (Index >= 0 & Index < ScanCount & Count > 0) {
-                    mScans.RemoveRange(Index, Count);
+                if (index >= 0 & index < ScanCount & count > 0)
+                {
+                    mScans.RemoveRange(index, count);
                 }
 
             }

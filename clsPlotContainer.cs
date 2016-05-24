@@ -207,7 +207,7 @@ namespace MSFileInfoScanner
             const int CHARGE_END = 6;
 
             var usCulture = CultureInfo.GetCultureInfo("en-us");
-            // Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
+            // var fontTypeface = new Typeface(new FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal);
             var fontTypeface = new Typeface("Arial");
 
             var fontSizeEm = FontSizeBase + 3;
@@ -247,7 +247,7 @@ namespace MSFileInfoScanner
         private void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, HorizontalAlignment hAlign, VerticalAlignment vAlign, int padding)
         {
             var usCulture = CultureInfo.GetCultureInfo("en-us");
-            // Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
+            // var fontTypeface = new Typeface(new FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal);
             var fontTypeface = new Typeface("Arial");
 
             var fontSizeEm = FontSizeBase + 1;

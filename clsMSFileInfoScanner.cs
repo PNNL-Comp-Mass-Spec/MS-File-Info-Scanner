@@ -1012,46 +1012,6 @@ namespace MSFileInfoScanner
 
         }
 
-        //Private Sub LogErrors( strSource As String,  strMessage As String,  ex As Exception, Optional  blnAllowInformUser As Boolean = True, Optional  blnAllowThrowingException As Boolean = True, Optional  blnLogLocalOnly As Boolean = True, Optional  eNewErrorCode As iMSFileInfoScanner.eMSFileScannerErrorCodes = iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError)
-        //    Dim strMessageWithoutCRLF As String
-        //    Dim fsErrorLogFile As StreamWriter
-
-        //    mStatusMessage = String.Copy(strMessage)
-
-        //    strMessageWithoutCRLF = mStatusMessage.Replace(ControlChars.NewLine, "; ")
-
-        //    If ex Is Nothing Then
-        //        ex = New Exception("Error")
-        //    Else
-        //        If Not ex.Message Is Nothing AndAlso ex.Message.Length > 0 Then
-        //            strMessageWithoutCRLF &= "; " & ex.Message
-        //        End If
-        //    End If
-
-        //    ShowErrorMessage(strSource & ": " & strMessageWithoutCRLF)
-
-        //    Try
-        //        fsErrorLogFile = New StreamWriter("MSFileInfoScanner_Errors.txt", True)
-        //        fsErrorLogFile.WriteLine(DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") & '\t' & strSource & '\t' & strMessageWithoutCRLF)
-        //    Catch ex2 As Exception
-        //        ' Ignore errors here
-        //    Finally
-        //        If Not fsErrorLogFile Is Nothing Then
-        //            fsErrorLogFile.Close()
-        //        End If
-        //    End Try
-
-        //    If Not eNewErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError Then
-        //        SetErrorCode(eNewErrorCode, True)
-        //    End If
-
-        //    If Me.ShowMessages AndAlso blnAllowInformUser Then
-        //        Windows.Forms.MessageBox.Show(mStatusMessage & ControlChars.NewLine & ex.Message, "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
-        //    ElseIf blnAllowThrowingException Then
-        //        Throw New Exception(mStatusMessage, ex)
-        //    End If
-        //End Sub
-
         private void OpenFileIntegrityDetailsFile()
         {
             OpenFileIntegrityOutputFile(eDataFileTypeConstants.FileIntegrityDetails, ref mFileIntegrityDetailsFilePath, ref mFileIntegrityDetailsWriter);
