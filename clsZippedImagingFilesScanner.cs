@@ -24,7 +24,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if at least one valid file is found; otherwise false</returns>
         /// <remarks></remarks>
-        protected bool DetermineAcqStartEndTime(FileInfo fiZipFile, clsDatasetFileInfo datasetFileInfo)
+        private bool DetermineAcqStartEndTime(FileInfo fiZipFile, clsDatasetFileInfo datasetFileInfo)
         {
 
             var blnSuccess = false;
@@ -110,7 +110,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected DirectoryInfo GetDatasetFolder(string strDataFilePath)
+        private DirectoryInfo GetDatasetFolder(string strDataFilePath)
         {
 
             // First see if strFileOrFolderPath points to a valid file
@@ -182,9 +182,8 @@ namespace MSFileInfoScanner
                 }
 
                 // In case we cannot find any .Zip files, update the .AcqTime values to the folder creation date
-                var _with1 = datasetFileInfo;
-                _with1.AcqTimeStart = diDatasetFolder.CreationTime;
-                _with1.AcqTimeEnd = diDatasetFolder.CreationTime;
+                datasetFileInfo.AcqTimeStart = diDatasetFolder.CreationTime;
+                datasetFileInfo.AcqTimeEnd = diDatasetFolder.CreationTime;
 
                 // Look for the 0_R*.zip files
                 // If we cannot find any zip files, return false
@@ -199,18 +198,17 @@ namespace MSFileInfoScanner
                     var fiFirstImagingFile = lstFiles.First();
 
                     // Initialize the .DatasetFileInfo
-                    var _with2 = mDatasetStatsSummarizer.DatasetFileInfo;
-                    _with2.FileSystemCreationTime = fiFirstImagingFile.CreationTime;
-                    _with2.FileSystemModificationTime = fiFirstImagingFile.LastWriteTime;
+                    mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = fiFirstImagingFile.CreationTime;
+                    mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = fiFirstImagingFile.LastWriteTime;
 
-                    _with2.AcqTimeStart = _with2.FileSystemModificationTime;
-                    _with2.AcqTimeEnd = _with2.FileSystemModificationTime;
+                    mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
+                    mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
 
-                    _with2.DatasetID = datasetFileInfo.DatasetID;
-                    _with2.DatasetName = diDatasetFolder.Name;
-                    _with2.FileExtension = fiFirstImagingFile.Extension;
-                    _with2.FileSizeBytes = 0;
-                    _with2.ScanCount = 0;
+                    mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetFileInfo.DatasetID;
+                    mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = diDatasetFolder.Name;
+                    mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = fiFirstImagingFile.Extension;
+                    mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = 0;
+                    mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
 
 
                     // Update the dataset name and file extension

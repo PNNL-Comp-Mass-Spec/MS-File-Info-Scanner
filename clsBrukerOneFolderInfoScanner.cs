@@ -29,7 +29,7 @@ namespace MSFileInfoScanner
 
         private const string PEK_FILE_FILENAME_LINE = "Filename:";
 
-        private readonly DateTime MINIMUM_ACCEPTABLE_ACQ_START_TIME = new DateTime(1975,1,1);
+        private readonly DateTime MINIMUM_ACCEPTABLE_ACQ_START_TIME = new DateTime(1975, 1, 1);
 
         public override string GetDatasetNameViaPath(string strDataFilePath)
         {
@@ -41,7 +41,8 @@ namespace MSFileInfoScanner
                 var ioFolderInfo = new DirectoryInfo(strDataFilePath);
                 strDatasetName = ioFolderInfo.Parent.Name;
             }
-            catch (Exception) {
+            catch (Exception)
+            {
                 // Ignore errors
             }
 
@@ -67,28 +68,34 @@ namespace MSFileInfoScanner
             bool blnSuccess;
             dtDate = DateTime.MinValue;
 
-            try {
+            try
+            {
                 var strSplitLine = strLineIn.Split(' ').ToList();
 
                 // Remove any entries from strSplitLine that are blank
                 var lineParts = (from item in strSplitLine where !string.IsNullOrEmpty(item) select item).ToList();
 
-                if (lineParts.Count >= 5) {
+                if (lineParts.Count >= 5)
+                {
                     var intStartIndex = lineParts.Count - 5;
 
                     // Construct date in the format yyyy-MMM-dd hh:mm:ss
                     // For example:                 2005-Aug-20 07:56:55
-                    var strDate = 
-                        lineParts[4 + intStartIndex] + "-" + 
-                        lineParts[1 + intStartIndex] + "-" + 
-                        lineParts[2 + intStartIndex] + " " + 
+                    var strDate =
+                        lineParts[4 + intStartIndex] + "-" +
+                        lineParts[1 + intStartIndex] + "-" +
+                        lineParts[2 + intStartIndex] + " " +
                         lineParts[3 + intStartIndex];
 
                     blnSuccess = DateTime.TryParse(strDate, out dtDate);
-                } else {
+                }
+                else
+                {
                     blnSuccess = false;
                 }
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 // Date parse failed
                 blnSuccess = false;
             }
@@ -101,16 +108,20 @@ namespace MSFileInfoScanner
         {
             bool blnSuccess;
 
-            try {
+            try
+            {
                 // Try to open the acqu file
                 blnSuccess = false;
-                using (var srInFile = new StreamReader(Path.Combine(strFolderPath, BRUKER_ACQU_FILE))) {
+                using (var srInFile = new StreamReader(Path.Combine(strFolderPath, BRUKER_ACQU_FILE)))
+                {
                     while (!srInFile.EndOfStream)
                     {
                         var strLineIn = srInFile.ReadLine();
 
-                        if ((strLineIn != null)) {
-                            if (strLineIn.StartsWith(BRUKER_ACQU_FILE_ACQ_LINE_START)) {
+                        if ((strLineIn != null))
+                        {
+                            if (strLineIn.StartsWith(BRUKER_ACQU_FILE_ACQ_LINE_START))
+                            {
                                 // Date line found
                                 // It is of the form: ##$AQ_DATE= <Sat Aug 20 07:56:55 2005>
                                 strLineIn = strLineIn.Substring(BRUKER_ACQU_FILE_ACQ_LINE_START.Length).Trim();
@@ -126,7 +137,9 @@ namespace MSFileInfoScanner
                     }
                 }
 
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 // Error opening the acqu file
                 blnSuccess = false;
             }
@@ -139,15 +152,18 @@ namespace MSFileInfoScanner
         {
             bool blnSuccess;
 
-            try {
+            try
+            {
                 // Try to open the Lock file
                 // The date line is the first (and only) line in the file
                 blnSuccess = false;
-                using (var srInFile = new StreamReader(Path.Combine(strFolderPath, BRUKER_LOCK_FILE))) {
+                using (var srInFile = new StreamReader(Path.Combine(strFolderPath, BRUKER_LOCK_FILE)))
+                {
                     if (!srInFile.EndOfStream)
                     {
                         var strLineIn = srInFile.ReadLine();
-                        if ((strLineIn != null)) {
+                        if ((strLineIn != null))
+                        {
                             // Date line found
                             // It is of the form: wd37119 2208 WD37119\9TOperator Sat Aug 20 06:10:31 2005
 
@@ -159,7 +175,9 @@ namespace MSFileInfoScanner
                     }
                 }
 
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 // Error opening the Lock file
                 blnSuccess = false;
             }
@@ -179,13 +197,16 @@ namespace MSFileInfoScanner
             datasetFileInfo.FileSizeBytes = 0;
             datasetFileInfo.ScanCount = 0;
 
-            try {
-                foreach (var zippedSFile in diZippedSFilesFolderInfo.GetFiles("s*.zip")) {
+            try
+            {
+                foreach (var zippedSFile in diZippedSFilesFolderInfo.GetFiles("s*.zip"))
+                {
                     // Get the info on each zip file
 
                     using (var objZipFile = new Ionic.Zip.ZipFile(zippedSFile.FullName))
                     {
-                        foreach (var objZipEntry in objZipFile.Entries) {
+                        foreach (var objZipEntry in objZipFile.Entries)
+                        {
                             datasetFileInfo.FileSizeBytes += objZipEntry.UncompressedSize;
                             datasetFileInfo.ScanCount += 1;
                         }
@@ -194,7 +215,9 @@ namespace MSFileInfoScanner
                 }
                 blnSuccess = true;
 
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 blnSuccess = false;
             }
 
@@ -212,7 +235,8 @@ namespace MSFileInfoScanner
 
             foreach (var pekFile in icrFolderInfo.GetFiles("*.pek"))
             {
-                try {
+                try
+                {
                     // Try to open the PEK file
                     intFileListCount = 0;
                     using (var srInFile = new StreamReader(pekFile.OpenRead()))
@@ -221,8 +245,10 @@ namespace MSFileInfoScanner
                         {
                             var strLineIn = srInFile.ReadLine();
 
-                            if ((strLineIn != null)) {
-                                if (strLineIn.StartsWith(PEK_FILE_FILENAME_LINE)) {
+                            if ((strLineIn != null))
+                            {
+                                if (strLineIn.StartsWith(PEK_FILE_FILENAME_LINE))
+                                {
                                     intFileListCount += 1;
                                 }
                             }
@@ -230,12 +256,15 @@ namespace MSFileInfoScanner
                     }
                     blnSuccess = true;
 
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     // Error opening or parsing the PEK file
                     blnSuccess = false;
                 }
 
-                if (intFileListCount > datasetFileInfo.ScanCount) {
+                if (intFileListCount > datasetFileInfo.ScanCount)
+                {
                     datasetFileInfo.ScanCount = intFileListCount;
                 }
 
@@ -260,7 +289,8 @@ namespace MSFileInfoScanner
 
             foreach (var ticFile in ticFolderInfo.GetFiles("*.tic"))
             {
-                try {
+                try
+                {
                     // Try to open the TIC file
                     intFileListCount = 0;
                     using (var srInFile = new StreamReader(ticFile.OpenRead()))
@@ -276,26 +306,34 @@ namespace MSFileInfoScanner
 
                             if (blnParsingTICFileList)
                             {
-                                if (strLineIn.StartsWith(TIC_FILE_TIC_FILE_LIST_END)) {
+                                if (strLineIn.StartsWith(TIC_FILE_TIC_FILE_LIST_END))
+                                {
                                     blnParsingTICFileList = false;
                                     break;
                                 }
-                               
-                                if (strLineIn == TIC_FILE_COMMENT_SECTION_END) {
+
+                                if (strLineIn == TIC_FILE_COMMENT_SECTION_END)
+                                {
                                     // Found the end of the text section; exit the loop
                                     break;
                                 }
 
                                 intFileListCount += 1;
                             }
-                            else {
-                                if (strLineIn.StartsWith(TIC_FILE_NUMBER_OF_FILES_LINE_START)) {
+                            else
+                            {
+                                if (strLineIn.StartsWith(TIC_FILE_NUMBER_OF_FILES_LINE_START))
+                                {
                                     // Number of files line found
                                     // Parse out the file count
                                     datasetFileInfo.ScanCount = int.Parse(strLineIn.Substring(TIC_FILE_NUMBER_OF_FILES_LINE_START.Length).Trim());
-                                } else if (strLineIn.StartsWith(TIC_FILE_TIC_FILE_LIST_START)) {
+                                }
+                                else if (strLineIn.StartsWith(TIC_FILE_TIC_FILE_LIST_START))
+                                {
                                     blnParsingTICFileList = true;
-                                } else if (strLineIn == TIC_FILE_COMMENT_SECTION_END) {
+                                }
+                                else if (strLineIn == TIC_FILE_COMMENT_SECTION_END)
+                                {
                                     // Found the end of the text section; exit the loop
                                     break;
                                 }
@@ -306,12 +344,15 @@ namespace MSFileInfoScanner
 
                     dtTICModificationDate = ticFile.LastWriteTime;
 
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     // Error opening or parsing the TIC file
                     blnSuccess = false;
                 }
 
-                if (intFileListCount > datasetFileInfo.ScanCount) {
+                if (intFileListCount > datasetFileInfo.ScanCount)
+                {
                     datasetFileInfo.ScanCount = intFileListCount;
                 }
 
@@ -342,12 +383,14 @@ namespace MSFileInfoScanner
             var blnParsingBrukerOneFolder = false;
             bool blnSuccess;
 
-            try {
+            try
+            {
                 // Determine whether strDataFilePath points to a file or a folder
                 // See if strFileOrFolderPath points to a valid file
                 var brukerDatasetfile = new FileInfo(strDataFilePath);
 
-                if (brukerDatasetfile.Exists) {
+                if (brukerDatasetfile.Exists)
+                {
                     // Parsing a zipped S folder
                     blnParsingBrukerOneFolder = false;
 
@@ -360,21 +403,27 @@ namespace MSFileInfoScanner
                     datasetFileInfo.AcqTimeStart = brukerDatasetfile.LastWriteTime;
                     datasetFileInfo.AcqTimeEnd = brukerDatasetfile.LastWriteTime;
 
-                } else {
+                }
+                else
+                {
                     // Assuming it's a "1" folder
                     blnParsingBrukerOneFolder = true;
 
                     diZippedSFilesFolderInfo = new DirectoryInfo(strDataFilePath);
-                    if (diZippedSFilesFolderInfo.Exists) {
+                    if (diZippedSFilesFolderInfo.Exists)
+                    {
                         // Determine the dataset name by looking up the name of the parent folder of strDataFilePath
                         diZippedSFilesFolderInfo = diZippedSFilesFolderInfo.Parent;
                         blnSuccess = true;
-                    } else {
+                    }
+                    else
+                    {
                         blnSuccess = false;
                     }
                 }
 
-                if (blnSuccess && diZippedSFilesFolderInfo != null) {
+                if (blnSuccess && diZippedSFilesFolderInfo != null)
+                {
                     datasetFileInfo.FileSystemCreationTime = diZippedSFilesFolderInfo.CreationTime;
                     datasetFileInfo.FileSystemModificationTime = diZippedSFilesFolderInfo.LastWriteTime;
 
@@ -387,19 +436,24 @@ namespace MSFileInfoScanner
                     datasetFileInfo.FileSizeBytes = 0;
                     datasetFileInfo.ScanCount = 0;
                 }
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 blnSuccess = false;
             }
 
-            if (blnSuccess && blnParsingBrukerOneFolder) {
+            if (blnSuccess && blnParsingBrukerOneFolder)
+            {
                 // Parse the Acqu File to populate .AcqTimeEnd
                 blnSuccess = ParseBrukerAcquFile(strDataFilePath, datasetFileInfo);
 
-                if (blnSuccess) {
+                if (blnSuccess)
+                {
                     // Parse the Lock file to populate.AcqTimeStart
                     blnSuccess = ParseBrukerLockFile(strDataFilePath, datasetFileInfo);
 
-                    if (!blnSuccess) {
+                    if (!blnSuccess)
+                    {
                         // Use the end time as the start time
                         datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd;
                         blnSuccess = true;
@@ -407,80 +461,102 @@ namespace MSFileInfoScanner
                 }
             }
 
-            if (blnSuccess) {
+            if (blnSuccess)
+            {
                 // Look for the zipped S folders in ioZippedSFilesFolderInfo
-                try {
+                try
+                {
                     blnSuccess = ParseBrukerZippedSFolders(diZippedSFilesFolderInfo, datasetFileInfo);
                     intScanCountSaved = datasetFileInfo.ScanCount;
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     // Error parsing zipped S Folders; do not abort
                 }
 
-                try {
+                try
+                {
                     blnSuccess = false;
 
                     // Look for the TIC* folder to obtain the scan count from a .Tic file
                     // If the Scan Count in the TIC is larger than the scan count from ParseBrukerZippedSFolders,
                     //  then we'll use that instead
-                    foreach (var subFolder in diZippedSFilesFolderInfo.GetDirectories("TIC*")) {
+                    foreach (var subFolder in diZippedSFilesFolderInfo.GetDirectories("TIC*"))
+                    {
                         blnSuccess = ParseTICFolder(subFolder, datasetFileInfo, out dtTICModificationDate);
 
-                        if (blnSuccess) {
+                        if (blnSuccess)
+                        {
                             // Successfully parsed a TIC folder; do not parse any others
                             break;
                         }
                     }
 
-                    if (!blnSuccess) {
+                    if (!blnSuccess)
+                    {
                         // TIC folder not found; see if a .TIC file is present in ioZippedSFilesFolderInfo
                         blnSuccess = ParseTICFolder(diZippedSFilesFolderInfo, datasetFileInfo, out dtTICModificationDate);
                     }
 
-                    if (blnSuccess & !blnParsingBrukerOneFolder && dtTICModificationDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME) {
+                    if (blnSuccess & !blnParsingBrukerOneFolder && dtTICModificationDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                    {
                         // If dtTICModificationDate is earlier than .AcqTimeStart then update to dtTICMOdificationDate
-                        var _with3 = datasetFileInfo;
-                        if (dtTICModificationDate < _with3.AcqTimeStart) {
-                            _with3.AcqTimeStart = dtTICModificationDate;
-                            _with3.AcqTimeEnd = dtTICModificationDate;
+                        if (dtTICModificationDate < datasetFileInfo.AcqTimeStart)
+                        {
+                            datasetFileInfo.AcqTimeStart = dtTICModificationDate;
+                            datasetFileInfo.AcqTimeEnd = dtTICModificationDate;
                         }
                     }
 
-                    if (!blnSuccess) {
+                    if (!blnSuccess)
+                    {
                         // .Tic file not found in ioZippedSFilesFolderInfo
                         // Look for an ICR* folder to obtain the scan count from a .Pek file
                         foreach (var subFolder in diZippedSFilesFolderInfo.GetDirectories("ICR*"))
                         {
                             blnSuccess = ParseICRFolder(subFolder, datasetFileInfo);
 
-                            if (blnSuccess) {
+                            if (blnSuccess)
+                            {
                                 // Successfully parsed an ICR folder; do not parse any others
                                 break; // TODO: might not be correct. Was : Exit For
                             }
                         }
                     }
 
-                    if (blnSuccess) {
-                        if (intScanCountSaved > datasetFileInfo.ScanCount) {
+                    if (blnSuccess)
+                    {
+                        if (intScanCountSaved > datasetFileInfo.ScanCount)
+                        {
                             datasetFileInfo.ScanCount = intScanCountSaved;
                         }
-                    } else {
+                    }
+                    else
+                    {
                         // Set success to true anyway since we do have enough information to save the MS file info
                         blnSuccess = true;
                     }
 
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     // Error parsing the TIC* or ICR* folders; do not abort
                 }
 
                 // Validate datasetFileInfo.AcqTimeStart vs. datasetFileInfo.AcqTimeEnd
-                var _with4 = datasetFileInfo;
-                if (datasetFileInfo.AcqTimeEnd >= MINIMUM_ACCEPTABLE_ACQ_START_TIME) {
-                    if (_with4.AcqTimeStart > _with4.AcqTimeEnd) {
+                if (datasetFileInfo.AcqTimeEnd >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                {
+                    if (datasetFileInfo.AcqTimeStart > datasetFileInfo.AcqTimeEnd)
+                    {
                         // Start time cannot be greater than the end time
-                        _with4.AcqTimeStart = _with4.AcqTimeEnd;
-                    } else if (_with4.AcqTimeStart < MINIMUM_ACCEPTABLE_ACQ_START_TIME) {
-                        _with4.AcqTimeStart = _with4.AcqTimeEnd;
-                    } else {
+                        datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd;
+                    }
+                    else if (datasetFileInfo.AcqTimeStart < MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                    {
+                        datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd;
+                    }
+                    else
+                    {
                         //'Dim dtDateCompare As DateTime
                         //'If .ScanCount > 0 Then
                         //'    ' Make sure the start time is greater than the end time minus the scan count times 30 seconds per scan
