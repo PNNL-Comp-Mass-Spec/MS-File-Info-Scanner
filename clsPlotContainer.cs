@@ -334,7 +334,7 @@ namespace MSFileInfoScanner
         private int PointSizeToPixels(int fontSizePoints)
         {
             var fontSizePixels = fontSizePoints * 1.33;
-            return Convert.ToInt32(Math.Round(fontSizePixels, 0));
+            return (int)Math.Round(fontSizePixels, 0);
         }
 
     }

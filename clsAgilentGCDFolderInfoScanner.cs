@@ -7,7 +7,6 @@ using PNNLOmics.Utilities;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
 //
-// Last modified January 17, 2013
 
 namespace MSFileInfoScanner
 {

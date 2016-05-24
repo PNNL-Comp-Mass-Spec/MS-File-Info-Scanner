@@ -6,7 +6,6 @@ using UIMFLibrary;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 //
-// Last modified August 27, 2013
 
 namespace MSFileInfoScanner
 {
@@ -130,7 +129,7 @@ namespace MSFileInfoScanner
                 }
 
                 if (intOverallAvgCount > 0) {
-                    sngOverallScore = Convert.ToSingle(dblOverallAvgIntensitySum / intOverallAvgCount);
+                    sngOverallScore = (float)(dblOverallAvgIntensitySum / intOverallAvgCount);
                 } else {
                     sngOverallScore = 0;
                 }
@@ -300,7 +299,7 @@ namespace MSFileInfoScanner
 
                     if (mSaveTICAndBPI) {
                         if (dblTIC > BAD_TIC_OR_BPI && dblTIC > BAD_TIC_OR_BPI) {
-                            mTICandBPIPlot.AddData(intFrameNumber, intMSLevel, Convert.ToSingle(dblElutionTime), dblBPI, dblTIC);
+                            mTICandBPIPlot.AddData(intFrameNumber, intMSLevel, (float)dblElutionTime, dblBPI, dblTIC);
                         }
 
                         var dblPressure = objFrameParams.GetValueDouble(FrameParamKeyType.PressureBack);
@@ -311,7 +310,7 @@ namespace MSFileInfoScanner
                         if (Math.Abs(dblPressure) < float.Epsilon)
                             dblPressure = objFrameParams.GetValueDouble(FrameParamKeyType.PressureFront);
 
-                        mInstrumentSpecificPlots.AddDataTICOnly(intFrameNumber, intMSLevel, Convert.ToSingle(dblElutionTime), dblPressure);
+                        mInstrumentSpecificPlots.AddDataTICOnly(intFrameNumber, intMSLevel, (float)dblElutionTime, dblPressure);
                     }
 
 
@@ -401,7 +400,7 @@ namespace MSFileInfoScanner
                                     }
 
                                     if (mSaveLCMS2DPlots) {
-                                        mLCMS2DPlot.AddScan(intFrameNumber, intMSLevel, Convert.ToSingle(dblElutionTime), intIonCount, dblMZList, dblIonsIntensity);
+                                        mLCMS2DPlot.AddScan(intFrameNumber, intMSLevel, (float)dblElutionTime, intIonCount, dblMZList, dblIonsIntensity);
                                     }
 
                                     if (mCheckCentroidingStatus) {
@@ -607,14 +606,14 @@ namespace MSFileInfoScanner
                             // StartTime and Endtime were stored as the number of ticks (where each tick is 100 ns)
                             // Tick start date is either 1 January 1601 or 1 January 0001
 
-                            var dtRunTime = DateTime.MinValue.AddTicks(Convert.ToInt64(dblEndTime - dblStartTime));
+                            var dtRunTime = DateTime.MinValue.AddTicks((long)(dblEndTime - dblStartTime));
 
                             dblRunTime = dtRunTime.Subtract(DateTime.MinValue).TotalMinutes;
 
                             // In some .UIMF files, the DateStarted column in Global_Parameters is simply the date, and not a specific time of day
                             // If that's the case, then update datasetFileInfo.AcqTimeStart to be based on dblRunTime
                             if (datasetFileInfo.AcqTimeStart.Date == datasetFileInfo.AcqTimeStart) {
-                                var dtReportedDateStarted = DateTime.MinValue.AddTicks(Convert.ToInt64(dblStartTime));
+                                var dtReportedDateStarted = DateTime.MinValue.AddTicks((long)dblStartTime);
 
                                 if (dtReportedDateStarted.Year < 500) {
                                     dtReportedDateStarted = dtReportedDateStarted.AddYears(1600);

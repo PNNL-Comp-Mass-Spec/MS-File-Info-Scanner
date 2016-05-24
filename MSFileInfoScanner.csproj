@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -44,6 +44,10 @@
     </Reference>
     <Reference Include="MathNet.Numerics">
       <HintPath>Lib\MathNet.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="MSFileInfoScannerInterfaces, Version=1.1.5988.17918, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\MSFileInfoScannerInterfaces.dll</HintPath>
     </Reference>
     <Reference Include="NetCDFReader">
       <HintPath>Lib\NetCDFReader.dll</HintPath>
@@ -75,6 +79,10 @@
     </Reference>
     <Reference Include="SharedVBNetRoutines">
       <HintPath>Lib\SharedVBNetRoutines.dll</HintPath>
+    </Reference>
+    <Reference Include="SpectraTypeClassifier, Version=1.1.5988.17918, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\SpectraTypeClassifier.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -126,16 +134,6 @@
     <Compile Include="clsZippedImagingFilesScanner.cs" />
     <Compile Include="MSFileInfoProcessorInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="MSFileInfoScannerInterfaces\MSFileInfoScannerInterfaces.csproj">
-      <Project>{378c3a36-522b-42c6-90ee-71cbbfa7ce63}</Project>
-      <Name>MSFileInfoScannerInterfaces</Name>
-    </ProjectReference>
-    <ProjectReference Include="SpectraTypeClassifier\SpectraTypeClassifier.csproj">
-      <Project>{7c99fa75-805a-401e-8372-104794e035f4}</Project>
-      <Name>SpectraTypeClassifier</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

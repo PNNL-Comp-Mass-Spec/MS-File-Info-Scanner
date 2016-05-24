@@ -507,11 +507,11 @@ namespace MSFileInfoScanner
                         mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
                         if (mSaveTICAndBPI & !blnTICStored) {
-                            mTICandBPIPlot.AddData(intScanIndex + 1, intMSLevels[intScanIndex], Convert.ToSingle(dblScanTimes[intScanIndex]), dblBPI, dblTIC);
+                            mTICandBPIPlot.AddData(intScanIndex + 1, intMSLevels[intScanIndex], (float)dblScanTimes[intScanIndex], dblBPI, dblTIC);
                         }
 
                         if (mSaveLCMS2DPlots) {
-                            mLCMS2DPlot.AddScan(intScanIndex + 1, intMSLevels[intScanIndex], Convert.ToSingle(dblScanTimes[intScanIndex]), oMSDataSpectrum.Mzs.Length, oMSDataSpectrum.Mzs, oMSDataSpectrum.Intensities);
+                            mLCMS2DPlot.AddScan(intScanIndex + 1, intMSLevels[intScanIndex], (float)dblScanTimes[intScanIndex], oMSDataSpectrum.Mzs.Length, oMSDataSpectrum.Mzs, oMSDataSpectrum.Intensities);
                         }
 
                         if (mCheckCentroidingStatus) {
@@ -523,7 +523,7 @@ namespace MSFileInfoScanner
                     }
 
                     if (DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 60) {
-                        ReportMessage(" ... " + ((intScanIndex + 1) / Convert.ToDouble(dblScanTimes.Length) * 100).ToString("0.0") + "% complete");
+                        ReportMessage(" ... " + ((intScanIndex + 1) / (double)dblScanTimes.Length * 100).ToString("0.0") + "% complete");
                         dtLastProgressTime = DateTime.UtcNow;
                     }
 
@@ -611,7 +611,7 @@ namespace MSFileInfoScanner
             }
 
 
-            if (int2DScanNumMin / Convert.ToDouble(int2DScanNumMax) > 0.5) {
+            if (int2DScanNumMin / (double)int2DScanNumMax > 0.5) {
                 // Zoom in the 2D plot to prevent all of the the data from being scrunched to the right
                 mLCMS2DPlot.Options.UseObservedMinScan = true;
             }

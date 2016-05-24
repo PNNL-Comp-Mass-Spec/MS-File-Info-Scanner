@@ -14,7 +14,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "May 19, 2016";
+        public const string PROGRAM_DATE = "May 24, 2016";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
@@ -62,31 +62,15 @@ namespace MSFileInfoScanner
         private static bool mZipFileCheckAllData;
 
         private static bool mPostResultsToDMS;
-        private static clsMSFileInfoScanner withEventsField_mMSFileScanner;
-        private static clsMSFileInfoScanner mMSFileScanner
-        {
-            get { return withEventsField_mMSFileScanner; }
-            set
-            {
-                if (withEventsField_mMSFileScanner != null)
-                {
-                    withEventsField_mMSFileScanner.ErrorEvent -= mMSFileScanner_ErrorEvent;
-                    withEventsField_mMSFileScanner.MessageEvent -= mMSFileScanner_MessageEvent;
-                }
-                withEventsField_mMSFileScanner = value;
-                if (withEventsField_mMSFileScanner != null)
-                {
-                    withEventsField_mMSFileScanner.ErrorEvent += mMSFileScanner_ErrorEvent;
-                    withEventsField_mMSFileScanner.MessageEvent += mMSFileScanner_MessageEvent;
-                }
-            }
-
-        }
+        
+        /// <summary>
+        /// Main function
+        /// </summary>
+        /// <returns>0 if no error, error code if an error</returns>
+        /// <remarks>The STAThread attribute is required for OxyPlot functionality</remarks>
         [STAThread()]
         public static int Main()
         {
-
-            // Returns 0 if no error, error code if an error
 
             int intReturnCode;
             var objParseCommandLine = new clsParseCommandLine();
@@ -97,7 +81,7 @@ namespace MSFileInfoScanner
             mLogFilePath = string.Empty;
 
             mRecurseFolders = false;
-            mRecurseFoldersMaxLevels = 0;
+            mRecurseFoldersMaxLevels = 2;
             mIgnoreErrorsWhenRecursing = false;
 
             mReprocessingExistingFiles = false;
@@ -153,86 +137,88 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    mMSFileScanner = new clsMSFileInfoScanner();
+                    var scanner = new clsMSFileInfoScanner();
+
+                    scanner.ErrorEvent += mMSFileScanner_ErrorEvent;
+                    scanner.MessageEvent += mMSFileScanner_MessageEvent;
 
                     if (mCheckFileIntegrity)
                         mUseCacheFiles = true;
 
-                    var _with1 = mMSFileScanner;
                     // Note: These values will be overridden if /P was used and they are defined in the parameter file
 
-                    _with1.UseCacheFiles = mUseCacheFiles;
-                    _with1.ReprocessExistingFiles = mReprocessingExistingFiles;
-                    _with1.ReprocessIfCachedSizeIsZero = mReprocessIfCachedSizeIsZero;
+                    scanner.UseCacheFiles = mUseCacheFiles;
+                    scanner.ReprocessExistingFiles = mReprocessingExistingFiles;
+                    scanner.ReprocessIfCachedSizeIsZero = mReprocessIfCachedSizeIsZero;
 
-                    _with1.SaveTICAndBPIPlots = mSaveTICandBPIPlots;
-                    _with1.SaveLCMS2DPlots = mSaveLCMS2DPlots;
-                    _with1.LCMS2DPlotMaxPointsToPlot = mLCMS2DMaxPointsToPlot;
-                    _with1.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor;
-                    _with1.TestLCMSGradientColorSchemes = mTestLCMSGradientColorSchemes;
+                    scanner.SaveTICAndBPIPlots = mSaveTICandBPIPlots;
+                    scanner.SaveLCMS2DPlots = mSaveLCMS2DPlots;
+                    scanner.LCMS2DPlotMaxPointsToPlot = mLCMS2DMaxPointsToPlot;
+                    scanner.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor;
+                    scanner.TestLCMSGradientColorSchemes = mTestLCMSGradientColorSchemes;
 
-                    _with1.CheckCentroidingStatus = mCheckCentroidingStatus;
+                    scanner.CheckCentroidingStatus = mCheckCentroidingStatus;
 
-                    _with1.ScanStart = mScanStart;
-                    _with1.ScanEnd = mScanEnd;
-                    _with1.ShowDebugInfo = mShowDebugInfo;
+                    scanner.ScanStart = mScanStart;
+                    scanner.ScanEnd = mScanEnd;
+                    scanner.ShowDebugInfo = mShowDebugInfo;
 
-                    _with1.ComputeOverallQualityScores = mComputeOverallQualityScores;
-                    _with1.CreateDatasetInfoFile = mCreateDatasetInfoFile;
-                    _with1.CreateScanStatsFile = mCreateScanStatsFile;
+                    scanner.ComputeOverallQualityScores = mComputeOverallQualityScores;
+                    scanner.CreateDatasetInfoFile = mCreateDatasetInfoFile;
+                    scanner.CreateScanStatsFile = mCreateScanStatsFile;
 
-                    _with1.UpdateDatasetStatsTextFile = mUpdateDatasetStatsTextFile;
-                    _with1.DatasetStatsTextFileName = mDatasetStatsTextFileName;
+                    scanner.UpdateDatasetStatsTextFile = mUpdateDatasetStatsTextFile;
+                    scanner.DatasetStatsTextFileName = mDatasetStatsTextFileName;
 
-                    _with1.CheckFileIntegrity = mCheckFileIntegrity;
-                    _with1.MaximumTextFileLinesToCheck = mMaximumTextFileLinesToCheck;
-                    _with1.ComputeFileHashes = mComputeFileHashes;
-                    _with1.ZipFileCheckAllData = mZipFileCheckAllData;
+                    scanner.CheckFileIntegrity = mCheckFileIntegrity;
+                    scanner.MaximumTextFileLinesToCheck = mMaximumTextFileLinesToCheck;
+                    scanner.ComputeFileHashes = mComputeFileHashes;
+                    scanner.ZipFileCheckAllData = mZipFileCheckAllData;
 
-                    _with1.IgnoreErrorsWhenRecursing = mIgnoreErrorsWhenRecursing;
+                    scanner.IgnoreErrorsWhenRecursing = mIgnoreErrorsWhenRecursing;
 
                     if (mLogFilePath.Length > 0)
                     {
-                        _with1.LogMessagesToFile = true;
-                        _with1.LogFilePath = mLogFilePath;
+                        scanner.LogMessagesToFile = true;
+                        scanner.LogFilePath = mLogFilePath;
                     }
 
-                    _with1.DatasetIDOverride = mDatasetID;
-                    _with1.DSInfoDBPostingEnabled = mPostResultsToDMS;
+                    scanner.DatasetIDOverride = mDatasetID;
+                    scanner.DSInfoDBPostingEnabled = mPostResultsToDMS;
 
                     if (!string.IsNullOrEmpty(mParameterFilePath))
                     {
-                        _with1.LoadParameterFileSettings(mParameterFilePath);
+                        scanner.LoadParameterFileSettings(mParameterFilePath);
                     }
 
                     if (mRecurseFolders)
                     {
-                        if (mMSFileScanner.ProcessMSFilesAndRecurseFolders(mInputDataFilePath, mOutputFolderName, mRecurseFoldersMaxLevels))
+                        if (scanner.ProcessMSFilesAndRecurseFolders(mInputDataFilePath, mOutputFolderName, mRecurseFoldersMaxLevels))
                         {
                             intReturnCode = 0;
                         }
                         else
                         {
-                            intReturnCode = (int)mMSFileScanner.ErrorCode;
+                            intReturnCode = (int)scanner.ErrorCode;
                         }
                     }
                     else
                     {
-                        if (mMSFileScanner.ProcessMSFileOrFolderWildcard(mInputDataFilePath, mOutputFolderName, true))
+                        if (scanner.ProcessMSFileOrFolderWildcard(mInputDataFilePath, mOutputFolderName, true))
                         {
                             intReturnCode = 0;
                         }
                         else
                         {
-                            intReturnCode = (int)mMSFileScanner.ErrorCode;
+                            intReturnCode = (int)scanner.ErrorCode;
                             if (intReturnCode != 0)
                             {
-                                ShowErrorMessage("Error while processing: " + mMSFileScanner.GetErrorMessage());
+                                ShowErrorMessage("Error while processing: " + scanner.GetErrorMessage());
                             }
                         }
                     }
 
-                    mMSFileScanner.SaveCachedResults();
+                    scanner.SaveCachedResults();
                 }
 
             }
@@ -479,7 +465,7 @@ namespace MSFileInfoScanner
         {
             try
             {
-                mMSFileScanner = new clsMSFileInfoScanner();
+                var scanner = new clsMSFileInfoScanner();
 
                 Console.WriteLine("This program will scan a series of MS data files (or data folders) and " + "extract the acquisition start and end times, number of spectra, and the " + "total size of the data, saving the values in the file " + clsMSFileInfoScanner.DefaultAcquisitionTimeFilename + ". " + "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), " + "Agilent or QStar/QTrap .WIFF files, Masslynx .Raw folders, Bruker 1 folders, " + "Bruker XMass analysis.baf files, .UIMF files (IMS), " + "zipped Bruker imaging datasets (with 0_R*.zip files), and " + "DeconTools _isos.csv files");
 
@@ -546,8 +532,8 @@ namespace MSFileInfoScanner
                 Console.WriteLine();
                 Console.WriteLine("Use /PostToDMS to store the dataset info in the DMS database.  To customize the server name and/or stored procedure to use for posting, use an XML parameter file with settings DSInfoConnectionString, DSInfoDBPostingEnabled, and DSInfoStoredProcedure");
                 Console.WriteLine();
-                Console.WriteLine("Known file extensions: " + CollapseList(mMSFileScanner.GetKnownFileExtensionsList()));
-                Console.WriteLine("Known folder extensions: " + CollapseList(mMSFileScanner.GetKnownFolderExtensionsList()));
+                Console.WriteLine("Known file extensions: " + CollapseList(scanner.GetKnownFileExtensionsList()));
+                Console.WriteLine("Known folder extensions: " + CollapseList(scanner.GetKnownFolderExtensionsList()));
                 Console.WriteLine();
 
                 Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005");
@@ -584,15 +570,15 @@ namespace MSFileInfoScanner
             }
         }
 
-        private static void mMSFileScanner_ErrorEvent(string Message)
+        private static void mMSFileScanner_ErrorEvent(string message)
         {
             // We could display any error messages here
             // However, mMSFileScanner already will have written out to the console, so there is no need to do so again
 
-            WriteToErrorStream(Message);
+            WriteToErrorStream(message);
         }
 
-        private static void mMSFileScanner_MessageEvent(string Message)
+        private static void mMSFileScanner_MessageEvent(string message)
         {
             // We could display any status messages here
             // However, mMSFileScanner already will have written out to the console, so there is no need to do so again

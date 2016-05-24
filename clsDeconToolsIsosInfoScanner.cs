@@ -8,7 +8,6 @@ using ThermoRawFileReaderDLL.FinniganFileIO;
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2013
 //
-// Last modified April 29, 2016
 
 namespace MSFileInfoScanner
 {
@@ -166,7 +165,7 @@ namespace MSFileInfoScanner
                         var udtCurrentScan = (from item in lstScanData where item.Scan == intCurrentScan select item).ToList().FirstOrDefault();
 
                         lstIons.Sort(new clsLCMSDataPlotter.udtMSIonTypeComparer());
-                        mLCMS2DPlot.AddScan(intCurrentScan, udtCurrentScan.MSLevel, Convert.ToSingle(udtCurrentScan.ElutionTime), lstIons);
+                        mLCMS2DPlot.AddScan(intCurrentScan, udtCurrentScan.MSLevel, udtCurrentScan.ElutionTime, lstIons);
 
                         if (scansFileIsMissing && mSaveTICAndBPI) {
                             // Determine the TIC and BPI values using the data from the .isos file

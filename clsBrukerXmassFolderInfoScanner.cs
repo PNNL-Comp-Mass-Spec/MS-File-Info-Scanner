@@ -8,7 +8,6 @@ using PNNLOmics.Utilities;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 //
-// Last modified September 14, 2015
 
 namespace MSFileInfoScanner
 {
@@ -620,7 +619,7 @@ namespace MSFileInfoScanner
 
                     if (oScanDataSorted[intIndex].MSLevel == 0)
                         oScanDataSorted[intIndex].MSLevel = 1;
-                    var sngElutionTime = Convert.ToSingle(oScanDataSorted[intIndex].RT / 60.0);
+                    var sngElutionTime = (float)(oScanDataSorted[intIndex].RT / 60.0);
                     string strScanTypeName;
 
                     if (string.IsNullOrEmpty(oScanDataSorted[intIndex].SpotNumber))

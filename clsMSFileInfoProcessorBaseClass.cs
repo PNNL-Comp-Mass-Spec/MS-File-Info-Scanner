@@ -5,7 +5,6 @@ using MSFileInfoScannerInterfaces;
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2007
 //
-// Last modified May 11, 2015
 
 namespace MSFileInfoScanner
 {
@@ -75,7 +74,6 @@ namespace MSFileInfoScanner
         public sealed override event ErrorEventEventHandler ErrorEvent;
         public sealed override event MessageEventEventHandler MessageEvent;
 
-        //Public Event ProgressUpdate( Progress As Single)
         #endregion
 
         #region "Properties"
@@ -387,7 +385,6 @@ namespace MSFileInfoScanner
             }
         }
 
-
         protected void ShowProgress(int scanNumber, int scanCount, ref DateTime dtLastProgressTime, int modulusValue = 100, int detailedUpdateIntervalSeconds = 30)
         {
             if (modulusValue < 1)
@@ -409,7 +406,7 @@ namespace MSFileInfoScanner
                 return;
             }
 
-            var sngProgress = Convert.ToSingle(scanNumber / scanCount * 100);
+            var sngProgress = scanNumber / (float)scanCount * 100;
 
             if (!(DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > detailedUpdateIntervalSeconds))
             {
@@ -508,7 +505,7 @@ namespace MSFileInfoScanner
 
             // Set MaxPointsToPlot in mLCMS2DPlotOverview to be intLCMS2DOverviewPlotDivisor times smaller 
             // than the MaxPointsToPlot value in mLCMS2DPlot
-            mLCMS2DPlotOverview.Options.MaxPointsToPlot = Convert.ToInt32(Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / (double)intLCMS2DOverviewPlotDivisor, 0));
+            mLCMS2DPlotOverview.Options.MaxPointsToPlot = (int)Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / (double)intLCMS2DOverviewPlotDivisor, 0);
 
             // Copy the data from mLCMS2DPlot to mLCMS2DPlotOverview
             // mLCMS2DPlotOverview will auto-filter the data to track, at most, mLCMS2DPlotOverview.Options.MaxPointsToPlot points
@@ -838,21 +835,21 @@ namespace MSFileInfoScanner
             if (intValue < 1000) {
                 return intValue.ToString();
             } else if (intValue < 1000000.0) {
-                return Convert.ToInt32(Math.Round(intValue / 1000.0, 0)) + "K";
+                return (int)Math.Round(intValue / 1000.0, 0) + "K";
             } else {
-                return Convert.ToInt32(Math.Round(intValue / 1000.0 / 1000, 0)) + "M";
+                return (int)Math.Round(intValue / 1000.0 / 1000, 0) + "M";
             }
 
         }
 
-        private void mLCMS2DPlot_ErrorEvent(string Message)
+        private void mLCMS2DPlot_ErrorEvent(string message)
         {
-            ReportError("Error in LCMS2DPlot: " + Message);
+            ReportError("Error in LCMS2DPlot: " + message);
         }
 
-        private void mLCMS2DPlotOverview_ErrorEvent(string Message)
+        private void mLCMS2DPlotOverview_ErrorEvent(string message)
         {
-            ReportError("Error in LCMS2DPlotOverview: " + Message);
+            ReportError("Error in LCMS2DPlotOverview: " + message);
         }
 
         private void mDatasetStatsSummarizer_ErrorEvent(string errorMessage)

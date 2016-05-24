@@ -269,14 +269,14 @@ namespace MSFileInfoScanner
 
         }
 
-        private void mPWizParser_ErrorEvent(string Message)
+        private void mPWizParser_ErrorEvent(string message)
         {
-            ReportError(Message);
+            ReportError(message);
         }
 
-        private void mPWizParser_MessageEvent(string Message)
+        private void mPWizParser_MessageEvent(string message)
         {
-            ShowMessage(Message);
+            ShowMessage(message);
         }
     }
 }

@@ -4,7 +4,6 @@ using System.IO;
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2005
 //
-// Last modified September 17, 2005
 
 namespace MSFileInfoScanner
 {
@@ -32,8 +31,8 @@ namespace MSFileInfoScanner
             TimeSpan dtTimeSpan;
 
             try {
-                var intMinutes = Convert.ToInt32(Math.Floor(dblMinutes));
-                var intSeconds = Convert.ToInt32(Math.Round((dblMinutes - intMinutes) * 60, 0));
+                var intMinutes = (int)Math.Floor(dblMinutes);
+                var intSeconds = (int)Math.Round((dblMinutes - intMinutes) * 60, 0);
 
                 dtTimeSpan = new TimeSpan(0, intMinutes, intSeconds);
             } catch (Exception) {

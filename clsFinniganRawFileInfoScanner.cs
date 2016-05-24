@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using PNNLOmics.Utilities;
 using ThermoRawFileReaderDLL.FinniganFileIO;
 using SpectraTypeClassifier;
+using ThermoRawFileReaderDLL;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2005
 //
-// Last modified May 11, 2015
 
 namespace MSFileInfoScanner
 {
@@ -94,7 +95,7 @@ namespace MSFileInfoScanner
 
                 if (intOverallAvgCount > 0)
                 {
-                    sngOverallScore = Convert.ToSingle(dblOverallAvgIntensitySum / intOverallAvgCount);
+                    sngOverallScore = (float)(dblOverallAvgIntensitySum / intOverallAvgCount);
                 }
                 else
                 {
@@ -107,13 +108,15 @@ namespace MSFileInfoScanner
 
         }
 
-        private clsSpectrumTypeClassifier.eCentroidStatusConstants GetCentroidStatus(int intScanNumber, FinniganFileReaderBaseClass.udtScanHeaderInfoType udtScanHeaderInfoType)
+        private clsSpectrumTypeClassifier.eCentroidStatusConstants GetCentroidStatus(
+            int intScanNumber, 
+            clsScanInfo scanInfo)
         {
 
 
-            if (udtScanHeaderInfoType.IsCentroidScan)
+            if (scanInfo.IsCentroided)
             {
-                if (mIsProfileM.IsMatch(udtScanHeaderInfoType.FilterText))
+                if (mIsProfileM.IsMatch(scanInfo.FilterText))
                 {
                     ShowMessage("Warning: Scan " + intScanNumber + " appears to be profile mode data, yet XRawFileIO reported it to be centroid");
                 }
@@ -121,7 +124,7 @@ namespace MSFileInfoScanner
                 return clsSpectrumTypeClassifier.eCentroidStatusConstants.Centroid;
             }
 
-            if (mIsCentroid.IsMatch(udtScanHeaderInfoType.FilterText))
+            if (mIsCentroid.IsMatch(scanInfo.FilterText))
             {
                 ShowMessage("Warning: Scan " + intScanNumber + " appears to be centroided data, yet XRawFileIO reported it to be profile");
             }
@@ -151,11 +154,6 @@ namespace MSFileInfoScanner
 
         private void LoadScanDetails(XRawFileIO objXcaliburAccessor)
         {
-            var udtScanHeaderInfo = new FinniganFileReaderBaseClass.udtScanHeaderInfoType();
-
-            int intScanStart;
-            int intScanEnd;
-
             Console.Write("  Loading scan details");
 
             if (mSaveTICAndBPI)
@@ -172,10 +170,16 @@ namespace MSFileInfoScanner
             var dtLastProgressTime = DateTime.UtcNow;
 
             var intScanCount = objXcaliburAccessor.GetNumScans();
+
+            int intScanStart;
+            int intScanEnd;
+
             GetStartAndEndScans(intScanCount, out intScanStart, out intScanEnd);
 
             for (var intScanNumber = intScanStart; intScanNumber <= intScanEnd; intScanNumber++)
             {
+
+                clsScanInfo scanInfo;
 
                 try
                 {
@@ -184,7 +188,7 @@ namespace MSFileInfoScanner
                         Console.WriteLine(" ... scan " + intScanNumber);
                     }
 
-                    var blnSuccess = objXcaliburAccessor.GetScanInfo(intScanNumber, out udtScanHeaderInfo);
+                    var blnSuccess = objXcaliburAccessor.GetScanInfo(intScanNumber, out scanInfo);
 
                     if (blnSuccess)
                     {
@@ -192,34 +196,34 @@ namespace MSFileInfoScanner
                         {
                             mTICandBPIPlot.AddData(
                                 intScanNumber,
-                                udtScanHeaderInfo.MSLevel,
-                                Convert.ToSingle(udtScanHeaderInfo.RetentionTime),
-                                udtScanHeaderInfo.BasePeakIntensity,
-                                udtScanHeaderInfo.TotalIonCurrent);
+                                scanInfo.MSLevel,
+                                (float)scanInfo.RetentionTime,
+                                scanInfo.BasePeakIntensity,
+                                scanInfo.TotalIonCurrent);
                         }
 
                         var objScanStatsEntry = new clsScanStatsEntry
                         {
                             ScanNumber = intScanNumber,
-                            ScanType = udtScanHeaderInfo.MSLevel,
-                            ScanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(udtScanHeaderInfo.FilterText),
-                            ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(udtScanHeaderInfo.FilterText),
-                            ElutionTime = udtScanHeaderInfo.RetentionTime.ToString("0.0000"),
-                            TotalIonIntensity = StringUtilities.ValueToString(udtScanHeaderInfo.TotalIonCurrent, 5),
-                            BasePeakIntensity = StringUtilities.ValueToString(udtScanHeaderInfo.BasePeakIntensity, 5),
-                            BasePeakMZ = StringUtilities.DblToString(udtScanHeaderInfo.BasePeakMZ, 4),
+                            ScanType = scanInfo.MSLevel,
+                            ScanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(scanInfo.FilterText),
+                            ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(scanInfo.FilterText),
+                            ElutionTime = scanInfo.RetentionTime.ToString("0.0000"),
+                            TotalIonIntensity = StringUtilities.ValueToString(scanInfo.TotalIonCurrent, 5),
+                            BasePeakIntensity = StringUtilities.ValueToString(scanInfo.BasePeakIntensity, 5),
+                            BasePeakMZ = StringUtilities.DblToString(scanInfo.BasePeakMZ, 4),
                             BasePeakSignalToNoiseRatio = "0",
-                            IonCount = udtScanHeaderInfo.NumPeaks,
-                            IonCountRaw = udtScanHeaderInfo.NumPeaks
+                            IonCount = scanInfo.NumPeaks,
+                            IonCountRaw = scanInfo.NumPeaks
                         };
 
 
                         // Store the ScanEvent values in .ExtendedScanInfo
-                        StoreExtendedScanInfo(ref objScanStatsEntry.ExtendedScanInfo, udtScanHeaderInfo.ScanEventNames, udtScanHeaderInfo.ScanEventValues);
+                        StoreExtendedScanInfo(ref objScanStatsEntry.ExtendedScanInfo, scanInfo.ScanEvents);
 
                         // Store the collision mode and the scan filter text
-                        objScanStatsEntry.ExtendedScanInfo.CollisionMode = udtScanHeaderInfo.CollisionMode;
-                        objScanStatsEntry.ExtendedScanInfo.ScanFilterText = udtScanHeaderInfo.FilterText;
+                        objScanStatsEntry.ExtendedScanInfo.CollisionMode = scanInfo.CollisionMode;
+                        objScanStatsEntry.ExtendedScanInfo.ScanFilterText = scanInfo.FilterText;
 
                         mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
@@ -228,6 +232,7 @@ namespace MSFileInfoScanner
                 catch (Exception ex)
                 {
                     ReportError("Error loading header info for scan " + intScanNumber + ": " + ex.Message);
+                    continue;
                 }
 
 
@@ -246,7 +251,7 @@ namespace MSFileInfoScanner
                         {
                             if (mSaveLCMS2DPlots)
                             {
-                                mLCMS2DPlot.AddScan2D(intScanNumber, udtScanHeaderInfo.MSLevel, Convert.ToSingle(udtScanHeaderInfo.RetentionTime), intIonCount, dblMassIntensityPairs);
+                                mLCMS2DPlot.AddScan2D(intScanNumber, scanInfo.MSLevel, (float)scanInfo.RetentionTime, intIonCount, dblMassIntensityPairs);
                             }
 
                             if (mCheckCentroidingStatus)
@@ -260,9 +265,9 @@ namespace MSFileInfoScanner
                                     lstMZs.Add(dblMassIntensityPairs[0, i]);
                                 }
 
-                                var centroidingStatus = GetCentroidStatus(intScanNumber, udtScanHeaderInfo);
+                                var centroidingStatus = GetCentroidStatus(intScanNumber, scanInfo);
 
-                                mDatasetStatsSummarizer.ClassifySpectrum(lstMZs, udtScanHeaderInfo.MSLevel, centroidingStatus);
+                                mDatasetStatsSummarizer.ClassifySpectrum(lstMZs, scanInfo.MSLevel, centroidingStatus);
                             }
                         }
 
@@ -501,22 +506,18 @@ namespace MSFileInfoScanner
                 strEntryValue = string.Empty;
             }
 
-            //'Dim strEntryNames(0) As String
-            //'Dim strEntryValues(0) As String
+            var scanEvents = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>(strEntryName, strEntryValue)
+            };
 
-            //'strEntryNames(0) = String.Copy(strEntryName)
-            //'strEntryValues(0) = String.Copy(strEntryValue)
-
-            //'StoreExtendedScanInfo(htExtendedScanInfo, strEntryNames, strEntryValues)
-
-            // This command is equivalent to the above series of commands
-            // It converts strEntryName to an array and strEntryValue to a separate array and passes those arrays to StoreExtendedScanInfo()
-            StoreExtendedScanInfo(ref udtExtendedScanInfo, new[] { strEntryName }, new[] { strEntryValue });
+            StoreExtendedScanInfo(ref udtExtendedScanInfo, scanEvents);
 
         }
 
-
-        private void StoreExtendedScanInfo(ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo, string[] strEntryNames, string[] strEntryValues)
+        private void StoreExtendedScanInfo(
+            ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo, 
+            IReadOnlyCollection<KeyValuePair<string, string>> scanEvents)
         {
             var cTrimChars = new[] {
                 ':',
@@ -525,68 +526,68 @@ namespace MSFileInfoScanner
 
             try
             {
-                if (strEntryNames == null || strEntryValues == null)
+                if (scanEvents == null || scanEvents.Count == 0)
                 {
                     return;
                 }
 
-                for (var intIndex = 0; intIndex <= strEntryNames.Length - 1; intIndex++)
+                foreach (var scanEvent in scanEvents)
                 {
-                    if (strEntryNames[intIndex] == null || strEntryNames[intIndex].Trim().Length == 0)
+                    if (string.IsNullOrWhiteSpace(scanEvent.Key))
                     {
                         // Empty entry name; do not add
                         continue;
                     }
 
-                    // We're only storing certain entries from strEntryNames
-                    var entryNameLCase = strEntryNames[intIndex].ToLower().TrimEnd(cTrimChars);
+                    // We're only storing certain scan events
+                    var entryNameLCase = scanEvent.Key.ToLower().TrimEnd(cTrimChars);
 
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_ION_INJECTION_TIME,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.IonInjectionTime = strEntryValues[intIndex];
+                        udtExtendedScanInfo.IonInjectionTime = scanEvent.Value;
                         break;
                     }
 
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_SCAN_SEGMENT,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.ScanSegment = strEntryValues[intIndex];
+                        udtExtendedScanInfo.ScanSegment = scanEvent.Value;
                         break;
                     }
 
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_SCAN_EVENT,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.ScanEvent = strEntryValues[intIndex];
+                        udtExtendedScanInfo.ScanEvent = scanEvent.Value;
                         break;
                     }
 
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_CHARGE_STATE,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.ChargeState = strEntryValues[intIndex];
+                        udtExtendedScanInfo.ChargeState = scanEvent.Value;
                         break;
                     }
 
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_MONOISOTOPIC_MZ,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.MonoisotopicMZ = strEntryValues[intIndex];
+                        udtExtendedScanInfo.MonoisotopicMZ = scanEvent.Value;
                         break;
                     }
 
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_COLLISION_MODE,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.CollisionMode = strEntryValues[intIndex];
+                        udtExtendedScanInfo.CollisionMode = scanEvent.Value;
                         break;
                     }
 
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_SCAN_FILTER_TEXT,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.ScanFilterText = strEntryValues[intIndex];
+                        udtExtendedScanInfo.ScanFilterText = scanEvent.Value;
                         break;
                     }
                 }

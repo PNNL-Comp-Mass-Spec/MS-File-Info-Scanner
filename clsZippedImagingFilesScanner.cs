@@ -5,7 +5,6 @@ using System.Linq;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 //
-// Last modified July 23, 2012
 
 namespace MSFileInfoScanner
 {

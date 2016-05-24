@@ -289,10 +289,10 @@ namespace MSFileInfoScanner
             }
 
             // Round intMaxScan down to the nearest multiple of 10
-            intMaxScan = Convert.ToInt32(Math.Ceiling(intMaxScan / 10.0) * 10);
+            intMaxScan = (int)Math.Ceiling(intMaxScan / 10.0) * 10;
 
             // Multiple dblMaxIntensity by 2% and then round up to the nearest integer
-            dblMaxIntensity = Convert.ToDouble(Math.Ceiling(dblMaxIntensity * 1.02));
+            dblMaxIntensity = (double)Math.Ceiling(dblMaxIntensity * 1.02);
 
             var myPlot = clsOxyplotUtilities.GetBasicPlotModel(strTitle, strXAxisLabel, strYAxisLabel);
 

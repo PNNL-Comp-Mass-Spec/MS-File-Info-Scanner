@@ -26,6 +26,7 @@ namespace MSFileInfoScanner
         //
         // VB6 version Last modified January 22, 2004
         // Updated to VB.NET September 17, 2005, though did not upgrade the extended function info functions or data point reading options
+        // Updated to C# in May 2016
 
         //-------------------------------
         //-- Start Native IO Headers
@@ -960,7 +961,7 @@ namespace MSFileInfoScanner
                                     sngEndMass = 0;
 
                                     // Since the first scan may not have the full mass range, we'll also check a scan
-                                    //  in the middle of the file as a random comparison
+                                    // in the middle of the file as a random comparison
                                     if (udtThisMSData.FunctionInfo[lngFunctionNumber].ScanCount >= 3)
                                     {
                                         //Call sScanStats.GetScanStats(strCleanMLynxDataFolderPath, lngFunctionNumber, .ProcessNumber, CLng(.ScanCount / 3))
@@ -1165,14 +1166,14 @@ namespace MSFileInfoScanner
 
             if (startBit == 0)
             {
-                thisMask = (long)((Math.Pow(2, (endBit + 1))) - 1);
+                thisMask = (long)(Math.Pow(2, (endBit + 1)) - 1);
             }
             else
             {
                 thisMask = 0;
                 for (var bitIndex = startBit; bitIndex <= endBit; bitIndex++)
                 {
-                    thisMask += (long)(Math.Pow(2, bitIndex));
+                    thisMask += (long)Math.Pow(2, bitIndex);
                 }
             }
 
@@ -1430,10 +1431,8 @@ namespace MSFileInfoScanner
                             break;
                     }
 
-                    udtMSFunctionInfo.IonMode = (short)(Convert.ToInt16(udtNativeFunctionInfo.PackedFunctionInfo & maskIonMode) / 32);
-                    // 32 = 2^5
-                    udtMSFunctionInfo.AcquisitionDataType = (short)(Convert.ToInt16(udtNativeFunctionInfo.PackedFunctionInfo & maskAcquisitionDataType) / 1024);
-                    // 1024 = 2^10
+                    udtMSFunctionInfo.IonMode = (short)((short)(udtNativeFunctionInfo.PackedFunctionInfo & maskIonMode) / 32f);     // 32 = 2^5
+                    udtMSFunctionInfo.AcquisitionDataType = (short)((short)(udtNativeFunctionInfo.PackedFunctionInfo & maskAcquisitionDataType) / 1024f);    // 1024 = 2^10
 
                     udtMSFunctionInfo.CycleTime = udtNativeFunctionInfo.CycleTime;
                     udtMSFunctionInfo.InterScanDelay = udtNativeFunctionInfo.InterScanDelay;
@@ -1441,8 +1440,7 @@ namespace MSFileInfoScanner
                     udtMSFunctionInfo.EndRT = udtNativeFunctionInfo.EndRT;
 
                     udtMSFunctionInfo.MsMsCollisionEnergy = (short)(udtNativeFunctionInfo.PackedMSMSInfo & maskCollisionEnergy);
-                    udtMSFunctionInfo.MSMSSegmentOrChannelCount = (short)(NumConversion.Int32ToUnsigned(udtNativeFunctionInfo.PackedMSMSInfo) / 256);
-                    // 256 = 2^8
+                    udtMSFunctionInfo.MSMSSegmentOrChannelCount = (short)(NumConversion.Int32ToUnsigned(udtNativeFunctionInfo.PackedMSMSInfo) / 256f);      // 256 = 2^8
 
                     udtMSFunctionInfo.FunctionSetMass = udtNativeFunctionInfo.FunctionSetMass;
                     udtMSFunctionInfo.InterSegmentChannelTime = udtNativeFunctionInfo.InterSegmentChannelTime;
@@ -1580,8 +1578,9 @@ namespace MSFileInfoScanner
                             udtNativeScanIndexRecord.TicValue = udtNativeScanIndexRecordCompressedScan.TicValue;
                             udtNativeScanIndexRecord.ScanTime = udtNativeScanIndexRecordCompressedScan.ScanTime;
 
-                            udtNativeScanIndexRecord.PackedBasePeakIntensity = 0;
                             // Unused
+                            udtNativeScanIndexRecord.PackedBasePeakIntensity = 0;
+                            
                             udtNativeScanIndexRecord.PackedBasePeakInfo = udtNativeScanIndexRecordCompressedScan.PackedBasePeakInfo;
                         }
                         else
@@ -1607,8 +1606,9 @@ namespace MSFileInfoScanner
 
                     if (!blnScanOffsetAndPeakCountOnly)
                     {
-                        udtScanIndexRecord.SegmentNumber = (short)(Convert.ToInt16(udtNativeScanIndexRecord.PackedScanInfo & maskSegment) / 4194304);
                         // 4194304 = 2^22
+                        udtScanIndexRecord.SegmentNumber = (short)((short)(udtNativeScanIndexRecord.PackedScanInfo & maskSegment) / 4194304);
+                        
                         udtScanIndexRecord.UseFollowingContinuum = NumConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskUseFollowingContinuum);
                         udtScanIndexRecord.ContiuumDataOverride = NumConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskContiuumDataOverride);
                         udtScanIndexRecord.ScanContainsMolecularMasses = NumConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskScanContainsMolecularMasses);
@@ -1621,14 +1621,15 @@ namespace MSFileInfoScanner
                         udtScanIndexRecord.TicValue = udtNativeScanIndexRecord.TicValue;
                         udtScanIndexRecord.ScanTime = udtNativeScanIndexRecord.ScanTime;
 
-                        udtScanIndexRecord.BasePeakIntensity = (int)(UnpackIntensity(udtNativeScanIndexRecord.PackedBasePeakIntensity, udtNativeScanIndexRecord.PackedBasePeakInfo, udtMSFunctionInfo.AcquisitionDataType));
+                        udtScanIndexRecord.BasePeakIntensity = (int)UnpackIntensity(udtNativeScanIndexRecord.PackedBasePeakIntensity, udtNativeScanIndexRecord.PackedBasePeakInfo, udtMSFunctionInfo.AcquisitionDataType);
 
-                        udtScanIndexRecord.BasePeakMass = (float)(UnpackMass(udtNativeScanIndexRecord.PackedBasePeakInfo, udtMSFunctionInfo.AcquisitionDataType, true));
+                        udtScanIndexRecord.BasePeakMass = (float)UnpackMass(udtNativeScanIndexRecord.PackedBasePeakInfo, udtMSFunctionInfo.AcquisitionDataType, true);
 
                         // ToDo: May need to calibrate the base peak mass
-                        udtScanIndexRecord.BasePeakMass = udtScanIndexRecord.BasePeakMass;
+                        // udtScanIndexRecord.BasePeakMass = udtScanIndexRecord.BasePeakMass;
 
                         udtScanIndexRecord.LoMass = 0;
+
                         // ToDo: Figure out if this can be read from the FunctionIndex file
                         udtScanIndexRecord.HiMass = 0;
                         udtScanIndexRecord.SetMass = 0;
@@ -1942,12 +1943,12 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    intUnpackedValue = (int)((long)(lngPackedValue / (Math.Pow(2, intStartBit))) & CreateMask(0, (byte)(intEndBit - intStartBit)));
+                    intUnpackedValue = (int)((long)(lngPackedValue / Math.Pow(2, intStartBit)) & CreateMask(0, (byte)(intEndBit - intStartBit)));
                 }
             }
             else
             {
-                intUnpackedValue = Convert.ToInt32(NumConversion.Int32ToUnsigned(lngPackedValue) / Math.Pow(2, intStartBit));
+                intUnpackedValue = (int)(NumConversion.Int32ToUnsigned(lngPackedValue) / Math.Pow(2, intStartBit));
             }
 
             return intUnpackedValue;
@@ -1974,7 +1975,7 @@ namespace MSFileInfoScanner
                 //Debug.Assert sngUnpackedIntensity = PackedBasePeakIntensity * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 3)
                 case 0:
                     // Compressed data
-                    sngUnpackedIntensity = (float)(Convert.ToInt16(PackedBasePeakInfo & maskBPCompressedDataIntensity) / 8 * Math.Pow(4, (PackedBasePeakInfo & maskBPCompressedDataIntensityScale)));
+                    sngUnpackedIntensity = (float)((short)(PackedBasePeakInfo & maskBPCompressedDataIntensity) / 8f * Math.Pow(4, (PackedBasePeakInfo & maskBPCompressedDataIntensityScale)));
                     break;
                 //Debug.Assert sngUnpackedIntensity = ExtractFromBitsInt32(PackedBasePeakInfo, 3, 10) * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 2)
                 case 1:
@@ -1985,7 +1986,7 @@ namespace MSFileInfoScanner
                 case 6:
                 case 7:
                     // Standard data and Uncalibrated data
-                    sngUnpackedIntensity = (float)(Convert.ToInt16(PackedBasePeakIntensity & maskBPStandardDataIntensity) / 8 * Math.Pow(4, (PackedBasePeakIntensity & maskBPStandardDataIntensityScale)));
+                    sngUnpackedIntensity = (float)((short)(PackedBasePeakIntensity & maskBPStandardDataIntensity) / 8f * Math.Pow(4, (PackedBasePeakIntensity & maskBPStandardDataIntensityScale)));
                     break;
                 //Debug.Assert sngUnpackedIntensity = ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 3, 15) * 4 ^ ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 0, 2)
                 case 8:
@@ -2020,11 +2021,11 @@ namespace MSFileInfoScanner
                     //  then right shifting 9 bits by dividing by 2^9
                     // It would be more straightforward to use PackedBasePeakInfo And CreateMask(9, 31) but VB won't let us
                     //  And a Currency Value with a Long; this gives an OverFlow error
-                    var MassMantissa = Convert.ToInt32(NumConversion.Int32ToUnsigned(PackedBasePeakInfo) / 512);
+                    var MassMantissa = (int)(NumConversion.Int32ToUnsigned(PackedBasePeakInfo) / 512f);
                     // 512 = 2^9
 
                     // Compute the MassExponent value by multiplying the Packed Value by the appropriate BitMask, then right shifting 4 bits by dividing by 2^4
-                    var MassExponent = Convert.ToInt16(PackedBasePeakInfo & maskBPMassExponent) / 16;
+                    var MassExponent = (short)(PackedBasePeakInfo & maskBPMassExponent) / 16f;
                     // 16 = 2^4
 
                     if (blnProcessingFunctionIndexFile)
@@ -2044,7 +2045,7 @@ namespace MSFileInfoScanner
                     }
 
                     // Note that we divide by 2^23 to convert the mass mantissa to fractional form
-                    dblUnpackedMass = MassMantissa / 8388608 * (Math.Pow(2, MassExponent));
+                    dblUnpackedMass = MassMantissa / 8388608f * (Math.Pow(2, MassExponent));
                     // 8388608 = 2^23
                     break;
                 case 0:
@@ -2054,14 +2055,13 @@ namespace MSFileInfoScanner
                     // It would be more straightforward to use PackedBasePeakInfo And CreateMask(11, 31) but VB won't let us
                     //  And a Currency Value with a Long; this gives an OverFlow error
                     // We must divide the MassMantissa by 128 to get the mass
-                    dblUnpackedMass = Convert.ToInt32(NumConversion.Int32ToUnsigned(PackedBasePeakInfo) / 2048) / 128;
-                    // 2048 = 2^11
+                    dblUnpackedMass = (int)(NumConversion.Int32ToUnsigned(PackedBasePeakInfo) / 2048f) / 128f;      // 2048 = 2^11
                     break;
-                //Debug.Assert dblUnpackedMass = ExtractFromBitsInt32(PackedBasePeakInfo, 11, 31) / 128
+                    // Debug.Assert(dblUnpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 11, 31) / 128f);
                 case 1:
                     // Standard data
                     // We must divide the MassMantissa by 1024 to get the mass
-                    dblUnpackedMass = Convert.ToInt16(PackedBasePeakInfo & maskBPStandardDataMass) / 1024;
+                    dblUnpackedMass = (short)(PackedBasePeakInfo & maskBPStandardDataMass) / 1024f;
                     break;
                 case 2:
                 case 3:
@@ -2078,10 +2078,9 @@ namespace MSFileInfoScanner
                     // Compute the MassMantissa Value by converting the Packed Value to an Unsigned Int32 (and storing in a long),
                     //  then right shifting 4 bits by dividing by 2^4
                     // We must divide the MassMantissa by 128 to get the mass
-                    dblUnpackedMass = Convert.ToInt32(NumConversion.Int32ToUnsigned(PackedBasePeakInfo) / 16) / 128;
-                    // 16 = 2^4
+                    dblUnpackedMass = (int)(NumConversion.Int32ToUnsigned(PackedBasePeakInfo) / 16f) / 128f;        // 16 = 2^4
                     break;
-                //Debug.Assert dblUnpackedMass = ExtractFromBitsInt32(PackedBasePeakInfo, 4, 31) / 128
+                    //Debug.Assert(dblUnpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 4, 31) / 128f);
                 default:
                     dblUnpackedMass = 0;
                     break;

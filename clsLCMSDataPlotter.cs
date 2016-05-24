@@ -213,7 +213,7 @@ namespace MSFileInfoScanner
                         }
                         else
                         {
-                            sngIonsIntensityFiltered[intIonCountNew] = Convert.ToSingle(dblMassIntensityPairs[1, intIndex]);
+                            sngIonsIntensityFiltered[intIonCountNew] = (float)dblMassIntensityPairs[1, intIndex];
                         }
 
                         bytChargeFiltered[intIonCountNew] = 0;
@@ -229,7 +229,7 @@ namespace MSFileInfoScanner
                     {
                         if (sngIonsIntensityFiltered[intIndex] > 0)
                         {
-                            sngIonsIntensityFiltered[intIndex] = Convert.ToSingle(Math.Log10(sngIonsIntensityFiltered[intIndex]));
+                            sngIonsIntensityFiltered[intIndex] = (float)Math.Log10(sngIonsIntensityFiltered[intIndex]);
                         }
                     }
                 }
@@ -356,7 +356,7 @@ namespace MSFileInfoScanner
                         }
                         else
                         {
-                            sngIonsIntensityFiltered[intIonCountNew] = Convert.ToSingle(lstIons[intIndex].Intensity);
+                            sngIonsIntensityFiltered[intIonCountNew] = (float)lstIons[intIndex].Intensity;
                         }
 
                         bytCharge[intIonCountNew] = lstIons[intIndex].Charge;
@@ -534,7 +534,7 @@ namespace MSFileInfoScanner
 
             if (intDataCount > 0)
             {
-                return Convert.ToSingle(dblIntensitySum / intDataCount);
+                return (float)dblIntensitySum / intDataCount;
             }
             else
             {
@@ -1194,13 +1194,13 @@ namespace MSFileInfoScanner
             if (intItemCount % 2 == 0)
             {
                 // Even number
-                intMidpointIndex = Convert.ToInt32(Math.Floor(intItemCount / 2.0)) - 1;
+                intMidpointIndex = (int)Math.Floor(intItemCount / 2.0) - 1;
                 blnAverage = true;
             }
             else
             {
                 // Odd number
-                intMidpointIndex = Convert.ToInt32(Math.Floor(intItemCount / 2.0));
+                intMidpointIndex = (int)Math.Floor(intItemCount / 2.0);
             }
 
             if (intMidpointIndex > intItemCount)
@@ -1451,18 +1451,18 @@ namespace MSFileInfoScanner
             }
 
             // Round intMinScan down to the nearest multiple of 10
-            intMinScan = Convert.ToInt32(Math.Floor(intMinScan / 10.0) * 10);
+            intMinScan = (int)Math.Floor(intMinScan / 10.0) * 10;
             if (intMinScan < 0)
                 intMinScan = 0;
 
             // Round intMaxScan up to the nearest multiple of 10
-            intMaxScan = Convert.ToInt32(Math.Ceiling(intMaxScan / 10.0) * 10);
+            intMaxScan = (int)Math.Ceiling(intMaxScan / 10.0) * 10;
 
             // Round dblMinMZ down to the nearest multiple of 100
-            dblMinMZ = Convert.ToInt64(Math.Floor(dblMinMZ / 100.0) * 100);
+            dblMinMZ = (long)Math.Floor(dblMinMZ / 100.0) * 100;
 
             // Round dblMaxMZ up to the nearest multiple of 100
-            dblMaxMZ = Convert.ToInt64(Math.Ceiling(dblMaxMZ / 100.0) * 100);
+            dblMaxMZ = (long)Math.Ceiling(dblMaxMZ / 100.0) * 100;
 
             string yAxisLabel;
             if (mOptions.PlottingDeisotopedData) {
@@ -1525,7 +1525,7 @@ namespace MSFileInfoScanner
             }
 
             if (Math.Abs(myPlot.Axes[0].Minimum - myPlot.Axes[0].Maximum) < 0.01) {
-                intMinScan = Convert.ToInt32(myPlot.Axes[0].Minimum);
+                intMinScan = (int)myPlot.Axes[0].Minimum;
                 myPlot.Axes[0].Minimum = intMinScan - 1;
                 myPlot.Axes[0].Maximum = intMinScan + 1;
             } else if (intMinScan == intMaxScan) {
@@ -1574,11 +1574,11 @@ namespace MSFileInfoScanner
             }
             else if (intValue < 1000000.0)
             {
-                return Convert.ToInt32(Math.Round(intValue / 1000.0, 0)) + "K";
+                return (int)Math.Round(intValue / 1000.0, 0) + "K";
             }
             else
             {
-                return Convert.ToInt32(Math.Round(intValue / 1000.0 / 1000, 0)) + "M";
+                return (int)Math.Round(intValue / 1000.0 / 1000, 0) + "M";
             }
 
         }

@@ -1113,20 +1113,24 @@ namespace MSFileInfoScanner
 
             if (blnZipFileCheckAllData && mFastZippedSFileCheck)
             {
-                var strFileNameLCase = Path.GetFileName(strFilePath).ToLower();
-                if (strFileNameLCase == "0.ser.zip")
+                var fileName = Path.GetFileName(strFilePath);
+                if (fileName != null)
                 {
-                    // Do not run a full check on 0.ser.zip files
-                    blnZipFileCheckAllData = false;
-
-                }
-                else if (strFileNameLCase.Length > 2 && strFileNameLCase.StartsWith("s") &&
-                         char.IsNumber(strFileNameLCase[1]))
-                {
-                    // Run a full check on s001.zip but not the other s*.zip files
-                    if (strFileNameLCase != "s001.zip")
+                    var strFileNameLCase = fileName.ToLower();
+                    if (strFileNameLCase == "0.ser.zip")
                     {
+                        // Do not run a full check on 0.ser.zip files
                         blnZipFileCheckAllData = false;
+
+                    }
+                    else if (strFileNameLCase.Length > 2 && strFileNameLCase.StartsWith("s") &&
+                             char.IsNumber(strFileNameLCase[1]))
+                    {
+                        // Run a full check on s001.zip but not the other s*.zip files
+                        if (strFileNameLCase != "s001.zip")
+                        {
+                            blnZipFileCheckAllData = false;
+                        }
                     }
                 }
             }
@@ -1145,11 +1149,11 @@ namespace MSFileInfoScanner
 
             if (blnZipFileCheckAllData)
             {
-                sngMaxExecutionTimeMinutes = Convert.ToSingle(dblFileSizeMB * MAX_THREAD_RATE_CHECK_ALL_DATA);
+                sngMaxExecutionTimeMinutes = (float)(dblFileSizeMB * MAX_THREAD_RATE_CHECK_ALL_DATA);
             }
             else
             {
-                sngMaxExecutionTimeMinutes = Convert.ToSingle(dblFileSizeMB * MAX_THREAD_RATE_QUICK_CHECK);
+                sngMaxExecutionTimeMinutes = (float)(dblFileSizeMB * MAX_THREAD_RATE_QUICK_CHECK);
             }
 
             var objZipLibTest = new Thread(CheckZipFileWork);

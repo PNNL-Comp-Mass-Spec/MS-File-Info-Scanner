@@ -3,7 +3,6 @@ using MSFileInfoScannerInterfaces;
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2005
 //
-// Last modified May 20, 2015
 
 namespace MSFileInfoScanner
 {

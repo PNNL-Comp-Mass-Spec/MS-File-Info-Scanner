@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2005
 //
-// Last modified September 17, 2005
 
 namespace MSFileInfoScanner
 {

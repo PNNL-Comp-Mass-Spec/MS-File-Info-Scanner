@@ -3,7 +3,6 @@ using System.IO;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
 //
-// Last modified November 3, 2015
 
 namespace MSFileInfoScanner
 {
