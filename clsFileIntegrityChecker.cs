@@ -697,7 +697,7 @@ namespace MSFileInfoScanner
             var intExpectedTabCount = 0;
             var intExpectedCommaCount = 0;
 
-            var strErrorMessage = string.Empty;
+            string strErrorMessage;
             var blnErrorLogged = false;
          
             if (mMaximumTextFileLinesToCheck <= 0)
@@ -739,23 +739,22 @@ namespace MSFileInfoScanner
                         if (blnCharCountSkipsBlankLines && strLineIn.Trim().Length == 0)
                         {
                             blnSuccess = true;
-
                         }
                         else
                         {
                             if (intMinimumTabCount > 0)
                             {
                                 // Count the number of tabs
-                                blnSuccess = CheckTextFileCountChars(ref strLineIn, ref blnBlankLineRead, intLinesRead,
+                                blnSuccess = CheckTextFileCountChars(strLineIn, ref blnBlankLineRead, intLinesRead,
                                                                      ref intExpectedTabCount, '\t', "Tab",
                                                                      intMinimumTabCount, blnRequireEqualTabsPerLine,
-                                                                     ref strErrorMessage);
+                                                                     out strErrorMessage);
 
                                 if (!blnSuccess)
                                 {
                                     LogFileIntegrityError(strFilePath, strErrorMessage);
                                     blnErrorLogged = true;
-                                    break; // TODO: might not be correct. Was : Exit Do
+                                    break;
                                 }
 
                             }
@@ -763,16 +762,16 @@ namespace MSFileInfoScanner
                             if (intMinimumCommaCount > 0)
                             {
                                 // Count the number of commas
-                                blnSuccess = CheckTextFileCountChars(ref strLineIn, ref blnBlankLineRead, intLinesRead,
+                                blnSuccess = CheckTextFileCountChars(strLineIn, ref blnBlankLineRead, intLinesRead,
                                                                      ref intExpectedCommaCount, ',', "Comma",
                                                                      intMinimumCommaCount, blnRequireEqualCommasPerLine,
-                                                                     ref strErrorMessage);
+                                                                     out strErrorMessage);
 
                                 if (!blnSuccess)
                                 {
                                     LogFileIntegrityError(strFilePath, strErrorMessage);
                                     blnErrorLogged = true;
-                                    break; // TODO: might not be correct. Was : Exit Do
+                                    break;
                                 }
 
                             }
@@ -835,12 +834,13 @@ namespace MSFileInfoScanner
         /// <param name="strErrorMessage">Error message</param>
         /// <returns>True if the line is valid; otherwise False; when False, then updates strErrorMessage</returns>
         /// <remarks></remarks>
-        private bool CheckTextFileCountChars(ref string strLineIn, ref bool blnBlankLineRead, int intLinesRead,
+        private bool CheckTextFileCountChars(string strLineIn, ref bool blnBlankLineRead, int intLinesRead,
                                              ref int intExpectedCharCount, char chCharToCount, string strCharDescription,
                                              int intMinimumCharCount, bool blnRequireEqualCharsPerLine,
-                                             ref string strErrorMessage)
+                                             out string strErrorMessage)
         {
             var blnLineIsValid = true;
+            strErrorMessage = string.Empty;
 
             // Count the number of chCharToCount characters
             var intCharCount = CountChars(strLineIn, chCharToCount);
@@ -874,22 +874,24 @@ namespace MSFileInfoScanner
                 }
             }
 
-            if (blnLineIsValid && blnRequireEqualCharsPerLine)
+            if (!blnLineIsValid || !blnRequireEqualCharsPerLine)
             {
-                if (intLinesRead <= 1)
+                return blnLineIsValid;
+            }
+
+            if (intLinesRead <= 1)
+            {
+                intExpectedCharCount = intCharCount;
+            }
+            else
+            {
+                if (intCharCount != intExpectedCharCount)
                 {
-                    intExpectedCharCount = intCharCount;
-                }
-                else
-                {
-                    if (intCharCount != intExpectedCharCount)
+                    if (strLineIn.Length > 0)
                     {
-                        if (strLineIn.Length > 0)
-                        {
-                            strErrorMessage = "Line " + intLinesRead + " has " + intCharCount + " " + strCharDescription +
-                                              "s, but previous line has " + intExpectedCharCount + " tabs";
-                            blnLineIsValid = false;
-                        }
+                        strErrorMessage = "Line " + intLinesRead + " has " + intCharCount + " " + strCharDescription +
+                                          "s, but previous line has " + intExpectedCharCount + " tabs";
+                        blnLineIsValid = false;
                     }
                 }
             }
@@ -1046,7 +1048,7 @@ namespace MSFileInfoScanner
                             if (!strLineIn.ToUpper().StartsWith(ICR2LS_LINE_START))
                             {
                                 blnFileIsValid = false;
-                                break; // TODO: might not be correct. Was : Exit Do
+                                break;
                             }
                         }
                         else if (intLinesRead == 2)
@@ -1054,13 +1056,13 @@ namespace MSFileInfoScanner
                             if (!strLineIn.ToUpper().StartsWith(VERSION_LINE_START))
                             {
                                 blnFileIsValid = false;
-                                break; // TODO: might not be correct. Was : Exit Do
+                                break;
                             }
                         }
                         else
                         {
                             // This code shouldn't be reached
-                            break; // TODO: might not be correct. Was : Exit Do
+                            break;
                         }
 
                     }
@@ -1618,7 +1620,7 @@ namespace MSFileInfoScanner
                                                 true);
 
                                             if (!blnNeedToCheckAttributeNames)
-                                                break; // TODO: might not be correct. Was : Exit Do
+                                                break;
                                         } while (objXMLReader.MoveToNextAttribute());
 
                                     }

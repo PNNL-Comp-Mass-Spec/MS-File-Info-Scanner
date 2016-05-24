@@ -45,60 +45,63 @@ namespace MSFileInfoScanner
 
 
                     while (oZipEntry.MoveNext()) {
-
-                        if (!oZipEntry.Current.IsDirectory)
+                        
+                        if (oZipEntry.Current.IsDirectory)
                         {
-                            // Split the filename on the forward slash character
-                            var strNameParts = oZipEntry.Current.FileName.Split('/');
+                            continue;
+                        }
+                        // Split the filename on the forward slash character
+                        var strNameParts = oZipEntry.Current.FileName.Split('/');
 
+                        if (strNameParts.Length <= 0)
+                        {
+                            continue;
+                        }
 
-                            if (strNameParts.Length > 0) {
-                                if (string.Equals(strNameParts[strNameParts.Length - 1], strFileNameToFind, StringComparison.CurrentCultureIgnoreCase)) {
-                                    if (oZipEntry.Current.LastModified < datasetFileInfo.AcqTimeStart) {
-                                        datasetFileInfo.AcqTimeStart = oZipEntry.Current.LastModified;
-                                    }
-
-                                    if (oZipEntry.Current.LastModified > datasetFileInfo.AcqTimeEnd) {
-                                        datasetFileInfo.AcqTimeEnd = oZipEntry.Current.LastModified;
-                                    }
-
-                                    // Bump up the scan count
-                                    datasetFileInfo.ScanCount += 1;
-
-                                    // Add a Scan Stats entry
-                                    var objScanStatsEntry = new clsScanStatsEntry
-                                    {
-                                        ScanNumber = datasetFileInfo.ScanCount,
-                                        ScanType = 1,
-                                        ScanTypeName = "MALDI-HMS",
-                                        ScanFilterText = "",
-                                        ElutionTime = "0",
-                                        TotalIonIntensity = "0",
-                                        BasePeakIntensity = "0",
-                                        BasePeakMZ = "0",
-                                        BasePeakSignalToNoiseRatio = "0",
-                                        IonCount = 0,
-                                        IonCountRaw = 0
-                                    };
-
-
-
-
-                                    // Base peak signal to noise ratio
-
-
-                                    mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
-
-
-                                    blnSuccess = true;
-
-                                }
+                        if (string.Equals(strNameParts[strNameParts.Length - 1], strFileNameToFind, StringComparison.CurrentCultureIgnoreCase)) {
+                            if (oZipEntry.Current.LastModified < datasetFileInfo.AcqTimeStart) {
+                                datasetFileInfo.AcqTimeStart = oZipEntry.Current.LastModified;
                             }
+
+                            if (oZipEntry.Current.LastModified > datasetFileInfo.AcqTimeEnd) {
+                                datasetFileInfo.AcqTimeEnd = oZipEntry.Current.LastModified;
+                            }
+
+                            // Bump up the scan count
+                            datasetFileInfo.ScanCount += 1;
+
+                            // Add a Scan Stats entry
+                            var objScanStatsEntry = new clsScanStatsEntry
+                            {
+                                ScanNumber = datasetFileInfo.ScanCount,
+                                ScanType = 1,
+                                ScanTypeName = "MALDI-HMS",
+                                ScanFilterText = "",
+                                ElutionTime = "0",
+                                TotalIonIntensity = "0",
+                                BasePeakIntensity = "0",
+                                BasePeakMZ = "0",
+                                BasePeakSignalToNoiseRatio = "0",
+                                IonCount = 0,
+                                IonCountRaw = 0
+                            };
+
+
+
+
+                            // Base peak signal to noise ratio
+
+
+                            mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
+
+
+                            blnSuccess = true;
+
                         }
                     }
 
                     if (blnSuccess)
-                        break; // TODO: might not be correct. Was : Exit For
+                        break;
                 }
 
             } catch (Exception ex) {

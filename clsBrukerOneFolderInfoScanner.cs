@@ -519,7 +519,7 @@ namespace MSFileInfoScanner
                             if (blnSuccess)
                             {
                                 // Successfully parsed an ICR folder; do not parse any others
-                                break; // TODO: might not be correct. Was : Exit For
+                                break;
                             }
                         }
                     }

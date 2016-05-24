@@ -838,7 +838,7 @@ namespace MSFileInfoScanner
 					mDatasetSummaryStatsUpToDate = false;
 
 					blnMatchFound = true;
-					break; // TODO: might not be correct. Was : Exit For
+					break;
 				}
 			}
 

@@ -477,11 +477,11 @@ namespace MSFileInfoScanner
                     intZeroPointCount += 1;
                 } else {
                     intIndexNonZeroValue = intIndex;
-                    break; // TODO: might not be correct. Was : Exit For
+                    break;
                 }
                 intPointsChecked += 1;
                 if (intPointsChecked >= MAX_POINTS_TO_CHECK)
-                    break; // TODO: might not be correct. Was : Exit For
+                    break;
             }
 
             if (intZeroPointCount > 0 && intIndexNonZeroValue >= 0) {

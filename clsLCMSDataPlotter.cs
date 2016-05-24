@@ -332,7 +332,7 @@ namespace MSFileInfoScanner
                             Console.WriteLine("  Sorting m/z data (i = " + mSortingWarnCount + ")");
                         }
                         lstIons.Sort(new udtMSIonTypeComparer());
-                        break;// TODO: might not be correct. Was : Exit For
+                        break;
                     }
                 }
 
@@ -390,7 +390,7 @@ namespace MSFileInfoScanner
                 if (dblIonsMZFiltered[intIndex + 1] - dblIonsMZFiltered[intIndex] < mOptions.MZResolution)
                 {
                     blnCentroidRequired = true;
-                    break; // TODO: might not be correct. Was : Exit For
+                    break;
                 }
             }
 
@@ -600,7 +600,7 @@ namespace MSFileInfoScanner
                             }
                             else
                             {
-                                break; // TODO: might not be correct. Was : Exit Do
+                                break;
                             }
                             intIndexAdjacent -= 1;
                         }
@@ -619,7 +619,7 @@ namespace MSFileInfoScanner
                             }
                             else
                             {
-                                break; // TODO: might not be correct. Was : Exit Do
+                                break;
                             }
                             intIndexAdjacent += 1;
                         }
@@ -1050,7 +1050,7 @@ namespace MSFileInfoScanner
                 if (mScans[intIndex].MSLevel > 0)
                 {
                     blnMSLevelDefined = true;
-                    break; // TODO: might not be correct. Was : Exit For
+                    break;
                 }
             }
 

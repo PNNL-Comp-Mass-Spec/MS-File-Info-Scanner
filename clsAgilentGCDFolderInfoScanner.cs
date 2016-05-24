@@ -140,7 +140,7 @@ namespace MSFileInfoScanner
                             dctRunTimeText[strKey].Matched = true;
                             dblTotalRuntime += dblRunTime;
                             blnRunTimeFound = true;
-                            break; // TODO: might not be correct. Was : Exit For
+                            break;
                         }
                     }
                 }
