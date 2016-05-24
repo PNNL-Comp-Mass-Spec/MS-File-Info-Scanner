@@ -15,24 +15,8 @@ namespace MSFileInfoScanner
     {
 
         // Note: The extension must be in all caps
-
         public const string AGILENT_TOF_OR_QSTAR_FILE_EXTENSION = ".WIFF";
-        private clsProteowizardDataParser withEventsField_mPWizParser;
-        protected clsProteowizardDataParser mPWizParser {
-            get { return withEventsField_mPWizParser; }
-            set {
-                if (withEventsField_mPWizParser != null) {
-                    withEventsField_mPWizParser.ErrorEvent -= mPWizParser_ErrorEvent;
-                    withEventsField_mPWizParser.MessageEvent -= mPWizParser_MessageEvent;
-                }
-                withEventsField_mPWizParser = value;
-                if (withEventsField_mPWizParser != null) {
-                    withEventsField_mPWizParser.ErrorEvent += mPWizParser_ErrorEvent;
-                    withEventsField_mPWizParser.MessageEvent += mPWizParser_MessageEvent;
-                }
-            }
 
-        }
         public override string GetDatasetNameViaPath(string strDataFilePath)
         {
             // The dataset name is simply the file name without .wiff
@@ -99,7 +83,7 @@ namespace MSFileInfoScanner
                 }
 
                 // Instantiate the Proteowizard Data Parser class
-                mPWizParser = new clsProteowizardDataParser(objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot,
+                var pWizParser = new clsProteowizardDataParser(objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot,
                                                             mLCMS2DPlot, mSaveLCMS2DPlots, mSaveTICAndBPI,
                                                             mCheckCentroidingStatus)
                 {
@@ -107,6 +91,8 @@ namespace MSFileInfoScanner
                     HighResMS2 = true
                 };
 
+                pWizParser.ErrorEvent += mPWizParser_ErrorEvent;
+                pWizParser.MessageEvent += mPWizParser_MessageEvent;
 
                 var blnTICStored = false;
                 var blnSRMDataCached = false;
@@ -116,15 +102,15 @@ namespace MSFileInfoScanner
 
                 if (objPWiz.ChromatogramCount > 0) {
                     // Process the chromatograms
-                    mPWizParser.StoreChromatogramInfo(datasetFileInfo, out blnTICStored, out blnSRMDataCached, out dblRuntimeMinutes);
-                    mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
+                    pWizParser.StoreChromatogramInfo(datasetFileInfo, out blnTICStored, out blnSRMDataCached, out dblRuntimeMinutes);
+                    pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
 
                 }
 
                 if (objPWiz.SpectrumCount > 0 & !blnSRMDataCached) {
                     // Process the spectral data (though only if we did not process SRM data)
-                    mPWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, ref dblRuntimeMinutes);
-                    mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
+                    pWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, ref dblRuntimeMinutes);
+                    pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
                 }
 
                 objPWiz.Dispose();

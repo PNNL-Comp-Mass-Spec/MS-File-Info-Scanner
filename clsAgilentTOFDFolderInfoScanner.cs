@@ -19,22 +19,7 @@ namespace MSFileInfoScanner
         public const string AGILENT_XML_CONTENTS_FILE = "Contents.xml";
 
         public const string AGILENT_TIME_SEGMENT_FILE = "MSTS.xml";
-        private clsProteowizardDataParser withEventsField_mPWizParser;
-        protected clsProteowizardDataParser mPWizParser {
-            get { return withEventsField_mPWizParser; }
-            set {
-                if (withEventsField_mPWizParser != null) {
-                    withEventsField_mPWizParser.ErrorEvent -= mPWizParser_ErrorEvent;
-                    withEventsField_mPWizParser.MessageEvent -= mPWizParser_MessageEvent;
-                }
-                withEventsField_mPWizParser = value;
-                if (withEventsField_mPWizParser != null) {
-                    withEventsField_mPWizParser.ErrorEvent += mPWizParser_ErrorEvent;
-                    withEventsField_mPWizParser.MessageEvent += mPWizParser_MessageEvent;
-                }
-            }
-
-        }
+       
         public override string GetDatasetNameViaPath(string strDataFilePath)
         {
             // The dataset name is simply the folder name without .D
@@ -117,7 +102,7 @@ namespace MSFileInfoScanner
         /// <param name="dblTotalAcqTimeMinutes"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected bool ProcessTimeSegmentFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo, out double dblTotalAcqTimeMinutes)
+        private bool ProcessTimeSegmentFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo, out double dblTotalAcqTimeMinutes)
         {
 
             var blnSuccess = false;
@@ -292,7 +277,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected bool ReadBinaryData(string strDataFolderPath, clsDatasetFileInfo datasetFileInfo)
+        private bool ReadBinaryData(string strDataFolderPath, clsDatasetFileInfo datasetFileInfo)
         {
 
             bool blnSuccess;
@@ -317,7 +302,7 @@ namespace MSFileInfoScanner
                 }
 
                 // Instantiate the Proteowizard Data Parser class
-                mPWizParser = new clsProteowizardDataParser(objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot,
+                var pWizParser = new clsProteowizardDataParser(objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot,
                                                             mLCMS2DPlot, mSaveLCMS2DPlots, mSaveTICAndBPI,
                                                             mCheckCentroidingStatus)
                 {
@@ -325,6 +310,8 @@ namespace MSFileInfoScanner
                     HighResMS2 = true
                 };
 
+                pWizParser.ErrorEvent += mPWizParser_ErrorEvent;
+                pWizParser.MessageEvent += mPWizParser_MessageEvent;
 
                 var blnTICStored = false;
                 double dblRuntimeMinutes = 0;
@@ -332,15 +319,15 @@ namespace MSFileInfoScanner
                 if (objPWiz.ChromatogramCount > 0) {
                     // Process the chromatograms
                     bool blnSRMDataCached;
-                    mPWizParser.StoreChromatogramInfo(datasetFileInfo, out blnTICStored, out blnSRMDataCached, out dblRuntimeMinutes);
-                    mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
+                    pWizParser.StoreChromatogramInfo(datasetFileInfo, out blnTICStored, out blnSRMDataCached, out dblRuntimeMinutes);
+                    pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
 
                 }
 
                 if (objPWiz.SpectrumCount > 0) {
                     // Process the spectral data
-                    mPWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, ref dblRuntimeMinutes);
-                    mPWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
+                    pWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, ref dblRuntimeMinutes);
+                    pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
                 }
 
                 objPWiz.Dispose();
