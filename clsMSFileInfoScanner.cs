@@ -100,7 +100,7 @@ namespace MSFileInfoScanner
         //'    AgilentOrQStarWiffFile = 4
         //'End Enum
 
-        protected enum eMessageTypeConstants
+        private enum eMessageTypeConstants
         {
             Normal = 0,
             ErrorMsg = 1,
@@ -154,18 +154,18 @@ namespace MSFileInfoScanner
         private int mScanEnd;
 
         private bool mShowDebugInfo;
-        protected bool mLogMessagesToFile;
-        protected string mLogFilePath;
+        private bool mLogMessagesToFile;
+        private string mLogFilePath;
 
-        protected StreamWriter mLogFile;
+        private StreamWriter mLogFile;
 
         // This variable is updated in ProcessMSFileOrFolder
-        protected string mOutputFolderPath;
+        private string mOutputFolderPath;
         // If blank, then mOutputFolderPath will be used; if mOutputFolderPath is also blank, then the log is created in the same folder as the executing assembly
-        protected string mLogFolderPath;
+        private string mLogFolderPath;
 
 
-        protected string mDatasetInfoXML = "";
+        private string mDatasetInfoXML = "";
         private readonly clsFileIntegrityChecker mFileIntegrityChecker;
 	
         private StreamWriter mFileIntegrityDetailsWriter;
@@ -770,7 +770,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected void HandleException(string strBaseMessage, Exception ex)
+        private void HandleException(string strBaseMessage, Exception ex)
         {
             if (string.IsNullOrEmpty(strBaseMessage)) {
                 strBaseMessage = "Error";
@@ -788,12 +788,12 @@ namespace MSFileInfoScanner
             }
         }
 
-        protected void LogMessage(string strMessage)
+        private void LogMessage(string strMessage)
         {
             LogMessage(strMessage, eMessageTypeConstants.Normal);
         }
 
-        protected void LogMessage(string strMessage, eMessageTypeConstants eMessageType)
+        private void LogMessage(string strMessage, eMessageTypeConstants eMessageType)
         {
             // Note that ProcessMSFileOrFolder() will update mOutputFolderPath, which is used here if mLogFolderPath is blank
 
@@ -1056,17 +1056,17 @@ namespace MSFileInfoScanner
         //    End If
         //End Sub
 
-        protected void OpenFileIntegrityDetailsFile()
+        private void OpenFileIntegrityDetailsFile()
         {
             OpenFileIntegrityOutputFile(eDataFileTypeConstants.FileIntegrityDetails, ref mFileIntegrityDetailsFilePath, ref mFileIntegrityDetailsWriter);
         }
 
-        protected void OpenFileIntegrityErrorsFile()
+        private void OpenFileIntegrityErrorsFile()
         {
             OpenFileIntegrityOutputFile(eDataFileTypeConstants.FileIntegrityErrors, ref mFileIntegrityErrorsFilePath, ref mFileIntegrityErrorsWriter);
         }
 
-        protected void OpenFileIntegrityOutputFile(eDataFileTypeConstants eDataFileType, ref string strFilePath, ref StreamWriter objStreamWriter)
+        private void OpenFileIntegrityOutputFile(eDataFileTypeConstants eDataFileType, ref string strFilePath, ref StreamWriter objStreamWriter)
         {
             var blnOpenedExistingFile = false;
             FileStream fsFileStream = null;
@@ -2274,12 +2274,12 @@ namespace MSFileInfoScanner
 
         }
 
-        protected void ShowErrorMessage(string strMessage)
+        private void ShowErrorMessage(string strMessage)
         {
             ShowErrorMessage(strMessage, true);
         }
 
-        protected void ShowErrorMessage(string strMessage, bool blnAllowLogToFile)
+        private void ShowErrorMessage(string strMessage, bool blnAllowLogToFile)
         {
             var strSeparator = "------------------------------------------------------------------------------";
 
@@ -2299,23 +2299,23 @@ namespace MSFileInfoScanner
 
         }
 
-        protected void ShowMessage(string strMessage)
+        private void ShowMessage(string strMessage)
         {
             ShowMessage(strMessage, true, false, eMessageTypeConstants.Normal);
         }
 
-        protected void ShowMessage(string strMessage, eMessageTypeConstants eMessageType)
+        private void ShowMessage(string strMessage, eMessageTypeConstants eMessageType)
         {
             ShowMessage(strMessage, true, false, eMessageType);
         }
 
-        protected void ShowMessage(string strMessage, bool blnAllowLogToFile)
+        private void ShowMessage(string strMessage, bool blnAllowLogToFile)
         {
             ShowMessage(strMessage, blnAllowLogToFile, false, eMessageTypeConstants.Normal);
         }
 
 
-        protected void ShowMessage(string strMessage, bool blnAllowLogToFile, bool blnPrecedeWithNewline, eMessageTypeConstants eMessageType)
+        private void ShowMessage(string strMessage, bool blnAllowLogToFile, bool blnPrecedeWithNewline, eMessageTypeConstants eMessageType)
         {
             if (blnPrecedeWithNewline) {
                 Console.WriteLine();
@@ -2365,7 +2365,7 @@ namespace MSFileInfoScanner
             return blnValidFile;
         }
 
-        protected void SleepNow(int sleepTimeSeconds)
+        private void SleepNow(int sleepTimeSeconds)
         {
             System.Threading.Thread.Sleep(sleepTimeSeconds * 10);
         }

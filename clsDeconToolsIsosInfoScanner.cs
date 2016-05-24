@@ -32,7 +32,7 @@ namespace MSFileInfoScanner
 
         public const float DEFAUT_MAX_FIT = 0.15f;
 
-        protected struct udtIsosDataType
+        private struct udtIsosDataType
         {
             public int Scan;
             public byte Charge;
@@ -42,7 +42,7 @@ namespace MSFileInfoScanner
             public double MonoMass;
         }
 
-        protected struct udtScansDataType
+        private struct udtScansDataType
         {
             public int Scan;
             public float ElutionTime;
@@ -375,8 +375,7 @@ namespace MSFileInfoScanner
                         lstScanData.Add(udtScanData);
 
                         if (mSaveTICAndBPI) {
-                            var _with3 = udtScanData;
-                            mTICandBPIPlot.AddData(_with3.Scan, _with3.MSLevel, _with3.ElutionTime, _with3.BasePeakIntensity, _with3.TotalIonCurrent);
+                            mTICandBPIPlot.AddData(udtScanData.Scan, udtScanData.MSLevel, udtScanData.ElutionTime, udtScanData.BasePeakIntensity, udtScanData.TotalIonCurrent);
                         }
 
                         var objScanStatsEntry = new clsScanStatsEntry
@@ -445,20 +444,19 @@ namespace MSFileInfoScanner
             var intDatasetID = DatasetID;
 
             // Record the file size and Dataset ID
-            var _with5 = datasetFileInfo;
-            _with5.FileSystemCreationTime = fiIsosFile.CreationTime;
-            _with5.FileSystemModificationTime = fiIsosFile.LastWriteTime;
+            datasetFileInfo.FileSystemCreationTime = fiIsosFile.CreationTime;
+            datasetFileInfo.FileSystemModificationTime = fiIsosFile.LastWriteTime;
 
             // The acquisition times will get updated below to more accurate values
-            _with5.AcqTimeStart = _with5.FileSystemModificationTime;
-            _with5.AcqTimeEnd = _with5.FileSystemModificationTime;
+            datasetFileInfo.AcqTimeStart = datasetFileInfo.FileSystemModificationTime;
+            datasetFileInfo.AcqTimeEnd = datasetFileInfo.FileSystemModificationTime;
 
-            _with5.DatasetID = intDatasetID;
-            _with5.DatasetName = GetDatasetNameViaPath(fiIsosFile.Name);
-            _with5.FileExtension = fiIsosFile.Extension;
-            _with5.FileSizeBytes = fiIsosFile.Length;
+            datasetFileInfo.DatasetID = intDatasetID;
+            datasetFileInfo.DatasetName = GetDatasetNameViaPath(fiIsosFile.Name);
+            datasetFileInfo.FileExtension = fiIsosFile.Extension;
+            datasetFileInfo.FileSizeBytes = fiIsosFile.Length;
 
-            _with5.ScanCount = 0;
+            datasetFileInfo.ScanCount = 0;
 
 
             mDatasetStatsSummarizer.ClearCachedData();
@@ -474,16 +472,15 @@ namespace MSFileInfoScanner
             UpdateDatasetFileStats(fiIsosFile, intDatasetID);
 
             // Copy over the updated filetime info from datasetFileInfo to mDatasetFileInfo
-            var _with6 = mDatasetStatsSummarizer.DatasetFileInfo;
-            _with6.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
-            _with6.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
-            _with6.DatasetID = datasetFileInfo.DatasetID;
-            _with6.DatasetName = string.Copy(datasetFileInfo.DatasetName);
-            _with6.FileExtension = string.Copy(datasetFileInfo.FileExtension);
-            _with6.AcqTimeStart = datasetFileInfo.AcqTimeStart;
-            _with6.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
-            _with6.ScanCount = datasetFileInfo.ScanCount;
-            _with6.FileSizeBytes = datasetFileInfo.FileSizeBytes;
+            mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
+            mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
+            mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetFileInfo.DatasetID;
+            mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
+            mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
+            mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
+            mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
+            mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
+            mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
 
             return true;
 

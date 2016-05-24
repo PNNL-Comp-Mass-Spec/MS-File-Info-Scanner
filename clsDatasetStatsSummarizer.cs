@@ -62,16 +62,16 @@ namespace MSFileInfoScanner
 		#endregion
 
 		#region "Classwide Variables"
-		protected string mFileDate;
-		protected string mDatasetStatsSummaryFileName;
+		private readonly string mFileDate;
+		private string mDatasetStatsSummaryFileName;
 
-		protected string mErrorMessage = string.Empty;
-		protected List<clsScanStatsEntry> mDatasetScanStats;
+		private string mErrorMessage = string.Empty;
+		private List<clsScanStatsEntry> mDatasetScanStats;
 
 		public udtSampleInfoType SampleInfo;
 		private clsSpectrumTypeClassifier mSpectraTypeClassifier;
 
-		protected clsSpectrumTypeClassifier SpectraTypeClassifier {
+		private clsSpectrumTypeClassifier SpectraTypeClassifier {
             get { return mSpectraTypeClassifier; }
 			set {
                 if (mSpectraTypeClassifier != null)
@@ -86,11 +86,11 @@ namespace MSFileInfoScanner
 			}
 
 		}
-		protected bool mDatasetSummaryStatsUpToDate;
+		private bool mDatasetSummaryStatsUpToDate;
 
-		protected clsDatasetSummaryStats mDatasetSummaryStats;
+		private clsDatasetSummaryStats mDatasetSummaryStats;
 
-        protected clsMedianUtilities mMedianUtils;
+        private clsMedianUtilities mMedianUtils;
 		#endregion
 
 		#region "Events"
@@ -253,7 +253,7 @@ namespace MSFileInfoScanner
 		}
 
 
-		protected void ComputeScanStatsUpdateDetails(
+		private void ComputeScanStatsUpdateDetails(
             clsScanStatsEntry objScanStats, 
             ref double dblElutionTimeMax, 
             ref clsDatasetSummaryStats.udtSummaryStatDetailsType udtSummaryStatDetails, 
@@ -297,7 +297,7 @@ namespace MSFileInfoScanner
 
 		}
 
-		protected double ComputeMedian(double[] dblList, int intItemCount)
+		private double ComputeMedian(double[] dblList, int intItemCount)
 		{
 
 			var lstData = new List<double>(intItemCount);
@@ -778,7 +778,7 @@ namespace MSFileInfoScanner
 
 		}
 
-		protected string FixNull(string strText)
+		private string FixNull(string strText)
 		{
 		    if (string.IsNullOrEmpty(strText)) {
 				return string.Empty;
@@ -809,7 +809,7 @@ namespace MSFileInfoScanner
 			ClearCachedData();
 		}
 
-		protected void ReportError(string message)
+		private void ReportError(string message)
 		{
 			mErrorMessage = string.Copy(message);
 			if (ErrorEvent != null) {

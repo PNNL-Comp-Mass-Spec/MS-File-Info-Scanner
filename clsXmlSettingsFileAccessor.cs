@@ -855,10 +855,9 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Tools to manipulates XML Settings files.
         /// </summary>
-        protected class XMLFileReader
+        private class XMLFileReader
         {
-
-            public enum XMLItemTypeEnum
+            private enum XMLItemTypeEnum
             {
                 GetKeys = 0,
                 GetValues = 1,
@@ -874,15 +873,17 @@ namespace MSFileInfoScanner
             private string m_SaveFilename;
 
             private bool m_initialized;
-            public bool NotifyOnEvent;
+            private readonly bool NotifyOnEvent;
 
-            public bool NotifyOnException;
+            private readonly bool NotifyOnException;
             public event InformationMessageEventHandler InformationMessage;
 
             /// <summary>Initializes a new instance of the XMLFileReader (non case-sensitive)</summary>
             /// <param name="XmlFilename">The name of the XML file.</param>
-            public XMLFileReader(string XmlFilename)
+            /// <param name="notifyOnEvent"></param>
+            public XMLFileReader(string XmlFilename, bool notifyOnEvent)
             {
+                NotifyOnEvent = notifyOnEvent;
                 NotifyOnException = false;
                 InitXMLFileReader(XmlFilename, false);
             }
@@ -890,8 +891,10 @@ namespace MSFileInfoScanner
             /// <summary>Initializes a new instance of the XMLFileReader.</summary>
             /// <param name="XmlFilename">The name of the XML file.</param>
             /// <param name="IsCaseSensitive">Case sensitive as boolean.</param>
-            public XMLFileReader(string XmlFilename, bool IsCaseSensitive)
+            /// <param name="notifyOnEvent"></param>
+            public XMLFileReader(string XmlFilename, bool IsCaseSensitive, bool notifyOnEvent)
             {
+                NotifyOnEvent = notifyOnEvent;
                 NotifyOnException = true;
                 InitXMLFileReader(XmlFilename, IsCaseSensitive);
             }
@@ -938,7 +941,7 @@ namespace MSFileInfoScanner
             /// This routine returns the name of the ini file.
             /// </summary>
             /// <return>The function returns the name of ini file.</return>
-            public string XmlFilename
+            private string XmlFilename
             {
                 get
                 {
@@ -962,7 +965,7 @@ namespace MSFileInfoScanner
             /// This routine returns a boolean showing if the name is case sensitive or not.
             /// </summary>
             /// <return>The function returns a Boolean.</return>
-            public bool CaseSensitive
+            private bool CaseSensitive
             {
                 get { return m_CaseSensitive; }
             }
@@ -1205,7 +1208,7 @@ namespace MSFileInfoScanner
             /// <param name="keyName">The name of the key.</param>
             /// <param name="newValue">The new value for the "key".</param>
             /// <return>The function returns a boolean that shows if the change was done.</return>
-            public bool SetXmlKey(string sectionName, string keyName, string newValue)
+            private bool SetXmlKey(string sectionName, string keyName, string newValue)
             {
                 if (!Initialized)
                     throw new XMLFileReaderNotInitializedException();
@@ -1259,7 +1262,7 @@ namespace MSFileInfoScanner
             /// </summary>
             /// <param name="sectionName">The name of the section.</param>
             ///<return>The function returns a string collection with comments</return>
-            public StringCollection GetXmlSectionComments(string sectionName)
+            private StringCollection GetXmlSectionComments(string sectionName)
             {
                 if (!Initialized)
                     throw new XMLFileReaderNotInitializedException();
@@ -1304,7 +1307,7 @@ namespace MSFileInfoScanner
             /// <param name="sectionName">The name of the section.</param>
             /// <param name="comments">A string collection.</param>
             ///<return>The function returns a Boolean that shows if the change was done.</return>
-            public bool SetXMLComments(string sectionName, StringCollection comments)
+            private bool SetXMLComments(string sectionName, StringCollection comments)
             {
                 if (!Initialized)
                     throw new XMLFileReaderNotInitializedException();
@@ -1823,7 +1826,7 @@ namespace MSFileInfoScanner
             /// <summary>It Sets or Gets the output file name.</summary>
             public string OutputFilename
             {
-                get
+                private get
                 {
                     if (!Initialized)
                         throw new XMLFileReaderNotInitializedException();

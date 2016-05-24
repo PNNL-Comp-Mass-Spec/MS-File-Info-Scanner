@@ -27,12 +27,12 @@ namespace FileProcessor
 		public const char ALTERNATE_SWITCH_CHAR = '-';
 
 		public const char DEFAULT_SWITCH_PARAM_CHAR = ':';
-		protected readonly Dictionary<string, string> mSwitches = new Dictionary<string, string>();
+		private readonly Dictionary<string, string> mSwitches = new Dictionary<string, string>();
 
-		protected readonly List<string> mNonSwitchParameters = new List<string>();
-		protected bool mShowHelp;
+		private readonly List<string> mNonSwitchParameters = new List<string>();
+		private bool mShowHelp;
 
-		protected bool mDebugMode;
+		private bool mDebugMode;
 		public bool NeedToShowHelp
 		{
 			get { return mShowHelp; }
@@ -527,7 +527,7 @@ namespace FileProcessor
 
 		}
 
-		protected string[] SplitCommandLineParams(string strCmdLine)
+		private string[] SplitCommandLineParams(string strCmdLine)
 		{
 			var strParameters = new List<string>();
 

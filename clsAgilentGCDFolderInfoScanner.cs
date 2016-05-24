@@ -219,7 +219,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected bool ProcessChemstationMSDataFile(string strDatafilePath, clsDatasetFileInfo datasetFileInfo)
+        private bool ProcessChemstationMSDataFile(string strDatafilePath, clsDatasetFileInfo datasetFileInfo)
         {
             bool blnSuccess;
             var intCurrentIndex = 0;

@@ -14,7 +14,7 @@ namespace MSFileInfoScanner
     public class clsPlotContainer
     {
 
-        protected enum ImageFileFormat
+        private enum ImageFileFormat
         {
             PNG,
             JPG
@@ -42,9 +42,9 @@ namespace MSFileInfoScanner
         public bool PlottingDeisotopedData { get; set; }
 
 
-        protected OxyPlot.PlotModel mPlot;
+        private readonly OxyPlot.PlotModel mPlot;
 
-        protected Dictionary<string, OxyPalette> mColorGradients;
+        private Dictionary<string, OxyPalette> mColorGradients;
         /// <summary>
         /// Constructor
         /// </summary>
@@ -93,7 +93,7 @@ namespace MSFileInfoScanner
         }
 
 
-        protected void SaveToFileLoop(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
+        private void SaveToFileLoop(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
         {
             if (mColorGradients == null || mColorGradients.Count == 0) {
                 SaveToFile(imageFilePath, fileFormat, width, height, resolution);
@@ -133,8 +133,7 @@ namespace MSFileInfoScanner
 
         }
 
-
-        protected void SaveToFile(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
+        private void SaveToFile(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
         {
             Console.WriteLine("Saving " + Path.GetFileName(imageFilePath));
 
@@ -202,8 +201,7 @@ namespace MSFileInfoScanner
             mColorGradients = colorGradients;
         }
 
-
-        protected void AddDeisotopedDataLegend(DrawingContext drawContext, int canvasWidth, int canvasHeight, int offsetLeft, int offsetTop, int spacing)
+        private void AddDeisotopedDataLegend(DrawingContext drawContext, int canvasWidth, int canvasHeight, int offsetLeft, int offsetTop, int spacing)
         {
             const int CHARGE_START = 1;
             const int CHARGE_END = 6;
@@ -246,7 +244,7 @@ namespace MSFileInfoScanner
         }
 
 
-        protected void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, HorizontalAlignment hAlign, VerticalAlignment vAlign, int padding)
+        private void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, HorizontalAlignment hAlign, VerticalAlignment vAlign, int padding)
         {
             var usCulture = CultureInfo.GetCultureInfo("en-us");
             // Dim fontTypeface = New Typeface(New FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal)
@@ -327,13 +325,13 @@ namespace MSFileInfoScanner
 
         }
 
-        protected double PointSizeToEm(int fontSizePoints)
+        private double PointSizeToEm(int fontSizePoints)
         {
             var fontSizeEm = fontSizePoints / 12;
             return fontSizeEm;
         }
 
-        protected int PointSizeToPixels(int fontSizePoints)
+        private int PointSizeToPixels(int fontSizePoints)
         {
             var fontSizePixels = fontSizePoints * 1.33;
             return Convert.ToInt32(Math.Round(fontSizePixels, 0));

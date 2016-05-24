@@ -39,20 +39,23 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <remarks></remarks>
 
-        protected void ComputeQualityScores(XRawFileIO objXcaliburAccessor, clsDatasetFileInfo datasetFileInfo)
+        private void ComputeQualityScores(XRawFileIO objXcaliburAccessor, clsDatasetFileInfo datasetFileInfo)
         {
             float sngOverallScore;
 
             double dblOverallAvgIntensitySum = 0;
             var intOverallAvgCount = 0;
 
-            if (mLCMS2DPlot.ScanCountCached > 0) {
+            if (mLCMS2DPlot.ScanCountCached > 0)
+            {
                 // Obtain the overall average intensity value using the data cached in mLCMS2DPlot
                 // This avoids having to reload all of the data using objXcaliburAccessor
                 const int intMSLevelFilter = 1;
                 sngOverallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(intMSLevelFilter);
 
-            } else {
+            }
+            else
+            {
                 var intScanCount = objXcaliburAccessor.GetNumScans();
                 int intScanStart;
                 int intScanEnd;
@@ -79,7 +82,8 @@ namespace MSFileInfoScanner
                     // For now, this just computes the average intensity for each scan and then computes and overall average intensity value
 
                     double dblIntensitySum = 0;
-                    for (var intIonIndex = 0; intIonIndex <= dblMassIntensityPairs.GetUpperBound(1); intIonIndex++) {
+                    for (var intIonIndex = 0; intIonIndex <= dblMassIntensityPairs.GetUpperBound(1); intIonIndex++)
+                    {
                         dblIntensitySum += dblMassIntensityPairs[1, intIonIndex];
                     }
 
@@ -88,9 +92,12 @@ namespace MSFileInfoScanner
                     intOverallAvgCount += 1;
                 }
 
-                if (intOverallAvgCount > 0) {
+                if (intOverallAvgCount > 0)
+                {
                     sngOverallScore = Convert.ToSingle(dblOverallAvgIntensitySum / intOverallAvgCount);
-                } else {
+                }
+                else
+                {
                     sngOverallScore = 0;
                 }
 
@@ -99,20 +106,23 @@ namespace MSFileInfoScanner
             datasetFileInfo.OverallQualityScore = sngOverallScore;
 
         }
-        
-        protected clsSpectrumTypeClassifier.eCentroidStatusConstants GetCentroidStatus(int intScanNumber, FinniganFileReaderBaseClass.udtScanHeaderInfoType udtScanHeaderInfoType)
-        {
-           
 
-            if (udtScanHeaderInfoType.IsCentroidScan) {
-                if (mIsProfileM.IsMatch(udtScanHeaderInfoType.FilterText)) {
+        private clsSpectrumTypeClassifier.eCentroidStatusConstants GetCentroidStatus(int intScanNumber, FinniganFileReaderBaseClass.udtScanHeaderInfoType udtScanHeaderInfoType)
+        {
+
+
+            if (udtScanHeaderInfoType.IsCentroidScan)
+            {
+                if (mIsProfileM.IsMatch(udtScanHeaderInfoType.FilterText))
+                {
                     ShowMessage("Warning: Scan " + intScanNumber + " appears to be profile mode data, yet XRawFileIO reported it to be centroid");
                 }
 
                 return clsSpectrumTypeClassifier.eCentroidStatusConstants.Centroid;
             }
 
-            if (mIsCentroid.IsMatch(udtScanHeaderInfoType.FilterText)) {
+            if (mIsCentroid.IsMatch(udtScanHeaderInfoType.FilterText))
+            {
                 ShowMessage("Warning: Scan " + intScanNumber + " appears to be centroided data, yet XRawFileIO reported it to be profile");
             }
 
@@ -127,16 +137,19 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public override string GetDatasetNameViaPath(string strDataFilePath)
         {
-            try {
+            try
+            {
                 // The dataset name is simply the file name without .Raw
                 return Path.GetFileNameWithoutExtension(strDataFilePath);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 return string.Empty;
             }
         }
 
 
-        protected void LoadScanDetails(XRawFileIO objXcaliburAccessor)
+        private void LoadScanDetails(XRawFileIO objXcaliburAccessor)
         {
             var udtScanHeaderInfo = new FinniganFileReaderBaseClass.udtScanHeaderInfoType();
 
@@ -145,12 +158,14 @@ namespace MSFileInfoScanner
 
             Console.Write("  Loading scan details");
 
-            if (mSaveTICAndBPI) {
+            if (mSaveTICAndBPI)
+            {
                 // Initialize the TIC and BPI arrays
                 InitializeTICAndBPI();
             }
 
-            if (mSaveLCMS2DPlots) {
+            if (mSaveLCMS2DPlots)
+            {
                 InitializeLCMS2DPlot();
             }
 
@@ -159,22 +174,27 @@ namespace MSFileInfoScanner
             var intScanCount = objXcaliburAccessor.GetNumScans();
             GetStartAndEndScans(intScanCount, out intScanStart, out intScanEnd);
 
-            for (var intScanNumber = intScanStart; intScanNumber <= intScanEnd; intScanNumber++) {
+            for (var intScanNumber = intScanStart; intScanNumber <= intScanEnd; intScanNumber++)
+            {
 
-                try {
-                    if (mShowDebugInfo) {
+                try
+                {
+                    if (mShowDebugInfo)
+                    {
                         Console.WriteLine(" ... scan " + intScanNumber);
                     }
 
                     var blnSuccess = objXcaliburAccessor.GetScanInfo(intScanNumber, out udtScanHeaderInfo);
 
-                    if (blnSuccess) {
-                        if (mSaveTICAndBPI) {
+                    if (blnSuccess)
+                    {
+                        if (mSaveTICAndBPI)
+                        {
                             mTICandBPIPlot.AddData(
-                                intScanNumber, 
-                                udtScanHeaderInfo.MSLevel, 
-                                Convert.ToSingle(udtScanHeaderInfo.RetentionTime), 
-                                udtScanHeaderInfo.BasePeakIntensity, 
+                                intScanNumber,
+                                udtScanHeaderInfo.MSLevel,
+                                Convert.ToSingle(udtScanHeaderInfo.RetentionTime),
+                                udtScanHeaderInfo.BasePeakIntensity,
                                 udtScanHeaderInfo.TotalIonCurrent);
                         }
 
@@ -204,13 +224,17 @@ namespace MSFileInfoScanner
                         mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
                     }
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     ReportError("Error loading header info for scan " + intScanNumber + ": " + ex.Message);
                 }
 
 
-                try {
-                    if (mSaveLCMS2DPlots | mCheckCentroidingStatus) {
+                try
+                {
+                    if (mSaveLCMS2DPlots | mCheckCentroidingStatus)
+                    {
                         // Also need to load the raw data
 
                         double[,] dblMassIntensityPairs;
@@ -218,17 +242,21 @@ namespace MSFileInfoScanner
                         // Load the ions for this scan
                         var intIonCount = objXcaliburAccessor.GetScanData2D(intScanNumber, out dblMassIntensityPairs);
 
-                        if (intIonCount > 0) {
-                            if (mSaveLCMS2DPlots) {
+                        if (intIonCount > 0)
+                        {
+                            if (mSaveLCMS2DPlots)
+                            {
                                 mLCMS2DPlot.AddScan2D(intScanNumber, udtScanHeaderInfo.MSLevel, Convert.ToSingle(udtScanHeaderInfo.RetentionTime), intIonCount, dblMassIntensityPairs);
                             }
 
-                            if (mCheckCentroidingStatus) {
+                            if (mCheckCentroidingStatus)
+                            {
                                 var mzCount = dblMassIntensityPairs.GetLength(1);
 
                                 var lstMZs = new List<double>(mzCount);
 
-                                for (var i = 0; i <= mzCount - 1; i++) {
+                                for (var i = 0; i <= mzCount - 1; i++)
+                                {
                                     lstMZs.Add(dblMassIntensityPairs[0, i]);
                                 }
 
@@ -240,7 +268,9 @@ namespace MSFileInfoScanner
 
                     }
 
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     ReportError("Error loading m/z and intensity values for scan " + intScanNumber + ": " + ex.Message);
                 }
 
@@ -266,7 +296,8 @@ namespace MSFileInfoScanner
             // Obtain the full path to the file
             var fiRawFile = new FileInfo(strDataFilePath);
 
-            if (!fiRawFile.Exists) {
+            if (!fiRawFile.Exists)
+            {
                 ShowMessage(".Raw file not found: " + strDataFilePath);
                 return false;
             }
@@ -302,21 +333,26 @@ namespace MSFileInfoScanner
             var objXcaliburAccessor = new XRawFileIO();
 
             // Open a handle to the data file
-            if (!objXcaliburAccessor.OpenRawFile(fiRawFile.FullName)) {
+            if (!objXcaliburAccessor.OpenRawFile(fiRawFile.FullName))
+            {
                 // File open failed
                 ReportError("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
                 blnReadError = true;
 
 
-                if (!string.Equals(clsMSFileInfoScanner.GetAppFolderPath().Substring(0, 2), fiRawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase)) {
-                    if (mCopyFileLocalOnReadError) {
+                if (!string.Equals(clsMSFileInfoScanner.GetAppFolderPath().Substring(0, 2), fiRawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
+                {
+                    if (mCopyFileLocalOnReadError)
+                    {
                         // Copy the file locally and try again
 
-                        try {
+                        try
+                        {
                             strDataFilePathLocal = Path.Combine(clsMSFileInfoScanner.GetAppFolderPath(), Path.GetFileName(strDataFilePath));
 
 
-                            if (!string.Equals(strDataFilePathLocal, strDataFilePath, StringComparison.InvariantCultureIgnoreCase)) {
+                            if (!string.Equals(strDataFilePathLocal, strDataFilePath, StringComparison.InvariantCultureIgnoreCase))
+                            {
                                 ShowMessage("Copying file " + Path.GetFileName(strDataFilePath) + " to the working folder");
                                 File.Copy(strDataFilePath, strDataFilePathLocal, true);
 
@@ -326,15 +362,20 @@ namespace MSFileInfoScanner
                                 // Update fiRawFile then try to re-open
                                 fiRawFile = new FileInfo(strDataFilePath);
 
-                                if (!objXcaliburAccessor.OpenRawFile(fiRawFile.FullName)) {
+                                if (!objXcaliburAccessor.OpenRawFile(fiRawFile.FullName))
+                                {
                                     // File open failed
                                     ReportError("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
                                     blnReadError = true;
-                                } else {
+                                }
+                                else
+                                {
                                     blnReadError = false;
                                 }
                             }
-                        } catch (Exception) {
+                        }
+                        catch (Exception)
+                        {
                             blnReadError = true;
                         }
                     }
@@ -343,17 +384,23 @@ namespace MSFileInfoScanner
 
             }
 
-            if (!blnReadError) {
+            if (!blnReadError)
+            {
                 // Read the file info
-                try {
+                try
+                {
                     datasetFileInfo.AcqTimeStart = objXcaliburAccessor.FileInfo.CreationDate;
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     // Read error
                     blnReadError = true;
                 }
 
-                if (!blnReadError) {
-                    try {
+                if (!blnReadError)
+                {
+                    try
+                    {
                         // Look up the end scan time then compute .AcqTimeEnd
                         var intScanEnd = objXcaliburAccessor.FileInfo.ScanEnd;
                         FinniganFileReaderBaseClass.udtScanHeaderInfoType udtScanHeaderInfo;
@@ -361,20 +408,23 @@ namespace MSFileInfoScanner
 
                         datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(udtScanHeaderInfo.RetentionTime);
                         datasetFileInfo.ScanCount = objXcaliburAccessor.GetNumScans();
-                    } catch (Exception) {
+                    }
+                    catch (Exception)
+                    {
                         // Error; use default values
-                        var _with5 = datasetFileInfo;
-                        _with5.AcqTimeEnd = _with5.AcqTimeStart;
-                        _with5.ScanCount = 0;
+                        datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
+                        datasetFileInfo.ScanCount = 0;
                     }
 
-                    if (mSaveTICAndBPI || mCreateDatasetInfoFile || mCreateScanStatsFile || mSaveLCMS2DPlots || mCheckCentroidingStatus) {
+                    if (mSaveTICAndBPI || mCreateDatasetInfoFile || mCreateScanStatsFile || mSaveLCMS2DPlots || mCheckCentroidingStatus)
+                    {
                         // Load data from each scan
                         // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
                         LoadScanDetails(objXcaliburAccessor);
                     }
 
-                    if (mComputeOverallQualityScores) {
+                    if (mComputeOverallQualityScores)
+                    {
                         // Note that this call will also create the TICs and BPIs
                         ComputeQualityScores(objXcaliburAccessor, datasetFileInfo);
                     }
@@ -382,20 +432,26 @@ namespace MSFileInfoScanner
             }
 
 
-            var _with6 = mDatasetStatsSummarizer.SampleInfo;
-            _with6.SampleName = objXcaliburAccessor.FileInfo.SampleName;
-            _with6.Comment1 = objXcaliburAccessor.FileInfo.Comment1;
-            _with6.Comment2 = objXcaliburAccessor.FileInfo.Comment2;
+            mDatasetStatsSummarizer.SampleInfo.SampleName = objXcaliburAccessor.FileInfo.SampleName;
+            mDatasetStatsSummarizer.SampleInfo.Comment1 = objXcaliburAccessor.FileInfo.Comment1;
+            mDatasetStatsSummarizer.SampleInfo.Comment2 = objXcaliburAccessor.FileInfo.Comment2;
 
-            if (!string.IsNullOrEmpty(objXcaliburAccessor.FileInfo.SampleComment)) {
-                if (string.IsNullOrEmpty(_with6.Comment1)) {
-                    _with6.Comment1 = objXcaliburAccessor.FileInfo.SampleComment;
-                } else {
-                    if (string.IsNullOrEmpty(_with6.Comment2)) {
-                        _with6.Comment2 = objXcaliburAccessor.FileInfo.SampleComment;
-                    } else {
+            if (!string.IsNullOrEmpty(objXcaliburAccessor.FileInfo.SampleComment))
+            {
+                if (string.IsNullOrEmpty(mDatasetStatsSummarizer.SampleInfo.Comment1))
+                {
+                    mDatasetStatsSummarizer.SampleInfo.Comment1 = objXcaliburAccessor.FileInfo.SampleComment;
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(mDatasetStatsSummarizer.SampleInfo.Comment2))
+                    {
+                        mDatasetStatsSummarizer.SampleInfo.Comment2 = objXcaliburAccessor.FileInfo.SampleComment;
+                    }
+                    else
+                    {
                         // Append the sample comment to comment 2
-                        _with6.Comment2 += "; " + objXcaliburAccessor.FileInfo.SampleComment;
+                        mDatasetStatsSummarizer.SampleInfo.Comment2 += "; " + objXcaliburAccessor.FileInfo.SampleComment;
                     }
                 }
             }
@@ -409,22 +465,25 @@ namespace MSFileInfoScanner
             UpdateDatasetFileStats(fiRawFile, intDatasetID);
 
             // Copy over the updated filetime info from datasetFileInfo to mDatasetFileInfo
-            var _with7 = mDatasetStatsSummarizer.DatasetFileInfo;
-            _with7.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
-            _with7.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
-            _with7.DatasetID = datasetFileInfo.DatasetID;
-            _with7.DatasetName = string.Copy(datasetFileInfo.DatasetName);
-            _with7.FileExtension = string.Copy(datasetFileInfo.FileExtension);
-            _with7.AcqTimeStart = datasetFileInfo.AcqTimeStart;
-            _with7.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
-            _with7.ScanCount = datasetFileInfo.ScanCount;
-            _with7.FileSizeBytes = datasetFileInfo.FileSizeBytes;
+            mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
+            mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
+            mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetFileInfo.DatasetID;
+            mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
+            mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
+            mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
+            mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
+            mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
+            mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
 
             // Delete the local copy of the data file
-            if (blnDeleteLocalFile) {
-                try {
+            if (blnDeleteLocalFile)
+            {
+                try
+                {
                     File.Delete(strDataFilePathLocal);
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     // Deletion failed
                     ReportError("Deletion failed for: " + Path.GetFileName(strDataFilePathLocal));
                 }
@@ -435,9 +494,10 @@ namespace MSFileInfoScanner
         }
 
 
-        protected void StoreExtendedScanInfo(ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo, string strEntryName, string strEntryValue)
+        private void StoreExtendedScanInfo(ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo, string strEntryName, string strEntryValue)
         {
-            if (strEntryValue == null) {
+            if (strEntryValue == null)
+            {
                 strEntryValue = string.Empty;
             }
 
@@ -456,21 +516,24 @@ namespace MSFileInfoScanner
         }
 
 
-        protected void StoreExtendedScanInfo(ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo, string[] strEntryNames, string[] strEntryValues)
+        private void StoreExtendedScanInfo(ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo, string[] strEntryNames, string[] strEntryValues)
         {
             var cTrimChars = new[] {
                 ':',
                 ' '
             };
 
-            try {
+            try
+            {
                 if (strEntryNames == null || strEntryValues == null)
                 {
                     return;
                 }
 
-                for (var intIndex = 0; intIndex <= strEntryNames.Length - 1; intIndex++) {
-                    if (strEntryNames[intIndex] == null || strEntryNames[intIndex].Trim().Length == 0) {
+                for (var intIndex = 0; intIndex <= strEntryNames.Length - 1; intIndex++)
+                {
+                    if (strEntryNames[intIndex] == null || strEntryNames[intIndex].Trim().Length == 0)
+                    {
                         // Empty entry name; do not add
                         continue;
                     }
@@ -527,11 +590,13 @@ namespace MSFileInfoScanner
                         break;
                     }
                 }
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 // Ignore any errors here
             }
 
-        }       
+        }
 
     }
 }

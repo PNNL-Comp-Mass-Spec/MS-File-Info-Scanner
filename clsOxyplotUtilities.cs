@@ -14,7 +14,7 @@ namespace MSFileInfoScanner
 
         public const int FONT_SIZE_BASE = 16;
 
-        protected const string DEFAULT_AXIS_LABEL_FORMAT = "#,##0";
+        private const string DEFAULT_AXIS_LABEL_FORMAT = "#,##0";
         public static PlotModel GetBasicPlotModel(string strTitle, string xAxisLabel, string yAxisLabel)
         {
 

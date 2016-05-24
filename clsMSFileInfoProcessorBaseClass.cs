@@ -17,6 +17,18 @@ namespace MSFileInfoScanner
         /// </summary>
         protected clsMSFileInfoProcessorBaseClass()
         {
+            mTICandBPIPlot = new clsTICandBPIPlotter();
+            mInstrumentSpecificPlots = new clsTICandBPIPlotter();
+            
+            mDatasetStatsSummarizer = new clsDatasetStatsSummarizer();
+            mDatasetStatsSummarizer.ErrorEvent += mDatasetStatsSummarizer_ErrorEvent;
+
+            mLCMS2DPlot = new clsLCMSDataPlotter();
+            mLCMS2DPlot.ErrorEvent += mLCMS2DPlot_ErrorEvent;
+
+            mLCMS2DPlotOverview = new clsLCMSDataPlotter();
+            mLCMS2DPlotOverview.ErrorEvent += mLCMS2DPlotOverview_ErrorEvent;
+
             InitializeLocalVariables();
         }
 
@@ -30,68 +42,36 @@ namespace MSFileInfoScanner
 
         protected bool mCheckCentroidingStatus;
         protected bool mComputeOverallQualityScores;
+
         // When True, then creates an XML file with dataset info
         protected bool mCreateDatasetInfoFile;
+
         // When True, then creates a _ScanStats.txt file
         protected bool mCreateScanStatsFile;
 
-        protected int mLCMS2DOverviewPlotDivisor;
-        // When True, then adds a new row to a tab-delimited text file that has dataset stats
-        protected bool mUpdateDatasetStatsTextFile;
+        private int mLCMS2DOverviewPlotDivisor;
 
-        protected string mDatasetStatsTextFileName;
-        protected int mScanStart;
-        protected int mScanEnd;
+        // When True, then adds a new row to a tab-delimited text file that has dataset stats
+        private bool mUpdateDatasetStatsTextFile;
+
+        private string mDatasetStatsTextFileName;
+        private int mScanStart;
+        private int mScanEnd;
 
         protected bool mShowDebugInfo;
 
-        protected int mDatasetID;
+        private int mDatasetID;
 
         protected bool mCopyFileLocalOnReadError;
-        protected clsTICandBPIPlotter mTICandBPIPlot;
+        protected readonly clsTICandBPIPlotter mTICandBPIPlot;
 
-        protected clsTICandBPIPlotter mInstrumentSpecificPlots;
-        private clsLCMSDataPlotter withEventsField_mLCMS2DPlot;
-        protected clsLCMSDataPlotter mLCMS2DPlot {
-            get { return withEventsField_mLCMS2DPlot; }
-            set {
-                if (withEventsField_mLCMS2DPlot != null) {
-                    withEventsField_mLCMS2DPlot.ErrorEvent -= mLCMS2DPlot_ErrorEvent;
-                }
-                withEventsField_mLCMS2DPlot = value;
-                if (withEventsField_mLCMS2DPlot != null) {
-                    withEventsField_mLCMS2DPlot.ErrorEvent += mLCMS2DPlot_ErrorEvent;
-                }
-            }
-        }
-        private clsLCMSDataPlotter withEventsField_mLCMS2DPlotOverview;
-        protected clsLCMSDataPlotter mLCMS2DPlotOverview {
-            get { return withEventsField_mLCMS2DPlotOverview; }
-            set {
-                if (withEventsField_mLCMS2DPlotOverview != null) {
-                    withEventsField_mLCMS2DPlotOverview.ErrorEvent -= mLCMS2DPlotOverview_ErrorEvent;
-                }
-                withEventsField_mLCMS2DPlotOverview = value;
-                if (withEventsField_mLCMS2DPlotOverview != null) {
-                    withEventsField_mLCMS2DPlotOverview.ErrorEvent += mLCMS2DPlotOverview_ErrorEvent;
-                }
-            }
+        protected readonly clsTICandBPIPlotter mInstrumentSpecificPlots;
 
-        }
-        private clsDatasetStatsSummarizer withEventsField_mDatasetStatsSummarizer;
-        protected clsDatasetStatsSummarizer mDatasetStatsSummarizer {
-            get { return withEventsField_mDatasetStatsSummarizer; }
-            set {
-                if (withEventsField_mDatasetStatsSummarizer != null) {
-                    withEventsField_mDatasetStatsSummarizer.ErrorEvent -= mDatasetStatsSummarizer_ErrorEvent;
-                }
-                withEventsField_mDatasetStatsSummarizer = value;
-                if (withEventsField_mDatasetStatsSummarizer != null) {
-                    withEventsField_mDatasetStatsSummarizer.ErrorEvent += mDatasetStatsSummarizer_ErrorEvent;
-                }
-            }
+        protected readonly clsLCMSDataPlotter mLCMS2DPlot;
+        private readonly clsLCMSDataPlotter mLCMS2DPlotOverview;
 
-        }
+        protected readonly clsDatasetStatsSummarizer mDatasetStatsSummarizer;
+
         public sealed override event ErrorEventEventHandler ErrorEvent;
         public sealed override event MessageEventEventHandler MessageEvent;
 
@@ -209,7 +189,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected bool CreateDatasetInfoFile(string strInputFileName, string strOutputFolderPath)
+        private bool CreateDatasetInfoFile(string strInputFileName, string strOutputFolderPath)
         {
 
             bool blnSuccess;
@@ -336,7 +316,7 @@ namespace MSFileInfoScanner
         /// <param name="intScanStart">1 if mScanStart is zero; otherwise mScanStart</param>
         /// <param name="intScanEnd">intScanCount if mScanEnd is zero; otherwise Min(mScanEnd, intScanCount)</param>
         /// <remarks></remarks>
-        protected void GetStartAndEndScans(int intScanCount, int intScanNumFirst, out int intScanStart, out int intScanEnd)
+        private void GetStartAndEndScans(int intScanCount, int intScanNumFirst, out int intScanStart, out int intScanEnd)
         {
             if (mScanStart > 0) {
                 intScanStart = mScanStart;
@@ -352,15 +332,9 @@ namespace MSFileInfoScanner
 
         }
 
-
-        protected void InitializeLocalVariables()
+        private void InitializeLocalVariables()
         {
-            mTICandBPIPlot = new clsTICandBPIPlotter();
-            mInstrumentSpecificPlots = new clsTICandBPIPlotter();
-
-            mLCMS2DPlot = new clsLCMSDataPlotter();
-            mLCMS2DPlotOverview = new clsLCMSDataPlotter();
-
+          
             mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR;
 
             mSaveTICAndBPI = false;
@@ -380,8 +354,6 @@ namespace MSFileInfoScanner
             mShowDebugInfo = false;
 
             mDatasetID = 0;
-
-            mDatasetStatsSummarizer = new clsDatasetStatsSummarizer();
 
             mCopyFileLocalOnReadError = false;
 
@@ -516,14 +488,14 @@ namespace MSFileInfoScanner
 
         }
 
-        protected bool CreateOverview2DPlots(string strDatasetName, string strOutputFolderPath, int intLCMS2DOverviewPlotDivisor)
+        private bool CreateOverview2DPlots(string strDatasetName, string strOutputFolderPath, int intLCMS2DOverviewPlotDivisor)
         {
 
             return CreateOverview2DPlots(strDatasetName, strOutputFolderPath, intLCMS2DOverviewPlotDivisor, string.Empty);
 
         }
 
-        protected bool CreateOverview2DPlots(string strDatasetName, string strOutputFolderPath, int intLCMS2DOverviewPlotDivisor, string strScanModeSuffixAddon)
+        private bool CreateOverview2DPlots(string strDatasetName, string strOutputFolderPath, int intLCMS2DOverviewPlotDivisor, string strScanModeSuffixAddon)
         {
             if (intLCMS2DOverviewPlotDivisor <= 1) {
                 // Nothing to do; just return True
@@ -672,7 +644,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected bool CreateQCPlotHTMLFile(string strDatasetName, string strOutputFolderPath)
+        private bool CreateQCPlotHTMLFile(string strDatasetName, string strOutputFolderPath)
         {
             try {
                 // Obtain the dataset summary stats (they will be auto-computed if not up to date)
@@ -860,7 +832,7 @@ namespace MSFileInfoScanner
         /// <param name="intValue"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected string IntToEngineeringNotation(int intValue)
+        private string IntToEngineeringNotation(int intValue)
         {
 
             if (intValue < 1000) {

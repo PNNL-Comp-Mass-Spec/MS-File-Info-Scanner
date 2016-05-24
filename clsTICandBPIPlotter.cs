@@ -18,7 +18,7 @@ namespace MSFileInfoScanner
             BPIMSn = 2
         }
 
-        protected struct udtOutputFileInfoType
+        private struct udtOutputFileInfoType
         {
             public eOutputFileTypes FileType;
             public string FileName;
@@ -30,28 +30,28 @@ namespace MSFileInfoScanner
         #region "Member variables"
         // Data stored in mTIC will get plotted for all scans, both MS and MS/MS
 
-        protected clsChromatogramInfo mTIC;
+        private clsChromatogramInfo mTIC;
         // Data stored in mBPI will be plotted separately for MS and MS/MS spectra
 
-        protected clsChromatogramInfo mBPI;
-        protected string mTICXAxisLabel = "LC Scan Number";
-        protected string mTICYAxisLabel = "Intensity";
+        private clsChromatogramInfo mBPI;
+        private string mTICXAxisLabel = "LC Scan Number";
+        private string mTICYAxisLabel = "Intensity";
 
-        protected bool mTICYAxisExponentialNotation = true;
-        protected string mBPIXAxisLabel = "LC Scan Number";
-        protected string mBPIYAxisLabel = "Intensity";
+        private bool mTICYAxisExponentialNotation = true;
+        private string mBPIXAxisLabel = "LC Scan Number";
+        private string mBPIYAxisLabel = "Intensity";
 
-        protected bool mBPIYAxisExponentialNotation = true;
-        protected string mTICPlotAbbrev = "TIC";
+        private bool mBPIYAxisExponentialNotation = true;
+        private string mTICPlotAbbrev = "TIC";
 
-        protected string mBPIPlotAbbrev = "BPI";
-        protected bool mBPIAutoMinMaxY;
-        protected bool mTICAutoMinMaxY;
+        private string mBPIPlotAbbrev = "BPI";
+        private bool mBPIAutoMinMaxY;
+        private bool mTICAutoMinMaxY;
 
-        protected bool mRemoveZeroesFromEnds;
+        private bool mRemoveZeroesFromEnds;
         #endregion
 
-        protected List<udtOutputFileInfoType> mRecentFiles;
+        private List<udtOutputFileInfoType> mRecentFiles;
 
         public bool BPIAutoMinMaxY {
             get { return mBPIAutoMinMaxY; }
@@ -144,7 +144,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected void AddRecentFile(string strFilePath, eOutputFileTypes eFileType)
+        private void AddRecentFile(string strFilePath, eOutputFileTypes eFileType)
         {
             var udtOutputFileInfo = default(udtOutputFileInfoType);
 
@@ -156,7 +156,7 @@ namespace MSFileInfoScanner
         }
 
 
-        protected void AddSeries(PlotModel myplot, List<DataPoint> objPoints)
+        private void AddSeries(PlotModel myplot, List<DataPoint> objPoints)
         {
             // Generate a black curve with no symbols
             var series = new LineSeries();
@@ -442,7 +442,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected void RemoveZeroesAtFrontAndBack(clsChromatogramInfo objChrom)
+        private void RemoveZeroesAtFrontAndBack(clsChromatogramInfo objChrom)
         {
             const int MAX_POINTS_TO_CHECK = 100;
             var intPointsChecked = 0;
@@ -490,7 +490,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected void ValidateMSLevel(clsChromatogramInfo objChrom)
+        private void ValidateMSLevel(clsChromatogramInfo objChrom)
         {
             var blnMSLevelDefined = false;
 
@@ -510,7 +510,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected class clsChromatogramDataPoint
+        private class clsChromatogramDataPoint
         {
             public int ScanNum { get; set; }
             public float TimeMinutes { get; set; }
@@ -518,7 +518,7 @@ namespace MSFileInfoScanner
             public int MSLevel { get; set; }
         }
 
-        protected class clsChromatogramInfo
+        private class clsChromatogramInfo
         {
 
             public int ScanCount {
@@ -530,7 +530,7 @@ namespace MSFileInfoScanner
             }
 
 
-            protected List<clsChromatogramDataPoint> mScans;
+            private List<clsChromatogramDataPoint> mScans;
             public clsChromatogramInfo()
             {
                 Initialize();
