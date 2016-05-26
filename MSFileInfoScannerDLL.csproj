@@ -137,11 +137,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if exist "$(TargetDir)SQLite.Interop.dll" (del "$(TargetDir)SQLite.Interop.dll")
+    <PostBuildEvent>if exist pwiz_bindings_cli.dll del pwiz_bindings_cli.dll
+if exist "$(TargetDir)SQLite.Interop.dll" (del "$(TargetDir)SQLite.Interop.dll")
 if not exist "$(TargetDir)x86" mkdir "$(TargetDir)x86"
 if not exist "$(TargetDir)x64" mkdir "$(TargetDir)x64"
 xcopy "$(ProjectDir)Lib\x86\SQLite.Interop.dll" "$(TargetDir)x86" /D /Y
-xcopy "$(ProjectDir)Lib\x64\SQLite.Interop.dll" "$(TargetDir)x64" /D /Y</PostBuildEvent>
+xcopy "$(ProjectDir)Lib\x64\SQLite.Interop.dll" "$(TargetDir)x64" /D /Y
+xcopy "$(ProjectDir)Lib\netcdf.dll" "$(TargetDir)" /D /Y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
