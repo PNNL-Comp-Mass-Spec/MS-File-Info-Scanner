@@ -415,7 +415,6 @@ namespace MSFileInfoScanner
                 // Open the analysis.baf (or extension.baf) file using the ProteoWizardWrapper
                 ShowMessage("Determining acquisition info using Proteowizard (this could take a while)");
 
-
                 var objPWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(fiBAFFileInfo.FullName);
 
                 try
@@ -1005,6 +1004,9 @@ namespace MSFileInfoScanner
 
                         if (!blnSuccess)
                         {
+                            // Add the proteowizard assembly resolve prior to entering the ParseBAFFile function
+                            pwiz.ProteowizardWrapper.DependencyLoader.AddAssemblyResolver();
+
                             // Use ProteoWizard to extract the scan counts and acquisition time information
                             // If mSaveLCMS2DPlots = True, this method will also read the m/z and intensity values from each scan so that we can make 2D plots
                             bafFileParsed = ParseBAFFile(fiFileInfo, datasetFileInfo);

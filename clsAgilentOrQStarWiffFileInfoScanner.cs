@@ -61,24 +61,53 @@ namespace MSFileInfoScanner
             mDatasetStatsSummarizer.ClearCachedData();
             mLCMS2DPlot.Options.UseObservedMinScan = false;
 
-            try {
+            // Add the proteowizard assembly resolve prior to calling ProcessWiffFile
+            pwiz.ProteowizardWrapper.DependencyLoader.AddAssemblyResolver();
+
+            ProcessWiffFile(fiDatasetFile, datasetFileInfo);
+
+            // Read the file info from the file system
+            // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
+            UpdateDatasetFileStats(fiDatasetFile, datasetFileInfo.DatasetID);
+
+            // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
+            mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
+            mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
+            mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
+            mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
+            mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
+            mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
+
+            return true;
+
+        }
+
+        private void ProcessWiffFile(FileInfo fiDatasetFile, clsDatasetFileInfo datasetFileInfo)
+        {
+            try
+            {
                 // Open the .Wiff file using the ProteoWizardWrapper
 
                 var objPWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(fiDatasetFile.FullName);
 
-                try {
+                try
+                {
                     var dtRunStartTime = Convert.ToDateTime(objPWiz.RunStartTime);
 
                     // Update AcqTimeEnd if possible
                     // Found out by trial and error that we need to use .ToUniversalTime() to adjust the time reported by ProteoWizard
                     dtRunStartTime = dtRunStartTime.ToUniversalTime();
-                    if (dtRunStartTime < datasetFileInfo.AcqTimeEnd) {
-                        if (datasetFileInfo.AcqTimeEnd.Subtract(dtRunStartTime).TotalDays < 1) {
+                    if (dtRunStartTime < datasetFileInfo.AcqTimeEnd)
+                    {
+                        if (datasetFileInfo.AcqTimeEnd.Subtract(dtRunStartTime).TotalDays < 1)
+                        {
                             datasetFileInfo.AcqTimeStart = dtRunStartTime;
                         }
                     }
 
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd;
                 }
 
@@ -100,14 +129,16 @@ namespace MSFileInfoScanner
 
                 // Note that SRM .Wiff files will only have chromatograms, and no spectra
 
-                if (objPWiz.ChromatogramCount > 0) {
+                if (objPWiz.ChromatogramCount > 0)
+                {
                     // Process the chromatograms
                     pWizParser.StoreChromatogramInfo(datasetFileInfo, out blnTICStored, out blnSRMDataCached, out dblRuntimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
 
                 }
 
-                if (objPWiz.SpectrumCount > 0 & !blnSRMDataCached) {
+                if (objPWiz.SpectrumCount > 0 & !blnSRMDataCached)
+                {
                     // Process the spectral data (though only if we did not process SRM data)
                     pWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, ref dblRuntimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
@@ -116,25 +147,11 @@ namespace MSFileInfoScanner
                 objPWiz.Dispose();
                 PRISM.Processes.clsProgRunner.GarbageCollectNow();
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 ReportError("Error using ProteoWizard reader: " + ex.Message);
             }
-
-
-            // Read the file info from the file system
-            // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
-            UpdateDatasetFileStats(fiDatasetFile, datasetFileInfo.DatasetID);
-
-            // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
-            mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
-            mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
-            mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
-            mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
-            mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
-            mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
-
-            return true;
-
         }
 
         private void TestPWiz(string strFilePath)

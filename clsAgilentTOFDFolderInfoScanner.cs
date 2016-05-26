@@ -250,6 +250,9 @@ namespace MSFileInfoScanner
                     //	      <Acquisition>
                     //	        <AcqMode>TargetedMS2</AcqMode>
 
+                    // Add the proteowizard assembly resolve prior to calling ReadBinaryData
+                    pwiz.ProteowizardWrapper.DependencyLoader.AddAssemblyResolver();
+
                     // Read the raw data to create the TIC and BPI
                     ReadBinaryData(diRootFolder.FullName, datasetFileInfo);
 
