@@ -335,10 +335,14 @@ namespace MSFileInfoScanner
             // Use Xraw to read the .Raw file
             // If reading from a SAMBA-mounted network share, and if the current user has 
             //  Read privileges but not Read&Execute privileges, then we will need to copy the file locally
-            var objXcaliburAccessor = new XRawFileIO();
+            var xcaliburAccessor = new XRawFileIO();
+
+            // Attach event handlers
+            xcaliburAccessor.ReportError += XcaliburAccessor_ReportError;
+            xcaliburAccessor.ReportWarning += XcaliburAccessor_ReportWarning;
 
             // Open a handle to the data file
-            if (!objXcaliburAccessor.OpenRawFile(fiRawFile.FullName))
+            if (!xcaliburAccessor.OpenRawFile(fiRawFile.FullName))
             {
                 // File open failed
                 ReportError("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
@@ -367,7 +371,7 @@ namespace MSFileInfoScanner
                                 // Update fiRawFile then try to re-open
                                 fiRawFile = new FileInfo(strDataFilePath);
 
-                                if (!objXcaliburAccessor.OpenRawFile(fiRawFile.FullName))
+                                if (!xcaliburAccessor.OpenRawFile(fiRawFile.FullName))
                                 {
                                     // File open failed
                                     ReportError("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
@@ -394,7 +398,7 @@ namespace MSFileInfoScanner
                 // Read the file info
                 try
                 {
-                    datasetFileInfo.AcqTimeStart = objXcaliburAccessor.FileInfo.CreationDate;
+                    datasetFileInfo.AcqTimeStart = xcaliburAccessor.FileInfo.CreationDate;
                 }
                 catch (Exception)
                 {
@@ -407,12 +411,12 @@ namespace MSFileInfoScanner
                     try
                     {
                         // Look up the end scan time then compute .AcqTimeEnd
-                        var intScanEnd = objXcaliburAccessor.FileInfo.ScanEnd;
+                        var intScanEnd = xcaliburAccessor.FileInfo.ScanEnd;
                         FinniganFileReaderBaseClass.udtScanHeaderInfoType udtScanHeaderInfo;
-                        objXcaliburAccessor.GetScanInfo(intScanEnd, out udtScanHeaderInfo);
+                        xcaliburAccessor.GetScanInfo(intScanEnd, out udtScanHeaderInfo);
 
                         datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(udtScanHeaderInfo.RetentionTime);
-                        datasetFileInfo.ScanCount = objXcaliburAccessor.GetNumScans();
+                        datasetFileInfo.ScanCount = xcaliburAccessor.GetNumScans();
                     }
                     catch (Exception)
                     {
@@ -425,45 +429,45 @@ namespace MSFileInfoScanner
                     {
                         // Load data from each scan
                         // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
-                        LoadScanDetails(objXcaliburAccessor);
+                        LoadScanDetails(xcaliburAccessor);
                     }
 
                     if (mComputeOverallQualityScores)
                     {
                         // Note that this call will also create the TICs and BPIs
-                        ComputeQualityScores(objXcaliburAccessor, datasetFileInfo);
+                        ComputeQualityScores(xcaliburAccessor, datasetFileInfo);
                     }
                 }
             }
 
 
-            mDatasetStatsSummarizer.SampleInfo.SampleName = objXcaliburAccessor.FileInfo.SampleName;
-            mDatasetStatsSummarizer.SampleInfo.Comment1 = objXcaliburAccessor.FileInfo.Comment1;
-            mDatasetStatsSummarizer.SampleInfo.Comment2 = objXcaliburAccessor.FileInfo.Comment2;
+            mDatasetStatsSummarizer.SampleInfo.SampleName = xcaliburAccessor.FileInfo.SampleName;
+            mDatasetStatsSummarizer.SampleInfo.Comment1 = xcaliburAccessor.FileInfo.Comment1;
+            mDatasetStatsSummarizer.SampleInfo.Comment2 = xcaliburAccessor.FileInfo.Comment2;
 
-            if (!string.IsNullOrEmpty(objXcaliburAccessor.FileInfo.SampleComment))
+            if (!string.IsNullOrEmpty(xcaliburAccessor.FileInfo.SampleComment))
             {
                 if (string.IsNullOrEmpty(mDatasetStatsSummarizer.SampleInfo.Comment1))
                 {
-                    mDatasetStatsSummarizer.SampleInfo.Comment1 = objXcaliburAccessor.FileInfo.SampleComment;
+                    mDatasetStatsSummarizer.SampleInfo.Comment1 = xcaliburAccessor.FileInfo.SampleComment;
                 }
                 else
                 {
                     if (string.IsNullOrEmpty(mDatasetStatsSummarizer.SampleInfo.Comment2))
                     {
-                        mDatasetStatsSummarizer.SampleInfo.Comment2 = objXcaliburAccessor.FileInfo.SampleComment;
+                        mDatasetStatsSummarizer.SampleInfo.Comment2 = xcaliburAccessor.FileInfo.SampleComment;
                     }
                     else
                     {
                         // Append the sample comment to comment 2
-                        mDatasetStatsSummarizer.SampleInfo.Comment2 += "; " + objXcaliburAccessor.FileInfo.SampleComment;
+                        mDatasetStatsSummarizer.SampleInfo.Comment2 += "; " + xcaliburAccessor.FileInfo.SampleComment;
                     }
                 }
             }
 
 
             // Close the handle to the data file
-            objXcaliburAccessor.CloseRawFile();
+            xcaliburAccessor.CloseRawFile();
 
             // Read the file info from the file system
             // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
@@ -497,7 +501,6 @@ namespace MSFileInfoScanner
             return !blnReadError;
 
         }
-
 
         private void StoreExtendedScanInfo(ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo, string strEntryName, string strEntryValue)
         {
@@ -598,6 +601,17 @@ namespace MSFileInfoScanner
             }
 
         }
+
+        private void XcaliburAccessor_ReportWarning(string message)
+        {
+            ShowMessage(message);
+        }
+
+        private void XcaliburAccessor_ReportError(string message)
+        {
+            ReportError(message);
+        }
+
 
     }
 }

@@ -128,7 +128,7 @@ namespace MSFileInfoScanner
         /// </summary>
 		public clsDatasetStatsSummarizer()
 		{
-			mFileDate = "May 23, 2016";
+			mFileDate = "May 24, 2016";
 
             mErrorMessage = string.Empty;
 

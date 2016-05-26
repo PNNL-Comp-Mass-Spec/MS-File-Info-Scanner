@@ -64,7 +64,7 @@ namespace MSFileInfoScanner
 
         private int mPointCountCachedAfterLastTrim;
 
-        private List<clsScanData> mScans;
+        private readonly List<clsScanData> mScans;
 
         private MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions mOptions;
 
@@ -115,6 +115,8 @@ namespace MSFileInfoScanner
             mMaxIonCountReported = 0;
 
             mLastGCTime = DateTime.UtcNow;
+
+            mScans = new List<clsScanData>();
         }
 
         private void AddRecentFile(string strFilePath, eOutputFileTypes eFileType)
@@ -853,15 +855,7 @@ namespace MSFileInfoScanner
             mPointCountCached = 0;
             mPointCountCachedAfterLastTrim = 0;
 
-            if (mScans == null)
-            {
-                mScans = new List<clsScanData>();
-            }
-            else
-            {
-                mScans.Clear();
-            }
-
+            mScans.Clear();
             ClearRecentFileInfo();
         }
 

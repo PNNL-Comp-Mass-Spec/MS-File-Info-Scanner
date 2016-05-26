@@ -174,6 +174,8 @@ namespace MSFileInfoScanner
 
             try
             {
+                // Note: as of May 2016 this only works if you compile as x86 or with "Prefer 32-bit" enabled when compiling as AnyCPU
+
                 objNETCDFReader = new NetCDFReader.clsMSNetCdf();
                 blnSuccess = objNETCDFReader.OpenMSCdfFile(Path.Combine(strFolderPath, AGILENT_ANALYSIS_CDF_FILE));
                 if (blnSuccess)
@@ -190,7 +192,7 @@ namespace MSFileInfoScanner
                         double dblMassMin = 0;
                         double dblMassMax = 0;
 
-                        if (objNETCDFReader.GetScanInfo(intScanCount - 1, ref intScanNumber, ref dblScanTotalIntensity, ref dblScanTime, ref dblMassMin, ref dblMassMax))
+                        if (objNETCDFReader.GetScanInfo(intScanCount - 1, out intScanNumber, out dblScanTotalIntensity, out dblScanTime, out dblMassMin, out dblMassMax))
                         {
                             // Add 1 to intScanNumber since the scan number is off by one in the CDF file
                             datasetFileInfo.ScanCount = intScanNumber + 1;

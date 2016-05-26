@@ -10,7 +10,6 @@ namespace MSFileInfoScanner
     public class clsProteowizardDataParser
     {
 
-
         public event ErrorEventEventHandler ErrorEvent;
         public delegate void ErrorEventEventHandler(string message);
         public event MessageEventEventHandler MessageEvent;

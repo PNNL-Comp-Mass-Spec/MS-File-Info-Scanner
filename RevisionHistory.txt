@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.4.5989; May 25, 2016
+	- New NetCDFReader.dll, ThermoRawFileReaderDLL.dll, and ProteowizardWrapper.dll
+	- Stop copying pwiz_bindings_cli.dll and related DLLs to the bin folder since the ProteowizardWrapper auto resolves the best folder to load those files from
+
 Version 1.4.5988; May 24, 2016
 	- Convert the project to C#
 
