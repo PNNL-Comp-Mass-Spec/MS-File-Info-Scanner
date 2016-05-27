@@ -96,22 +96,22 @@ namespace SpectraTypeClassifier
 
         public int CentroidedMS1Spectra()
         {
-            return mCentroidedSpectra.Count(item => item.Key <= 1);
+            return (from item in mCentroidedSpectra where item.Key <= 1 select item.Value).Sum();
         }
 
         public int CentroidedMSnSpectra()
         {
-            return mCentroidedSpectra.Count(item => item.Key > 1);
+            return (from item in mCentroidedSpectra where item.Key > 1 select item.Value).Sum();
         }
 
         public int CentroidedMS1SpectraClassifiedAsProfile()
         {
-            return mCentroidedSpectraClassifiedAsProfile.Count(item => item.Key <= 1);
+            return (from item in mCentroidedSpectraClassifiedAsProfile where item.Key <= 1 select item.Value).Sum();
         }
 
         public int CentroidedMSnSpectraClassifiedAsProfile()
         {
-            return mCentroidedSpectraClassifiedAsProfile.Count(item => item.Key > 1);
+            return (from item in mCentroidedSpectraClassifiedAsProfile where item.Key > 1 select item.Value).Sum();
         }
 
         public double FractionCentroided()
@@ -145,12 +145,12 @@ namespace SpectraTypeClassifier
 
         public int TotalMS1Spectra()
         {
-            return mTotalSpectra.Count(item => item.Key <= 1);
+            return mTotalSpectra.Where(item => item.Key <= 1).Sum(item => item.Value);
         }
 
         public int TotalMSnSpectra()
         {
-            return mTotalSpectra.Count(item => item.Key > 1);
+            return mTotalSpectra.Where(item => item.Key > 1).Sum(item => item.Value);
         }
 
 

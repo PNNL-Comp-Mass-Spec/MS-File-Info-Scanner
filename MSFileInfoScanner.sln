@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFileInfoScanner", "MSFileInfoScanner.csproj", "{ED7FBC96-FF30-4E96-AAD7-2F0D8D4F31E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFileInfoScannerUnitTests", "UnitTests\MSFileInfoScannerUnitTests.csproj", "{12D4ADD8-E0E6-45A1-9699-2409B26F2637}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{ED7FBC96-FF30-4E96-AAD7-2F0D8D4F31E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED7FBC96-FF30-4E96-AAD7-2F0D8D4F31E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED7FBC96-FF30-4E96-AAD7-2F0D8D4F31E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12D4ADD8-E0E6-45A1-9699-2409B26F2637}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12D4ADD8-E0E6-45A1-9699-2409B26F2637}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12D4ADD8-E0E6-45A1-9699-2409B26F2637}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12D4ADD8-E0E6-45A1-9699-2409B26F2637}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
