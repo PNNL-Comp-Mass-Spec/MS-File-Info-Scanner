@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using SpectraTypeClassifier;
 
 namespace MSFileInfoScannerUnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class SpectraTypeClassifierTests
     {
-        [TestMethod]
+        [Test]
         public void TestStats()
         {
             var classifier = new clsSpectrumTypeClassifier();
@@ -97,7 +97,7 @@ namespace MSFileInfoScannerUnitTests
 
         }
 
-        [TestMethod]
+        [Test]
         public void TestMedian()
         {
             var medianUtilities = new clsMedianUtilities();
