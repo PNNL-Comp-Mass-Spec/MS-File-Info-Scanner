@@ -240,7 +240,7 @@
             Update progress.
             </summary>
             <param name="percentComplete">
-            Percent complete.
+            Percent complete; value between 0 and 100
             </param>
         </member>
         <member name="M:UIMFLibrary.BinCentricTableCreation.UpdateProgress(System.Double,System.String)">
@@ -248,7 +248,7 @@
             Update progress.
             </summary>
             <param name="percentComplete">
-            Percent complete.
+            Percent complete; value between 0 and 100
             </param>
             <param name="currentTask">
             Current task.
@@ -2331,7 +2331,7 @@
         </member>
         <member name="F:UIMFLibrary.DataReader.m_UsingLegacyFrameParameters">
             <summary>
-            True when the .UIMF file has table Frame_Params (which takes precedence over any existing Frame_Parameters table)
+            True when the .UIMF file has table Frame_Parameters (note that the Frame_Params table takes precedence over an existing Frame_Parameters table)
             </summary>
         </member>
         <member name="F:UIMFLibrary.DataReader.m_LegacyFrameParametersMissingColumns">
@@ -3703,7 +3703,7 @@
             True if the table has a column<see cref="T:System.Boolean"/>.
             </returns>
         </member>
-        <member name="M:UIMFLibrary.DataReader.UpdateAllCalibrationCoefficients(System.Single,System.Single,System.Boolean)">
+        <member name="M:UIMFLibrary.DataReader.UpdateAllCalibrationCoefficients(System.Double,System.Double,System.Boolean)">
             <summary>
             /// Update the calibration coefficients for all frames
             </summary>
@@ -3717,7 +3717,7 @@
             Optional argument that should be set to true if calibration is automatic. Defaults to false.
             </param>
         </member>
-        <member name="M:UIMFLibrary.DataReader.UpdateCalibrationCoefficients(System.Int32,System.Single,System.Single,System.Boolean)">
+        <member name="M:UIMFLibrary.DataReader.UpdateCalibrationCoefficients(System.Int32,System.Double,System.Double,System.Boolean)">
             <summary>
             Update the calibration coefficients for a single frame
             </summary>
@@ -4314,7 +4314,7 @@
             Full path to the data file
             </param>
             <param name="createLegacyParametersTables">
-            When true, then will create and populate tables Global_Parameters and Frame_Parameters
+            When true, then will create and populate legacy tables Global_Parameters and Frame_Parameters
             </param>
             <remarks>When creating a brand new .UIMF file, you must call CreateTables() after instantiating the writer</remarks>
         </member>
@@ -4708,7 +4708,22 @@
             The Log_Entries table will be created if it doesn't exist
             </remarks>
         </member>
-        <member name="M:UIMFLibrary.DataWriter.UpdateAllCalibrationCoefficients(System.Data.SQLite.SQLiteConnection,System.Single,System.Single,System.Boolean)">
+        <member name="M:UIMFLibrary.DataWriter.UpdateAllCalibrationCoefficients(System.Double,System.Double,System.Boolean)">
+            <summary>
+            Update the slope and intercept for all frames
+            </summary>
+            <param name="slope">
+            The slope value for the calibration.
+            </param>
+            <param name="intercept">
+            The intercept for the calibration.
+            </param>
+            <param name="isAutoCalibrating">
+            Optional argument that should be set to true if calibration is automatic. Defaults to false.
+            </param>
+            <remarks>This function is called by the AutoCalibrateUIMF DLL</remarks>
+        </member>
+        <member name="M:UIMFLibrary.DataWriter.UpdateAllCalibrationCoefficients(System.Data.SQLite.SQLiteConnection,System.Double,System.Double,System.Boolean)">
             <summary>
             Update the slope and intercept for all frames
             </summary>
@@ -4724,7 +4739,7 @@
             </param>
             <remarks>This function is called by the AutoCalibrateUIMF DLL</remarks>
         </member>
-        <member name="M:UIMFLibrary.DataWriter.UpdateCalibrationCoefficients(System.Int32,System.Single,System.Single)">
+        <member name="M:UIMFLibrary.DataWriter.UpdateCalibrationCoefficients(System.Int32,System.Double,System.Double)">
             <summary>
             </summary>
             <param name="frameNumber">
@@ -4734,7 +4749,7 @@
             <param name="intercept">
             </param>
         </member>
-        <member name="M:UIMFLibrary.DataWriter.UpdateCalibrationCoefficients(System.Data.SQLite.SQLiteConnection,System.Int32,System.Single,System.Single,System.Boolean)">
+        <member name="M:UIMFLibrary.DataWriter.UpdateCalibrationCoefficients(System.Data.SQLite.SQLiteConnection,System.Int32,System.Double,System.Double,System.Boolean)">
             <summary>
             Update the slope and intercept for the given frame
             </summary>
@@ -5058,6 +5073,23 @@
             <returns>
             m/z<see cref="T:System.Double"/>.
             </returns>
+        </member>
+        <member name="P:UIMFLibrary.DataWriter.HasFrameParamsTable">
+            <summary>
+            True if the UIMF file has table Frame_Params
+            </summary>
+            <remarks>When opening a .UIMF file without the Frame_Params table, the writer will auto-add it</remarks>
+        </member>
+        <member name="P:UIMFLibrary.DataWriter.HasGlobalParamsTable">
+            <summary>
+            True if the UIMF file has table Global_Params
+            </summary>
+            <remarks>When opening a .UIMF file without the Global_Params table, the writer will auto-add it</remarks>
+        </member>
+        <member name="P:UIMFLibrary.DataWriter.HasLegacyParameterTables">
+            <summary>
+            True if the UIMF file has tables Global_Parameters and Frame_Parameters
+            </summary>
         </member>
         <member name="T:UIMFLibrary.PressureUnits">
             <summary>
