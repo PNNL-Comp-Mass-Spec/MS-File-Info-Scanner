@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using PNNLOmics.Utilities;
-using ThermoRawFileReaderDLL.FinniganFileIO;
+using ThermoRawFileReader;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2013

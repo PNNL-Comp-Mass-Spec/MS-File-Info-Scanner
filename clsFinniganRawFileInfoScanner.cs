@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using PNNLOmics.Utilities;
-using ThermoRawFileReaderDLL.FinniganFileIO;
 using SpectraTypeClassifier;
-using ThermoRawFileReaderDLL;
+using ThermoRawFileReader;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2005

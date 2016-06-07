@@ -98,8 +98,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="ThermoRawFileReaderDLL">
-      <HintPath>Lib\ThermoRawFileReaderDLL.dll</HintPath>
+    <Reference Include="ThermoRawFileReader, Version=2.0.6001.33223, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\ThermoRawFileReader.dll</HintPath>
     </Reference>
     <Reference Include="UIMFLibrary">
       <HintPath>Lib\UIMFLibrary.dll</HintPath>
