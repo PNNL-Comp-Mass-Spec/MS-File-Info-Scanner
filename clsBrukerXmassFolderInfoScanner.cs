@@ -56,7 +56,6 @@ namespace MSFileInfoScanner
             SpotNumber = 6
         }
 
-
         private void AddDatasetScan(
             int intScanNumber,
             int intMSLevel,
@@ -302,7 +301,7 @@ namespace MSFileInfoScanner
             return true;
         }
 
-        private bool ParseAutoMSFile(DirectoryInfo diDatasetFolder, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseAutoMSFile(DirectoryInfo diDatasetFolder)
         {
 
             try
@@ -400,7 +399,7 @@ namespace MSFileInfoScanner
                     ShowMessage("analysis.baf file is over 1 GB; ProteoWizard typically cannot handle .baf files this large");
 
                     // Look for a ser file
-                    if (File.Exists(Path.Combine(fiBAFFileInfo.Directory.FullName, "ser")))
+                    if (fiBAFFileInfo.Directory != null && File.Exists(Path.Combine(fiBAFFileInfo.Directory.FullName, "ser")))
                     {
                         ShowMessage("Will parse the ser file instead");
                         return false;
@@ -413,7 +412,7 @@ namespace MSFileInfoScanner
                 }
 
                 // Open the analysis.baf (or extension.baf) file using the ProteoWizardWrapper
-                ShowMessage("Determining acquisition info using Proteowizard (this could take a while)");
+                ShowMessage("Determining acquisition info using Proteowizard");
 
                 var objPWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(fiBAFFileInfo.FullName);
 
@@ -496,7 +495,6 @@ namespace MSFileInfoScanner
             try
             {
                 var lstMetadataNameToID = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
-                var lstMetadataNameToDescription = new Dictionary<string, string>();
                 var lstScanData = new Dictionary<string, udtMCFScanInfoType>();
 
                 if (mSaveTICAndBPI)
@@ -540,12 +538,12 @@ namespace MSFileInfoScanner
                         {
                             var intMetadataId = ReadDbInt(drReader, "metadataId");
                             var strMetadataName = ReadDbString(drReader, "permanentName");
-                            var strMetadataDescription = ReadDbString(drReader, "displayName");
+                            // var strMetadataDescription = ReadDbString(drReader, "displayName");
 
                             if (intMetadataId > 0)
                             {
                                 lstMetadataNameToID.Add(strMetadataName, intMetadataId);
-                                lstMetadataNameToDescription.Add(strMetadataName, strMetadataDescription);
+                                // lstMetadataNameToDescription.Add(strMetadataName, strMetadataDescription);
                             }
                         }
                     }
@@ -873,8 +871,6 @@ namespace MSFileInfoScanner
         {
             // Process a Bruker Xmass folder, specified by strDataFilePath (which can either point to the dataset folder containing the XMass files, or any of the XMass files in the dataset folder)
 
-            bool blnSuccess;
-
             try
             {
                 // Determine whether strDataFilePath points to a file or a folder
@@ -903,6 +899,7 @@ namespace MSFileInfoScanner
                     BRUKER_FID_FILE_NAME,
                     BRUKER_EXTENSION_BAF_FILE_NAME
                 };
+
                 var fiFiles = new List<FileInfo>();
 
                 foreach (var instrumentDataFile in lstInstrumentDataFiles)
@@ -955,99 +952,92 @@ namespace MSFileInfoScanner
                 if (fiFiles.Count == 0)
                 {
                     ReportError(string.Join(" or ", lstInstrumentDataFiles) + " or " + BRUKER_MCF_FILE_EXTENSION + " or " + BRUKER_SQLITE_INDEX_EXTENSION + " file not found in " + diDatasetFolder.FullName);
-                    blnSuccess = false;
+                    return false;
                 }
-                else
+
+                var fiFileInfo = fiFiles.First();
+
+                // Read the file info from the file system
+                // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
+                UpdateDatasetFileStats(fiFileInfo, datasetFileInfo.DatasetID);
+
+                // Update the dataset name and file extension
+                datasetFileInfo.DatasetName = GetDatasetNameViaPath(diDatasetFolder.FullName);
+                datasetFileInfo.FileExtension = string.Empty;
+                datasetFileInfo.FileSizeBytes = fiFileInfo.Length;
+
+                // Find the apexAcquisition.method or submethods.xml file in the XMASS_Method.m subfolder to determine .AcqTimeStart
+                // This function updates datasetFileInfo.AcqTimeEnd and datasetFileInfo.AcqTimeStart to have the same time
+                var success = DetermineAcqStartTime(diDatasetFolder, datasetFileInfo);
+
+                // Update the acquisition end time using the write time of the .baf file
+                if (fiFileInfo.LastWriteTime > datasetFileInfo.AcqTimeEnd)
                 {
-                    var fiFileInfo = fiFiles.First();
+                    datasetFileInfo.AcqTimeEnd = fiFileInfo.LastWriteTime;
 
-                    // Read the file info from the file system
-                    // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
-                    UpdateDatasetFileStats(fiFileInfo, datasetFileInfo.DatasetID);
-
-                    // Update the dataset name and file extension
-                    datasetFileInfo.DatasetName = GetDatasetNameViaPath(diDatasetFolder.FullName);
-                    datasetFileInfo.FileExtension = string.Empty;
-                    datasetFileInfo.FileSizeBytes = fiFileInfo.Length;
-
-                    // Find the apexAcquisition.method or submethods.xml file in the XMASS_Method.m subfolder to determine .AcqTimeStart
-                    // This function updates datasetFileInfo.AcqTimeEnd and datasetFileInfo.AcqTimeStart to have the same time
-                    blnSuccess = DetermineAcqStartTime(diDatasetFolder, datasetFileInfo);
-
-                    // Update the acquisition end time using the write time of the .baf file
-                    if (fiFileInfo.LastWriteTime > datasetFileInfo.AcqTimeEnd)
+                    if (datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes > 60)
                     {
-                        datasetFileInfo.AcqTimeEnd = fiFileInfo.LastWriteTime;
+                        // Update the start time to match the end time to prevent accidentally reporting an inaccurately long acquisition length
+                        datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd;
+                    }
+                }
 
-                        if (datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes > 60)
-                        {
-                            // Update the start time to match the end time to prevent accidentally reporting an inaccurately long acquisition length
-                            datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd;
-                        }
+                // Look for the Storage.mcf_idx file and the corresponding .mcf_idx file
+                // If they exist, we can extract information from them using SqLite
+                success = ParseMcfIndexFiles(diDatasetFolder, datasetFileInfo);
+
+                if (!success)
+                {
+                    Dictionary<int, float> scanElutionTimeMap;
+
+                    // Parse the scan.xml file (if it exists) to determine the number of spectra acquired
+                    // We can also obtain TIC and elution time values from this file
+                    // However, it does not track whether a scan is MS or MSn
+                    // If the scans.xml file contains runtime entries (e.g. <minutes>100.0456</minutes>) then .AcqTimeEnd is updated using .AcqTimeStart + RunTimeMinutes
+                    success = ParseScanXMLFile(diDatasetFolder, datasetFileInfo, out scanElutionTimeMap);
+
+                    var bafFileParsed = false;
+
+                    if (!success)
+                    {
+                        // Use ProteoWizard to extract the scan counts and acquisition time information
+                        // If mSaveLCMS2DPlots = True, this method will also read the m/z and intensity values from each scan so that we can make 2D plots
+                        bafFileParsed = ParseBAFFile(fiFileInfo, datasetFileInfo);
                     }
 
-                    // Look for the Storage.mcf_idx file and the corresponding .mcf_idx file
-                    // If they exist, we can extract information from them using SqLite
-                    blnSuccess = ParseMcfIndexFiles(diDatasetFolder, datasetFileInfo);
-
-                    if (!blnSuccess)
+                    if (mSaveTICAndBPI & mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC == 0 || mSaveLCMS2DPlots & mLCMS2DPlot.ScanCountCached == 0)
                     {
-                        Dictionary<int, float> scanElutionTimeMap;
+                        // If a ser or fid file exists, we can read the data from it to create the TIC and BPI plots, plus also the 2D plot
 
-                        // Parse the scan.xml file (if it exists) to determine the number of spectra acquired
-                        // We can also obtain TIC and elution time values from this file
-                        // However, it does not track whether a scan is MS or MSn
-                        // If the scans.xml file contains runtime entries (e.g. <minutes>100.0456</minutes>) then .AcqTimeEnd is updated using .AcqTimeStart + RunTimeMinutes
-                        blnSuccess = ParseScanXMLFile(diDatasetFolder, datasetFileInfo, out scanElutionTimeMap);
+                        var serOrFidParsed = ParseSerOrFidFile(fiFileInfo.Directory, scanElutionTimeMap);
 
-                        var bafFileParsed = false;
-
-                        if (!blnSuccess)
+                        if (!serOrFidParsed & !bafFileParsed)
                         {
-                            // Add the proteowizard assembly resolve prior to entering the ParseBAFFile function
-                            pwiz.ProteowizardWrapper.DependencyLoader.AddAssemblyResolver();
-
-                            // Use ProteoWizard to extract the scan counts and acquisition time information
-                            // If mSaveLCMS2DPlots = True, this method will also read the m/z and intensity values from each scan so that we can make 2D plots
+                            // Look for an analysis.baf file
                             bafFileParsed = ParseBAFFile(fiFileInfo, datasetFileInfo);
                         }
 
-                        if (mSaveTICAndBPI & mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC == 0 || mSaveLCMS2DPlots & mLCMS2DPlot.ScanCountCached == 0)
-                        {
-                            // If a ser or fid file exists, we can read the data from it to create the TIC and BPI plots, plus also the 2D plot
-
-                            var serOrFidParsed = ParseSerOrFidFile(fiFileInfo.Directory, scanElutionTimeMap);
-
-                            if (!serOrFidParsed & !bafFileParsed)
-                            {
-                                // Look for an analysis.baf file
-                                bafFileParsed = ParseBAFFile(fiFileInfo, datasetFileInfo);
-                            }
-
-                        }
                     }
-
-                    // Parse the AutoMS.txt file (if it exists) to determine which scans are MS and which are MS/MS
-                    ParseAutoMSFile(diDatasetFolder, datasetFileInfo);
-
-                    // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
-                    mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
-                    mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
-                    mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
-                    mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
-                    mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
-                    mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
-
-                    blnSuccess = true;
                 }
+
+                // Parse the AutoMS.txt file (if it exists) to determine which scans are MS and which are MS/MS
+                ParseAutoMSFile(diDatasetFolder);
+
+                // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
+                mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
+                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
+                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
+                mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
+
+                return true;
             }
             catch (Exception ex)
             {
                 ReportError("Exception processing BAF data: " + ex.Message);
-                blnSuccess = false;
+                return false;
             }
-
-            return blnSuccess;
 
         }
 
@@ -1179,8 +1169,8 @@ namespace MSFileInfoScanner
 
         private bool ReadAndStoreMcfIndexData(
             SQLiteConnection cnDB,
-            Dictionary<string, int> lstMetadataNameToID,
-            Dictionary<string, udtMCFScanInfoType> lstScanData,
+            IReadOnlyDictionary<string, int> lstMetadataNameToID,
+            IDictionary<string, udtMCFScanInfoType> lstScanData,
             eMcfMetadataFields eMcfMetadataField)
         {
 

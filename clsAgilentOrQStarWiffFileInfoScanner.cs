@@ -61,9 +61,6 @@ namespace MSFileInfoScanner
             mDatasetStatsSummarizer.ClearCachedData();
             mLCMS2DPlot.Options.UseObservedMinScan = false;
 
-            // Add the proteowizard assembly resolve prior to calling ProcessWiffFile
-            pwiz.ProteowizardWrapper.DependencyLoader.AddAssemblyResolver();
-
             ProcessWiffFile(fiDatasetFile, datasetFileInfo);
 
             // Read the file info from the file system
