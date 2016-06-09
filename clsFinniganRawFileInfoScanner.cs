@@ -410,10 +410,10 @@ namespace MSFileInfoScanner
                     {
                         // Look up the end scan time then compute .AcqTimeEnd
                         var intScanEnd = xcaliburAccessor.FileInfo.ScanEnd;
-                        FinniganFileReaderBaseClass.udtScanHeaderInfoType udtScanHeaderInfo;
-                        xcaliburAccessor.GetScanInfo(intScanEnd, out udtScanHeaderInfo);
+                        clsScanInfo scanInfo;
+                        xcaliburAccessor.GetScanInfo(intScanEnd, out scanInfo);
 
-                        datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(udtScanHeaderInfo.RetentionTime);
+                        datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(scanInfo.RetentionTime);
                         datasetFileInfo.ScanCount = xcaliburAccessor.GetNumScans();
                     }
                     catch (Exception)
