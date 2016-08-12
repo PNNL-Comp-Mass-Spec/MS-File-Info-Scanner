@@ -225,7 +225,7 @@ namespace MSFileInfoScanner
 
             Console.WriteLine("  Reading the _isos.csv file");
 
-            using (var srIsosFile = new StreamReader(new FileStream(strIsosFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
+            using (var srIsosFile = new StreamReader(new FileStream(strIsosFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))) {
                 while (!srIsosFile.EndOfStream) {
                     intRowNumber += 1;
                     var strLineIn = srIsosFile.ReadLine();
@@ -323,7 +323,7 @@ namespace MSFileInfoScanner
 
             Console.WriteLine("  Reading the _scans.csv file");
 
-            using (var srIsosFile = new StreamReader(new FileStream(strScansFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
+            using (var srIsosFile = new StreamReader(new FileStream(strScansFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))) {
                 while (!srIsosFile.EndOfStream) {
                     intRowNumber += 1;
                     var strLineIn = srIsosFile.ReadLine();
@@ -377,11 +377,22 @@ namespace MSFileInfoScanner
                             mTICandBPIPlot.AddData(udtScanData.Scan, udtScanData.MSLevel, udtScanData.ElutionTime, udtScanData.BasePeakIntensity, udtScanData.TotalIonCurrent);
                         }
 
+                        string scanTypeName;
+                        if (string.IsNullOrWhiteSpace(udtScanData.FilterText))
+                        {
+                            udtScanData.FilterText = udtScanData.MSLevel > 1 ? "HMSn" : "HMS";
+                            scanTypeName = udtScanData.FilterText;
+                        }
+                        else
+                        {
+                            scanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(udtScanData.FilterText);
+                        }
+
                         var objScanStatsEntry = new clsScanStatsEntry
                         {
                             ScanNumber = udtScanData.Scan,
                             ScanType = udtScanData.MSLevel,
-                            ScanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(udtScanData.FilterText),
+                            ScanTypeName = scanTypeName,
                             ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(udtScanData.FilterText),
                             ElutionTime = udtScanData.ElutionTime.ToString("0.0000"),
                             TotalIonIntensity = StringUtilities.ValueToString(udtScanData.TotalIonCurrent, 5),
