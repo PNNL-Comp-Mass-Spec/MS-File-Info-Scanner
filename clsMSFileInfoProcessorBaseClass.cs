@@ -20,13 +20,13 @@ namespace MSFileInfoScanner
             mInstrumentSpecificPlots = new clsTICandBPIPlotter();
             
             mDatasetStatsSummarizer = new clsDatasetStatsSummarizer();
-            mDatasetStatsSummarizer.ErrorEvent += mDatasetStatsSummarizer_ErrorEvent;
+            RegisterEvents(mDatasetStatsSummarizer);
 
             mLCMS2DPlot = new clsLCMSDataPlotter();
-            mLCMS2DPlot.ErrorEvent += mLCMS2DPlot_ErrorEvent;
+            RegisterEvents(mLCMS2DPlot);
 
             mLCMS2DPlotOverview = new clsLCMSDataPlotter();
-            mLCMS2DPlotOverview.ErrorEvent += mLCMS2DPlotOverview_ErrorEvent;
+            RegisterEvents(mLCMS2DPlotOverview);
 
             InitializeLocalVariables();
         }
@@ -70,9 +70,6 @@ namespace MSFileInfoScanner
         private readonly clsLCMSDataPlotter mLCMS2DPlotOverview;
 
         protected readonly clsDatasetStatsSummarizer mDatasetStatsSummarizer;
-
-        public sealed override event ErrorEventEventHandler ErrorEvent;
-        public sealed override event MessageEventEventHandler MessageEvent;
 
         #endregion
 
@@ -204,11 +201,11 @@ namespace MSFileInfoScanner
                 blnSuccess = mDatasetStatsSummarizer.CreateDatasetInfoFile(datasetName, datasetInfoFilePath);
 
                 if (!blnSuccess) {
-                    ReportError("Error calling objDatasetStatsSummarizer.CreateDatasetInfoFile: " + mDatasetStatsSummarizer.ErrorMessage);
+                    OnErrorEvent("Error calling objDatasetStatsSummarizer.CreateDatasetInfoFile: " + mDatasetStatsSummarizer.ErrorMessage);
                 }
 
             } catch (Exception ex) {
-                ReportError("Error creating dataset info file: " + ex.Message);
+                OnErrorEvent("Error creating dataset info file: " + ex.Message, ex);
                 blnSuccess = false;
             }
 
@@ -232,11 +229,11 @@ namespace MSFileInfoScanner
                 blnSuccess = mDatasetStatsSummarizer.CreateScanStatsFile(datasetName, scanStatsFilePath);
 
                 if (!blnSuccess) {
-                    ReportError("Error calling objDatasetStatsSummarizer.CreateScanStatsFile: " + mDatasetStatsSummarizer.ErrorMessage);
+                    OnErrorEvent("Error calling objDatasetStatsSummarizer.CreateScanStatsFile: " + mDatasetStatsSummarizer.ErrorMessage);
                 }
 
             } catch (Exception ex) {
-                ReportError("Error creating dataset ScanStats file: " + ex.Message);
+                OnErrorEvent("Error creating dataset ScanStats file: " + ex.Message, ex);
                 blnSuccess = false;
             }
 
@@ -265,11 +262,11 @@ namespace MSFileInfoScanner
 
                 if (!success)
                 {
-                    ReportError("Error calling objDatasetStatsSummarizer.UpdateDatasetStatsTextFile: " + mDatasetStatsSummarizer.ErrorMessage);
+                    OnErrorEvent("Error calling objDatasetStatsSummarizer.UpdateDatasetStatsTextFile: " + mDatasetStatsSummarizer.ErrorMessage);
                 }
 
             } catch (Exception ex) {
-                ReportError("Error updating the dataset stats text file: " + ex.Message);
+                OnErrorEvent("Error updating the dataset stats text file: " + ex.Message, ex);
                 success = false;
             }
 
@@ -288,7 +285,7 @@ namespace MSFileInfoScanner
                 return mDatasetStatsSummarizer.CreateDatasetInfoXML();
 
             } catch (Exception ex) {
-                ReportError("Error getting dataset info XML: " + ex.Message);
+                OnErrorEvent("Error getting dataset info XML", ex);
             }
 
             return string.Empty;
@@ -370,20 +367,6 @@ namespace MSFileInfoScanner
             // Initialize var that tracks m/z vs. time
             mLCMS2DPlot.Reset();
             mLCMS2DPlotOverview.Reset();
-        }
-
-        protected void ReportError(string message)
-        {
-            if (ErrorEvent != null) {
-                ErrorEvent(message);
-            }
-        }
-
-        protected void ShowMessage(string message)
-        {
-            if (MessageEvent != null) {
-                MessageEvent(message);
-            }
         }
 
         protected void ShowProgress(int scanNumber, int scanCount, ref DateTime dtLastProgressTime, int modulusValue = 100, int detailedUpdateIntervalSeconds = 30)
@@ -555,14 +538,14 @@ namespace MSFileInfoScanner
                     string errorMessage;
                     blnSuccess = mTICandBPIPlot.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, out errorMessage);
                     if (!blnSuccess) {
-                        ReportError("Error calling mTICandBPIPlot.SaveTICAndBPIPlotFiles: " + errorMessage);
+                        OnErrorEvent("Error calling mTICandBPIPlot.SaveTICAndBPIPlotFiles: " + errorMessage);
                         successOverall = false;
                     }
 
                     // Write out any instrument-specific plots
                     blnSuccess = mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, out errorMessage);
                     if (!blnSuccess) {
-                        ReportError("Error calling mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles: " + errorMessage);
+                        OnErrorEvent("Error calling mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles: " + errorMessage);
                         successOverall = false;
                     }
 
@@ -635,7 +618,7 @@ namespace MSFileInfoScanner
                 }
 
             } catch (Exception ex) {
-                ReportError("Error creating output files: " + ex.Message);
+                OnErrorEvent("Error creating output files: " + ex.Message, ex);
                 successOverall = false;
             }
 
@@ -775,7 +758,7 @@ namespace MSFileInfoScanner
                 return true;
 
             } catch (Exception ex) {
-                ReportError("Error creating QC plot HTML file: " + ex.Message);
+                OnErrorEvent("Error creating QC plot HTML file: " + ex.Message, ex);
                 return false;
             }
 
@@ -835,31 +818,17 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         private string IntToEngineeringNotation(int value)
         {
-
             if (value < 1000) {
                 return value.ToString();
-            } else if (value < 1000000.0) {
-                return (int)Math.Round(value / 1000.0, 0) + "K";
-            } else {
-                return (int)Math.Round(value / 1000.0 / 1000, 0) + "M";
             }
 
+            if (value < 1000000.0) {
+                return (int)Math.Round(value / 1000.0, 0) + "K";
+            }
+
+            return (int)Math.Round(value / 1000.0 / 1000, 0) + "M";
         }
 
-        private void mLCMS2DPlot_ErrorEvent(string message)
-        {
-            ReportError("Error in LCMS2DPlot: " + message);
-        }
-
-        private void mLCMS2DPlotOverview_ErrorEvent(string message)
-        {
-            ReportError("Error in LCMS2DPlotOverview: " + message);
-        }
-
-        private void mDatasetStatsSummarizer_ErrorEvent(string errorMessage)
-        {
-            ReportError(errorMessage);
-        }
     }
 }
 

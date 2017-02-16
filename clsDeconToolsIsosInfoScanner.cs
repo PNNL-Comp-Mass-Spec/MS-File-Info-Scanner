@@ -67,14 +67,16 @@ namespace MSFileInfoScanner
         public override string GetDatasetNameViaPath(string strDataFilePath)
         {
 
-            try {
+            try
+            {
                 if (strDataFilePath.ToUpper().EndsWith(DECONTOOLS_ISOS_FILE_SUFFIX)) {
                     // The dataset name is simply the file name without _isos.csv
                     var datasetName = Path.GetFileName(strDataFilePath);
                     return datasetName.Substring(0, datasetName.Length - DECONTOOLS_ISOS_FILE_SUFFIX.Length);
-                } else {
-                    return string.Empty;
                 }
+
+                return string.Empty;
+
             } catch (Exception) {
                 return string.Empty;
             }
@@ -112,7 +114,7 @@ namespace MSFileInfoScanner
             var lstIsosData = LoadIsosFile(fiIsosFile.FullName, MaxFit);
 
             if (lstIsosData.Count == 0) {
-                ReportError("No data found in the _isos.csv file: " + fiIsosFile.FullName);
+                OnErrorEvent("No data found in the _isos.csv file: " + fiIsosFile.FullName);
                 return;
             }
 
@@ -272,7 +274,7 @@ namespace MSFileInfoScanner
 
                     if (intCurrentScan > intLastScan) {
                         if (intLastScanParseErrors > 0) {
-                            ShowMessage("Warning: Skipped " + intLastScanParseErrors + " data points in scan " + intLastScan + " due to data conversion errors");
+                            OnWarningEvent("Warning: Skipped " + intLastScanParseErrors + " data points in scan " + intLastScan + " due to data conversion errors");
                         }
 
                         intLastScan = intCurrentScan;
@@ -317,7 +319,7 @@ namespace MSFileInfoScanner
             }
 
             if (!File.Exists(strScansFilePath)) {
-                ShowMessage("Warning: _scans.csv file is missing; will plot vs. scan number instead of vs. elution time");
+                OnWarningEvent("Warning: _scans.csv file is missing; will plot vs. scan number instead of vs. elution time");
                 return lstScanData;
             }
 
@@ -411,7 +413,7 @@ namespace MSFileInfoScanner
                         mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
                     } catch (Exception ex) {
-                        ShowMessage("Warning: Ignoring scan " + lstData[dctColumnInfo["scan_num"]] + " since data conversion error: " + ex.Message);
+                        OnWarningEvent("Warning: Ignoring scan " + lstData[dctColumnInfo["scan_num"]] + " since data conversion error: " + ex.Message);
                     }
 
                 }
@@ -447,7 +449,7 @@ namespace MSFileInfoScanner
             var fiIsosFile = new FileInfo(strDataFilePath);
 
             if (!fiIsosFile.Exists) {
-                ShowMessage("_isos.csv file not found: " + strDataFilePath);
+                OnErrorEvent("_isos.csv file not found: " + strDataFilePath);
                 return false;
             }
 

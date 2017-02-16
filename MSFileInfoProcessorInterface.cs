@@ -6,7 +6,7 @@ using MSFileInfoScannerInterfaces;
 
 namespace MSFileInfoScanner
 {
-    public abstract class iMSFileInfoProcessor
+    public abstract class iMSFileInfoProcessor : clsEventNotifier
     {
         public enum ProcessingOptions
         {
@@ -33,12 +33,7 @@ namespace MSFileInfoScanner
         public abstract bool ShowDebugInfo { get; set; }
         public abstract bool GetOption(ProcessingOptions eOption);
         public abstract void SetOption(ProcessingOptions eOption, bool blnValue);
-
-        public abstract event ErrorEventEventHandler ErrorEvent;
-        public delegate void ErrorEventEventHandler(string message);
-
-        public abstract event MessageEventEventHandler MessageEvent;
-        public delegate void MessageEventEventHandler(string message);
+        
     }
 }
 

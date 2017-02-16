@@ -85,7 +85,7 @@ namespace MSFileInfoScanner
 
             } catch (Exception ex) {
                 // Exception reading file
-                ReportError("Exception reading " + AGILENT_XML_CONTENTS_FILE + ": " + ex.Message);
+                OnErrorEvent("Exception reading " + AGILENT_XML_CONTENTS_FILE + ": " + ex.Message, ex);
                 blnSuccess = false;
             }
 
@@ -170,7 +170,7 @@ namespace MSFileInfoScanner
 
             } catch (Exception ex) {
                 // Exception reading file
-                ReportError("Exception reading " + AGILENT_TIME_SEGMENT_FILE + ": " + ex.Message);
+                OnErrorEvent("Exception reading " + AGILENT_TIME_SEGMENT_FILE + ": " + ex.Message, ex);
                 blnSuccess = false;
             }
 
@@ -268,7 +268,7 @@ namespace MSFileInfoScanner
 
 
             } catch (Exception ex) {
-                ReportError("Exception parsing Agilent TOF .D folder: " + ex.Message);
+                OnErrorEvent("Exception parsing Agilent TOF .D folder: " + ex.Message, ex);
                 blnSuccess = false;
             }
 
@@ -309,8 +309,7 @@ namespace MSFileInfoScanner
                     HighResMS2 = true
                 };
 
-                pWizParser.ErrorEvent += mPWizParser_ErrorEvent;
-                pWizParser.MessageEvent += mPWizParser_MessageEvent;
+                RegisterEvents(pWizParser);
 
                 var blnTICStored = false;
                 double dblRuntimeMinutes = 0;
@@ -335,22 +334,13 @@ namespace MSFileInfoScanner
                 blnSuccess = true;
 
             } catch (Exception ex) {
-                ReportError("Exception reading the Binary Data in the Agilent TOF .D folder using Proteowizard: " + ex.Message);
+                OnErrorEvent("Exception reading the Binary Data in the Agilent TOF .D folder using Proteowizard: " + ex.Message, ex);
                 blnSuccess = false;
             }
 
             return blnSuccess;
         }
 
-        private void mPWizParser_ErrorEvent(string message)
-        {
-            ReportError(message);
-        }
-
-        private void mPWizParser_MessageEvent(string message)
-        {
-            ShowMessage(message);
-        }
 
     }
 }

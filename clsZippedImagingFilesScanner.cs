@@ -104,7 +104,7 @@ namespace MSFileInfoScanner
                 }
 
             } catch (Exception ex) {
-                ReportError("Error finding XMass method folder: " + ex.Message);
+                OnErrorEvent("Error finding XMass method folder: " + ex.Message);
                 blnSuccess = false;
             }
 
@@ -160,10 +160,9 @@ namespace MSFileInfoScanner
 
             if (fiFileInfo.Name.ToLower().StartsWith(ZIPPED_IMAGING_FILE_NAME_PREFIX.ToLower()) && fiFileInfo.Extension.ToLower() == ".zip") {
                 return true;
-            } else {
-                return false;
             }
 
+            return false;
         }
 
         public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
@@ -179,7 +178,7 @@ namespace MSFileInfoScanner
 
                 // Validate that we have selected a valid folder
                 if (!diDatasetFolder.Exists) {
-                    ReportError("File/folder not found: " + strDataFilePath);
+                    OnErrorEvent("File/folder not found: " + strDataFilePath);
                     return false;
                 }
 
@@ -193,7 +192,7 @@ namespace MSFileInfoScanner
                 var lstFiles = diDatasetFolder.GetFiles(ZIPPED_IMAGING_FILE_SEARCH_SPEC).ToList();
                 if (lstFiles.Count == 0) {
                     // 0_R*.zip files not found
-                    ReportError(ZIPPED_IMAGING_FILE_SEARCH_SPEC + "files not found in " + diDatasetFolder.FullName);
+                    OnErrorEvent(ZIPPED_IMAGING_FILE_SEARCH_SPEC + "files not found in " + diDatasetFolder.FullName);
                     blnSuccess = false;
 
                 } else {
@@ -247,7 +246,7 @@ namespace MSFileInfoScanner
                     blnSuccess = true;
                 }
             } catch (Exception ex) {
-                ReportError("Exception processing Zipped Imaging Files: " + ex.Message);
+                OnErrorEvent("Exception processing Zipped Imaging Files: " + ex.Message);
                 blnSuccess = false;
             }
 

@@ -157,7 +157,7 @@ namespace MSFileInfoScanner
                 dctBPI = objUIMFReader.GetBPIByFrame(intFrameStart, intFrameEnd, 0, 0);
 
             } catch (Exception ex) {
-                ReportError("Error obtaining TIC and BPI for overall dataset: " + ex.Message);
+                OnErrorEvent("Error obtaining TIC and BPI for overall dataset: " + ex.Message);
                 dctTIC = new Dictionary<int, double>();
                 dctBPI = new Dictionary<int, double>();
             }
@@ -410,12 +410,12 @@ namespace MSFileInfoScanner
                             }
 
                         } catch (Exception ex) {
-                            ReportError("Error loading m/z and intensity values for frame " + intFrameNumber + ": " + ex.Message);
+                            OnWarningEvent("Error loading m/z and intensity values for frame " + intFrameNumber + ": " + ex.Message);
                         }
                     }
 
                 } catch (Exception ex) {
-                    ReportError("Error loading header info for frame " + intFrameNumber + ": " + ex.Message);
+                    OnWarningEvent("Error loading header info for frame " + intFrameNumber + ": " + ex.Message);
                 }
 
                 ShowProgress(intMasterFrameNumIndex, intMasterFrameNumList.Length, ref dtLastProgressTime);
@@ -473,7 +473,7 @@ namespace MSFileInfoScanner
                 objUIMFReader = new DataReader(fiFileInfo.FullName);
             } catch (Exception ex) {
                 // File open failed
-                ReportError("Call to .OpenUIMF failed for " + fiFileInfo.Name + ": " + ex.Message);
+                OnErrorEvent("Call to .OpenUIMF failed for " + fiFileInfo.Name + ": " + ex.Message, ex);
                 blnReadError = true;
             }
 
@@ -535,7 +535,8 @@ namespace MSFileInfoScanner
 
                         if (!DateTime.TryParse(strReportedDateStarted, out dtReportedDateStarted)) {
                             // Invalid date; log a message
-                            ShowMessage(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + strReportedDateStarted + "; will use the time the datafile was last modified");
+                            OnWarningEvent(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + strReportedDateStarted + "; " + 
+                                "will use the time the datafile was last modified");
                             blnInaccurateStartTime = true;
                         } else {
                             if (dtReportedDateStarted.Year < 450) {
@@ -551,7 +552,8 @@ namespace MSFileInfoScanner
 
                             } else if (dtReportedDateStarted.Year < 2000 | dtReportedDateStarted.Year > DateTime.Now.Year + 1) {
                                 // Invalid date; log a message
-                                ShowMessage(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + strReportedDateStarted + "; will use the time the datafile was last modified");
+                                OnWarningEvent(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + strReportedDateStarted + "; " + 
+                                    "will use the time the datafile was last modified");
                                 blnInaccurateStartTime = true;
 
                             } else {
@@ -568,7 +570,7 @@ namespace MSFileInfoScanner
                         }
 
                     } catch (Exception ex2) {
-                        ShowMessage("Exception extracting the DateStarted date from table Global_Parameters in the .UIMF file: " + ex2.Message);
+                        OnWarningEvent("Exception extracting the DateStarted date from table Global_Parameters in the .UIMF file: " + ex2.Message);
                     }
 
                     // NumFrames is the total number of frames in the file (for all frame types)
@@ -692,7 +694,7 @@ namespace MSFileInfoScanner
 
                     if (dblRunTime > 0) {
                         if (dblRunTime > 24000) {
-                            ShowMessage("Invalid runtime computed using the StartTime value from the first and last frames: " + dblRunTime);
+                            OnWarningEvent("Invalid runtime computed using the StartTime value from the first and last frames: " + dblRunTime);
                         } else {
                             if (blnInaccurateStartTime) {
                                 datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.AddMinutes(-dblRunTime);
@@ -703,7 +705,7 @@ namespace MSFileInfoScanner
                     }
 
                 } catch (Exception ex) {
-                    ShowMessage("Exception extracting acquisition time information: " + ex.Message);
+                    OnWarningEvent("Exception extracting acquisition time information: " + ex.Message);
                 }
 
                 if (mSaveTICAndBPI || mCreateDatasetInfoFile || mCreateScanStatsFile || mSaveLCMS2DPlots) {
@@ -718,11 +720,8 @@ namespace MSFileInfoScanner
                 }
             }
 
-            if ((objUIMFReader != null)) {
-                // Close the handle to the data file
-                objUIMFReader.Dispose();
-            }
-
+            // Close the handle to the data file
+            objUIMFReader?.Dispose();
 
             // Read the file info from the file system
             // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)

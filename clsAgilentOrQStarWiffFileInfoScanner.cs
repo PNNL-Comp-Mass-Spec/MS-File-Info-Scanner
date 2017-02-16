@@ -117,8 +117,7 @@ namespace MSFileInfoScanner
                     HighResMS2 = true
                 };
 
-                pWizParser.ErrorEvent += mPWizParser_ErrorEvent;
-                pWizParser.MessageEvent += mPWizParser_MessageEvent;
+                RegisterEvents(pWizParser);
 
                 var blnTICStored = false;
                 var blnSRMDataCached = false;
@@ -147,7 +146,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                ReportError("Error using ProteoWizard reader: " + ex.Message);
+                OnErrorEvent("Error using ProteoWizard reader: " + ex.Message, ex);
             }
         }
 
@@ -278,19 +277,10 @@ namespace MSFileInfoScanner
                 }
 
             } catch (Exception ex) {
-                ReportError("Error using ProteoWizard reader: " + ex.Message);
+                OnErrorEvent("Error using ProteoWizard reader: " + ex.Message, ex);
             }
 
         }
 
-        private void mPWizParser_ErrorEvent(string message)
-        {
-            ReportError(message);
-        }
-
-        private void mPWizParser_MessageEvent(string message)
-        {
-            ShowMessage(message);
-        }
     }
 }

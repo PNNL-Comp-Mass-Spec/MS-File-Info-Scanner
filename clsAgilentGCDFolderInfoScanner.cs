@@ -26,7 +26,7 @@ namespace MSFileInfoScanner
         private const string ACQ_METHOD_FILE_POST_RUN_LINE = "(Post Run)";
 
         private readonly Regex mExtractTime;
-	
+    
         private class clsLineMatchSearchInfo
         {
             public readonly bool MatchLineStart;
@@ -59,7 +59,7 @@ namespace MSFileInfoScanner
                 return string.Empty;
             }
         }
-	
+    
         private bool ExtractRunTime(string strText, out double dblRunTimeMinutes)
         {
 
@@ -148,7 +148,7 @@ namespace MSFileInfoScanner
 
             } catch (Exception ex) {
                 // Exception reading file
-                ReportError("Exception reading " + AGILENT_ACQ_METHOD_FILE + ": " + ex.Message);
+                OnErrorEvent("Exception reading " + AGILENT_ACQ_METHOD_FILE + ": " + ex.Message, ex);
                 blnSuccess = false;
             }
 
@@ -205,7 +205,7 @@ namespace MSFileInfoScanner
 
             } catch (Exception ex) {
                 // Exception reading file
-                ReportError("Exception reading " + AGILENT_GC_INI_FILE + ": " + ex.Message);
+                OnErrorEvent("Exception reading " + AGILENT_GC_INI_FILE + ": " + ex.Message, ex);
                 blnSuccess = false;
             }
 
@@ -246,7 +246,7 @@ namespace MSFileInfoScanner
                             lstIntensities = oSpectrum.Intensities;
                             blnValidSpectrum = true;
                         } catch (Exception ex) {
-                            ReportError("Exception obtaining data from the MS file for spectrum index " + intCurrentIndex + ": " + ex.Message);
+                            OnWarningEvent("Exception obtaining data from the MS file for spectrum index " + intCurrentIndex + ": " + ex.Message);
                             blnValidSpectrum = false;
                         }
 
@@ -304,7 +304,7 @@ namespace MSFileInfoScanner
 
             } catch (Exception ex) {
                 // Exception reading file
-                ReportError("Exception reading data from the MS file at spectrum index " + intCurrentIndex + ": " + ex.Message);
+                OnWarningEvent("Exception reading data from the MS file at spectrum index " + intCurrentIndex + ": " + ex.Message);
                 blnSuccess = false;
             }
 
@@ -425,7 +425,7 @@ namespace MSFileInfoScanner
 
 
             } catch (Exception ex) {
-                ReportError("Exception parsing GC .D folder: " + ex.Message);
+                OnErrorEvent("Exception parsing GC .D folder: " + ex.Message, ex);
                 blnSuccess = false;
             }
 

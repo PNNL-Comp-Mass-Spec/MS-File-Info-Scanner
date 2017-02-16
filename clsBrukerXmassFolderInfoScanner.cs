@@ -183,7 +183,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                ReportError("Error finding XMass method folder: " + ex.Message);
+                OnErrorEvent("Error finding XMass method folder: " + ex.Message, ex);
                 blnSuccess = false;
             }
 
@@ -213,7 +213,7 @@ namespace MSFileInfoScanner
                 return acquistionMethodFiles.First();
             }
 
-            ReportError("Multiple 'apexAcquisition.method' files were found in the .D folder; not sure which to use");
+            OnErrorEvent("Multiple 'apexAcquisition.method' files were found in the .D folder; not sure which to use");
             return null;
 
         }
@@ -246,7 +246,7 @@ namespace MSFileInfoScanner
                 }
             }
 
-            ReportError("Multiple 'acqus' files were found in the .D folder; not sure which one to use");
+            OnErrorEvent("Multiple 'acqus' files were found in the .D folder; not sure which one to use");
             return null;
 
         }
@@ -370,7 +370,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                ReportError("Error finding AutoMS.txt file: " + ex.Message);
+                OnErrorEvent("Error finding AutoMS.txt file: " + ex.Message, ex);
                 return false;
             }
 
@@ -396,23 +396,20 @@ namespace MSFileInfoScanner
             {
                 if (fiBAFFileInfo.Length > 1024 * 1024 * 1024)
                 {
-                    ShowMessage("analysis.baf file is over 1 GB; ProteoWizard typically cannot handle .baf files this large");
+                    OnWarningEvent("analysis.baf file is over 1 GB; ProteoWizard typically cannot handle .baf files this large");
 
                     // Look for a ser file
                     if (fiBAFFileInfo.Directory != null && File.Exists(Path.Combine(fiBAFFileInfo.Directory.FullName, "ser")))
                     {
-                        ShowMessage("Will parse the ser file instead");
+                        OnStatusEvent("Will parse the ser file instead");
                         return false;
                     }
-                    else
-                    {
-                        ShowMessage("Ser file not found; trying ProteoWizard anyway");
-                    }
 
+                    OnWarningEvent("Ser file not found; trying ProteoWizard anyway");
                 }
 
                 // Open the analysis.baf (or extension.baf) file using the ProteoWizardWrapper
-                ShowMessage("Determining acquisition info using Proteowizard");
+                OnDebugEvent("Determining acquisition info using Proteowizard");
 
                 var objPWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(fiBAFFileInfo.FullName);
 
@@ -445,8 +442,7 @@ namespace MSFileInfoScanner
                     HighResMS2 = true
                 };
 
-                pWizParser.ErrorEvent += mPWizParser_ErrorEvent;
-                pWizParser.MessageEvent += mPWizParser_MessageEvent;
+                RegisterEvents(pWizParser);
 
                 // Note that SRM .Wiff files will only have chromatograms, and no spectra
 
@@ -480,7 +476,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                ReportError("Error using ProteoWizard reader: " + ex.Message);
+                OnErrorEvent("Error using ProteoWizard reader: " + ex.Message, ex);
                 blnSuccess = false;
             }
 
@@ -514,7 +510,7 @@ namespace MSFileInfoScanner
                 if (!fiFileInfo.Exists)
                 {
                     // Storage.mcf_idx not found
-                    ShowMessage("Note: " + BRUKER_SQLITE_INDEX_FILE_NAME + " file does not exist");
+                    OnWarningEvent("Note: " + BRUKER_SQLITE_INDEX_FILE_NAME + " file does not exist");
                     return false;
                 }
 
@@ -556,7 +552,7 @@ namespace MSFileInfoScanner
                 if (fiFiles.Count == 0)
                 {
                     // Storage.mcf_idx not found
-                    ShowMessage("Note: " + BRUKER_SQLITE_INDEX_FILE_NAME + " file was found but _1.mcf_idx file does not exist");
+                    OnWarningEvent("Note: " + BRUKER_SQLITE_INDEX_FILE_NAME + " file was found but _1.mcf_idx file does not exist");
                     return false;
                 }
 
@@ -662,7 +658,7 @@ namespace MSFileInfoScanner
             catch (Exception ex)
             {
                 // Error parsing Storage.mcf_idx file
-                ReportError("Error parsing " + BRUKER_SQLITE_INDEX_FILE_NAME + " file: " + ex.Message);
+                OnErrorEvent("Error parsing " + BRUKER_SQLITE_INDEX_FILE_NAME + " file: " + ex.Message, ex);
                 return false;
             }
 
@@ -803,18 +799,18 @@ namespace MSFileInfoScanner
 
                     return true;
                 }
-                else if (validFile)
+
+                if (validFile)
                 {
                     // The XML file is valid, but no scans were listed; must be a bad dataset
                     // Return true because there is no point in opening this dataset with ProteoWizard
                     return true;
                 }
-
             }
             catch (Exception ex)
             {
                 // Error parsing the Scan.xml file
-                ReportError("Error parsing " + BRUKER_SCANINFO_XML_FILE + " file: " + ex.Message);
+                OnErrorEvent("Error parsing " + BRUKER_SCANINFO_XML_FILE + " file: " + ex.Message, ex);
                 return false;
             }
 
@@ -833,12 +829,9 @@ namespace MSFileInfoScanner
                 // User specified a file; assume the parent folder of this file is the dataset folder
                 return fiFileInfo.Directory;
             }
-            else
-            {
-                // Assume this is the path to the dataset folder
-                return new DirectoryInfo(strDataFilePath);
-            }
-
+            
+            // Assume this is the path to the dataset folder
+            return new DirectoryInfo(strDataFilePath);
         }
 
         public override string GetDatasetNameViaPath(string strDataFilePath)
@@ -880,7 +873,7 @@ namespace MSFileInfoScanner
                 // Validate that we have selected a valid folder
                 if (!diDatasetFolder.Exists)
                 {
-                    ReportError("File/folder not found: " + strDataFilePath);
+                    OnErrorEvent("File/folder not found: " + strDataFilePath);
                     return false;
                 }
 
@@ -951,7 +944,10 @@ namespace MSFileInfoScanner
 
                 if (fiFiles.Count == 0)
                 {
-                    ReportError(string.Join(" or ", lstInstrumentDataFiles) + " or " + BRUKER_MCF_FILE_EXTENSION + " or " + BRUKER_SQLITE_INDEX_EXTENSION + " file not found in " + diDatasetFolder.FullName);
+                    OnErrorEvent(
+                        string.Join(" or ", lstInstrumentDataFiles) + " or " + 
+                        BRUKER_MCF_FILE_EXTENSION + " or " + 
+                        BRUKER_SQLITE_INDEX_EXTENSION + " file not found in " + diDatasetFolder.FullName);
                     return false;
                 }
 
@@ -968,7 +964,7 @@ namespace MSFileInfoScanner
 
                 // Find the apexAcquisition.method or submethods.xml file in the XMASS_Method.m subfolder to determine .AcqTimeStart
                 // This function updates datasetFileInfo.AcqTimeEnd and datasetFileInfo.AcqTimeStart to have the same time
-                var success = DetermineAcqStartTime(diDatasetFolder, datasetFileInfo);
+                DetermineAcqStartTime(diDatasetFolder, datasetFileInfo);
 
                 // Update the acquisition end time using the write time of the .baf file
                 if (fiFileInfo.LastWriteTime > datasetFileInfo.AcqTimeEnd)
@@ -984,7 +980,7 @@ namespace MSFileInfoScanner
 
                 // Look for the Storage.mcf_idx file and the corresponding .mcf_idx file
                 // If they exist, we can extract information from them using SqLite
-                success = ParseMcfIndexFiles(diDatasetFolder, datasetFileInfo);
+                var success = ParseMcfIndexFiles(diDatasetFolder, datasetFileInfo);
 
                 if (!success)
                 {
@@ -1035,13 +1031,13 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                ReportError("Exception processing BAF data: " + ex.Message);
+                OnErrorEvent("Exception processing BAF data: " + ex.Message, ex);
                 return false;
             }
 
         }
 
-        private bool ParseSerOrFidFile(DirectoryInfo diDotDFolder, Dictionary<int, float> scanElutionTimeMap)
+        private bool ParseSerOrFidFile(DirectoryInfo diDotDFolder, IReadOnlyDictionary<int, float> scanElutionTimeMap)
         {
 
 
@@ -1103,12 +1099,12 @@ namespace MSFileInfoScanner
                                 continue;
                             }
                             // Treat this as a warning
-                            ShowMessage("Unable to retrieve scan " + scanNumber + " using the BrukerDataReader: " + ex.Message);
+                            OnWarningEvent("Unable to retrieve scan " + scanNumber + " using the BrukerDataReader: " + ex.Message);
                         }
                         else
                         {
                             // Treat this as an error
-                            ReportError("Error retrieving scan " + scanNumber + " using the BrukerDataReader: " + ex.Message);
+                            OnErrorEvent("Error retrieving scan " + scanNumber + " using the BrukerDataReader: " + ex.Message);
                         }
 
                         // Ignore this scan
@@ -1127,7 +1123,7 @@ namespace MSFileInfoScanner
                         double basePeakIntensity = 0;
                         double totalIonCurrent = 0;
 
-                        if (intensities.Count() > 0)
+                        if (intensities.Length > 0)
                         {
                             basePeakIntensity = intensities.Max();
                             totalIonCurrent = intensities.Sum();
@@ -1161,7 +1157,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                ReportError("Exception processing Bruker ser or fid file: " + ex.Message);
+                OnErrorEvent("Exception processing Bruker ser or fid file: " + ex.Message, ex);
                 return false;
             }
 
@@ -1334,16 +1330,6 @@ namespace MSFileInfoScanner
                 // Unknown field
             }
 
-        }
-
-        private void mPWizParser_ErrorEvent(string message)
-        {
-            ReportError(message);
-        }
-
-        private void mPWizParser_MessageEvent(string message)
-        {
-            ShowMessage(message);
         }
 
         private class clsScanDataSortComparer : IComparer<udtMCFScanInfoType>

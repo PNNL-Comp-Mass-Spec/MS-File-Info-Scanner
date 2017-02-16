@@ -823,8 +823,8 @@ namespace MSFileInfoScanner
                 baseMessage = "Error";
             }
 
-            // Note that ShowErrorMessage() will call LogMessage()
-            ShowErrorMessage(baseMessage + ": " + ex.Message, true);
+            // Note that ReportError() will call LogMessage()
+            ReportError(baseMessage, ex);
 
         }
 
@@ -890,9 +890,12 @@ namespace MSFileInfoScanner
 
             }
 
-            if ((mLogFile != null)) {
+            if (mLogFile != null) {
                 string messageType;
                 switch (eMessageType) {
+                    case eMessageTypeConstants.Debug:
+                        messageType = "Debug";
+                        break;
                     case eMessageTypeConstants.Normal:
                         messageType = "Normal";
                         break;
@@ -928,7 +931,7 @@ namespace MSFileInfoScanner
                     // See if parameterFilePath points to a file in the same directory as the application
                     parameterFilePath = Path.Combine(GetAppFolderPath(), Path.GetFileName(parameterFilePath));
                     if (!File.Exists(parameterFilePath)) {
-                        ShowErrorMessage("Parameter file not found: " + parameterFilePath);
+                        ReportError("Parameter file not found: " + parameterFilePath);
                         SetErrorCode(eMSFileScannerErrorCodes.ParameterFileNotFound);
                         return false;
                     }
@@ -939,7 +942,7 @@ namespace MSFileInfoScanner
 
                     if (!objSettingsFile.SectionPresent(XML_SECTION_MSFILESCANNER_SETTINGS)) {
                         // MS File Scanner section not found; that's ok
-                        ShowMessage("Warning: Parameter file " + parameterFilePath + " does not have section \"" + XML_SECTION_MSFILESCANNER_SETTINGS + "\"", eMessageTypeConstants.Warning);
+                        ReportWarning("Parameter file " + parameterFilePath + " does not have section \"" + XML_SECTION_MSFILESCANNER_SETTINGS + "\"");
                     } else {
                         DSInfoConnectionString = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoConnectionString", DSInfoConnectionString);
                         DSInfoDBPostingEnabled = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoDBPostingEnabled", DSInfoDBPostingEnabled);
@@ -990,7 +993,7 @@ namespace MSFileInfoScanner
                     }
 
                 } else {
-                    ShowErrorMessage("Error calling objSettingsFile.LoadSettings for " + parameterFilePath);
+                    ReportError("Error calling objSettingsFile.LoadSettings for " + parameterFilePath);
                     return false;
                 }
 
@@ -1108,7 +1111,7 @@ namespace MSFileInfoScanner
             bool success;
 
             try {
-                ShowMessage("  Posting DatasetInfo XML to the database");
+                ReportMessage("  Posting DatasetInfo XML to the database");
 
                 // We need to remove the encoding line from dsInfoXML before posting to the DB
                 // This line will look like this:
@@ -1127,7 +1130,7 @@ namespace MSFileInfoScanner
                 // Call the stored procedure using connection string connectionString
 
                 if (string.IsNullOrEmpty(connectionString)) {
-                    ShowErrorMessage("Connection string not defined; unable to post the dataset info to the database");
+                    ReportError("Connection string not defined; unable to post the dataset info to the database");
                     SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
                     return false;
                 }
@@ -1159,7 +1162,7 @@ namespace MSFileInfoScanner
                     // No errors
                     success = true;
                 } else {
-                    ShowErrorMessage("Error calling stored procedure, return code = " + result);
+                    ReportError("Error calling stored procedure, return code = " + result);
                     SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
                     success = false;
                 }
@@ -1214,7 +1217,7 @@ namespace MSFileInfoScanner
                     datasetID = mDSInfoDatasetIDOverride;
                 }
 
-                ShowMessage("  Posting DatasetInfo XML to the database (using Dataset ID " + datasetID + ")");
+                ReportMessage("  Posting DatasetInfo XML to the database (using Dataset ID " + datasetID + ")");
 
                 // We need to remove the encoding line from strDatasetInfoXML before posting to the DB
                 // This line will look like this:
@@ -1231,7 +1234,7 @@ namespace MSFileInfoScanner
                 // Call stored procedure strStoredProcedure using connection string strConnectionString
 
                 if (string.IsNullOrEmpty(connectionString)) {
-                    ShowErrorMessage("Connection string not defined; unable to post the dataset info to the database");
+                    ReportError("Connection string not defined; unable to post the dataset info to the database");
                     SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
                     return false;
                 }
@@ -1266,7 +1269,7 @@ namespace MSFileInfoScanner
                     // No errors
                     success = true;
                 } else {
-                    ShowErrorMessage("Error calling stored procedure, return code = " + result);
+                    ReportError("Error calling stored procedure, return code = " + result);
                     SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
                     success = false;
                 }
@@ -1423,13 +1426,13 @@ namespace MSFileInfoScanner
 
             try {
                 if (string.IsNullOrEmpty(inputFileOrFolderPath)) {
-                    ShowErrorMessage("Input file name is empty");
+                    ReportError("Input file name is empty");
                 } else {
                     try {
                         if (Path.GetFileName(inputFileOrFolderPath).Length == 0) {
-                            ShowMessage("Parsing " + Path.GetDirectoryName(inputFileOrFolderPath));
+                            ReportMessage("Parsing " + Path.GetDirectoryName(inputFileOrFolderPath));
                         } else {
-                            ShowMessage("Parsing " + Path.GetFileName(inputFileOrFolderPath));
+                            ReportMessage("Parsing " + Path.GetFileName(inputFileOrFolderPath));
                         }
                     } catch (Exception ex) {
                         HandleException("Error parsing " + inputFileOrFolderPath, ex);
@@ -1440,7 +1443,7 @@ namespace MSFileInfoScanner
                     bool isFolder;
                     FileSystemInfo objFileSystemInfo;
                     if (!GetFileOrFolderInfo(inputFileOrFolderPath, out isFolder, out objFileSystemInfo)) {
-                        ShowErrorMessage("File or folder not found: " + objFileSystemInfo.FullName);
+                        ReportError("File or folder not found: " + objFileSystemInfo.FullName);
                         if (SKIP_FILES_IN_ERROR) {
                             return true;
                         } else {
@@ -1594,14 +1597,13 @@ namespace MSFileInfoScanner
                     }
 
                     if (!knownMSDataType) {
-                        ShowErrorMessage("Unknown file type: " + Path.GetFileName(inputFileOrFolderPath));
+                        ReportError("Unknown file type: " + Path.GetFileName(inputFileOrFolderPath));
                         SetErrorCode(eMSFileScannerErrorCodes.UnknownFileExtension);
                         return false;
                     }
 
                     // Attach the events
-                    mMSInfoScanner.ErrorEvent += mMSInfoScanner_ErrorEvent;
-                    mMSInfoScanner.MessageEvent += mMSInfoScannerMessageEvent;
+                    RegisterEvents(mMSInfoScanner);
 
                     var datasetName = mMSInfoScanner.GetDatasetNameViaPath(objFileSystemInfo.FullName);
 
@@ -1622,13 +1624,13 @@ namespace MSFileInfoScanner
 
                                 if (lngCachedSizeBytes > 0) {
                                     // File is present in mCachedResults, and its size is > 0, so we won't re-process it
-                                    ShowMessage("  Skipping " + Path.GetFileName(inputFileOrFolderPath) + " since already in cached results");
+                                    ReportMessage("  Skipping " + Path.GetFileName(inputFileOrFolderPath) + " since already in cached results");
                                     eMSFileProcessingState = eMSFileProcessingStateConstants.SkippedSinceFoundInCache;
                                     return true;
                                 }
                             } else {
                                 // File is present in mCachedResults, and mReprocessIfCachedSizeIsZero=False, so we won't re-process it
-                                ShowMessage("  Skipping " + Path.GetFileName(inputFileOrFolderPath) + " since already in cached results");
+                                ReportMessage("  Skipping " + Path.GetFileName(inputFileOrFolderPath) + " since already in cached results");
                                 eMSFileProcessingState = eMSFileProcessingStateConstants.SkippedSinceFoundInCache;
                                 return true;
                             }
@@ -1751,7 +1753,7 @@ namespace MSFileInfoScanner
 
                     if (matchCount == 0) {
                         if (mErrorCode == eMSFileScannerErrorCodes.NoError) {
-                            ShowMessage("No match was found for the input file path:" + inputFileOrFolderPath, eMessageTypeConstants.Warning);
+                            ReportWarning("No match was found for the input file path:" + inputFileOrFolderPath);
                         }
                     } else {
                         Console.WriteLine();
@@ -1807,7 +1809,7 @@ namespace MSFileInfoScanner
                     var fiFileInfo = new FileInfo(cleanPath);
                     if (Path.IsPathRooted(cleanPath)) {
                         if (fiFileInfo.Directory != null && !fiFileInfo.Directory.Exists) {
-                            ShowErrorMessage("Folder not found: " + fiFileInfo.DirectoryName);
+                            ReportError("Folder not found: " + fiFileInfo.DirectoryName);
                             SetErrorCode(eMSFileScannerErrorCodes.InvalidInputFilePath);
                             return false;
                         }
@@ -1926,7 +1928,7 @@ namespace MSFileInfoScanner
 
             if (diInputFolder == null)
             {
-                 ShowErrorMessage("Unable to instantiate a directory info object for " + inputFolderPath);
+                ReportError("Unable to instantiate a directory info object for " + inputFolderPath);
                 return false;
             }
 
@@ -2241,49 +2243,68 @@ namespace MSFileInfoScanner
 
         }
 
-        private void ShowErrorMessage(string message, bool allowLogToFile = true)
+        /// <summary>
+        /// Raise event ErrorEvent and call LogMessage
+        /// </summary>
+        /// <param name="errorMessage"></param>
+        /// <param name="ex"></param>
+        /// <remarks>The calling thread needs to monitor this event and display it at the console</remarks>
+        private void ReportError(string errorMessage, Exception ex = null)
         {
-            const string separator = "------------------------------------------------------------------------------";
+           
+            OnErrorEvent(errorMessage, ex);
 
-            Console.WriteLine();
-            Console.WriteLine(separator);
-            Console.WriteLine(message);
-            Console.WriteLine(separator);
-            Console.WriteLine();
-
-            if (ErrorEvent != null) {
-                ErrorEvent(message);
+            string formattedError;
+            if (ex == null || errorMessage.EndsWith(ex.Message))
+            {
+                formattedError = errorMessage;
+            }
+            else
+            {
+                formattedError = errorMessage + ": " + ex.Message;
             }
 
-            if (allowLogToFile) {
-                LogMessage(message, eMessageTypeConstants.ErrorMsg);
-            }
+            LogMessage(formattedError, eMessageTypeConstants.ErrorMsg);
 
         }
 
-        private void ShowMessage(string message, eMessageTypeConstants eMessageType)
-        {
-            ShowMessage(message, allowLogToFile: true, precedeWithNewline: false, eMessageType: eMessageType);
-        }
-
-
-        private void ShowMessage(
+        /// <summary>
+        /// Report a status message and optionally write to the log file
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="allowLogToFile"></param>
+        /// <param name="eMessageType"></param>
+        private void ReportMessage(
             string message, 
             bool allowLogToFile = true, 
-            bool precedeWithNewline = false, 
             eMessageTypeConstants eMessageType = eMessageTypeConstants.Normal)
         {
-            if (precedeWithNewline) {
-                Console.WriteLine();
-            }
-            Console.WriteLine(message);
 
-            if (MessageEvent != null) {
-                MessageEvent(message);
-            }
+            if (eMessageType == eMessageTypeConstants.Debug)
+                OnDebugEvent(message);
+            if (eMessageType == eMessageTypeConstants.Warning)
+                OnWarningEvent(message);
+            else
+                OnStatusEvent(message);
 
             if (allowLogToFile) {
                 LogMessage(message, eMessageType);
+            }
+
+        }
+
+        /// <summary>
+        /// Report a warning message and optionally write to the log file
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="allowLogToFile"></param>
+        private void ReportWarning(string message, bool allowLogToFile = true)
+        {
+            OnWarningEvent(message);
+
+            if (allowLogToFile)
+            {
+                LogMessage(message, eMessageTypeConstants.Warning);
             }
 
         }
@@ -2440,8 +2461,6 @@ namespace MSFileInfoScanner
         {
             ShowErrorMessage(message);
         }
-
-        #endregion
 
     }
 }

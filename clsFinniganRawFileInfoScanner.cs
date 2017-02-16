@@ -116,7 +116,7 @@ namespace MSFileInfoScanner
             {
                 if (mIsProfileM.IsMatch(scanInfo.FilterText))
                 {
-                    ShowMessage("Warning: Scan " + intScanNumber + " appears to be profile mode data, yet XRawFileIO reported it to be centroid");
+                    OnWarningEvent("Warning: Scan " + intScanNumber + " appears to be profile mode data, yet XRawFileIO reported it to be centroid");
                 }
 
                 return clsSpectrumTypeClassifier.eCentroidStatusConstants.Centroid;
@@ -124,7 +124,7 @@ namespace MSFileInfoScanner
 
             if (mIsCentroid.IsMatch(scanInfo.FilterText))
             {
-                ShowMessage("Warning: Scan " + intScanNumber + " appears to be centroided data, yet XRawFileIO reported it to be profile");
+                OnWarningEvent("Warning: Scan " + intScanNumber + " appears to be centroided data, yet XRawFileIO reported it to be profile");
             }
 
             return clsSpectrumTypeClassifier.eCentroidStatusConstants.Profile;
@@ -229,7 +229,7 @@ namespace MSFileInfoScanner
                 }
                 catch (Exception ex)
                 {
-                    ReportError("Error loading header info for scan " + intScanNumber + ": " + ex.Message);
+                    OnErrorEvent("Error loading header info for scan " + intScanNumber + ": " + ex.Message);
                     continue;
                 }
 
@@ -274,7 +274,7 @@ namespace MSFileInfoScanner
                 }
                 catch (Exception ex)
                 {
-                    ReportError("Error loading m/z and intensity values for scan " + intScanNumber + ": " + ex.Message);
+                    OnErrorEvent("Error loading m/z and intensity values for scan " + intScanNumber + ": " + ex.Message);
                 }
 
                 ShowProgress(intScanNumber, intScanCount, ref dtLastProgressTime);
@@ -301,7 +301,7 @@ namespace MSFileInfoScanner
 
             if (!fiRawFile.Exists)
             {
-                ShowMessage(".Raw file not found: " + strDataFilePath);
+                OnErrorEvent(".Raw file not found: " + strDataFilePath);
                 return false;
             }
 
@@ -343,7 +343,7 @@ namespace MSFileInfoScanner
             if (!xcaliburAccessor.OpenRawFile(fiRawFile.FullName))
             {
                 // File open failed
-                ReportError("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
+                OnErrorEvent("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
                 blnReadError = true;
 
 
@@ -360,7 +360,7 @@ namespace MSFileInfoScanner
 
                             if (!string.Equals(strDataFilePathLocal, strDataFilePath, StringComparison.InvariantCultureIgnoreCase))
                             {
-                                ShowMessage("Copying file " + Path.GetFileName(strDataFilePath) + " to the working folder");
+                                OnDebugEvent("Copying file " + Path.GetFileName(strDataFilePath) + " to the working folder");
                                 File.Copy(strDataFilePath, strDataFilePathLocal, true);
 
                                 strDataFilePath = string.Copy(strDataFilePathLocal);
@@ -372,7 +372,7 @@ namespace MSFileInfoScanner
                                 if (!xcaliburAccessor.OpenRawFile(fiRawFile.FullName))
                                 {
                                     // File open failed
-                                    ReportError("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
+                                    OnErrorEvent("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
                                     blnReadError = true;
                                 }
                                 else
@@ -492,7 +492,7 @@ namespace MSFileInfoScanner
                 catch (Exception)
                 {
                     // Deletion failed
-                    ReportError("Deletion failed for: " + Path.GetFileName(strDataFilePathLocal));
+                    OnErrorEvent("Deletion failed for: " + Path.GetFileName(strDataFilePathLocal));
                 }
             }
 
@@ -602,12 +602,12 @@ namespace MSFileInfoScanner
 
         private void XcaliburAccessor_ReportWarning(string message)
         {
-            ShowMessage(message);
+            OnWarningEvent(message);
         }
 
         private void XcaliburAccessor_ReportError(string message)
         {
-            ReportError(message);
+            OnErrorEvent(message);
         }
 
 
