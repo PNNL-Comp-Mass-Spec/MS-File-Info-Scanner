@@ -1,7 +1,10 @@
 ﻿namespace MSFileInfoScannerInterfaces
 {
-    public abstract class iMSFileInfoScanner
+    public abstract class iMSFileInfoScanner : clsEventNotifier
     {
+        /// <summary>
+        /// MSFileInfoScanner error codes
+        /// </summary>
         public enum eMSFileScannerErrorCodes
         {
             NoError = 0,
@@ -22,6 +25,9 @@
             UnspecifiedError = -1
         }
 
+        /// <summary>
+        /// Processing state constants
+        /// </summary>
         public enum eMSFileProcessingStateConstants
         {
             NotProcessed = 0,
@@ -30,6 +36,9 @@
             ProcessedSuccessfully = 3
         }
 
+        /// <summary>
+        /// Data file type constants
+        /// </summary>
         public enum eDataFileTypeConstants
         {
             MSFileInfo = 0,
@@ -37,12 +46,6 @@
             FileIntegrityDetails = 2,
             FileIntegrityErrors = 3
         }
-
-        public abstract event MessageEventEventHandler MessageEvent;
-        public delegate void MessageEventEventHandler(string message);
-
-        public abstract event ErrorEventEventHandler ErrorEvent;
-        public delegate void ErrorEventEventHandler(string message);
 
         public abstract bool AbortProcessing { get; set; }
         public abstract string AcquisitionTimeFilename { get; set; }

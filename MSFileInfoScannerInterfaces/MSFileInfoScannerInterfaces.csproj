@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="clsEventNotifier.cs" />
+    <Compile Include="IEventNotifier.cs" />
     <Compile Include="iMSFileInfoScanner.cs" />
     <Compile Include="clsLCMSDataPlotterOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
