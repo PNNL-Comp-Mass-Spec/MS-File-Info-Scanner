@@ -4,7 +4,7 @@ using System.IO;
 
 namespace MSFileInfoScanner
 {
-    public class clsMSFileInfoDataCache
+    public class clsMSFileInfoDataCache : clsEventNotifier
     {
 
         #region "Constants and Enums"
@@ -87,10 +87,7 @@ namespace MSFileInfoScanner
         private eCachedResultsStateConstants mFolderIntegrityInfoResultsState;
 
         private int mMaximumFolderIntegrityInfoFolderID;
-        public event ErrorEventEventHandler ErrorEvent;
-        public delegate void ErrorEventEventHandler(string message);
-        public event StatusEventEventHandler StatusEvent;
-        public delegate void StatusEventEventHandler(string message);
+
         #endregion
 
         #region "Properties"
@@ -368,10 +365,7 @@ namespace MSFileInfoScanner
 
             clsMSFileInfoScanner.ValidateDataFilePath(ref mFolderIntegrityInfoFilePath, MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo);
 
-            if (StatusEvent != null)
-            {
-                StatusEvent("Loading cached folder integrity info from: " + Path.GetFileName(mFolderIntegrityInfoFilePath));
-            }
+            OnDebugEvent("Loading cached folder integrity info from: " + Path.GetFileName(mFolderIntegrityInfoFilePath));
 
             if (File.Exists(mFolderIntegrityInfoFilePath))
             {
@@ -446,10 +440,7 @@ namespace MSFileInfoScanner
 
             clsMSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, MSFileInfoScannerInterfaces.iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo);
 
-            if (StatusEvent != null)
-            {
-                StatusEvent("Loading cached acquisition time file data from: " + Path.GetFileName(mAcquisitionTimeFilePath));
-            }
+            OnDebugEvent("Loading cached acquisition time file data from: " + Path.GetFileName(mAcquisitionTimeFilePath));
 
             if (File.Exists(mAcquisitionTimeFilePath))
             {
@@ -619,10 +610,7 @@ namespace MSFileInfoScanner
                 return false;
             }
 
-            if (StatusEvent != null)
-            {
-                StatusEvent("Saving cached folder integrity info to: " + Path.GetFileName(mFolderIntegrityInfoFilePath));
-            }
+            OnDebugEvent("Saving cached folder integrity info to: " + Path.GetFileName(mFolderIntegrityInfoFilePath));
 
             try
             {
@@ -666,10 +654,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                if (ErrorEvent != null)
-                {
-                    ErrorEvent("Error in SaveCachedFolderIntegrityInfoResults: " + ex.Message);
-                }
+                OnErrorEvent("Error in SaveCachedFolderIntegrityInfoResults", ex);
                 blnSuccess = false;
             }
 
@@ -685,9 +670,7 @@ namespace MSFileInfoScanner
             if ((mMSFileInfoDataset != null) && 
                 mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].Rows.Count > 0 && 
                 mMSFileInfoCachedResultsState == eCachedResultsStateConstants.Modified) {
-                    if (StatusEvent != null) {
-                        StatusEvent("Saving cached acquisition time file data to: " + Path.GetFileName(mAcquisitionTimeFilePath));
-                    }
+                    OnDebugEvent("Saving cached acquisition time file data to: " + Path.GetFileName(mAcquisitionTimeFilePath));
 
                     try {
                         // Write all of mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE) to the results file
@@ -722,9 +705,7 @@ namespace MSFileInfoScanner
                         blnSuccess = true;
 
                     } catch (Exception ex) {
-                        if (ErrorEvent != null) {
-                            ErrorEvent("Error in SaveCachedMSInfoResults: " + ex.Message);
-                        }
+                        OnErrorEvent("Error in SaveCachedMSInfoResults", ex);
                         blnSuccess = false;
                     }
                 }
@@ -769,10 +750,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                if (ErrorEvent != null)
-                {
-                    ErrorEvent("Error in UpdateCachedMSFileInfo: " + ex.Message);
-                }
+                OnErrorEvent("Error in UpdateCachedMSFileInfo", ex);
                 blnSuccess = false;
             }
 
@@ -795,10 +773,7 @@ namespace MSFileInfoScanner
                 if (mFolderIntegrityInfoResultsState == eCachedResultsStateConstants.NotInitialized)
                 {
                     // Coding error; this shouldn't be the case
-                    if (ErrorEvent != null)
-                    {
-                        ErrorEvent("mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized in UpdateCachedFolderIntegrityInfo; unable to continue");
-                    }
+                    OnErrorEvent("mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized in UpdateCachedFolderIntegrityInfo; unable to continue");
                     return false;
                 }
 
@@ -834,10 +809,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                if (ErrorEvent != null)
-                {
-                    ErrorEvent("Error in UpdateCachedFolderIntegrityInfo: " + ex.Message);
-                }
+                OnErrorEvent("Error in UpdateCachedFolderIntegrityInfo", ex);
                 blnSuccess = false;
             }
 

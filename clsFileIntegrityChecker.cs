@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using ExtensionMethods;
+using MSFileInfoScannerInterfaces;
 
 // This class will check the integrity of files in a given folder
 //
@@ -11,7 +12,7 @@ using ExtensionMethods;
 
 namespace MSFileInfoScanner
 {
-    public class clsFileIntegrityChecker
+    public class clsFileIntegrityChecker : clsEventNotifier
     {
 
         public clsFileIntegrityChecker()
@@ -92,9 +93,6 @@ namespace MSFileInfoScanner
         private bool mComputeFileHashes;
 
         private udtZipFileWorkParamsType mZipFileWorkParams;
-        public event ErrorCaughtEventHandler ErrorCaught;
-
-        public delegate void ErrorCaughtEventHandler(string strMessage);
 
         public event FileIntegrityFailureEventHandler FileIntegrityFailure;
 
@@ -2128,22 +2126,18 @@ namespace MSFileInfoScanner
 
             var strMessageWithoutCRLF = mStatusMessage.Replace(Environment.NewLine, "; ");
 
+            if (string.IsNullOrEmpty(strSource))
+                strSource = "Unknown_Source";
+
             if (ex == null)
             {
-                ex = new Exception("Error");
+                OnErrorEvent(strSource + ": " + strMessageWithoutCRLF);
             }
             else
             {
-                if (ex.Message.Length > 0)
-                {
-                    strMessageWithoutCRLF += "; " + ex.Message;
-                }
+                OnErrorEvent(strSource + ": " + strMessageWithoutCRLF, ex);
             }
 
-            if (ErrorCaught != null)
-            {
-                ErrorCaught(strSource + ": " + strMessageWithoutCRLF);
-            }
         }
 
 

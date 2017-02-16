@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using MSFileInfoScannerInterfaces;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
@@ -15,7 +16,7 @@ namespace MSFileInfoScanner
     /// Furthermore, it will bin the data by MZResolution m/z units (necessary if the data is not centroided)
     /// </summary>
     /// <remarks></remarks>
-    public class clsLCMSDataPlotter
+    public class clsLCMSDataPlotter : clsEventNotifier
     {
 
         #region "Constants, Enums, Structures"
@@ -69,8 +70,6 @@ namespace MSFileInfoScanner
         private MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions mOptions;
 
         private readonly List<udtOutputFileInfoType> mRecentFiles;
-        public event ErrorEventEventHandler ErrorEvent;
-        public delegate void ErrorEventEventHandler(string message);
 
         private int mSortingWarnCount;
         private int mSpectraFoundExceedingMaxIonCount;
@@ -242,10 +241,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                if (ErrorEvent != null)
-                {
-                    ErrorEvent("Error in clsLCMSDataPlotter.AddScan2D: " + ex.Message + "; inner exception: " + ex.InnerException.Message);
-                }
+                OnErrorEvent("Error in clsLCMSDataPlotter.AddScan2D: " + ex.Message, ex);
                 return false;
             }
 
@@ -372,10 +368,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                if (ErrorEvent != null)
-                {
-                    ErrorEvent("Error in clsLCMSDataPlotter.AddScan: " + ex.Message + "; inner exception: " + ex.InnerException.Message);
-                }
+                OnErrorEvent("Error in clsLCMSDataPlotter.AddScan: " + ex.Message, ex);
                 return false;
             }
 
@@ -482,10 +475,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                if (ErrorEvent != null)
-                {
-                    ErrorEvent("Error in clsLCMSDataPlotter.AddScanSkipFilters: " + ex.Message + "; inner exception: " + ex.InnerException.Message);
-                }
+                OnErrorEvent("Error in clsLCMSDataPlotter.AddScanSkipFilters: " + ex.Message, ex);
                 blnSuccess = false;
             }
 
@@ -649,10 +639,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                if (ErrorEvent != null)
-                {
-                    ErrorEvent("Error in clsLCMSDataPlotter.CentroidMSData: " + ex.Message);
-                }
+                OnErrorEvent("Error in clsLCMSDataPlotter.CentroidMSData: " + ex.Message, ex);
             }
 
         }

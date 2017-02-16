@@ -27,12 +27,11 @@ namespace MSFileInfoScanner
         {
 
             mFileIntegrityChecker = new clsFileIntegrityChecker();
-            mFileIntegrityChecker.ErrorCaught += mFileIntegrityChecker_ErrorCaught;
+            RegisterEvents(mFileIntegrityChecker);
             mFileIntegrityChecker.FileIntegrityFailure += mFileIntegrityChecker_FileIntegrityFailure;
 
             mMSFileInfoDataCache = new clsMSFileInfoDataCache();
-            mMSFileInfoDataCache.ErrorEvent += mMSFileInfoDataCache_ErrorEvent;
-            mMSFileInfoDataCache.StatusEvent += mMSFileInfoDataCache_StatusEvent;
+            RegisterEvents(mMSFileInfoDataCache);
 
             mErrorCode = eMSFileScannerErrorCodes.NoError;
 
@@ -154,7 +153,8 @@ namespace MSFileInfoScanner
         {
             Normal = 0,
             ErrorMsg = 1,
-            Warning = 2
+            Warning = 2,
+            Debug = 3
         }
 
         #endregion
@@ -2418,11 +2418,6 @@ namespace MSFileInfoScanner
 
         }
 
-        private void mFileIntegrityChecker_ErrorCaught(string message)
-        {
-            ShowErrorMessage("Error caught in FileIntegrityChecker: " + message);
-        }
-
         private void mFileIntegrityChecker_FileIntegrityFailure(string filePath, string message)
         {
             if (mFileIntegrityErrorsWriter == null) {
@@ -2430,36 +2425,11 @@ namespace MSFileInfoScanner
             }
 
             WriteFileIntegrityFailure(mFileIntegrityErrorsWriter, filePath, message);
-        }
-
-        #region "Events"
-
-        public sealed override event MessageEventEventHandler MessageEvent;
-        public sealed override event ErrorEventEventHandler ErrorEvent;
-
-        private void mMSInfoScanner_ErrorEvent(string message)
-        {
-            ShowErrorMessage(message);
-        }
-
-        private void mMSInfoScannerMessageEvent(string message)
-        {
-            ShowMessage(message, eMessageTypeConstants.Normal);
-        }
-
-        private void mMSFileInfoDataCache_ErrorEvent(string message)
-        {
-            ShowErrorMessage(message);
-        }
-
-        private void mMSFileInfoDataCache_StatusEvent(string message)
-        {
-            ShowMessage(message);
-        }
+        }        
 
         private void mExecuteSP_DBErrorEvent(string message)
         {
-            ShowErrorMessage(message);
+            ReportError(message);
         }
 
     }

@@ -7,13 +7,8 @@ using PNNLOmics.Utilities;
 namespace MSFileInfoScanner
 {
     [CLSCompliant(false)]
-    public class clsProteowizardDataParser
+    public class clsProteowizardDataParser : clsEventNotifier
     {
-
-        public event ErrorEventEventHandler ErrorEvent;
-        public delegate void ErrorEventEventHandler(string message);
-        public event MessageEventEventHandler MessageEvent;
-        public delegate void MessageEventEventHandler(string message);
 
         private readonly pwiz.ProteowizardWrapper.MSDataFileReader mPWiz;
 
@@ -291,20 +286,6 @@ namespace MSFileInfoScanner
 
         }
 
-        private void ReportMessage(string strMessage)
-        {
-            if (MessageEvent != null) {
-                MessageEvent(strMessage);
-            }
-        }
-
-        private void ReportError(string strError)
-        {
-            if (ErrorEvent != null) {
-                ErrorEvent(strError);
-            }
-        }
-
         public void StoreChromatogramInfo(clsDatasetFileInfo datasetFileInfo, out bool blnTICStored, out bool blnSRMDataCached, out double dblRuntimeMinutes)
         {
             var lstTICScanTimes = new List<float>();
@@ -331,7 +312,7 @@ namespace MSFileInfoScanner
             for (var intChromIndex = 0; intChromIndex <= mPWiz.ChromatogramCount - 1; intChromIndex++) {
                 try {
                     if (intChromIndex == 0) {
-                        ReportMessage("Obtaining chromatograms (this could take as long as 60 seconds)");
+                        OnStatusEvent("Obtaining chromatograms (this could take as long as 60 seconds)");
                     }
                     string strChromID;
                     float[] sngTimes;
@@ -367,7 +348,7 @@ namespace MSFileInfoScanner
 
 
                 } catch (Exception ex) {
-                    ReportError("Error processing chromatogram " + intChromIndex + ": " + ex.Message);
+                    OnErrorEvent("Error processing chromatogram " + intChromIndex + ": " + ex.Message, ex);
                 }
 
             }
@@ -399,7 +380,7 @@ namespace MSFileInfoScanner
                 double dblTIC = 0;
                 double dblBPI = 0;
 
-                ReportMessage("Obtaining scan times and MSLevels (this could take several minutes)");
+                OnStatusEvent("Obtaining scan times and MSLevels (this could take several minutes)");
 
                 mPWiz.GetScanTimesAndMsLevels(out dblScanTimes, out intMSLevels);
 
@@ -409,7 +390,7 @@ namespace MSFileInfoScanner
                     dblScanTimes[intScanIndex] /= 60.0;
                 }
 
-                ReportMessage("Reading spectra");
+                OnStatusEvent("Reading spectra");
                 var dtLastProgressTime = DateTime.UtcNow;
 
 
@@ -518,18 +499,18 @@ namespace MSFileInfoScanner
                         }
 
                     } catch (Exception ex) {
-                        ReportError("Error loading header info for scan " + intScanIndex + 1 + ": " + ex.Message);
+                        OnErrorEvent("Error loading header info for scan " + intScanIndex + 1 + ": " + ex.Message);
                     }
 
                     if (DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 60) {
-                        ReportMessage(" ... " + ((intScanIndex + 1) / (double)dblScanTimes.Length * 100).ToString("0.0") + "% complete");
+                        OnDebugEvent(" ... " + ((intScanIndex + 1) / (double)dblScanTimes.Length * 100).ToString("0.0") + "% complete");
                         dtLastProgressTime = DateTime.UtcNow;
                     }
 
                 }
 
             } catch (Exception ex) {
-                ReportError("Error obtaining scan times and MSLevels using GetScanTimesAndMsLevels: " + ex.Message);
+                OnErrorEvent("Error obtaining scan times and MSLevels using GetScanTimesAndMsLevels: " + ex.Message, ex);
             }
 
         }
