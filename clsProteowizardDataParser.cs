@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using MSFileInfoScannerInterfaces;
 using pwiz.CLI.data;
 using PNNLOmics.Utilities;
 
