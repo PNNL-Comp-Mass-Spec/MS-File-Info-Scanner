@@ -573,23 +573,30 @@ namespace MSFileInfoScanner
             var dblMZList = new double[intMax2DDataCount];
             var dblIntensityList = new double[intMax2DDataCount];
 
-            var dct2DEnum = dct2DData.GetEnumerator();
-            while (dct2DEnum.MoveNext()) {
-                var int2DPlotScanNum = dct2DEnum.Current.Key;
-
-                var obj2DMzAndIntensity = dct2DEnum.Current.Value;
-
-                obj2DMzAndIntensity.Keys.CopyTo(dblMZList, 0);
-                obj2DMzAndIntensity.Values.CopyTo(dblIntensityList, 0);
-
-                // Make sure the data is sorted
-                Array.Sort(dblMZList, dblIntensityList, 0, obj2DMzAndIntensity.Count);
-
-                // Store the data
-                mLCMS2DPlot.AddScan(dct2DEnum.Current.Key, intMSLevel, dct2DDataScanTimes[int2DPlotScanNum], obj2DMzAndIntensity.Count, dblMZList, dblIntensityList);
-
+            if (dct2DData == null)
+            {
+                return;
             }
 
+            using (var dct2DEnum = dct2DData.GetEnumerator())
+            {
+                while (dct2DEnum.MoveNext())
+                {
+                    var int2DPlotScanNum = dct2DEnum.Current.Key;
+
+                    var obj2DMzAndIntensity = dct2DEnum.Current.Value;
+
+                    obj2DMzAndIntensity.Keys.CopyTo(dblMZList, 0);
+                    obj2DMzAndIntensity.Values.CopyTo(dblIntensityList, 0);
+
+                    // Make sure the data is sorted
+                    Array.Sort(dblMZList, dblIntensityList, 0, obj2DMzAndIntensity.Count);
+
+                    // Store the data
+                    mLCMS2DPlot.AddScan(dct2DEnum.Current.Key, intMSLevel, dct2DDataScanTimes[int2DPlotScanNum], obj2DMzAndIntensity.Count, dblMZList,
+                                        dblIntensityList);
+                }
+            }
 
             if (int2DScanNumMin / (double)int2DScanNumMax > 0.5) {
                 // Zoom in the 2D plot to prevent all of the the data from being scrunched to the right
@@ -636,24 +643,31 @@ namespace MSFileInfoScanner
             ref int int2DScanNumMin, 
             ref int int2DScanNumMax)
         {
-            var dct2DEnum = dct2DData.GetEnumerator();
+            if (dct2DData == null)
+                return;
 
-            while (dct2DEnum.MoveNext()) {
-                var int2DPlotScanNum = dct2DEnum.Current.Key;
+            using (var dct2DEnum = dct2DData.GetEnumerator())
+            {
+                while (dct2DEnum.MoveNext())
+                {
+                    var int2DPlotScanNum = dct2DEnum.Current.Key;
 
-                if (dct2DEnum.Current.Value.Count > intMax2DDataCount) {
-                    intMax2DDataCount = dct2DEnum.Current.Value.Count;
-                }
+                    if (dct2DEnum.Current.Value.Count > intMax2DDataCount)
+                    {
+                        intMax2DDataCount = dct2DEnum.Current.Value.Count;
+                    }
 
-                if (int2DPlotScanNum < int2DScanNumMin) {
-                    int2DScanNumMin = int2DPlotScanNum;
-                }
+                    if (int2DPlotScanNum < int2DScanNumMin)
+                    {
+                        int2DScanNumMin = int2DPlotScanNum;
+                    }
 
-                if (int2DPlotScanNum > int2DScanNumMax) {
-                    int2DScanNumMax = int2DPlotScanNum;
+                    if (int2DPlotScanNum > int2DScanNumMax)
+                    {
+                        int2DScanNumMax = int2DPlotScanNum;
+                    }
                 }
             }
-
         }
 
     }
