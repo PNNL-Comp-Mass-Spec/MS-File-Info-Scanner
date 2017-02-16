@@ -16,7 +16,6 @@ namespace MSFileInfoScanner
         //  For the remaining points, their data values will be changed to mSkipDataPointFlag (defaults to -1)
 
 
-        private const int INITIAL_MEMORY_RESERVE = 50000;
         private const float DEFAULT_SKIP_DATA_POINT_FLAG = -1;
 
         // 4 steps in Sub FilterDataByMaxDataCountToLoad
@@ -45,9 +44,7 @@ namespace MSFileInfoScanner
             set { mMaximumDataCountToKeep = value; }
         }
 
-        public float Progress {
-            get { return mProgress; }
-        }
+        public float Progress => mProgress;
 
         public float SkipDataPointFlag {
             get { return mSkipDataPointFlag; }
@@ -338,39 +335,13 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Sort the data and mark data points beyond the first intMaximumDataCountInArraysToLoad points with mSkipDataPointFlag
         /// </summary>
-        /// <param name="sngAbundances"></param>
-        /// <param name="intDataIndices"></param>
-        /// <param name="intDataCount"></param>
+        /// <param name="dataValuesAndIndices"></param>
         /// <param name="intMaximumDataCountInArraysToLoad"></param>
         /// <param name="intSubtaskStepCount"></param>
         /// <remarks>
         /// This sub uses a full sort to filter the data
         /// This will be slow for large arrays and you should therefore use FilterDataByMaxDataCountToKeep if possible
-        /// </remarks>
-        private void SortAndMarkPointsToSkip(float[] sngAbundances, int[] intDataIndices, int intDataCount, int intMaximumDataCountInArraysToLoad, int intSubtaskStepCount)
-        {
-            if (intDataCount > 0) {
-                // Sort sngAbundances ascending, sorting intDataIndices in parallel
-                Array.Sort(sngAbundances, intDataIndices, 0, intDataCount);
-
-                UpdateProgress(2.333f / intSubtaskStepCount * 100.0f);
-
-                // Change the abundance values to mSkipDataPointFlag for data up to index intDataCount-intMaximumDataCountInArraysToLoad-1
-                for (var intIndex = 0; intIndex <= intDataCount - intMaximumDataCountInArraysToLoad - 1; intIndex++) {
-                    sngAbundances[intIndex] = mSkipDataPointFlag;
-                }
-
-                UpdateProgress(2.666f / intSubtaskStepCount * 100.0f);
-
-                // Re-sort, this time on intDataIndices with sngAbundances in parallel
-                Array.Sort(intDataIndices, sngAbundances, 0, intDataCount);
-
-            }
-
-            UpdateProgress(3f / intSubtaskStepCount * 100.0f);
-
-        }
-
+        /// </remarks>    
         private void SortAndMarkPointsToSkip(
             List<Tuple<float,int>> dataValuesAndIndices, 
             int intMaximumDataCountInArraysToLoad, int intSubtaskStepCount)
@@ -403,9 +374,7 @@ namespace MSFileInfoScanner
         {
             mProgress = sngProgress;
 
-            if (ProgressChanged != null) {
-                ProgressChanged(mProgress);
-            }
+            ProgressChanged?.Invoke(mProgress);
         }
     }
 

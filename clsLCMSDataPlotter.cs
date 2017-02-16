@@ -49,10 +49,8 @@ namespace MSFileInfoScanner
                 {
                     return MZ.ToString("0.000") + ", " + Intensity.ToString("0") + ", " + Charge + "+";
                 }
-                else
-                {
-                    return MZ.ToString("0.000") + ", " + Intensity.ToString("0");
-                }
+
+                return MZ.ToString("0.000") + ", " + Intensity.ToString("0");
             }
         }
 
@@ -67,7 +65,7 @@ namespace MSFileInfoScanner
 
         private readonly List<clsScanData> mScans;
 
-        private MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions mOptions;
+        private clsLCMSDataPlotterOptions mOptions;
 
         private readonly List<udtOutputFileInfoType> mRecentFiles;
 
@@ -80,16 +78,13 @@ namespace MSFileInfoScanner
         #endregion
 
         #region "Properties"
-        public MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions Options
+        public clsLCMSDataPlotterOptions Options
         {
             get { return mOptions; }
             set { mOptions = value; }
         }
 
-        public int ScanCountCached
-        {
-            get { return mScans.Count; }
-        }
+        public int ScanCountCached => mScans.Count;
 
         #endregion
 
@@ -97,7 +92,7 @@ namespace MSFileInfoScanner
         /// Constructor
         /// </summary>
         public clsLCMSDataPlotter()
-            : this(new MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions())
+            : this(new clsLCMSDataPlotterOptions())
         {
         }
 
@@ -105,7 +100,7 @@ namespace MSFileInfoScanner
         /// Constructor
         /// </summary>
         /// <param name="objOptions"></param>
-        public clsLCMSDataPlotter(MSFileInfoScannerInterfaces.clsLCMSDataPlotterOptions objOptions)
+        public clsLCMSDataPlotter(clsLCMSDataPlotterOptions objOptions)
         {
             mOptions = objOptions;
             mRecentFiles = new List<udtOutputFileInfoType>();
@@ -528,10 +523,8 @@ namespace MSFileInfoScanner
             {
                 return (float)dblIntensitySum / intDataCount;
             }
-            else
-            {
-                return 0;
-            }
+
+            return 0;
         }
 
 
@@ -824,16 +817,12 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public clsScanData GetCachedScanByIndex(int intIndex)
         {
-
             if (intIndex >= 0 && intIndex < mScans.Count)
             {
                 return mScans[intIndex];
             }
-            else
-            {
-                return null;
-            }
 
+            return null;
         }
 
 
@@ -1202,15 +1191,12 @@ namespace MSFileInfoScanner
 
         private List<List<ScatterPoint>> GetMonoMassSeriesByCharge(int intMsLevelFilter, out double dblMinMz, out double dblMaxMz, out double dblScanTimeMax, out int intMinScan, out int intMaxScan)
         {
-
-            double dblScanTimeMin = 0;
-
             intMinScan = int.MaxValue;
             intMaxScan = 0;
             dblMinMz = float.MaxValue;
             dblMaxMz = 0;
 
-            dblScanTimeMin = double.MaxValue;
+            var dblScanTimeMin = double.MaxValue;
             dblScanTimeMax = 0;
 
             // Determine the maximum charge state
@@ -1548,20 +1534,17 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         private string IntToEngineeringNotation(int intValue)
         {
-
             if (intValue < 1000)
             {
                 return intValue.ToString();
             }
-            else if (intValue < 1000000.0)
+
+            if (intValue < 1000000.0)
             {
                 return (int)Math.Round(intValue / 1000.0, 0) + "K";
             }
-            else
-            {
-                return (int)Math.Round(intValue / 1000.0 / 1000, 0) + "M";
-            }
 
+            return (int)Math.Round(intValue / 1000.0 / 1000, 0) + "M";
         }
 
         public bool Save2DPlots(string strDatasetName, string strOutputFolderPath)
@@ -1643,10 +1626,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                if (ErrorEvent != null)
-                {
-                    ErrorEvent("Error in clsLCMSDataPlotter.Save2DPlots: " + ex.Message);
-                }
+                OnErrorEvent("Error in clsLCMSDataPlotter.Save2DPlots: " + ex.Message, ex);
                 blnSuccess = false;
             }
 
@@ -1665,37 +1645,25 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public class clsScanData
         {
-
-            private readonly int mScanNumber;
             private int mMSLevel;
 
-            private readonly float mScanTimeMinutes;
             public int IonCount;
             public double[] IonsMZ;
             public float[] IonsIntensity;
 
             public byte[] Charge;
-            public int MSLevel
-            {
-                get { return mMSLevel; }
-            }
+            public int MSLevel => mMSLevel;
 
-            public int ScanNumber
-            {
-                get { return mScanNumber; }
-            }
+            public int ScanNumber { get; }
 
-            public float ScanTimeMinutes
-            {
-                get { return mScanTimeMinutes; }
-            }
+            public float ScanTimeMinutes { get; }
 
 
             public clsScanData(int intScanNumber, int intMSLevel, float sngScanTimeMinutes, int intDataCount, double[] dblIonsMZ, float[] sngIonsIntensity, byte[] bytCharge)
             {
-                mScanNumber = intScanNumber;
+                ScanNumber = intScanNumber;
                 mMSLevel = intMSLevel;
-                mScanTimeMinutes = sngScanTimeMinutes;
+                ScanTimeMinutes = sngScanTimeMinutes;
 
                 IonCount = intDataCount;
                 IonsMZ = new double[intDataCount];

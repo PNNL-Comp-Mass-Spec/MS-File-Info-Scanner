@@ -37,13 +37,6 @@ namespace MSFileInfoScanner
             // Obtain the full path to the file
             var fiDatasetFile = new FileInfo(strDataFilePath);
 
-
-            var blnTest = false;
-            if (blnTest) {
-                TestPWiz(fiDatasetFile.FullName);
-            }
-
-
             datasetFileInfo.FileSystemCreationTime = fiDatasetFile.CreationTime;
             datasetFileInfo.FileSystemModificationTime = fiDatasetFile.LastWriteTime;
 

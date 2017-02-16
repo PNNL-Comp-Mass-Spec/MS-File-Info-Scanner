@@ -45,6 +45,7 @@ namespace MSFileInfoScanner
         private XMLFileReader m_XMLFileAccessor;
 
         private bool mCaseSensitive;
+
         // When mCaseSensitive = False, then dtSectionNames stores mapping between lowercase section name and actual section name stored in file
         //   If section is present more than once in file, then only grabs the last occurence of the section
         // When mCaseSensitive = True, then the mappings in dtSectionNames are effectively not used
@@ -99,11 +100,8 @@ namespace MSFileInfoScanner
                 CacheSectionNames();
                 return true;
             }
-            else
-            {
-                return false;
-            }
 
+            return false;
         }
 
         public bool ManualParseXmlOrIniFile(string strFilePath)
@@ -118,7 +116,8 @@ namespace MSFileInfoScanner
             {
                 return false;
             }
-            else if (m_XMLFileAccessor.ManualParseXmlOrIniFile(strFilePath))
+
+            if (m_XMLFileAccessor.ManualParseXmlOrIniFile(strFilePath))
             {
                 if (m_XMLFileAccessor.Initialized)
                 {
@@ -137,22 +136,19 @@ namespace MSFileInfoScanner
         /// <return>The function returns a boolean that shows if the file was successfully saved.</return>
         public bool SaveSettings()
         {
-
             if (m_XMLFileAccessor == null)
             {
                 return false;
             }
-            else if (m_XMLFileAccessor.Initialized)
+
+            if (m_XMLFileAccessor.Initialized)
             {
                 m_XMLFileAccessor.OutputFilename = m_XMLFilePath;
                 m_XMLFileAccessor.Save();
                 return true;
             }
-            else
-            {
-                return false;
-            }
 
+            return false;
         }
 
         /// <summary>Checks if a section is present in the settings file.</summary>
@@ -289,16 +285,12 @@ namespace MSFileInfoScanner
                     {
                         return mCachedSection.dtKeys[keyNameToFind];
                     }
-                    else
-                    {
-                        return string.Empty;
-                    }
+
+                    return string.Empty;
                 }
             }
-            else
-            {
-                return string.Empty;
-            }
+
+            return string.Empty;
         }
 
         private string GetCachedSectionName(string sectionName)
@@ -311,10 +303,8 @@ namespace MSFileInfoScanner
             {
                 return dtSectionNames[sectionNameToFind];
             }
-            else
-            {
-                return string.Empty;
-            }
+
+            return string.Empty;
         }
 
         private string SetNameCase(string aName)
@@ -325,10 +315,8 @@ namespace MSFileInfoScanner
             {
                 return aName;
             }
-            else
-            {
-                return aName.ToLower();
-            }
+
+            return aName.ToLower();
         }
 
         /// <summary>
@@ -370,11 +358,9 @@ namespace MSFileInfoScanner
                 valueNotPresent = true;
                 return valueIfMissing;
             }
-            else
-            {
-                valueNotPresent = false;
-                return strResult;
-            }
+
+            valueNotPresent = false;
+            return strResult;
         }
 
         /// <summary>
@@ -401,10 +387,8 @@ namespace MSFileInfoScanner
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         public short GetParam(string sectionName, string keyName, short valueIfMissing)
@@ -467,37 +451,34 @@ namespace MSFileInfoScanner
                 valueNotPresent = true;
                 return valueIfMissing;
             }
-            else
-            {
-                valueNotPresent = false;
-                try
-                {
-                    short result;
-                    if (short.TryParse(strResult, out result))
-                    {
-                        return result;
-                    }
-                    else if (strResult.ToLower() == "true")
-                    {
-                        return -1;
-                    }
-                    else if (strResult.ToLower() == "false")
-                    {
-                        return 0;
-                    }
-                    else
-                    {
-                        valueNotPresent = true;
-                        return valueIfMissing;
-                    }
-                }
-                catch
-                {
-                    valueNotPresent = true;
-                    return valueIfMissing;
-                }
-            }
 
+            valueNotPresent = false;
+            try
+            {
+                short result;
+                if (short.TryParse(strResult, out result))
+                {
+                    return result;
+                }
+
+                if (strResult.ToLower() == "true")
+                {
+                    return -1;
+                }
+
+                if (strResult.ToLower() == "false")
+                {
+                    return 0;
+                }
+
+                valueNotPresent = true;
+                return valueIfMissing;
+            }
+            catch
+            {
+                valueNotPresent = true;
+                return valueIfMissing;
+            }
         }
 
         /// <summary>
@@ -614,37 +595,34 @@ namespace MSFileInfoScanner
                 valueNotPresent = true;
                 return valueIfMissing;
             }
-            else
-            {
-                valueNotPresent = false;
-                try
-                {
-                    float result;
-                    if (float.TryParse(strResult, out result))
-                    {
-                        return result;
-                    }
-                    else if (strResult.ToLower() == "true")
-                    {
-                        return -1;
-                    }
-                    else if (strResult.ToLower() == "false")
-                    {
-                        return 0;
-                    }
-                    else
-                    {
-                        valueNotPresent = true;
-                        return valueIfMissing;
-                    }
-                }
-                catch
-                {
-                    valueNotPresent = true;
-                    return valueIfMissing;
-                }
-            }
 
+            valueNotPresent = false;
+            try
+            {
+                float result;
+                if (float.TryParse(strResult, out result))
+                {
+                    return result;
+                }
+
+                if (strResult.ToLower() == "true")
+                {
+                    return -1;
+                }
+
+                if (strResult.ToLower() == "false")
+                {
+                    return 0;
+                }
+
+                valueNotPresent = true;
+                return valueIfMissing;
+            }
+            catch
+            {
+                valueNotPresent = true;
+                return valueIfMissing;
+            }
         }
 
         /// <summary>
@@ -665,37 +643,34 @@ namespace MSFileInfoScanner
                 valueNotPresent = true;
                 return valueIfMissing;
             }
-            else
-            {
-                valueNotPresent = false;
-                try
-                {
-                    double result;
-                    if (double.TryParse(strResult, out result))
-                    {
-                        return result;
-                    }
-                    
-                    if (strResult.ToLower() == "true")
-                    {
-                        return -1;
-                    }
-                    
-                    if (strResult.ToLower() == "false")
-                    {
-                        return 0;
-                    }
-                    
-                    valueNotPresent = true;
-                    return valueIfMissing;
-                }
-                catch
-                {
-                    valueNotPresent = true;
-                    return valueIfMissing;
-                }
-            }
 
+            valueNotPresent = false;
+            try
+            {
+                double result;
+                if (double.TryParse(strResult, out result))
+                {
+                    return result;
+                }
+                    
+                if (strResult.ToLower() == "true")
+                {
+                    return -1;
+                }
+                    
+                if (strResult.ToLower() == "false")
+                {
+                    return 0;
+                }
+                    
+                valueNotPresent = true;
+                return valueIfMissing;
+            }
+            catch
+            {
+                valueNotPresent = true;
+                return valueIfMissing;
+            }
         }
 
         /// <summary>
@@ -846,10 +821,7 @@ namespace MSFileInfoScanner
 
         void m_XMLFileAccessor_InformationMessage(string msg)
         {
-            if (InformationMessage != null)
-            {
-                InformationMessage(msg);
-            }
+            InformationMessage?.Invoke(msg);
         }
 
         /// <summary>
@@ -932,10 +904,7 @@ namespace MSFileInfoScanner
             /// <summary>
             /// Legacy property; calls XmlFilename
             /// </summary>
-            public string IniFilename
-            {
-                get { return XmlFilename; }
-            }
+            public string IniFilename => XmlFilename;
 
             /// <summary>
             /// This routine returns the name of the ini file.
@@ -956,19 +925,13 @@ namespace MSFileInfoScanner
             /// This routine returns a boolean showing if the file was initialized or not.
             /// </summary>
             /// <return>The function returns a Boolean.</return>
-            public bool Initialized
-            {
-                get { return m_initialized; }
-            }
+            public bool Initialized => m_initialized;
 
             /// <summary>
             /// This routine returns a boolean showing if the name is case sensitive or not.
             /// </summary>
             /// <return>The function returns a Boolean.</return>
-            private bool CaseSensitive
-            {
-                get { return m_CaseSensitive; }
-            }
+            private bool CaseSensitive => m_CaseSensitive;
 
             /// <summary>
             /// This routine sets a name.
@@ -981,10 +944,8 @@ namespace MSFileInfoScanner
                 {
                     return aName;
                 }
-                else
-                {
-                    return aName.ToLower();
-                }
+
+                return aName.ToLower();
             }
 
             /// <summary>
@@ -1005,10 +966,8 @@ namespace MSFileInfoScanner
                 {
                     return GetRoot();
                 }
-                else
-                {
-                    return GetSection(sections[sections.Count - 1]);
-                }
+
+                return GetSection(sections[sections.Count - 1]);
             }
 
             /// <summary>
@@ -1130,25 +1089,21 @@ namespace MSFileInfoScanner
                         // delete this item
                         return DeleteItem(sectionName, keyName);
                     }
-                    else
-                    {
-                        // add or update the value attribute
-                        item.SetAttribute("value", newValue);
-                        return true;
-                    }
+                    
+                    // add or update the value attribute
+                    item.SetAttribute("value", newValue);
+                    return true;
                 }
-                else
+                
+                // try to create the item
+                if ((!string.IsNullOrEmpty(keyName)) && ((newValue != null)))
                 {
-                    // try to create the item
-                    if ((!string.IsNullOrEmpty(keyName)) && ((newValue != null)))
-                    {
-                        // construct a new item (blank values are OK)
-                        item = m_XmlDoc.CreateElement("item");
-                        item.SetAttribute("key", SetNameCase(keyName));
-                        item.SetAttribute("value", newValue);
-                        section.AppendChild(item);
-                        return true;
-                    }
+                    // construct a new item (blank values are OK)
+                    item = m_XmlDoc.CreateElement("item");
+                    item.SetAttribute("key", SetNameCase(keyName));
+                    item.SetAttribute("value", newValue);
+                    section.AppendChild(item);
+                    return true;
                 }
                 return false;
             }
@@ -1163,10 +1118,7 @@ namespace MSFileInfoScanner
                 var section = GetSection(sectionName);
                 if ((section != null))
                 {
-                    if (section.ParentNode != null)
-                    {
-                        section.ParentNode.RemoveChild(section);
-                    }
+                    section.ParentNode?.RemoveChild(section);
                     UpdateSections();
                     return true;
                 }
@@ -1184,10 +1136,7 @@ namespace MSFileInfoScanner
                 var item = GetItem(sectionName, keyName);
                 if ((item != null))
                 {
-                    if (item.ParentNode != null)
-                    {
-                        item.ParentNode.RemoveChild(item);
-                    }
+                    item.ParentNode?.RemoveChild(item);
                     return true;
                 }
                 return false;
@@ -1242,11 +1191,7 @@ namespace MSFileInfoScanner
                     throw new XMLFileReaderNotInitializedException();
 
                 XmlNode N = GetItem(sectionName, keyName);
-                if (N != null && N.Attributes != null)
-                {
-                    return (N.Attributes.GetNamedItem("value").Value);
-                }
-                return null;
+                return N?.Attributes?.GetNamedItem("value").Value;
             }
 
             /// <summary>
@@ -1279,15 +1224,12 @@ namespace MSFileInfoScanner
                     target = GetSection(sectionName);
                 }
 
-                if ((target != null))
+                var nodes = target?.SelectNodes("comment");
+                if (nodes != null && nodes.Count > 0)
                 {
-                    var nodes = target.SelectNodes("comment");
-                    if (nodes != null && nodes.Count > 0)
+                    foreach (XmlElement N in nodes)
                     {
-                        foreach (XmlElement N in nodes)
-                        {
-                            sc.Add(N.InnerText);
-                        }
+                        sc.Add(N.InnerText);
                     }
                 }
                 return sc;
@@ -1400,29 +1342,27 @@ namespace MSFileInfoScanner
                 {
                     return null;
                 }
-                else
+
+                var nodes = section.SelectNodes("item");
+                if (nodes != null && nodes.Count > 0)
                 {
-                    var nodes = section.SelectNodes("item");
-                    if (nodes != null && nodes.Count > 0)
+                    foreach (XmlElement N in nodes)
                     {
-                        foreach (XmlElement N in nodes)
+                        switch (itemType)
                         {
-                            switch (itemType)
-                            {
-                                case XMLItemTypeEnum.GetKeys:
-                                    items.Add(N.Attributes.GetNamedItem("key").Value);
-                                    break;
-                                case XMLItemTypeEnum.GetValues:
-                                    items.Add(N.Attributes.GetNamedItem("value").Value);
-                                    break;
-                                case XMLItemTypeEnum.GetKeysAndValues:
-                                    items.Add(N.Attributes.GetNamedItem("key").Value + "=" + N.Attributes.GetNamedItem("value").Value);
-                                    break;
-                            }
+                            case XMLItemTypeEnum.GetKeys:
+                                items.Add(N.Attributes.GetNamedItem("key").Value);
+                                break;
+                            case XMLItemTypeEnum.GetValues:
+                                items.Add(N.Attributes.GetNamedItem("value").Value);
+                                break;
+                            case XMLItemTypeEnum.GetKeysAndValues:
+                                items.Add(N.Attributes.GetNamedItem("key").Value + "=" + N.Attributes.GetNamedItem("value").Value);
+                                break;
                         }
                     }
-                    return items;
                 }
+                return items;
             }
 
             /// <summary>The funtions gets a collection of keys in a section.</summary>
@@ -1510,13 +1450,10 @@ namespace MSFileInfoScanner
                         N.RemoveAttribute(attributeName);
                         return true;
                     }
-                    else
-                    {
-                        attributeName = SetNameCase(attributeName);
-                        N.SetAttribute(attributeName, attributeValue);
-                        return true;
-                    }
 
+                    attributeName = SetNameCase(attributeName);
+                    N.SetAttribute(attributeName, attributeValue);
+                    return true;
                 }
                 catch (Exception e)
                 {
@@ -1542,10 +1479,7 @@ namespace MSFileInfoScanner
                         var Natt = m_XmlDoc.CreateAttribute("name");
                         Natt.Value = SetNameCase(sectionName);
                         N.Attributes.SetNamedItem(Natt);
-                        if (m_XmlDoc.DocumentElement != null)
-                        {
-                            m_XmlDoc.DocumentElement.AppendChild(N);
-                        }
+                        m_XmlDoc.DocumentElement?.AppendChild(N);
                         sections.Add(Natt.Value);
                         return true;
                     }
@@ -1816,11 +1750,8 @@ namespace MSFileInfoScanner
 
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
 
+                return false;
             }
 
             /// <summary>It Sets or Gets the output file name.</summary>
@@ -1879,10 +1810,7 @@ namespace MSFileInfoScanner
                     }
                     if (NotifyOnEvent)
                     {
-                        if (InformationMessage != null)
-                        {
-                            InformationMessage("File save complete.");
-                        }
+                        InformationMessage?.Invoke("File save complete.");
                     }
                 }
                 else
@@ -1932,10 +1860,7 @@ namespace MSFileInfoScanner
 
         public class XMLFileReaderNotInitializedException : ApplicationException
         {
-            public override string Message
-            {
-                get { return "The XMLFileReader instance has not been properly initialized."; }
-            }
+            public override string Message => "The XMLFileReader instance has not been properly initialized.";
         }
 
     }

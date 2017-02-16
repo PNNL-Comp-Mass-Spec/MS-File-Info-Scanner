@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -108,6 +107,7 @@ namespace MSFileInfoScanner
         public const bool USE_XML_OUTPUT_FILE = false;
 
         private const bool SKIP_FILES_IN_ERROR = true;
+
         //Public Enum iMSFileInfoScanner.eMSFileScannerErrorCodes
         //	NoError = 0
         //	InvalidInputFilePath = 1
@@ -218,13 +218,13 @@ namespace MSFileInfoScanner
 
         private string mDatasetInfoXML = "";
         private readonly clsFileIntegrityChecker mFileIntegrityChecker;
-	
+    
         private StreamWriter mFileIntegrityDetailsWriter;
 
         private StreamWriter mFileIntegrityErrorsWriter;
 
         private iMSFileInfoProcessor mMSInfoScanner;
-	
+    
         private readonly clsMSFileInfoDataCache mMSFileInfoDataCache;
 
         private DateTime mLastWriteTimeFileIntegrityDetails;
@@ -272,9 +272,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Returns the dataset info, formatted as XML
         /// </summary>
-        public override string DatasetInfoXML {
-            get { return mDatasetInfoXML; }
-        }
+        public override string DatasetInfoXML => mDatasetInfoXML;
 
         public override string GetDataFileFilename(eDataFileTypeConstants eDataFileType)
         {
@@ -309,13 +307,11 @@ namespace MSFileInfoScanner
                     break;
                 default:
                     // Unknown file type
-                    throw new ArgumentOutOfRangeException("eDataFileType");                
+                    throw new ArgumentOutOfRangeException(nameof(eDataFileType));                
             }
         }
 
-        public static string DefaultAcquisitionTimeFilename {
-            get { return DefaultDataFileName(eDataFileTypeConstants.MSFileInfo); }
-        }
+        public static string DefaultAcquisitionTimeFilename => DefaultDataFileName(eDataFileTypeConstants.MSFileInfo);
 
         public static string DefaultDataFileName(eDataFileTypeConstants eDataFileType)
         {
@@ -352,12 +348,13 @@ namespace MSFileInfoScanner
         /// When True, then computes an Sha1 hash on every file
         /// </summary>
         public override bool ComputeFileHashes {
-            get {
+            get
+            {
                 if ((mFileIntegrityChecker != null)) {
                     return mFileIntegrityChecker.ComputeFileHashes;
-                } else {
-                    return false;
                 }
+
+                return false;
             }
             set {
                 if ((mFileIntegrityChecker != null)) {
@@ -424,9 +421,7 @@ namespace MSFileInfoScanner
             set { mDSInfoStoredProcedure = value; }
         }
 
-        public override eMSFileScannerErrorCodes ErrorCode {
-            get { return mErrorCode; }
-        }
+        public override eMSFileScannerErrorCodes ErrorCode => mErrorCode;
 
         public override bool IgnoreErrorsWhenRecursing {
             get { return mIgnoreErrorsWhenRecursing; }
@@ -475,12 +470,13 @@ namespace MSFileInfoScanner
         }
 
         public override int MaximumTextFileLinesToCheck {
-            get {
+            get
+            {
                 if ((mFileIntegrityChecker != null)) {
                     return mFileIntegrityChecker.MaximumTextFileLinesToCheck;
-                } else {
-                    return 0;
                 }
+
+                return 0;
             }
             set {
                 if ((mFileIntegrityChecker != null)) {
@@ -490,12 +486,13 @@ namespace MSFileInfoScanner
         }
 
         public override int MaximumXMLElementNodesToCheck {
-            get {
+            get
+            {
                 if ((mFileIntegrityChecker != null)) {
                     return mFileIntegrityChecker.MaximumTextFileLinesToCheck;
-                } else {
-                    return 0;
                 }
+
+                return 0;
             }
             set {
                 if ((mFileIntegrityChecker != null)) {
@@ -580,12 +577,13 @@ namespace MSFileInfoScanner
         }
 
         public override bool ZipFileCheckAllData {
-            get {
+            get
+            {
                 if ((mFileIntegrityChecker != null)) {
                     return mFileIntegrityChecker.ZipFileCheckAllData;
-                } else {
-                    return false;
                 }
+
+                return false;
             }
             set {
                 if ((mFileIntegrityChecker != null)) {

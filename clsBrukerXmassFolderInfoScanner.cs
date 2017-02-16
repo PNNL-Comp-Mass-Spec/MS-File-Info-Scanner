@@ -1337,39 +1337,32 @@ namespace MSFileInfoScanner
 
             public int Compare(udtMCFScanInfoType x, udtMCFScanInfoType y)
             {
-
                 if (x.RT < y.RT)
                 {
                     return -1;
                 }
-                else if (x.RT > y.RT)
+
+                if (x.RT > y.RT)
                 {
                     return 1;
                 }
-                else
-                {
-                    if (x.AcqTime < y.AcqTime)
-                    {
-                        return -1;
-                    }
-                    else if (x.AcqTime > y.AcqTime)
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        if (string.IsNullOrEmpty(x.SpotNumber) || string.IsNullOrEmpty(y.SpotNumber))
-                        {
-                            return 0;
-                        }
-                        else
-                        {
-                            return string.CompareOrdinal(x.SpotNumber, y.SpotNumber);
-                        }
 
-                    }
+                if (x.AcqTime < y.AcqTime)
+                {
+                    return -1;
                 }
 
+                if (x.AcqTime > y.AcqTime)
+                {
+                    return 1;
+                }
+
+                if (string.IsNullOrEmpty(x.SpotNumber) || string.IsNullOrEmpty(y.SpotNumber))
+                {
+                    return 0;
+                }
+
+                return string.CompareOrdinal(x.SpotNumber, y.SpotNumber);
             }
         }
 

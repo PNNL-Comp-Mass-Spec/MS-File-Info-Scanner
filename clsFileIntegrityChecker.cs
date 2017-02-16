@@ -95,7 +95,6 @@ namespace MSFileInfoScanner
         private udtZipFileWorkParamsType mZipFileWorkParams;
 
         public event FileIntegrityFailureEventHandler FileIntegrityFailure;
-
         public delegate void FileIntegrityFailureEventHandler(string strFilePath, string strMessage);
 
         #endregion
@@ -133,10 +132,7 @@ namespace MSFileInfoScanner
             }
         }
 
-        public string StatusMessage
-        {
-            get { return mStatusMessage; }
-        }
+        public string StatusMessage => mStatusMessage;
 
         /// <summary>
         /// When True, then performs an exhaustive CRC check of each Zip file; otherwise, performs a quick test
@@ -1112,23 +1108,20 @@ namespace MSFileInfoScanner
             if (blnZipFileCheckAllData && mFastZippedSFileCheck)
             {
                 var fileName = Path.GetFileName(strFilePath);
-                if (fileName != null)
-                {
-                    var strFileNameLCase = fileName.ToLower();
-                    if (strFileNameLCase == "0.ser.zip")
-                    {
-                        // Do not run a full check on 0.ser.zip files
-                        blnZipFileCheckAllData = false;
 
-                    }
-                    else if (strFileNameLCase.Length > 2 && strFileNameLCase.StartsWith("s") &&
-                             char.IsNumber(strFileNameLCase[1]))
+                var strFileNameLCase = fileName.ToLower();
+                if (strFileNameLCase == "0.ser.zip")
+                {
+                    // Do not run a full check on 0.ser.zip files
+                    blnZipFileCheckAllData = false;
+                }
+                else if (strFileNameLCase.Length > 2 && strFileNameLCase.StartsWith("s") &&
+                         char.IsNumber(strFileNameLCase[1]))
+                {
+                    // Run a full check on s001.zip but not the other s*.zip files
+                    if (strFileNameLCase != "s001.zip")
                     {
-                        // Run a full check on s001.zip but not the other s*.zip files
-                        if (strFileNameLCase != "s001.zip")
-                        {
-                            blnZipFileCheckAllData = false;
-                        }
+                        blnZipFileCheckAllData = false;
                     }
                 }
             }
@@ -1188,13 +1181,12 @@ namespace MSFileInfoScanner
 
         private void CheckZipFileWork()
         {
-            var blnThrowExceptionIfInvalid = true;
             var blnZipIsValid = false;
 
             try
             {
                 blnZipIsValid = CheckZipFileIntegrity(mZipFileWorkParams.FilePath, mZipFileWorkParams.CheckAllData,
-                                                      blnThrowExceptionIfInvalid);
+                                                      blnThrowExceptionIfInvalid: true);
 
                 if (!blnZipIsValid)
                 {
@@ -1350,11 +1342,8 @@ namespace MSFileInfoScanner
                 return CheckTextFileWork(strFilePath, 1, 0, intMinimumCommaCount, false, true,
                                          new List<string> { strHeaderRequired }, true, false, 0);
             }
-            else
-            {
-                return true;
-            }
 
+            return true;
         }
 
         /// <summary>
@@ -1933,30 +1922,32 @@ namespace MSFileInfoScanner
                 return;
             }
 
-            var lineHeaderEnum = requiredTextItems.GetEnumerator();
-            while (lineHeaderEnum.MoveNext())
+            using (var lineHeaderEnum = requiredTextItems.GetEnumerator())
             {
-                if (lineHeaderEnum.Current.Value)
+                while (lineHeaderEnum.MoveNext())
                 {
-                    continue;
-                }
-
-                if (blnMatchStart)
-                {
-                    if (textToSearch.StartsWith(lineHeaderEnum.Current.Key))
+                    if (lineHeaderEnum.Current.Value)
                     {
-                        requiredTextItems[lineHeaderEnum.Current.Key] = true;
-                        intRequiredTextMatchCount += 1;
-                        break;
+                        continue;
                     }
-                }
-                else
-                {
-                    if (textToSearch.Contains(lineHeaderEnum.Current.Key))
+
+                    if (blnMatchStart)
                     {
-                        requiredTextItems[lineHeaderEnum.Current.Key] = true;
-                        intRequiredTextMatchCount += 1;
-                        break;
+                        if (textToSearch.StartsWith(lineHeaderEnum.Current.Key))
+                        {
+                            requiredTextItems[lineHeaderEnum.Current.Key] = true;
+                            intRequiredTextMatchCount += 1;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if (textToSearch.Contains(lineHeaderEnum.Current.Key))
+                        {
+                            requiredTextItems[lineHeaderEnum.Current.Key] = true;
+                            intRequiredTextMatchCount += 1;
+                            break;
+                        }
                     }
                 }
             }
@@ -2119,7 +2110,6 @@ namespace MSFileInfoScanner
 
         }
 
-
         private void LogErrors(string strSource, string strMessage, Exception ex)
         {
             mStatusMessage = string.Copy(strMessage);
@@ -2140,13 +2130,9 @@ namespace MSFileInfoScanner
 
         }
 
-
         private void LogFileIntegrityError(string strFilePath, string strErrorMessage)
         {
-            if (FileIntegrityFailure != null)
-            {
-                FileIntegrityFailure(strFilePath, strErrorMessage);
-            }
+            FileIntegrityFailure?.Invoke(strFilePath, strErrorMessage);
         }
 
         public string MD5CalcFile(string strPath)
