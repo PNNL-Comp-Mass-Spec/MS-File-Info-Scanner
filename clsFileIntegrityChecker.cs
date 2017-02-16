@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using ExtensionMethods;
 using MSFileInfoScannerInterfaces;
 
 // This class will check the integrity of files in a given folder
@@ -839,7 +838,7 @@ namespace MSFileInfoScanner
             // Count the number of chCharToCount characters
             var intCharCount = CountChars(strLineIn, chCharToCount);
 
-            if (strLineIn.EndsWith(chCharToCount) && intCharCount > 1 && intCharCount > intMinimumCharCount)
+            if (strLineIn.EndsWith(chCharToCount.ToString()) && intCharCount > 1 && intCharCount > intMinimumCharCount)
             {
                 // Decrement the char count by one since the line ends in the character we're counting
                 intCharCount -= 1;

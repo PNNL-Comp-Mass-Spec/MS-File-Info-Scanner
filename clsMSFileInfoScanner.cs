@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
-using ExtensionMethods;
 using MSFileInfoScannerInterfaces;
 
 // Scans a series of MS data files (or data folders) and extracts the acquisition start and end times, 
@@ -1459,7 +1458,7 @@ namespace MSFileInfoScanner
                             mMSInfoScanner = new clsBrukerOneFolderInfoScanner();
                             knownMSDataType = true;
                         } else {
-                            if (inputFileOrFolderPath.EndsWith('\\')) {
+                            if (inputFileOrFolderPath.EndsWith(@"\")) {
                                 inputFileOrFolderPath = inputFileOrFolderPath.TrimEnd('\\');
                             }
 
