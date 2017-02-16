@@ -14,7 +14,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "August 12, 2016";
+        public const string PROGRAM_DATE = "February 16, 2017";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
@@ -139,8 +139,11 @@ namespace MSFileInfoScanner
                 {
                     var scanner = new clsMSFileInfoScanner();
 
+                    scanner.DebugEvent += mMSFileScanner_DebugEvent;
                     scanner.ErrorEvent += mMSFileScanner_ErrorEvent;
-                    scanner.MessageEvent += mMSFileScanner_MessageEvent;
+                    scanner.WarningEvent += mMSFileScanner_WarningEvent;
+                    scanner.StatusEvent += mMSFileScanner_MessageEvent;
+                    scanner.ProgressUpdate += mMSFileScanner_ProgressUpdate;
 
                     if (mCheckFileIntegrity)
                         mUseCacheFiles = true;
@@ -570,18 +573,58 @@ namespace MSFileInfoScanner
             }
         }
 
-        private static void mMSFileScanner_ErrorEvent(string message)
+        private static void mMSFileScanner_DebugEvent(string message)
         {
-            // We could display any error messages here
-            // However, mMSFileScanner already will have written out to the console, so there is no need to do so again
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(message);
+            Console.ResetColor();
 
+        }
+        private static void mMSFileScanner_ErrorEvent(string message, Exception ex)
+        {
+            Console.WriteLine();
+
+            string formattedError;
+            if (ex == null || message.EndsWith(ex.Message))
+            {
+                formattedError = message;
+            }
+            else
+            {
+                formattedError = message + ": " + ex.Message;
+            }
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(formattedError);
+
+            if (ex != null)
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine(PRISM.clsStackTraceFormatter.GetExceptionStackTrace(ex));
+            }
+            Console.ResetColor();
+
+            // Also write the message to the error stream
             WriteToErrorStream(message);
         }
 
         private static void mMSFileScanner_MessageEvent(string message)
         {
-            // We could display any status messages here
-            // However, mMSFileScanner already will have written out to the console, so there is no need to do so again
+            Console.WriteLine(message);
+
+        }
+
+        private static void mMSFileScanner_ProgressUpdate(string progressMessage, float percentComplete)
+        {
+            mMSFileScanner_DebugEvent(percentComplete.ToString("0.0") + "%, " + progressMessage);
+        }
+
+        private static void mMSFileScanner_WarningEvent(string message)
+        {
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(message);
+            Console.ResetColor();
+
         }
 
     }
