@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using MSFileInfoScannerInterfaces;
+using PRISM;
 
 // Scans a series of MS data files (or data folders) and extracts the acquisition start and end times, 
 // number of spectra, and the total size of the Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
@@ -1149,13 +1150,13 @@ namespace MSFileInfoScanner
                 command.Parameters["@DatasetInfoXML"].Direction = ParameterDirection.Input;
                 command.Parameters["@DatasetInfoXML"].Value = dsInfoXMLClean;
 
-                var executeSP = new PRISM.DataBase.clsExecuteDatabaseSP(connectionString);
+                var executeSP = new clsExecuteDatabaseSP(connectionString);
 
                 executeSP.DBErrorEvent += mExecuteSP_DBErrorEvent;
 
                 var result = executeSP.ExecuteSP(command, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES);
 
-                if (result == PRISM.DataBase.clsExecuteDatabaseSP.RET_VAL_OK) {
+                if (result == clsExecuteDatabaseSP.RET_VAL_OK) {
                     // No errors
                     success = true;
                 } else {
@@ -1257,11 +1258,11 @@ namespace MSFileInfoScanner
                 command.Parameters["@DatasetInfoXML"].Direction = ParameterDirection.Input;
                 command.Parameters["@DatasetInfoXML"].Value = dsInfoXMLClean;
 
-                var executeSP = new PRISM.DataBase.clsExecuteDatabaseSP(connectionString);
+                var executeSP = new clsExecuteDatabaseSP(connectionString);
 
                 var result = executeSP.ExecuteSP(command, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES);
 
-                if (result == PRISM.DataBase.clsExecuteDatabaseSP.RET_VAL_OK)
+                if (result == clsExecuteDatabaseSP.RET_VAL_OK)
                 {
                     // No errors
                     success = true;

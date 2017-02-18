@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
 //
@@ -329,7 +330,7 @@ namespace MSFileInfoScanner
                 }
 
                 objPWiz.Dispose();
-                PRISM.Processes.clsProgRunner.GarbageCollectNow();
+                clsProgRunner.GarbageCollectNow();
 
                 blnSuccess = true;
 

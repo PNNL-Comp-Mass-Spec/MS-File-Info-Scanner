@@ -6,6 +6,7 @@ using MSFileInfoScannerInterfaces;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using PRISM;
 
 namespace MSFileInfoScanner
 {
@@ -962,7 +963,7 @@ namespace MSFileInfoScanner
                             {
                                 // Perform garbage collection every 60 seconds
                                 mLastGCTime = DateTime.UtcNow;
-                                PRISM.Processes.clsProgRunner.GarbageCollectNow();
+                                clsProgRunner.GarbageCollectNow();
                             }
 
                         }

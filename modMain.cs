@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using FileProcessor;
 using MSFileInfoScannerInterfaces;
+using PRISM;
 
 // Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
 
@@ -599,7 +600,7 @@ namespace MSFileInfoScanner
             if (ex != null)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine(PRISM.clsStackTraceFormatter.GetExceptionStackTrace(ex));
+                Console.WriteLine(clsStackTraceFormatter.GetExceptionStackTrace(ex));
             }
             Console.ResetColor();
 

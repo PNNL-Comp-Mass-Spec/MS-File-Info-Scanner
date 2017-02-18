@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using pwiz.CLI.msdata;
+using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2005
@@ -134,7 +135,7 @@ namespace MSFileInfoScanner
                 }
 
                 objPWiz.Dispose();
-                PRISM.Processes.clsProgRunner.GarbageCollectNow();
+                clsProgRunner.GarbageCollectNow();
 
             }
             catch (Exception ex)

@@ -1,7 +1,8 @@
-﻿using MSFileInfoScannerInterfaces;
-using System;
+﻿using System;
 using System.Data;
 using System.IO;
+using MSFileInfoScannerInterfaces;
+using PRISM;
 
 namespace MSFileInfoScanner
 {

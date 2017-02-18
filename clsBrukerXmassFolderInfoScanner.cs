@@ -5,6 +5,7 @@ using System.Linq;
 using System.Data.SQLite;
 using System.Xml;
 using PNNLOmics.Utilities;
+using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 //
@@ -470,7 +471,7 @@ namespace MSFileInfoScanner
                 }
 
                 objPWiz.Dispose();
-                PRISM.Processes.clsProgRunner.GarbageCollectNow();
+                clsProgRunner.GarbageCollectNow();
 
                 blnSuccess = true;
             }
