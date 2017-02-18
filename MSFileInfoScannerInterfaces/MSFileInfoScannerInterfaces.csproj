@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MSFileInfoScannerInterfaces</RootNamespace>
     <AssemblyName>MSFileInfoScannerInterfaces</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PRISM">
+      <HintPath>..\Lib\PRISM.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -40,8 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="clsEventNotifier.cs" />
-    <Compile Include="IEventNotifier.cs" />
     <Compile Include="iMSFileInfoScanner.cs" />
     <Compile Include="clsLCMSDataPlotterOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

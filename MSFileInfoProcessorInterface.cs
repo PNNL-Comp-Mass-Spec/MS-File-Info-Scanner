@@ -1,4 +1,5 @@
 using MSFileInfoScannerInterfaces;
+using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2005

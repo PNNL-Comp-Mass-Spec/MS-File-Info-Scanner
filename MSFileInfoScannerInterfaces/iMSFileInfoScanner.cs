@@ -1,4 +1,7 @@
-﻿namespace MSFileInfoScannerInterfaces
+﻿
+using PRISM;
+
+namespace MSFileInfoScannerInterfaces
 {
     public abstract class iMSFileInfoScanner : clsEventNotifier
     {
