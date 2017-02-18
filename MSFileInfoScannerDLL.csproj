@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MSFileInfoScanner</RootNamespace>
     <AssemblyName>MSFileInfoScanner</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -129,7 +129,6 @@
     <Compile Include="clsProteowizardDataParser.cs" />
     <Compile Include="clsTICandBPIPlotter.cs" />
     <Compile Include="clsUIMFInfoScanner.cs" />
-    <Compile Include="clsXmlSettingsFileAccessor.cs" />
     <Compile Include="clsZippedImagingFilesScanner.cs" />
     <Compile Include="MSFileInfoProcessorInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
