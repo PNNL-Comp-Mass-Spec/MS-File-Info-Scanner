@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using FileProcessor;
 using MSFileInfoScannerInterfaces;
 using PRISM;
 
@@ -15,7 +14,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "February 16, 2017";
+        public const string PROGRAM_DATE = "March 31, 2017";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;

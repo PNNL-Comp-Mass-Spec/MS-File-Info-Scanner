@@ -252,7 +252,7 @@ namespace MSFileInfoScanner
 
 
             foreach (var chromDataPoint in objData.Scans) {
-		    
+            
                 if (intMSLevelFilter != 0 && chromDataPoint.MSLevel != intMSLevelFilter &&
                     !(intMSLevelFilter == 2 & chromDataPoint.MSLevel >= 2))
                 {

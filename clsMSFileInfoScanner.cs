@@ -6,10 +6,10 @@ using System.IO;
 using MSFileInfoScannerInterfaces;
 using PRISM;
 
-// Scans a series of MS data files (or data folders) and extracts the acquisition start and end times, 
+// Scans a series of MS data files (or data folders) and extracts the acquisition start and end times,
 // number of spectra, and the total size of the Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
 //
-// Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar/QTrap .WIFF files, 
+// Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar/QTrap .WIFF files,
 // Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, and .UIMF files (IMS)
 //
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -218,13 +218,13 @@ namespace MSFileInfoScanner
 
         private string mDatasetInfoXML = "";
         private readonly clsFileIntegrityChecker mFileIntegrityChecker;
-    
+
         private StreamWriter mFileIntegrityDetailsWriter;
 
         private StreamWriter mFileIntegrityErrorsWriter;
 
         private iMSFileInfoProcessor mMSInfoScanner;
-    
+
         private readonly clsMSFileInfoDataCache mMSFileInfoDataCache;
 
         private DateTime mLastWriteTimeFileIntegrityDetails;
@@ -307,7 +307,7 @@ namespace MSFileInfoScanner
                     break;
                 default:
                     // Unknown file type
-                    throw new ArgumentOutOfRangeException(nameof(eDataFileType));                
+                    throw new ArgumentOutOfRangeException(nameof(eDataFileType));
             }
         }
 
@@ -329,7 +329,7 @@ namespace MSFileInfoScanner
                         return "UnknownFileType.xml";
                 }
             }
-        
+
             switch (eDataFileType) {
                 case eDataFileTypeConstants.MSFileInfo:
                     return DEFAULT_ACQUISITION_TIME_FILENAME_TXT;
@@ -373,7 +373,7 @@ namespace MSFileInfoScanner
 
         /// <summary>
         /// If True, then will create the _DatasetInfo.xml file
-        /// </summary>   
+        /// </summary>
         public override bool CreateDatasetInfoFile {
             get { return mCreateDatasetInfoFile; }
             set { mCreateDatasetInfoFile = value; }
@@ -809,7 +809,7 @@ namespace MSFileInfoScanner
                 fileOrFolderInfo = diFolderInfo;
                 isFolder = true;
                 return true;
-            }                       
+            }
 
             fileOrFolderInfo = new FileInfo(fileOrFolderPath);
             return false;
@@ -1116,7 +1116,7 @@ namespace MSFileInfoScanner
                 //   <?xml version="1.0" encoding="utf-16" standalone="yes"?>
 
                 var startIndex = dsInfoXML.IndexOf("?>", StringComparison.Ordinal);
-                
+
                 string dsInfoXMLClean;
                 if (startIndex > 0)
                 {
@@ -1152,7 +1152,7 @@ namespace MSFileInfoScanner
 
                 var executeSP = new clsExecuteDatabaseSP(connectionString);
 
-                executeSP.DBErrorEvent += mExecuteSP_DBErrorEvent;
+                executeSP.ErrorEvent += mExecuteSP_DBErrorEvent;
 
                 var result = executeSP.ExecuteSP(command, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES);
 
@@ -1389,8 +1389,8 @@ namespace MSFileInfoScanner
 
         public override bool ProcessMSFileOrFolder(
             string inputFileOrFolderPath,
-            string outputFolderPath, 
-            bool resetErrorCode, 
+            string outputFolderPath,
+            bool resetErrorCode,
             out eMSFileProcessingStateConstants eMSFileProcessingState)
         {
 
@@ -1467,23 +1467,23 @@ namespace MSFileInfoScanner
                                 case clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION:
                                     // Agilent .D folder or Bruker .D folder
 
-                                    if (Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 || 
-                                        Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_SER_FILE_NAME).Length > 0 || 
-                                        Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_FID_FILE_NAME).Length > 0 || 
-                                        Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_idx").Length > 0 || 
-                                        Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_xtr").Length > 0 || 
-                                        Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 || 
-                                        Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME).Length > 0) 
+                                    if (Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 ||
+                                        Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_SER_FILE_NAME).Length > 0 ||
+                                        Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_FID_FILE_NAME).Length > 0 ||
+                                        Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_idx").Length > 0 ||
+                                        Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_xtr").Length > 0 ||
+                                        Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 ||
+                                        Directory.GetFiles(inputFileOrFolderPath, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME).Length > 0)
                                     {
                                         mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
 
-                                    } else if (Directory.GetFiles(inputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 || 
+                                    } else if (Directory.GetFiles(inputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 ||
                                         Directory.GetFiles(inputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 ||
-                                        Directory.GetFiles(inputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0) 
+                                        Directory.GetFiles(inputFileOrFolderPath, clsAgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0)
                                     {
                                         mMSInfoScanner = new clsAgilentGCDFolderInfoScanner();
 
-                                    } else if (Directory.GetDirectories(inputFileOrFolderPath, clsAgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Length > 0) 
+                                    } else if (Directory.GetDirectories(inputFileOrFolderPath, clsAgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Length > 0)
                                     {
                                         mMSInfoScanner = new clsAgilentTOFDFolderInfoScanner();
 
@@ -1572,14 +1572,14 @@ namespace MSFileInfoScanner
                                     break;
                                 case clsDeconToolsIsosInfoScanner.DECONTOOLS_CSV_FILE_EXTENSION:
 
-                                    if (objFileSystemInfo.FullName.ToUpper().EndsWith(clsDeconToolsIsosInfoScanner.DECONTOOLS_ISOS_FILE_SUFFIX)) {
+                                    if (objFileSystemInfo.FullName.EndsWith(clsDeconToolsIsosInfoScanner.DECONTOOLS_ISOS_FILE_SUFFIX, StringComparison.InvariantCultureIgnoreCase)) {
                                         mMSInfoScanner = new clsDeconToolsIsosInfoScanner();
                                         knownMSDataType = true;
                                     }
 
                                     break;
                                 default:
-                                    // Unknown file extension; check for a zipped folder 
+                                    // Unknown file extension; check for a zipped folder
                                     if (clsBrukerOneFolderInfoScanner.IsZippedSFolder(objFileSystemInfo.Name)) {
                                         // Bruker s001.zip file
                                         mMSInfoScanner = new clsBrukerOneFolderInfoScanner();
@@ -1672,7 +1672,8 @@ namespace MSFileInfoScanner
 
                 // See if inputFilePath contains a wildcard
                 eMSFileProcessingStateConstants eMSFileProcessingState;
-                if ((inputFileOrFolderPath != null) && (inputFileOrFolderPath.IndexOf('*') >= 0 | inputFileOrFolderPath.IndexOf('?') >= 0)) {
+                if ((inputFileOrFolderPath != null) &&
+                    (inputFileOrFolderPath.IndexOf('*') >= 0 || inputFileOrFolderPath.IndexOf('?') >= 0)) {
                     // Obtain a list of the matching files and folders
 
                     // Copy the path into cleanPath and replace any * or ? characters with _
@@ -1700,7 +1701,8 @@ namespace MSFileInfoScanner
                     foreach (var fiFileMatch in diFolderInfo.GetFiles(inputFileOrFolderPath)) {
                         success = ProcessMSFileOrFolder(fiFileMatch.FullName, outputFolderPath, resetErrorCode, out eMSFileProcessingState);
 
-                        if (eMSFileProcessingState == eMSFileProcessingStateConstants.ProcessedSuccessfully || eMSFileProcessingState == eMSFileProcessingStateConstants.FailedProcessing) {
+                        if (eMSFileProcessingState == eMSFileProcessingStateConstants.ProcessedSuccessfully ||
+                            eMSFileProcessingState == eMSFileProcessingStateConstants.FailedProcessing) {
                             processedFileList.Add(fiFileMatch.FullName);
                         }
 
@@ -1800,7 +1802,8 @@ namespace MSFileInfoScanner
             // First, see if it contains a * or ?
             try {
                 string inputFolderPath;
-                if ((inputFilePathOrFolder != null) && (inputFilePathOrFolder.IndexOf('*') >= 0 | inputFilePathOrFolder.IndexOf('?') >= 0)) {
+                if ((inputFilePathOrFolder != null) &&
+                    (inputFilePathOrFolder.IndexOf('*') >= 0 || inputFilePathOrFolder.IndexOf('?') >= 0)) {
                     // Copy the path into strCleanPath and replace any * or ? characters with _
                     var cleanPath = inputFilePathOrFolder.Replace("*", "_").Replace("?", "_");
 
@@ -1877,12 +1880,12 @@ namespace MSFileInfoScanner
         }
 
         private bool RecurseFoldersWork(
-            string inputFolderPath, 
-            string fileNameMatch, 
-            string outputFolderPath, 
-            ref int fileProcessCount, 
-            ref int fileProcessFailCount, 
-            int recursionLevel, 
+            string inputFolderPath,
+            string fileNameMatch,
+            string outputFolderPath,
+            ref int fileProcessCount,
+            ref int fileProcessFailCount,
+            int recursionLevel,
             int recurseFoldersMaxLevels)
         {
 
@@ -2137,7 +2140,7 @@ namespace MSFileInfoScanner
                                 }
 
                                 if (!success & !mIgnoreErrorsWhenRecursing) {
-                                    break; 
+                                    break;
                                 }
 
                                 CheckForAbortProcessingFile();
@@ -2249,11 +2252,11 @@ namespace MSFileInfoScanner
         /// <remarks>The calling thread needs to monitor this event and display it at the console</remarks>
         private void ReportError(string errorMessage, Exception ex = null)
         {
-           
+
             OnErrorEvent(errorMessage, ex);
 
             string formattedError;
-            if (ex == null || errorMessage.EndsWith(ex.Message))
+            if (ex == null || errorMessage.EndsWith(ex.Message, StringComparison.InvariantCultureIgnoreCase))
             {
                 formattedError = errorMessage;
             }
@@ -2273,8 +2276,8 @@ namespace MSFileInfoScanner
         /// <param name="allowLogToFile"></param>
         /// <param name="eMessageType"></param>
         private void ReportMessage(
-            string message, 
-            bool allowLogToFile = true, 
+            string message,
+            bool allowLogToFile = true,
             eMessageTypeConstants eMessageType = eMessageTypeConstants.Normal)
         {
 
@@ -2372,8 +2375,8 @@ namespace MSFileInfoScanner
         }
 
         private void WriteFileIntegrityDetails(
-            TextWriter srOutFile, 
-            int folderID, 
+            TextWriter srOutFile,
+            int folderID,
             IEnumerable<clsFileIntegrityChecker.udtFileStatsType> udtFileStats)
         {
 
@@ -2383,11 +2386,11 @@ namespace MSFileInfoScanner
             foreach (var item in udtFileStats) {
                 // Note: HH:mm:ss corresponds to time in 24 hour format
                 srOutFile.WriteLine(
-                    folderID.ToString() + '\t' + 
-                    item.FileName + '\t' + 
-                    item.SizeBytes + '\t' + 
-                    item.ModificationDate.ToString("yyyy-MM-dd HH:mm:ss") + '\t' + 
-                    item.FailIntegrity + '\t' + 
+                    folderID.ToString() + '\t' +
+                    item.FileName + '\t' +
+                    item.SizeBytes + '\t' +
+                    item.ModificationDate.ToString("yyyy-MM-dd HH:mm:ss") + '\t' +
+                    item.FailIntegrity + '\t' +
                     item.FileHash + '\t' + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             }
 
@@ -2423,9 +2426,9 @@ namespace MSFileInfoScanner
             }
 
             WriteFileIntegrityFailure(mFileIntegrityErrorsWriter, filePath, message);
-        }        
+        }
 
-        private void mExecuteSP_DBErrorEvent(string message)
+        private void mExecuteSP_DBErrorEvent(string message, Exception ex)
         {
             ReportError(message);
         }
