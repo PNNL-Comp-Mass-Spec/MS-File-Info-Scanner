@@ -12,6 +12,8 @@
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -70,8 +72,8 @@
       <HintPath>Lib\PNNLOmics.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
-    <Reference Include="PRISM">
-      <HintPath>Lib\PRISM.dll</HintPath>
+    <Reference Include="PRISM, Version=2.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PRISM-Library.1.0.2\lib\net462\PRISM.dll</HintPath>
     </Reference>
     <Reference Include="ProteowizardWrapper">
       <HintPath>Lib\ProteowizardWrapper.dll</HintPath>
@@ -88,6 +90,7 @@
       <HintPath>Lib\SpectraTypeClassifier.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite">
       <HintPath>Lib\System.Data.SQLite.dll</HintPath>
@@ -129,7 +132,6 @@
     <Compile Include="clsMSFileInfoScanner.cs" />
     <Compile Include="clsOxyplotUtilities.cs" />
     <Compile Include="modMain.cs" />
-    <Compile Include="clsParseCommandLine.cs" />
     <Compile Include="clsPlotContainer.cs" />
     <Compile Include="clsProteowizardDataParser.cs" />
     <Compile Include="clsTICandBPIPlotter.cs" />
