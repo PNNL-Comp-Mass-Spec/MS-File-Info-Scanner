@@ -68,9 +68,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data.SQLite">
-      <HintPath>Lib\System.Data.SQLite.dll</HintPath>
-    </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
@@ -80,9 +77,6 @@
     <Reference Include="System.Xml" />
     <Reference Include="ThermoRawFileReader">
       <HintPath>Lib\ThermoRawFileReader.dll</HintPath>
-    </Reference>
-    <Reference Include="UIMFLibrary">
-      <HintPath>Lib\UIMFLibrary.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
@@ -124,15 +118,21 @@
     <PackageReference Include="PRISM-Library">
       <Version>1.0.2</Version>
     </PackageReference>
+    <PackageReference Include="System.Data.SQLite.Core">
+      <Version>1.0.97</Version>
+    </PackageReference>
+    <PackageReference Include="UIMFLibrary">
+      <Version>1.0.3</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>if exist "$(TargetDir)pwiz_bindings_cli.dll" del "$(TargetDir)pwiz_bindings_cli.dll"
 if exist "$(TargetDir)SQLite.Interop.dll" (del "$(TargetDir)SQLite.Interop.dll")
-if not exist "$(TargetDir)x86" mkdir "$(TargetDir)x86"
-if not exist "$(TargetDir)x64" mkdir "$(TargetDir)x64"
-xcopy "$(ProjectDir)Lib\x86\SQLite.Interop.dll" "$(TargetDir)x86" /D /Y
-xcopy "$(ProjectDir)Lib\x64\SQLite.Interop.dll" "$(TargetDir)x64" /D /Y
-xcopy "$(ProjectDir)Lib\netcdf.dll" "$(TargetDir)" /D /Y</PostBuildEvent>
+rem if not exist "$(TargetDir)x86" mkdir "$(TargetDir)x86"
+rem if not exist "$(TargetDir)x64" mkdir "$(TargetDir)x64"
+rem xcopy "$(ProjectDir)Lib\x86\SQLite.Interop.dll" "$(TargetDir)x86" /D /Y
+rem xcopy "$(ProjectDir)Lib\x64\SQLite.Interop.dll" "$(TargetDir)x64" /D /Y
+rem xcopy "$(ProjectDir)Lib\netcdf.dll" "$(TargetDir)" /D /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>
