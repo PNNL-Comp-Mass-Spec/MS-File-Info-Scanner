@@ -13,6 +13,7 @@ namespace MSFileInfoScanner
 
     public class clsPlotContainer
     {
+        private const double PIXELS_PER_DIP = 1.25;
 
         private enum ImageFileFormat
         {
@@ -24,9 +25,7 @@ namespace MSFileInfoScanner
 
         public string AnnotationBottomRight { get; set; }
 
-        public OxyPlot.PlotModel Plot {
-            get { return mPlot; }
-        }
+        public OxyPlot.PlotModel Plot => mPlot;
 
         public int FontSizeBase { get; set; }
 
@@ -91,7 +90,6 @@ namespace MSFileInfoScanner
             SaveToFileLoop(jpgFilePath, ImageFileFormat.JPG, width, height, resolution);
 
         }
-
 
         private void SaveToFileLoop(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
         {
@@ -225,7 +223,7 @@ namespace MSFileInfoScanner
             for (var chargeState = CHARGE_START; chargeState <= CHARGE_END; chargeState++) {
                 var newBrush = new SolidColorBrush(GetColorByCharge(chargeState));
 
-                var newText = new FormattedText(chargeState + "+", usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, newBrush);
+                var newText = new FormattedText(chargeState + "+", usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, newBrush, null, PIXELS_PER_DIP);
 
                 var textRect = new Rect(0, 0, canvasWidth, canvasHeight);
                 var position = textRect.Location;
@@ -243,7 +241,6 @@ namespace MSFileInfoScanner
 
         }
 
-
         private void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, HorizontalAlignment hAlign, VerticalAlignment vAlign, int padding)
         {
             var usCulture = CultureInfo.GetCultureInfo("en-us");
@@ -252,7 +249,7 @@ namespace MSFileInfoScanner
 
             var fontSizeEm = FontSizeBase + 1;
 
-            var newText = new FormattedText(textToAdd, usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, Brushes.Black);
+            var newText = new FormattedText(textToAdd, usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, Brushes.Black, null, PIXELS_PER_DIP);
 
             var textRect = new Rect(0, 0, canvasWidth, canvasHeight);
             var position = textRect.Location;
