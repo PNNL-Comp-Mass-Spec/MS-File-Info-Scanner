@@ -16,19 +16,19 @@ namespace MSFileInfoScannerUnitTests
 
             var lstProfileMZs = new List<double>
             {
-                701.76070, 701.98029, 701.99028, 702.00026, 702.01025, 702.02023, 702.03022, 702.04020, 702.05019, 
-                702.06017, 702.07016, 702.08014, 702.09013, 702.10012, 702.11010, 702.12009, 702.13008, 702.14007, 
-                702.15005, 702.16004, 702.17003, 702.18002, 702.19001, 702.19999, 702.20999, 702.21998, 702.22997, 
-                702.23996, 713.10317, 713.11340, 713.12362, 713.13384, 713.14407, 713.15429, 713.16451, 713.17474, 
-                713.18496, 713.19518, 713.20541, 713.21592, 713.22615, 713.23637, 713.24660, 716.19035, 716.20064, 
-                716.21093, 716.22122, 716.23151, 716.24180, 716.25209, 716.26238, 716.27267, 716.28296, 716.29325, 
+                701.76070, 701.98029, 701.99028, 702.00026, 702.01025, 702.02023, 702.03022, 702.04020, 702.05019,
+                702.06017, 702.07016, 702.08014, 702.09013, 702.10012, 702.11010, 702.12009, 702.13008, 702.14007,
+                702.15005, 702.16004, 702.17003, 702.18002, 702.19001, 702.19999, 702.20999, 702.21998, 702.22997,
+                702.23996, 713.10317, 713.11340, 713.12362, 713.13384, 713.14407, 713.15429, 713.16451, 713.17474,
+                713.18496, 713.19518, 713.20541, 713.21592, 713.22615, 713.23637, 713.24660, 716.19035, 716.20064,
+                716.21093, 716.22122, 716.23151, 716.24180, 716.25209, 716.26238, 716.27267, 716.28296, 716.29325,
                 716.30354, 716.31383, 716.32412
             };
 
             classifier.CheckSpectrum(lstProfileMZs, 1, false, clsSpectrumTypeClassifier.eCentroidStatusConstants.Profile);
 
             var lstCentroidMZs = new List<double>
-            { 
+            {
                 500.29,500.34,501.18,502.18,503.18,504.18,505.17,506.17,507.17,507.24,507.30
             };
 
@@ -51,13 +51,13 @@ namespace MSFileInfoScannerUnitTests
                     classifier.CheckSpectrum(updatedProfileMZs, 1, false, centroidingStatusMS1);
 
                     continue;
-                } 
+                }
 
                 // Centroid mode
 
                 var updatedCentroidMZs = lstCentroidMZs.Select(value => value + scan * 2).ToList();
-                
-                // Purposely mis-classify the spectrum every 4 scans 
+
+                // Purposely mis-classify the spectrum every 4 scans
                 // (though the SpectrumClassifier class doesn't really care if this happens)
                 var centroidingStatusMS2 = scan % 4 == 0
                                             ? clsSpectrumTypeClassifier.eCentroidStatusConstants.Profile
