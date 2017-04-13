@@ -26,7 +26,7 @@ namespace MSFileInfoScanner
         private const string ACQ_METHOD_FILE_POST_RUN_LINE = "(Post Run)";
 
         private readonly Regex mExtractTime;
-    
+
         private class clsLineMatchSearchInfo
         {
             public readonly bool MatchLineStart;
@@ -59,7 +59,7 @@ namespace MSFileInfoScanner
                 return string.Empty;
             }
         }
-    
+
         private bool ExtractRunTime(string strText, out double dblRunTimeMinutes)
         {
 
@@ -111,7 +111,7 @@ namespace MSFileInfoScanner
                         {
                             continue;
                         }
-                        
+
                         foreach (var strKey in dctRunTimeText.Keys) {
                             if (dctRunTimeText[strKey].Matched)
                             {
@@ -189,7 +189,7 @@ namespace MSFileInfoScanner
                         {
                             continue;
                         }
-                        
+
                         // Runtime is the value after the equals sign
                         var strSplitLine = strLineIn.Split('=');
                         if (strSplitLine.Length <= 1)

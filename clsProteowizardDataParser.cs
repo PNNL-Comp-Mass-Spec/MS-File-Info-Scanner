@@ -28,13 +28,13 @@ namespace MSFileInfoScanner
 
         private bool mHighResMS2;
         public bool HighResMS1 {
-            get { return mHighResMS1; }
-            set { mHighResMS1 = value; }
+            get => mHighResMS1;
+            set => mHighResMS1 = value;
         }
 
         public bool HighResMS2 {
-            get { return mHighResMS2; }
-            set { mHighResMS2 = value; }
+            get => mHighResMS2;
+            set => mHighResMS2 = value;
         }
 
         /// <summary>
@@ -48,12 +48,12 @@ namespace MSFileInfoScanner
         /// <param name="blnSaveTICandBPI"></param>
         /// <param name="blnCheckCentroidingStatus"></param>
         public clsProteowizardDataParser(
-            pwiz.ProteowizardWrapper.MSDataFileReader objPWiz, 
-            clsDatasetStatsSummarizer objDatasetStatsSummarizer, 
-            clsTICandBPIPlotter objTICandBPIPlot, 
-            clsLCMSDataPlotter objLCMS2DPlot, 
-            bool blnSaveLCMS2DPlots, 
-            bool blnSaveTICandBPI, 
+            pwiz.ProteowizardWrapper.MSDataFileReader objPWiz,
+            clsDatasetStatsSummarizer objDatasetStatsSummarizer,
+            clsTICandBPIPlotter objTICandBPIPlot,
+            clsLCMSDataPlotter objLCMS2DPlot,
+            bool blnSaveLCMS2DPlots,
+            bool blnSaveTICandBPI,
             bool blnCheckCentroidingStatus)
         {
             mPWiz = objPWiz;
@@ -65,11 +65,9 @@ namespace MSFileInfoScanner
             mSaveTICAndBPI = blnSaveTICandBPI;
             mCheckCentroidingStatus = blnCheckCentroidingStatus;
 
-            const string Q_REGEX = "Q[0-9]=([0-9.]+)";
-            mGetQ1MZ = new Regex(Q_REGEX, RegexOptions.Compiled);
+            mGetQ1MZ = new Regex("Q[0-9]=([0-9.]+)", RegexOptions.Compiled);
 
-            const string Q1_Q3_REGEX = "Q1=[0-9.]+ Q3=([0-9.]+)";
-            mGetQ3MZ = new Regex(Q1_Q3_REGEX, RegexOptions.Compiled);
+            mGetQ3MZ = new Regex("Q1=[0-9.]+ Q3=([0-9.]+)", RegexOptions.Compiled);
 
         }
 
@@ -103,7 +101,7 @@ namespace MSFileInfoScanner
         {
             var intIndexMatch = lstItems.BinarySearch(sngValToFind);
             if (intIndexMatch >= 0) {
-                // Exact match found			
+                // Exact match found
             } else {
                 // Find the nearest match
                 intIndexMatch = intIndexMatch ^ -1;
@@ -151,14 +149,14 @@ namespace MSFileInfoScanner
 
 
         private void ProcessSRM(
-            string strChromID, 
-            float[] sngTimes, 
-            float[] sngIntensities, 
-            List<float> lstTICScanTimes, 
-            List<int> lstTICScanNumbers, 
+            string strChromID,
+            float[] sngTimes,
+            float[] sngIntensities,
+            List<float> lstTICScanTimes,
+            List<int> lstTICScanNumbers,
             ref double dblRuntimeMinutes,
-            Dictionary<int, Dictionary<double, double>> dct2DDataParent, 
-            Dictionary<int, Dictionary<double, double>> dct2DDataProduct, 
+            Dictionary<int, Dictionary<double, double>> dct2DDataParent,
+            Dictionary<int, Dictionary<double, double>> dct2DDataProduct,
             Dictionary<int, float> dct2DDataScanTimes)
         {
             double dblParentMZ;
@@ -232,11 +230,11 @@ namespace MSFileInfoScanner
 
 
         private void ProcessTIC(
-            float[] sngTimes, 
-            float[] sngIntensities, 
-            List<float> lstTICScanTimes, 
-            List<int> lstTICScanNumbers, 
-            ref double dblRuntimeMinutes, 
+            float[] sngTimes,
+            float[] sngIntensities,
+            List<float> lstTICScanTimes,
+            List<int> lstTICScanNumbers,
+            ref double dblRuntimeMinutes,
             bool blnStoreInTICandBPIPlot)
         {
             for (var intIndex = 0; intIndex <= sngTimes.Length - 1; intIndex++) {
@@ -518,8 +516,8 @@ namespace MSFileInfoScanner
 
 
         private void Store2DPlotData(
-            Dictionary<int, float> dct2DDataScanTimes, 
-            Dictionary<int, Dictionary<double, double>> dct2DDataParent, 
+            Dictionary<int, float> dct2DDataScanTimes,
+            Dictionary<int, Dictionary<double, double>> dct2DDataParent,
             Dictionary<int, Dictionary<double, double>> dct2DDataProduct)
         {
             // This variable keeps track of the length of the largest Dictionary(Of Double, Double) var in dct2DData
@@ -564,11 +562,11 @@ namespace MSFileInfoScanner
 
 
         private void Store2DPlotDataWork(
-            Dictionary<int, Dictionary<double, double>> dct2DData, 
-            Dictionary<int, float> dct2DDataScanTimes, 
-            int intMSLevel, 
-            int intMax2DDataCount, 
-            int int2DScanNumMin, 
+            Dictionary<int, Dictionary<double, double>> dct2DData,
+            Dictionary<int, float> dct2DDataScanTimes,
+            int intMSLevel,
+            int intMax2DDataCount,
+            int int2DScanNumMin,
             int int2DScanNumMax)
         {
             var dblMZList = new double[intMax2DDataCount];
@@ -639,9 +637,9 @@ namespace MSFileInfoScanner
 
 
         private void UpdateDataRanges(
-            Dictionary<int, Dictionary<double, double>> dct2DData, 
-            ref int intMax2DDataCount, 
-            ref int int2DScanNumMin, 
+            Dictionary<int, Dictionary<double, double>> dct2DData,
+            ref int intMax2DDataCount,
+            ref int int2DScanNumMin,
             ref int int2DScanNumMax)
         {
             if (dct2DData == null)

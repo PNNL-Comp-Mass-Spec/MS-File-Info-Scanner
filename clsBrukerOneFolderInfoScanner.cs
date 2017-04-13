@@ -56,7 +56,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Parse out the date from a string of the form 
+        /// Parse out the date from a string of the form
         /// Sat Aug 20 07:56:55 2005
         /// </summary>
         /// <param name="strLineIn"></param>
@@ -364,7 +364,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="strDataFilePath">Bruker 1 folder path or Bruker s001.zip file</param>
         /// <param name="datasetFileInfo"></param>

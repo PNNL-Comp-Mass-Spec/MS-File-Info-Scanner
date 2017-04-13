@@ -18,7 +18,7 @@ namespace MSFileInfoScanner
         {
             mTICandBPIPlot = new clsTICandBPIPlotter();
             mInstrumentSpecificPlots = new clsTICandBPIPlotter();
-            
+
             mDatasetStatsSummarizer = new clsDatasetStatsSummarizer();
             RegisterEvents(mDatasetStatsSummarizer);
 
@@ -79,8 +79,8 @@ namespace MSFileInfoScanner
         /// This property allows the parent class to define the DatasetID value
         /// </summary>
         public override int DatasetID {
-            get { return mDatasetID; }
-            set { mDatasetID = value; }
+            get => mDatasetID;
+            set => mDatasetID = value;
         }
 
         public override string DatasetStatsTextFileName {
@@ -95,7 +95,7 @@ namespace MSFileInfoScanner
         }
 
         public override clsLCMSDataPlotterOptions LCMS2DPlotOptions {
-            get { return mLCMS2DPlot.Options; }
+            get => mLCMS2DPlot.Options;
             set {
                 mLCMS2DPlot.Options = value;
                 mLCMS2DPlotOverview.Options = value.Clone();
@@ -103,26 +103,26 @@ namespace MSFileInfoScanner
         }
 
         public override int LCMS2DOverviewPlotDivisor {
-            get { return mLCMS2DOverviewPlotDivisor; }
-            set { mLCMS2DOverviewPlotDivisor = value; }
+            get => mLCMS2DOverviewPlotDivisor;
+            set => mLCMS2DOverviewPlotDivisor = value;
         }
 
         public override int ScanStart {
-            get { return mScanStart; }
-            set { mScanStart = value; }
+            get => mScanStart;
+            set => mScanStart = value;
         }
 
         public override bool ShowDebugInfo {
-            get { return mShowDebugInfo; }
-            set { mShowDebugInfo = value; }
+            get => mShowDebugInfo;
+            set => mShowDebugInfo = value;
         }
 
         /// <summary>
         /// When ScanEnd is > 0, then will stop processing at the specified scan number
         /// </summary>
         public override int ScanEnd {
-            get { return mScanEnd; }
-            set { mScanEnd = value; }
+            get => mScanEnd;
+            set => mScanEnd = value;
         }
 
         #endregion
@@ -330,7 +330,7 @@ namespace MSFileInfoScanner
 
         private void InitializeLocalVariables()
         {
-          
+
             mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR;
 
             mSaveTICAndBPI = false;
@@ -487,7 +487,7 @@ namespace MSFileInfoScanner
 
             mLCMS2DPlotOverview.Options = mLCMS2DPlot.Options.Clone();
 
-            // Set MaxPointsToPlot in mLCMS2DPlotOverview to be lcms2DOverviewPlotDivisor times smaller 
+            // Set MaxPointsToPlot in mLCMS2DPlotOverview to be lcms2DOverviewPlotDivisor times smaller
             // than the MaxPointsToPlot value in mLCMS2DPlot
             mLCMS2DPlotOverview.Options.MaxPointsToPlot = (int)Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / (double)lcms2DOverviewPlotDivisor, 0);
 
@@ -784,7 +784,7 @@ namespace MSFileInfoScanner
             swOutFile.WriteLine(indent + "  <tr><th>Scan Type</th><th>Scan Count</th><th>Scan Filter Text</th></tr>");
 
 
-            foreach (var scanTypeEntry in objDatasetSummaryStats.objScanTypeStats) {                
+            foreach (var scanTypeEntry in objDatasetSummaryStats.objScanTypeStats) {
                 var scanType = scanTypeEntry.Key;
                 var indexMatch = scanType.IndexOf(clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR, StringComparison.Ordinal);
 

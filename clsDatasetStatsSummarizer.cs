@@ -17,9 +17,9 @@ using SpectraTypeClassifier;
 // E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
 // Website: http://panomics.pnnl.gov/ or http://omics.pnl.gov
 // -------------------------------------------------------------------------------
-// 
+//
 // Licensed under the Apache License, Version 2.0; you may not use this file except
-// in compliance with the License.  You may obtain a copy of the License at 
+// in compliance with the License.  You may obtain a copy of the License at
 // http://www.apache.org/licenses/LICENSE-2.0
 //
 
@@ -73,7 +73,7 @@ namespace MSFileInfoScanner
         private clsSpectrumTypeClassifier mSpectraTypeClassifier;
 
         private clsSpectrumTypeClassifier SpectraTypeClassifier {
-            get { return mSpectraTypeClassifier; }
+            get => mSpectraTypeClassifier;
             set {
                 if (mSpectraTypeClassifier != null)
                 {
@@ -219,7 +219,7 @@ namespace MSFileInfoScanner
 
 
                 foreach (var objEntry in objScanStats) {
-                    
+
                     if (objEntry.ScanType > 1) {
                         // MSn spectrum
                         ComputeScanStatsUpdateDetails(objEntry, ref objSummaryStats.ElutionTimeMax, ref objSummaryStats.MSnStats, dblTICListMSn, ref intTICListMSnCount, dblBPIListMSn, ref intBPIListMSnCount);
@@ -253,12 +253,12 @@ namespace MSFileInfoScanner
 
 
         private void ComputeScanStatsUpdateDetails(
-            clsScanStatsEntry objScanStats, 
-            ref double dblElutionTimeMax, 
-            ref clsDatasetSummaryStats.udtSummaryStatDetailsType udtSummaryStatDetails, 
-            double[] dblTICList, 
-            ref int intTICListCount, 
-            double[] dblBPIList, 
+            clsScanStatsEntry objScanStats,
+            ref double dblElutionTimeMax,
+            ref clsDatasetSummaryStats.udtSummaryStatDetailsType udtSummaryStatDetails,
+            double[] dblTICList,
+            ref int intTICListCount,
+            double[] dblBPIList,
             ref int intBPIListCount)
         {
             double dblTIC;
@@ -334,10 +334,10 @@ namespace MSFileInfoScanner
         /// <returns>True if success; False if failure</returns>
         /// <remarks></remarks>
         public bool CreateDatasetInfoFile(
-            string strDatasetName, 
-            string strDatasetInfoFilePath, 
-            List<clsScanStatsEntry> objScanStats, 
-            clsDatasetFileInfo datasetFileInfo, 
+            string strDatasetName,
+            string strDatasetInfoFilePath,
+            List<clsScanStatsEntry> objScanStats,
+            clsDatasetFileInfo datasetFileInfo,
             udtSampleInfoType udtSampleInfo)
         {
 
@@ -451,9 +451,9 @@ namespace MSFileInfoScanner
         /// <returns>XML (as string)</returns>
         /// <remarks></remarks>
         public string CreateDatasetInfoXML(
-            string strDatasetName, 
-            List<clsScanStatsEntry> objScanStats, 
-            clsDatasetFileInfo datasetFileInfo, 
+            string strDatasetName,
+            List<clsScanStatsEntry> objScanStats,
+            clsDatasetFileInfo datasetFileInfo,
             udtSampleInfoType udtSampleInfo)
         {
 
@@ -507,11 +507,11 @@ namespace MSFileInfoScanner
                 //     Indentation = 2
                 // };
 
-                // However, when you send the output to a StringBuilder it is always encoded as Unicode (UTF-16) 
-                //  since this is the only character encoding used in the .NET Framework for String values, 
-                //  and thus you'll see the attribute encoding="utf-16" in the opening XML declaration 
-                // The alternative is to use a MemoryStream.  Here, the stream encoding is set by the XmlWriter 
-                //  and so you see the attribute encoding="utf-8" in the opening XML declaration encoding 
+                // However, when you send the output to a StringBuilder it is always encoded as Unicode (UTF-16)
+                //  since this is the only character encoding used in the .NET Framework for String values,
+                //  and thus you'll see the attribute encoding="utf-16" in the opening XML declaration
+                // The alternative is to use a MemoryStream.  Here, the stream encoding is set by the XmlWriter
+                //  and so you see the attribute encoding="utf-8" in the opening XML declaration encoding
                 //  (since we used objXMLSettings.Encoding = Encoding.UTF8)
                 //
                 var objMemStream = new MemoryStream();
@@ -676,9 +676,9 @@ namespace MSFileInfoScanner
         /// <returns>True if success; False if failure</returns>
         /// <remarks></remarks>
         public bool CreateScanStatsFile(
-            string strDatasetName, 
-            string strScanStatsFilePath, 
-            List<clsScanStatsEntry> objScanStats, 
+            string strDatasetName,
+            string strScanStatsFilePath,
+            List<clsScanStatsEntry> objScanStats,
             clsDatasetFileInfo datasetFileInfo)
         {
             var intDatasetID = datasetFileInfo.DatasetID;
@@ -858,10 +858,10 @@ namespace MSFileInfoScanner
         /// <returns>True if success; False if failure</returns>
         /// <remarks></remarks>
         public bool UpdateDatasetStatsTextFile(
-            string strDatasetName, 
-            string strDatasetStatsFilePath, 
-            List<clsScanStatsEntry> objScanStats, 
-            clsDatasetFileInfo datasetFileInfo, 
+            string strDatasetName,
+            string strDatasetStatsFilePath,
+            List<clsScanStatsEntry> objScanStats,
+            clsDatasetFileInfo datasetFileInfo,
             udtSampleInfoType udtSampleInfo)
         {
 
@@ -905,18 +905,18 @@ namespace MSFileInfoScanner
                         swOutFile.WriteLine(strLineOut);
                     }
 
-                    strLineOut = 
-                        strDatasetName + '\t' + 
-                        (objSummaryStats.MSStats.ScanCount + objSummaryStats.MSnStats.ScanCount) + '\t' 
+                    strLineOut =
+                        strDatasetName + '\t' +
+                        (objSummaryStats.MSStats.ScanCount + objSummaryStats.MSnStats.ScanCount) + '\t'
                         + objSummaryStats.MSStats.ScanCount + '\t'
-                        + objSummaryStats.MSnStats.ScanCount + '\t' 
-                        + objSummaryStats.ElutionTimeMax.ToString("0.00") + '\t' 
-                        + datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00") + '\t' + 
-                        datasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt") + '\t' + 
-                        datasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt") + '\t' + 
-                        datasetFileInfo.FileSizeBytes + '\t' + 
-                        FixNull(udtSampleInfo.SampleName) + '\t' + 
-                        FixNull(udtSampleInfo.Comment1) + '\t' + 
+                        + objSummaryStats.MSnStats.ScanCount + '\t'
+                        + objSummaryStats.ElutionTimeMax.ToString("0.00") + '\t'
+                        + datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00") + '\t' +
+                        datasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt") + '\t' +
+                        datasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt") + '\t' +
+                        datasetFileInfo.FileSizeBytes + '\t' +
+                        FixNull(udtSampleInfo.SampleName) + '\t' +
+                        FixNull(udtSampleInfo.Comment1) + '\t' +
                         FixNull(udtSampleInfo.Comment2);
 
                     swOutFile.WriteLine(strLineOut);
@@ -975,13 +975,13 @@ namespace MSFileInfoScanner
         }
 
         public int ScanNumber;
-        
+
         // 1 for MS, 2 for MS2, 3 for MS3
         public int ScanType;
 
         // Example values: "FTMS + p NSI Full ms [400.00-2000.00]" or "ITMS + c ESI Full ms [300.00-2000.00]" or "ITMS + p ESI d Z ms [1108.00-1118.00]" or "ITMS + c ESI d Full ms2 342.90@cid35.00"
         public string ScanFilterText;
-        
+
         // Example values: MS, HMS, Zoom, CID-MSn, or PQD-MSn
         public string ScanTypeName;
 

@@ -81,8 +81,8 @@ namespace MSFileInfoScanner
         #region "Properties"
         public clsLCMSDataPlotterOptions Options
         {
-            get { return mOptions; }
-            set { mOptions = value; }
+            get => mOptions;
+            set => mOptions = value;
         }
 
         public int ScanCountCached => mScans.Count;
@@ -126,7 +126,6 @@ namespace MSFileInfoScanner
 
             mRecentFiles.Add(udtOutputFileInfo);
         }
-        
 
         public bool AddScan2D(int intScanNumber, int intMSLevel, float sngScanTimeMinutes, int intIonCount, double[,] dblMassIntensityPairs)
         {
@@ -496,7 +495,7 @@ namespace MSFileInfoScanner
                 // Need to step through the scans and reduce the number of points in memory
 
                 // Note that the number of data points remaining after calling this function may still be
-                //  more than mOptions.MaxPointsToPlot, depending on mOptions.MinPointsPerSpectrum 
+                //  more than mOptions.MaxPointsToPlot, depending on mOptions.MinPointsPerSpectrum
                 //  (see TrimCachedData for more details)
 
                 TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum);
@@ -557,7 +556,7 @@ namespace MSFileInfoScanner
                 Array.Sort(sngIntensitySorted, intPointerArray);
 
                 // Now process the data from the highest intensity to the lowest intensity
-                // As each data point is processed, we will either: 
+                // As each data point is processed, we will either:
                 //  a) set its intensity to the negative of the actual intensity to mark it as being processed
                 //  b) set its intensity to Single.MinValue (-3.40282347E+38) if the point is to be removed
                 //     because it is within sngMZResolution m/z units of a point with a higher intensity
@@ -845,7 +844,7 @@ namespace MSFileInfoScanner
         /// Note that the number of data points remaining after calling this function may still be
         ///  more than intTargetDataPointCount, depending on intMinPointsPerSpectrum .
         /// For example, if intMinPointsPerSpectrum = 5 and we have 5000 scans, then there will be
-        ///  at least 5*5000 = 25000 data points in memory.  If intTargetDataPointCount = 10000, then 
+        ///  at least 5*5000 = 25000 data points in memory.  If intTargetDataPointCount = 10000, then
         ///  there could be as many as 25000 + 10000 = 25000 points in memory
         /// </remarks>
         private void TrimCachedData(int intTargetDataPointCount, int intMinPointsPerSpectrum)
@@ -1151,7 +1150,7 @@ namespace MSFileInfoScanner
                 // List is empty (or intItemCount = 0)
                 return 0;
             }
-            
+
             if (intItemCount <= 1)
             {
                 // Only 1 item; the median is the value
@@ -1277,7 +1276,7 @@ namespace MSFileInfoScanner
             dblScanTimeMax = 0;
 
             for (var intScanIndex = 0; intScanIndex <= mScans.Count - 1; intScanIndex++) {
-                
+
                 if (intMSLevelFilter != 0 && mScans[intScanIndex].MSLevel != intMSLevelFilter)
                 {
                     continue;
@@ -1363,7 +1362,7 @@ namespace MSFileInfoScanner
                 // Need to step through the scans and reduce the number of points in memory
 
                 // Note that the number of data points remaining after calling this function may still be
-                //  more than mOptions.MaxPointsToPlot, depending on mOptions.MinPointsPerSpectrum 
+                //  more than mOptions.MaxPointsToPlot, depending on mOptions.MinPointsPerSpectrum
                 //  (see TrimCachedData for more details)
 
                 TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum);

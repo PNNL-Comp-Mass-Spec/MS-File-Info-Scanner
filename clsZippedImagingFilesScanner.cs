@@ -28,41 +28,49 @@ namespace MSFileInfoScanner
 
             var blnSuccess = false;
 
-            try {
+            try
+            {
                 // Bump up the file size
                 datasetFileInfo.FileSizeBytes += fiZipFile.Length;
 
                 var lstFileNamesToFind = new List<string> {
-                    "analysis.baf", 
-                    "apexAcquisition.method", 
+                    "analysis.baf",
+                    "apexAcquisition.method",
                     "submethods.xml"};
 
                 var oZipFile = new Ionic.Zip.ZipFile(fiZipFile.FullName);
 
-                foreach (var strFileNameToFind in lstFileNamesToFind) {
-                    var oZipEntry = oZipFile.GetEnumerator();
+                foreach (var strFileNameToFind in lstFileNamesToFind)
+                {
+                    using (var oZipEntry = oZipFile.GetEnumerator())
+                    {
 
 
-                    while (oZipEntry.MoveNext()) {
-                        
-                        if (oZipEntry.Current.IsDirectory)
+                        while (oZipEntry.MoveNext())
                         {
-                            continue;
-                        }
-                        // Split the filename on the forward slash character
-                        var strNameParts = oZipEntry.Current.FileName.Split('/');
 
-                        if (strNameParts.Length <= 0)
-                        {
-                            continue;
-                        }
+                            if (oZipEntry.Current.IsDirectory)
+                            {
+                                continue;
+                            }
+                            // Split the filename on the forward slash character
+                            var strNameParts = oZipEntry.Current.FileName.Split('/');
 
-                        if (string.Equals(strNameParts[strNameParts.Length - 1], strFileNameToFind, StringComparison.CurrentCultureIgnoreCase)) {
-                            if (oZipEntry.Current.LastModified < datasetFileInfo.AcqTimeStart) {
+                            if (strNameParts.Length <= 0)
+                            {
+                                continue;
+                            }
+
+                            if (!string.Equals(strNameParts[strNameParts.Length - 1], strFileNameToFind, StringComparison.CurrentCultureIgnoreCase))
+                                continue;
+
+                            if (oZipEntry.Current.LastModified < datasetFileInfo.AcqTimeStart)
+                            {
                                 datasetFileInfo.AcqTimeStart = oZipEntry.Current.LastModified;
                             }
 
-                            if (oZipEntry.Current.LastModified > datasetFileInfo.AcqTimeEnd) {
+                            if (oZipEntry.Current.LastModified > datasetFileInfo.AcqTimeEnd)
+                            {
                                 datasetFileInfo.AcqTimeEnd = oZipEntry.Current.LastModified;
                             }
 
@@ -85,17 +93,11 @@ namespace MSFileInfoScanner
                                 IonCountRaw = 0
                             };
 
-
-
-
                             // Base peak signal to noise ratio
-
 
                             mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
-
                             blnSuccess = true;
-
                         }
                     }
 
@@ -103,7 +105,9 @@ namespace MSFileInfoScanner
                         break;
                 }
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 OnErrorEvent("Error finding XMass method folder: " + ex.Message);
                 blnSuccess = false;
             }
@@ -118,7 +122,8 @@ namespace MSFileInfoScanner
             // First see if strFileOrFolderPath points to a valid file
             var fiFileInfo = new FileInfo(strDataFilePath);
 
-            if (fiFileInfo.Exists) {
+            if (fiFileInfo.Exists)
+            {
                 // User specified a file; assume the parent folder of this file is the dataset folder
                 return fiFileInfo.Directory;
             }
@@ -131,17 +136,21 @@ namespace MSFileInfoScanner
         {
             var strDatasetName = string.Empty;
 
-            try {
+            try
+            {
                 // The dataset name for a dataset with zipped imaging files is the name of the parent directory
                 // However, strDataFilePath could be a file or a folder path, so use GetDatasetFolder to get the dataset folder
                 var diDatasetFolder = GetDatasetFolder(strDataFilePath);
                 strDatasetName = diDatasetFolder.Name;
 
-                if (strDatasetName.ToLower().EndsWith(".d")) {
+                if (strDatasetName.ToLower().EndsWith(".d"))
+                {
                     strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - 2);
                 }
 
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 // Ignore errors
             }
 
@@ -154,11 +163,13 @@ namespace MSFileInfoScanner
 
             var fiFileInfo = new FileInfo(strFileName);
 
-            if (string.IsNullOrWhiteSpace(strFileName)) {
+            if (string.IsNullOrWhiteSpace(strFileName))
+            {
                 return false;
             }
 
-            if (fiFileInfo.Name.ToLower().StartsWith(ZIPPED_IMAGING_FILE_NAME_PREFIX.ToLower()) && fiFileInfo.Extension.ToLower() == ".zip") {
+            if (fiFileInfo.Name.ToLower().StartsWith(ZIPPED_IMAGING_FILE_NAME_PREFIX.ToLower()) && fiFileInfo.Extension.ToLower() == ".zip")
+            {
                 return true;
             }
 
@@ -171,13 +182,15 @@ namespace MSFileInfoScanner
 
             bool blnSuccess;
 
-            try {
+            try
+            {
                 // Determine whether strDataFilePath points to a file or a folder
 
                 var diDatasetFolder = GetDatasetFolder(strDataFilePath);
 
                 // Validate that we have selected a valid folder
-                if (!diDatasetFolder.Exists) {
+                if (!diDatasetFolder.Exists)
+                {
                     OnErrorEvent("File/folder not found: " + strDataFilePath);
                     return false;
                 }
@@ -190,12 +203,15 @@ namespace MSFileInfoScanner
                 // If we cannot find any zip files, return false
 
                 var lstFiles = diDatasetFolder.GetFiles(ZIPPED_IMAGING_FILE_SEARCH_SPEC).ToList();
-                if (lstFiles.Count == 0) {
+                if (lstFiles.Count == 0)
+                {
                     // 0_R*.zip files not found
                     OnErrorEvent(ZIPPED_IMAGING_FILE_SEARCH_SPEC + "files not found in " + diDatasetFolder.FullName);
                     blnSuccess = false;
 
-                } else {
+                }
+                else
+                {
                     var fiFirstImagingFile = lstFiles.First();
 
                     // Initialize the .DatasetFileInfo
@@ -222,12 +238,14 @@ namespace MSFileInfoScanner
 
                     // Process each zip file
 
-                    foreach (var fiFileInfo in lstFiles) {
+                    foreach (var fiFileInfo in lstFiles)
+                    {
                         // Examine all of the apexAcquisition.method files in this zip file
                         DetermineAcqStartEndTime(fiFileInfo, datasetFileInfo);
                     }
 
-                    if (datasetFileInfo.AcqTimeEnd == DateTime.MinValue || datasetFileInfo.AcqTimeStart == DateTime.MaxValue) {
+                    if (datasetFileInfo.AcqTimeEnd == DateTime.MinValue || datasetFileInfo.AcqTimeStart == DateTime.MaxValue)
+                    {
                         // Did not find any apexAcquisition.method files or submethods.xml files
                         // Use the file modification date of the first zip file
                         datasetFileInfo.AcqTimeStart = fiFirstImagingFile.LastWriteTime;
@@ -245,7 +263,9 @@ namespace MSFileInfoScanner
 
                     blnSuccess = true;
                 }
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 OnErrorEvent("Exception processing Zipped Imaging Files: " + ex.Message);
                 blnSuccess = false;
             }

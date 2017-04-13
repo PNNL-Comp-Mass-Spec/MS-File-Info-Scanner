@@ -236,25 +236,25 @@ namespace MSFileInfoScanner
         #region "Processing Options and Interface Functions"
 
         public override bool AbortProcessing {
-            get { return mAbortProcessing; }
-            set { mAbortProcessing = value; }
+            get => mAbortProcessing;
+            set => mAbortProcessing = value;
         }
 
         public override string AcquisitionTimeFilename {
-            get { return GetDataFileFilename(eDataFileTypeConstants.MSFileInfo); }
-            set { SetDataFileFilename(value, eDataFileTypeConstants.MSFileInfo); }
+            get => GetDataFileFilename(eDataFileTypeConstants.MSFileInfo);
+            set => SetDataFileFilename(value, eDataFileTypeConstants.MSFileInfo);
         }
 
         public override bool CheckCentroidingStatus {
-            get { return mCheckCentroidingStatus; }
-            set { mCheckCentroidingStatus = value; }
+            get => mCheckCentroidingStatus;
+            set => mCheckCentroidingStatus = value;
         }
 
         /// <summary>
         /// When true, then checks the integrity of every file in every folder processed
         /// </summary>
         public override bool CheckFileIntegrity {
-            get { return mCheckFileIntegrity; }
+            get => mCheckFileIntegrity;
             set {
                 mCheckFileIntegrity = value;
                 if (mCheckFileIntegrity) {
@@ -265,8 +265,8 @@ namespace MSFileInfoScanner
         }
 
         public override bool ComputeOverallQualityScores {
-            get { return mComputeOverallQualityScores; }
-            set { mComputeOverallQualityScores = value; }
+            get => mComputeOverallQualityScores;
+            set => mComputeOverallQualityScores = value;
         }
 
         /// <summary>
@@ -367,32 +367,32 @@ namespace MSFileInfoScanner
         /// If True, then copies .Raw files to the local drive if unable to read the file over the network
         /// </summary>
         public override bool CopyFileLocalOnReadError {
-            get { return mCopyFileLocalOnReadError; }
-            set { mCopyFileLocalOnReadError = value; }
+            get => mCopyFileLocalOnReadError;
+            set => mCopyFileLocalOnReadError = value;
         }
 
         /// <summary>
         /// If True, then will create the _DatasetInfo.xml file
         /// </summary>
         public override bool CreateDatasetInfoFile {
-            get { return mCreateDatasetInfoFile; }
-            set { mCreateDatasetInfoFile = value; }
+            get => mCreateDatasetInfoFile;
+            set => mCreateDatasetInfoFile = value;
         }
 
         /// <summary>
         /// If True, then will create the _ScanStats.txt file
         /// </summary>
         public override bool CreateScanStatsFile {
-            get { return mCreateScanStatsFile; }
-            set { mCreateScanStatsFile = value; }
+            get => mCreateScanStatsFile;
+            set => mCreateScanStatsFile = value;
         }
 
         /// <summary>
         /// DatasetID value to use instead of trying to lookup the value in DMS (and instead of using 0)
         /// </summary>
         public override int DatasetIDOverride {
-            get { return mDSInfoDatasetIDOverride; }
-            set { mDSInfoDatasetIDOverride = value; }
+            get => mDSInfoDatasetIDOverride;
+            set => mDSInfoDatasetIDOverride = value;
         }
 
         public override string DatasetStatsTextFileName {
@@ -407,66 +407,66 @@ namespace MSFileInfoScanner
         }
 
         public override string DSInfoConnectionString {
-            get { return mDSInfoConnectionString; }
-            set { mDSInfoConnectionString = value; }
+            get => mDSInfoConnectionString;
+            set => mDSInfoConnectionString = value;
         }
 
         public override bool DSInfoDBPostingEnabled {
-            get { return mDSInfoDBPostingEnabled; }
-            set { mDSInfoDBPostingEnabled = value; }
+            get => mDSInfoDBPostingEnabled;
+            set => mDSInfoDBPostingEnabled = value;
         }
 
         public override string DSInfoStoredProcedure {
-            get { return mDSInfoStoredProcedure; }
-            set { mDSInfoStoredProcedure = value; }
+            get => mDSInfoStoredProcedure;
+            set => mDSInfoStoredProcedure = value;
         }
 
         public override eMSFileScannerErrorCodes ErrorCode => mErrorCode;
 
         public override bool IgnoreErrorsWhenRecursing {
-            get { return mIgnoreErrorsWhenRecursing; }
-            set { mIgnoreErrorsWhenRecursing = value; }
+            get => mIgnoreErrorsWhenRecursing;
+            set => mIgnoreErrorsWhenRecursing = value;
         }
 
         public override float LCMS2DPlotMZResolution {
-            get { return mLCMS2DPlotOptions.MZResolution; }
-            set { mLCMS2DPlotOptions.MZResolution = value; }
+            get => mLCMS2DPlotOptions.MZResolution;
+            set => mLCMS2DPlotOptions.MZResolution = value;
         }
 
         public override int LCMS2DPlotMaxPointsToPlot {
-            get { return mLCMS2DPlotOptions.MaxPointsToPlot; }
-            set { mLCMS2DPlotOptions.MaxPointsToPlot = value; }
+            get => mLCMS2DPlotOptions.MaxPointsToPlot;
+            set => mLCMS2DPlotOptions.MaxPointsToPlot = value;
         }
 
         public override int LCMS2DOverviewPlotDivisor {
-            get { return mLCMS2DOverviewPlotDivisor; }
-            set { mLCMS2DOverviewPlotDivisor = value; }
+            get => mLCMS2DOverviewPlotDivisor;
+            set => mLCMS2DOverviewPlotDivisor = value;
         }
 
         public override int LCMS2DPlotMinPointsPerSpectrum {
-            get { return mLCMS2DPlotOptions.MinPointsPerSpectrum; }
-            set { mLCMS2DPlotOptions.MinPointsPerSpectrum = value; }
+            get => mLCMS2DPlotOptions.MinPointsPerSpectrum;
+            set => mLCMS2DPlotOptions.MinPointsPerSpectrum = value;
         }
 
         public override float LCMS2DPlotMinIntensity {
-            get { return mLCMS2DPlotOptions.MinIntensity; }
-            set { mLCMS2DPlotOptions.MinIntensity = value; }
+            get => mLCMS2DPlotOptions.MinIntensity;
+            set => mLCMS2DPlotOptions.MinIntensity = value;
         }
 
 
         public override bool LogMessagesToFile {
-            get { return mLogMessagesToFile; }
-            set { mLogMessagesToFile = value; }
+            get => mLogMessagesToFile;
+            set => mLogMessagesToFile = value;
         }
 
         public override string LogFilePath {
-            get { return mLogFilePath; }
-            set { mLogFilePath = value; }
+            get => mLogFilePath;
+            set => mLogFilePath = value;
         }
 
         public override string LogFolderPath {
-            get { return mLogFolderPath; }
-            set { mLogFolderPath = value; }
+            get => mLogFolderPath;
+            set => mLogFolderPath = value;
         }
 
         public override int MaximumTextFileLinesToCheck {
@@ -502,31 +502,31 @@ namespace MSFileInfoScanner
         }
 
         public override bool RecheckFileIntegrityForExistingFolders {
-            get { return mRecheckFileIntegrityForExistingFolders; }
-            set { mRecheckFileIntegrityForExistingFolders = value; }
+            get => mRecheckFileIntegrityForExistingFolders;
+            set => mRecheckFileIntegrityForExistingFolders = value;
         }
 
         public override bool ReprocessExistingFiles {
-            get { return mReprocessExistingFiles; }
-            set { mReprocessExistingFiles = value; }
+            get => mReprocessExistingFiles;
+            set => mReprocessExistingFiles = value;
         }
 
         public override bool ReprocessIfCachedSizeIsZero {
-            get { return mReprocessIfCachedSizeIsZero; }
-            set { mReprocessIfCachedSizeIsZero = value; }
+            get => mReprocessIfCachedSizeIsZero;
+            set => mReprocessIfCachedSizeIsZero = value;
         }
 
         /// <summary>
         /// If True, then saves TIC and BPI plots as PNG files
         /// </summary>
         public override bool SaveTICAndBPIPlots {
-            get { return mSaveTICAndBPIPlots; }
-            set { mSaveTICAndBPIPlots = value; }
+            get => mSaveTICAndBPIPlots;
+            set => mSaveTICAndBPIPlots = value;
         }
 
         public override bool ShowDebugInfo {
-            get { return mShowDebugInfo; }
-            set { mShowDebugInfo = value; }
+            get => mShowDebugInfo;
+            set => mShowDebugInfo = value;
         }
 
         /// <summary>
@@ -534,37 +534,37 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <value></value>
         public override bool SaveLCMS2DPlots {
-            get { return mSaveLCMS2DPlots; }
-            set { mSaveLCMS2DPlots = value; }
+            get => mSaveLCMS2DPlots;
+            set => mSaveLCMS2DPlots = value;
         }
 
         /// <summary>
         /// When ScanStart is > 0, then will start processing at the specified scan number
         /// </summary>
         public override int ScanStart {
-            get { return mScanStart; }
-            set { mScanStart = value; }
+            get => mScanStart;
+            set => mScanStart = value;
         }
 
         /// <summary>
         /// When ScanEnd is > 0, then will stop processing at the specified scan number
         /// </summary>
         public override int ScanEnd {
-            get { return mScanEnd; }
-            set { mScanEnd = value; }
+            get => mScanEnd;
+            set => mScanEnd = value;
         }
 
         /// <summary>
         /// Set to True to print out a series of 2D plots, each using a different color scheme
         /// </summary>
         public bool TestLCMSGradientColorSchemes {
-            get { return mLCMS2DPlotOptions.TestGradientColorSchemes; }
-            set { mLCMS2DPlotOptions.TestGradientColorSchemes = value; }
+            get => mLCMS2DPlotOptions.TestGradientColorSchemes;
+            set => mLCMS2DPlotOptions.TestGradientColorSchemes = value;
         }
 
         public override bool UpdateDatasetStatsTextFile {
-            get { return mUpdateDatasetStatsTextFile; }
-            set { mUpdateDatasetStatsTextFile = value; }
+            get => mUpdateDatasetStatsTextFile;
+            set => mUpdateDatasetStatsTextFile = value;
         }
 
         /// <summary>
@@ -572,8 +572,8 @@ namespace MSFileInfoScanner
         /// If you simply want to create TIC and BPI files, and/or the _DatasetInfo.xml file for a single dataset, then set this to False
         /// </summary>
         public override bool UseCacheFiles {
-            get { return mUseCacheFiles; }
-            set { mUseCacheFiles = value; }
+            get => mUseCacheFiles;
+            set => mUseCacheFiles = value;
         }
 
         public override bool ZipFileCheckAllData {

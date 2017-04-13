@@ -186,13 +186,8 @@ namespace MSFileInfoScanner
                     {
                         // Lookup the scan time of the final scan
 
-                        var intScanNumber = 0;
-                        double dblScanTotalIntensity = 0;
-                        double dblScanTime = 0;
-                        double dblMassMin = 0;
-                        double dblMassMax = 0;
-
-                        if (objNETCDFReader.GetScanInfo(intScanCount - 1, out intScanNumber, out dblScanTotalIntensity, out dblScanTime, out dblMassMin, out dblMassMax))
+                        if (objNETCDFReader.GetScanInfo(intScanCount - 1, out var intScanNumber,
+                            out var dblScanTotalIntensity, out var dblScanTime, out var dblMassMin, out var dblMassMax))
                         {
                             // Add 1 to intScanNumber since the scan number is off by one in the CDF file
                             datasetFileInfo.ScanCount = intScanNumber + 1;
@@ -211,10 +206,7 @@ namespace MSFileInfoScanner
             }
             finally
             {
-                if ((objNETCDFReader != null))
-                {
-                    objNETCDFReader.CloseMSCdfFile();
-                }
+                objNETCDFReader?.CloseMSCdfFile();
             }
 
             return blnSuccess;
@@ -222,7 +214,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// 
+        /// Process the data file
         /// </summary>
         /// <param name="strDataFilePath">Dataset folder ptah</param>
         /// <param name="datasetFileInfo"></param>

@@ -105,13 +105,13 @@ namespace MSFileInfoScanner
         /// </summary>
         public bool ComputeFileHashes
         {
-            get { return mComputeFileHashes; }
-            set { mComputeFileHashes = value; }
+            get => mComputeFileHashes;
+            set => mComputeFileHashes = value;
         }
 
         public int MaximumTextFileLinesToCheck
         {
-            get { return mMaximumTextFileLinesToCheck; }
+            get => mMaximumTextFileLinesToCheck;
             set
             {
                 if (value < 0)
@@ -122,7 +122,7 @@ namespace MSFileInfoScanner
 
         public int MaximumXMLElementNodesToCheck
         {
-            get { return mMaximumXMLElementNodesToCheck; }
+            get => mMaximumXMLElementNodesToCheck;
             set
             {
                 if (value < 0)
@@ -138,8 +138,8 @@ namespace MSFileInfoScanner
         /// </summary>
         public bool ZipFileCheckAllData
         {
-            get { return mZipFileCheckAllData; }
-            set { mZipFileCheckAllData = value; }
+            get => mZipFileCheckAllData;
+            set => mZipFileCheckAllData = value;
         }
 
         #endregion
@@ -262,7 +262,7 @@ namespace MSFileInfoScanner
                 // Example contents:
                 //  Instrument model: LTQ Orbitrap
                 //  Instrument name: LTQ Orbitrap
-                //  Instrument description: 
+                //  Instrument description:
                 //  Instrument serial number: SN1006B
                 //
                 //  Creator: LTQ
@@ -290,8 +290,8 @@ namespace MSFileInfoScanner
             else if (strFileNameLower.StartsWith("cat_log"))
             {
                 // Example contents:
-                //  5/16/2008 7:41:55 PM, 14418 'dta' files were concatenated to 'D:\DMS_Work\OU_CN32_002_run3_3Apr08_Draco_07-12-25_dta.txt', Normal, 
-                //  5/16/2008 7:48:47 PM, 14418 'out' files were concatenated to 'D:\DMS_Work\OU_CN32_002_run3_3Apr08_Draco_07-12-25_out.txt', Normal, 
+                //  5/16/2008 7:41:55 PM, 14418 'dta' files were concatenated to 'D:\DMS_Work\OU_CN32_002_run3_3Apr08_Draco_07-12-25_dta.txt', Normal,
+                //  5/16/2008 7:48:47 PM, 14418 'out' files were concatenated to 'D:\DMS_Work\OU_CN32_002_run3_3Apr08_Draco_07-12-25_out.txt', Normal,
                 blnFileIsValid = CheckTextFileWork(strFilePath, 1, 0, new List<string>
                 {
                     "were concatenated",
@@ -325,7 +325,7 @@ namespace MSFileInfoScanner
             {
                 // Header line should always be present
                 // Example contents:
-                //  RankXc	ScanNum	ChargeState	MultiProteinID	Reference	
+                //  RankXc	ScanNum	ChargeState	MultiProteinID	Reference
                 //  1	9	1	1	CN32_0001
                 blnFileIsValid = CheckTextFileWork(strFilePath, 1, 4, "RankXc", true);
 
@@ -335,8 +335,8 @@ namespace MSFileInfoScanner
             {
                 // Header line should always be present
                 // Example contents:
-                //  Scannum	CS	RankXc	ObservedIons	PossibleIons	
-                //  9	1	1	4	6	
+                //  Scannum	CS	RankXc	ObservedIons	PossibleIons
+                //  9	1	1	4	6
                 blnFileIsValid = CheckTextFileWork(strFilePath, 1, 4, "Scannum", true);
 
                 // SEQUEST
@@ -345,8 +345,8 @@ namespace MSFileInfoScanner
             {
                 // Note: Header line could be missing
                 // Example contents:
-                //  Scannum	NL1_Intensity	NL2_Intensity	NL3_Intensity	
-                //  9	0	0	0	
+                //  Scannum	NL1_Intensity	NL2_Intensity	NL3_Intensity
+                //  9	0	0	0
                 blnFileIsValid = CheckTextFileWork(strFilePath, 1, 3, true);
 
                 // X!Tandem
@@ -376,7 +376,7 @@ namespace MSFileInfoScanner
                 //  mass range          = 200.0000 - 5000.0000
                 //  scan range          = 1 - 15240
                 //
-                //     #     Scan   MasterScan   Precursor   Charge     (M+H)+  
+                //     #     Scan   MasterScan   Precursor   Charge     (M+H)+
                 //  ------  ------  ----------  -----------  ------  -----------
                 blnFileIsValid = CheckTextFileWork(strFilePath, 6, 0, new List<string>
                 {
@@ -469,7 +469,7 @@ namespace MSFileInfoScanner
             {
                 // Example contents:
                 //  Unique_Seq_ID	Cleavage_State	Terminus_State	Protein_Name	Protein_Expectation_Value_Log(e)	Protein_Intensity_Log(I)
-                //  1	2	0	P005|G3P_RABIT		
+                //  1	2	0	P005|G3P_RABIT
                 blnFileIsValid = CheckTextFileWork(strFilePath, 1, 5, "Unique_Seq_ID", true);
 
                 // Peptide Prophet
@@ -497,9 +497,9 @@ namespace MSFileInfoScanner
                 //  TurboSEQUEST - PVM Master v.27 (rev. 12), (c) 1998-2005
                 //  Molecular Biotechnology, Univ. of Washington, J.Eng/S.Morgan/J.Yates
                 //  Licensed to Thermo Electron Corp.
-                // 
+                //
                 //  NumHosts = 10, NumArch = 1
-                // 
+                //
                 //    Arch:WIN32  CPU:1  Tid:40000  Name:p1
                 //    Arch:LINUXI386  CPU:4  Tid:80000  Name:node18
                 blnFileIsValid = CheckTextFileWork(strFilePath, 5, 0);
@@ -692,7 +692,7 @@ namespace MSFileInfoScanner
 
             string strErrorMessage;
             var blnErrorLogged = false;
-         
+
             if (mMaximumTextFileLinesToCheck <= 0)
             {
                 intMaximumTextFileLinesToCheck = int.MaxValue;
@@ -771,7 +771,7 @@ namespace MSFileInfoScanner
 
                             if (blnNeedToCheckLineHeaders)
                             {
-                                FindRequiredTextInLine(strLineIn, ref blnNeedToCheckLineHeaders, textLineHeaders, ref intLineHeaderMatchCount, blnRequiredTextMatchesLineStart);                               
+                                FindRequiredTextInLine(strLineIn, ref blnNeedToCheckLineHeaders, textLineHeaders, ref intLineHeaderMatchCount, blnRequiredTextMatchesLineStart);
                             }
                             else if (intMinimumTabCount == 0 && intMinimumCommaCount == 0 &&
                                      intLinesRead > intMinimumLineCount)
@@ -1513,7 +1513,7 @@ namespace MSFileInfoScanner
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         /// <remarks></remarks>
         private bool CheckXMLFileWork(
-            string strFilePath, 
+            string strFilePath,
             int intMinimumElementCount,
             List<string> strRequiredElementNames,
             List<string> strRequiredAttributeNames)
@@ -1589,10 +1589,10 @@ namespace MSFileInfoScanner
                                 if (blnNeedToCheckElementNames)
                                 {
                                     FindRequiredTextInLine(
-                                        objXMLReader.Name, 
+                                        objXMLReader.Name,
                                         ref blnNeedToCheckElementNames,
                                         requiredElements,
-                                        ref intElementNameMatchCount, 
+                                        ref intElementNameMatchCount,
                                         true);
                                 }
 
@@ -1606,7 +1606,7 @@ namespace MSFileInfoScanner
                                                 objXMLReader.Name,
                                                 ref blnNeedToCheckAttributeNames,
                                                 requiredAttributes,
-                                                ref intAttributeNameMatchCount, 
+                                                ref intAttributeNameMatchCount,
                                                 true);
 
                                             if (!blnNeedToCheckAttributeNames)
@@ -1622,12 +1622,12 @@ namespace MSFileInfoScanner
                                 {
                                     break;
                                 }
-                                
+
                                 if (!blnNeedToCheckElementNames && !blnNeedToCheckAttributeNames &&
                                          intElementsRead > intMinimumElementCount)
                                 {
                                     // All conditions have been met; no need to continue reading the file
-                                    break; 
+                                    break;
                                 }
                             }
 

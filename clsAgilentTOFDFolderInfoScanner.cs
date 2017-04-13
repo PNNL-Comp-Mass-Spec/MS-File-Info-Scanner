@@ -19,7 +19,7 @@ namespace MSFileInfoScanner
         public const string AGILENT_XML_CONTENTS_FILE = "Contents.xml";
 
         public const string AGILENT_TIME_SEGMENT_FILE = "MSTS.xml";
-       
+
         public override string GetDatasetNameViaPath(string strDataFilePath)
         {
             // The dataset name is simply the folder name without .D
@@ -61,7 +61,7 @@ namespace MSFileInfoScanner
                                         // Convert from Universal time to Local time
                                         var dtAcquisitionTime = dtAcquisitionStartTime.ToLocalTime();
 
-                                        // There have been some cases where the acquisition start time is several years before the file modification time, 
+                                        // There have been some cases where the acquisition start time is several years before the file modification time,
                                         // for example XG_A83CapiHSSWash1.d where the time in the Contents.xml file is 3/20/2005 while the file modification time is 2010
                                         // Thus, we use a sanity check of a maximum run time of 24 hours
 

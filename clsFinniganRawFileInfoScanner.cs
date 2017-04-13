@@ -107,7 +107,7 @@ namespace MSFileInfoScanner
         }
 
         private clsSpectrumTypeClassifier.eCentroidStatusConstants GetCentroidStatus(
-            int intScanNumber, 
+            int intScanNumber,
             clsScanInfo scanInfo)
         {
 
@@ -331,7 +331,7 @@ namespace MSFileInfoScanner
             var blnReadError = false;
 
             // Use Xraw to read the .Raw file
-            // If reading from a SAMBA-mounted network share, and if the current user has 
+            // If reading from a SAMBA-mounted network share, and if the current user has
             //  Read privileges but not Read&Execute privileges, then we will need to copy the file locally
             var xcaliburAccessor = new XRawFileIO();
 
@@ -517,7 +517,7 @@ namespace MSFileInfoScanner
         }
 
         private void StoreExtendedScanInfo(
-            ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo, 
+            ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo,
             IReadOnlyCollection<KeyValuePair<string, string>> scanEvents)
         {
             var cTrimChars = new[] {

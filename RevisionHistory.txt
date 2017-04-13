@@ -1,5 +1,15 @@
 MS File Info Scanner Change Log
 
+Version 1.4.6311; April 12, 2017
+	- Use expression bodies for properties
+
+Version 1.4.6302; April 3, 2017
+	- Update to .NET 4.6.2 and obtain PRISM.DLL from NuGet
+
+Version 1.4.6248; February 17, 2017
+	- Use clsEventNotifier in PRISM.dll
+	- Improved message logging
+
 Version 1.4.6068; August 12, 2016
 	- Properly determine scan type when parsing DeconTools results from an IMS instrument
 		- Was previously relying on the scan filter text, which is undefined for IMS data

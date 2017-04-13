@@ -34,7 +34,7 @@ namespace MSFileInfoScanner
         public abstract bool ShowDebugInfo { get; set; }
         public abstract bool GetOption(ProcessingOptions eOption);
         public abstract void SetOption(ProcessingOptions eOption, bool blnValue);
-        
+
     }
 }
 

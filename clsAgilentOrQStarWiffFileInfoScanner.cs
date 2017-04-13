@@ -197,7 +197,7 @@ namespace MSFileInfoScanner
                                 double dtRunTimeSeconds2 = 0;
                                 const int LOOP_ITERATIONS = 2000;
 
-                                // Note from Matt Chambers (matt.chambers42@gmail.com) 
+                                // Note from Matt Chambers (matt.chambers42 at gmail)
                                 // Repeatedly accessing items directly via oMZs.data() can be very slow
                                 // With 700 points and 2000 iterations, it takes anywhere from 0.6 to 1.1 seconds to run from dtStartTime to dtEndTime
                                 dtStartTime = DateTime.Now;

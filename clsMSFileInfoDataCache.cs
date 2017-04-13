@@ -96,14 +96,14 @@ namespace MSFileInfoScanner
 
         public string AcquisitionTimeFilePath
         {
-            get { return mAcquisitionTimeFilePath; }
-            set { mAcquisitionTimeFilePath = value; }
+            get => mAcquisitionTimeFilePath;
+            set => mAcquisitionTimeFilePath = value;
         }
 
         public string FolderIntegrityInfoFilePath
         {
-            get { return mFolderIntegrityInfoFilePath; }
-            set { mFolderIntegrityInfoFilePath = value; }
+            get => mFolderIntegrityInfoFilePath;
+            set => mFolderIntegrityInfoFilePath = value;
         }
 
         #endregion
@@ -165,8 +165,8 @@ namespace MSFileInfoScanner
         }
 
         public bool CachedFolderIntegrityInfoContainsFolder(
-            string strFolderPath, 
-            out int intFolderID, 
+            string strFolderPath,
+            out int intFolderID,
             out DataRow objRowMatch)
         {
             if (DatasetTableContainsPrimaryKeyValue(mFolderIntegrityInfoDataset, FOLDER_INTEGRITY_INFO_DATATABLE, strFolderPath, out objRowMatch))
@@ -324,8 +324,8 @@ namespace MSFileInfoScanner
             SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(ref dtFolderIntegrityInfo, COL_NAME_INFO_LAST_MODIFIED, dtDefaultDate);
 
             // Use the folder path as the primary key
-            var FolderInfoPrimaryKeyColumn = new[] { 
-                dtFolderIntegrityInfo.Columns[COL_NAME_FOLDER_PATH] 
+            var FolderInfoPrimaryKeyColumn = new[] {
+                dtFolderIntegrityInfo.Columns[COL_NAME_FOLDER_PATH]
             };
             dtFolderIntegrityInfo.PrimaryKey = FolderInfoPrimaryKeyColumn;
 
@@ -551,8 +551,8 @@ namespace MSFileInfoScanner
         }
 
         private void PopulateFolderIntegrityInfoDataRow(
-            int intFolderID, 
-            clsFileIntegrityChecker.udtFolderStatsType udtFolderStats, 
+            int intFolderID,
+            clsFileIntegrityChecker.udtFolderStatsType udtFolderStats,
             DataRow objRow)
         {
             PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow, DateTime.Now);
@@ -664,8 +664,8 @@ namespace MSFileInfoScanner
 
             var blnSuccess = false;
 
-            if ((mMSFileInfoDataset != null) && 
-                mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].Rows.Count > 0 && 
+            if ((mMSFileInfoDataset != null) &&
+                mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].Rows.Count > 0 &&
                 mMSFileInfoCachedResultsState == eCachedResultsStateConstants.Modified) {
                     OnDebugEvent("Saving cached acquisition time file data to: " + Path.GetFileName(mAcquisitionTimeFilePath));
 
@@ -756,7 +756,7 @@ namespace MSFileInfoScanner
         }
 
         public bool UpdateCachedFolderIntegrityInfo(
-            clsFileIntegrityChecker.udtFolderStatsType udtFolderStats, 
+            clsFileIntegrityChecker.udtFolderStatsType udtFolderStats,
             out int intFolderID)
         {
             // Update the entry for this dataset in mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE)
@@ -818,14 +818,14 @@ namespace MSFileInfoScanner
         {
             // Note: HH:mm:ss corresponds to time in 24 hour format
             srOutFile.WriteLine(
-                objRow[COL_NAME_DATASET_ID].ToString() + '\t' + 
-                objRow[COL_NAME_DATASET_NAME] + '\t' + 
-                objRow[COL_NAME_FILE_EXTENSION] + '\t' + 
-                ((DateTime)objRow[COL_NAME_ACQ_TIME_START]).ToString("yyyy-MM-dd HH:mm:ss") + '\t' + 
+                objRow[COL_NAME_DATASET_ID].ToString() + '\t' +
+                objRow[COL_NAME_DATASET_NAME] + '\t' +
+                objRow[COL_NAME_FILE_EXTENSION] + '\t' +
+                ((DateTime)objRow[COL_NAME_ACQ_TIME_START]).ToString("yyyy-MM-dd HH:mm:ss") + '\t' +
                 ((DateTime)objRow[COL_NAME_ACQ_TIME_END]).ToString("yyyy-MM-dd HH:mm:ss") + '\t' +
-                objRow[COL_NAME_SCAN_COUNT] + '\t' + 
-                objRow[COL_NAME_FILE_SIZE_BYTES] + '\t' + 
-                objRow[COL_NAME_INFO_LAST_MODIFIED] + '\t' + 
+                objRow[COL_NAME_SCAN_COUNT] + '\t' +
+                objRow[COL_NAME_FILE_SIZE_BYTES] + '\t' +
+                objRow[COL_NAME_INFO_LAST_MODIFIED] + '\t' +
                 ((DateTime)objRow[COL_NAME_FILE_MODIFICATION_DATE]).ToString("yyyy-MM-dd HH:mm:ss"));
 
         }

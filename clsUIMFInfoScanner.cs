@@ -24,9 +24,9 @@ namespace MSFileInfoScanner
         /// <param name="dctMasterFrameList"></param>
         /// <param name="intMasterFrameNumList"></param>
         private void ComputeQualityScores(
-            DataReader objUIMFReader, 
-            clsDatasetFileInfo datasetFileInfo, 
-            Dictionary<int, DataReader.FrameType> dctMasterFrameList, 
+            DataReader objUIMFReader,
+            clsDatasetFileInfo datasetFileInfo,
+            Dictionary<int, DataReader.FrameType> dctMasterFrameList,
             int[] intMasterFrameNumList)
         {
             float sngOverallScore;
@@ -89,7 +89,7 @@ namespace MSFileInfoScanner
                         continue;
                     }
 
-                    // The m/z and intensity arrays might contain entries with m/z values of 0; 
+                    // The m/z and intensity arrays might contain entries with m/z values of 0;
                     // need to copy the data in place to get the data in the correct format.
 
                     if (intIonCount > dblMZList.Length) {
@@ -141,9 +141,9 @@ namespace MSFileInfoScanner
         }
 
         private void ConstructTICandBPI(
-            DataReader objUIMFReader, 
-            int intFrameStart, 
-            int intFrameEnd, 
+            DataReader objUIMFReader,
+            int intFrameStart,
+            int intFrameEnd,
             out Dictionary<int, double> dctTIC,
             out Dictionary<int, double> dctBPI)
         {
@@ -281,7 +281,7 @@ namespace MSFileInfoScanner
                         dblFrameStartTimeAddon += 60 * 24;
                     }
 
-                    // Compute the elution time (in minutes) of this frame                    
+                    // Compute the elution time (in minutes) of this frame
                     var dblElutionTime = dblFrameStartTimeCurrent + dblFrameStartTimeAddon - dblFrameStartTimeInitial;
 
                     double dblBPI;
@@ -371,7 +371,7 @@ namespace MSFileInfoScanner
                             var intIonCount = objUIMFReader.GetSpectrum(intFrameNumber, intFrameNumber, eFrameType, 0, objFrameParams.Scans, out dblMZList, out intIntensityList);
 
                             if (intIonCount > 0) {
-                                // The m/z and intensity arrays might contain entries with m/z values of 0; 
+                                // The m/z and intensity arrays might contain entries with m/z values of 0;
                                 // need to copy the data in place to get the data in the correct format.
                                 // In addition, we'll copy the intensity values from intIntensityList() into dblIonsIntensity()
 
@@ -535,7 +535,7 @@ namespace MSFileInfoScanner
 
                         if (!DateTime.TryParse(strReportedDateStarted, out dtReportedDateStarted)) {
                             // Invalid date; log a message
-                            OnWarningEvent(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + strReportedDateStarted + "; " + 
+                            OnWarningEvent(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + strReportedDateStarted + "; " +
                                 "will use the time the datafile was last modified");
                             blnInaccurateStartTime = true;
                         } else {
@@ -552,7 +552,7 @@ namespace MSFileInfoScanner
 
                             } else if (dtReportedDateStarted.Year < 2000 | dtReportedDateStarted.Year > DateTime.Now.Year + 1) {
                                 // Invalid date; log a message
-                                OnWarningEvent(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + strReportedDateStarted + "; " + 
+                                OnWarningEvent(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + strReportedDateStarted + "; " +
                                     "will use the time the datafile was last modified");
                                 blnInaccurateStartTime = true;
 

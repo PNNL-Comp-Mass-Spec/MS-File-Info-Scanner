@@ -198,7 +198,7 @@ namespace MSFileInfoScanner
                         Intensity = lstIsosData[intIndex].Abundance,
                         Charge = lstIsosData[intIndex].Charge
                     };
-                    
+
                     lstIons.Add(udtIon);
                 }
             }

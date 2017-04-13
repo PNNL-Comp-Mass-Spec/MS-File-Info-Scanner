@@ -40,25 +40,25 @@ namespace MSFileInfoScanner
 
         #region "Properties"
         public int MaximumDataCountToLoad {
-            get { return mMaximumDataCountToKeep; }
-            set { mMaximumDataCountToKeep = value; }
+            get => mMaximumDataCountToKeep;
+            set => mMaximumDataCountToKeep = value;
         }
 
         public float Progress => mProgress;
 
         public float SkipDataPointFlag {
-            get { return mSkipDataPointFlag; }
-            set { mSkipDataPointFlag = value; }
+            get => mSkipDataPointFlag;
+            set => mSkipDataPointFlag = value;
         }
 
         public bool TotalIntensityPercentageFilterEnabled {
-            get { return mTotalIntensityPercentageFilterEnabled; }
-            set { mTotalIntensityPercentageFilterEnabled = value; }
+            get => mTotalIntensityPercentageFilterEnabled;
+            set => mTotalIntensityPercentageFilterEnabled = value;
         }
 
         public float TotalIntensityPercentageFilter {
-            get { return mTotalIntensityPercentageFilter; }
-            set { mTotalIntensityPercentageFilter = value; }
+            get => mTotalIntensityPercentageFilter;
+            set => mTotalIntensityPercentageFilter = value;
         }
         #endregion
 
@@ -138,7 +138,7 @@ namespace MSFileInfoScanner
                     // No data loaded
                     return;
                 }
-                
+
                 if (mDataValues.Count <= mMaximumDataCountToKeep)
                 {
                     // Loaded less than mMaximumDataCountToKeep data points
@@ -249,7 +249,7 @@ namespace MSFileInfoScanner
                     }
 
                     if (!blnUseFullDataSort) {
-                        var intDataCountImplicitlyIncluded = 0;                        
+                        var intDataCountImplicitlyIncluded = 0;
                         for (var intIndex = 0; intIndex <= dataPointCount - 1; intIndex++)
                         {
                             if (mDataValues[intIndex].Item1 < dblBinToSortAbundanceMinimum)
@@ -341,9 +341,9 @@ namespace MSFileInfoScanner
         /// <remarks>
         /// This sub uses a full sort to filter the data
         /// This will be slow for large arrays and you should therefore use FilterDataByMaxDataCountToKeep if possible
-        /// </remarks>    
+        /// </remarks>
         private void SortAndMarkPointsToSkip(
-            List<Tuple<float,int>> dataValuesAndIndices, 
+            List<Tuple<float,int>> dataValuesAndIndices,
             int intMaximumDataCountInArraysToLoad, int intSubtaskStepCount)
         {
             var dataCount = dataValuesAndIndices.Count;
@@ -351,7 +351,7 @@ namespace MSFileInfoScanner
             if (dataCount > 0)
             {
                 dataValuesAndIndices.Sort();
-             
+
                 UpdateProgress(2.333f / intSubtaskStepCount * 100.0f);
 
                 // Change the abundance values to mSkipDataPointFlag for data up to index intDataCount-intMaximumDataCountInArraysToLoad-1
@@ -382,6 +382,16 @@ namespace MSFileInfoScanner
     {
         public int Compare(Tuple<float, int> x, Tuple<float, int> y)
         {
+            if (x == null)
+            {
+                return y == null ? 0 : 1;
+            }
+
+            if (y == null)
+            {
+                return 1;
+            }
+
             if (x.Item2 < y.Item2)
                 return -1;
 

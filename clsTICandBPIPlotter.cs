@@ -54,66 +54,62 @@ namespace MSFileInfoScanner
         private readonly List<udtOutputFileInfoType> mRecentFiles;
 
         public bool BPIAutoMinMaxY {
-            get { return mBPIAutoMinMaxY; }
-            set { mBPIAutoMinMaxY = value; }
+            get => mBPIAutoMinMaxY;
+            set => mBPIAutoMinMaxY = value;
         }
 
         public string BPIPlotAbbrev {
-            get { return mBPIPlotAbbrev; }
-            set { mBPIPlotAbbrev = value; }
+            get => mBPIPlotAbbrev;
+            set => mBPIPlotAbbrev = value;
         }
 
         public string BPIXAxisLabel {
-            get { return mBPIXAxisLabel; }
-            set { mBPIXAxisLabel = value; }
+            get => mBPIXAxisLabel;
+            set => mBPIXAxisLabel = value;
         }
 
         public string BPIYAxisLabel {
-            get { return mBPIYAxisLabel; }
-            set { mBPIYAxisLabel = value; }
+            get => mBPIYAxisLabel;
+            set => mBPIYAxisLabel = value;
         }
 
         public bool BPIYAxisExponentialNotation {
-            get { return mBPIYAxisExponentialNotation; }
-            set { mBPIYAxisExponentialNotation = value; }
+            get => mBPIYAxisExponentialNotation;
+            set => mBPIYAxisExponentialNotation = value;
         }
 
-        public int CountBPI {
-            get { return mBPI.ScanCount; }
-        }
+        public int CountBPI => mBPI.ScanCount;
 
-        public int CountTIC {
-            get { return mTIC.ScanCount; }
-        }
+        public int CountTIC => mTIC.ScanCount;
 
         public bool RemoveZeroesFromEnds {
-            get { return mRemoveZeroesFromEnds; }
-            set { mRemoveZeroesFromEnds = value; }
+            get => mRemoveZeroesFromEnds;
+            set => mRemoveZeroesFromEnds = value;
         }
 
         public bool TICAutoMinMaxY {
-            get { return mTICAutoMinMaxY; }
-            set { mTICAutoMinMaxY = value; }
+            get => mTICAutoMinMaxY;
+            set => mTICAutoMinMaxY = value;
         }
 
         public string TICPlotAbbrev {
-            get { return mTICPlotAbbrev; }
-            set { mTICPlotAbbrev = value; }
+            get => mTICPlotAbbrev;
+            set => mTICPlotAbbrev = value;
         }
 
         public string TICXAxisLabel {
-            get { return mTICXAxisLabel; }
-            set { mTICXAxisLabel = value; }
+            get => mTICXAxisLabel;
+            set => mTICXAxisLabel = value;
         }
 
         public string TICYAxisLabel {
-            get { return mTICYAxisLabel; }
-            set { mTICYAxisLabel = value; }
+            get => mTICYAxisLabel;
+            set => mTICYAxisLabel = value;
         }
 
         public bool TICYAxisExponentialNotation {
-            get { return mTICYAxisExponentialNotation; }
-            set { mTICYAxisExponentialNotation = value; }
+            get => mTICYAxisExponentialNotation;
+            set => mTICYAxisExponentialNotation = value;
         }
 
         public clsTICandBPIPlotter()
@@ -204,9 +200,9 @@ namespace MSFileInfoScanner
         /// <remarks>The list of recent files gets cleared each time you call SaveTICAndBPIPlotFiles() or Reset()</remarks>
         public bool GetRecentFileInfo(eOutputFileTypes eFileType, out string strFileName, out string strFilePath)
         {
-            for (var intIndex = 0; intIndex <= mRecentFiles.Count - 1; intIndex++) 
+            for (var intIndex = 0; intIndex <= mRecentFiles.Count - 1; intIndex++)
             {
-                if (mRecentFiles[intIndex].FileType == eFileType) 
+                if (mRecentFiles[intIndex].FileType == eFileType)
                 {
                     strFileName = mRecentFiles[intIndex].FileName;
                     strFilePath = mRecentFiles[intIndex].FilePath;
@@ -233,12 +229,12 @@ namespace MSFileInfoScanner
         /// <returns>OxyPlot PlotContainer</returns>
         /// <remarks></remarks>
         private clsPlotContainer InitializePlot(
-            clsChromatogramInfo objData, 
-            string strTitle, 
-            int intMSLevelFilter, 
-            string strXAxisLabel, 
-            string strYAxisLabel, 
-            bool blnAutoMinMaxY, 
+            clsChromatogramInfo objData,
+            string strTitle,
+            int intMSLevelFilter,
+            string strXAxisLabel,
+            string strYAxisLabel,
+            bool blnAutoMinMaxY,
             bool blnYAxisExponentialNotation)
         {
 
@@ -252,7 +248,7 @@ namespace MSFileInfoScanner
 
 
             foreach (var chromDataPoint in objData.Scans) {
-            
+
                 if (intMSLevelFilter != 0 && chromDataPoint.MSLevel != intMSLevelFilter &&
                     !(intMSLevelFilter == 2 & chromDataPoint.MSLevel >= 2))
                 {
@@ -287,7 +283,7 @@ namespace MSFileInfoScanner
             intMaxScan = (int)Math.Ceiling(intMaxScan / 10.0) * 10;
 
             // Multiple dblMaxIntensity by 2% and then round up to the nearest integer
-            dblMaxIntensity = (double)Math.Ceiling(dblMaxIntensity * 1.02);
+            dblMaxIntensity = Math.Ceiling(dblMaxIntensity * 1.02);
 
             var myPlot = clsOxyplotUtilities.GetBasicPlotModel(strTitle, strXAxisLabel, strYAxisLabel);
 
@@ -323,7 +319,7 @@ namespace MSFileInfoScanner
 
                 // Alternative method is to add a TextAnnotation, but these are inside the main plot area
                 // and are tied to a data point
-                // 
+                //
                 // var objScanTimeMaxText = new OxyPlot.Annotations.TextAnnotation
                 // {
                 //     TextRotation = 0,
@@ -332,7 +328,7 @@ namespace MSFileInfoScanner
                 //     StrokeThickness = 2,
                 //     FontSize = FONT_SIZE_BASE
                 // };
-                // 
+                //
                 // objScanTimeMaxText.TextPosition = new DataPoint(intMaxScan, 0);
                 // myPlot.Annotations.Add(objScanTimeMaxText);
 
@@ -515,13 +511,9 @@ namespace MSFileInfoScanner
         private class clsChromatogramInfo
         {
 
-            public int ScanCount {
-                get { return mScans.Count; }
-            }
+            public int ScanCount => mScans.Count;
 
-            public IEnumerable<clsChromatogramDataPoint> Scans {
-                get { return mScans; }
-            }
+            public IEnumerable<clsChromatogramDataPoint> Scans => mScans;
 
 
             private List<clsChromatogramDataPoint> mScans;
@@ -569,7 +561,6 @@ namespace MSFileInfoScanner
             {
                 RemoveRange(index, 1);
             }
-
 
             public void RemoveRange(int index, int count)
             {
