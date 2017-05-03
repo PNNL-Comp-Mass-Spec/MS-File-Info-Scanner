@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using pwiz.CLI.data;
-using PNNLOmics.Utilities;
 using PRISM;
 
 namespace MSFileInfoScanner
@@ -183,16 +182,16 @@ namespace MSFileInfoScanner
                     ScanType = 1,
                     ScanTypeName = "SRM",
                     ScanFilterText = StripExtraFromChromID(strChromID),
-                    ElutionTime = sngTimes[intIndex].ToString("0.0000"),
+                    ElutionTime = sngTimes[intIndex].ToString("0.0###"),
                     TotalIonIntensity = sngIntensities[intIndex].ToString("0.0"),
                     BasePeakIntensity = sngIntensities[intIndex].ToString("0.0")
                 };
 
 
                 if (blnParentMZFound) {
-                    objScanStatsEntry.BasePeakMZ = dblParentMZ.ToString("0.000");
+                    objScanStatsEntry.BasePeakMZ = dblParentMZ.ToString("0.0###");
                 } else if (blnProductMZFound) {
-                    objScanStatsEntry.BasePeakMZ = dblProductMZ.ToString("0.000");
+                    objScanStatsEntry.BasePeakMZ = dblProductMZ.ToString("0.0###");
                 } else {
                     objScanStatsEntry.BasePeakMZ = "0";
                 }
@@ -425,7 +424,7 @@ namespace MSFileInfoScanner
 
 
                         objScanStatsEntry.ScanFilterText = "";
-                        objScanStatsEntry.ElutionTime = dblScanTimes[intScanIndex].ToString("0.0000");
+                        objScanStatsEntry.ElutionTime = dblScanTimes[intScanIndex].ToString("0.0###");
 
                         // Bump up dblRuntimeMinutes if necessary
                         if (dblScanTimes[intScanIndex] > dblRuntimeMinutes) {

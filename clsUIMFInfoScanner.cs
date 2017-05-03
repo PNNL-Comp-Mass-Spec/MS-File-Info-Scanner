@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using PNNLOmics.Utilities;
+using PRISM;
 using UIMFLibrary;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -329,7 +329,7 @@ namespace MSFileInfoScanner
 
                     objScanStatsEntry.ScanFilterText = "";
 
-                    objScanStatsEntry.ElutionTime = dblElutionTime.ToString("0.0000");
+                    objScanStatsEntry.ElutionTime = dblElutionTime.ToString("0.0###");
                     if (dblTIC > BAD_TIC_OR_BPI) {
                         objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5);
                     } else {

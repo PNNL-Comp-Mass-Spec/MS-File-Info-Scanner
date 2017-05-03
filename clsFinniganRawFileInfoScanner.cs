@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using PNNLOmics.Utilities;
+using PRISM;
 using SpectraTypeClassifier;
 using ThermoRawFileReader;
 
@@ -206,10 +206,10 @@ namespace MSFileInfoScanner
                             ScanType = scanInfo.MSLevel,
                             ScanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(scanInfo.FilterText),
                             ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(scanInfo.FilterText),
-                            ElutionTime = scanInfo.RetentionTime.ToString("0.0000"),
+                            ElutionTime = scanInfo.RetentionTime.ToString("0.0###"),
                             TotalIonIntensity = StringUtilities.ValueToString(scanInfo.TotalIonCurrent, 5),
                             BasePeakIntensity = StringUtilities.ValueToString(scanInfo.BasePeakIntensity, 5),
-                            BasePeakMZ = StringUtilities.DblToString(scanInfo.BasePeakMZ, 4),
+                            BasePeakMZ = scanInfo.BasePeakMZ.ToString("0.0###"),
                             BasePeakSignalToNoiseRatio = "0",
                             IonCount = scanInfo.NumPeaks,
                             IonCountRaw = scanInfo.NumPeaks

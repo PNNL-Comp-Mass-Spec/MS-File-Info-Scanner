@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Data.SQLite;
 using System.Xml;
-using PNNLOmics.Utilities;
 using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -77,7 +76,7 @@ namespace MSFileInfoScanner
                 ScanType = intMSLevel,
                 ScanTypeName = strScanTypeName,
                 ScanFilterText = "",
-                ElutionTime = sngElutionTime.ToString("0.0000"),
+                ElutionTime = sngElutionTime.ToString("0.0###"),
                 TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5),
                 BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5),
                 BasePeakMZ = "0",

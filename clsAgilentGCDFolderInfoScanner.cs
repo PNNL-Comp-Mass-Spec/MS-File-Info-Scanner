@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using PNNLOmics.Utilities;
+using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
 //
@@ -259,10 +259,10 @@ namespace MSFileInfoScanner
                                 ScanType = intMSLevel,
                                 ScanTypeName = "GC-MS",
                                 ScanFilterText = "",
-                                ElutionTime = oSpectrum.RetentionTimeMinutes.ToString("0.0000"),
+                                ElutionTime = oSpectrum.RetentionTimeMinutes.ToString("0.0###"),
                                 TotalIonIntensity = StringUtilities.ValueToString(oSpectrum.TIC, 1),
                                 BasePeakIntensity = StringUtilities.ValueToString(oSpectrum.BasePeakAbundance, 1),
-                                BasePeakMZ = StringUtilities.ValueToString(oSpectrum.BasePeakMZ, 5),
+                                BasePeakMZ = oSpectrum.BasePeakMZ.ToString("0.0###"),
                                 BasePeakSignalToNoiseRatio = "0",
                                 IonCount = lstMZs.Count
                             };

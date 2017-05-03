@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using PNNLOmics.Utilities;
+using PRISM;
 using ThermoRawFileReader;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -396,10 +396,10 @@ namespace MSFileInfoScanner
                             ScanType = udtScanData.MSLevel,
                             ScanTypeName = scanTypeName,
                             ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(udtScanData.FilterText),
-                            ElutionTime = udtScanData.ElutionTime.ToString("0.0000"),
+                            ElutionTime = udtScanData.ElutionTime.ToString("0.0###"),
                             TotalIonIntensity = StringUtilities.ValueToString(udtScanData.TotalIonCurrent, 5),
                             BasePeakIntensity = StringUtilities.ValueToString(udtScanData.BasePeakIntensity, 5),
-                            BasePeakMZ = StringUtilities.DblToString(udtScanData.BasePeakMZ, 4),
+                            BasePeakMZ = udtScanData.BasePeakMZ.ToString("0.0###"),
                             BasePeakSignalToNoiseRatio = "0",
                             IonCount = udtScanData.NumDeisotoped,
                             IonCountRaw = udtScanData.NumPeaks,
