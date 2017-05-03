@@ -221,7 +221,7 @@ namespace MSFileInfoScanner
                                 dtEndTime = DateTime.Now;
                                 dtRunTimeSeconds2 = dtEndTime.Subtract(dtStartTime).TotalSeconds;
 
-                                Console.WriteLine("  " + oMZs.data.Count + " points with " + LOOP_ITERATIONS + " iterations gives Runtime1=" + dtRunTimeSeconds1.ToString("0.000") + " sec. vs. Runtime2=" + dtRunTimeSeconds2.ToString("0.000") + " sec.");
+                                Console.WriteLine("  " + oMZs.data.Count + " points with " + LOOP_ITERATIONS + " iterations gives Runtime1=" + dtRunTimeSeconds1.ToString("0.0##") + " sec. vs. Runtime2=" + dtRunTimeSeconds2.ToString("0.0##") + " sec.");
 
                                 if (Math.Abs(dblTIC1 - dblTIC2) > float.Epsilon) {
                                     Console.WriteLine("  TIC values don't agree; this is unexpected");

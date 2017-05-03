@@ -48,10 +48,10 @@ namespace MSFileInfoScanner
             {
                 if (Charge > 0)
                 {
-                    return MZ.ToString("0.000") + ", " + Intensity.ToString("0") + ", " + Charge + "+";
+                    return MZ.ToString("0.0###") + ", " + Intensity.ToString("0") + ", " + Charge + "+";
                 }
 
-                return MZ.ToString("0.000") + ", " + Intensity.ToString("0");
+                return MZ.ToString("0.0###") + ", " + Intensity.ToString("0");
             }
         }
 
