@@ -152,7 +152,7 @@ namespace MSFileInfoScanner
 
         private void LoadScanDetails(XRawFileIO objXcaliburAccessor)
         {
-            Console.Write("  Loading scan details");
+            OnStatusEvent("  Loading scan details");
 
             if (mSaveTICAndBPI)
             {
@@ -167,33 +167,29 @@ namespace MSFileInfoScanner
 
             var dtLastProgressTime = DateTime.UtcNow;
 
-            var intScanCount = objXcaliburAccessor.GetNumScans();
+            var scanCount = objXcaliburAccessor.GetNumScans();
 
-            int intScanStart;
-            int intScanEnd;
+            int scanStart;
+            int scanEnd;
 
-            GetStartAndEndScans(intScanCount, out intScanStart, out intScanEnd);
+            GetStartAndEndScans(scanCount, out scanStart, out scanEnd);
 
-            for (var intScanNumber = intScanStart; intScanNumber <= intScanEnd; intScanNumber++)
+            for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
             {
 
                 clsScanInfo scanInfo;
 
                 try
                 {
-                    if (mShowDebugInfo)
-                    {
-                        Console.WriteLine(" ... scan " + intScanNumber);
-                    }
 
-                    var blnSuccess = objXcaliburAccessor.GetScanInfo(intScanNumber, out scanInfo);
+                    var blnSuccess = objXcaliburAccessor.GetScanInfo(scanNumber, out scanInfo);
 
                     if (blnSuccess)
                     {
                         if (mSaveTICAndBPI)
                         {
                             mTICandBPIPlot.AddData(
-                                intScanNumber,
+                                scanNumber,
                                 scanInfo.MSLevel,
                                 (float)scanInfo.RetentionTime,
                                 scanInfo.BasePeakIntensity,
@@ -202,7 +198,7 @@ namespace MSFileInfoScanner
 
                         var objScanStatsEntry = new clsScanStatsEntry
                         {
-                            ScanNumber = intScanNumber,
+                            ScanNumber = scanNumber,
                             ScanType = scanInfo.MSLevel,
                             ScanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(scanInfo.FilterText),
                             ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(scanInfo.FilterText),
@@ -229,7 +225,7 @@ namespace MSFileInfoScanner
                 }
                 catch (Exception ex)
                 {
-                    OnErrorEvent("Error loading header info for scan " + intScanNumber + ": " + ex.Message);
+                    OnErrorEvent("Error loading header info for scan " + scanNumber + ": " + ex.Message);
                     continue;
                 }
 
@@ -243,13 +239,13 @@ namespace MSFileInfoScanner
                         double[,] dblMassIntensityPairs;
 
                         // Load the ions for this scan
-                        var intIonCount = objXcaliburAccessor.GetScanData2D(intScanNumber, out dblMassIntensityPairs);
+                        var intIonCount = objXcaliburAccessor.GetScanData2D(scanNumber, out dblMassIntensityPairs);
 
                         if (intIonCount > 0)
                         {
                             if (mSaveLCMS2DPlots)
                             {
-                                mLCMS2DPlot.AddScan2D(intScanNumber, scanInfo.MSLevel, (float)scanInfo.RetentionTime, intIonCount, dblMassIntensityPairs);
+                                mLCMS2DPlot.AddScan2D(scanNumber, scanInfo.MSLevel, (float)scanInfo.RetentionTime, intIonCount, dblMassIntensityPairs);
                             }
 
                             if (mCheckCentroidingStatus)
@@ -263,7 +259,7 @@ namespace MSFileInfoScanner
                                     lstMZs.Add(dblMassIntensityPairs[0, i]);
                                 }
 
-                                var centroidingStatus = GetCentroidStatus(intScanNumber, scanInfo);
+                                var centroidingStatus = GetCentroidStatus(scanNumber, scanInfo);
 
                                 mDatasetStatsSummarizer.ClassifySpectrum(lstMZs, scanInfo.MSLevel, centroidingStatus);
                             }
@@ -274,7 +270,7 @@ namespace MSFileInfoScanner
                 }
                 catch (Exception ex)
                 {
-                    OnErrorEvent("Error loading m/z and intensity values for scan " + intScanNumber + ": " + ex.Message);
+                    OnErrorEvent("Error loading m/z and intensity values for scan " + scanNumber + ": " + ex.Message);
                 }
 
                 ShowProgress(intScanNumber, intScanCount, ref dtLastProgressTime);
