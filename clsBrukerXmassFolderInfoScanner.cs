@@ -233,7 +233,7 @@ namespace MSFileInfoScanner
                 return acqusFiles.First();
             }
 
-            // Often the Bruker file structures contain multiple Acqus files. I will select 
+            // Often the Bruker file structures contain multiple Acqus files. I will select
             // the one that is in the same folder as the 'ser' file and if that isn't present,
             // the same folder as the 'fid' file. Otherwise, throw errors
 
@@ -829,7 +829,7 @@ namespace MSFileInfoScanner
                 // User specified a file; assume the parent folder of this file is the dataset folder
                 return fiFileInfo.Directory;
             }
-            
+
             // Assume this is the path to the dataset folder
             return new DirectoryInfo(strDataFilePath);
         }
@@ -945,8 +945,8 @@ namespace MSFileInfoScanner
                 if (fiFiles.Count == 0)
                 {
                     OnErrorEvent(
-                        string.Join(" or ", lstInstrumentDataFiles) + " or " + 
-                        BRUKER_MCF_FILE_EXTENSION + " or " + 
+                        string.Join(" or ", lstInstrumentDataFiles) + " or " +
+                        BRUKER_MCF_FILE_EXTENSION + " or " +
                         BRUKER_SQLITE_INDEX_EXTENSION + " file not found in " + diDatasetFolder.FullName);
                     return false;
                 }
@@ -1149,7 +1149,11 @@ namespace MSFileInfoScanner
 
                     }
 
+                    var percentComplete = scanNumber / (float)scanCount * 100;
+                    OnProgressUpdate("Scans processed: " + scanNumber, percentComplete);
+
                     ShowProgress(scanNumber, scanCount, ref dtLastProgressTime, 2);
+
                 }
 
                 return true;

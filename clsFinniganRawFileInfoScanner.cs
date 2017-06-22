@@ -273,7 +273,10 @@ namespace MSFileInfoScanner
                     OnErrorEvent("Error loading m/z and intensity values for scan " + scanNumber + ": " + ex.Message);
                 }
 
-                ShowProgress(intScanNumber, intScanCount, ref dtLastProgressTime);
+                var percentComplete = scanNumber / (float)scanCount * 100;
+                OnProgressUpdate("Scans processed: " + scanNumber, percentComplete);
+
+                ShowProgress(scanNumber, scanCount, ref dtLastProgressTime);
 
             }
 

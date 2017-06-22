@@ -418,6 +418,9 @@ namespace MSFileInfoScanner
                     OnWarningEvent("Error loading header info for frame " + intFrameNumber + ": " + ex.Message);
                 }
 
+                var percentComplete = intMasterFrameNumIndex / (float)intMasterFrameNumList.Length * 100;
+                OnProgressUpdate("Frames processed: " + intMasterFrameNumIndex, percentComplete);
+
                 ShowProgress(intMasterFrameNumIndex, intMasterFrameNumList.Length, ref dtLastProgressTime);
 
                 dblFrameStartTimePrevious = dblFrameStartTimeCurrent;
