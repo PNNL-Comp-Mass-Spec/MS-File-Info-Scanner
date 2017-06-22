@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.4.6381; June 21, 2017
+	- Report progress using OnProgressUpdate
+
 Version 1.4.6332; May 3, 2017
 	- Use ValueToString in PRISM.dll instead of PNNLOmics.dll
  

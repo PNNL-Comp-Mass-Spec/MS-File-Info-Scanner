@@ -14,7 +14,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "April 12, 2017";
+        public const string PROGRAM_DATE = "June 21, 2017";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
@@ -62,6 +62,8 @@ namespace MSFileInfoScanner
         private static bool mZipFileCheckAllData;
 
         private static bool mPostResultsToDMS;
+
+        private static DateTime mLastProgressTime;
 
         /// <summary>
         /// Main function
@@ -114,6 +116,8 @@ namespace MSFileInfoScanner
             mMaximumTextFileLinesToCheck = clsFileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK;
 
             mPostResultsToDMS = false;
+
+            mLastProgressTime = DateTime.UtcNow;
 
             //'TestZipper("\\proto-6\Db_Backups\Albert_Backup\MT_Shewanella_P196", "*.BAK.zip")
             //'Return 0
@@ -615,6 +619,11 @@ namespace MSFileInfoScanner
 
         private static void mMSFileScanner_ProgressUpdate(string progressMessage, float percentComplete)
         {
+            if (DateTime.UtcNow.Subtract(mLastProgressTime).TotalSeconds < 5)
+                return;
+
+            Console.WriteLine();
+            mLastProgressTime = DateTime.UtcNow;
             mMSFileScanner_DebugEvent(percentComplete.ToString("0.0") + "%, " + progressMessage);
         }
 
