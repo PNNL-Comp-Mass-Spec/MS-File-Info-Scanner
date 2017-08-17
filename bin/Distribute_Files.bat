@@ -1,4 +1,4 @@
-xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner_Installer\Debug\MSFileInfoScanner_Installer.msi" \\floyd\Software\MSFileInfoScanner /y
+rem Obsolete: xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner_Installer\Debug\MSFileInfoScanner_Installer.msi" \\floyd\Software\MSFileInfoScanner /y
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt" \\floyd\Software\MSFileInfoScanner /y
 
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScannerInterfaces.dll"   "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\bin" /y
@@ -30,18 +30,20 @@ xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileIn
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.xml"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\SpectraTypeClassifier.dll"       \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.*"   \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
-xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
-xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\UIMFLibrary.*"                   \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
-xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MathNet.Numerics.*"                   \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
+xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\UIMFLibrary.*"                   \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MathNet.Numerics.*"              \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\PRISM.dll"                       \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.dll"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution_NewDecon2LS\MSFileInfoScanner /y
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.pdb"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution_NewDecon2LS\MSFileInfoScanner /y
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.xml"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution_NewDecon2LS\MSFileInfoScanner /y
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\SpectraTypeClassifier.dll"       \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution_NewDecon2LS\MSFileInfoScanner /y
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.*"   \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution_NewDecon2LS\MSFileInfoScanner /y
-xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution_NewDecon2LS\MSFileInfoScanner /y
+xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution_NewDecon2LS\MSFileInfoScanner /y /d
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\UIMFLibrary.*"                   \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution_NewDecon2LS\MSFileInfoScanner /y /d
-xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MathNet.Numerics.*"                   \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution_NewDecon2LS\MSFileInfoScanner /y /d
+xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MathNet.Numerics.*"              \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution_NewDecon2LS\MSFileInfoScanner /y /d
+xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\PRISM.dll"                       \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution_NewDecon2LS\MSFileInfoScanner /y /d
 
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.dll"   \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution /y
 
@@ -50,8 +52,9 @@ xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileIn
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.xml"           \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\SpectraTypeClassifier.dll"       \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.*"   \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
-xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
+xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\UIMFLibrary.*"                   \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MathNet.Numerics.*"                   \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MathNet.Numerics.*"              \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\My Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\PRISM.dll"                       \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 
 pause
