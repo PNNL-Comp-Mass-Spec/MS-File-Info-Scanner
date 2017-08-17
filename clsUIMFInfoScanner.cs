@@ -237,7 +237,15 @@ namespace MSFileInfoScanner
 
             for (var intMasterFrameNumIndex = 0; intMasterFrameNumIndex <= intMasterFrameNumList.Length - 1; intMasterFrameNumIndex++) {
                 var intFrameNumber = intMasterFrameNumList[intMasterFrameNumIndex];
-                var eFrameType = dctMasterFrameList[intFrameNumber];
+
+                if (!dctMasterFrameList.TryGetValue(intFrameNumber, out var eFrameType))
+                {
+                    OnWarningEvent(string.Format(
+                        "Frametype {0} not found in dictionary dctMasterFrameList; ignoring frame {1}",
+                        eFrameType, intFrameNumber));
+
+                    continue;
+                }
 
                 // Check whether the frame number is within the desired range
                 if (intFrameNumber < intFrameStart || intFrameNumber > intFrameEnd) {
