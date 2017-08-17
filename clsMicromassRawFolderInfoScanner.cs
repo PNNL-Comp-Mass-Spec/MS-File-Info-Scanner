@@ -87,51 +87,67 @@ namespace MSFileInfoScanner
 
                 var objNativeFileIO = new clsMassLynxNativeIO();
 
-                clsMassLynxNativeIO.udtMSHeaderInfoType udtHeaderInfo;
-                if (objNativeFileIO.GetFileInfo(ioFolderInfo.FullName, out udtHeaderInfo)) {
+                if (objNativeFileIO.GetFileInfo(ioFolderInfo.FullName, out var udtHeaderInfo))
+                {
                     var dtNewStartDate = DateTime.Parse(udtHeaderInfo.AcquDate + " " + udtHeaderInfo.AcquTime);
 
                     var intFunctionCount = objNativeFileIO.GetFunctionCount(ioFolderInfo.FullName);
 
-                    if (intFunctionCount > 0) {
+                    if (intFunctionCount > 0)
+                    {
                         // Sum up the scan count of all of the functions
                         // Additionally, find the largest EndRT value in all of the functions
                         float sngEndRT = 0;
                         for (var intFunctionNumber = 1; intFunctionNumber <= intFunctionCount; intFunctionNumber++)
                         {
-                            clsMassLynxNativeIO.udtMSFunctionInfoType udtFunctionInfo;
-                            if (objNativeFileIO.GetFunctionInfo(ioFolderInfo.FullName, 1, out udtFunctionInfo)) {
+                            if (objNativeFileIO.GetFunctionInfo(ioFolderInfo.FullName, 1, out clsMassLynxNativeIO.udtMSFunctionInfoType udtFunctionInfo))
+                            {
                                 datasetFileInfo.ScanCount += udtFunctionInfo.ScanCount;
-                                if (udtFunctionInfo.EndRT > sngEndRT) {
+                                if (udtFunctionInfo.EndRT > sngEndRT)
+                                {
                                     sngEndRT = udtFunctionInfo.EndRT;
                                 }
                             }
                         }
 
-                        if (dtNewStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME) {
+                        if (dtNewStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                        {
                             datasetFileInfo.AcqTimeStart = dtNewStartDate;
 
-                            if (sngEndRT > 0) {
+                            if (sngEndRT > 0)
+                            {
                                 datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.Add(MinutesToTimeSpan(sngEndRT));
-                            } else {
-                                datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
                             }
-                        } else {
-                            // Keep .AcqTimeEnd as the file modification date
-                            // Set .AcqTimeStart based on .AcqEndTime
-                            if (sngEndRT > 0) {
-                                datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.Subtract(MinutesToTimeSpan(sngEndRT));
-                            } else {
+                            else
+                            {
                                 datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
                             }
                         }
-                    } else {
-                        if (dtNewStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME) {
+                        else
+                        {
+                            // Keep .AcqTimeEnd as the file modification date
+                            // Set .AcqTimeStart based on .AcqEndTime
+                            if (sngEndRT > 0)
+                            {
+                                datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.Subtract(MinutesToTimeSpan(sngEndRT));
+                            }
+                            else
+                            {
+                                datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (dtNewStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                        {
                             datasetFileInfo.AcqTimeStart = dtNewStartDate;
                         }
                     }
 
-                } else {
+                }
+                else
+                {
                     // Error getting the header info using clsMassLynxNativeIO
                     // Continue anyway since we've populated some of the values
                 }

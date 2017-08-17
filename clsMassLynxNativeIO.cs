@@ -531,19 +531,12 @@ namespace MSFileInfoScanner
             int lngFunctionNumber,
             out short intFunctionType)
         {
-            int lngScanCount;
-            float sngStartRT;
-            float sngEndRT;
-            float sngStartMass;
-            float sngEndMass;
-            string strFunctionTypeText;
-            double dblFunctionSetMass;
 
             return GetFunctionInfo(strMLynxDataFolderPath, lngFunctionNumber,
-                                   out lngScanCount, out sngStartRT, out sngEndRT,
-                                   out sngStartMass, out sngEndMass,
-                                   out intFunctionType, out strFunctionTypeText,
-                                   out dblFunctionSetMass);
+                                   out _, out _, out _,
+                                   out _, out _,
+                                   out intFunctionType, out _,
+                                   out _);
         }
 
         public bool GetFunctionInfo(
@@ -708,16 +701,10 @@ namespace MSFileInfoScanner
             // Note that ScanType = 0 means MS-only scan (survey scan)
             // ScanType > 0 means ms/ms scan
 
-            bool blnCalibrated;
-            bool blnContinuum;
-            bool blnOverload;
-            float sngMassStart;
-            float sngMassEnd;
-
             return GetScanInfoEx(strMLynxDataFolderPath, lngFunctionNumber, lngScanNumber,
                                  out lngScanType, out sngBasePeakMZ, out sngParentIonMZ, out sngRT,
-                                 out sngBasePeakIntensity, out sngTotalIonCurrent, out blnCalibrated,
-                                 out blnContinuum, out blnOverload, out sngMassStart, out sngMassEnd);
+                                 out sngBasePeakIntensity, out sngTotalIonCurrent, out _,
+                                 out _, out _, out _, out _);
         }
 
         public bool GetScanInfoEx(
@@ -807,9 +794,7 @@ namespace MSFileInfoScanner
         public bool IsFunctionMsMs(string strMLynxDataFolderPath, int lngFunctionNumber)
         {
 
-            short intFunctionType;
-
-            if (GetFunctionInfo(strMLynxDataFolderPath, lngFunctionNumber, out intFunctionType))
+            if (GetFunctionInfo(strMLynxDataFolderPath, lngFunctionNumber, out short intFunctionType))
             {
                 return (intFunctionType != 0);
             }
@@ -819,22 +804,11 @@ namespace MSFileInfoScanner
 
         public bool IsSpectrumContinuumData(string strMLynxDataFolderPath, int lngFunctionNumber, int lngScanNumber = 1)
         {
-            int lngScanType;
-            float sngBasePeakMZ;
-            float sngParentIonMZ;
-            float sngRT;
-            float sngBasePeakIntensity;
-            float sngTotalIonCurrent;
-            bool blnCalibrated;
-            bool blnContinuum;
-            bool blnOverload;
-            float sngMassStart;
-            float sngMassEnd;
 
             if (GetScanInfoEx(strMLynxDataFolderPath, lngFunctionNumber, lngScanNumber,
-                              out lngScanType, out sngBasePeakMZ, out sngParentIonMZ, out sngRT,
-                              out sngBasePeakIntensity, out sngTotalIonCurrent, out blnCalibrated,
-                              out blnContinuum, out blnOverload, out sngMassStart, out sngMassEnd))
+                              out _, out _, out _, out _,
+                              out _, out _, out _,
+                              out var blnContinuum, out _, out _, out _))
             {
                 return blnContinuum;
             }
@@ -1224,8 +1198,7 @@ namespace MSFileInfoScanner
 
         private int CLngSafe(string strValue)
         {
-            int value;
-            if (int.TryParse(strValue, out value))
+            if (int.TryParse(strValue, out var value))
             {
                 return value;
             }
@@ -1234,8 +1207,7 @@ namespace MSFileInfoScanner
 
         private float CSngSafe(string strValue)
         {
-            float value;
-            if (float.TryParse(strValue, out value))
+            if (float.TryParse(strValue, out var value))
             {
                 return value;
             }
@@ -1444,7 +1416,6 @@ namespace MSFileInfoScanner
 
                     udtMSFunctionInfo.FunctionSetMass = udtNativeFunctionInfo.FunctionSetMass;
                     udtMSFunctionInfo.InterSegmentChannelTime = udtNativeFunctionInfo.InterSegmentChannelTime;
-
 
                     // Since udtNativeFunctionInfo.ScanCount is always 0, we need to use NativeIOGetScanCount instead
                     var lngScanCount = NativeIOGetScanCount(dataDirPath, ref udtMSFunctionInfo);
@@ -1660,8 +1631,7 @@ namespace MSFileInfoScanner
 
             for (var intCalIndex = 0; intCalIndex <= strCalParameters.Length - 1; intCalIndex++)
             {
-                double paramValue;
-                if (double.TryParse(strCalParameters[intCalIndex], out paramValue))
+                if (double.TryParse(strCalParameters[intCalIndex], out var paramValue))
                 {
                     dblCalibrationCoeffs[intCalIndex] = paramValue;
                     intCalibrationCoeffCount++;
@@ -1678,8 +1648,7 @@ namespace MSFileInfoScanner
                 if (strCalParameters[intCalIndex].ToUpper().StartsWith("T"))
                 {
                     strCalParameters[intCalIndex] = strCalParameters[intCalIndex].Substring(1);
-                    short calTypeID;
-                    if (short.TryParse(strCalParameters[intCalIndex], out calTypeID))
+                    if (short.TryParse(strCalParameters[intCalIndex], out var calTypeID))
                     {
                         intCalibrationTypeID = calTypeID;
                     }
@@ -1746,8 +1715,8 @@ namespace MSFileInfoScanner
                                     lngFunctionNumber = CLngSafe(strLineIn.Substring(CAL_STDDEV_FUNCTION_NAME.Length, intColonLoc - CAL_STDDEV_FUNCTION_NAME.Length));
                                     if (lngFunctionNumber >= 1 & lngFunctionNumber <= udtThisMSData.FunctionCount)
                                     {
-                                        double calStdDev;
-                                        if (double.TryParse(strKeyValue, out calStdDev)) {
+                                        if (double.TryParse(strKeyValue, out var calStdDev))
+                                        {
                                             udtThisMSData.FunctionInfo[lngFunctionNumber].CalStDev = calStdDev;
                                         }
                                     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Data.SQLite;
@@ -85,9 +86,7 @@ namespace MSFileInfoScanner
                 IonCountRaw = 0
             };
 
-
-            double dblElutionTime;
-            if (double.TryParse(objScanStatsEntry.ElutionTime, out dblElutionTime))
+            if (double.TryParse(objScanStatsEntry.ElutionTime, out var dblElutionTime))
             {
                 if (dblElutionTime > dblMaxRunTimeMinutes)
                 {
@@ -237,7 +236,6 @@ namespace MSFileInfoScanner
             // the one that is in the same folder as the 'ser' file and if that isn't present,
             // the same folder as the 'fid' file. Otherwise, throw errors
 
-
             foreach (var acquFile in acqusFiles)
             {
                 if (acquFile.Directory != null && acquFile.Directory.Name.Equals(diDotDFolder.Name, StringComparison.OrdinalIgnoreCase))
@@ -333,8 +331,7 @@ namespace MSFileInfoScanner
                             continue;
                         }
 
-                        int intScanNumber;
-                        if (!int.TryParse(strSplitLine[0], out intScanNumber))
+                        if (!int.TryParse(strSplitLine[0], out var intScanNumber))
                         {
                             continue;
                         }
@@ -984,13 +981,12 @@ namespace MSFileInfoScanner
 
                 if (!success)
                 {
-                    Dictionary<int, float> scanElutionTimeMap;
 
                     // Parse the scan.xml file (if it exists) to determine the number of spectra acquired
                     // We can also obtain TIC and elution time values from this file
                     // However, it does not track whether a scan is MS or MSn
                     // If the scans.xml file contains runtime entries (e.g. <minutes>100.0456</minutes>) then .AcqTimeEnd is updated using .AcqTimeStart + RunTimeMinutes
-                    success = ParseScanXMLFile(diDatasetFolder, datasetFileInfo, out scanElutionTimeMap);
+                    success = ParseScanXMLFile(diDatasetFolder, datasetFileInfo, out var scanElutionTimeMap);
 
                     var bafFileParsed = false;
 
@@ -1112,8 +1108,7 @@ namespace MSFileInfoScanner
                     }
 
                     const int msLevel = 1;
-                    float elutionTime;
-                    if (!scanElutionTimeMap.TryGetValue(scanNumber, out elutionTime))
+                    if (!scanElutionTimeMap.TryGetValue(scanNumber, out var elutionTime))
                     {
                         elutionTime = scanNumber / 60f;
                     }
@@ -1176,18 +1171,12 @@ namespace MSFileInfoScanner
 
             var cmd = new SQLiteCommand(cnDB);
 
-            string strTable;
-            string strField;
-
-            int intMetadataId;
-
-            if (!GetMetaDataFieldAndTable(eMcfMetadataField, out strField, out strTable))
+            if (!GetMetaDataFieldAndTable(eMcfMetadataField, out var strField, out var strTable))
             {
                 return false;
             }
 
-
-            if (lstMetadataNameToID.TryGetValue(strField, out intMetadataId))
+            if (lstMetadataNameToID.TryGetValue(strField, out var intMetadataId))
             {
                 cmd.CommandText = "SELECT GuidA, MetaDataId, Value FROM " + strTable + " WHERE MetaDataId = " + intMetadataId;
 
@@ -1199,9 +1188,8 @@ namespace MSFileInfoScanner
                         var strGuid = ReadDbString(drReader, "GuidA");
                         var strValue = ReadDbString(drReader, "Value");
 
-                        udtMCFScanInfoType udtScanInfo;
                         bool blnNewEntry;
-                        if (lstScanData.TryGetValue(strGuid, out udtScanInfo))
+                        if (lstScanData.TryGetValue(strGuid, out var udtScanInfo))
                         {
                             blnNewEntry = false;
                         }
@@ -1252,15 +1240,14 @@ namespace MSFileInfoScanner
             return strValue;
         }
 
-        private int ReadDbInt(SQLiteDataReader drReader, string strColumnName)
+        private int ReadDbInt(IDataRecord drReader, string strColumnName)
         {
             try
             {
                 var strValue = drReader[strColumnName].ToString();
                 if (!string.IsNullOrEmpty(strValue))
                 {
-                    int intValue;
-                    if (int.TryParse(strValue, out intValue))
+                    if (int.TryParse(strValue, out var intValue))
                     {
                         return intValue;
                     }

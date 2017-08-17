@@ -12,7 +12,6 @@ namespace MSFileInfoScanner
     public class clsBrukerOneFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
 
-
         public const string BRUKER_ONE_FOLDER_NAME = "1";
         private const string BRUKER_LOCK_FILE = "LOCK";
         private const string BRUKER_ACQU_FILE = "acqu";
@@ -126,8 +125,7 @@ namespace MSFileInfoScanner
                                 strLineIn = strLineIn.Substring(BRUKER_ACQU_FILE_ACQ_LINE_START.Length).Trim();
                                 strLineIn = strLineIn.TrimEnd(BRUKER_ACQU_FILE_ACQ_LINE_END);
 
-                                DateTime dtDate;
-                                blnSuccess = ParseBrukerDateFromArray(strLineIn, out dtDate);
+                                blnSuccess = ParseBrukerDateFromArray(strLineIn, out var dtDate);
                                 if (blnSuccess)
                                     datasetFileInfo.AcqTimeEnd = dtDate;
                                 break;
@@ -166,8 +164,7 @@ namespace MSFileInfoScanner
                             // Date line found
                             // It is of the form: wd37119 2208 WD37119\9TOperator Sat Aug 20 06:10:31 2005
 
-                            DateTime dtDate;
-                            blnSuccess = ParseBrukerDateFromArray(strLineIn, out dtDate);
+                            blnSuccess = ParseBrukerDateFromArray(strLineIn, out var dtDate);
                             if (blnSuccess)
                                 datasetFileInfo.AcqTimeStart = dtDate;
                         }

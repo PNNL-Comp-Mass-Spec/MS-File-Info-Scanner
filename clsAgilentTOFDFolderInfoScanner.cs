@@ -234,10 +234,8 @@ namespace MSFileInfoScanner
                     // Parse the Contents.xml file to determine the acquisition start time
                     var blnAcqStartTimeDetermined = ProcessContentsXMLFile(diAcqDataFolder.FullName, datasetFileInfo);
 
-                    double dblAcquisitionLengthMinutes;
-
                     // Parse the MSTS.xml file to determine the acquisition length and number of scans
-                    var blnValidMSTS = ProcessTimeSegmentFile(diAcqDataFolder.FullName, datasetFileInfo, out dblAcquisitionLengthMinutes);
+                    var blnValidMSTS = ProcessTimeSegmentFile(diAcqDataFolder.FullName, datasetFileInfo, out var dblAcquisitionLengthMinutes);
 
                     if (!blnAcqStartTimeDetermined && blnValidMSTS) {
                         // Compute the start time from .AcqTimeEnd minus dblAcquisitionLengthMinutes
@@ -317,8 +315,7 @@ namespace MSFileInfoScanner
 
                 if (objPWiz.ChromatogramCount > 0) {
                     // Process the chromatograms
-                    bool blnSRMDataCached;
-                    pWizParser.StoreChromatogramInfo(datasetFileInfo, out blnTICStored, out blnSRMDataCached, out dblRuntimeMinutes);
+                    pWizParser.StoreChromatogramInfo(datasetFileInfo, out blnTICStored, out _, out dblRuntimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
 
                 }

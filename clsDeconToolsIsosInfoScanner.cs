@@ -364,10 +364,10 @@ namespace MSFileInfoScanner
 
                         if (intColIndexScanInfo > 0) {
                             var infoText = lstData[intColIndexScanInfo];
-                            int infoValue;
 
                             // Only store infoText in .FilterText if infoText is not simply an integer
-                            if (!int.TryParse(infoText, out infoValue)) {
+                            if (!int.TryParse(infoText, out _))
+                            {
                                 udtScanData.FilterText = infoText;
                             }
 

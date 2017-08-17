@@ -14,7 +14,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "June 21, 2017";
+        public const string PROGRAM_DATE = "August 16, 2017";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
@@ -289,10 +289,9 @@ namespace MSFileInfoScanner
                 }
 
                 int value;
-                string strValue;
 
                 // Query parser to see if various parameters are present
-                if (parser.RetrieveValueForParameter("I", out strValue))
+                if (parser.RetrieveValueForParameter("I", out var strValue))
                 {
                     mInputDataFilePath = strValue;
                 }

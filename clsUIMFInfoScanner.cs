@@ -50,12 +50,10 @@ namespace MSFileInfoScanner
                 var intIntensityList = new int[intGlobalMaxBins + 1];
 
                 // Call .GetStartAndEndScans to get the start and end Frames
-                int intFrameStart;
-                int intFrameEnd;
-                GetStartAndEndScans(objGlobalParams.NumFrames, out intFrameStart, out intFrameEnd);
+                GetStartAndEndScans(objGlobalParams.NumFrames, out var intFrameStart, out var intFrameEnd);
 
-
-                for (var intMasterFrameNumIndex = 0; intMasterFrameNumIndex <= intMasterFrameNumList.Length - 1; intMasterFrameNumIndex++) {
+                for (var intMasterFrameNumIndex = 0; intMasterFrameNumIndex <= intMasterFrameNumList.Count - 1; intMasterFrameNumIndex++)
+                {
                     var intFrameNumber = intMasterFrameNumList[intMasterFrameNumIndex];
                     var eFrameType = dctMasterFrameList[intFrameNumber];
 
@@ -220,10 +218,10 @@ namespace MSFileInfoScanner
             var dblIonsIntensity = new double[intGlobalMaxBins + 1];
 
             // Call .GetStartAndEndScans to get the start and end Frames
-            GetStartAndEndScans(objGlobalParams.NumFrames, out intFrameStart, out intFrameEnd);
+            GetStartAndEndScans(objGlobalParams.NumFrames, out var intFrameStart, out var intFrameEnd);
 
             // Construct the TIC and BPI (of all frames)
-            ConstructTICandBPI(objUIMFReader, intFrameStart, intFrameEnd, out dctTIC, out dctBPI);
+            ConstructTICandBPI(objUIMFReader, intFrameStart, intFrameEnd, out var dctTIC, out var dctBPI);
 
             Console.Write("  Loading frame details");
 
@@ -292,14 +290,12 @@ namespace MSFileInfoScanner
                     // Compute the elution time (in minutes) of this frame
                     var dblElutionTime = dblFrameStartTimeCurrent + dblFrameStartTimeAddon - dblFrameStartTimeInitial;
 
-                    double dblBPI;
-                    double dblTIC;
-
-                    if (!dctBPI.TryGetValue(intFrameNumber, out dblBPI)) {
+                    if (!dctBPI.TryGetValue(intFrameNumber, out var dblBPI))
+                    {
                         dblBPI = BAD_TIC_OR_BPI;
                     }
 
-                    if (!dctTIC.TryGetValue(intFrameNumber, out dblTIC))
+                    if (!dctTIC.TryGetValue(intFrameNumber, out var dblTIC))
                     {
                         dblTIC = BAD_TIC_OR_BPI;
                     }
@@ -538,13 +534,14 @@ namespace MSFileInfoScanner
                     double dblRunTime = 0;
 
                     // First examine objGlobalParams.DateStarted
-                    try {
-                        DateTime dtReportedDateStarted;
+                    try
+                    {
 
                         var blnValidStartTime = false;
                         var strReportedDateStarted = objGlobalParams.GetValue(GlobalParamKeyType.DateStarted);
 
-                        if (!DateTime.TryParse(strReportedDateStarted, out dtReportedDateStarted)) {
+                        if (!DateTime.TryParse(strReportedDateStarted, out var dtReportedDateStarted))
+                        {
                             // Invalid date; log a message
                             OnWarningEvent(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + strReportedDateStarted + "; " +
                                 "will use the time the datafile was last modified");

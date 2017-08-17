@@ -130,8 +130,7 @@ namespace MSFileInfoScanner
                                 continue;
                             }
 
-                            double dblRunTime;
-                            if (!ExtractRunTime(strLineIn, out dblRunTime))
+                            if (!ExtractRunTime(strLineIn, out var dblRunTime))
                             {
                                 continue;
                             }

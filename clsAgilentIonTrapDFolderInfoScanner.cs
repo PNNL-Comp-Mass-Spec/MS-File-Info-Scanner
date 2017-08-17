@@ -187,7 +187,7 @@ namespace MSFileInfoScanner
                         // Lookup the scan time of the final scan
 
                         if (objNETCDFReader.GetScanInfo(intScanCount - 1, out var intScanNumber,
-                            out var dblScanTotalIntensity, out var dblScanTime, out var dblMassMin, out var dblMassMax))
+                            out _, out var dblScanTime, out _, out _))
                         {
                             // Add 1 to intScanNumber since the scan number is off by one in the CDF file
                             datasetFileInfo.ScanCount = intScanNumber + 1;

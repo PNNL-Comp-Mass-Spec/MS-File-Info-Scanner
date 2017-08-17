@@ -56,16 +56,12 @@ namespace MSFileInfoScanner
             else
             {
                 var intScanCount = objXcaliburAccessor.GetNumScans();
-                int intScanStart;
-                int intScanEnd;
-                GetStartAndEndScans(intScanCount, out intScanStart, out intScanEnd);
+                GetStartAndEndScans(intScanCount, out var intScanStart, out var intScanEnd);
 
                 for (var intScanNumber = intScanStart; intScanNumber <= intScanEnd; intScanNumber++)
                 {
                     // This function returns the number of points in dblMassIntensityPairs()
-                    double[,] dblMassIntensityPairs;
-                    var intReturnCode = objXcaliburAccessor.GetScanData2D(intScanNumber, out dblMassIntensityPairs);
-
+                    var intReturnCode = objXcaliburAccessor.GetScanData2D(intScanNumber, out var dblMassIntensityPairs);
 
                     if (intReturnCode <= 0)
                     {
@@ -169,10 +165,7 @@ namespace MSFileInfoScanner
 
             var scanCount = objXcaliburAccessor.GetNumScans();
 
-            int scanStart;
-            int scanEnd;
-
-            GetStartAndEndScans(scanCount, out scanStart, out scanEnd);
+            GetStartAndEndScans(scanCount, out var scanStart, out var scanEnd);
 
             for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
             {
@@ -236,10 +229,8 @@ namespace MSFileInfoScanner
                     {
                         // Also need to load the raw data
 
-                        double[,] dblMassIntensityPairs;
-
                         // Load the ions for this scan
-                        var intIonCount = objXcaliburAccessor.GetScanData2D(scanNumber, out dblMassIntensityPairs);
+                        var intIonCount = objXcaliburAccessor.GetScanData2D(scanNumber, out var dblMassIntensityPairs);
 
                         if (intIonCount > 0)
                         {
@@ -409,8 +400,7 @@ namespace MSFileInfoScanner
                     {
                         // Look up the end scan time then compute .AcqTimeEnd
                         var intScanEnd = xcaliburAccessor.FileInfo.ScanEnd;
-                        clsScanInfo scanInfo;
-                        xcaliburAccessor.GetScanInfo(intScanEnd, out scanInfo);
+                        xcaliburAccessor.GetScanInfo(intScanEnd, out clsScanInfo scanInfo);
 
                         datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(scanInfo.RetentionTime);
                         datasetFileInfo.ScanCount = xcaliburAccessor.GetNumScans();

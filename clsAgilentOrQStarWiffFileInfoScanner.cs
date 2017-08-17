@@ -176,8 +176,7 @@ namespace MSFileInfoScanner
                         // Use the following to determine info on this spectrum
                         if (clsProteowizardDataParser.TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_ms_level, out param))
                         {
-                            int intMSLevel;
-                            int.TryParse(param.value, out intMSLevel);
+                            int.TryParse(param.value, out _);
                         }
 
                         // Use the following to get the MZs and Intensities
@@ -254,9 +253,9 @@ namespace MSFileInfoScanner
                         var oChromatogram = objPWiz2.run.chromatogramList.chromatogram(intChromIndex, getBinaryData: true);
 
                         // Determine the chromatogram type
-                        pwiz.CLI.data.CVParam param;
 
-                        if (clsProteowizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out param)) {
+                        if (clsProteowizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out var param))
+                        {
                             // Obtain the data
                             oChromatogram.getTimeIntensityPairs(ref oTimeIntensityPairList);
                         }

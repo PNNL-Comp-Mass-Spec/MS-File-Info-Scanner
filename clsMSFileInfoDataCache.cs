@@ -66,7 +66,6 @@ namespace MSFileInfoScanner
         }
         #endregion
 
-
         private enum eCachedResultsStateConstants
         {
             NotInitialized = 0,
@@ -120,7 +119,6 @@ namespace MSFileInfoScanner
             return dtDate;
         }
 
-
         public void AutosaveCachedResults()
         {
             if (mCachedResultsAutoSaveIntervalMinutes > 0)
@@ -148,8 +146,7 @@ namespace MSFileInfoScanner
 
         public bool CachedMSInfoContainsDataset(string strDatasetName)
         {
-            DataRow objRowMatch;
-            return CachedMSInfoContainsDataset(strDatasetName, out objRowMatch);
+            return CachedMSInfoContainsDataset(strDatasetName, out _);
         }
 
         public bool CachedMSInfoContainsDataset(string strDatasetName, out DataRow objRowMatch)
@@ -157,11 +154,9 @@ namespace MSFileInfoScanner
             return DatasetTableContainsPrimaryKeyValue(mMSFileInfoDataset, MS_FILEINFO_DATATABLE, strDatasetName, out objRowMatch);
         }
 
-
         public bool CachedFolderIntegrityInfoContainsFolder(string strFolderPath, out int intFolderID)
         {
-            DataRow objRowMatch;
-            return CachedFolderIntegrityInfoContainsFolder(strFolderPath, out intFolderID, out objRowMatch);
+            return CachedFolderIntegrityInfoContainsFolder(strFolderPath, out intFolderID, out _);
         }
 
         public bool CachedFolderIntegrityInfoContainsFolder(
@@ -219,8 +214,7 @@ namespace MSFileInfoScanner
         private bool DatasetTableContainsPrimaryKeyValue(
             DataSet dsDataset, string strTableName, string strValueToFind)
         {
-            DataRow objRowMatch;
-            return DatasetTableContainsPrimaryKeyValue(dsDataset, strTableName, strValueToFind, out objRowMatch);
+            return DatasetTableContainsPrimaryKeyValue(dsDataset, strTableName, strValueToFind, out _);
         }
 
         private bool DatasetTableContainsPrimaryKeyValue(
@@ -280,15 +274,13 @@ namespace MSFileInfoScanner
         {
             try
             {
-                double value;
-                return double.TryParse(strValue, out value);
+                return double.TryParse(strValue, out _);
             }
             catch (Exception)
             {
                 return false;
             }
         }
-
 
         private void InitializeDatasets()
         {
@@ -311,7 +303,6 @@ namespace MSFileInfoScanner
             // Use the dataset name as the primary key since we won't always know Dataset_ID
             var MSInfoPrimaryKeyColumn = new[] { dtMSFileInfo.Columns[COL_NAME_DATASET_NAME] };
             dtMSFileInfo.PrimaryKey = MSInfoPrimaryKeyColumn;
-
 
             // Make the Folder Integrity Info datatable
             var dtFolderIntegrityInfo = new DataTable(FOLDER_INTEGRITY_INFO_DATATABLE);
@@ -349,7 +340,6 @@ namespace MSFileInfoScanner
                 LoadCachedFolderIntegrityInfoResults();
             }
         }
-
 
         private void LoadCachedFolderIntegrityInfoResults()
         {
@@ -394,8 +384,7 @@ namespace MSFileInfoScanner
                         if (!IsNumber(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FolderID]))
                             continue;
 
-                        int intFolderID;
-                        if (CachedFolderIntegrityInfoContainsFolder(strFolderPath, out intFolderID))
+                        if (CachedFolderIntegrityInfoContainsFolder(strFolderPath, out var intFolderID))
                             continue;
 
                         try
@@ -426,7 +415,6 @@ namespace MSFileInfoScanner
             mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
 
         }
-
 
         private void LoadCachedMSFileInfoResults()
         {
@@ -521,8 +509,7 @@ namespace MSFileInfoScanner
 
         private DateTime ParseDate(string dateText)
         {
-            DateTime parsedDate;
-            if (DateTime.TryParse(dateText, out parsedDate))
+            if (DateTime.TryParse(dateText, out var parsedDate))
                 return parsedDate;
 
             return DateTime.MinValue;
@@ -532,7 +519,6 @@ namespace MSFileInfoScanner
         {
             PopulateMSInfoDataRow(datasetFileInfo, objRow, DateTime.Now);
         }
-
 
         private void PopulateMSInfoDataRow(clsDatasetFileInfo datasetFileInfo, DataRow objRow, DateTime dtInfoLastModified)
         {
@@ -557,7 +543,6 @@ namespace MSFileInfoScanner
         {
             PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow, DateTime.Now);
         }
-
 
         private void PopulateFolderIntegrityInfoDataRow(
             int intFolderID,
@@ -720,8 +705,7 @@ namespace MSFileInfoScanner
             try
             {
                 // Examine the data in memory and add or update the data for strDataset
-                DataRow objRow;
-                if (CachedMSInfoContainsDataset(datasetFileInfo.DatasetName, out objRow))
+                if (CachedMSInfoContainsDataset(datasetFileInfo.DatasetName, out var objRow))
                 {
                     // Item already present; update it
                     try
@@ -775,8 +759,7 @@ namespace MSFileInfoScanner
                 }
 
                 // Examine the data in memory and add or update the data for strDataset
-                DataRow objRow;
-                if (CachedFolderIntegrityInfoContainsFolder(udtFolderStats.FolderPath, out intFolderID, out objRow))
+                if (CachedFolderIntegrityInfoContainsFolder(udtFolderStats.FolderPath, out intFolderID, out var objRow))
                 {
                     // Item already present; update it
                     try
@@ -829,7 +812,6 @@ namespace MSFileInfoScanner
                 ((DateTime)objRow[COL_NAME_FILE_MODIFICATION_DATE]).ToString("yyyy-MM-dd HH:mm:ss"));
 
         }
-
 
         private void WriteFolderIntegrityInfoDataLine(StreamWriter srOutFile, DataRow objRow)
         {

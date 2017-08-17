@@ -255,25 +255,24 @@ namespace MSFileInfoScanner
             clsScanStatsEntry objScanStats,
             ref double dblElutionTimeMax,
             ref clsDatasetSummaryStats.udtSummaryStatDetailsType udtSummaryStatDetails,
-            double[] dblTICList,
+            IList<double> dblTICList,
             ref int intTICListCount,
-            double[] dblBPIList,
+            IList<double> dblBPIList,
             ref int intBPIListCount)
         {
-            double dblTIC;
-            double dblBPI;
 
             if (!string.IsNullOrEmpty(objScanStats.ElutionTime))
             {
-                double dblElutionTime;
-                if (double.TryParse(objScanStats.ElutionTime, out dblElutionTime)) {
-                    if (dblElutionTime > dblElutionTimeMax) {
+                if (double.TryParse(objScanStats.ElutionTime, out var dblElutionTime))
+                {
+                    if (dblElutionTime > dblElutionTimeMax)
+                    {
                         dblElutionTimeMax = dblElutionTime;
                     }
                 }
             }
 
-            if (double.TryParse(objScanStats.TotalIonIntensity, out dblTIC)) {
+            if (double.TryParse(objScanStats.TotalIonIntensity, out var dblTIC)) {
                 if (dblTIC > udtSummaryStatDetails.TICMax) {
                     udtSummaryStatDetails.TICMax = dblTIC;
                 }
@@ -282,7 +281,7 @@ namespace MSFileInfoScanner
                 intTICListCount += 1;
             }
 
-            if (double.TryParse(objScanStats.BasePeakIntensity, out dblBPI)) {
+            if (double.TryParse(objScanStats.BasePeakIntensity, out var dblBPI)) {
                 if (dblBPI > udtSummaryStatDetails.BPIMax) {
                     udtSummaryStatDetails.BPIMax = dblBPI;
                 }
@@ -390,7 +389,6 @@ namespace MSFileInfoScanner
         {
             return CreateDatasetInfoXML(strDatasetName, mDatasetScanStats, DatasetFileInfo, SampleInfo);
         }
-
 
         /// <summary>
         /// Creates XML summarizing the data in objScanStats and datasetFileInfo

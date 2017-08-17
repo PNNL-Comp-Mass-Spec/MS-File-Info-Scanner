@@ -535,8 +535,7 @@ namespace MSFileInfoScanner
                 bool blnSuccess;
                 if (mSaveTICAndBPI) {
                     // Write out the TIC and BPI plots
-                    string errorMessage;
-                    blnSuccess = mTICandBPIPlot.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, out errorMessage);
+                    blnSuccess = mTICandBPIPlot.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName, out var errorMessage);
                     if (!blnSuccess) {
                         OnErrorEvent("Error calling mTICandBPIPlot.SaveTICAndBPIPlotFiles: " + errorMessage);
                         successOverall = false;

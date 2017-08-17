@@ -158,12 +158,10 @@ namespace MSFileInfoScanner
             Dictionary<int, Dictionary<double, double>> dct2DDataProduct,
             Dictionary<int, float> dct2DDataScanTimes)
         {
-            double dblParentMZ;
-            double dblProductMZ;
 
             // Attempt to parse out the product m/z
-            var blnParentMZFound = ExtractQ1MZ(strChromID, out dblParentMZ);
-            var blnProductMZFound = ExtractQ3MZ(strChromID, out dblProductMZ);
+            var blnParentMZFound = ExtractQ1MZ(strChromID, out var dblParentMZ);
+            var blnProductMZFound = ExtractQ3MZ(strChromID, out var dblProductMZ);
 
             for (var intIndex = 0; intIndex <= sngTimes.Length - 1; intIndex++) {
                 // Find the ScanNumber in the TIC nearest to sngTimes[intIndex]
@@ -312,18 +310,14 @@ namespace MSFileInfoScanner
                     if (intChromIndex == 0) {
                         OnStatusEvent("Obtaining chromatograms (this could take as long as 60 seconds)");
                     }
-                    string strChromID;
-                    float[] sngTimes;
-                    float[] sngIntensities;
-                    mPWiz.GetChromatogram(intChromIndex, out strChromID, out sngTimes, out sngIntensities);
+                    mPWiz.GetChromatogram(intChromIndex, out var strChromID, out var sngTimes, out var sngIntensities);
 
                     if (strChromID == null)
                         strChromID = string.Empty;
 
-                    CVParam param;
                     var oCVParams = mPWiz.GetChromatogramCVParams(intChromIndex);
 
-                    if (TryGetCVParam(oCVParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out param)) {
+                    if (TryGetCVParam(oCVParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out var param)) {
                         // This chromatogram is the TIC
 
                         var blnStoreInTICandBPIPlot = (mSaveTICAndBPI && mPWiz.SpectrumCount == 0);
@@ -373,14 +367,12 @@ namespace MSFileInfoScanner
         public void StoreMSSpectraInfo(clsDatasetFileInfo datasetFileInfo, bool blnTICStored, ref double dblRuntimeMinutes)
         {
             try {
-                double[] dblScanTimes;
-                byte[] intMSLevels;
                 double dblTIC = 0;
                 double dblBPI = 0;
 
                 OnStatusEvent("Obtaining scan times and MSLevels (this could take several minutes)");
 
-                mPWiz.GetScanTimesAndMsLevels(out dblScanTimes, out intMSLevels);
+                mPWiz.GetScanTimesAndMsLevels(out var dblScanTimes, out var intMSLevels);
 
                 // The scan times returned by .GetScanTimesAndMsLevels() are the acquisition time in seconds from the start of the analysis
                 // Convert these to minutes
@@ -423,6 +415,7 @@ namespace MSFileInfoScanner
                         }
 
 
+                    
                         objScanStatsEntry.ScanFilterText = "";
                         objScanStatsEntry.ElutionTime = dblScanTimes[intScanIndex].ToString("0.0###");
 
@@ -433,8 +426,8 @@ namespace MSFileInfoScanner
 
                         var oSpectrum = mPWiz.GetSpectrumObject(intScanIndex);
 
-                        CVParam param;
-                        if (TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out param)) {
+                        if (TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out var param))
+                        {
                             dblTIC = param.value;
                             objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5);
                             blnComputeTIC = false;
@@ -534,24 +527,26 @@ namespace MSFileInfoScanner
             Store2DPlotDataWork(dct2DDataParent, dct2DDataScanTimes, 1, intMax2DDataCount, int2DScanNumMin, int2DScanNumMax);
             Store2DPlotDataWork(dct2DDataProduct, dct2DDataScanTimes, 2, intMax2DDataCount, int2DScanNumMin, int2DScanNumMax);
 
-
         }
 
-
-        private void Store2DPlotDataPoint(Dictionary<int, Dictionary<double, double>> dct2DData, int intScanNumber, double dblMZ, double dblIntensity)
+        private void Store2DPlotDataPoint(IDictionary<int, Dictionary<double, double>> dct2DData, int intScanNumber, double dblMZ, double dblIntensity)
         {
-            Dictionary<double, double> obj2DMzAndIntensity;
 
-            if (dct2DData.TryGetValue(intScanNumber, out obj2DMzAndIntensity)) {
-                double dblCurrentIntensity;
-                if (obj2DMzAndIntensity.TryGetValue(dblMZ, out dblCurrentIntensity)) {
+            if (dct2DData.TryGetValue(intScanNumber, out var obj2DMzAndIntensity))
+            {
+                if (obj2DMzAndIntensity.TryGetValue(dblMZ, out var dblCurrentIntensity))
+                {
                     // Bump up the stored intensity at dblProductMZ
                     obj2DMzAndIntensity[dblMZ] = dblCurrentIntensity + dblIntensity;
-                } else {
+                }
+                else
+                {
                     obj2DMzAndIntensity.Add(dblMZ, dblIntensity);
                 }
-            } else {
-                obj2DMzAndIntensity = new Dictionary<double, double> {{dblMZ, dblIntensity}};
+            }
+            else
+            {
+                obj2DMzAndIntensity = new Dictionary<double, double> { { dblMZ, dblIntensity } };
             }
 
             // Store the data for this scan

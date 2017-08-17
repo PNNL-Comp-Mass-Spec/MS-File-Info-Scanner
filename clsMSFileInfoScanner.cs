@@ -649,13 +649,13 @@ namespace MSFileInfoScanner
                 var checkFolder = true;
                 if (mUseCacheFiles && !forceRecheck)
                 {
-                    DataRow objRow;
-                    if (mMSFileInfoDataCache.CachedFolderIntegrityInfoContainsFolder(diFolderInfo.FullName, out folderID, out objRow))
+                    if (mMSFileInfoDataCache.CachedFolderIntegrityInfoContainsFolder(diFolderInfo.FullName, out folderID, out var objRow))
                     {
                         var cachedFileCount = (int)objRow[clsMSFileInfoDataCache.COL_NAME_FILE_COUNT];
                         var cachedCountFailIntegrity = (int)objRow[clsMSFileInfoDataCache.COL_NAME_COUNT_FAIL_INTEGRITY];
 
-                        if (cachedFileCount == fileCount && cachedCountFailIntegrity == 0) {
+                        if (cachedFileCount == fileCount && cachedCountFailIntegrity == 0)
+                        {
                             // Folder contains the same number of files as last time, and no files failed the integrity check last time
                             // Do not recheck the folder
                             checkFolder = false;
@@ -668,10 +668,7 @@ namespace MSFileInfoScanner
                     return;
                 }
 
-                clsFileIntegrityChecker.udtFolderStatsType udtFolderStats;
-                List<clsFileIntegrityChecker.udtFileStatsType> udtFileStats;
-
-                mFileIntegrityChecker.CheckIntegrityOfFilesInFolder(folderPath, out udtFolderStats, out udtFileStats, processedFileList);
+                mFileIntegrityChecker.CheckIntegrityOfFilesInFolder(folderPath, out var udtFolderStats, out var udtFileStats, processedFileList);
 
                 if (mUseCacheFiles) {
                     if (!mMSFileInfoDataCache.UpdateCachedFolderIntegrityInfo(udtFolderStats, out folderID)) {
@@ -1381,10 +1378,7 @@ namespace MSFileInfoScanner
         // Main processing function
         public override bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputFolderPath)
         {
-
-            eMSFileProcessingStateConstants eMSFileProcessingState;
-
-            return ProcessMSFileOrFolder(inputFileOrFolderPath, outputFolderPath, true, out eMSFileProcessingState);
+            return ProcessMSFileOrFolder(inputFileOrFolderPath, outputFolderPath, true, out _);
         }
 
         public override bool ProcessMSFileOrFolder(
@@ -1438,13 +1432,15 @@ namespace MSFileInfoScanner
 
                     // Determine whether inputFileOrFolderPath points to a file or a folder
 
-                    bool isFolder;
-                    FileSystemInfo objFileSystemInfo;
-                    if (!GetFileOrFolderInfo(inputFileOrFolderPath, out isFolder, out objFileSystemInfo)) {
+                    if (!GetFileOrFolderInfo(inputFileOrFolderPath, out var isFolder, out var objFileSystemInfo))
+                    {
                         ReportError("File or folder not found: " + objFileSystemInfo.FullName);
-                        if (SKIP_FILES_IN_ERROR) {
+                        if (SKIP_FILES_IN_ERROR)
+                        {
                             return true;
-                        } else {
+                        }
+                        else
+                        {
                             SetErrorCode(eMSFileScannerErrorCodes.FilePathError);
                             return false;
                         }
@@ -1610,23 +1606,30 @@ namespace MSFileInfoScanner
                         // See if the datasetName in inputFileOrFolderPath is already present in mCachedResults
                         // If it is present, then don't process it (unless mReprocessIfCachedSizeIsZero = True and it's size is 0)
 
-                        DataRow objRow;
-                        if (datasetName.Length > 0 && mMSFileInfoDataCache.CachedMSInfoContainsDataset(datasetName, out objRow)) {
-                            if (mReprocessIfCachedSizeIsZero) {
+                        if (datasetName.Length > 0 && mMSFileInfoDataCache.CachedMSInfoContainsDataset(datasetName, out var objRow))
+                        {
+                            if (mReprocessIfCachedSizeIsZero)
+                            {
                                 long lngCachedSizeBytes;
-                                try {
+                                try
+                                {
                                     lngCachedSizeBytes = (long)objRow[clsMSFileInfoDataCache.COL_NAME_FILE_SIZE_BYTES];
-                                } catch (Exception) {
+                                }
+                                catch (Exception)
+                                {
                                     lngCachedSizeBytes = 1;
                                 }
 
-                                if (lngCachedSizeBytes > 0) {
+                                if (lngCachedSizeBytes > 0)
+                                {
                                     // File is present in mCachedResults, and its size is > 0, so we won't re-process it
                                     ReportMessage("  Skipping " + Path.GetFileName(inputFileOrFolderPath) + " since already in cached results");
                                     eMSFileProcessingState = eMSFileProcessingStateConstants.SkippedSinceFoundInCache;
                                     return true;
                                 }
-                            } else {
+                            }
+                            else
+                            {
                                 // File is present in mCachedResults, and mReprocessIfCachedSizeIsZero=False, so we won't re-process it
                                 ReportMessage("  Skipping " + Path.GetFileName(inputFileOrFolderPath) + " since already in cached results");
                                 eMSFileProcessingState = eMSFileProcessingStateConstants.SkippedSinceFoundInCache;
