@@ -26,8 +26,8 @@ namespace MSFileInfoScanner
         private void ComputeQualityScores(
             DataReader objUIMFReader,
             clsDatasetFileInfo datasetFileInfo,
-            Dictionary<int, DataReader.FrameType> dctMasterFrameList,
-            int[] intMasterFrameNumList)
+            IReadOnlyDictionary<int, DataReader.FrameType> dctMasterFrameList,
+            IReadOnlyList<int> intMasterFrameNumList)
         {
             float sngOverallScore;
 
@@ -172,8 +172,10 @@ namespace MSFileInfoScanner
             }
         }
 
-
-        private void LoadFrameDetails(DataReader objUIMFReader, Dictionary<int, DataReader.FrameType> dctMasterFrameList, int[] intMasterFrameNumList)
+        private void LoadFrameDetails(
+            DataReader objUIMFReader,
+            IReadOnlyDictionary<int, DataReader.FrameType> dctMasterFrameList,
+            IReadOnlyList<int> intMasterFrameNumList)
         {
             const int BAD_TIC_OR_BPI = int.MinValue;
 

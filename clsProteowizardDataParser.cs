@@ -152,11 +152,11 @@ namespace MSFileInfoScanner
             float[] sngTimes,
             float[] sngIntensities,
             List<float> lstTICScanTimes,
-            List<int> lstTICScanNumbers,
+            IReadOnlyList<int> lstTICScanNumbers,
             ref double dblRuntimeMinutes,
-            Dictionary<int, Dictionary<double, double>> dct2DDataParent,
-            Dictionary<int, Dictionary<double, double>> dct2DDataProduct,
-            Dictionary<int, float> dct2DDataScanTimes)
+            IDictionary<int, Dictionary<double, double>> dct2DDataParent,
+            IDictionary<int, Dictionary<double, double>> dct2DDataProduct,
+            IDictionary<int, float> dct2DDataScanTimes)
         {
 
             // Attempt to parse out the product m/z
@@ -227,14 +227,14 @@ namespace MSFileInfoScanner
 
 
         private void ProcessTIC(
-            float[] sngTimes,
-            float[] sngIntensities,
+            IReadOnlyList<float> sngTimes,
+            IReadOnlyList<float> sngIntensities,
             List<float> lstTICScanTimes,
             List<int> lstTICScanNumbers,
             ref double dblRuntimeMinutes,
             bool blnStoreInTICandBPIPlot)
         {
-            for (var intIndex = 0; intIndex <= sngTimes.Length - 1; intIndex++) {
+            for (var intIndex = 0; intIndex <= sngTimes.Count - 1; intIndex++) {
                 lstTICScanTimes.Add(sngTimes[intIndex]);
                 lstTICScanNumbers.Add(intIndex + 1);
 
@@ -557,7 +557,7 @@ namespace MSFileInfoScanner
 
         private void Store2DPlotDataWork(
             Dictionary<int, Dictionary<double, double>> dct2DData,
-            Dictionary<int, float> dct2DDataScanTimes,
+            IReadOnlyDictionary<int, float> dct2DDataScanTimes,
             int intMSLevel,
             int intMax2DDataCount,
             int int2DScanNumMin,
