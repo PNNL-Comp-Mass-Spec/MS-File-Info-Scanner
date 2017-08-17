@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.4.6381; August 16, 2017
+	- Use TryGetValue when looking up the frame type using the master frame list dictionary
+
 Version 1.4.6381; June 21, 2017
 	- Report progress using OnProgressUpdate
 
