@@ -773,7 +773,6 @@ namespace MSFileInfoScanner
             return string.Format("<a href=\"{0}\"><img src=\"{0}\" width=\"{1}\" border=\"0\"></a>", filename, widthPixels);
         }
 
-
         private void GenerateQCScanTypeSummaryHTML(TextWriter swOutFile, clsDatasetSummaryStats objDatasetSummaryStats, string indent)
         {
             if (indent == null)
@@ -781,7 +780,6 @@ namespace MSFileInfoScanner
 
             swOutFile.WriteLine(indent + @"<table border=""1"">");
             swOutFile.WriteLine(indent + "  <tr><th>Scan Type</th><th>Scan Count</th><th>Scan Filter Text</th></tr>");
-
 
             foreach (var scanTypeEntry in objDatasetSummaryStats.objScanTypeStats) {
                 var scanType = scanTypeEntry.Key;

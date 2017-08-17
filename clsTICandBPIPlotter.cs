@@ -246,7 +246,6 @@ namespace MSFileInfoScanner
             // Instantiate the list to track the data points
             var objPoints = new List<DataPoint>();
 
-
             foreach (var chromDataPoint in objData.Scans) {
 
                 if (intMSLevelFilter != 0 && chromDataPoint.MSLevel != intMSLevelFilter &&
@@ -366,7 +365,6 @@ namespace MSFileInfoScanner
 
         }
 
-
         public void Reset()
         {
             if (mBPI == null) {
@@ -458,7 +456,6 @@ namespace MSFileInfoScanner
                 objChrom.RemoveRange(intIndexNonZeroValue + 1, intZeroPointCount);
             }
 
-
             // Now check the first few values
             intIndexNonZeroValue = -1;
             intZeroPointCount = 0;
@@ -515,13 +512,11 @@ namespace MSFileInfoScanner
 
             public IEnumerable<clsChromatogramDataPoint> Scans => mScans;
 
-
             private List<clsChromatogramDataPoint> mScans;
             public clsChromatogramInfo()
             {
                 Initialize();
             }
-
 
             public void AddPoint(int intScanNumber, int intMSLevel, float sngScanTimeMinutes, double dblIntensity)
             {

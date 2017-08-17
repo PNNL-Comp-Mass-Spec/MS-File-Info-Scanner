@@ -456,7 +456,6 @@ namespace MSFileInfoScanner
                     datasetFileInfo.ScanCount = objPWiz.ChromatogramCount;
                 }
 
-
                 if (objPWiz.SpectrumCount > 0 & !blnSRMDataCached)
                 {
                     // Process the spectral data (though only if we did not process SRM data)
@@ -483,7 +482,6 @@ namespace MSFileInfoScanner
 
         private bool ParseMcfIndexFiles(DirectoryInfo diDatasetFolder, clsDatasetFileInfo datasetFileInfo)
         {
-
 
             try
             {
@@ -522,7 +520,6 @@ namespace MSFileInfoScanner
                     {
                         CommandText = "SELECT metadataId, permanentName, displayName FROM MetadataId"
                     };
-
 
                     using (var drReader = cmd.ExecuteReader())
                     {
@@ -570,7 +567,6 @@ namespace MSFileInfoScanner
 
                     cnDB.Close();
                 }
-
 
                 // Parse each entry in lstScanData
                 // Copy the values to a generic list so that we can sort them
@@ -670,7 +666,6 @@ namespace MSFileInfoScanner
         {
 
             scanElutionTimeMap = new Dictionary<int, float>();
-
 
             try
             {
@@ -1036,7 +1031,6 @@ namespace MSFileInfoScanner
         private bool ParseSerOrFidFile(DirectoryInfo diDotDFolder, IReadOnlyDictionary<int, float> scanElutionTimeMap)
         {
 
-
             try
             {
                 var fiSerOrFidFile = new FileInfo(Path.Combine(diDotDFolder.FullName, "ser"));
@@ -1047,7 +1041,6 @@ namespace MSFileInfoScanner
                     if (!fiSerOrFidFile.Exists)
                         return false;
                 }
-
 
                 // Look for the apexAcquisition.method
                 var fiSettingsFile = FindBrukerSettingsFile(diDotDFolder);
@@ -1261,7 +1254,6 @@ namespace MSFileInfoScanner
             return 0;
 
         }
-
 
         private void UpdateScanInfo(eMcfMetadataFields eMcfMetadataField, string strValue, ref udtMCFScanInfoType udtScanInfo)
         {

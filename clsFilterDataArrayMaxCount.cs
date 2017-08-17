@@ -15,7 +15,6 @@ namespace MSFileInfoScanner
         //  This routine will determine which data points to retain
         //  For the remaining points, their data values will be changed to mSkipDataPointFlag (defaults to -1)
 
-
         private const float DEFAULT_SKIP_DATA_POINT_FLAG = -1;
 
         // 4 steps in Sub FilterDataByMaxDataCountToLoad
@@ -402,5 +401,3 @@ namespace MSFileInfoScanner
         }
     }
 }
-
-

@@ -97,7 +97,6 @@ namespace MSFileInfoScanner
 
         }
 
-
         private void LoadData(FileInfo fiIsosFile, clsDatasetFileInfo datasetFileInfo)
         {
             // Cache the data in the _isos.csv and _scans.csv files
@@ -157,7 +156,6 @@ namespace MSFileInfoScanner
             mLCMS2DPlot.Options.PlottingDeisotopedData = true;
 
             var dblMaxMonoMass = mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot;
-
 
             for (var intIndex = 0; intIndex <= lstIsosData.Count - 1; intIndex++) {
                 if (lstIsosData[intIndex].Scan > intCurrentScan || intIndex == lstIsosData.Count - 1) {
@@ -270,7 +268,6 @@ namespace MSFileInfoScanner
                     } catch (Exception) {
                         blnParseError = true;
                     }
-
 
                     if (intCurrentScan > intLastScan) {
                         if (intLastScanParseErrors > 0) {
@@ -423,7 +420,6 @@ namespace MSFileInfoScanner
 
         }
 
-
         private void ParseColumnHeaders(Dictionary<string, int> dctColumnInfo, List<string> lstData, string strFileDescription)
         {
             foreach (var columnName in dctColumnInfo.Keys.ToList()) {
@@ -469,7 +465,6 @@ namespace MSFileInfoScanner
             datasetFileInfo.FileSizeBytes = fiIsosFile.Length;
 
             datasetFileInfo.ScanCount = 0;
-
 
             mDatasetStatsSummarizer.ClearCachedData();
 

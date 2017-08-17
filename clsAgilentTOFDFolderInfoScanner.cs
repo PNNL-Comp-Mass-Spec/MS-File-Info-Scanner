@@ -83,7 +83,6 @@ namespace MSFileInfoScanner
 
                 }
 
-
             } catch (Exception ex) {
                 // Exception reading file
                 OnErrorEvent("Exception reading " + AGILENT_XML_CONTENTS_FILE + ": " + ex.Message, ex);
@@ -227,7 +226,6 @@ namespace MSFileInfoScanner
                     blnSuccess = true;
                 }
 
-
                 if (blnSuccess) {
                     // The AcqData folder exists
 
@@ -254,7 +252,6 @@ namespace MSFileInfoScanner
 
                 }
 
-
                 if (blnSuccess) {
                     // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
@@ -264,7 +261,6 @@ namespace MSFileInfoScanner
                     mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
                     mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
                 }
-
 
             } catch (Exception ex) {
                 OnErrorEvent("Exception parsing Agilent TOF .D folder: " + ex.Message, ex);
@@ -338,7 +334,6 @@ namespace MSFileInfoScanner
 
             return blnSuccess;
         }
-
 
     }
 }

@@ -135,7 +135,6 @@ namespace MSFileInfoScanner
 
         }
 
-
         public void AddDatasetScan(clsScanStatsEntry objScanStats)
         {
             mDatasetScanStats.Add(objScanStats);
@@ -216,7 +215,6 @@ namespace MSFileInfoScanner
                 var dblTICListMSn = new double[intScanStatsCount];
                 var dblBPIListMSn = new double[intScanStatsCount];
 
-
                 foreach (var objEntry in objScanStats) {
 
                     if (objEntry.ScanType > 1) {
@@ -249,7 +247,6 @@ namespace MSFileInfoScanner
             }
 
         }
-
 
         private void ComputeScanStatsUpdateDetails(
             clsScanStatsEntry objScanStats,
@@ -493,7 +490,6 @@ namespace MSFileInfoScanner
                     CloseOutput = false     // Do not close output automatically so that MemoryStream can be read after the XmlWriter has been closed
                 };
 
-
                 // We could cache the text using a StringBuilder, like this:
                 //
                 // var sbDatasetInfo = new StringBuilder();
@@ -522,7 +518,6 @@ namespace MSFileInfoScanner
                 objDSInfo.WriteElementString("Dataset", strDatasetName);
 
                 objDSInfo.WriteStartElement("ScanTypes");
-
 
                 foreach (var scanTypeEntry in objSummaryStats.objScanTypeStats)
                 {
@@ -626,7 +621,6 @@ namespace MSFileInfoScanner
                     // SampleInfo EndElement
                 }
 
-
                 objDSInfo.WriteEndElement();
                 //End the "Root" element (DatasetInfo)
                 objDSInfo.WriteEndDocument();
@@ -713,7 +707,6 @@ namespace MSFileInfoScanner
                     sbLineOut.Append("Dataset" + '\t' + "ScanNumber" + '\t' + clsScanStatsEntry.SCANSTATS_COL_ION_INJECTION_TIME + '\t' + clsScanStatsEntry.SCANSTATS_COL_SCAN_SEGMENT + '\t' + clsScanStatsEntry.SCANSTATS_COL_SCAN_EVENT + '\t' + clsScanStatsEntry.SCANSTATS_COL_CHARGE_STATE + '\t' + clsScanStatsEntry.SCANSTATS_COL_MONOISOTOPIC_MZ + '\t' + clsScanStatsEntry.SCANSTATS_COL_COLLISION_MODE + '\t' + clsScanStatsEntry.SCANSTATS_COL_SCAN_FILTER_TEXT);
 
                     swScanStatsExFile.WriteLine(sbLineOut.ToString());
-
 
                     foreach (var objScanStatsEntry in objScanStats) {
                         sbLineOut.Clear();
@@ -865,7 +858,6 @@ namespace MSFileInfoScanner
             var blnWriteHeaders = false;
 
             bool blnSuccess;
-
 
             try {
                 if (objScanStats == null) {

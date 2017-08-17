@@ -151,13 +151,11 @@ namespace MSFileInfoScanner
             try {
                 var objPWiz2 = new MSDataFile(strFilePath);
 
-
                 Console.WriteLine("Spectrum count: " + objPWiz2.run.spectrumList.size());
                 Console.WriteLine();
 
                 if (objPWiz2.run.spectrumList.size() > 0) {
                     var intSpectrumIndex = 0;
-
 
                     do {
                         var oSpectrum = objPWiz2.run.spectrumList.spectrum(intSpectrumIndex, getBinaryData: true);
@@ -185,7 +183,6 @@ namespace MSFileInfoScanner
 
                         if (oMZs.data.Count > 0) {
                             Console.WriteLine("  Data count: " + oMZs.data.Count);
-
 
                             if (RUN_BENCHMARKS) {
                                 double dblTIC1 = 0;
@@ -238,10 +235,8 @@ namespace MSFileInfoScanner
                     } while (intSpectrumIndex < objPWiz2.run.spectrumList.size());
                 }
 
-
                 if (objPWiz2.run.chromatogramList.size() > 0) {
                     var intChromIndex = 0;
-
 
                     do {
                         var oTimeIntensityPairList = new TimeIntensityPairList();

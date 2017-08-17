@@ -12,7 +12,6 @@ namespace MSFileInfoScanner
 
         public const string EXPONENTIAL_FORMAT = "0.00E+00";
 
-
         public const int FONT_SIZE_BASE = 16;
 
         private const string DEFAULT_AXIS_LABEL_FORMAT = "#,##0";

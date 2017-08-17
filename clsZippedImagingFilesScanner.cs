@@ -45,7 +45,6 @@ namespace MSFileInfoScanner
                     using (var oZipEntry = oZipFile.GetEnumerator())
                     {
 
-
                         while (oZipEntry.MoveNext())
                         {
 
@@ -227,7 +226,6 @@ namespace MSFileInfoScanner
                     mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = 0;
                     mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
 
-
                     // Update the dataset name and file extension
                     datasetFileInfo.DatasetName = GetDatasetNameViaPath(diDatasetFolder.FullName);
                     datasetFileInfo.FileExtension = string.Empty;
@@ -252,7 +250,6 @@ namespace MSFileInfoScanner
                         datasetFileInfo.AcqTimeEnd = fiFirstImagingFile.LastWriteTime;
                     }
 
-
                     // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
                     mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
@@ -273,7 +270,6 @@ namespace MSFileInfoScanner
             return blnSuccess;
 
         }
-
 
     }
 }

@@ -683,7 +683,6 @@ namespace MSFileInfoScanner
             return lngScanCount;
         }
 
-
         public bool GetScanInfo(
             string strMLynxDataFolderPath,
             int lngFunctionNumber,
@@ -842,7 +841,6 @@ namespace MSFileInfoScanner
 
             var blnSuccess = false;
 
-
             try
             {
 
@@ -888,8 +886,6 @@ namespace MSFileInfoScanner
             try
             {
 
-
-
                 var ioFileInfo = new FileInfo(strMLynxDataFolderPath);
                 string strCleanMLynxDataFolderPath;
             
@@ -920,7 +916,6 @@ namespace MSFileInfoScanner
                         for (var lngFunctionNumber = 1; lngFunctionNumber <= udtThisMSData.FunctionCount; lngFunctionNumber++)
                         {
                             InitializeFunctionInfo(ref udtThisMSData.FunctionInfo[lngFunctionNumber], lngFunctionNumber);
-
 
                             if (NativeIOGetFunctionInfo(strCleanMLynxDataFolderPath, ref udtThisMSData.FunctionInfo[lngFunctionNumber]))
                             {
@@ -1014,7 +1009,6 @@ namespace MSFileInfoScanner
 
             var udtScanIndexRecord = default(udtScanIndexRecordType);
 
-
             try
             {
 
@@ -1086,7 +1080,6 @@ namespace MSFileInfoScanner
                 mMSData.UserSuppliedDataDirPath = string.Empty;
             }
 
-
             if (mMSData.FunctionCount == 0 || mMSData.UserSuppliedDataDirPath.ToLower() != strMLynxDataFolderPath.ToLower())
             {
                 var lngNumFunctions = LoadMSFunctionInfo(ref mMSData, strMLynxDataFolderPath);
@@ -1109,7 +1102,6 @@ namespace MSFileInfoScanner
             return blnValidDataFolder;
 
         }
-
 
         //---------------------------------------------------------
         // The following functions are used for Native file IO
@@ -1154,7 +1146,6 @@ namespace MSFileInfoScanner
             return thisMask;
 
         }
-
 
         private void CreateNativeDataMasks()
         {
@@ -1427,7 +1418,6 @@ namespace MSFileInfoScanner
 
                 }
 
-
                 return blnSuccess;
             }
             catch (Exception ex)
@@ -1448,7 +1438,6 @@ namespace MSFileInfoScanner
 
             try
             {
-
 
                 var strFuncIdxFile = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(udtMSFunctionInfo.FunctionNumber) + ".idx");
                 var ioFileInfo = new FileInfo(strFuncIdxFile);
@@ -1615,7 +1604,6 @@ namespace MSFileInfoScanner
                 Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOGetScanInfo:" + ex.Message);
                 return false;
             }
-
 
         }
 
@@ -1784,7 +1772,6 @@ namespace MSFileInfoScanner
                 {
                     return false;
                 }
-
 
                 using (var srInFile = new StreamReader(strFilePath))
                 {

@@ -982,8 +982,6 @@ namespace MSFileInfoScanner
 
                 }
 
-
-
             }
             catch (Exception ex)
             {
@@ -1020,7 +1018,6 @@ namespace MSFileInfoScanner
                     var srInFile =
                         new StreamReader(new FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
-
 
                     // Confirm that the first two lines look like:
                     //  ICR-2LS Data File (GA Anderson & JE Bruce); output from MASIC by Matthew E Monroe
@@ -1254,7 +1251,6 @@ namespace MSFileInfoScanner
                         {
                             objEntry.ZipErrorAction = Ionic.Zip.ZipErrorAction.Throw;
 
-
                             if (!objEntry.IsDirectory)
                             {
                                 var swTestStream = new FileStream(strTempPath, FileMode.Create, FileAccess.Write,
@@ -1274,7 +1270,6 @@ namespace MSFileInfoScanner
                 {
                     blnZipIsValid = Ionic.Zip.ZipFile.CheckZip(strZipFilePath);
                 }
-
 
             }
             catch (Exception)
@@ -1544,7 +1539,6 @@ namespace MSFileInfoScanner
                 // However, once all of the attributes have been found, it is changed to false
                 var blnNeedToCheckAttributeNames = (requiredAttributes.Count > 0);
 
-
                 int intMaximumXMLElementNodesToCheck;
                 if (mMaximumXMLElementNodesToCheck <= 0)
                 {
@@ -1577,7 +1571,6 @@ namespace MSFileInfoScanner
                                 XMLTextReaderSkipWhitespace(objXMLReader);
                                 if (objXMLReader.ReadState != System.Xml.ReadState.Interactive)
                                     break;
-
 
                                 if (objXMLReader.NodeType != System.Xml.XmlNodeType.Element)
                                 {
@@ -1643,7 +1636,6 @@ namespace MSFileInfoScanner
                                                   requiredElements.Count, ref blnErrorLogged);
                     }
 
-
                     if (requiredAttributes.Count > 0 && !blnErrorLogged)
                     {
                         // Make sure that all of the required attribute names were found; log an error if any were missing
@@ -1676,7 +1668,6 @@ namespace MSFileInfoScanner
             return !blnErrorLogged;
 
         }
-
 
         /// <summary>
         /// Checks the integrity of each file in the given folder (provided the extension is recognized)
@@ -1738,7 +1729,6 @@ namespace MSFileInfoScanner
                                 blnSkipFile = true;
                             }
                         }
-
 
                         if (!blnSkipFile)
                         {
@@ -2087,7 +2077,6 @@ namespace MSFileInfoScanner
                 FileCount = 0,
                 FileCountFailIntegrity = 0
             };
-
 
             return udtFolderStats;
 

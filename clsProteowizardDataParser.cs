@@ -133,7 +133,6 @@ namespace MSFileInfoScanner
             return intIndexMatch;
         }
 
-
         public void PossiblyUpdateAcqTimeStart(clsDatasetFileInfo datasetFileInfo, double dblRuntimeMinutes)
         {
             if (dblRuntimeMinutes > 0)
@@ -145,7 +144,6 @@ namespace MSFileInfoScanner
                 }
             }
         }
-
 
         private void ProcessSRM(
             string strChromID,
@@ -173,7 +171,6 @@ namespace MSFileInfoScanner
                     dblRuntimeMinutes = sngTimes[intIndex];
                 }
 
-
                 var objScanStatsEntry = new clsScanStatsEntry
                 {
                     ScanNumber = intScanNumber,
@@ -184,7 +181,6 @@ namespace MSFileInfoScanner
                     TotalIonIntensity = sngIntensities[intIndex].ToString("0.0"),
                     BasePeakIntensity = sngIntensities[intIndex].ToString("0.0")
                 };
-
 
                 if (blnParentMZFound) {
                     objScanStatsEntry.BasePeakMZ = dblParentMZ.ToString("0.0###");
@@ -202,7 +198,6 @@ namespace MSFileInfoScanner
 
                 mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
-
                 if (mSaveLCMS2DPlots && sngIntensities[intIndex] > 0) {
                     // Store the m/z and intensity values in dct2DDataParent and dct2DDataProduct
 
@@ -214,7 +209,6 @@ namespace MSFileInfoScanner
                         Store2DPlotDataPoint(dct2DDataProduct, intScanNumber, dblProductMZ, sngIntensities[intIndex]);
                     }
 
-
                     if (!dct2DDataScanTimes.ContainsKey(intScanNumber)) {
                         dct2DDataScanTimes[intScanNumber] = sngTimes[intIndex];
                     }
@@ -224,7 +218,6 @@ namespace MSFileInfoScanner
             }
 
         }
-
 
         private void ProcessTIC(
             IReadOnlyList<float> sngTimes,
@@ -276,7 +269,6 @@ namespace MSFileInfoScanner
                     lstTICScanTimes.Add(sngTICScanTimes[intIndex]);
                     lstTICScanNumbers.Add(intTICScanNumbers[intIndex]);
                 }
-
 
             }
 
@@ -338,13 +330,11 @@ namespace MSFileInfoScanner
                         blnSRMDataCached = true;
                     }
 
-
                 } catch (Exception ex) {
                     OnErrorEvent("Error processing chromatogram " + intChromIndex + ": " + ex.Message, ex);
                 }
 
             }
-
 
             if (!mSaveLCMS2DPlots)
             {
@@ -362,7 +352,6 @@ namespace MSFileInfoScanner
 
             Store2DPlotData(dct2DDataScanTimes, dct2DDataParent, dct2DDataProduct);
         }
-
 
         public void StoreMSSpectraInfo(clsDatasetFileInfo datasetFileInfo, bool blnTICStored, ref double dblRuntimeMinutes)
         {
@@ -382,7 +371,6 @@ namespace MSFileInfoScanner
 
                 OnStatusEvent("Reading spectra");
                 var dtLastProgressTime = DateTime.UtcNow;
-
 
                 for (var intScanIndex = 0; intScanIndex <= dblScanTimes.Length - 1; intScanIndex++) {
 
@@ -413,8 +401,6 @@ namespace MSFileInfoScanner
                             }
 
                         }
-
-
                     
                         objScanStatsEntry.ScanFilterText = "";
                         objScanStatsEntry.ElutionTime = dblScanTimes[intScanIndex].ToString("0.0###");
@@ -506,7 +492,6 @@ namespace MSFileInfoScanner
 
         }
 
-
         private void Store2DPlotData(
             Dictionary<int, float> dct2DDataScanTimes,
             Dictionary<int, Dictionary<double, double>> dct2DDataParent,
@@ -553,7 +538,6 @@ namespace MSFileInfoScanner
             dct2DData[intScanNumber] = obj2DMzAndIntensity;
 
         }
-
 
         private void Store2DPlotDataWork(
             Dictionary<int, Dictionary<double, double>> dct2DData,
@@ -628,7 +612,6 @@ namespace MSFileInfoScanner
             paramMatch = null;
             return false;
         }
-
 
         private void UpdateDataRanges(
             Dictionary<int, Dictionary<double, double>> dct2DData,

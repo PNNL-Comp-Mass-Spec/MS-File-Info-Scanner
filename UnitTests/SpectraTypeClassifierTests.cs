@@ -94,7 +94,6 @@ namespace MSFileInfoScannerUnitTests
             Assert.AreEqual(0.85, classifier.FractionCentroided(), 0.001, "Fraction centroided");
             Assert.AreEqual(1, classifier.FractionCentroidedMSn(), 0.001, "Fraction centroided MSn");
 
-
         }
 
         [Test]

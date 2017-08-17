@@ -417,7 +417,6 @@ namespace MSFileInfoScanner
                 if (parser.IsParameterPresent("PostToDMS"))
                     mPostResultsToDMS = true;
 
-
                 return true;
             }
             catch (Exception ex)
@@ -465,7 +464,6 @@ namespace MSFileInfoScanner
 
             WriteToErrorStream(strMessage);
         }
-
 
         private static void ShowProgramHelp()
         {
@@ -602,7 +600,7 @@ namespace MSFileInfoScanner
             if (ex != null)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine(clsStackTraceFormatter.GetExceptionStackTrace(ex));
+                Console.WriteLine(clsStackTraceFormatter.GetExceptionStackTraceMultiLine(ex));
             }
             Console.ResetColor();
 

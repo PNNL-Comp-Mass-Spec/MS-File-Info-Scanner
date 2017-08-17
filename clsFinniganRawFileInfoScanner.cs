@@ -107,7 +107,6 @@ namespace MSFileInfoScanner
             clsScanInfo scanInfo)
         {
 
-
             if (scanInfo.IsCentroided)
             {
                 if (mIsProfileM.IsMatch(scanInfo.FilterText))
@@ -144,7 +143,6 @@ namespace MSFileInfoScanner
                 return string.Empty;
             }
         }
-
 
         private void LoadScanDetails(XRawFileIO objXcaliburAccessor)
         {
@@ -204,7 +202,6 @@ namespace MSFileInfoScanner
                             IonCountRaw = scanInfo.NumPeaks
                         };
 
-
                         // Store the ScanEvent values in .ExtendedScanInfo
                         StoreExtendedScanInfo(ref objScanStatsEntry.ExtendedScanInfo, scanInfo.ScanEvents);
 
@@ -221,7 +218,6 @@ namespace MSFileInfoScanner
                     OnErrorEvent("Error loading header info for scan " + scanNumber + ": " + ex.Message);
                     continue;
                 }
-
 
                 try
                 {
@@ -336,7 +332,6 @@ namespace MSFileInfoScanner
                 OnErrorEvent("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
                 blnReadError = true;
 
-
                 if (!string.Equals(clsMSFileInfoScanner.GetAppFolderPath().Substring(0, 2), fiRawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
                 {
                     if (mCopyFileLocalOnReadError)
@@ -346,7 +341,6 @@ namespace MSFileInfoScanner
                         try
                         {
                             strDataFilePathLocal = Path.Combine(clsMSFileInfoScanner.GetAppFolderPath(), Path.GetFileName(strDataFilePath));
-
 
                             if (!string.Equals(strDataFilePathLocal, strDataFilePath, StringComparison.InvariantCultureIgnoreCase))
                             {
@@ -427,7 +421,6 @@ namespace MSFileInfoScanner
                 }
             }
 
-
             mDatasetStatsSummarizer.SampleInfo.SampleName = xcaliburAccessor.FileInfo.SampleName;
             mDatasetStatsSummarizer.SampleInfo.Comment1 = xcaliburAccessor.FileInfo.Comment1;
             mDatasetStatsSummarizer.SampleInfo.Comment2 = xcaliburAccessor.FileInfo.Comment2;
@@ -451,7 +444,6 @@ namespace MSFileInfoScanner
                     }
                 }
             }
-
 
             // Close the handle to the data file
             xcaliburAccessor.CloseRawFile();
@@ -598,7 +590,6 @@ namespace MSFileInfoScanner
         {
             OnErrorEvent(message);
         }
-
 
     }
 }

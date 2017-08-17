@@ -40,7 +40,6 @@ namespace MSFileInfoScanner
 
         public bool PlottingDeisotopedData { get; set; }
 
-
         private readonly OxyPlot.PlotModel mPlot;
 
         private Dictionary<string, OxyPalette> mColorGradients;
@@ -218,7 +217,6 @@ namespace MSFileInfoScanner
                 Brush = new SolidColorBrush(Colors.Black),
                 Thickness = 1
             };
-
 
             for (var chargeState = CHARGE_START; chargeState <= CHARGE_END; chargeState++) {
                 var newBrush = new SolidColorBrush(GetColorByCharge(chargeState));

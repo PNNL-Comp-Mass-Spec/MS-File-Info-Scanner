@@ -453,7 +453,6 @@ namespace MSFileInfoScanner
             set => mLCMS2DPlotOptions.MinIntensity = value;
         }
 
-
         public override bool LogMessagesToFile {
             get => mLogMessagesToFile;
             set => mLogMessagesToFile = value;
@@ -628,7 +627,6 @@ namespace MSFileInfoScanner
             }
         }
 
-
         private void CheckIntegrityOfFilesInFolder(string folderPath, bool forceRecheck, List<string> processedFileList)
         {
             var folderID = 0;
@@ -707,7 +705,6 @@ namespace MSFileInfoScanner
                 clsDeconToolsIsosInfoScanner.DECONTOOLS_CSV_FILE_EXTENSION.ToUpper()
             };
 
-
             return lstExtensionsToParse;
         }
 
@@ -726,7 +723,6 @@ namespace MSFileInfoScanner
 
             return lstExtensionsToParse;
         }
-
 
         public override string GetErrorMessage()
         {
@@ -914,7 +910,6 @@ namespace MSFileInfoScanner
         {
 
             var objSettingsFile = new XmlSettingsFileAccessor();
-
 
             try {
                 if (string.IsNullOrEmpty(parameterFilePath)) {
@@ -1189,7 +1184,6 @@ namespace MSFileInfoScanner
             return PostDatasetInfoUseDatasetID(datasetID, DatasetInfoXML, connectionString, storedProcedureName);
         }
 
-
         /// <summary>
         /// Post the dataset info in strDatasetInfoXML to the database, using the specified connection string and stored procedure
         /// This version assumes the stored procedure takes DatasetID as the first parameter
@@ -1337,7 +1331,6 @@ namespace MSFileInfoScanner
                     success = true;
                 }
             }
-
 
             if (success) {
                 success = scanner.CreateOutputFiles(inputFileOrFolderPath, outputFolderPath);
@@ -1532,7 +1525,6 @@ namespace MSFileInfoScanner
                             }
                         }
 
-
                         if (!knownMSDataType) {
                             // Examine the extension on inputFileOrFolderPath
                             switch (objFileSystemInfo.Extension.ToUpper()) {
@@ -1725,7 +1717,6 @@ namespace MSFileInfoScanner
                     if (mAbortProcessing)
                         return false;
 
-
                     foreach (var diFolderMatch in diFolderInfo.GetDirectories(inputFileOrFolderPath)) {
                         success = ProcessMSFileOrFolder(diFolderMatch.FullName, outputFolderPath, resetErrorCode, out eMSFileProcessingState);
 
@@ -1848,7 +1839,6 @@ namespace MSFileInfoScanner
                         }
                     }
                 }
-
 
                 if (!string.IsNullOrEmpty(inputFolderPath)) {
                     // Initialize some parameters
@@ -2161,7 +2151,6 @@ namespace MSFileInfoScanner
                             if (mAbortProcessing)
                                 break;
 
-
                             retryCount += 1;
                             if (retryCount >= MAX_ACCESS_ATTEMPTS) {
                                 return false;
@@ -2181,7 +2170,6 @@ namespace MSFileInfoScanner
                             break;
                     }
                 }
-
 
             } catch (Exception ex) {
                 HandleException("Error in RecurseFoldersWork examining subfolders in " + inputFolderPath, ex);
@@ -2210,7 +2198,6 @@ namespace MSFileInfoScanner
         {
 
             var objSettingsFile = new XmlSettingsFileAccessor();
-
 
             try {
                 if (string.IsNullOrEmpty(parameterFilePath)) {

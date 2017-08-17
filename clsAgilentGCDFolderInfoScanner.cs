@@ -249,8 +249,6 @@ namespace MSFileInfoScanner
                             blnValidSpectrum = false;
                         }
 
-
-
                         if (blnValidSpectrum) {
                             var objScanStatsEntry = new clsScanStatsEntry
                             {
@@ -369,7 +367,6 @@ namespace MSFileInfoScanner
                         fiMethodFile = new FileInfo(Path.Combine(ioFolderInfo.FullName, AGILENT_GC_INI_FILE));
                     }
 
-
                     if (fiMethodFile.Exists) {
 
                         // Update the AcqTimes only if the LastWriteTime of the acqmeth.txt or GC.ini file is within the next 60 minutes of .AcqTimeEnd
@@ -392,7 +389,6 @@ namespace MSFileInfoScanner
                     }
                 }
 
-
                 if (!blnAcqTimeDetermined) {
                     try {
                         // Parse the acqmeth.txt file to determine the actual values for .AcqTimeStart and .AcqTimeEnd
@@ -411,7 +407,6 @@ namespace MSFileInfoScanner
                     blnSuccess = true;
                 }
 
-
                 if (blnSuccess) {
                     // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
@@ -421,7 +416,6 @@ namespace MSFileInfoScanner
                     mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
                     mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
                 }
-
 
             } catch (Exception ex) {
                 OnErrorEvent("Exception parsing GC .D folder: " + ex.Message, ex);
