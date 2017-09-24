@@ -75,11 +75,9 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ParseRunLogFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo)
+        private void ParseRunLogFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo)
         {
             var strMostRecentMethodLine = string.Empty;
-
-            bool blnSuccess;
 
             try
             {
@@ -153,31 +151,25 @@ namespace MSFileInfoScanner
                     }
                 }
 
-                blnSuccess = blnProcessedFirstMethodLine;
-
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Run.log file not found
-                blnSuccess = false;
+                OnWarningEvent("Error in ParseRunLogFile: " + ex.Message);
             }
-
-            return blnSuccess;
 
         }
 
-        private bool ParseAnalysisCDFFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo)
+        private void ParseAnalysisCDFFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo)
         {
             NetCDFReader.clsMSNetCdf objNETCDFReader = null;
-
-            bool blnSuccess;
 
             try
             {
                 // Note: as of May 2016 this only works if you compile as x86 or with "Prefer 32-bit" enabled when compiling as AnyCPU
 
                 objNETCDFReader = new NetCDFReader.clsMSNetCdf();
-                blnSuccess = objNETCDFReader.OpenMSCdfFile(Path.Combine(strFolderPath, AGILENT_ANALYSIS_CDF_FILE));
+                var blnSuccess = objNETCDFReader.OpenMSCdfFile(Path.Combine(strFolderPath, AGILENT_ANALYSIS_CDF_FILE));
                 if (blnSuccess)
                 {
                     var intScanCount = objNETCDFReader.GetScanCount();
@@ -200,9 +192,9 @@ namespace MSFileInfoScanner
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                blnSuccess = false;
+                OnWarningEvent("Error in ParseAnalysisCDFFile: " + ex.Message);
             }
             finally
             {
