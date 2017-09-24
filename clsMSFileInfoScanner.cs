@@ -542,6 +542,45 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Get the the appData folder for this program
+        /// For example: C:\Users\username\AppData\Roaming\MSFileInfoScanner
+        /// </summary>
+        /// <param name="appName"></param>
+        /// <returns></returns>
+        public static string GetAppDataFolderPath(string appName = "")
+        {
+            if (string.IsNullOrWhiteSpace(appName))
+            {
+                appName = Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
+            }
+
+            try
+            {
+                var appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+
+                if (string.IsNullOrWhiteSpace(appName))
+                    return appDataFolder;
+
+                var appFolder = new DirectoryInfo(Path.Combine(appDataFolder, appName));
+
+                if (!appFolder.Exists)
+                {
+                    appFolder.Create();
+                }
+
+                return appFolder.FullName;
+
+            }
+            catch (Exception ex)
+            {
+                ConsoleMsgUtils.ShowError("Error in GetAppDataFolderPath: " + ex.Message);
+                return Path.GetTempPath();
+            }
+
+
+        }
+
         public static string GetAppFolderPath()
         {
             // Could use Application.StartupPath, but .GetExecutingAssembly is better
