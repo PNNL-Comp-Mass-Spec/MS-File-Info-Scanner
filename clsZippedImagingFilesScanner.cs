@@ -14,6 +14,7 @@ namespace MSFileInfoScanner
         public const string ZIPPED_IMAGING_FILE_SEARCH_SPEC = "0_R*.zip";
 
         public const string ZIPPED_IMAGING_FILE_NAME_PREFIX = "0_R";
+
         /// <summary>
         /// Examines the subdirectories in the specified zip file
         /// Determines the oldest and newest modified analysis.baf files (or apexAcquisition.method file if analysis.baf files are not found)
