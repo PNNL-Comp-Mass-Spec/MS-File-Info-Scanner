@@ -54,7 +54,7 @@ namespace MSFileInfoScanner
                 MajorTickSize = 8,
                 MajorGridlineStyle = LineStyle.None,
                 MinorGridlineStyle = LineStyle.None,
-                StringFormat = DEFAULT_AXIS_LABEL_FORMAT,
+                StringFormat = clsAxisInfo.DEFAULT_AXIS_LABEL_FORMAT,
                 Font = "Arial"
             };
 
@@ -75,61 +75,12 @@ namespace MSFileInfoScanner
             if (!dataPoints.Any())
                 return;
 
-            var minValue = Math.Abs(dataPoints[0]);
-            var maxValue = minValue;
+            var axisInfo = new clsAxisInfo();
+            clsPlotUtilities.GetAxisFormatInfo(dataPoints, integerData, axisInfo);
 
-            foreach (var currentValAbs in from value in dataPoints select Math.Abs(value)) {
-                minValue = Math.Min(minValue, currentValAbs);
-                maxValue = Math.Max(maxValue, currentValAbs);
-            }
-
-            if (Math.Abs(minValue - 0) < float.Epsilon & Math.Abs(maxValue - 0) < float.Epsilon) {
-                currentAxis.StringFormat = "0";
-                currentAxis.MinorGridlineThickness = 0;
-                currentAxis.MajorStep = 1;
-                return;
-            }
-
-            if (integerData) {
-                if (maxValue >= 1000000) {
-                    currentAxis.StringFormat = EXPONENTIAL_FORMAT;
-                }
-                return;
-            }
-
-            var minDigitsPrecision = 0;
-
-            if (maxValue < 0.02) {
-                currentAxis.StringFormat = EXPONENTIAL_FORMAT;
-            } else if (maxValue < 0.2) {
-                minDigitsPrecision = 2;
-                currentAxis.StringFormat = "0.00";
-            } else if (maxValue < 2) {
-                minDigitsPrecision = 1;
-                currentAxis.StringFormat = "0.0";
-            } else if (maxValue >= 1000000) {
-                currentAxis.StringFormat = EXPONENTIAL_FORMAT;
-            }
-
-            if (maxValue - minValue < 1E-05) {
-                if (!currentAxis.StringFormat.Contains(".")) {
-                    currentAxis.StringFormat = "0.00";
-                }
-            } else {
-                // Examine the range of values between the minimum and the maximum
-                // If the range is small, e.g. between 3.95 and 3.98, then we need to guarantee that we have at least 2 digits of precision
-                // The following combination of Log10 and ceiling determins the minimum needed
-                var minDigitsRangeBased = (int)Math.Ceiling(-(Math.Log10(maxValue - minValue)));
-
-                if (minDigitsRangeBased > minDigitsPrecision) {
-                    minDigitsPrecision = minDigitsRangeBased;
-                }
-
-                if (minDigitsPrecision > 0) {
-                    currentAxis.StringFormat = "0." + new string('0', minDigitsPrecision);
-                }
-            }
-
+            currentAxis.StringFormat = axisInfo.StringFormat;
+            currentAxis.MinorGridlineThickness = axisInfo.MajorStep;
+            currentAxis.MajorStep = axisInfo.MinorGridlineThickness;
         }
 
         public static void ValidateMajorStep(Axis currentAxis)
