@@ -105,7 +105,6 @@ namespace MSFileInfoScanner
         public const string XML_SECTION_MSFILESCANNER_SETTINGS = "MSFileInfoScannerSettings";
         private const int FILE_MODIFICATION_WINDOW_MINUTES = 60;
         private const int MAX_FILE_READ_ACCESS_ATTEMPTS = 2;
-        public const bool USE_XML_OUTPUT_FILE = false;
 
         private const bool SKIP_FILES_IN_ERROR = true;
 
@@ -268,20 +267,6 @@ namespace MSFileInfoScanner
 
         public static string DefaultDataFileName(eDataFileTypeConstants eDataFileType)
         {
-            if (USE_XML_OUTPUT_FILE) {
-                switch (eDataFileType) {
-                    case eDataFileTypeConstants.MSFileInfo:
-                        return DEFAULT_ACQUISITION_TIME_FILENAME_XML;
-                    case eDataFileTypeConstants.FolderIntegrityInfo:
-                        return DEFAULT_FOLDER_INTEGRITY_INFO_FILENAME_XML;
-                    case eDataFileTypeConstants.FileIntegrityDetails:
-                        return DEFAULT_FILE_INTEGRITY_DETAILS_FILENAME_XML;
-                    case eDataFileTypeConstants.FileIntegrityErrors:
-                        return DEFAULT_FILE_INTEGRITY_ERRORS_FILENAME_XML;
-                    default:
-                        return "UnknownFileType.xml";
-                }
-            }
 
             switch (eDataFileType)
             {
