@@ -29,6 +29,7 @@ namespace MSFileInfoScanner
         #endregion
 
         #region "Member variables"
+
         // Data stored in mTIC will get plotted for all scans, both MS and MS/MS
 
         private clsChromatogramInfo mTIC;
@@ -77,8 +78,18 @@ namespace MSFileInfoScanner
 
         #endregion
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="dataSource"></param>
+        /// <param name="writeDebug"></param>
+        public clsTICandBPIPlotter(string dataSource = "", bool writeDebug = false)
         {
             mRecentFiles = new List<udtOutputFileInfoType>();
+
+            mDataSource = dataSource;
+            mWriteDebug = writeDebug;
+
             Reset();
         }
 
@@ -182,6 +193,25 @@ namespace MSFileInfoScanner
             strFilePath = string.Empty;
 
             return false;
+        }
+
+        private clsPlotContainerBase InitializePlot(
+            clsChromatogramInfo objData,
+            string plotTitle,
+            int msLevelFilter,
+            string xAxisLabel,
+            string yAxisLabel,
+            bool autoMinMaxY,
+            bool yAxisExponentialNotation)
+        {
+            if (PlotWithPython)
+            {
+                return InitializePythonPlot(objData, plotTitle, msLevelFilter, xAxisLabel, yAxisLabel, autoMinMaxY, yAxisExponentialNotation);
+            }
+            else
+            {
+                return InitializeOxyPlot(objData, plotTitle, msLevelFilter, xAxisLabel, yAxisLabel, autoMinMaxY, yAxisExponentialNotation);
+            }
         }
 
         /// <summary>
@@ -358,12 +388,127 @@ namespace MSFileInfoScanner
             return plotContainer;
         }
 
+        /// <summary>
+        /// Plots a BPI or TIC chromatogram
+        /// </summary>
+        /// <param name="objData">Data to display</param>
+        /// <param name="plotTitle">Title of the plot</param>
+        /// <param name="msLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
+        /// <param name="xAxisLabel"></param>
+        /// <param name="yAxisLabel"></param>
+        /// <param name="autoMinMaxY"></param>
+        /// <param name="yAxisExponentialNotation"></param>
+        /// <returns>Python PlotContainer</returns>
+        private clsPythonPlotContainer InitializePythonPlot(
+            clsChromatogramInfo objData,
+            string plotTitle,
+            int msLevelFilter,
+            string xAxisLabel,
+            string yAxisLabel,
+            bool autoMinMaxY,
+            bool yAxisExponentialNotation)
+        {
+
+            double dblScanTimeMax = 0;
+            double dblMaxIntensity = 0;
+
+            // Instantiate the list to track the data points
+            var objPoints = new List<DataPoint>();
+
+            foreach (var chromDataPoint in objData.Scans)
+            {
+                if (msLevelFilter != 0 && chromDataPoint.MSLevel != msLevelFilter &&
+                    !(msLevelFilter == 2 & chromDataPoint.MSLevel >= 2))
+                {
+                    continue;
+                }
+
+                objPoints.Add(new DataPoint(chromDataPoint.ScanNum, chromDataPoint.Intensity));
+
+                if (chromDataPoint.TimeMinutes > dblScanTimeMax)
+                {
+                    dblScanTimeMax = chromDataPoint.TimeMinutes;
+                }
+
+                if (chromDataPoint.Intensity > dblMaxIntensity)
+                {
+                    dblMaxIntensity = chromDataPoint.Intensity;
+                }
+            }
+
+            if (objPoints.Count == 0)
+            {
+                // Nothing to plot
+                var emptyContainer = new clsPythonPlotContainer2D();
+                return emptyContainer;
+            }
+
+            var plotContainer = new clsPythonPlotContainer2D(plotTitle, xAxisLabel, yAxisLabel) {
+                DeleteTempFiles = DeleteTempFiles
+            };
+
+
+            if (yAxisExponentialNotation)
+            {
+                plotContainer.YAxisInfo.StringFormat = clsAxisInfo.EXPONENTIAL_FORMAT;
+            }
+
+            plotContainer.SetData(objPoints);
+
+            // Update the axis format codes if the data values are small or the range of data is small
+
+            // Assume the X axis is plotting integers
+            var xVals = (from item in objPoints select item.X).ToList();
+            clsPlotUtilities.GetAxisFormatInfo(xVals, true, plotContainer.XAxisInfo);
+
+            // Assume the Y axis is plotting doubles
+            var yVals = (from item in objPoints select item.Y).ToList();
+            clsPlotUtilities.GetAxisFormatInfo(yVals, false, plotContainer.YAxisInfo);
+
+            // Possibly add a label showing the maximum elution time
+            if (dblScanTimeMax > 0)
+            {
+                string strCaption;
+                if (dblScanTimeMax < 2)
+                {
+                    strCaption = Math.Round(dblScanTimeMax, 2).ToString("0.00") + " minutes";
+                }
+                else if (dblScanTimeMax < 10)
+                {
+                    strCaption = Math.Round(dblScanTimeMax, 1).ToString("0.0") + " minutes";
+                }
+                else
+                {
+                    strCaption = Math.Round(dblScanTimeMax, 0).ToString("0") + " minutes";
+                }
+
+                plotContainer.AnnotationBottomRight = strCaption;
+            }
+
+            // Override the auto-computed Y axis range
+            if (autoMinMaxY)
+            {
+                // Auto scale
+            }
+            else
+            {
+                plotContainer.XAxisInfo.SetRange(0, dblMaxIntensity);
+            }
+
+            return plotContainer;
+        }
+        /// <summary>
+        /// Clear BPI and TIC data
+        /// </summary>
         public void Reset()
         {
-            if (mBPI == null) {
+            if (mBPI == null)
+            {
                 mBPI = new clsChromatogramInfo();
                 mTIC = new clsChromatogramInfo();
-            } else {
+            }
+            else
+            {
                 mBPI.Initialize();
                 mTIC.Initialize();
             }
@@ -371,12 +516,18 @@ namespace MSFileInfoScanner
             mRecentFiles.Clear();
         }
 
-        public bool SaveTICAndBPIPlotFiles(string strDatasetName, string strOutputFolderPath, out string strErrorMessage)
+        /// <summary>
+        /// Save BPI and TIC plots
+        /// </summary>
+        /// <param name="strDatasetName"></param>
+        /// <param name="strOutputFolderPath"></param>
+        /// <returns>True if success, false if an error</returns>
+        public bool SaveTICAndBPIPlotFiles(string strDatasetName, string strOutputFolderPath)
         {
             bool blnSuccess;
-            strErrorMessage = string.Empty;
 
-            try {
+            try
+            {
 
                 mRecentFiles.Clear();
 
