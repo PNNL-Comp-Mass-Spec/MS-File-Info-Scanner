@@ -209,8 +209,6 @@ namespace MSFileInfoScanner
                 objNETCDFReader?.CloseMSCdfFile();
             }
 
-            return blnSuccess;
-
         }
 
         /// <summary>
@@ -225,7 +223,8 @@ namespace MSFileInfoScanner
 
             var blnSuccess = false;
 
-            try {
+            try
+            {
                 var diFolder = new DirectoryInfo(strDataFilePath);
 
                 datasetFileInfo.FileSystemCreationTime = diFolder.CreationTime;
@@ -248,7 +247,9 @@ namespace MSFileInfoScanner
                     datasetFileInfo.AcqTimeStart = fiYepFile.LastWriteTime;
                     datasetFileInfo.AcqTimeEnd = fiYepFile.LastWriteTime;
                     blnSuccess = true;
-                } else {
+                }
+                else
+                {
                     // Analysis.yep not found; look for Run.log
                     var fiRunLog = new FileInfo(Path.Combine(diFolder.FullName, AGILENT_RUN_LOG_FILE));
                     if (fiRunLog.Exists)
@@ -259,7 +260,8 @@ namespace MSFileInfoScanner
 
                         // Sum up the sizes of all of the files in this folder
                         datasetFileInfo.FileSizeBytes = 0;
-                        foreach (var datasetFile in diFolder.GetFiles()) {
+                        foreach (var datasetFile in diFolder.GetFiles())
+                        {
                             datasetFileInfo.FileSizeBytes += datasetFile.Length;
                         }
                     }
@@ -267,22 +269,25 @@ namespace MSFileInfoScanner
 
                 datasetFileInfo.ScanCount = 0;
 
-                if (blnSuccess) {
-                    try {
+                if (blnSuccess)
+                {
+                    try
+                    {
                         // Parse the Run Log file to determine the actual values for .AcqTimeStart and .AcqTimeEnd
-                        blnSuccess = ParseRunLogFile(strDataFilePath, datasetFileInfo);
+                        ParseRunLogFile(strDataFilePath, datasetFileInfo);
 
                         // Parse the Analysis.cdf file to determine the scan count and to further refine .AcqTimeStart
-                        blnSuccess = ParseAnalysisCDFFile(strDataFilePath, datasetFileInfo);
-                    } catch (Exception) {
-                        // Error parsing the Run Log file or the Analysis.cdf file; do not abort
-
+                        ParseAnalysisCDFFile(strDataFilePath, datasetFileInfo);
                     }
-
-                    blnSuccess = true;
+                    catch (Exception)
+                    {
+                        // Error parsing the Run Log file or the Analysis.cdf file; do not abort
+                    }
                 }
 
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 blnSuccess = false;
             }
 

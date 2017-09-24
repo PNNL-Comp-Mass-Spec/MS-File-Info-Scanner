@@ -21,9 +21,12 @@ namespace MSFileInfoScanner
         public override string GetDatasetNameViaPath(string strDataFilePath)
         {
             // The dataset name is simply the file name without .wiff
-            try {
+            try
+            {
                 return Path.GetFileNameWithoutExtension(strDataFilePath);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 return string.Empty;
             }
         }
@@ -73,7 +76,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private void ProcessWiffFile(FileInfo fiDatasetFile, clsDatasetFileInfo datasetFileInfo)
+        private void ProcessWiffFile(FileSystemInfo fiDatasetFile, clsDatasetFileInfo datasetFileInfo)
         {
             try
             {
@@ -148,21 +151,26 @@ namespace MSFileInfoScanner
         {
             const bool RUN_BENCHMARKS = false;
 
-            try {
+            try
+            {
                 var objPWiz2 = new MSDataFile(strFilePath);
 
                 Console.WriteLine("Spectrum count: " + objPWiz2.run.spectrumList.size());
                 Console.WriteLine();
 
-                if (objPWiz2.run.spectrumList.size() > 0) {
+                if (objPWiz2.run.spectrumList.size() > 0)
+                {
                     var intSpectrumIndex = 0;
 
-                    do {
+                    do
+                    {
                         var oSpectrum = objPWiz2.run.spectrumList.spectrum(intSpectrumIndex, getBinaryData: true);
 
                         pwiz.CLI.data.CVParam param;
-                        if (oSpectrum.scanList.scans.Count > 0) {
-                            if (clsProteowizardDataParser.TryGetCVParam(oSpectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_scan_start_time, out param)) {
+                        if (oSpectrum.scanList.scans.Count > 0)
+                        {
+                            if (clsProteowizardDataParser.TryGetCVParam(oSpectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_scan_start_time, out param))
+                            {
                                 var intScanNum = intSpectrumIndex + 1;
                                 var dblStartTimeMinutes = param.timeInSeconds() / 60.0;
 
@@ -181,10 +189,13 @@ namespace MSFileInfoScanner
                         var oMZs = oSpectrum.getMZArray();
                         oSpectrum.getIntensityArray();
 
-                        if (oMZs.data.Count > 0) {
+                        if (oMZs.data.Count > 0)
+                        {
                             Console.WriteLine("  Data count: " + oMZs.data.Count);
 
-                            if (RUN_BENCHMARKS) {
+                            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                            if (RUN_BENCHMARKS)
+                            {
                                 double dblTIC1 = 0;
                                 double dblTIC2 = 0;
                                 var dtStartTime = default(DateTime);
@@ -197,8 +208,10 @@ namespace MSFileInfoScanner
                                 // Repeatedly accessing items directly via oMZs.data() can be very slow
                                 // With 700 points and 2000 iterations, it takes anywhere from 0.6 to 1.1 seconds to run from dtStartTime to dtEndTime
                                 dtStartTime = DateTime.Now;
-                                for (var j = 1; j <= LOOP_ITERATIONS; j++) {
-                                    for (var intIndex = 0; intIndex <= oMZs.data.Count - 1; intIndex++) {
+                                for (var j = 1; j <= LOOP_ITERATIONS; j++)
+                                {
+                                    for (var intIndex = 0; intIndex <= oMZs.data.Count - 1; intIndex++)
+                                    {
                                         dblTIC1 += oMZs.data[intIndex];
                                     }
                                 }
@@ -208,9 +221,11 @@ namespace MSFileInfoScanner
                                 // The preferred method is to copy the data from .data to a locally-stored mzArray var
                                 // With 700 points and 2000 iterations, it takes 0.016 seconds to run from dtStartTime to dtEndTime
                                 dtStartTime = DateTime.Now;
-                                for (var j = 1; j <= LOOP_ITERATIONS; j++) {
+                                for (var j = 1; j <= LOOP_ITERATIONS; j++)
+                                {
                                     var oMzArray = oMZs.data;
-                                    for (var intIndex = 0; intIndex <= oMzArray.Count - 1; intIndex++) {
+                                    for (var intIndex = 0; intIndex <= oMzArray.Count - 1; intIndex++)
+                                    {
                                         dblTIC2 += oMzArray[intIndex];
                                     }
                                 }
@@ -219,26 +234,32 @@ namespace MSFileInfoScanner
 
                                 Console.WriteLine("  " + oMZs.data.Count + " points with " + LOOP_ITERATIONS + " iterations gives Runtime1=" + dtRunTimeSeconds1.ToString("0.0##") + " sec. vs. Runtime2=" + dtRunTimeSeconds2.ToString("0.0##") + " sec.");
 
-                                if (Math.Abs(dblTIC1 - dblTIC2) > float.Epsilon) {
+                                if (Math.Abs(dblTIC1 - dblTIC2) > float.Epsilon)
+                                {
                                     Console.WriteLine("  TIC values don't agree; this is unexpected");
                                 }
                             }
 
                         }
 
-                        if (intSpectrumIndex < 25) {
+                        if (intSpectrumIndex < 25)
+                        {
                             intSpectrumIndex += 1;
-                        } else {
+                        }
+                        else
+                        {
                             intSpectrumIndex += 50;
                         }
 
                     } while (intSpectrumIndex < objPWiz2.run.spectrumList.size());
                 }
 
-                if (objPWiz2.run.chromatogramList.size() > 0) {
+                if (objPWiz2.run.chromatogramList.size() > 0)
+                {
                     var intChromIndex = 0;
 
-                    do {
+                    do
+                    {
                         var oTimeIntensityPairList = new TimeIntensityPairList();
 
                         // Note that even for a small .Wiff file (1.5 MB), obtaining the Chromatogram list will take some time (20 to 60 seconds)
@@ -255,7 +276,8 @@ namespace MSFileInfoScanner
                             oChromatogram.getTimeIntensityPairs(ref oTimeIntensityPairList);
                         }
 
-                        if (clsProteowizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out param)) {
+                        if (clsProteowizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out param))
+                        {
                             // Obtain the SRM scan
                             oChromatogram.getTimeIntensityPairs(ref oTimeIntensityPairList);
                         }
@@ -264,7 +286,9 @@ namespace MSFileInfoScanner
                     } while (intChromIndex < 50 && intChromIndex < objPWiz2.run.chromatogramList.size());
                 }
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 OnErrorEvent("Error using ProteoWizard reader: " + ex.Message, ex);
             }
 

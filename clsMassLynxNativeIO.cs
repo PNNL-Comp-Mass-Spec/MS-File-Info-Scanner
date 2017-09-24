@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
@@ -875,7 +876,7 @@ namespace MSFileInfoScanner
 
         private int LoadMSFunctionInfo(ref udtMSDataType udtThisMSData, string strMLynxDataFolderPath)
         {
-        
+
             // Determines the number of functions in the given data file
             // Returns the function count, or 0 on failure
 
@@ -888,7 +889,7 @@ namespace MSFileInfoScanner
 
                 var ioFileInfo = new FileInfo(strMLynxDataFolderPath);
                 string strCleanMLynxDataFolderPath;
-            
+
                 if (ioFileInfo.Exists)
                 {
                     // strMLynxDataFolderPath contains a file; remove the filename from strMLynxDataFolderPath
@@ -1540,7 +1541,7 @@ namespace MSFileInfoScanner
 
                             // Unused
                             udtNativeScanIndexRecord.PackedBasePeakIntensity = 0;
-                            
+
                             udtNativeScanIndexRecord.PackedBasePeakInfo = udtNativeScanIndexRecordCompressedScan.PackedBasePeakInfo;
                         }
                         else
@@ -1568,7 +1569,7 @@ namespace MSFileInfoScanner
                     {
                         // 4194304 = 2^22
                         udtScanIndexRecord.SegmentNumber = (short)((short)(udtNativeScanIndexRecord.PackedScanInfo & maskSegment) / 4194304);
-                        
+
                         udtScanIndexRecord.UseFollowingContinuum = NumConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskUseFollowingContinuum);
                         udtScanIndexRecord.ContiuumDataOverride = NumConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskContiuumDataOverride);
                         udtScanIndexRecord.ScanContainsMolecularMasses = NumConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskScanContainsMolecularMasses);
@@ -1610,7 +1611,7 @@ namespace MSFileInfoScanner
         private void NativeIOParseCalibrationCoeffs(
             string strTextToParse,
             out short intCalibrationCoeffCount,
-            double[] dblCalibrationCoeffs,
+            IList<double> dblCalibrationCoeffs,
             out short intCalibrationTypeID)
         {
             var strCalParameters = strTextToParse.Split(',');
@@ -1659,7 +1660,7 @@ namespace MSFileInfoScanner
 
             try
             {
-    
+
                 var strFilePath = Path.Combine(udtThisMSData.CurrentDataDirPath, "_HEADER.TXT");
                 var fileInfo = new FileInfo(strFilePath);
 
@@ -1690,9 +1691,9 @@ namespace MSFileInfoScanner
                                     if (lngFunctionNumber >= 1 & lngFunctionNumber <= udtThisMSData.FunctionCount) {
 
                                         NativeIOParseCalibrationCoeffs(
-                                            strKeyValue, 
-                                            out udtThisMSData.FunctionInfo[lngFunctionNumber].CalibrationCoefficientCount, 
-                                            udtThisMSData.FunctionInfo[lngFunctionNumber].CalibrationCoefficients, 
+                                            strKeyValue,
+                                            out udtThisMSData.FunctionInfo[lngFunctionNumber].CalibrationCoefficientCount,
+                                            udtThisMSData.FunctionInfo[lngFunctionNumber].CalibrationCoefficients,
                                             out udtThisMSData.FunctionInfo[lngFunctionNumber].CalTypeID);
 
                                     } else {
@@ -1728,7 +1729,7 @@ namespace MSFileInfoScanner
 
         private bool NativeIOReadHeader(string dataDirPath, out udtMSHeaderInfoType headerInfo)
         {
-        
+
             // Duplicates job of DMRawReadHeader to avoid need for calling Dll
             // Returns True if successful, False if not
 
@@ -1763,7 +1764,7 @@ namespace MSFileInfoScanner
 
             try
             {
-    
+
 
                 var strFilePath = Path.Combine(dataDirPath, "_HEADER.TXT");
                 var fiHeaderFile = new FileInfo(strFilePath);
@@ -1795,12 +1796,11 @@ namespace MSFileInfoScanner
                         var intColonLoc = strLineIn.IndexOf(':');
                         var strKeyName = strLineIn.Substring(0, intColonLoc).ToUpper();
                         var strKeyValue = strLineIn.Substring(intColonLoc + 1).Trim();
-                    
+
                         switch (strKeyName)
                         {
                             case "VERSION":
-                                short versionMajor;
-                                if (short.TryParse(strKeyValue, out versionMajor))
+                                if (short.TryParse(strKeyValue, out var versionMajor))
                                 {
                                     headerInfo.VersionMajor = versionMajor;
                                     headerInfo.VersionMinor = (int)(Convert.ToSingle(strKeyValue) - headerInfo.VersionMajor);
@@ -1856,14 +1856,14 @@ namespace MSFileInfoScanner
                                 break;
                             case "CAL MS1 STATIC":
                                 NativeIOParseCalibrationCoeffs(
-                                    strKeyValue, 
+                                    strKeyValue,
                                     out headerInfo.CalMS1StaticCoeffCount,
                                     headerInfo.CalMS1StaticCoeffs,
                                     out headerInfo.CalMS1StaticTypeID);
                                 break;
                             case "CAL MS2 STATIC":
                                 NativeIOParseCalibrationCoeffs(
-                                    strKeyValue, 
+                                    strKeyValue,
                                     out headerInfo.CalMS2StaticCoeffCount,
                                     headerInfo.CalMS2StaticCoeffs,
                                     out headerInfo.CalMS2StaticTypeID);
@@ -1960,7 +1960,7 @@ namespace MSFileInfoScanner
         private double UnpackMass(int PackedBasePeakInfo, short intAcquisitionDataType, bool blnProcessingFunctionIndexFile)
         {
             // See note for Acquisition Data Types 9 to 12 below
-            double dblUnpackedMass = 0;
+            double dblUnpackedMass;
 
             switch (intAcquisitionDataType)
             {
@@ -2078,7 +2078,7 @@ namespace MSFileInfoScanner
             public static Int16 UnsignedToInt16(Int32 Value)
             {
                 if (Value < 0 | Value >= OFFSET_2)
-                    throw new ArgumentOutOfRangeException("Value");
+                    throw new ArgumentOutOfRangeException(nameof(Value));
 
                 if (Value <= MAXINT_2)
                 {

@@ -23,9 +23,12 @@ namespace MSFileInfoScanner
         public override string GetDatasetNameViaPath(string strDataFilePath)
         {
             // The dataset name is simply the folder name without .D
-            try {
+            try
+            {
                 return Path.GetFileNameWithoutExtension(strDataFilePath);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 return string.Empty;
             }
         }
@@ -41,21 +44,27 @@ namespace MSFileInfoScanner
         {
             var blnSuccess = false;
 
-            try {
+            try
+            {
 
                 // Open the Contents.xml file
                 var strFilePath = Path.Combine(strFolderPath, AGILENT_XML_CONTENTS_FILE);
 
-                using (var srReader = new System.Xml.XmlTextReader(new FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
+                using (var srReader = new System.Xml.XmlTextReader(new FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                {
 
-                    while (!srReader.EOF) {
+                    while (!srReader.EOF)
+                    {
                         srReader.Read();
 
-                        switch (srReader.NodeType) {
+                        switch (srReader.NodeType)
+                        {
                             case System.Xml.XmlNodeType.Element:
 
-                                if (srReader.Name == "AcquiredTime") {
-                                    try {
+                                if (srReader.Name == "AcquiredTime")
+                                {
+                                    try
+                                    {
                                         var dtAcquisitionStartTime = srReader.ReadElementContentAsDateTime();
 
                                         // Convert from Universal time to Local time
@@ -65,12 +74,15 @@ namespace MSFileInfoScanner
                                         // for example XG_A83CapiHSSWash1.d where the time in the Contents.xml file is 3/20/2005 while the file modification time is 2010
                                         // Thus, we use a sanity check of a maximum run time of 24 hours
 
-                                        if (datasetFileInfo.AcqTimeEnd.Subtract(dtAcquisitionTime).TotalDays < 1) {
+                                        if (datasetFileInfo.AcqTimeEnd.Subtract(dtAcquisitionTime).TotalDays < 1)
+                                        {
                                             datasetFileInfo.AcqTimeStart = dtAcquisitionStartTime.ToLocalTime();
                                             blnSuccess = true;
                                         }
 
-                                    } catch (Exception) {
+                                    }
+                                    catch (Exception)
+                                    {
                                         // Ignore errors here
                                     }
 
@@ -83,7 +95,9 @@ namespace MSFileInfoScanner
 
                 }
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 // Exception reading file
                 OnErrorEvent("Exception reading " + AGILENT_XML_CONTENTS_FILE + ": " + ex.Message, ex);
                 blnSuccess = false;
@@ -118,14 +132,18 @@ namespace MSFileInfoScanner
                 // Open the Contents.xml file
                 var strFilePath = Path.Combine(strFolderPath, AGILENT_TIME_SEGMENT_FILE);
 
-                using (var srReader = new System.Xml.XmlTextReader(new FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
+                using (var srReader = new System.Xml.XmlTextReader(new FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                {
 
-                    while (!srReader.EOF) {
+                    while (!srReader.EOF)
+                    {
                         srReader.Read();
 
-                        switch (srReader.NodeType) {
+                        switch (srReader.NodeType)
+                        {
                             case System.Xml.XmlNodeType.Element:
-                                switch (srReader.Name) {
+                                switch (srReader.Name)
+                                {
                                     case "TimeSegment":
                                         dblStartTime = 0;
                                         dblEndTime = 0;
@@ -146,15 +164,17 @@ namespace MSFileInfoScanner
                                         break;
                                     default:
                                         break;
-                                    // Ignore it
+                                        // Ignore it
                                 }
 
                                 break;
                             case System.Xml.XmlNodeType.EndElement:
-                                if (srReader.Name == "TimeSegment") {
+                                if (srReader.Name == "TimeSegment")
+                                {
                                     // Store the acqtime for this time segment
 
-                                    if (dblEndTime > dblStartTime) {
+                                    if (dblEndTime > dblStartTime)
+                                    {
                                         blnSuccess = true;
                                         dblTotalAcqTimeMinutes += (dblEndTime - dblStartTime);
                                     }
@@ -168,7 +188,9 @@ namespace MSFileInfoScanner
 
                 }
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 // Exception reading file
                 OnErrorEvent("Exception reading " + AGILENT_TIME_SEGMENT_FILE + ": " + ex.Message, ex);
                 blnSuccess = false;
@@ -184,7 +206,8 @@ namespace MSFileInfoScanner
 
             var blnSuccess = false;
 
-            try {
+            try
+            {
                 var diRootFolder = new DirectoryInfo(strDataFilePath);
                 var diAcqDataFolder = new DirectoryInfo(Path.Combine(diRootFolder.FullName, AGILENT_ACQDATA_FOLDER_NAME));
 
@@ -200,9 +223,11 @@ namespace MSFileInfoScanner
                 datasetFileInfo.FileSizeBytes = 0;
                 datasetFileInfo.ScanCount = 0;
 
-                if (diAcqDataFolder.Exists) {
+                if (diAcqDataFolder.Exists)
+                {
                     // Sum up the sizes of all of the files in the AcqData folder
-                    foreach (var fiFile in diAcqDataFolder.GetFiles("*", SearchOption.AllDirectories)) {
+                    foreach (var fiFile in diAcqDataFolder.GetFiles("*", SearchOption.AllDirectories))
+                    {
                         datasetFileInfo.FileSizeBytes += fiFile.Length;
                     }
 
@@ -210,14 +235,17 @@ namespace MSFileInfoScanner
                     // Use its modification time to get an initial estimate for the acquisition end time
                     var fiMSScanfile = new FileInfo(Path.Combine(diAcqDataFolder.FullName, AGILENT_MS_SCAN_FILE));
 
-                    if (fiMSScanfile.Exists) {
+                    if (fiMSScanfile.Exists)
+                    {
                         datasetFileInfo.AcqTimeStart = fiMSScanfile.LastWriteTime;
                         datasetFileInfo.AcqTimeEnd = fiMSScanfile.LastWriteTime;
 
                         // Read the file info from the file system
                         // Several of these stats will be further updated later
                         UpdateDatasetFileStats(fiMSScanfile, datasetFileInfo.DatasetID);
-                    } else {
+                    }
+                    else
+                    {
                         // Read the file info from the file system
                         // Several of these stats will be further updated later
                         UpdateDatasetFileStats(diAcqDataFolder, datasetFileInfo.DatasetID);
@@ -226,7 +254,8 @@ namespace MSFileInfoScanner
                     blnSuccess = true;
                 }
 
-                if (blnSuccess) {
+                if (blnSuccess)
+                {
                     // The AcqData folder exists
 
                     // Parse the Contents.xml file to determine the acquisition start time
@@ -235,7 +264,8 @@ namespace MSFileInfoScanner
                     // Parse the MSTS.xml file to determine the acquisition length and number of scans
                     var blnValidMSTS = ProcessTimeSegmentFile(diAcqDataFolder.FullName, datasetFileInfo, out var dblAcquisitionLengthMinutes);
 
-                    if (!blnAcqStartTimeDetermined && blnValidMSTS) {
+                    if (!blnAcqStartTimeDetermined && blnValidMSTS)
+                    {
                         // Compute the start time from .AcqTimeEnd minus dblAcquisitionLengthMinutes
                         datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.AddMinutes(-dblAcquisitionLengthMinutes);
                     }
@@ -252,7 +282,8 @@ namespace MSFileInfoScanner
 
                 }
 
-                if (blnSuccess) {
+                if (blnSuccess)
+                {
                     // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
                     mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
@@ -262,7 +293,9 @@ namespace MSFileInfoScanner
                     mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
                 }
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 OnErrorEvent("Exception parsing Agilent TOF .D folder: " + ex.Message, ex);
                 blnSuccess = false;
             }
@@ -271,27 +304,31 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ReadBinaryData(string strDataFolderPath, clsDatasetFileInfo datasetFileInfo)
+        private void ReadBinaryData(string strDataFolderPath, clsDatasetFileInfo datasetFileInfo)
         {
 
-            bool blnSuccess;
-
-            try {
+            try
+            {
                 // Open the data folder using the ProteoWizardWrapper
 
                 var objPWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(strDataFolderPath);
 
-                try {
+                try
+                {
                     var dtRunStartTime = Convert.ToDateTime(objPWiz.RunStartTime);
 
                     // Update AcqTimeEnd if possible
-                    if (dtRunStartTime < datasetFileInfo.AcqTimeEnd) {
-                        if (datasetFileInfo.AcqTimeEnd.Subtract(dtRunStartTime).TotalDays < 1) {
+                    if (dtRunStartTime < datasetFileInfo.AcqTimeEnd)
+                    {
+                        if (datasetFileInfo.AcqTimeEnd.Subtract(dtRunStartTime).TotalDays < 1)
+                        {
                             datasetFileInfo.AcqTimeStart = dtRunStartTime;
                         }
                     }
 
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     // Leave the times unchanged
                 }
 
@@ -309,14 +346,16 @@ namespace MSFileInfoScanner
                 var blnTICStored = false;
                 double dblRuntimeMinutes = 0;
 
-                if (objPWiz.ChromatogramCount > 0) {
+                if (objPWiz.ChromatogramCount > 0)
+                {
                     // Process the chromatograms
                     pWizParser.StoreChromatogramInfo(datasetFileInfo, out blnTICStored, out _, out dblRuntimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
 
                 }
 
-                if (objPWiz.SpectrumCount > 0) {
+                if (objPWiz.SpectrumCount > 0)
+                {
                     // Process the spectral data
                     pWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, ref dblRuntimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
@@ -325,14 +364,12 @@ namespace MSFileInfoScanner
                 objPWiz.Dispose();
                 clsProgRunner.GarbageCollectNow();
 
-                blnSuccess = true;
-
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 OnErrorEvent("Exception reading the Binary Data in the Agilent TOF .D folder using Proteowizard: " + ex.Message, ex);
-                blnSuccess = false;
             }
 
-            return blnSuccess;
         }
 
     }

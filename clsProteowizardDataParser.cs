@@ -26,12 +26,14 @@ namespace MSFileInfoScanner
         private readonly Regex mGetQ3MZ;
 
         private bool mHighResMS2;
-        public bool HighResMS1 {
+        public bool HighResMS1
+        {
             get => mHighResMS1;
             set => mHighResMS1 = value;
         }
 
-        public bool HighResMS2 {
+        public bool HighResMS2
+        {
             get => mHighResMS2;
             set => mHighResMS2 = value;
         }
@@ -86,8 +88,10 @@ namespace MSFileInfoScanner
         private bool ExtractQMZ(Regex reGetMZ, string strChromID, out double dblMZ)
         {
             var reMatch = reGetMZ.Match(strChromID);
-            if (reMatch.Success) {
-                if (double.TryParse(reMatch.Groups[1].Value, out dblMZ)) {
+            if (reMatch.Success)
+            {
+                if (double.TryParse(reMatch.Groups[1].Value, out dblMZ))
+                {
                     return true;
                 }
             }
@@ -99,32 +103,43 @@ namespace MSFileInfoScanner
         private int FindNearestInList(List<float> lstItems, float sngValToFind)
         {
             var intIndexMatch = lstItems.BinarySearch(sngValToFind);
-            if (intIndexMatch >= 0) {
+            if (intIndexMatch >= 0)
+            {
                 // Exact match found
-            } else {
+            }
+            else
+            {
                 // Find the nearest match
                 intIndexMatch = intIndexMatch ^ -1;
-                if (intIndexMatch == lstItems.Count) {
+                if (intIndexMatch == lstItems.Count)
+                {
                     intIndexMatch -= 1;
                 }
 
-                if (intIndexMatch > 0) {
+                if (intIndexMatch > 0)
+                {
                     // Possibly decrement intIndexMatch
-                    if (Math.Abs(lstItems[intIndexMatch - 1] - sngValToFind) < Math.Abs(lstItems[intIndexMatch] - sngValToFind)) {
+                    if (Math.Abs(lstItems[intIndexMatch - 1] - sngValToFind) < Math.Abs(lstItems[intIndexMatch] - sngValToFind))
+                    {
                         intIndexMatch -= 1;
                     }
                 }
 
-                if (intIndexMatch < lstItems.Count) {
+                if (intIndexMatch < lstItems.Count)
+                {
                     // Possible increment intIndexMatch
-                    if (Math.Abs(lstItems[intIndexMatch + 1] - sngValToFind) < Math.Abs(lstItems[intIndexMatch] - sngValToFind)) {
+                    if (Math.Abs(lstItems[intIndexMatch + 1] - sngValToFind) < Math.Abs(lstItems[intIndexMatch] - sngValToFind))
+                    {
                         intIndexMatch += 1;
                     }
                 }
 
-                if (intIndexMatch < 0) {
+                if (intIndexMatch < 0)
+                {
                     intIndexMatch = 0;
-                } else if (intIndexMatch == lstItems.Count) {
+                }
+                else if (intIndexMatch == lstItems.Count)
+                {
                     intIndexMatch = lstItems.Count - 1;
                 }
 
@@ -139,7 +154,8 @@ namespace MSFileInfoScanner
             {
                 var dtAcqTimeStartAlt = datasetFileInfo.AcqTimeEnd.AddMinutes(-dblRuntimeMinutes);
 
-                if (dtAcqTimeStartAlt < datasetFileInfo.AcqTimeStart && datasetFileInfo.AcqTimeStart.Subtract(dtAcqTimeStartAlt).TotalDays < 1) {
+                if (dtAcqTimeStartAlt < datasetFileInfo.AcqTimeStart && datasetFileInfo.AcqTimeStart.Subtract(dtAcqTimeStartAlt).TotalDays < 1)
+                {
                     datasetFileInfo.AcqTimeStart = dtAcqTimeStartAlt;
                 }
             }
@@ -161,13 +177,15 @@ namespace MSFileInfoScanner
             var blnParentMZFound = ExtractQ1MZ(strChromID, out var dblParentMZ);
             var blnProductMZFound = ExtractQ3MZ(strChromID, out var dblProductMZ);
 
-            for (var intIndex = 0; intIndex <= sngTimes.Length - 1; intIndex++) {
+            for (var intIndex = 0; intIndex <= sngTimes.Length - 1; intIndex++)
+            {
                 // Find the ScanNumber in the TIC nearest to sngTimes[intIndex]
                 var intIndexMatch = FindNearestInList(lstTICScanTimes, sngTimes[intIndex]);
                 var intScanNumber = lstTICScanNumbers[intIndexMatch];
 
                 // Bump up dblRuntimeMinutes if necessary
-                if (sngTimes[intIndex] > dblRuntimeMinutes) {
+                if (sngTimes[intIndex] > dblRuntimeMinutes)
+                {
                     dblRuntimeMinutes = sngTimes[intIndex];
                 }
 
@@ -182,11 +200,16 @@ namespace MSFileInfoScanner
                     BasePeakIntensity = sngIntensities[intIndex].ToString("0.0")
                 };
 
-                if (blnParentMZFound) {
+                if (blnParentMZFound)
+                {
                     objScanStatsEntry.BasePeakMZ = dblParentMZ.ToString("0.0###");
-                } else if (blnProductMZFound) {
+                }
+                else if (blnProductMZFound)
+                {
                     objScanStatsEntry.BasePeakMZ = dblProductMZ.ToString("0.0###");
-                } else {
+                }
+                else
+                {
                     objScanStatsEntry.BasePeakMZ = "0";
                 }
 
@@ -198,18 +221,22 @@ namespace MSFileInfoScanner
 
                 mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
-                if (mSaveLCMS2DPlots && sngIntensities[intIndex] > 0) {
+                if (mSaveLCMS2DPlots && sngIntensities[intIndex] > 0)
+                {
                     // Store the m/z and intensity values in dct2DDataParent and dct2DDataProduct
 
-                    if (blnParentMZFound) {
+                    if (blnParentMZFound)
+                    {
                         Store2DPlotDataPoint(dct2DDataParent, intScanNumber, dblParentMZ, sngIntensities[intIndex]);
                     }
 
-                    if (blnProductMZFound) {
+                    if (blnProductMZFound)
+                    {
                         Store2DPlotDataPoint(dct2DDataProduct, intScanNumber, dblProductMZ, sngIntensities[intIndex]);
                     }
 
-                    if (!dct2DDataScanTimes.ContainsKey(intScanNumber)) {
+                    if (!dct2DDataScanTimes.ContainsKey(intScanNumber))
+                    {
                         dct2DDataScanTimes[intScanNumber] = sngTimes[intIndex];
                     }
 
@@ -227,16 +254,19 @@ namespace MSFileInfoScanner
             ref double dblRuntimeMinutes,
             bool blnStoreInTICandBPIPlot)
         {
-            for (var intIndex = 0; intIndex <= sngTimes.Count - 1; intIndex++) {
+            for (var intIndex = 0; intIndex <= sngTimes.Count - 1; intIndex++)
+            {
                 lstTICScanTimes.Add(sngTimes[intIndex]);
                 lstTICScanNumbers.Add(intIndex + 1);
 
                 // Bump up dblRuntimeMinutes if necessary
-                if (sngTimes[intIndex] > dblRuntimeMinutes) {
+                if (sngTimes[intIndex] > dblRuntimeMinutes)
+                {
                     dblRuntimeMinutes = sngTimes[intIndex];
                 }
 
-                if (blnStoreInTICandBPIPlot) {
+                if (blnStoreInTICandBPIPlot)
+                {
                     // Use this TIC chromatogram for this dataset since there are no normal Mass Spectra
                     mTICandBPIPlot.AddDataTICOnly(intIndex + 1, 1, sngTimes[intIndex], sngIntensities[intIndex]);
 
@@ -246,14 +276,17 @@ namespace MSFileInfoScanner
 
             // Make sure lstTICScanTimes is sorted
             var blnNeedToSort = false;
-            for (var intIndex = 1; intIndex <= lstTICScanTimes.Count - 1; intIndex++) {
-                if (lstTICScanTimes[intIndex] < lstTICScanTimes[intIndex - 1]) {
+            for (var intIndex = 1; intIndex <= lstTICScanTimes.Count - 1; intIndex++)
+            {
+                if (lstTICScanTimes[intIndex] < lstTICScanTimes[intIndex - 1])
+                {
                     blnNeedToSort = true;
                     break;
                 }
             }
 
-            if (blnNeedToSort) {
+            if (blnNeedToSort)
+            {
                 var sngTICScanTimes = new float[lstTICScanTimes.Count];
                 var intTICScanNumbers = new int[lstTICScanTimes.Count];
 
@@ -265,7 +298,8 @@ namespace MSFileInfoScanner
                 lstTICScanTimes.Clear();
                 lstTICScanNumbers.Clear();
 
-                for (var intIndex = 0; intIndex <= sngTICScanTimes.Length - 1; intIndex++) {
+                for (var intIndex = 0; intIndex <= sngTICScanTimes.Length - 1; intIndex++)
+                {
                     lstTICScanTimes.Add(sngTICScanTimes[intIndex]);
                     lstTICScanNumbers.Add(intTICScanNumbers[intIndex]);
                 }
@@ -297,9 +331,12 @@ namespace MSFileInfoScanner
             blnTICStored = false;
             blnSRMDataCached = false;
 
-            for (var intChromIndex = 0; intChromIndex <= mPWiz.ChromatogramCount - 1; intChromIndex++) {
-                try {
-                    if (intChromIndex == 0) {
+            for (var intChromIndex = 0; intChromIndex <= mPWiz.ChromatogramCount - 1; intChromIndex++)
+            {
+                try
+                {
+                    if (intChromIndex == 0)
+                    {
                         OnStatusEvent("Obtaining chromatograms (this could take as long as 60 seconds)");
                     }
                     mPWiz.GetChromatogram(intChromIndex, out var strChromID, out var sngTimes, out var sngIntensities);
@@ -309,7 +346,8 @@ namespace MSFileInfoScanner
 
                     var oCVParams = mPWiz.GetChromatogramCVParams(intChromIndex);
 
-                    if (TryGetCVParam(oCVParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out var param)) {
+                    if (TryGetCVParam(oCVParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out var _))
+                    {
                         // This chromatogram is the TIC
 
                         var blnStoreInTICandBPIPlot = (mSaveTICAndBPI && mPWiz.SpectrumCount == 0);
@@ -322,7 +360,8 @@ namespace MSFileInfoScanner
 
                     }
 
-                    if (TryGetCVParam(oCVParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out param)) {
+                    if (TryGetCVParam(oCVParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out _))
+                    {
                         // This chromatogram is an SRM scan
 
                         ProcessSRM(strChromID, sngTimes, sngIntensities, lstTICScanTimes, lstTICScanNumbers, ref dblRuntimeMinutes, dct2DDataParent, dct2DDataProduct, dct2DDataScanTimes);
@@ -330,7 +369,9 @@ namespace MSFileInfoScanner
                         blnSRMDataCached = true;
                     }
 
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     OnErrorEvent("Error processing chromatogram " + intChromIndex + ": " + ex.Message, ex);
                 }
 
@@ -355,7 +396,8 @@ namespace MSFileInfoScanner
 
         public void StoreMSSpectraInfo(clsDatasetFileInfo datasetFileInfo, bool blnTICStored, ref double dblRuntimeMinutes)
         {
-            try {
+            try
+            {
                 double dblTIC = 0;
                 double dblBPI = 0;
 
@@ -365,16 +407,19 @@ namespace MSFileInfoScanner
 
                 // The scan times returned by .GetScanTimesAndMsLevels() are the acquisition time in seconds from the start of the analysis
                 // Convert these to minutes
-                for (var intScanIndex = 0; intScanIndex <= dblScanTimes.Length - 1; intScanIndex++) {
+                for (var intScanIndex = 0; intScanIndex <= dblScanTimes.Length - 1; intScanIndex++)
+                {
                     dblScanTimes[intScanIndex] /= 60.0;
                 }
 
                 OnStatusEvent("Reading spectra");
                 var dtLastProgressTime = DateTime.UtcNow;
 
-                for (var intScanIndex = 0; intScanIndex <= dblScanTimes.Length - 1; intScanIndex++) {
+                for (var intScanIndex = 0; intScanIndex <= dblScanTimes.Length - 1; intScanIndex++)
+                {
 
-                    try {
+                    try
+                    {
                         var blnComputeTIC = true;
                         var blnComputeBPI = true;
 
@@ -387,26 +432,36 @@ namespace MSFileInfoScanner
                             ScanType = oMSDataSpectrum.Level
                         };
 
-                        if (intMSLevels[intScanIndex] > 1) {
-                            if (mHighResMS2) {
+                        if (intMSLevels[intScanIndex] > 1)
+                        {
+                            if (mHighResMS2)
+                            {
                                 objScanStatsEntry.ScanTypeName = "HMSn";
-                            } else {
+                            }
+                            else
+                            {
                                 objScanStatsEntry.ScanTypeName = "MSn";
                             }
-                        } else {
-                            if (mHighResMS1) {
+                        }
+                        else
+                        {
+                            if (mHighResMS1)
+                            {
                                 objScanStatsEntry.ScanTypeName = "HMS";
-                            } else {
+                            }
+                            else
+                            {
                                 objScanStatsEntry.ScanTypeName = "MS";
                             }
 
                         }
-                    
+
                         objScanStatsEntry.ScanFilterText = "";
                         objScanStatsEntry.ElutionTime = dblScanTimes[intScanIndex].ToString("0.0###");
 
                         // Bump up dblRuntimeMinutes if necessary
-                        if (dblScanTimes[intScanIndex] > dblRuntimeMinutes) {
+                        if (dblScanTimes[intScanIndex] > dblRuntimeMinutes)
+                        {
                             dblRuntimeMinutes = dblScanTimes[intScanIndex];
                         }
 
@@ -437,7 +492,8 @@ namespace MSFileInfoScanner
                         objScanStatsEntry.IonCount = oMSDataSpectrum.Mzs.Length;
                         objScanStatsEntry.IonCountRaw = objScanStatsEntry.IonCount;
 
-                        if (blnComputeBPI | blnComputeTIC) {
+                        if (blnComputeBPI | blnComputeTIC)
+                        {
                             // Step through the raw data to compute the BPI and TIC
 
                             var dblMZs = oMSDataSpectrum.Mzs;
@@ -447,9 +503,11 @@ namespace MSFileInfoScanner
                             dblBPI = 0;
                             double dblBasePeakMZ = 0;
 
-                            for (var intIndex = 0; intIndex <= dblMZs.Length - 1; intIndex++) {
+                            for (var intIndex = 0; intIndex <= dblMZs.Length - 1; intIndex++)
+                            {
                                 dblTIC += dblIntensities[intIndex];
-                                if (dblIntensities[intIndex] > dblBPI) {
+                                if (dblIntensities[intIndex] > dblBPI)
+                                {
                                     dblBPI = dblIntensities[intIndex];
                                     dblBasePeakMZ = dblMZs[intIndex];
                                 }
@@ -463,37 +521,45 @@ namespace MSFileInfoScanner
 
                         mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
-                        if (mSaveTICAndBPI & !blnTICStored) {
+                        if (mSaveTICAndBPI & !blnTICStored)
+                        {
                             mTICandBPIPlot.AddData(intScanIndex + 1, intMSLevels[intScanIndex], (float)dblScanTimes[intScanIndex], dblBPI, dblTIC);
                         }
 
-                        if (mSaveLCMS2DPlots) {
+                        if (mSaveLCMS2DPlots)
+                        {
                             mLCMS2DPlot.AddScan(intScanIndex + 1, intMSLevels[intScanIndex], (float)dblScanTimes[intScanIndex], oMSDataSpectrum.Mzs.Length, oMSDataSpectrum.Mzs, oMSDataSpectrum.Intensities);
                         }
 
-                        if (mCheckCentroidingStatus) {
+                        if (mCheckCentroidingStatus)
+                        {
                             mDatasetStatsSummarizer.ClassifySpectrum(oMSDataSpectrum.Mzs, intMSLevels[intScanIndex]);
                         }
 
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex)
+                    {
                         OnErrorEvent("Error loading header info for scan " + intScanIndex + 1 + ": " + ex.Message);
                     }
 
-                    if (DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 60) {
+                    if (DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 60)
+                    {
                         OnDebugEvent(" ... " + ((intScanIndex + 1) / (double)dblScanTimes.Length * 100).ToString("0.0") + "% complete");
                         dtLastProgressTime = DateTime.UtcNow;
                     }
 
                 }
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 OnErrorEvent("Error obtaining scan times and MSLevels using GetScanTimesAndMsLevels: " + ex.Message, ex);
             }
 
         }
 
         private void Store2DPlotData(
-            Dictionary<int, float> dct2DDataScanTimes,
+            IReadOnlyDictionary<int, float> dct2DDataScanTimes,
             Dictionary<int, Dictionary<double, double>> dct2DDataParent,
             Dictionary<int, Dictionary<double, double>> dct2DDataProduct)
         {
@@ -575,7 +641,8 @@ namespace MSFileInfoScanner
                 }
             }
 
-            if (int2DScanNumMin / (double)int2DScanNumMax > 0.5) {
+            if (int2DScanNumMin / (double)int2DScanNumMax > 0.5)
+            {
                 // Zoom in the 2D plot to prevent all of the the data from being scrunched to the right
                 mLCMS2DPlot.Options.UseObservedMinScan = true;
             }
@@ -591,7 +658,8 @@ namespace MSFileInfoScanner
             // then remove text from sample= on
 
             var intCharIndex = strText.IndexOf("sample=", StringComparison.InvariantCultureIgnoreCase);
-            if (intCharIndex > 0) {
+            if (intCharIndex > 0)
+            {
                 strText = strText.Substring(0, intCharIndex).TrimEnd();
             }
 
@@ -601,9 +669,12 @@ namespace MSFileInfoScanner
 
         public static bool TryGetCVParam(CVParamList oCVParams, pwiz.CLI.cv.CVID cvidToFind, out CVParam paramMatch)
         {
-            foreach (var param in oCVParams) {
-                if (param.cvid == cvidToFind) {
-                    if (!param.empty()) {
+            foreach (var param in oCVParams)
+            {
+                if (param.cvid == cvidToFind)
+                {
+                    if (!param.empty())
+                    {
                         paramMatch = param;
                         return true;
                     }

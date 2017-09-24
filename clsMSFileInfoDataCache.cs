@@ -212,12 +212,6 @@ namespace MSFileInfoScanner
         }
 
         private bool DatasetTableContainsPrimaryKeyValue(
-            DataSet dsDataset, string strTableName, string strValueToFind)
-        {
-            return DatasetTableContainsPrimaryKeyValue(dsDataset, strTableName, strValueToFind, out _);
-        }
-
-        private bool DatasetTableContainsPrimaryKeyValue(
             DataSet dsDataset, string strTableName, string strValueToFind, out DataRow objRowMatch)
         {
 
@@ -357,16 +351,8 @@ namespace MSFileInfoScanner
             if (File.Exists(mFolderIntegrityInfoFilePath))
             {
                 // Read the entries from mFolderIntegrityInfoFilePath, populating mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE)
-
-                if (clsMSFileInfoScanner.USE_XML_OUTPUT_FILE)
+                using (var srInFile = new StreamReader(mFolderIntegrityInfoFilePath))
                 {
-                    var fsInFile = new FileStream(mFolderIntegrityInfoFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
-                    mFolderIntegrityInfoDataset.ReadXml(fsInFile);
-                    fsInFile.Close();
-                }
-                else
-                {
-                    var srInFile = new StreamReader(mFolderIntegrityInfoFilePath);
                     while (!srInFile.EndOfStream)
                     {
                         var strLineIn = srInFile.ReadLine();
@@ -394,7 +380,8 @@ namespace MSFileInfoScanner
                             intFolderID = Convert.ToInt32(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FolderID]);
                             udtFolderStats.FolderPath = strFolderPath;
                             udtFolderStats.FileCount = Convert.ToInt32(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FileCount]);
-                            udtFolderStats.FileCountFailIntegrity = Convert.ToInt32(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FileCountFailedIntegrity]);
+                            udtFolderStats.FileCountFailIntegrity =
+                                Convert.ToInt32(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FileCountFailedIntegrity]);
 
                             var dtInfoLastModified = ParseDate(strSplitLine[(int)eFolderIntegrityInfoFileColumns.InfoLastModified]);
 
@@ -407,9 +394,8 @@ namespace MSFileInfoScanner
                             // Do not add this entry
                         }
                     }
-                    srInFile.Close();
-
                 }
+
             }
 
             mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
@@ -430,17 +416,8 @@ namespace MSFileInfoScanner
             if (File.Exists(mAcquisitionTimeFilePath))
             {
                 // Read the entries from mAcquisitionTimeFilePath, populating mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE)
-
-                if (clsMSFileInfoScanner.USE_XML_OUTPUT_FILE)
+                using (var srInFile = new StreamReader(mAcquisitionTimeFilePath))
                 {
-                    using (var fsInFile = new FileStream(mAcquisitionTimeFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
-                    {
-                        mMSFileInfoDataset.ReadXml(fsInFile);
-                    }
-                }
-                else
-                {
-                    var srInFile = new StreamReader(mAcquisitionTimeFilePath);
                     while (!srInFile.EndOfStream)
                     {
                         var strLineIn = srInFile.ReadLine();
@@ -498,9 +475,8 @@ namespace MSFileInfoScanner
                             // Do not add this entry
                         }
                     }
-                    srInFile.Close();
-
                 }
+
             }
 
             mMSFileInfoCachedResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
@@ -597,26 +573,16 @@ namespace MSFileInfoScanner
             try
             {
                 // Write all of mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE) to the results file
-                if (clsMSFileInfoScanner.USE_XML_OUTPUT_FILE)
+                using (var srOutFile = new StreamWriter(new FileStream(mFolderIntegrityInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
-                    using (var fsOutfile = new FileStream(mFolderIntegrityInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+
+                    srOutFile.WriteLine(ConstructHeaderLine(iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo));
+
+                    foreach (DataRow objRow in mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].Rows)
                     {
-                        mFolderIntegrityInfoDataset.WriteXml(fsOutfile);
+                        WriteFolderIntegrityInfoDataLine(srOutFile, objRow);
                     }
-                }
-                else
-                {
-                    using (var srOutFile = new StreamWriter(new FileStream(mFolderIntegrityInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
-                    {
 
-                        srOutFile.WriteLine(ConstructHeaderLine(iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo));
-
-                        foreach (DataRow objRow in mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].Rows)
-                        {
-                            WriteFolderIntegrityInfoDataLine(srOutFile, objRow);
-                        }
-
-                    }
                 }
 
                 mCachedFolderIntegrityInfoLastSaveTime = DateTime.UtcNow;
@@ -651,46 +617,46 @@ namespace MSFileInfoScanner
 
             if ((mMSFileInfoDataset != null) &&
                 mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].Rows.Count > 0 &&
-                mMSFileInfoCachedResultsState == eCachedResultsStateConstants.Modified) {
-                    OnDebugEvent("Saving cached acquisition time file data to: " + Path.GetFileName(mAcquisitionTimeFilePath));
+                mMSFileInfoCachedResultsState == eCachedResultsStateConstants.Modified)
+            {
+                OnDebugEvent("Saving cached acquisition time file data to: " + Path.GetFileName(mAcquisitionTimeFilePath));
 
-                    try {
-                        // Write all of mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE) to the results file
-                        if (clsMSFileInfoScanner.USE_XML_OUTPUT_FILE) {
-                            using (var fsOutfile = new FileStream(mAcquisitionTimeFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
-                            {
-                                mMSFileInfoDataset.WriteXml(fsOutfile);
-                            }
-                        } else {
-                            using (var srOutFile = new StreamWriter(new FileStream(mAcquisitionTimeFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
-                            {
+                try
+                {
+                    // Write all of mMSFileInfoDataset.Tables(MS_FILEINFO_DATATABLE) to the results file
+                    using (var srOutFile = new StreamWriter(new FileStream(mAcquisitionTimeFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                    {
 
-                                srOutFile.WriteLine(ConstructHeaderLine(iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo));
+                        srOutFile.WriteLine(ConstructHeaderLine(iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo));
 
-                                foreach (DataRow objRow in mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].Rows)
-                                {
-                                    WriteMSInfoDataLine(srOutFile, objRow);
-                                }
-
-                            }
+                        foreach (DataRow objRow in mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].Rows)
+                        {
+                            WriteMSInfoDataLine(srOutFile, objRow);
                         }
 
-                        mCachedMSInfoResultsLastSaveTime = DateTime.UtcNow;
-
-                        if (blnClearCachedData) {
-                            // Clear the data table
-                            ClearCachedMSInfoResults();
-                        } else {
-                            mMSFileInfoCachedResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
-                        }
-
-                        blnSuccess = true;
-
-                    } catch (Exception ex) {
-                        OnErrorEvent("Error in SaveCachedMSInfoResults", ex);
-                        blnSuccess = false;
                     }
+
+                    mCachedMSInfoResultsLastSaveTime = DateTime.UtcNow;
+
+                    if (blnClearCachedData)
+                    {
+                        // Clear the data table
+                        ClearCachedMSInfoResults();
+                    }
+                    else
+                    {
+                        mMSFileInfoCachedResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
+                    }
+
+                    blnSuccess = true;
+
                 }
+                catch (Exception ex)
+                {
+                    OnErrorEvent("Error in SaveCachedMSInfoResults", ex);
+                    blnSuccess = false;
+                }
+            }
 
             return blnSuccess;
 
@@ -797,7 +763,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private void WriteMSInfoDataLine(StreamWriter srOutFile, DataRow objRow)
+        private void WriteMSInfoDataLine(TextWriter srOutFile, DataRow objRow)
         {
             // Note: HH:mm:ss corresponds to time in 24 hour format
             srOutFile.WriteLine(
@@ -813,7 +779,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private void WriteFolderIntegrityInfoDataLine(StreamWriter srOutFile, DataRow objRow)
+        private void WriteFolderIntegrityInfoDataLine(TextWriter srOutFile, DataRow objRow)
         {
             srOutFile.WriteLine(
                 objRow[COL_NAME_FOLDER_ID].ToString() + '\t' +
