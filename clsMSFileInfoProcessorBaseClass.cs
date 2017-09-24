@@ -16,8 +16,11 @@ namespace MSFileInfoScanner
         /// </summary>
         protected clsMSFileInfoProcessorBaseClass()
         {
-            mTICandBPIPlot = new clsTICandBPIPlotter();
-            mInstrumentSpecificPlots = new clsTICandBPIPlotter();
+            mTICandBPIPlot = new clsTICandBPIPlotter("TICandBPIPlot", true);
+            RegisterEvents(mTICandBPIPlot);
+
+            mInstrumentSpecificPlots = new clsTICandBPIPlotter("InstrumentSpecificPlots", true);
+            RegisterEvents(mInstrumentSpecificPlots);
 
             mDatasetStatsSummarizer = new clsDatasetStatsSummarizer();
             RegisterEvents(mDatasetStatsSummarizer);
@@ -62,6 +65,9 @@ namespace MSFileInfoScanner
         private int mDatasetID;
 
         protected bool mCopyFileLocalOnReadError;
+
+        private bool mPlotWithPython;
+
         protected readonly clsTICandBPIPlotter mTICandBPIPlot;
 
         protected readonly clsTICandBPIPlotter mInstrumentSpecificPlots;
@@ -160,6 +166,8 @@ namespace MSFileInfoScanner
                     return mCreateScanStatsFile;
                 case ProcessingOptions.CheckCentroidingStatus:
                     return mCheckCentroidingStatus;
+                case ProcessingOptions.PlotWithPython:
+                    return mPlotWithPython;
             }
 
             throw new Exception("Unrecognized option, " + eOption);
@@ -588,6 +596,22 @@ namespace MSFileInfoScanner
                 else
                 {
                     diFolderInfo = new DirectoryInfo(".");
+                }
+
+                mTICandBPIPlot.PlotWithPython = mPlotWithPython;
+
+                if (mPlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
+                {
+                    OnWarningEvent("Updating PlotWithPython to True in mLCMS2DPlot; this is typically set by ProcessMSDataset");
+                    mLCMS2DPlot.Options.PlotWithPython = true;
+                }
+
+                mTICandBPIPlot.DeleteTempFiles = !ShowDebugInfo;
+
+                if (mLCMS2DPlot.Options.DeleteTempFiles && ShowDebugInfo)
+                {
+                    OnWarningEvent("Updating DeleteTempFiles to False in mLCMS2DPlot; this is typically set by ProcessMSDataset");
+                    mLCMS2DPlot.Options.DeleteTempFiles = false;
                 }
 
                 bool blnSuccess;

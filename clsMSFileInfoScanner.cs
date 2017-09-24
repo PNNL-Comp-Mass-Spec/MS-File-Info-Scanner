@@ -1266,6 +1266,12 @@ namespace MSFileInfoScanner
 
                 scanner.DatasetStatsTextFileName = mDatasetStatsTextFileName;
 
+                if (PlotWithPython)
+                    mLCMS2DPlotOptions.PlotWithPython = true;
+
+                if (ShowDebugInfo)
+                    mLCMS2DPlotOptions.DeleteTempFiles = false;
+
                 scanner.LCMS2DPlotOptions = mLCMS2DPlotOptions;
                 scanner.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor;
 

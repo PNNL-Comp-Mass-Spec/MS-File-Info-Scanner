@@ -18,7 +18,8 @@ namespace MSFileInfoScanner
             CopyFileLocalOnReadError = 4,
             UpdateDatasetStatsTextFile = 5,
             CreateScanStatsFile = 6,
-            CheckCentroidingStatus = 7
+            CheckCentroidingStatus = 7,
+            PlotWithPython = 8
         }
 
         public abstract bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo);

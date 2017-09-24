@@ -14,7 +14,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "August 16, 2017";
+        public const string PROGRAM_DATE = "September 23, 2017";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
@@ -63,6 +63,8 @@ namespace MSFileInfoScanner
 
         private static bool mPostResultsToDMS;
 
+        private static bool mPlotWithPython;
+
         private static DateTime mLastProgressTime;
 
         /// <summary>
@@ -70,7 +72,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <returns>0 if no error, error code if an error</returns>
         /// <remarks>The STAThread attribute is required for OxyPlot functionality</remarks>
-        [STAThread()]
+        [STAThread]
         public static int Main()
         {
 
@@ -116,11 +118,9 @@ namespace MSFileInfoScanner
             mMaximumTextFileLinesToCheck = clsFileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK;
 
             mPostResultsToDMS = false;
+            mPlotWithPython = false;
 
             mLastProgressTime = DateTime.UtcNow;
-
-            //'TestZipper("\\proto-6\Db_Backups\Albert_Backup\MT_Shewanella_P196", "*.BAK.zip")
-            //'Return 0
 
             try
             {
@@ -134,100 +134,99 @@ namespace MSFileInfoScanner
                 if (mInputDataFilePath == null)
                     mInputDataFilePath = string.Empty;
 
+
                 if (!blnProceed || objParseCommandLine.NeedToShowHelp || objParseCommandLine.ParameterCount + objParseCommandLine.NonSwitchParameterCount == 0 || mInputDataFilePath.Length == 0)
                 {
                     ShowProgramHelp();
-                    intReturnCode = -1;
+                    return -1;
                 }
-                else
+
+                var scanner = new clsMSFileInfoScanner();
+
+                scanner.DebugEvent += mMSFileScanner_DebugEvent;
+                scanner.ErrorEvent += mMSFileScanner_ErrorEvent;
+                scanner.WarningEvent += mMSFileScanner_WarningEvent;
+                scanner.StatusEvent += mMSFileScanner_MessageEvent;
+                scanner.ProgressUpdate += mMSFileScanner_ProgressUpdate;
+
+                if (mCheckFileIntegrity)
+                    mUseCacheFiles = true;
+
+                // Note: These values will be overridden if /P was used and they are defined in the parameter file
+
+                scanner.UseCacheFiles = mUseCacheFiles;
+                scanner.ReprocessExistingFiles = mReprocessingExistingFiles;
+                scanner.ReprocessIfCachedSizeIsZero = mReprocessIfCachedSizeIsZero;
+
+                scanner.PlotWithPython = mPlotWithPython;
+                scanner.SaveTICAndBPIPlots = mSaveTICandBPIPlots;
+                scanner.SaveLCMS2DPlots = mSaveLCMS2DPlots;
+                scanner.LCMS2DPlotMaxPointsToPlot = mLCMS2DMaxPointsToPlot;
+                scanner.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor;
+                scanner.TestLCMSGradientColorSchemes = mTestLCMSGradientColorSchemes;
+
+                scanner.CheckCentroidingStatus = mCheckCentroidingStatus;
+
+                scanner.ScanStart = mScanStart;
+                scanner.ScanEnd = mScanEnd;
+                scanner.ShowDebugInfo = mShowDebugInfo;
+
+                scanner.ComputeOverallQualityScores = mComputeOverallQualityScores;
+                scanner.CreateDatasetInfoFile = mCreateDatasetInfoFile;
+                scanner.CreateScanStatsFile = mCreateScanStatsFile;
+
+                scanner.UpdateDatasetStatsTextFile = mUpdateDatasetStatsTextFile;
+                scanner.DatasetStatsTextFileName = mDatasetStatsTextFileName;
+
+                scanner.CheckFileIntegrity = mCheckFileIntegrity;
+                scanner.MaximumTextFileLinesToCheck = mMaximumTextFileLinesToCheck;
+                scanner.ComputeFileHashes = mComputeFileHashes;
+                scanner.ZipFileCheckAllData = mZipFileCheckAllData;
+
+                scanner.IgnoreErrorsWhenRecursing = mIgnoreErrorsWhenRecursing;
+
+                if (mLogFilePath.Length > 0)
                 {
-                    var scanner = new clsMSFileInfoScanner();
+                    scanner.LogMessagesToFile = true;
+                    scanner.LogFilePath = mLogFilePath;
+                }
 
-                    scanner.DebugEvent += mMSFileScanner_DebugEvent;
-                    scanner.ErrorEvent += mMSFileScanner_ErrorEvent;
-                    scanner.WarningEvent += mMSFileScanner_WarningEvent;
-                    scanner.StatusEvent += mMSFileScanner_MessageEvent;
-                    scanner.ProgressUpdate += mMSFileScanner_ProgressUpdate;
+                scanner.DatasetIDOverride = mDatasetID;
+                scanner.DSInfoDBPostingEnabled = mPostResultsToDMS;
 
-                    if (mCheckFileIntegrity)
-                        mUseCacheFiles = true;
+                if (!string.IsNullOrEmpty(mParameterFilePath))
+                {
+                    scanner.LoadParameterFileSettings(mParameterFilePath);
+                }
 
-                    // Note: These values will be overridden if /P was used and they are defined in the parameter file
-
-                    scanner.UseCacheFiles = mUseCacheFiles;
-                    scanner.ReprocessExistingFiles = mReprocessingExistingFiles;
-                    scanner.ReprocessIfCachedSizeIsZero = mReprocessIfCachedSizeIsZero;
-
-                    scanner.SaveTICAndBPIPlots = mSaveTICandBPIPlots;
-                    scanner.SaveLCMS2DPlots = mSaveLCMS2DPlots;
-                    scanner.LCMS2DPlotMaxPointsToPlot = mLCMS2DMaxPointsToPlot;
-                    scanner.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor;
-                    scanner.TestLCMSGradientColorSchemes = mTestLCMSGradientColorSchemes;
-
-                    scanner.CheckCentroidingStatus = mCheckCentroidingStatus;
-
-                    scanner.ScanStart = mScanStart;
-                    scanner.ScanEnd = mScanEnd;
-                    scanner.ShowDebugInfo = mShowDebugInfo;
-
-                    scanner.ComputeOverallQualityScores = mComputeOverallQualityScores;
-                    scanner.CreateDatasetInfoFile = mCreateDatasetInfoFile;
-                    scanner.CreateScanStatsFile = mCreateScanStatsFile;
-
-                    scanner.UpdateDatasetStatsTextFile = mUpdateDatasetStatsTextFile;
-                    scanner.DatasetStatsTextFileName = mDatasetStatsTextFileName;
-
-                    scanner.CheckFileIntegrity = mCheckFileIntegrity;
-                    scanner.MaximumTextFileLinesToCheck = mMaximumTextFileLinesToCheck;
-                    scanner.ComputeFileHashes = mComputeFileHashes;
-                    scanner.ZipFileCheckAllData = mZipFileCheckAllData;
-
-                    scanner.IgnoreErrorsWhenRecursing = mIgnoreErrorsWhenRecursing;
-
-                    if (mLogFilePath.Length > 0)
+                if (mRecurseFolders)
+                {
+                    if (scanner.ProcessMSFilesAndRecurseFolders(mInputDataFilePath, mOutputFolderName, mRecurseFoldersMaxLevels))
                     {
-                        scanner.LogMessagesToFile = true;
-                        scanner.LogFilePath = mLogFilePath;
-                    }
-
-                    scanner.DatasetIDOverride = mDatasetID;
-                    scanner.DSInfoDBPostingEnabled = mPostResultsToDMS;
-
-                    if (!string.IsNullOrEmpty(mParameterFilePath))
-                    {
-                        scanner.LoadParameterFileSettings(mParameterFilePath);
-                    }
-
-                    if (mRecurseFolders)
-                    {
-                        if (scanner.ProcessMSFilesAndRecurseFolders(mInputDataFilePath, mOutputFolderName, mRecurseFoldersMaxLevels))
-                        {
-                            intReturnCode = 0;
-                        }
-                        else
-                        {
-                            intReturnCode = (int)scanner.ErrorCode;
-                        }
+                        intReturnCode = 0;
                     }
                     else
                     {
-                        if (scanner.ProcessMSFileOrFolderWildcard(mInputDataFilePath, mOutputFolderName, true))
+                        intReturnCode = (int)scanner.ErrorCode;
+                    }
+                }
+                else
+                {
+                    if (scanner.ProcessMSFileOrFolderWildcard(mInputDataFilePath, mOutputFolderName, true))
+                    {
+                        intReturnCode = 0;
+                    }
+                    else
+                    {
+                        intReturnCode = (int)scanner.ErrorCode;
+                        if (intReturnCode != 0)
                         {
-                            intReturnCode = 0;
-                        }
-                        else
-                        {
-                            intReturnCode = (int)scanner.ErrorCode;
-                            if (intReturnCode != 0)
-                            {
-                                ShowErrorMessage("Error while processing: " + scanner.GetErrorMessage());
-                            }
+                            ShowErrorMessage("Error while processing: " + scanner.GetErrorMessage());
                         }
                     }
-
-                    scanner.SaveCachedResults();
                 }
 
+                scanner.SaveCachedResults();
             }
             catch (Exception ex)
             {
@@ -243,6 +242,152 @@ namespace MSFileInfoScanner
         {
             return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version + " (" + PROGRAM_DATE + ")";
         }
+
+        //private static void SaveTestPlots()
+        //{
+        //    // var plotter = new clsTICandBPIPlotter("modMain", true);
+
+        //    var testChart = new LiveCharts.WinForms.CartesianChart();
+
+        //    testChart.Series = new SeriesCollection
+        //    {
+        //        new LineSeries
+        //        {
+        //            Title = "Series 1",
+        //            Values = new ChartValues<double> {4, 6, 5, 2, 7}
+        //        },
+        //        new LineSeries
+        //        {
+        //            Title = "Series 2",
+        //            Values = new ChartValues<double> {6, 7, 3, 4, 6},
+        //            PointGeometry = null
+        //        },
+        //        //new LineSeries
+        //        //{
+        //        //    Title = "Series 2",
+        //        //    Values = new ChartValues<double> {5, 2, 8, 3},
+        //        //    PointGeometry = DefaultGeometries.Square,
+        //        //    PointGeometrySize = 15
+        //        //}
+        //    };
+
+        //    Console.WriteLine("Update XAxis");
+        //    testChart.AxisX.Add(new Axis
+        //    {
+        //        Title = "Month",
+        //        Labels = new[] { "Jan", "Feb", "Mar", "Apr", "May" }
+        //    });
+
+        //    testChart.AxisY.Add(new Axis
+        //    {
+        //        Title = "Sales",
+        //        LabelFormatter = value => value.ToString("C")
+        //    });
+
+        //    Console.WriteLine("Add legend");
+        //    testChart.LegendLocation = LegendLocation.Right;
+
+        //    ////modifying the series collection will animate and update the chart
+        //    //testChart.Series.Add(new LineSeries
+        //    //{
+        //    //    Values = new ChartValues<double> { 5, 3, 2, 4, 5 },
+        //    //    LineSmoothness = 0, //straight lines, 1 really smooth lines
+        //    //    PointGeometry = Geometry.Parse("m 25 70.36218 20 -28 -20 22 -8 -6 z"),
+        //    //    PointGeometrySize = 50,
+        //    //    PointForeground = System.Windows.Media.Brushes.Gray
+        //    //});
+
+        //    //modifying any series values will also animate and update the chart
+        //    // testChart.Series[2].Values.Add(5d);
+
+
+        //    //Viewbox viewBox = WrapChart(testChart, 1400, 700);
+        //    // testChart.Model.Updater.Run(false, true);
+
+        //    Console.WriteLine("Call AddTitleToChart");
+        //    var panel = AddTitleToChart(testChart, "My title");
+
+        //    Console.WriteLine("Update chart");
+        //    testChart.Update(false, true);
+
+        //    Console.WriteLine("Render as bitmap");
+        //    using (Bitmap printImage = new Bitmap(panel.Width, panel.Height))
+        //    {
+        //        panel.DrawToBitmap(printImage, new Rectangle(0, 0, printImage.Width, printImage.Height));
+
+        //        var fileName = "TestExport" + DateTime.Now.ToString("yyyy-MM-dd_hh_mm_ss") + ".png";
+        //        printImage.Save(fileName, ImageFormat.Png);
+        //    }
+
+        //    //var plotTest = new frmPlot();
+        //    //plotTest.Show();
+
+        //    Console.WriteLine("Saved");
+        //}
+
+        //public static TableLayoutPanel AddTitleToChart(Control chart, string title)
+        //{
+
+        //    Console.WriteLine("Add label");
+        //    Label label = new Label();
+        //    label.AutoSize = true;
+        //    label.Dock = System.Windows.Forms.DockStyle.Fill;
+        //    label.Font = new Font("Arial", 12);
+        //    label.Location = new System.Drawing.Point(3, 0);
+        //    label.Name = "label1";
+        //    label.Size = new System.Drawing.Size(1063, 55);
+        //    label.TabIndex = 0;
+        //    label.Text = title;
+        //    label.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+        //    label.BackColor = chart.BackColor;
+
+        //    chart.Dock = System.Windows.Forms.DockStyle.Fill;
+
+        //    Console.WriteLine("Create TableLayoutPanel");
+        //    TableLayoutPanel tableLayoutPanel = new TableLayoutPanel();
+        //    tableLayoutPanel.AutoSize = true;
+        //    tableLayoutPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+        //    tableLayoutPanel.BackColor = System.Drawing.Color.White;
+        //    tableLayoutPanel.ColumnCount = 1;
+        //    tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 1069F));
+        //    Console.WriteLine("Add label to TableLayoutPanel");
+        //    tableLayoutPanel.Controls.Add(label, 0, 0);
+        //    Console.WriteLine("Add chart to TableLayoutPanel");
+        //    tableLayoutPanel.Controls.Add(chart, 0, 1);
+
+        //    Console.WriteLine("Update TableLayoutPanel DockStyle");
+        //    tableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+        //    tableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+        //    tableLayoutPanel.Name = "tableLayoutPanel1";
+        //    Console.WriteLine("Set Rowcount= 2");
+        //    tableLayoutPanel.RowCount = 2;
+        //    tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+        //    tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+
+        //    Console.WriteLine("Define size");
+        //    tableLayoutPanel.Size = new System.Drawing.Size(1069, 662);
+
+        //    Console.WriteLine("Set tab index");
+        //    tableLayoutPanel.TabIndex = 2;
+
+        //    return (tableLayoutPanel);
+        //}
+
+        //public Viewbox viewBox WrapChart(CartesianChart testChart, Grid grid, int width, int height)
+        //{
+
+        //    testChart.grid.Width = width;
+        //    testChart.grid.Height = height;
+
+        //    viewbox.Child = chart.grid;
+
+        //    viewbox.Width = width;
+        //    viewbox.Height = height;
+        //    viewbox.Measure(new System.Windows.Size(width, height));
+        //    viewbox.Arrange(new Rect(0, 0, width, height));
+        //    viewbox.UpdateLayout();
+
+        //}
 
         private static bool SetOptionsUsingCommandLineParameters(clsParseCommandLine parser)
         {
@@ -275,7 +420,9 @@ namespace MSFileInfoScanner
                 "R",
                 "Z",
                 "PostToDMS",
-                "Debug"
+                "Debug",
+                "Python",
+                "PythonPlot"
             };
 
             try
@@ -417,6 +564,9 @@ namespace MSFileInfoScanner
                 if (parser.IsParameterPresent("PostToDMS"))
                     mPostResultsToDMS = true;
 
+                if (parser.IsParameterPresent("PythonPlot") || parser.IsParameterPresent("Python"))
+                    mPlotWithPython = true;
+
                 return true;
             }
             catch (Exception ex)
@@ -432,31 +582,23 @@ namespace MSFileInfoScanner
             return string.Join(", ", lstList);
         }
 
-        private static void ShowErrorMessage(string strMessage)
+        private static void ShowErrorMessage(string message)
         {
-            const string strSeparator = "------------------------------------------------------------------------------";
-
-            Console.WriteLine();
-            Console.WriteLine(strSeparator);
-            Console.WriteLine(strMessage);
-            Console.WriteLine(strSeparator);
-            Console.WriteLine();
-
-            WriteToErrorStream(strMessage);
+            ConsoleMsgUtils.ShowError(message);
         }
 
-        private static void ShowErrorMessage(string strTitle, List<string> items)
+        private static void ShowErrorMessage(string strTitle, IEnumerable<string> items)
         {
             const string strSeparator = "------------------------------------------------------------------------------";
 
             Console.WriteLine();
             Console.WriteLine(strSeparator);
-            Console.WriteLine(strTitle);
+            ConsoleMsgUtils.ShowError(strTitle, null, false, false);
             var strMessage = strTitle + ":";
 
             foreach (var item in items)
             {
-                Console.WriteLine("   " + item);
+                ConsoleMsgUtils.ShowError("   " + item, null, false, false);
                 strMessage += " " + item;
             }
             Console.WriteLine(strSeparator);
@@ -484,7 +626,7 @@ namespace MSFileInfoScanner
                 Console.WriteLine(" [/ScanStart:0] [/ScanEnd:0] [/Debug]");
                 Console.WriteLine(" [/C] [/M:nnn] [/H] [/QZ]");
                 Console.WriteLine(" [/CF] [/R] [/Z]");
-                Console.WriteLine(" [/PostToDMS]");
+                Console.WriteLine(" [/PostToDMS] [/PythonPlot]");
                 Console.WriteLine();
                 Console.WriteLine("Use /I to specify the name of a file or folder to scan; the path can contain the wildcard character *");
                 Console.WriteLine("The output folder name is optional.  If omitted, the output files will be created in the program directory.");
@@ -576,42 +718,17 @@ namespace MSFileInfoScanner
 
         private static void mMSFileScanner_DebugEvent(string message)
         {
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine(message);
-            Console.ResetColor();
-
+            ConsoleMsgUtils.ShowDebug(message);
         }
+
         private static void mMSFileScanner_ErrorEvent(string message, Exception ex)
         {
-            Console.WriteLine();
-
-            string formattedError;
-            if (ex == null || message.EndsWith(ex.Message))
-            {
-                formattedError = message;
-            }
-            else
-            {
-                formattedError = message + ": " + ex.Message;
-            }
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(formattedError);
-
-            if (ex != null)
-            {
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine(clsStackTraceFormatter.GetExceptionStackTraceMultiLine(ex));
-            }
-            Console.ResetColor();
-
-            // Also write the message to the error stream
-            WriteToErrorStream(message);
+            ConsoleMsgUtils.ShowError(message, ex, false);
         }
 
         private static void mMSFileScanner_MessageEvent(string message)
         {
             Console.WriteLine(message);
-
         }
 
         private static void mMSFileScanner_ProgressUpdate(string progressMessage, float percentComplete)
@@ -626,11 +743,7 @@ namespace MSFileInfoScanner
 
         private static void mMSFileScanner_WarningEvent(string message)
         {
-            Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(message);
-            Console.ResetColor();
-
+            ConsoleMsgUtils.ShowWarning(message);
         }
 
     }

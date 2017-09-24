@@ -129,6 +129,11 @@ namespace MSFileInfoScannerInterfaces
 
         public virtual int MaximumXMLElementNodesToCheck { get; set; }
 
+        /// <summary>
+        /// When true, generate plots using Python
+        /// </summary>
+        public virtual bool PlotWithPython { get; set; }
+
         public virtual bool RecheckFileIntegrityForExistingFolders { get; set; }
 
         public virtual bool ReprocessExistingFiles { get; set; }

@@ -79,6 +79,7 @@ namespace MSFileInfoScanner
         #endregion
 
         #region "Properties"
+
         public clsLCMSDataPlotterOptions Options
         {
             get => mOptions;
@@ -1029,23 +1030,18 @@ namespace MSFileInfoScanner
 
         #region "Plotting Functions"
 
-        private void AddSeriesMonoMassVsScan(IList<List<ScatterPoint>> lstPointsByCharge, PlotModel myPlot)
+        private void AddOxyPlotSeriesMonoMassVsScan(IList<List<ScatterPoint>> lstPointsByCharge, PlotModel myPlot)
         {
-            // Determine the number of data points to be plotted
-            var intTotalPoints = 0;
-            for (var intCharge = 0; intCharge <= lstPointsByCharge.Count - 1; intCharge++)
-            {
-                intTotalPoints += lstPointsByCharge[intCharge].Count;
-            }
+            var markerSize = GetMarkerSize(mScans.Count, lstPointsByCharge);
 
-            for (var intCharge = 0; intCharge <= lstPointsByCharge.Count - 1; intCharge++)
+            for (var charge = 0; charge <= lstPointsByCharge.Count - 1; charge++)
             {
-                if (lstPointsByCharge[intCharge].Count == 0)
+                if (lstPointsByCharge[charge].Count == 0)
                     continue;
 
-                var strTitle = intCharge + "+";
+                var strTitle = charge + "+";
 
-                var seriesColor = clsPlotContainer.GetColorByCharge(intCharge);
+                var seriesColor = clsPlotContainer.GetColorByCharge(charge);
 
                 var series = new ScatterSeries
                 {
@@ -1057,44 +1053,42 @@ namespace MSFileInfoScanner
                 // series.MarkerStroke = OxyColor.FromArgb(seriesColor.A, seriesColor.R, seriesColor.G, seriesColor.B)
 
                 // Customize the points
-                if (mScans.Count < 250)
-                {
-                    // Use a point size of 2 when fewer than 250 scans
-                    series.MarkerSize = 2;
-                }
-                else if (mScans.Count < 500)
-                {
-                    // Use a point size of 1 when 250 to 500 scans
-                    series.MarkerSize = 1;
-                }
-                else
-                {
-                    // Use a point size of 0.8 or 0.6 when >= 500 scans
-                    if (intTotalPoints < 80000)
-                    {
-                        series.MarkerSize = 0.8;
-                    }
-                    else
-                    {
-                        series.MarkerSize = 0.6;
-                    }
-                }
+                series.MarkerSize = markerSize;
 
-                series.Points.AddRange(lstPointsByCharge[intCharge]);
+                series.Points.AddRange(lstPointsByCharge[charge]);
 
                 myPlot.Series.Add(series);
             }
 
         }
 
-        private void AddSeriesMzVsScan(string strTitle, IEnumerable<ScatterPoint> objPoints, float sngColorScaleMinIntensity, float sngColorScaleMaxIntensity, PlotModel myPlot)
+        private void AddPythonPlotSeriesMonoMassVsScan(IList<List<ScatterPoint>> lstPointsByCharge, clsPythonPlotContainer3D plotContainer)
+        {
+
+            plotContainer.MarkerSize = GetMarkerSize(mScans.Count, lstPointsByCharge);
+
+            for (var charge = 0; charge <= lstPointsByCharge.Count - 1; charge++)
+            {
+                if (lstPointsByCharge[charge].Count == 0)
+                    continue;
+
+                plotContainer.AddData(lstPointsByCharge[charge], charge);
+            }
+
+        }
+
+        private void AddOxyPlotSeriesMzVsScan(
+            string strTitle,
+            IEnumerable<ScatterPoint> objPoints,
+            float colorScaleMinIntensity, float colorScaleMaxIntensity,
+            PlotModel myPlot)
         {
             // We use a linear color axis to color the data points based on intensity
             var colorAxis = new LinearColorAxis
             {
                 Position = AxisPosition.Right,
-                Minimum = sngColorScaleMinIntensity,
-                Maximum = sngColorScaleMaxIntensity,
+                Minimum = colorScaleMinIntensity,
+                Maximum = colorScaleMaxIntensity,
                 Palette = OxyPalettes.Jet(30),
                 IsAxisVisible = false
             };
@@ -1104,29 +1098,28 @@ namespace MSFileInfoScanner
             var series = new ScatterSeries
             {
                 MarkerType = MarkerType.Circle,
-                Title = strTitle
+                Title = strTitle,
+                MarkerSize = GetMarkerSize(mScans.Count)
             };
-
-            // Customize the point size
-            if (mScans.Count < 250)
-            {
-                // Use a point size of 2 when fewer than 250 scans
-                series.MarkerSize = 2;
-            }
-            else if (mScans.Count < 5000)
-            {
-                // Use a point size of 1 when 250 to 5000 scans
-                series.MarkerSize = 1;
-            }
-            else
-            {
-                // Use a point size of 0.6 when >= 5000 scans
-                series.MarkerSize = 0.6;
-            }
 
             series.Points.AddRange(objPoints);
 
             myPlot.Series.Add(series);
+        }
+
+        private void AddPythonPlotSeriesMzVsScan(
+            string strTitle,
+            List<ScatterPoint> objPoints,
+            float colorScaleMinIntensity, float colorScaleMaxIntensity,
+            clsPythonPlotContainer3D plotContainer)
+        {
+
+            plotContainer.PlotTitle = strTitle;
+            plotContainer.ColorScaleMinIntensity = colorScaleMinIntensity;
+            plotContainer.ColorScaleMaxIntensity = colorScaleMaxIntensity;
+            plotContainer.MarkerSize = GetMarkerSize(mScans.Count);
+
+            plotContainer.AddData(objPoints, 0);
         }
 
         private float ComputeMedian(float[] sngList, int intItemCount)
@@ -1177,12 +1170,141 @@ namespace MSFileInfoScanner
             return sngList[intMidpointIndex];
         }
 
-        private List<List<ScatterPoint>> GetMonoMassSeriesByCharge(int intMsLevelFilter, out double dblMinMz, out double dblMaxMz, out double dblScanTimeMax, out int intMinScan, out int intMaxScan)
+        private IList<List<ScatterPoint>> GetDataToPlot(
+            int msLevelFilter, bool skipTrimCachedData,
+            out int pointsToPlot, out double dblScanTimeMax,
+            out int minScan, out int maxScan,
+            out double minMZ, out double maxMZ,
+            out float colorScaleMinIntensity, out float colorScaleMaxIntensity)
         {
-            intMinScan = int.MaxValue;
-            intMaxScan = 0;
-            dblMinMz = float.MaxValue;
-            dblMaxMz = 0;
+
+            colorScaleMinIntensity = 0;
+            colorScaleMaxIntensity = 0;
+
+            if (!skipTrimCachedData && mPointCountCached > mOptions.MaxPointsToPlot)
+            {
+                // Need to step through the scans and reduce the number of points in memory
+
+                // Note that the number of data points remaining after calling this function may still be
+                //  more than mOptions.MaxPointsToPlot, depending on mOptions.MinPointsPerSpectrum
+                //  (see TrimCachedData for more details)
+
+                TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum);
+            }
+
+            // Populate objPoints and objScanTimePoints with the data
+            // At the same time, determine the range of m/z and intensity values
+            // Lastly, compute the median and average intensity values
+
+            // Instantiate the list to track the data points
+            var lstPointsByCharge = new List<List<ScatterPoint>>();
+
+            if (mOptions.PlottingDeisotopedData)
+            {
+                lstPointsByCharge = GetMonoMassSeriesByCharge(msLevelFilter, out minMZ, out maxMZ, out dblScanTimeMax, out minScan, out maxScan);
+            }
+            else
+            {
+                var objPoints = GetMzVsScanSeries(
+                    msLevelFilter,
+                    out colorScaleMinIntensity, out colorScaleMaxIntensity,
+                    out minMZ, out maxMZ,
+                    out dblScanTimeMax, out minScan, out maxScan);
+
+                lstPointsByCharge.Add(objPoints);
+            }
+
+            var dblMaxMzToUse = double.MaxValue;
+            if (mOptions.PlottingDeisotopedData)
+            {
+                dblMaxMzToUse = mOptions.MaxMonoMassForDeisotopedPlot;
+            }
+
+            // Count the actual number of points that will be plotted
+            pointsToPlot = 0;
+            foreach (var objSeries in lstPointsByCharge)
+            {
+                foreach (var item in objSeries)
+                {
+                    if (item.Y < dblMaxMzToUse)
+                    {
+                        pointsToPlot += 1;
+                    }
+                }
+            }
+
+            // Round minScan down to the nearest multiple of 10
+            minScan = (int)Math.Floor(minScan / 10.0) * 10;
+            if (minScan < 0)
+                minScan = 0;
+
+            // Round maxScan up to the nearest multiple of 10
+            maxScan = (int)Math.Ceiling(maxScan / 10.0) * 10;
+
+            // Round minMZ down to the nearest multiple of 100
+            minMZ = (long)Math.Floor(minMZ / 100.0) * 100;
+
+            // Round maxMZ up to the nearest multiple of 100
+            maxMZ = (long)Math.Ceiling(maxMZ / 100.0) * 100;
+
+            return lstPointsByCharge;
+        }
+
+        private double GetMarkerSize(int scanCount)
+        {
+            if (scanCount < 250)
+            {
+                // Use a point size of 2 when fewer than 250 scans
+                return 2;
+            }
+
+            if (scanCount < 5000)
+            {
+                // Use a point size of 1 when 250 to 5000 scans
+                return 1;
+            }
+
+            // Use a point size of 0.6 when >= 5000 scans
+            return 0.6;
+        }
+
+        private double GetMarkerSize(int scanCount, IEnumerable<List<ScatterPoint>> lstPointsByCharge)
+        {
+            // Determine the number of data points to be plotted
+            var totalPoints = lstPointsByCharge.Sum(item => item.Count);
+
+            // Customize the points
+            if (scanCount < 250)
+            {
+                // Use a point size of 2 when fewer than 250 scans
+                return 2;
+            }
+
+            if (mScans.Count < 500)
+            {
+                // Use a point size of 1 when 250 to 500 scans
+                return 1;
+            }
+
+            // Use a point size of 0.8 or 0.6 when >= 500 scans
+            if (totalPoints < 80000)
+            {
+                return 0.8;
+            }
+
+            return 0.6;
+        }
+
+        private List<List<ScatterPoint>> GetMonoMassSeriesByCharge(
+            int msLevelFilter,
+            out double minMZ, out double maxMZ,
+            out double dblScanTimeMax,
+            out int minScan, out int maxScan)
+        {
+            minScan = int.MaxValue;
+            maxScan = 0;
+            minMZ = float.MaxValue;
+            maxMZ = 0;
 
             var dblScanTimeMin = double.MaxValue;
             dblScanTimeMax = 0;
@@ -1338,96 +1460,62 @@ namespace MSFileInfoScanner
         /// When PlottingDeisotopedData is False, creates a 2D plot of m/z vs. scan number, using Intensity as the 3rd dimension to color the data points
         /// When PlottingDeisotopedData is True, creates a 2D plot of monoisotopic mass vs. scan number, using charge state as the 3rd dimension to color the data points
         /// </summary>
-        /// <param name="strTitle">Title of the plot</param>
-        /// <param name="intMSLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
-        /// <param name="blnSkipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for intMSLevelFilter, set blnSkipTrimCachedData to False on the first call and True on subsequent calls)</param>
+        /// <param name="plotTitle">Title of the plot</param>
+        /// <param name="msLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
+        /// <param name="skipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set blnSkipTrimCachedData to False on the first call and True on subsequent calls)</param>
         /// <returns>OxyPlot PlotContainer</returns>
         /// <remarks></remarks>
-        private clsPlotContainer InitializePlot(string strTitle, int intMSLevelFilter, bool blnSkipTrimCachedData)
+        private clsPlotContainerBase InitializePlot(string plotTitle, int msLevelFilter, bool skipTrimCachedData)
         {
-            int intMinScan;
-            int intMaxScan;
-
-            float sngColorScaleMinIntensity = 0;
-            float sngColorScaleMaxIntensity = 0;
-
-            double dblMinMZ;
-            double dblMaxMZ;
-
-            double dblScanTimeMax;
-
-            if (!blnSkipTrimCachedData && mPointCountCached > mOptions.MaxPointsToPlot) {
-                // Need to step through the scans and reduce the number of points in memory
-
-                // Note that the number of data points remaining after calling this function may still be
-                //  more than mOptions.MaxPointsToPlot, depending on mOptions.MinPointsPerSpectrum
-                //  (see TrimCachedData for more details)
-
-                TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum);
-
+            if (mOptions.PlotWithPython)
+            {
+                return InitializePythonPlot(plotTitle, msLevelFilter, skipTrimCachedData);
             }
+            else
+            {
+                return InitializeOxyPlot(plotTitle, msLevelFilter, skipTrimCachedData);
+            }
+        }
 
-            // When this is true, then will write a text file of the mass spectrum before before and after it is filtered
+
+        /// <summary>
+        /// When PlottingDeisotopedData is False, creates a 2D plot of m/z vs. scan number, using Intensity as the 3rd dimension to color the data points
+        /// When PlottingDeisotopedData is True, creates a 2D plot of monoisotopic mass vs. scan number, using charge state as the 3rd dimension to color the data points
+        /// </summary>
+        /// <param name="plotTitle">Title of the plot</param>
+        /// <param name="msLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
+        /// <param name="skipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set blnSkipTrimCachedData to False on the first call and True on subsequent calls)</param>
+        /// <returns>OxyPlot PlotContainer</returns>
+        /// <remarks></remarks>
+        private clsPlotContainerBase InitializeOxyPlot(string plotTitle, int msLevelFilter, bool skipTrimCachedData)
+        {
+            var lstPointsByCharge = GetDataToPlot(
+                msLevelFilter, skipTrimCachedData,
+                out var pointsToPlot, out var dblScanTimeMax,
+                out var minScan, out var maxScan,
+                out var minMZ, out var maxMZ,
+                out var colorScaleMinIntensity, out var colorScaleMaxIntensity);
+
+            // When this is true, then will write a text file of the mass spectrum before and after it is filtered
             // Used for debugging
             var blnWriteDebugData = false;
             StreamWriter swDebugFile = null;
 
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (blnWriteDebugData) {
-                swDebugFile = new StreamWriter(new FileStream(strTitle + " - LCMS Top " + IntToEngineeringNotation(mOptions.MaxPointsToPlot) + " points.txt", FileMode.Create, FileAccess.Write, FileShare.Read));
+                swDebugFile = new StreamWriter(new FileStream(plotTitle + " - LCMS Top " + IntToEngineeringNotation(mOptions.MaxPointsToPlot) + " points.txt", FileMode.Create, FileAccess.Write, FileShare.Read));
                 swDebugFile.WriteLine("scan" + '\t' + "m/z" + '\t' + "Intensity");
             }
 
-            // Populate objPoints and objScanTimePoints with the data
-            // At the same time, determine the range of m/z and intensity values
-            // Lastly, compute the median and average intensity values
-
-            // Instantiate the list to track the data points
-            var lstPointsByCharge = new List<List<ScatterPoint>>();
-
-            if (mOptions.PlottingDeisotopedData) {
-                lstPointsByCharge = GetMonoMassSeriesByCharge(intMSLevelFilter, out dblMinMZ, out dblMaxMZ, out dblScanTimeMax, out intMinScan, out intMaxScan);
-            } else {
-                var objPoints = GetMzVsScanSeries(intMSLevelFilter, out sngColorScaleMinIntensity, out sngColorScaleMaxIntensity, out dblMinMZ, out dblMaxMZ, out dblScanTimeMax, out intMinScan, out intMaxScan, blnWriteDebugData, swDebugFile);
-                lstPointsByCharge.Add(objPoints);
-            }
-
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (blnWriteDebugData) {
                 swDebugFile.Close();
             }
 
-            var dblMaxMzToUse = double.MaxValue;
-            if (mOptions.PlottingDeisotopedData) {
-                dblMaxMzToUse = mOptions.MaxMonoMassForDeisotopedPlot;
-            }
-
-            // Count the actual number of points that will be plotted
-            var intPointsToPlot = 0;
-            foreach (var objSeries in lstPointsByCharge) {
-                foreach (var item in objSeries) {
-                    if (item.Y < dblMaxMzToUse) {
-                        intPointsToPlot += 1;
-                    }
-                }
-            }
-
-            if (intPointsToPlot == 0) {
+            if (pointsToPlot == 0) {
                 // Nothing to plot
                 return new clsPlotContainer(new PlotModel());
             }
-
-            // Round intMinScan down to the nearest multiple of 10
-            intMinScan = (int)Math.Floor(intMinScan / 10.0) * 10;
-            if (intMinScan < 0)
-                intMinScan = 0;
-
-            // Round intMaxScan up to the nearest multiple of 10
-            intMaxScan = (int)Math.Ceiling(intMaxScan / 10.0) * 10;
-
-            // Round dblMinMZ down to the nearest multiple of 100
-            dblMinMZ = (long)Math.Floor(dblMinMZ / 100.0) * 100;
-
-            // Round dblMaxMZ up to the nearest multiple of 100
-            dblMaxMZ = (long)Math.Ceiling(dblMaxMZ / 100.0) * 100;
 
             string yAxisLabel;
             if (mOptions.PlottingDeisotopedData) {
@@ -1436,13 +1524,13 @@ namespace MSFileInfoScanner
                 yAxisLabel = "m/z";
             }
 
-            var myPlot = clsOxyplotUtilities.GetBasicPlotModel(strTitle, "LC Scan Number", yAxisLabel);
+            var myPlot = clsOxyplotUtilities.GetBasicPlotModel(plotTitle, "LC Scan Number", yAxisLabel);
 
             if (mOptions.PlottingDeisotopedData) {
-                AddSeriesMonoMassVsScan(lstPointsByCharge, myPlot);
+                AddOxyPlotSeriesMonoMassVsScan(lstPointsByCharge, myPlot);
                 myPlot.TitlePadding = 40;
             } else {
-                AddSeriesMzVsScan(strTitle, lstPointsByCharge.First(), sngColorScaleMinIntensity, sngColorScaleMaxIntensity, myPlot);
+                AddOxyPlotSeriesMzVsScan(plotTitle, lstPointsByCharge.First(), colorScaleMinIntensity, colorScaleMaxIntensity, myPlot);
             }
 
             // Update the axis format codes if the data values are small or the range of data is small
@@ -1454,11 +1542,10 @@ namespace MSFileInfoScanner
 
             var plotContainer = new clsPlotContainer(myPlot)
             {
-                FontSizeBase = clsOxyplotUtilities.FONT_SIZE_BASE,
-                AnnotationBottomLeft = intPointsToPlot.ToString("0,000") + " points plotted"
+                FontSizeBase = clsPlotContainer.DEFAULT_BASE_FONT_SIZE,
+                // Add a label showing the number of points displayed
+                AnnotationBottomLeft = pointsToPlot.ToString("0,000") + " points plotted"
             };
-
-            // Add a label showing the number of points displayed
 
             // Possibly add a label showing the maximum elution time
 
@@ -1478,46 +1565,187 @@ namespace MSFileInfoScanner
 
             // Override the auto-computed X axis range
             if (mOptions.UseObservedMinScan) {
-                myPlot.Axes[0].Minimum = intMinScan;
+                myPlot.Axes[0].Minimum = minScan;
             } else {
                 myPlot.Axes[0].Minimum = 0;
             }
 
-            if (intMaxScan == 0) {
+            if (maxScan == 0) {
                 myPlot.Axes[0].Maximum = 1;
             } else {
-                myPlot.Axes[0].Maximum = intMaxScan;
+                myPlot.Axes[0].Maximum = maxScan;
             }
 
             if (Math.Abs(myPlot.Axes[0].Minimum - myPlot.Axes[0].Maximum) < 0.01) {
-                intMinScan = (int)myPlot.Axes[0].Minimum;
-                myPlot.Axes[0].Minimum = intMinScan - 1;
-                myPlot.Axes[0].Maximum = intMinScan + 1;
-            } else if (intMinScan == intMaxScan) {
-                myPlot.Axes[0].Minimum = intMinScan - 1;
-                myPlot.Axes[0].Maximum = intMinScan + 1;
+                minScan = (int)myPlot.Axes[0].Minimum;
+                myPlot.Axes[0].Minimum = minScan - 1;
+                myPlot.Axes[0].Maximum = minScan + 1;
+            } else if (minScan == maxScan) {
+                myPlot.Axes[0].Minimum = minScan - 1;
+                myPlot.Axes[0].Maximum = minScan + 1;
             }
 
             // Assure that we don't see ticks between scan numbers
             clsOxyplotUtilities.ValidateMajorStep(myPlot.Axes[0]);
 
+            double dblMaxMzToUse;
+
             // Set the maximum value for the Y-axis
             if (mOptions.PlottingDeisotopedData) {
-                if (dblMaxMZ < mOptions.MaxMonoMassForDeisotopedPlot) {
-                    dblMaxMzToUse = dblMaxMZ;
+                if (maxMZ < mOptions.MaxMonoMassForDeisotopedPlot) {
+                    dblMaxMzToUse = maxMZ;
                 } else {
                     dblMaxMzToUse = mOptions.MaxMonoMassForDeisotopedPlot;
                 }
             } else {
-                dblMaxMzToUse = dblMaxMZ;
+                dblMaxMzToUse = maxMZ;
             }
 
             // Override the auto-computed axis range
-            myPlot.Axes[1].Minimum = dblMinMZ;
+            myPlot.Axes[1].Minimum = minMZ;
             myPlot.Axes[1].Maximum = dblMaxMzToUse;
 
             // Hide the legend
             myPlot.IsLegendVisible = false;
+
+            return plotContainer;
+
+        }
+
+        /// <summary>
+        /// When PlottingDeisotopedData is False, creates a 2D plot of m/z vs. scan number, using Intensity as the 3rd dimension to color the data points
+        /// When PlottingDeisotopedData is True, creates a 2D plot of monoisotopic mass vs. scan number, using charge state as the 3rd dimension to color the data points
+        /// </summary>
+        /// <param name="plotTitle">Title of the plot</param>
+        /// <param name="msLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
+        /// <param name="skipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set blnSkipTrimCachedData to False on the first call and True on subsequent calls)</param>
+        /// <returns>OxyPlot PlotContainer</returns>
+        /// <remarks></remarks>
+        private clsPlotContainerBase InitializePythonPlot(string plotTitle, int msLevelFilter, bool skipTrimCachedData)
+        {
+            var lstPointsByCharge = GetDataToPlot(
+                msLevelFilter, skipTrimCachedData,
+                out var pointsToPlot, out var dblScanTimeMax,
+                out var minScan, out var maxScan,
+                out var minMZ, out var maxMZ,
+                out var colorScaleMinIntensity, out var colorScaleMaxIntensity);
+
+            if (pointsToPlot == 0)
+            {
+                // Nothing to plot
+                return new clsPythonPlotContainer3D();
+            }
+
+            string yAxisLabel;
+            if (mOptions.PlottingDeisotopedData)
+            {
+                yAxisLabel = "Monoisotopic Mass";
+            }
+            else
+            {
+                yAxisLabel = "m/z";
+            }
+
+            var plotContainer = new clsPythonPlotContainer3D(plotTitle, "Scan", yAxisLabel, "Intensity") {
+                DeleteTempFiles = Options.DeleteTempFiles
+            };
+
+            if (mOptions.PlottingDeisotopedData)
+            {
+                AddPythonPlotSeriesMonoMassVsScan(lstPointsByCharge, plotContainer);
+            }
+            else
+            {
+                AddPythonPlotSeriesMzVsScan(plotTitle, lstPointsByCharge.First(), colorScaleMinIntensity, colorScaleMaxIntensity, plotContainer);
+            }
+
+            // Update the axis format codes if the data values are small or the range of data is small
+
+            // Assume the X axis is plotting integers
+            var xVals = (from item in lstPointsByCharge.First() select item.X).ToList();
+            clsPlotUtilities.GetAxisFormatInfo(xVals, true, plotContainer.XAxisInfo);
+
+            // Assume the Y axis is plotting doubles
+            var yVals = (from item in lstPointsByCharge.First() select item.Y).ToList();
+            clsPlotUtilities.GetAxisFormatInfo(yVals, false, plotContainer.YAxisInfo);
+
+            // Add a label showing the number of points displayed
+            plotContainer.AnnotationBottomLeft = pointsToPlot.ToString("0,000") + " points plotted";
+
+            // Possibly add a label showing the maximum elution time
+            if (dblScanTimeMax > 0)
+            {
+                string strCaption;
+                if (dblScanTimeMax < 2)
+                {
+                    strCaption = Math.Round(dblScanTimeMax, 2).ToString("0.00") + " minutes";
+                }
+                else if (dblScanTimeMax < 10)
+                {
+                    strCaption = Math.Round(dblScanTimeMax, 1).ToString("0.0") + " minutes";
+                }
+                else
+                {
+                    strCaption = Math.Round(dblScanTimeMax, 0).ToString("0") + " minutes";
+                }
+
+                plotContainer.AnnotationBottomRight = strCaption;
+
+            }
+
+            // Override the auto-computed X axis range
+            if (mOptions.UseObservedMinScan)
+            {
+                plotContainer.XAxisInfo.Minimum = minScan;
+            }
+            else
+            {
+                plotContainer.XAxisInfo.Minimum = 0;
+            }
+
+            if (maxScan == 0)
+            {
+                plotContainer.XAxisInfo.Maximum = 1;
+            }
+            else
+            {
+                plotContainer.XAxisInfo.Maximum = maxScan;
+            }
+
+            if (Math.Abs(plotContainer.XAxisInfo.Minimum - plotContainer.XAxisInfo.Maximum) < 0.01)
+            {
+                minScan = (int)plotContainer.XAxisInfo.Minimum;
+                plotContainer.XAxisInfo.Minimum = minScan - 1;
+                plotContainer.XAxisInfo.Maximum = minScan + 1;
+            }
+            else if (minScan == maxScan)
+            {
+                plotContainer.XAxisInfo.Minimum = minScan - 1;
+                plotContainer.XAxisInfo.Maximum = minScan + 1;
+            }
+
+            double dblMaxMzToUse;
+
+            // Set the maximum value for the Y-axis
+            if (mOptions.PlottingDeisotopedData)
+            {
+                if (maxMZ < mOptions.MaxMonoMassForDeisotopedPlot)
+                {
+                    dblMaxMzToUse = maxMZ;
+                }
+                else
+                {
+                    dblMaxMzToUse = mOptions.MaxMonoMassForDeisotopedPlot;
+                }
+            }
+            else
+            {
+                dblMaxMzToUse = maxMZ;
+            }
+
+            // Override the auto-computed axis range
+            plotContainer.YAxisInfo.Minimum = minMZ;
+            plotContainer.YAxisInfo.Maximum = dblMaxMzToUse;
 
             return plotContainer;
 
@@ -1585,35 +1813,41 @@ namespace MSFileInfoScanner
                     {"Rainbow30", OxyPalettes.Rainbow(30)}
                 };
 
-                var plotContainer = InitializePlot(strDatasetName + " - " + mOptions.MS1PlotTitle, 1, false);
-                plotContainer.PlottingDeisotopedData = mOptions.PlottingDeisotopedData;
+                var ms1Plot = InitializePlot(strDatasetName + " - " + mOptions.MS1PlotTitle, 1, false);
+                RegisterEvents(ms1Plot);
+
+                ms1Plot.PlottingDeisotopedData = mOptions.PlottingDeisotopedData;
 
                 if (mOptions.TestGradientColorSchemes)
                 {
-                    plotContainer.AddGradients(colorGradients);
+                    var oxyPlotContainer = ms1Plot as clsPlotContainer;
+                    oxyPlotContainer?.AddGradients(colorGradients);
                 }
 
-                string strPNGFilePath;
-                if (plotContainer.SeriesCount > 0)
+                if (ms1Plot.SeriesCount > 0)
                 {
+                    string pngFilename;
+
                     if (EMBED_FILTER_SETTINGS_IN_NAME)
                     {
-                        strPNGFilePath = strDatasetName + "_" + strFileNameSuffixAddon + "LCMS_" + mOptions.MaxPointsToPlot + "_" + mOptions.MinPointsPerSpectrum + "_" + mOptions.MZResolution.ToString("0.00") + strScanModeSuffixAddon + ".png";
+                        pngFilename = strDatasetName + "_" + strFileNameSuffixAddon + "LCMS_" + mOptions.MaxPointsToPlot + "_" + mOptions.MinPointsPerSpectrum + "_" + mOptions.MZResolution.ToString("0.00") + strScanModeSuffixAddon + ".png";
                     }
                     else
                     {
-                        strPNGFilePath = strDatasetName + "_" + strFileNameSuffixAddon + "LCMS" + strScanModeSuffixAddon + ".png";
+                        pngFilename = strDatasetName + "_" + strFileNameSuffixAddon + "LCMS" + strScanModeSuffixAddon + ".png";
                     }
-                    strPNGFilePath = Path.Combine(strOutputFolderPath, strPNGFilePath);
-                    plotContainer.SaveToPNG(strPNGFilePath, 1024, 700, 96);
+                    var strPNGFilePath = Path.Combine(strOutputFolderPath, pngFilename);
+                    ms1Plot.SaveToPNG(strPNGFilePath, 1024, 700, 96);
                     AddRecentFile(strPNGFilePath, eOutputFileTypes.LCMS);
                 }
 
-                plotContainer = InitializePlot(strDatasetName + " - " + mOptions.MS2PlotTitle, 2, true);
-                if (plotContainer.SeriesCount > 0)
+                var ms2Plot = InitializePlot(strDatasetName + " - " + mOptions.MS2PlotTitle, 2, true);
+                RegisterEvents(ms2Plot);
+
+                if (ms2Plot.SeriesCount > 0)
                 {
-                    strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName + "_" + strFileNameSuffixAddon + "LCMS_MSn" + strScanModeSuffixAddon + ".png");
-                    plotContainer.SaveToPNG(strPNGFilePath, 1024, 700, 96);
+                    var strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName + "_" + strFileNameSuffixAddon + "LCMS_MSn" + strScanModeSuffixAddon + ".png");
+                    ms2Plot.SaveToPNG(strPNGFilePath, 1024, 700, 96);
                     AddRecentFile(strPNGFilePath, eOutputFileTypes.LCMSMSn);
                 }
 

@@ -106,6 +106,8 @@ namespace MSFileInfoScannerInterfaces
 
         public bool PlottingDeisotopedData { get; set; }
 
+        public bool PlotWithPython { get; set; }
+
         /// <summary>
         /// Set to True to print out a series of 2D plots, each using a different color scheme
         /// </summary>
@@ -113,11 +115,13 @@ namespace MSFileInfoScannerInterfaces
 
         public bool UseObservedMinScan { get; set; }
 
+        #endregion
 
         public clsLCMSDataPlotterOptions Clone()
         {
             var objClone = new clsLCMSDataPlotterOptions
             {
+                DeleteTempFiles = DeleteTempFiles,
                 MaxPointsToPlot = MaxPointsToPlot,
                 MinPointsPerSpectrum = MinPointsPerSpectrum,
                 MZResolution = MZResolution,
@@ -125,6 +129,7 @@ namespace MSFileInfoScannerInterfaces
                 MS1PlotTitle = MS1PlotTitle,
                 MS2PlotTitle = MS2PlotTitle,
                 PlottingDeisotopedData = PlottingDeisotopedData,
+                PlotWithPython = PlotWithPython,
                 UseObservedMinScan = UseObservedMinScan,
                 MaxMonoMassForDeisotopedPlot = MaxMonoMassForDeisotopedPlot
             };
@@ -133,8 +138,13 @@ namespace MSFileInfoScannerInterfaces
 
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public clsLCMSDataPlotterOptions()
         {
+            DeleteTempFiles = true;
+
             mMaxPointsToPlot = DEFAULT_MAX_POINTS_TO_PLOT;
             mMinPointsPerSpectrum = DEFAULT_MIN_POINTS_PER_SPECTRUM;
 
@@ -147,6 +157,7 @@ namespace MSFileInfoScannerInterfaces
             mMaxMonoMass = DEFAULT_MAX_MONO_MASS_FOR_DEISOTOPED_PLOT;
 
             PlottingDeisotopedData = false;
+            PlotWithPython = false;
             UseObservedMinScan = false;
         }
 
