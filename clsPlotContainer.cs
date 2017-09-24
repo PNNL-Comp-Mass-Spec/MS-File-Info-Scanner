@@ -11,9 +11,14 @@ namespace MSFileInfoScanner
 {
     using System.Globalization;
 
-    public class clsPlotContainer
+    /// <summary>
+    /// Oxyplot container
+    /// </summary>
+    internal class clsPlotContainer : clsPlotContainerBase
     {
         private const double PIXELS_PER_DIP = 1.25;
+
+        public const int DEFAULT_BASE_FONT_SIZE = 16;
 
         private enum ImageFileFormat
         {
@@ -21,37 +26,37 @@ namespace MSFileInfoScanner
             JPG
         }
 
-        public string AnnotationBottomLeft { get; set; }
-
-        public string AnnotationBottomRight { get; set; }
-
-        public OxyPlot.PlotModel Plot => mPlot;
+        public OxyPlot.PlotModel Plot { get; }
 
         public int FontSizeBase { get; set; }
 
-        public int SeriesCount {
-            get {
-                if (mPlot == null) {
+        public override int SeriesCount
+        {
+            get
+            {
+                if (Plot == null)
+                {
                     return 0;
                 }
-                return mPlot.Series.Count;
+                return Plot.Series.Count;
             }
         }
 
-        public bool PlottingDeisotopedData { get; set; }
-
-        private readonly OxyPlot.PlotModel mPlot;
-
         private Dictionary<string, OxyPalette> mColorGradients;
+
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="thePlot"></param>
+        /// <param name="writeDebug"></param>
+        /// <param name="dataSource"></param>
         /// <remarks></remarks>
-        public clsPlotContainer(OxyPlot.PlotModel thePlot)
+        public clsPlotContainer(
+            OxyPlot.PlotModel thePlot,
+            bool writeDebug = false, string dataSource = "") : base(writeDebug, dataSource)
         {
-            mPlot = thePlot;
-            FontSizeBase = 16;
+            Plot = thePlot;
+            FontSizeBase = DEFAULT_BASE_FONT_SIZE;
         }
 
         /// <summary>
@@ -62,13 +67,15 @@ namespace MSFileInfoScanner
         /// <param name="height">PNG file height, in pixels</param>
         /// <param name="resolution">Image resolution, in dots per inch</param>
         /// <remarks></remarks>
-        public void SaveToPNG(string pngFilePath, int width, int height, int resolution)
+        public override void SaveToPNG(string pngFilePath, int width, int height, int resolution)
         {
-            if (string.IsNullOrWhiteSpace(pngFilePath)) {
+            if (string.IsNullOrWhiteSpace(pngFilePath))
+            {
                 throw new ArgumentOutOfRangeException(pngFilePath, "Filename cannot be empty");
             }
 
-            if (Path.GetExtension(pngFilePath).ToLower() != ".png") {
+            if (Path.GetExtension(pngFilePath).ToLower() != ".png")
+            {
                 pngFilePath += ".png";
             }
 
@@ -78,12 +85,16 @@ namespace MSFileInfoScanner
 
         public void SaveToJPG(string jpgFilePath, int width, int height, int resolution)
         {
-            if (string.IsNullOrWhiteSpace(jpgFilePath)) {
+            if (string.IsNullOrWhiteSpace(jpgFilePath))
+            {
                 throw new ArgumentOutOfRangeException(jpgFilePath, "Filename cannot be empty");
             }
 
-            if (Path.GetExtension(jpgFilePath).ToLower() != ".png") {
-                jpgFilePath += ".jpg";
+            if (Path.GetExtension(jpgFilePath).ToLower() != ".png")
+            {
+                jpgFilePath += "" +
+                               ".jpg" +
+                               "";
             }
 
             SaveToFileLoop(jpgFilePath, ImageFileFormat.JPG, width, height, resolution);
@@ -92,18 +103,22 @@ namespace MSFileInfoScanner
 
         private void SaveToFileLoop(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
         {
-            if (mColorGradients == null || mColorGradients.Count == 0) {
+            if (mColorGradients == null || mColorGradients.Count == 0)
+            {
                 SaveToFile(imageFilePath, fileFormat, width, height, resolution);
                 return;
             }
 
-            foreach (var colorGradient in mColorGradients) {
+            foreach (var colorGradient in mColorGradients)
+            {
                 var matchFound = false;
 
-                foreach (var axis in mPlot.Axes) {
+                foreach (var axis in Plot.Axes)
+                {
                     var newAxis = axis as LinearColorAxis;
 
-                    if (newAxis == null) {
+                    if (newAxis == null)
+                    {
                         continue;
                     }
 
@@ -122,7 +137,8 @@ namespace MSFileInfoScanner
                     SaveToFile(newFileName, fileFormat, width, height, resolution);
                 }
 
-                if (!matchFound) {
+                if (!matchFound)
+                {
                     SaveToFile(imageFilePath, fileFormat, width, height, resolution);
                     return;
                 }
@@ -135,10 +151,12 @@ namespace MSFileInfoScanner
             Console.WriteLine("Saving " + Path.GetFileName(imageFilePath));
 
             // Note that this operation can be slow if there are over 100,000 data points
-            var plotBitmap = OxyPlot.Wpf.PngExporter.ExportToBitmap(mPlot, width, height, OxyPlot.OxyColors.White, resolution);
+            var plotBitmap = OxyPlot.Wpf.PngExporter.ExportToBitmap(Plot, width, height, OxyPlot.OxyColors.White, resolution);
+
 
             var drawVisual = new DrawingVisual();
-            using (var drawContext = drawVisual.RenderOpen()) {
+            using (var drawContext = drawVisual.RenderOpen())
+            {
 
                 var myCanvas = new Rect(0, 0, width, height);
 
@@ -154,14 +172,15 @@ namespace MSFileInfoScanner
                 drawContext.DrawRectangle(null, rectPen, myCanvas);
 
                 if (!string.IsNullOrWhiteSpace(AnnotationBottomLeft)) {
-                    AddText(AnnotationBottomLeft, drawContext, width, height, HorizontalAlignment.Left, VerticalAlignment.Bottom, 5);
+                    AddText(AnnotationBottomLeft, drawContext, width, height, OxyPlot.HorizontalAlignment.Left, OxyPlot.VerticalAlignment.Bottom, 5);
                 }
 
                 if (!string.IsNullOrWhiteSpace(AnnotationBottomRight)) {
-                    AddText(AnnotationBottomRight, drawContext, width, height, HorizontalAlignment.Right, VerticalAlignment.Bottom, 5);
+                    AddText(AnnotationBottomRight, drawContext, width, height, OxyPlot.HorizontalAlignment.Right, OxyPlot.VerticalAlignment.Bottom, 5);
                 }
 
-                if (PlottingDeisotopedData) {
+                if (PlottingDeisotopedData)
+                {
                     AddDeisotopedDataLegend(drawContext, width, height, 10, -30, 25);
                 }
             }
@@ -173,7 +192,8 @@ namespace MSFileInfoScanner
 
             BitmapEncoder encoder;
 
-            switch (fileFormat) {
+            switch (fileFormat)
+            {
                 case ImageFileFormat.PNG:
                     encoder = new PngBitmapEncoder();
 
@@ -182,7 +202,7 @@ namespace MSFileInfoScanner
                     encoder = new JpegBitmapEncoder();
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(fileFormat.ToString(), "Unrecognized value: " + fileFormat.ToString());
+                    throw new ArgumentOutOfRangeException(fileFormat.ToString(), "Unrecognized value: " + fileFormat);
             }
 
             encoder.Frames.Add(BitmapFrame.Create(target));
@@ -209,7 +229,7 @@ namespace MSFileInfoScanner
 
             var fontSizeEm = FontSizeBase + 3;
 
-            // Write out the text 1+  2+  3+  4+  5+  6+  
+            // Write out the text 1+  2+  3+  4+  5+  6+
 
             // Create a box for the legend
             var rectPen = new Pen
@@ -218,7 +238,8 @@ namespace MSFileInfoScanner
                 Thickness = 1
             };
 
-            for (var chargeState = CHARGE_START; chargeState <= CHARGE_END; chargeState++) {
+            for (var chargeState = CHARGE_START; chargeState <= CHARGE_END; chargeState++)
+            {
                 var newBrush = new SolidColorBrush(GetColorByCharge(chargeState));
 
                 var newText = new FormattedText(chargeState + "+", usCulture, FlowDirection.LeftToRight, fontTypeface, fontSizeEm, newBrush, null, PIXELS_PER_DIP);
@@ -226,10 +247,11 @@ namespace MSFileInfoScanner
                 var textRect = new Rect(0, 0, canvasWidth, canvasHeight);
                 var position = textRect.Location;
 
-                position.X = mPlot.PlotArea.Left + offsetLeft + (chargeState - 1) * (newText.Width + spacing);
-                position.Y = mPlot.PlotArea.Top + offsetTop;
+                position.X = Plot.PlotArea.Left + offsetLeft + (chargeState - 1) * (newText.Width + spacing);
+                position.Y = Plot.PlotArea.Top + offsetTop;
 
-                if (chargeState == CHARGE_START) {
+                if (chargeState == CHARGE_START)
+                {
                     var legendBox = new Rect(position.X - 10, position.Y, CHARGE_END * (newText.Width + spacing) - spacing / 4.0, newText.Height);
                     drawContext.DrawRectangle(null, rectPen, legendBox);
                 }
@@ -239,7 +261,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, HorizontalAlignment hAlign, VerticalAlignment vAlign, int padding)
+        private void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, OxyPlot.HorizontalAlignment hAlign, OxyPlot.VerticalAlignment vAlign, int padding)
         {
             var usCulture = CultureInfo.GetCultureInfo("en-us");
             // var fontTypeface = new Typeface(new FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal);
@@ -252,30 +274,32 @@ namespace MSFileInfoScanner
             var textRect = new Rect(0, 0, canvasWidth, canvasHeight);
             var position = textRect.Location;
 
-            switch (hAlign) {
-                case HorizontalAlignment.Left:
+            switch (hAlign)
+            {
+                case OxyPlot.HorizontalAlignment.Left:
                     position.X += padding;
 
                     break;
-                case HorizontalAlignment.Center:
+                case OxyPlot.HorizontalAlignment.Center:
                     position.X += (textRect.Width - newText.Width) / 2;
 
                     break;
-                case HorizontalAlignment.Right:
+                case OxyPlot.HorizontalAlignment.Right:
                     position.X += textRect.Width - newText.Width - padding;
                     break;
             }
 
-            switch (vAlign) {
-                case VerticalAlignment.Top:
+            switch (vAlign)
+            {
+                case OxyPlot.VerticalAlignment.Top:
                     position.Y += padding;
 
                     break;
-                case VerticalAlignment.Middle:
+                case OxyPlot.VerticalAlignment.Middle:
                     position.Y += (textRect.Height - newText.Height) / 2;
 
                     break;
-                case VerticalAlignment.Bottom:
+                case OxyPlot.VerticalAlignment.Bottom:
                     position.Y += textRect.Height - newText.Height - padding;
                     break;
             }
@@ -286,7 +310,8 @@ namespace MSFileInfoScanner
         public static Color GetColorByCharge(int charge)
         {
             Color seriesColor;
-            switch (charge) {
+            switch (charge)
+            {
                 case 1:
                     seriesColor = Colors.MediumBlue;
                     break;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime;
 using OxyPlot;
 using OxyPlot.Axes;
 
@@ -10,11 +9,6 @@ namespace MSFileInfoScanner
     public class clsOxyplotUtilities
     {
 
-        public const string EXPONENTIAL_FORMAT = "0.00E+00";
-
-        public const int FONT_SIZE_BASE = 16;
-
-        private const string DEFAULT_AXIS_LABEL_FORMAT = "#,##0";
         public static PlotModel GetBasicPlotModel(string strTitle, string xAxisLabel, string yAxisLabel)
         {
 
@@ -22,20 +16,20 @@ namespace MSFileInfoScanner
             {
                 Title = string.Copy(strTitle),
                 TitleFont = "Arial",
-                TitleFontSize = FONT_SIZE_BASE + 4,
+                TitleFontSize = clsPlotContainer.DEFAULT_BASE_FONT_SIZE + 4,
                 TitleFontWeight = FontWeights.Normal
             };
 
             myPlot.Padding = new OxyThickness(myPlot.Padding.Left, myPlot.Padding.Top, 30, myPlot.Padding.Bottom);
 
-            myPlot.Axes.Add(MakeLinearAxis(AxisPosition.Bottom, xAxisLabel, FONT_SIZE_BASE));
+            myPlot.Axes.Add(MakeLinearAxis(AxisPosition.Bottom, xAxisLabel, clsPlotContainer.DEFAULT_BASE_FONT_SIZE));
             myPlot.Axes[0].Minimum = 0;
 
-            myPlot.Axes.Add(MakeLinearAxis(AxisPosition.Left, yAxisLabel, FONT_SIZE_BASE));
+            myPlot.Axes.Add(MakeLinearAxis(AxisPosition.Left, yAxisLabel, clsPlotContainer.DEFAULT_BASE_FONT_SIZE));
 
             // Adjust the font sizes
-            myPlot.Axes[0].FontSize = FONT_SIZE_BASE;
-            myPlot.Axes[1].FontSize = FONT_SIZE_BASE;
+            myPlot.Axes[0].FontSize = clsPlotContainer.DEFAULT_BASE_FONT_SIZE;
+            myPlot.Axes[1].FontSize = clsPlotContainer.DEFAULT_BASE_FONT_SIZE;
 
             // Set the background color
             myPlot.PlotAreaBackground = OxyColor.FromRgb(243, 243, 243);
