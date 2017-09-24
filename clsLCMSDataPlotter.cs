@@ -408,21 +408,20 @@ namespace MSFileInfoScanner
             mScans.Add(objScanData);
             mPointCountCached += objScanData.IonCount;
 
-            if (mPointCountCached > mOptions.MaxPointsToPlot * 5)
+            if (mPointCountCached <= mOptions.MaxPointsToPlot * 5)
+                return;
+
+            // Too many data points are being tracked; trim out the low abundance ones
+
+            // However, only repeat the trim if the number of cached data points has increased by 10%
+            // This helps speed up program execution by avoiding trimming data after every new scan is added
+
+            if (mPointCountCached > mPointCountCachedAfterLastTrim * 1.1)
             {
-                // Too many data points are being tracked; trim out the low abundance ones
+                // Step through the scans and reduce the number of points in memory
+                TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum);
 
-                // However, only repeat the trim if the number of cached data points has increased by 10%
-                // This helps speed up program execution by avoiding trimming data after every new scan is added
-
-                if (mPointCountCached > mPointCountCachedAfterLastTrim * 1.1)
-                {
-                    // Step through the scans and reduce the number of points in memory
-                    TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum);
-
-                }
             }
-
         }
 
         public bool AddScanSkipFilters(clsScanData objSourceData)
@@ -476,9 +475,9 @@ namespace MSFileInfoScanner
             mRecentFiles.Clear();
         }
 
-        public float ComputeAverageIntensityAllScans(int intMSLevelFilter)
+        public float ComputeAverageIntensityAllScans(int msLevelFilter)
         {
-            if (intMSLevelFilter > 0)
+            if (msLevelFilter > 0)
             {
                 ValidateMSLevel();
             }
@@ -501,7 +500,7 @@ namespace MSFileInfoScanner
             for (var intScanIndex = 0; intScanIndex <= mScans.Count - 1; intScanIndex++)
             {
 
-                if (intMSLevelFilter == 0 || mScans[intScanIndex].MSLevel == intMSLevelFilter)
+                if (msLevelFilter == 0 || mScans[intScanIndex].MSLevel == msLevelFilter)
                 {
                     for (var intIonIndex = 0; intIonIndex <= mScans[intScanIndex].IonCount - 1; intIonIndex++)
                     {
@@ -519,7 +518,12 @@ namespace MSFileInfoScanner
             return 0;
         }
 
-        private void CentroidMSData(float sngMZResolution, ref int intIonCount, double[] dblIonsMZ, float[] sngIonsIntensity, byte[] bytChargeFiltered)
+        private void CentroidMSData(
+            float sngMZResolution,
+            ref int intIonCount,
+            IList<double> dblIonsMZ,
+            IList<float> sngIonsIntensity,
+            IList<byte> bytChargeFiltered)
         {
             if (sngMZResolution <= 0)
             {
@@ -609,14 +613,14 @@ namespace MSFileInfoScanner
                 var intIonCountNew = 0;
                 for (var intIndex = 0; intIndex <= intIonCount - 1; intIndex++)
                 {
-                    if (sngIonsIntensity[intIndex] > float.MinValue)
-                    {
-                        // Keep this point; need to flip the intensity back to being positive
-                        dblIonsMZ[intIonCountNew] = dblIonsMZ[intIndex];
-                        sngIonsIntensity[intIonCountNew] = -sngIonsIntensity[intIndex];
-                        bytChargeFiltered[intIonCountNew] = bytChargeFiltered[intIndex];
-                        intIonCountNew += 1;
-                    }
+                    if (sngIonsIntensity[intIndex] <= float.MinValue)
+                        continue;
+
+                    // Keep this point; need to flip the intensity back to being positive
+                    dblIonsMZ[intIonCountNew] = dblIonsMZ[intIndex];
+                    sngIonsIntensity[intIonCountNew] = -sngIonsIntensity[intIndex];
+                    bytChargeFiltered[intIonCountNew] = bytChargeFiltered[intIndex];
+                    intIonCountNew += 1;
                 }
                 intIonCount = intIonCountNew;
 
@@ -656,6 +660,7 @@ namespace MSFileInfoScanner
                         TotalIntensityPercentageFilterEnabled = false
                     };
 
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     if (blnWriteDebugData)
                     {
                         swOutFile = new StreamWriter(new FileStream("DataDump_" + objMSSpectrum.ScanNumber.ToString() + "_BeforeFilter.txt", FileMode.Create, FileAccess.Write, FileShare.Read));
@@ -666,12 +671,15 @@ namespace MSFileInfoScanner
                     for (var intIonIndex = 0; intIonIndex <= objMSSpectrum.IonCount - 1; intIonIndex++)
                     {
                         objFilterDataArray.AddDataPoint(objMSSpectrum.IonsIntensity[intIonIndex], intIonIndex);
+
+                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if (blnWriteDebugData)
                         {
                             swOutFile.WriteLine(objMSSpectrum.IonsMZ[intIonIndex] + '\t' + objMSSpectrum.IonsIntensity[intIonIndex]);
                         }
                     }
 
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     if (blnWriteDebugData)
                     {
                         swOutFile.Close();
@@ -732,6 +740,7 @@ namespace MSFileInfoScanner
                     objMSSpectrum.IonCount = intIonCountNew;
                 }
 
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                 if (blnWriteDebugData)
                 {
                     swOutFile = new StreamWriter(new FileStream("DataDump_" + objMSSpectrum.ScanNumber.ToString() + "_PostFilter.txt", FileMode.Create, FileAccess.Write, FileShare.Read));
@@ -1182,12 +1191,14 @@ namespace MSFileInfoScanner
             byte intMaxCharge = 1;
 
             for (var intScanIndex = 0; intScanIndex <= mScans.Count - 1; intScanIndex++) {
-                if (intMsLevelFilter == 0 || mScans[intScanIndex].MSLevel == intMsLevelFilter) {
-                    if (mScans[intScanIndex].Charge.Length > 0) {
-                        for (var intIonIndex = 0; intIonIndex <= mScans[intScanIndex].IonCount - 1; intIonIndex++) {
-                            intMaxCharge = Math.Max(intMaxCharge, mScans[intScanIndex].Charge[intIonIndex]);
-                        }
-                    }
+                if (msLevelFilter != 0 && mScans[intScanIndex].MSLevel != msLevelFilter)
+                    continue;
+
+                if (mScans[intScanIndex].Charge.Length <= 0)
+                    continue;
+
+                for (var intIonIndex = 0; intIonIndex <= mScans[intScanIndex].IonCount - 1; intIonIndex++) {
+                    intMaxCharge = Math.Max(intMaxCharge, mScans[intScanIndex].Charge[intIonIndex]);
                 }
             }
 
@@ -1200,63 +1211,71 @@ namespace MSFileInfoScanner
 
             // Store the data, segregating by charge
             for (var intScanIndex = 0; intScanIndex <= mScans.Count - 1; intScanIndex++) {
+                if (msLevelFilter != 0 && mScans[intScanIndex].MSLevel != msLevelFilter)
+                    continue;
 
-                if (intMsLevelFilter == 0 || mScans[intScanIndex].MSLevel == intMsLevelFilter) {
-                    for (var intIonIndex = 0; intIonIndex <= mScans[intScanIndex].IonCount - 1; intIonIndex++) {
-                        var dataPoint = new ScatterPoint(mScans[intScanIndex].ScanNumber,
-                                                         mScans[intScanIndex].IonsMZ[intIonIndex])
-                        {
-                            Value = mScans[intScanIndex].IonsIntensity[intIonIndex]
-                        };
-
-                        lstSeries[mScans[intScanIndex].Charge[intIonIndex]].Add(dataPoint);
-
-                        UpdateMinMax(mScans[intScanIndex].IonsMZ[intIonIndex], ref dblMinMz, ref dblMaxMz);
-
-                    }
-
-                    UpdateMinMax(mScans[intScanIndex].ScanTimeMinutes, ref dblScanTimeMin, ref dblScanTimeMax);
-
-                    if (mScans[intScanIndex].ScanNumber < intMinScan)
+                for (var intIonIndex = 0; intIonIndex <= mScans[intScanIndex].IonCount - 1; intIonIndex++) {
+                    var dataPoint = new ScatterPoint(mScans[intScanIndex].ScanNumber,
+                                                     mScans[intScanIndex].IonsMZ[intIonIndex])
                     {
-                        intMinScan = mScans[intScanIndex].ScanNumber;
-                    }
+                        Value = mScans[intScanIndex].IonsIntensity[intIonIndex]
+                    };
 
-                    if (mScans[intScanIndex].ScanNumber > intMaxScan)
-                    {
-                        intMaxScan = mScans[intScanIndex].ScanNumber;
-                    }
+                    lstSeries[mScans[intScanIndex].Charge[intIonIndex]].Add(dataPoint);
+
+                    UpdateMinMax(mScans[intScanIndex].IonsMZ[intIonIndex], ref minMZ, ref maxMZ);
+
                 }
 
+                UpdateMinMax(mScans[intScanIndex].ScanTimeMinutes, ref dblScanTimeMin, ref dblScanTimeMax);
+
+                if (mScans[intScanIndex].ScanNumber < minScan)
+                {
+                    minScan = mScans[intScanIndex].ScanNumber;
+                }
+
+                if (mScans[intScanIndex].ScanNumber > maxScan)
+                {
+                    maxScan = mScans[intScanIndex].ScanNumber;
+                }
             }
 
             return lstSeries;
 
         }
 
-        private List<ScatterPoint> GetMzVsScanSeries(int intMSLevelFilter, out float sngColorScaleMinIntensity, out float sngColorScaleMaxIntensity, out double dblMinMZ, out double dblMaxMZ, out double dblScanTimeMax, out int intMinScan, out int intMaxScan, bool blnWriteDebugData, StreamWriter swDebugFile)
+        private List<ScatterPoint> GetMzVsScanSeries(
+            int msLevelFilter,
+            out float colorScaleMinIntensity,
+            out float colorScaleMaxIntensity,
+            out double minMZ,
+            out double maxMZ,
+            out double dblScanTimeMax,
+            out int minScan,
+            out int maxScan,
+            bool blnWriteDebugData = false,
+            TextWriter swDebugFile = null)
         {
 
             var objPoints = new List<ScatterPoint>();
 
-            double dblIntensitySum = 0;
             var intSortedIntensityListCount = 0;
             var sngSortedIntensityList = new float[mPointCountCached + 1];
 
-            sngColorScaleMinIntensity = float.MaxValue;
-            sngColorScaleMaxIntensity = 0;
+            colorScaleMinIntensity = float.MaxValue;
+            colorScaleMaxIntensity = 0;
 
-            intMinScan = int.MaxValue;
-            intMaxScan = 0;
-            dblMinMZ = float.MaxValue;
-            dblMaxMZ = 0;
+            minScan = int.MaxValue;
+            maxScan = 0;
+            minMZ = float.MaxValue;
+            maxMZ = 0;
 
             var dblScanTimeMin = double.MaxValue;
             dblScanTimeMax = 0;
 
             for (var intScanIndex = 0; intScanIndex <= mScans.Count - 1; intScanIndex++) {
 
-                if (intMSLevelFilter != 0 && mScans[intScanIndex].MSLevel != intMSLevelFilter)
+                if (msLevelFilter != 0 && mScans[intScanIndex].MSLevel != msLevelFilter)
                 {
                     continue;
                 }
@@ -1268,7 +1287,6 @@ namespace MSFileInfoScanner
                     }
 
                     sngSortedIntensityList[intSortedIntensityListCount] = mScans[intScanIndex].IonsIntensity[intIonIndex];
-                    dblIntensitySum += sngSortedIntensityList[intSortedIntensityListCount];
 
                     var dataPoint = new ScatterPoint(mScans[intScanIndex].ScanNumber,
                                                      mScans[intScanIndex].IonsMZ[intIonIndex])
@@ -1278,38 +1296,40 @@ namespace MSFileInfoScanner
 
                     objPoints.Add(dataPoint);
 
-                    if (blnWriteDebugData) {
-                        swDebugFile.WriteLine( mScans[intScanIndex].ScanNumber + '\t' +  mScans[intScanIndex].IonsMZ[intIonIndex] + '\t' +  mScans[intScanIndex].IonsIntensity[intIonIndex]);
+                    if (blnWriteDebugData)
+                    {
+                        swDebugFile?.WriteLine(
+                            mScans[intScanIndex].ScanNumber + '\t' +
+                            mScans[intScanIndex].IonsMZ[intIonIndex] + '\t' +
+                            mScans[intScanIndex].IonsIntensity[intIonIndex]);
                     }
 
-                    UpdateMinMax(sngSortedIntensityList[intSortedIntensityListCount], ref sngColorScaleMinIntensity, ref sngColorScaleMaxIntensity);
-                    UpdateMinMax( mScans[intScanIndex].IonsMZ[intIonIndex], ref dblMinMZ, ref dblMaxMZ);
+                    UpdateMinMax(sngSortedIntensityList[intSortedIntensityListCount], ref colorScaleMinIntensity, ref colorScaleMaxIntensity);
+                    UpdateMinMax( mScans[intScanIndex].IonsMZ[intIonIndex], ref minMZ, ref maxMZ);
 
                     intSortedIntensityListCount += 1;
                 }
 
                 UpdateMinMax( mScans[intScanIndex].ScanTimeMinutes, ref dblScanTimeMin, ref dblScanTimeMax);
 
-                if ( mScans[intScanIndex].ScanNumber < intMinScan) {
-                    intMinScan =  mScans[intScanIndex].ScanNumber;
+                if ( mScans[intScanIndex].ScanNumber < minScan) {
+                    minScan =  mScans[intScanIndex].ScanNumber;
                 }
 
-                if ( mScans[intScanIndex].ScanNumber > intMaxScan) {
-                    intMaxScan =  mScans[intScanIndex].ScanNumber;
+                if ( mScans[intScanIndex].ScanNumber > maxScan) {
+                    maxScan =  mScans[intScanIndex].ScanNumber;
                 }
             }
 
-            if (objPoints.Count > 0) {
-                // Compute median and average intensity values
-                if (intSortedIntensityListCount > 0) {
-                    Array.Sort(sngSortedIntensityList, 0, intSortedIntensityListCount);
-                    var sngMedianIntensity = ComputeMedian(sngSortedIntensityList, intSortedIntensityListCount);
+            if (objPoints.Count <= 0 || intSortedIntensityListCount <= 0)
+                return objPoints;
 
-                    // Set the minimum color intensity to the median
-                    sngColorScaleMinIntensity = sngMedianIntensity;
-                }
+            // Compute median and average intensity values
+            Array.Sort(sngSortedIntensityList, 0, intSortedIntensityListCount);
+            var sngMedianIntensity = ComputeMedian(sngSortedIntensityList, intSortedIntensityListCount);
 
-            }
+            // Set the minimum color intensity to the median
+            colorScaleMinIntensity = sngMedianIntensity;
 
             return objPoints;
         }

@@ -165,32 +165,36 @@ namespace MSFileInfoScanner
             throw new Exception("Unrecognized option, " + eOption);
         }
 
-        public override void SetOption(ProcessingOptions eOption, bool blnValue)
+        public override void SetOption(ProcessingOptions eOption, bool value)
         {
-            switch (eOption) {
+            switch (eOption)
+            {
                 case ProcessingOptions.CreateTICAndBPI:
-                    mSaveTICAndBPI = blnValue;
+                    mSaveTICAndBPI = value;
                     break;
                 case ProcessingOptions.ComputeOverallQualityScores:
-                    mComputeOverallQualityScores = blnValue;
+                    mComputeOverallQualityScores = value;
                     break;
                 case ProcessingOptions.CreateDatasetInfoFile:
-                    mCreateDatasetInfoFile = blnValue;
+                    mCreateDatasetInfoFile = value;
                     break;
                 case ProcessingOptions.CreateLCMS2DPlots:
-                    mSaveLCMS2DPlots = blnValue;
+                    mSaveLCMS2DPlots = value;
                     break;
                 case ProcessingOptions.CopyFileLocalOnReadError:
-                    mCopyFileLocalOnReadError = blnValue;
+                    mCopyFileLocalOnReadError = value;
                     break;
                 case ProcessingOptions.UpdateDatasetStatsTextFile:
-                    mUpdateDatasetStatsTextFile = blnValue;
+                    mUpdateDatasetStatsTextFile = value;
                     break;
                 case ProcessingOptions.CreateScanStatsFile:
-                    mCreateScanStatsFile = blnValue;
+                    mCreateScanStatsFile = value;
                     break;
                 case ProcessingOptions.CheckCentroidingStatus:
-                    mCheckCentroidingStatus = blnValue;
+                    mCheckCentroidingStatus = value;
+                    break;
+                case ProcessingOptions.PlotWithPython:
+                    mPlotWithPython = value;
                     break;
                 default:
                     throw new Exception("Unrecognized option, " + eOption);
@@ -571,14 +575,18 @@ namespace MSFileInfoScanner
                     outputFolderPath = string.Empty;
 
                 DirectoryInfo diFolderInfo;
-                if (outputFolderPath.Length > 0) {
+                if (outputFolderPath.Length > 0)
+                {
                     // Make sure the output folder exists
                     diFolderInfo = new DirectoryInfo(outputFolderPath);
 
-                    if (!diFolderInfo.Exists) {
+                    if (!diFolderInfo.Exists)
+                    {
                         diFolderInfo.Create();
                     }
-                } else {
+                }
+                else
+                {
                     diFolderInfo = new DirectoryInfo(".");
                 }
 

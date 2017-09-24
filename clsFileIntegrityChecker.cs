@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Xml;
 using PRISM;
 
 // This class will check the integrity of files in a given folder
@@ -571,7 +572,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount, int intMinimumTabCount,
-                                       List<string> strRequiredTextLineHeaders, bool blnRequireEqualTabsPerLine)
+                                       IReadOnlyCollection<string> strRequiredTextLineHeaders, bool blnRequireEqualTabsPerLine)
         {
             return CheckTextFileWork(strFilePath, intMinimumLineCount, intMinimumTabCount, 0, blnRequireEqualTabsPerLine,
                                      false, strRequiredTextLineHeaders, true, false, 0);
@@ -582,7 +583,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount, int intMinimumTabCount,
-                                       List<string> strRequiredTextLineHeaders, bool blnRequireEqualTabsPerLine,
+                                       IReadOnlyCollection<string> strRequiredTextLineHeaders, bool blnRequireEqualTabsPerLine,
                                        bool blnRequiredTextMatchesLineStart, int intRequiredTextMinMatchCount)
         {
             return CheckTextFileWork(strFilePath, intMinimumLineCount, intMinimumTabCount, 0, blnRequireEqualTabsPerLine,
@@ -631,7 +632,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount,
-                                       List<string> strRequiredTextLineHeaders, bool blnRequiredTextMatchesLineStart)
+                                       IReadOnlyCollection<string> strRequiredTextLineHeaders, bool blnRequiredTextMatchesLineStart)
         {
             return CheckTextFileWork(strFilePath, intMinimumLineCount, 0, 0, false, false, strRequiredTextLineHeaders,
                                      blnRequiredTextMatchesLineStart, false, 0);
@@ -659,7 +660,7 @@ namespace MSFileInfoScanner
             int intMinimumCommaCount,
             bool blnRequireEqualTabsPerLine,
             bool blnRequireEqualCommasPerLine,
-            List<string> strRequiredTextLineHeaders,
+            IReadOnlyCollection<string> strRequiredTextLineHeaders,
             bool blnRequiredTextMatchesLineStart,
             bool blnCharCountSkipsBlankLines,
             int intRequiredTextMinMatchCount)
@@ -903,7 +904,7 @@ namespace MSFileInfoScanner
         {
             var blnLineIsValid = true;
 
-            switch (Path.GetFileNameWithoutExtension(strFilePath).ToLower())
+            switch (Path.GetFileNameWithoutExtension(strFilePath)?.ToLower())
             {
                 case "acqu":
                 case "acqus":
@@ -1310,7 +1311,13 @@ namespace MSFileInfoScanner
             int intMinimumCommaCount;
             var strHeaderRequired = string.Empty;
 
-            var strFileNameLower = Path.GetFileName(strFilePath).ToLower();
+            var strFileNameLower = Path.GetFileName(strFilePath)?.ToLower();
+
+            if (string.IsNullOrWhiteSpace(strFileNameLower))
+            {
+                OnWarningEvent("Could not extract the filename from path sent to CheckCSVFile: " + strFilePath);
+                return false;
+            }
 
             if (strFileNameLower.EndsWith("_isos.csv"))
             {
@@ -1510,8 +1517,8 @@ namespace MSFileInfoScanner
         private bool CheckXMLFileWork(
             string strFilePath,
             int intMinimumElementCount,
-            List<string> strRequiredElementNames,
-            List<string> strRequiredAttributeNames)
+            IReadOnlyCollection<string> strRequiredElementNames,
+            IReadOnlyCollection<string> strRequiredAttributeNames)
         {
 
             var intElementNameMatchCount = 0;
@@ -1561,7 +1568,7 @@ namespace MSFileInfoScanner
                     // Initialize the stream reader and the XML Text Reader
                     using (var srInFile = new StreamReader(strFilePath))
                     {
-                        using (var objXMLReader = new System.Xml.XmlTextReader(srInFile))
+                        using (var objXMLReader = new XmlTextReader(srInFile))
                         {
 
                             // Read each of the nodes and examine them
@@ -1569,10 +1576,10 @@ namespace MSFileInfoScanner
                             while (objXMLReader.Read())
                             {
                                 XMLTextReaderSkipWhitespace(objXMLReader);
-                                if (objXMLReader.ReadState != System.Xml.ReadState.Interactive)
+                                if (objXMLReader.ReadState != ReadState.Interactive)
                                     break;
 
-                                if (objXMLReader.NodeType != System.Xml.XmlNodeType.Element)
+                                if (objXMLReader.NodeType != XmlNodeType.Element)
                                 {
                                     continue;
                                 }
@@ -1629,6 +1636,7 @@ namespace MSFileInfoScanner
                     }
                     // srInFile
 
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     if (requiredElements.Count > 0 && !blnErrorLogged)
                     {
                         // Make sure that all of the required element names were found; log an error if any were missing
@@ -1854,7 +1862,7 @@ namespace MSFileInfoScanner
             return false;
         }
 
-        private Dictionary<string, bool> ConvertTextListToDictionary(List<string> requiredTextItems)
+        private Dictionary<string, bool> ConvertTextListToDictionary(IReadOnlyCollection<string> requiredTextItems)
         {
             var requiredTextDictionary = new Dictionary<string, bool>();
 
@@ -1988,7 +1996,7 @@ namespace MSFileInfoScanner
         /// <param name="intMaximumTextFileLinesToCheck"></param>
         /// <returns>True if this file contains the required element text</returns>
         /// <remarks></remarks>
-        private bool XMLFileContainsElements(string strFilePath, string[] strElementsToMatch,
+        private bool XMLFileContainsElements(string strFilePath, IReadOnlyList<string> strElementsToMatch,
                                              int intMaximumTextFileLinesToCheck = 50)
         {
 
@@ -1998,13 +2006,13 @@ namespace MSFileInfoScanner
 
             try
             {
-                if (strElementsToMatch == null || strElementsToMatch.Length == 0)
+                if (strElementsToMatch == null || strElementsToMatch.Count == 0)
                 {
                     return false;
                 }
 
                 var intElementMatchCount = 0;
-                var blnElementFound = new bool[strElementsToMatch.Length];
+                var blnElementFound = new bool[strElementsToMatch.Count];
 
                 // Read, at most, the first intMaximumTextFileLinesToCheck lines to determine if this is an XML settings file
                 if (intMaximumTextFileLinesToCheck < 10)
@@ -2213,12 +2221,12 @@ namespace MSFileInfoScanner
             }
         }
 
-        private string XMLTextReaderGetInnerText(System.Xml.XmlTextReader objXMLReader)
+        private string XMLTextReaderGetInnerText(XmlReader objXMLReader)
         {
             var strValue = string.Empty;
             bool blnSuccess;
 
-            if (objXMLReader.NodeType == System.Xml.XmlNodeType.Element)
+            if (objXMLReader.NodeType == XmlNodeType.Element)
             {
                 // Advance the reader so that we can read the value
                 blnSuccess = objXMLReader.Read();
@@ -2228,7 +2236,7 @@ namespace MSFileInfoScanner
                 blnSuccess = true;
             }
 
-            if (blnSuccess && objXMLReader.NodeType != System.Xml.XmlNodeType.Whitespace & objXMLReader.HasValue)
+            if (blnSuccess && objXMLReader.NodeType != XmlNodeType.Whitespace & objXMLReader.HasValue)
             {
                 strValue = objXMLReader.Value;
             }
@@ -2236,9 +2244,9 @@ namespace MSFileInfoScanner
             return strValue;
         }
 
-        private void XMLTextReaderSkipWhitespace(System.Xml.XmlTextReader objXMLReader)
+        private void XMLTextReaderSkipWhitespace(XmlReader objXMLReader)
         {
-            if (objXMLReader.NodeType == System.Xml.XmlNodeType.Whitespace)
+            if (objXMLReader.NodeType == XmlNodeType.Whitespace)
             {
                 // Whitspace; read the next node
                 objXMLReader.Read();

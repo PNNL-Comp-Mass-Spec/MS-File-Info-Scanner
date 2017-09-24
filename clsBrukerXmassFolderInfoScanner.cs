@@ -107,7 +107,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if a valid file is found; otherwise false</returns>
         /// <remarks></remarks>
-        private bool DetermineAcqStartTime(DirectoryInfo diDatasetFolder, clsDatasetFileInfo datasetFileInfo)
+        private void DetermineAcqStartTime(DirectoryInfo diDatasetFolder, clsDatasetFileInfo datasetFileInfo)
         {
 
             var blnSuccess = false;
@@ -172,7 +172,6 @@ namespace MSFileInfoScanner
                         datasetFileInfo.AcqTimeStart = fiFile.LastWriteTime;
                     }
 
-                    blnSuccess = true;
                     break;
                 }
 
@@ -183,10 +182,7 @@ namespace MSFileInfoScanner
             catch (Exception ex)
             {
                 OnErrorEvent("Error finding XMass method folder: " + ex.Message, ex);
-                blnSuccess = false;
             }
-
-            return blnSuccess;
 
         }
 
@@ -299,7 +295,7 @@ namespace MSFileInfoScanner
             return true;
         }
 
-        private bool ParseAutoMSFile(DirectoryInfo diDatasetFolder)
+        private void ParseAutoMSFile(FileSystemInfo diDatasetFolder)
         {
 
             try
@@ -309,7 +305,7 @@ namespace MSFileInfoScanner
 
                 if (!fiFileInfo.Exists)
                 {
-                    return false;
+                    return;
                 }
 
                 using (var srReader = new StreamReader(new FileStream(fiFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read)))
@@ -362,13 +358,10 @@ namespace MSFileInfoScanner
 
                 }
 
-                return true;
-
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error finding AutoMS.txt file: " + ex.Message, ex);
-                return false;
             }
 
         }
@@ -380,6 +373,8 @@ namespace MSFileInfoScanner
 
             // Override strDataFilePath here, if needed
             var blnOverride = false;
+
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (blnOverride)
             {
                 var strNewDataFilePath = "c:\\temp\\analysis.baf";
@@ -660,7 +655,7 @@ namespace MSFileInfoScanner
         }
 
         private bool ParseScanXMLFile(
-            DirectoryInfo diDatasetFolder,
+            FileSystemInfo diDatasetFolder,
             clsDatasetFileInfo datasetFileInfo,
             out Dictionary<int, float> scanElutionTimeMap)
         {
@@ -1155,7 +1150,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ReadAndStoreMcfIndexData(
+        private void ReadAndStoreMcfIndexData(
             SQLiteConnection cnDB,
             IReadOnlyDictionary<string, int> lstMetadataNameToID,
             IDictionary<string, udtMCFScanInfoType> lstScanData,
@@ -1166,7 +1161,7 @@ namespace MSFileInfoScanner
 
             if (!GetMetaDataFieldAndTable(eMcfMetadataField, out var strField, out var strTable))
             {
-                return false;
+                return;
             }
 
             if (lstMetadataNameToID.TryGetValue(strField, out var intMetadataId))
@@ -1208,16 +1203,14 @@ namespace MSFileInfoScanner
 
             }
 
-            return true;
-
         }
 
-        private string ReadDbString(SQLiteDataReader drReader, string strColumnName)
+        private string ReadDbString(IDataRecord drReader, string strColumnName)
         {
             return ReadDbString(drReader, strColumnName, strValueIfNotFound: string.Empty);
         }
 
-        private string ReadDbString(SQLiteDataReader drReader, string strColumnName, string strValueIfNotFound)
+        private string ReadDbString(IDataRecord drReader, string strColumnName, string strValueIfNotFound)
         {
             string strValue;
 
@@ -1298,8 +1291,7 @@ namespace MSFileInfoScanner
 
                     break;
                 case eMcfMetadataFields.AcqTime:
-                    DateTime dtValue;
-                    if (DateTime.TryParse(strValue, out dtValue))
+                    if (DateTime.TryParse(strValue, out var dtValue))
                     {
                         udtScanInfo.AcqTime = dtValue;
                     }

@@ -31,11 +31,16 @@ namespace MSFileInfoScannerInterfaces
         protected string mMS1PlotTitle;
 
         protected string mMS2PlotTitle;
-        // The following is only used when PlottingDeisotopedData is true
 
+        // The following is only used when PlottingDeisotopedData is true
         protected double mMaxMonoMass;
+
+        #region "Properties"
+
+        public bool DeleteTempFiles { get; set; }
+
         public int MaxPointsToPlot {
-            get { return mMaxPointsToPlot; }
+            get => mMaxPointsToPlot;
             set {
                 if (value < 10)
                     value = 10;
@@ -44,7 +49,7 @@ namespace MSFileInfoScannerInterfaces
         }
 
         public int MinPointsPerSpectrum {
-            get { return mMinPointsPerSpectrum; }
+            get => mMinPointsPerSpectrum;
             set {
                 if (value < 0)
                     value = 0;
@@ -53,7 +58,7 @@ namespace MSFileInfoScannerInterfaces
         }
 
         public string MS1PlotTitle {
-            get { return mMS1PlotTitle; }
+            get => mMS1PlotTitle;
             set {
                 if (string.IsNullOrEmpty(value)) {
                     value = DEFAULT_MS1_PLOT_TITLE;
@@ -63,7 +68,7 @@ namespace MSFileInfoScannerInterfaces
         }
 
         public string MS2PlotTitle {
-            get { return mMS2PlotTitle; }
+            get => mMS2PlotTitle;
             set {
                 if (string.IsNullOrEmpty(value)) {
                     value = DEFAULT_MS2_PLOT_TITLE;
@@ -73,7 +78,7 @@ namespace MSFileInfoScannerInterfaces
         }
 
         public float MZResolution {
-            get { return mMZResolution; }
+            get => mMZResolution;
             set {
                 if (value < 0)
                     value = 0;
@@ -82,7 +87,7 @@ namespace MSFileInfoScannerInterfaces
         }
 
         public float MinIntensity {
-            get { return mMinIntensity; }
+            get => mMinIntensity;
             set {
                 if (value < 0)
                     value = 0;
@@ -91,7 +96,7 @@ namespace MSFileInfoScannerInterfaces
         }
 
         public double MaxMonoMassForDeisotopedPlot {
-            get { return mMaxMonoMass; }
+            get => mMaxMonoMass;
             set {
                 if (value < 100)
                     value = 100;

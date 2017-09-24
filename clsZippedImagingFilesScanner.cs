@@ -23,7 +23,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if at least one valid file is found; otherwise false</returns>
         /// <remarks></remarks>
-        private bool DetermineAcqStartEndTime(FileInfo fiZipFile, clsDatasetFileInfo datasetFileInfo)
+        private void DetermineAcqStartEndTime(FileInfo fiZipFile, clsDatasetFileInfo datasetFileInfo)
         {
 
             var blnSuccess = false;
@@ -47,11 +47,14 @@ namespace MSFileInfoScanner
 
                         while (oZipEntry.MoveNext())
                         {
+                            if (oZipEntry.Current == null)
+                                continue;
 
                             if (oZipEntry.Current.IsDirectory)
                             {
                                 continue;
                             }
+
                             // Split the filename on the forward slash character
                             var strNameParts = oZipEntry.Current.FileName.Split('/');
 
@@ -107,11 +110,8 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error finding XMass method folder: " + ex.Message);
-                blnSuccess = false;
+                OnErrorEvent("Error in DetermineAcqStartEndTime: " + ex.Message);
             }
-
-            return blnSuccess;
 
         }
 

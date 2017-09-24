@@ -31,8 +31,8 @@ namespace MSFileInfoScanner
         #region "Constants and Enums"
         public const string SCANTYPE_STATS_SEPCHAR = "::###::";
         public const string DATASET_INFO_FILE_SUFFIX = "_DatasetInfo.xml";
-            #endregion
         public const string DEFAULT_DATASET_STATS_FILENAME = "MSFileInfo_DatasetStats.txt";
+        #endregion
 
         #region "Structures"
 
@@ -99,7 +99,7 @@ namespace MSFileInfoScanner
         public clsDatasetFileInfo DatasetFileInfo { get; set; }
 
         public string DatasetStatsSummaryFileName {
-            get { return mDatasetStatsSummaryFileName; }
+            get => mDatasetStatsSummaryFileName;
             set {
                 if ((value != null)) {
                     mDatasetStatsSummaryFileName = value;
@@ -291,7 +291,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private double ComputeMedian(double[] dblList, int intItemCount)
+        private double ComputeMedian(IReadOnlyList<double> dblList, int intItemCount)
         {
 
             var lstData = new List<double>(intItemCount);
