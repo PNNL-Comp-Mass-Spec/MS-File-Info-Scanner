@@ -17,7 +17,7 @@ using PRISM;
 
 namespace MSFileInfoScanner
 {
-    public class clsMSFileInfoScanner : iMSFileInfoScanner
+    public sealed class clsMSFileInfoScanner : iMSFileInfoScanner
     {
         /// <summary>
         /// Constructor
@@ -34,44 +34,45 @@ namespace MSFileInfoScanner
 
             mErrorCode = eMSFileScannerErrorCodes.NoError;
 
-            mIgnoreErrorsWhenRecursing = false;
+            IgnoreErrorsWhenRecursing = false;
 
-            mUseCacheFiles = false;
+            DatasetInfoXML = string.Empty;
+            UseCacheFiles = false;
 
-            mLogMessagesToFile = false;
+            LogMessagesToFile = false;
             mLogFilePath = string.Empty;
             mLogFolderPath = string.Empty;
 
-            mReprocessExistingFiles = false;
-            mReprocessIfCachedSizeIsZero = false;
-            mRecheckFileIntegrityForExistingFolders = false;
+            ReprocessExistingFiles = false;
+            ReprocessIfCachedSizeIsZero = false;
+            RecheckFileIntegrityForExistingFolders = false;
 
-            mCreateDatasetInfoFile = false;
+            CreateDatasetInfoFile = false;
 
-            mUpdateDatasetStatsTextFile = false;
+            UpdateDatasetStatsTextFile = false;
             mDatasetStatsTextFileName = clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME;
 
-            mSaveTICAndBPIPlots = false;
-            mSaveLCMS2DPlots = false;
-            mCheckCentroidingStatus = false;
+            SaveTICAndBPIPlots = false;
+            SaveLCMS2DPlots = false;
+            CheckCentroidingStatus = false;
 
             mLCMS2DPlotOptions = new clsLCMSDataPlotterOptions();
             mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR;
 
-            mScanStart = 0;
-            mScanEnd = 0;
-            mShowDebugInfo = false;
+            ScanStart = 0;
+            ScanEnd = 0;
+            ShowDebugInfo = false;
 
-            mComputeOverallQualityScores = false;
+            ComputeOverallQualityScores = false;
 
-            mCopyFileLocalOnReadError = false;
+            CopyFileLocalOnReadError = false;
 
             mCheckFileIntegrity = false;
 
-            mDSInfoConnectionString = "Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;";
-            mDSInfoDBPostingEnabled = false;
-            mDSInfoStoredProcedure = "UpdateDatasetFileInfoXML";
-            mDSInfoDatasetIDOverride = 0;
+            DSInfoConnectionString = "Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;";
+            DSInfoDBPostingEnabled = false;
+            DSInfoStoredProcedure = "UpdateDatasetFileInfoXML";
+            DatasetIDOverride = 0;
 
             mFileIntegrityDetailsFilePath = Path.Combine(GetAppFolderPath(), DefaultDataFileName(eDataFileTypeConstants.FileIntegrityDetails));
             mFileIntegrityErrorsFilePath = Path.Combine(GetAppFolderPath(), DefaultDataFileName(eDataFileTypeConstants.FileIntegrityErrors));
@@ -163,49 +164,17 @@ namespace MSFileInfoScanner
 
         private eMSFileScannerErrorCodes mErrorCode;
 
-        private bool mAbortProcessing;
-
-        // If the following is false, data is not loaded/saved from/to the DatasetTimeFile.txt or the FolderIntegrityInfo.txt file
-        private bool mUseCacheFiles;
-
         private string mFileIntegrityDetailsFilePath;
 
         private string mFileIntegrityErrorsFilePath;
 
-        private bool mIgnoreErrorsWhenRecursing;
-        private bool mReprocessExistingFiles;
-
-        private bool mReprocessIfCachedSizeIsZero;
-
-        private bool mRecheckFileIntegrityForExistingFolders;
-        private bool mSaveTICAndBPIPlots;
-        private bool mSaveLCMS2DPlots;
-
-        private bool mCheckCentroidingStatus;
-        private bool mComputeOverallQualityScores;
-        private bool mCreateDatasetInfoFile;
-
-        private bool mCreateScanStatsFile;
-        private bool mUpdateDatasetStatsTextFile;
-
         private string mDatasetStatsTextFileName;
-
-        private bool mCopyFileLocalOnReadError;
-
         private bool mCheckFileIntegrity;
-        private string mDSInfoConnectionString;
-        private bool mDSInfoDBPostingEnabled;
-        private string mDSInfoStoredProcedure;
 
-        private int mDSInfoDatasetIDOverride;
         private readonly clsLCMSDataPlotterOptions mLCMS2DPlotOptions;
 
         private int mLCMS2DOverviewPlotDivisor;
-        private int mScanStart;
-        private int mScanEnd;
 
-        private bool mShowDebugInfo;
-        private bool mLogMessagesToFile;
         private string mLogFilePath;
 
         private StreamWriter mLogFile;
@@ -216,7 +185,6 @@ namespace MSFileInfoScanner
         // If blank, then mOutputFolderPath will be used; if mOutputFolderPath is also blank, then the log is created in the same folder as the executing assembly
         private string mLogFolderPath;
 
-        private string mDatasetInfoXML = "";
         private readonly clsFileIntegrityChecker mFileIntegrityChecker;
 
         private StreamWriter mFileIntegrityDetailsWriter;
@@ -234,20 +202,10 @@ namespace MSFileInfoScanner
         #endregion
 
         #region "Processing Options and Interface Functions"
-
-        public override bool AbortProcessing {
-            get => mAbortProcessing;
-            set => mAbortProcessing = value;
-        }
-
-        public override string AcquisitionTimeFilename {
+        public override string AcquisitionTimeFilename
+        {
             get => GetDataFileFilename(eDataFileTypeConstants.MSFileInfo);
             set => SetDataFileFilename(value, eDataFileTypeConstants.MSFileInfo);
-        }
-
-        public override bool CheckCentroidingStatus {
-            get => mCheckCentroidingStatus;
-            set => mCheckCentroidingStatus = value;
         }
 
         /// <summary>
@@ -266,16 +224,6 @@ namespace MSFileInfoScanner
                 }
             }
         }
-
-        public override bool ComputeOverallQualityScores {
-            get => mComputeOverallQualityScores;
-            set => mComputeOverallQualityScores = value;
-        }
-
-        /// <summary>
-        /// Returns the dataset info, formatted as XML
-        /// </summary>
-        public override string DatasetInfoXML => mDatasetInfoXML;
 
         public override string GetDataFileFilename(eDataFileTypeConstants eDataFileType)
         {
@@ -373,72 +321,24 @@ namespace MSFileInfoScanner
             }
         }
 
-        /// <summary>
-        /// If True, then copies .Raw files to the local drive if unable to read the file over the network
-        /// </summary>
-        public override bool CopyFileLocalOnReadError {
-            get => mCopyFileLocalOnReadError;
-            set => mCopyFileLocalOnReadError = value;
-        }
-
-        /// <summary>
-        /// If True, then will create the _DatasetInfo.xml file
-        /// </summary>
-        public override bool CreateDatasetInfoFile {
-            get => mCreateDatasetInfoFile;
-            set => mCreateDatasetInfoFile = value;
-        }
-
-        /// <summary>
-        /// If True, then will create the _ScanStats.txt file
-        /// </summary>
-        public override bool CreateScanStatsFile {
-            get => mCreateScanStatsFile;
-            set => mCreateScanStatsFile = value;
-        }
-
-        /// <summary>
-        /// DatasetID value to use instead of trying to lookup the value in DMS (and instead of using 0)
-        /// </summary>
-        public override int DatasetIDOverride {
-            get => mDSInfoDatasetIDOverride;
-            set => mDSInfoDatasetIDOverride = value;
-        }
-
-        public override string DatasetStatsTextFileName {
-            get { return mDatasetStatsTextFileName; }
-            set {
-                if (string.IsNullOrEmpty(value)) {
+        public override string DatasetStatsTextFileName
+        {
+            get => mDatasetStatsTextFileName;
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
                     // Do not update mDatasetStatsTextFileName
-                } else {
+                }
+                else
+                {
                     mDatasetStatsTextFileName = value;
                 }
             }
         }
 
-        public override string DSInfoConnectionString {
-            get => mDSInfoConnectionString;
-            set => mDSInfoConnectionString = value;
-        }
-
-        public override bool DSInfoDBPostingEnabled {
-            get => mDSInfoDBPostingEnabled;
-            set => mDSInfoDBPostingEnabled = value;
-        }
-
-        public override string DSInfoStoredProcedure {
-            get => mDSInfoStoredProcedure;
-            set => mDSInfoStoredProcedure = value;
-        }
-
-        public override eMSFileScannerErrorCodes ErrorCode => mErrorCode;
-
-        public override bool IgnoreErrorsWhenRecursing {
-            get => mIgnoreErrorsWhenRecursing;
-            set => mIgnoreErrorsWhenRecursing = value;
-        }
-
-        public override float LCMS2DPlotMZResolution {
+        public override float LCMS2DPlotMZResolution
+        {
             get => mLCMS2DPlotOptions.MZResolution;
             set => mLCMS2DPlotOptions.MZResolution = value;
         }
@@ -467,22 +367,7 @@ namespace MSFileInfoScanner
             set => mLCMS2DPlotOptions.MinIntensity = value;
         }
 
-        public override bool LogMessagesToFile {
-            get => mLogMessagesToFile;
-            set => mLogMessagesToFile = value;
-        }
-
-        public override string LogFilePath {
-            get => mLogFilePath;
-            set => mLogFilePath = value;
-        }
-
-        public override string LogFolderPath {
-            get => mLogFolderPath;
-            set => mLogFolderPath = value;
-        }
-
-        public override int MaximumTextFileLinesToCheck {
+        public override int MaximumTextFileLinesToCheck
         {
             get
             {
@@ -522,59 +407,6 @@ namespace MSFileInfoScanner
             }
         }
 
-        public override bool RecheckFileIntegrityForExistingFolders {
-            get => mRecheckFileIntegrityForExistingFolders;
-            set => mRecheckFileIntegrityForExistingFolders = value;
-        }
-
-        public override bool ReprocessExistingFiles {
-            get => mReprocessExistingFiles;
-            set => mReprocessExistingFiles = value;
-        }
-
-        public override bool ReprocessIfCachedSizeIsZero {
-            get => mReprocessIfCachedSizeIsZero;
-            set => mReprocessIfCachedSizeIsZero = value;
-        }
-
-        /// <summary>
-        /// If True, then saves TIC and BPI plots as PNG files
-        /// </summary>
-        public override bool SaveTICAndBPIPlots {
-            get => mSaveTICAndBPIPlots;
-            set => mSaveTICAndBPIPlots = value;
-        }
-
-        public override bool ShowDebugInfo {
-            get => mShowDebugInfo;
-            set => mShowDebugInfo = value;
-        }
-
-        /// <summary>
-        /// If True, then saves a 2D plot of m/z vs. Intensity (requires reading every data point in the data file, which will slow down the processing)
-        /// </summary>
-        /// <value></value>
-        public override bool SaveLCMS2DPlots {
-            get => mSaveLCMS2DPlots;
-            set => mSaveLCMS2DPlots = value;
-        }
-
-        /// <summary>
-        /// When ScanStart is > 0, then will start processing at the specified scan number
-        /// </summary>
-        public override int ScanStart {
-            get => mScanStart;
-            set => mScanStart = value;
-        }
-
-        /// <summary>
-        /// When ScanEnd is > 0, then will stop processing at the specified scan number
-        /// </summary>
-        public override int ScanEnd {
-            get => mScanEnd;
-            set => mScanEnd = value;
-        }
-
         /// <summary>
         /// Set to True to print out a series of 2D plots, each using a different color scheme
         /// </summary>
@@ -582,20 +414,6 @@ namespace MSFileInfoScanner
         {
             get => mLCMS2DPlotOptions.TestGradientColorSchemes;
             set => mLCMS2DPlotOptions.TestGradientColorSchemes = value;
-        }
-
-        public override bool UpdateDatasetStatsTextFile {
-            get => mUpdateDatasetStatsTextFile;
-            set => mUpdateDatasetStatsTextFile = value;
-        }
-
-        /// <summary>
-        /// If True, then saves/loads data from/to the cache files (DatasetTimeFile.txt and FolderIntegrityInfo.txt)
-        /// If you simply want to create TIC and BPI files, and/or the _DatasetInfo.xml file for a single dataset, then set this to False
-        /// </summary>
-        public override bool UseCacheFiles {
-            get => mUseCacheFiles;
-            set => mUseCacheFiles = value;
         }
 
         public override bool ZipFileCheckAllData
@@ -684,7 +502,7 @@ namespace MSFileInfoScanner
                 }
 
                 var checkFolder = true;
-                if (mUseCacheFiles && !forceRecheck)
+                if (UseCacheFiles && !forceRecheck)
                 {
                     if (mMSFileInfoDataCache.CachedFolderIntegrityInfoContainsFolder(diFolderInfo.FullName, out folderID, out var objRow))
                     {
@@ -707,8 +525,10 @@ namespace MSFileInfoScanner
 
                 mFileIntegrityChecker.CheckIntegrityOfFilesInFolder(folderPath, out var udtFolderStats, out var udtFileStats, processedFileList);
 
-                if (mUseCacheFiles) {
-                    if (!mMSFileInfoDataCache.UpdateCachedFolderIntegrityInfo(udtFolderStats, out folderID)) {
+                if (UseCacheFiles)
+                {
+                    if (!mMSFileInfoDataCache.UpdateCachedFolderIntegrityInfo(udtFolderStats, out folderID))
+                    {
                         folderID = -1;
                     }
                 }
@@ -866,7 +686,8 @@ namespace MSFileInfoScanner
 
         private void LoadCachedResults(bool forceLoad)
         {
-            if (mUseCacheFiles) {
+            if (UseCacheFiles)
+            {
                 mMSFileInfoDataCache.LoadCachedResults(forceLoad);
             }
         }
@@ -875,9 +696,12 @@ namespace MSFileInfoScanner
         {
             // Note that ProcessMSFileOrFolder() will update mOutputFolderPath, which is used here if mLogFolderPath is blank
 
-            if (mLogFile == null && mLogMessagesToFile) {
-                try {
-                    if (string.IsNullOrEmpty(mLogFilePath)) {
+            if (mLogFile == null && LogMessagesToFile)
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(mLogFilePath))
+                    {
                         // Auto-name the log file
                         mLogFilePath = Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetExecutingAssembly().Location);
                         mLogFilePath += "_log_" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
@@ -932,7 +756,7 @@ namespace MSFileInfoScanner
                 catch (Exception)
                 {
                     // Error creating the log file; set mLogMessagesToFile to false so we don't repeatedly try to create it
-                    mLogMessagesToFile = false;
+                    LogMessagesToFile = false;
                 }
 
             }
@@ -1144,7 +968,7 @@ namespace MSFileInfoScanner
         /// <returns>True if success; false if failure</returns>
         public override bool PostDatasetInfoToDB()
         {
-            return PostDatasetInfoToDB(mDatasetInfoXML, mDSInfoConnectionString, mDSInfoStoredProcedure);
+            return PostDatasetInfoToDB(DatasetInfoXML, DSInfoConnectionString, DSInfoStoredProcedure);
         }
 
         /// <summary>
@@ -1154,7 +978,7 @@ namespace MSFileInfoScanner
         /// <returns>True if success; false if failure</returns>
         public override bool PostDatasetInfoToDB(string dsInfoXML)
         {
-            return PostDatasetInfoToDB(dsInfoXML, mDSInfoConnectionString, mDSInfoStoredProcedure);
+            return PostDatasetInfoToDB(dsInfoXML, DSInfoConnectionString, DSInfoStoredProcedure);
         }
 
         /// <summary>
@@ -1294,9 +1118,11 @@ namespace MSFileInfoScanner
 
             bool success;
 
-            try {
-                if (datasetID == 0 && mDSInfoDatasetIDOverride > 0) {
-                    datasetID = mDSInfoDatasetIDOverride;
+            try
+            {
+                if (datasetID == 0 && DatasetIDOverride > 0)
+                {
+                    datasetID = DatasetIDOverride;
                 }
 
                 ReportMessage("  Posting DatasetInfo XML to the database (using Dataset ID " + datasetID + ")");
@@ -1389,25 +1215,26 @@ namespace MSFileInfoScanner
             do
             {
                 // Set the processing options
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, mSaveTICAndBPIPlots);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots, mSaveLCMS2DPlots);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus, mCheckCentroidingStatus);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, mComputeOverallQualityScores);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, mCreateDatasetInfoFile);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile, mCreateScanStatsFile);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError, mCopyFileLocalOnReadError);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile, mUpdateDatasetStatsTextFile);
+                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, SaveTICAndBPIPlots);
+                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots, SaveLCMS2DPlots);
+                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus, CheckCentroidingStatus);
+                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, ComputeOverallQualityScores);
+                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, CreateDatasetInfoFile);
+                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile, CreateScanStatsFile);
+                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError, CopyFileLocalOnReadError);
+                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.PlotWithPython, PlotWithPython);
+                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile, UpdateDatasetStatsTextFile);
 
                 scanner.DatasetStatsTextFileName = mDatasetStatsTextFileName;
 
                 scanner.LCMS2DPlotOptions = mLCMS2DPlotOptions;
                 scanner.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor;
 
-                scanner.ScanStart = mScanStart;
-                scanner.ScanEnd = mScanEnd;
-                scanner.ShowDebugInfo = mShowDebugInfo;
+                scanner.ScanStart = ScanStart;
+                scanner.ScanEnd = ScanEnd;
+                scanner.ShowDebugInfo = ShowDebugInfo;
 
-                scanner.DatasetID = mDSInfoDatasetIDOverride;
+                scanner.DatasetID = DatasetIDOverride;
 
                 // Process the data file
                 success = scanner.ProcessDataFile(inputFileOrFolderPath, datasetFileInfo);
@@ -1451,19 +1278,22 @@ namespace MSFileInfoScanner
                 }
 
                 // Cache the Dataset Info XML
-                mDatasetInfoXML = scanner.GetDatasetInfoXML();
+                DatasetInfoXML = scanner.GetDatasetInfoXML();
 
-                if (mUseCacheFiles) {
+                if (UseCacheFiles)
+                {
                     // Update the results database
-                    success = mMSFileInfoDataCache.UpdateCachedMSFileInfo(datasetFileInfo);
+                    mMSFileInfoDataCache.UpdateCachedMSFileInfo(datasetFileInfo);
 
                     // Possibly auto-save the cached results
                     AutosaveCachedResults();
                 }
 
-                if (mDSInfoDBPostingEnabled) {
-                    success = PostDatasetInfoToDB(mDatasetInfoXML);
-                    if (!success) {
+                if (DSInfoDBPostingEnabled)
+                {
+                    success = PostDatasetInfoToDB(DatasetInfoXML);
+                    if (!success)
+                    {
                         SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
                     }
                 }
@@ -1524,7 +1354,7 @@ namespace MSFileInfoScanner
             // Update mOutputFolderPath
             mOutputFolderPath = string.Copy(outputFolderPath);
 
-            mDatasetInfoXML = string.Empty;
+            DatasetInfoXML = string.Empty;
 
             LoadCachedResults(false);
 
@@ -1557,11 +1387,14 @@ namespace MSFileInfoScanner
                     if (!GetFileOrFolderInfo(inputFileOrFolderPath, out var isFolder, out var objFileSystemInfo))
                     {
                         ReportError("File or folder not found: " + objFileSystemInfo.FullName);
+
+                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if (SKIP_FILES_IN_ERROR)
                         {
                             return true;
                         }
                         else
+                        // ReSharper disable once HeuristicUnreachableCode
                         {
                             SetErrorCode(eMSFileScannerErrorCodes.FilePathError);
                             return false;
@@ -1819,7 +1652,7 @@ namespace MSFileInfoScanner
 
             var processedFileList = new List<string>();
 
-            mAbortProcessing = false;
+            AbortProcessing = false;
             var success = true;
             try
             {
@@ -1842,6 +1675,7 @@ namespace MSFileInfoScanner
                     var fiFileInfo = new FileInfo(cleanPath);
                     string inputFolderPath;
 
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     if (fiFileInfo.Directory != null && fiFileInfo.Directory.Exists)
                     {
                         inputFolderPath = fiFileInfo.DirectoryName;
@@ -1873,9 +1707,10 @@ namespace MSFileInfoScanner
                         }
 
                         CheckForAbortProcessingFile();
-                        if (mAbortProcessing)
+                        if (AbortProcessing)
                             break;
 
+                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if (!success && !SKIP_FILES_IN_ERROR)
                             break;
 
@@ -1885,7 +1720,7 @@ namespace MSFileInfoScanner
                             Console.Write(".");
                     }
 
-                    if (mAbortProcessing)
+                    if (AbortProcessing)
                         return false;
 
                     foreach (var diFolderMatch in diFolderInfo.GetDirectories(inputFileOrFolderPath))
@@ -1898,9 +1733,10 @@ namespace MSFileInfoScanner
                         }
 
                         CheckForAbortProcessingFile();
-                        if (mAbortProcessing)
+                        if (AbortProcessing)
                             break;
 
+                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if (!success && !SKIP_FILES_IN_ERROR)
                             break;
 
@@ -1910,11 +1746,12 @@ namespace MSFileInfoScanner
                             Console.Write(".");
                     }
 
-                    if (mAbortProcessing)
+                    if (AbortProcessing)
                         return false;
 
-                    if (mCheckFileIntegrity) {
-                        CheckIntegrityOfFilesInFolder(diFolderInfo.FullName, mRecheckFileIntegrityForExistingFolders, processedFileList);
+                    if (mCheckFileIntegrity)
+                    {
+                        CheckIntegrityOfFilesInFolder(diFolderInfo.FullName, RecheckFileIntegrityForExistingFolders, processedFileList);
                     }
 
                     if (matchCount == 0)
@@ -2037,7 +1874,7 @@ namespace MSFileInfoScanner
                 if (!string.IsNullOrEmpty(inputFolderPath))
                 {
                     // Initialize some parameters
-                    mAbortProcessing = false;
+                    AbortProcessing = false;
                     var fileProcessCount = 0;
                     var fileProcessFailCount = 0;
 
@@ -2181,7 +2018,7 @@ namespace MSFileInfoScanner
                                 break;
                             }
 
-                            if (mAbortProcessing)
+                            if (AbortProcessing)
                                 break;
 
                             if (!fileProcessed && !processedZippedSFolder)
@@ -2219,7 +2056,7 @@ namespace MSFileInfoScanner
                             }
                         }
 
-                        if (mAbortProcessing)
+                        if (AbortProcessing)
                             break;
 
                         retryCount += 1;
@@ -2247,12 +2084,13 @@ namespace MSFileInfoScanner
                     }
 
                     CheckForAbortProcessingFile();
-                    if (mAbortProcessing)
+                    if (AbortProcessing)
                         break;
                 }
 
-                if (mCheckFileIntegrity & !mAbortProcessing) {
-                    CheckIntegrityOfFilesInFolder(diInputFolder.FullName, mRecheckFileIntegrityForExistingFolders, processedFileList);
+                if (mCheckFileIntegrity & !AbortProcessing)
+                {
+                    CheckIntegrityOfFilesInFolder(diInputFolder.FullName, RecheckFileIntegrityForExistingFolders, processedFileList);
                 }
 
             }
@@ -2262,7 +2100,7 @@ namespace MSFileInfoScanner
                 return false;
             }
 
-            if (mAbortProcessing)
+            if (AbortProcessing)
             {
                 return success;
             }
@@ -2354,7 +2192,7 @@ namespace MSFileInfoScanner
                         SleepNow(1);
                     } while (retryCount < MAX_ACCESS_ATTEMPTS);
 
-                    if (mAbortProcessing)
+                    if (AbortProcessing)
                         break;
 
                 }
@@ -2378,7 +2216,8 @@ namespace MSFileInfoScanner
                                     success = RecurseFoldersWork(diSubfolder.FullName, fileNameMatch, outputFolderPath, ref fileProcessCount, ref fileProcessFailCount, recursionLevel + 1, recurseFoldersMaxLevels);
                                 }
 
-                                if (!success & !mIgnoreErrorsWhenRecursing) {
+                                if (!success & !IgnoreErrorsWhenRecursing)
+                                {
                                     break;
                                 }
 
@@ -2386,33 +2225,36 @@ namespace MSFileInfoScanner
 
                                 break;
 
-                            } catch (Exception ex) {
+                            }
+                            catch (Exception ex)
+                            {
                                 // Error parsing file
                                 HandleException("Error in RecurseFoldersWork at For Each diSubfolder(B) in " + inputFolderPath, ex);
-                                if (!ex.Message.Contains("no longer available")) {
+                                if (!ex.Message.Contains("no longer available"))
+                                {
                                     return false;
                                 }
                             }
 
-                            if (mAbortProcessing)
+                            if (AbortProcessing)
                                 break;
 
                             retryCount += 1;
-                            if (retryCount >= MAX_ACCESS_ATTEMPTS) {
+                            if (retryCount >= MAX_ACCESS_ATTEMPTS)
+                            {
                                 return false;
-                            } else {
-                                // Wait 1 second, then try again
-                                SleepNow(1);
                             }
 
+                            // Wait 1 second, then try again
+                            SleepNow(1);
                         } while (retryCount < MAX_ACCESS_ATTEMPTS);
 
-                        if (!success & !mIgnoreErrorsWhenRecursing)
+                        if (!success & !IgnoreErrorsWhenRecursing)
                         {
                             break;
                         }
 
-                        if (mAbortProcessing)
+                        if (AbortProcessing)
                             break;
                     }
                 }
@@ -2435,11 +2277,12 @@ namespace MSFileInfoScanner
 
         public override bool SaveCachedResults(bool clearCachedData)
         {
-            if (mUseCacheFiles) {
+            if (UseCacheFiles)
+            {
                 return mMSFileInfoDataCache.SaveCachedResults(clearCachedData);
-            } else {
-                return true;
             }
+
+            return true;
         }
 
         public override bool SaveParameterFileSettings(string parameterFilePath)
@@ -2579,7 +2422,9 @@ namespace MSFileInfoScanner
                 if (!fiFileInfo.Exists)
                 {
                     // Make sure the folder exists
-                    if (fiFileInfo.Directory != null && !fiFileInfo.Directory.Exists) {
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                    if (fiFileInfo.Directory != null && !fiFileInfo.Directory.Exists)
+                    {
                         fiFileInfo.Directory.Create();
                     }
                 }
@@ -2660,7 +2505,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private void WriteFileIntegrityFailure(StreamWriter srOutFile, string filePath, string message)
+        private void WriteFileIntegrityFailure(TextWriter srOutFile, string filePath, string message)
         {
 
             if (srOutFile == null)
