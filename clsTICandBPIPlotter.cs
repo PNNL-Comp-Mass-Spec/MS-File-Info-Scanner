@@ -4,10 +4,11 @@ using System.IO;
 using System.Linq;
 using OxyPlot;
 using OxyPlot.Series;
+using PRISM;
 
 namespace MSFileInfoScanner
 {
-    public class clsTICandBPIPlotter
+    public class clsTICandBPIPlotter : clsEventNotifier
     {
 
         #region "Constants, Enums, Structures"
@@ -384,37 +385,48 @@ namespace MSFileInfoScanner
                 ValidateMSLevel(mBPI);
                 ValidateMSLevel(mTIC);
 
-                if (mRemoveZeroesFromEnds) {
+                if (RemoveZeroesFromEnds)
+                {
                     // Check whether the last few scans have values if 0; if they do, remove them
                     RemoveZeroesAtFrontAndBack(mBPI);
                     RemoveZeroesAtFrontAndBack(mTIC);
                 }
 
-                var plotContainer = InitializePlot(mBPI, strDatasetName + " - " + mBPIPlotAbbrev + " - MS Spectra", 1, mBPIXAxisLabel, mBPIYAxisLabel, mBPIAutoMinMaxY, mBPIYAxisExponentialNotation);
-                string strPNGFilePath;
-                if (plotContainer.SeriesCount > 0) {
-                    strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName + "_" + mBPIPlotAbbrev + "_MS.png");
-                    plotContainer.SaveToPNG(strPNGFilePath, 1024, 600, 96);
+                var bpiPlotMS1 = InitializePlot(mBPI, strDatasetName + " - " + BPIPlotAbbrev + " - MS Spectra", 1, BPIXAxisLabel, BPIYAxisLabel, BPIAutoMinMaxY, BPIYAxisExponentialNotation);
+                RegisterEvents(bpiPlotMS1);
+
+                if (bpiPlotMS1.SeriesCount > 0)
+                {
+                    var strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName + "_" + BPIPlotAbbrev + "_MS.png");
+                    bpiPlotMS1.SaveToPNG(strPNGFilePath, 1024, 600, 96);
                     AddRecentFile(strPNGFilePath, eOutputFileTypes.BPIMS);
                 }
 
-                plotContainer = InitializePlot(mBPI, strDatasetName + " - " + mBPIPlotAbbrev + " - MS2 Spectra", 2, mBPIXAxisLabel, mBPIYAxisLabel, mBPIAutoMinMaxY, mBPIYAxisExponentialNotation);
-                if (plotContainer.SeriesCount > 0) {
-                    strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName + "_" + mBPIPlotAbbrev + "_MSn.png");
-                    plotContainer.SaveToPNG(strPNGFilePath, 1024, 600, 96);
+                var bpiPlotMS2 = InitializePlot(mBPI, strDatasetName + " - " + BPIPlotAbbrev + " - MS2 Spectra", 2, BPIXAxisLabel, BPIYAxisLabel, BPIAutoMinMaxY, BPIYAxisExponentialNotation);
+                RegisterEvents(bpiPlotMS2);
+
+                if (bpiPlotMS2.SeriesCount > 0)
+                {
+                    var strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName + "_" + BPIPlotAbbrev + "_MSn.png");
+                    bpiPlotMS2.SaveToPNG(strPNGFilePath, 1024, 600, 96);
                     AddRecentFile(strPNGFilePath, eOutputFileTypes.BPIMSn);
                 }
 
-                plotContainer = InitializePlot(mTIC, strDatasetName + " - " + mTICPlotAbbrev + " - All Spectra", 0, mTICXAxisLabel, mTICYAxisLabel, mTICAutoMinMaxY, mTICYAxisExponentialNotation);
-                if (plotContainer.SeriesCount > 0) {
-                    strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName + "_" + mTICPlotAbbrev + ".png");
-                    plotContainer.SaveToPNG(strPNGFilePath, 1024, 600, 96);
+                var ticPlot = InitializePlot(mTIC, strDatasetName + " - " + TICPlotAbbrev + " - All Spectra", 0, TICXAxisLabel, TICYAxisLabel, TICAutoMinMaxY, TICYAxisExponentialNotation);
+                RegisterEvents(ticPlot);
+
+                if (ticPlot.SeriesCount > 0)
+                {
+                    var strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName + "_" + TICPlotAbbrev + ".png");
+                    ticPlot.SaveToPNG(strPNGFilePath, 1024, 600, 96);
                     AddRecentFile(strPNGFilePath, eOutputFileTypes.TIC);
                 }
 
                 blnSuccess = true;
-            } catch (Exception ex) {
-                strErrorMessage = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                OnErrorEvent("Error in SaveTICAndBPIPlotFiles", ex);
                 blnSuccess = false;
             }
 
