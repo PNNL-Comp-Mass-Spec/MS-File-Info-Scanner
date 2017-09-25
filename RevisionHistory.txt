@@ -1,5 +1,10 @@
 MS File Info Scanner Change Log
 
+Version 1.5.6477; September 25, 2017
+	- Add option to create plots using Python instead of OxyPlot
+		- Enable with switch /PythonPlot
+		- Uses MSFileInfoScanner_Plotter.py
+
 Version 1.4.6381; August 16, 2017
 	- Use TryGetValue when looking up the frame type using the master frame list dictionary
 
