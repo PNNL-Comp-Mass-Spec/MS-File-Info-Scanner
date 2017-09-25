@@ -5,9 +5,17 @@ using System.Linq;
 using MSFileInfoScannerInterfaces;
 using PRISM;
 
-// Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
-
-// See clsMSFileInfoScanner for a program description
+// -------------------------------------------------------------------------------
+// This program scans a series of MS data files (or data folders) and extracts the acquisition start and end times,
+// number of spectra, and the total size of the Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
+//
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Program started in 2005
+// Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
+//
+// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/ or http://panomics.pnnl.gov/
+// -------------------------------------------------------------------------------
 
 namespace MSFileInfoScanner
 {

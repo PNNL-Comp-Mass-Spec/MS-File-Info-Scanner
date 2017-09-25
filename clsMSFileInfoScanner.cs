@@ -6,14 +6,20 @@ using System.IO;
 using MSFileInfoScannerInterfaces;
 using PRISM;
 
-// Scans a series of MS data files (or data folders) and extracts the acquisition start and end times,
+// -------------------------------------------------------------------------------
+// This program scans a series of MS data files (or data folders) and extracts the acquisition start and end times,
 // number of spectra, and the total size of the Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
 //
 // Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar/QTrap .WIFF files,
 // Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, and .UIMF files (IMS)
 //
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-// Started October 11, 2003
+// Program started in 2005
+// Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
+//
+// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/ or http://panomics.pnnl.gov/
+// -------------------------------------------------------------------------------
 
 namespace MSFileInfoScanner
 {
