@@ -50,8 +50,14 @@ namespace MSFileInfoScanner
 
                 using (var writer = new StreamWriter(new FileStream(exportFile.FullName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)))
                 {
+                    // Plot options: set of square brackets with semicolon separated key/value pairs
+                    writer.WriteLine("[" + GetPlotOptions() + "]");
+
+                    // Column names
                     writer.WriteLine("Charge\t" + XAxisInfo.Title + "\t" + YAxisInfo.Title + "\t" + ZAxisInfo.Title);
 
+                    // Column options: semicolon separated key/value pairs for each column, e.g.
+                    //
                     var additionalOptions = new List<string> {
                         "MarkerSize=" + MarkerSize
                     };
@@ -66,6 +72,7 @@ namespace MSFileInfoScanner
                     var charges = PointsByCharge.Keys.ToList();
                     charges.Sort();
 
+                    // Data, by charge state
                     foreach (var charge in charges)
                     {
                         foreach (var dataPoint in PointsByCharge[charge])

@@ -51,15 +51,22 @@ namespace MSFileInfoScanner
 
                 using (var writer = new StreamWriter(new FileStream(exportFile.FullName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)))
                 {
+                    // Plot options: set of square brackets with semicolon separated key/value pairs
+                    writer.WriteLine("[" + GetPlotOptions() + "]");
+
+                    // Column names
                     writer.WriteLine(XAxisInfo.Title + "\t" + YAxisInfo.Title);
+
+                    // Column options: semicolon separated key/value pairs for each column, e.g.
+                    // Autoscale=false;Minimum=0;Maximum=0;StringFormat=#,##0;MinorGridlineThickness=0;MajorStep=1
                     writer.WriteLine(XAxisInfo.GetOptions() + "\t" + YAxisInfo.GetOptions());
 
+                    // Data
                     foreach (var dataPoint in Data)
                     {
                         writer.WriteLine(dataPoint.X + "\t" + dataPoint.Y);
                     }
                 }
-
 
                 if (DeleteTempFiles)
                 {

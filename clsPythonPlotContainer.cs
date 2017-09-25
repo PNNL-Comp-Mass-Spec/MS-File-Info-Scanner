@@ -14,8 +14,6 @@ namespace MSFileInfoScanner
 
         public bool DeleteTempFiles { get; set; }
 
-        public string PlotTitle { get; set; }
-
         /// <summary>
         /// Path to the python executable
         /// </summary>

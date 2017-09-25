@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using PRISM;
 
@@ -11,6 +12,8 @@ namespace MSFileInfoScanner
         public string AnnotationBottomLeft { get; set; }
 
         public string AnnotationBottomRight { get; set; }
+
+        public string PlotTitle { get; set; }
 
         public bool PlottingDeisotopedData { get; set; }
 
@@ -25,6 +28,8 @@ namespace MSFileInfoScanner
         {
             AnnotationBottomLeft = string.Empty;
             AnnotationBottomRight = string.Empty;
+            PlotTitle = "Undefined Plot Title";
+
             PlottingDeisotopedData = false;
 
             if (writeDebug)
@@ -36,6 +41,21 @@ namespace MSFileInfoScanner
         protected virtual void Dispose(bool disposing)
         {
             mLogWriter?.Close();
+        }
+
+        /// <summary>
+        /// Get semicolon separated list of plot options
+        /// </summary>
+        /// <returns></returns>
+        protected string GetPlotOptions()
+        {
+            var plotOptions = new List<string> {
+                "Title=" + PlotTitle,
+                "BottomLeft=" + AnnotationBottomLeft,
+                "BottomRight=" + AnnotationBottomRight};
+
+            return string.Join(";", plotOptions);
+
         }
 
         protected void OpenDebugFile(string dataSource)
