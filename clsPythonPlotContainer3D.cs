@@ -43,7 +43,7 @@ namespace MSFileInfoScanner
             if (string.IsNullOrWhiteSpace(pngFilePath))
                 throw new ArgumentException("PNG file path cannot be blank", nameof(pngFilePath));
 
-            var exportFile = new FileInfo("TmpExport_" + Path.ChangeExtension(pngFilePath, null) + "_data.txt");
+            var exportFile = new FileInfo(Path.ChangeExtension(pngFilePath, null) + "_TmpExportData.txt");
 
             try
             {
