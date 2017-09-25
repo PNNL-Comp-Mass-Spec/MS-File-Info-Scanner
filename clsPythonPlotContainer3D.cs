@@ -66,18 +66,26 @@ namespace MSFileInfoScanner
                     }
                     writer.WriteLine(XAxisInfo.GetOptions() + "\t" + YAxisInfo.GetOptions() + "\t" + ZAxisInfo.GetOptions(additionalOptions));
 
-                    // Column names
-                    writer.WriteLine("Charge\t" + XAxisInfo.Title + "\t" + YAxisInfo.Title + "\t" + ZAxisInfo.Title);
-
                     var charges = PointsByCharge.Keys.ToList();
                     charges.Sort();
+
+                    var includeCharge = charges.Count > 1;
+
+                    // Column names
+                    if (includeCharge)
+                        writer.WriteLine(XAxisInfo.Title + "\t" + YAxisInfo.Title + "\t" + ZAxisInfo.Title + "\t" + "Charge");
+                    else
+                        writer.WriteLine(XAxisInfo.Title + "\t" + YAxisInfo.Title + "\t" + ZAxisInfo.Title);
 
                     // Data, by charge state
                     foreach (var charge in charges)
                     {
                         foreach (var dataPoint in PointsByCharge[charge])
                         {
-                            writer.WriteLine(charge + "\t" + dataPoint.X + "\t" + dataPoint.Y + "\t" + dataPoint.Value);
+                            if (includeCharge)
+                                writer.WriteLine(dataPoint.X + "\t" + dataPoint.Y + "\t" + dataPoint.Value + "\t" + charge);
+                            else
+                                writer.WriteLine(dataPoint.X + "\t" + dataPoint.Y + "\t" + dataPoint.Value);
                         }
                     }
                 }
