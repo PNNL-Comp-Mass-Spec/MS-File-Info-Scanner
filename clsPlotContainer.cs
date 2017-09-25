@@ -148,6 +148,9 @@ namespace MSFileInfoScanner
 
         private void SaveToFile(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
         {
+            if (string.IsNullOrWhiteSpace(imageFilePath))
+                throw new ArgumentOutOfRangeException(nameof(imageFilePath), "imageFilePath cannot be empty");
+
             Console.WriteLine("Saving " + Path.GetFileName(imageFilePath));
 
             // Note that this operation can be slow if there are over 100,000 data points
@@ -204,6 +207,8 @@ namespace MSFileInfoScanner
                 default:
                     throw new ArgumentOutOfRangeException(fileFormat.ToString(), "Unrecognized value: " + fileFormat);
             }
+
+            var bitMap = BitmapFrame.Create(target);
 
             encoder.Frames.Add(BitmapFrame.Create(target));
 
