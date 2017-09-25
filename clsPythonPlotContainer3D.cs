@@ -53,11 +53,8 @@ namespace MSFileInfoScanner
                     // Plot options: set of square brackets with semicolon separated key/value pairs
                     writer.WriteLine("[" + GetPlotOptions() + "]");
 
-                    // Column names
-                    writer.WriteLine("Charge\t" + XAxisInfo.Title + "\t" + YAxisInfo.Title + "\t" + ZAxisInfo.Title);
-
                     // Column options: semicolon separated key/value pairs for each column, e.g.
-                    //
+                    // Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=0;MajorStep=1
                     var additionalOptions = new List<string> {
                         "MarkerSize=" + MarkerSize
                     };
@@ -68,6 +65,9 @@ namespace MSFileInfoScanner
                         additionalOptions.Add("ColorScaleMaxIntensity=" + ColorScaleMaxIntensity);
                     }
                     writer.WriteLine(XAxisInfo.GetOptions() + "\t" + YAxisInfo.GetOptions() + "\t" + ZAxisInfo.GetOptions(additionalOptions));
+
+                    // Column names
+                    writer.WriteLine("Charge\t" + XAxisInfo.Title + "\t" + YAxisInfo.Title + "\t" + ZAxisInfo.Title);
 
                     var charges = PointsByCharge.Keys.ToList();
                     charges.Sort();

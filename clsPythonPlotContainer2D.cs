@@ -54,12 +54,12 @@ namespace MSFileInfoScanner
                     // Plot options: set of square brackets with semicolon separated key/value pairs
                     writer.WriteLine("[" + GetPlotOptions() + "]");
 
+                    // Column options: semicolon separated key/value pairs for each column, e.g.
+                    // Autoscale=false;Minimum=0;Maximum=4295028224;StringFormat=#,##0;MinorGridlineThickness=0;MajorStep=1
+                    writer.WriteLine(XAxisInfo.GetOptions() + "\t" + YAxisInfo.GetOptions());
+
                     // Column names
                     writer.WriteLine(XAxisInfo.Title + "\t" + YAxisInfo.Title);
-
-                    // Column options: semicolon separated key/value pairs for each column, e.g.
-                    // Autoscale=false;Minimum=0;Maximum=0;StringFormat=#,##0;MinorGridlineThickness=0;MajorStep=1
-                    writer.WriteLine(XAxisInfo.GetOptions() + "\t" + YAxisInfo.GetOptions());
 
                     // Data
                     foreach (var dataPoint in Data)
