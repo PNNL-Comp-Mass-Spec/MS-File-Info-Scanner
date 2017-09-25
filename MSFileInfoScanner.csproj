@@ -144,7 +144,6 @@ rem if not exist "$(TargetDir)x86" mkdir "$(TargetDir)x86"
 rem if not exist "$(TargetDir)x64" mkdir "$(TargetDir)x64"
 rem xcopy "$(ProjectDir)Lib\x86\SQLite.Interop.dll" "$(TargetDir)x86" /D /Y
 rem xcopy "$(ProjectDir)Lib\x64\SQLite.Interop.dll" "$(TargetDir)x64" /D /Y
-xcopy "$(ProjectDir)Lib\netcdf.dll" "$(TargetDir)" /D /Y
-xcopy "$(TargetPath)" \\floyd\software\MSFileInfoScanner\Exe_Only\Beta\ /D /Y</PostBuildEvent>
+xcopy "$(ProjectDir)Lib\netcdf.dll" "$(TargetDir)" /D /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>
