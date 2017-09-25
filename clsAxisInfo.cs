@@ -94,7 +94,7 @@ namespace MSFileInfoScanner
             AutoScale = false;
 
             Minimum = min;
-            Maximum = min;
+            Maximum = max;
 
         }
 
