@@ -30,7 +30,7 @@ MSFileInfoScanner.exe
  [/ScanStart:0] [/ScanEnd:0] [/Debug]
  [/C] [/M:nnn] [/H] [/QZ]
  [/CF] [/R] [/Z]
- [/PostToDMS]
+ [/PostToDMS] [/PythonPlot]
 
 Use /I to specify the name of a file or folder to scan; the path can contain the wildcard character *
 The output folder name is optional.  If omitted, the output files will be created in the program directory.
@@ -97,6 +97,8 @@ only if their cached size is 0 bytes.
 Use /PostToDMS to store the dataset info in the DMS database.  To customize the server name 
 and/or stored procedure to use for posting, use an XML parameter file with settings 
 DSInfoConnectionString, DSInfoDBPostingEnabled, and DSInfoStoredProcedure
+
+Use /PythonPlot to create plots with Python instead of OxyPlot
 
 Known file extensions: .RAW, .WIFF, .BAF, .MCF, .MCF_IDX, .UIMF, _isos.CSV
 Known folder extensions: .D, .RAW

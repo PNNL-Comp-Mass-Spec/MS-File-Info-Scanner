@@ -1775,9 +1775,7 @@ namespace MSFileInfoScanner
 
         public bool Save2DPlots(string strDatasetName, string strOutputFolderPath)
         {
-
             return Save2DPlots(strDatasetName, strOutputFolderPath, "", "");
-
         }
 
         public bool Save2DPlots(string strDatasetName, string strOutputFolderPath, string strFileNameSuffixAddon, string strScanModeSuffixAddon)

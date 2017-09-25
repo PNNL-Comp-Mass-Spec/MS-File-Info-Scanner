@@ -14,7 +14,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "September 23, 2017";
+        public const string PROGRAM_DATE = "September 25, 2017";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
@@ -677,6 +677,8 @@ namespace MSFileInfoScanner
                 Console.WriteLine("Use /Z to reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes.");
                 Console.WriteLine();
                 Console.WriteLine("Use /PostToDMS to store the dataset info in the DMS database.  To customize the server name and/or stored procedure to use for posting, use an XML parameter file with settings DSInfoConnectionString, DSInfoDBPostingEnabled, and DSInfoStoredProcedure");
+                Console.WriteLine();
+                Console.WriteLine("Use /PythonPlot to create plots with Python instead of OxyPlot");
                 Console.WriteLine();
                 Console.WriteLine("Known file extensions: " + CollapseList(scanner.GetKnownFileExtensionsList()));
                 Console.WriteLine("Known folder extensions: " + CollapseList(scanner.GetKnownFolderExtensionsList()));
