@@ -33,11 +33,24 @@ namespace MSFileInfoScanner
         public clsAxisInfo(string title = "Undefined")
         {
             AutoScale = true;
-            MajorStep = 1;
-            MinorGridlineThickness = 0;
+            MajorStep = double.NaN;
+            MinorGridlineThickness = 1;
             StringFormat = DEFAULT_AXIS_LABEL_FORMAT;
             Title = title;
         }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public clsAxisInfo(double majorStep, double minorGridlineThickness, string title = "Undefined")
+        {
+            AutoScale = true;
+            MajorStep = majorStep;
+            MinorGridlineThickness = minorGridlineThickness;
+            StringFormat = DEFAULT_AXIS_LABEL_FORMAT;
+            Title = title;
+        }
+
 
         /// <summary>
         /// Get options as a semi colon separated list of key-value pairs
@@ -68,8 +81,12 @@ namespace MSFileInfoScanner
             }
 
             options.Add("StringFormat=" + StringFormat);
-            options.Add("MinorGridlineThickness=" + MinorGridlineThickness);
-            options.Add("MajorStep=" + MajorStep);
+
+            if (!double.IsNaN(MinorGridlineThickness))
+                options.Add("MinorGridlineThickness=" + MinorGridlineThickness);
+
+            if (!double.IsNaN(MajorStep))
+                options.Add("MajorStep=" + MajorStep);
 
             if (additionalOptions != null && additionalOptions.Count > 0)
                 options.AddRange(additionalOptions);

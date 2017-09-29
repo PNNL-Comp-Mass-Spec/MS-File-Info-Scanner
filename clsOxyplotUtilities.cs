@@ -75,19 +75,19 @@ namespace MSFileInfoScanner
             if (!dataPoints.Any())
                 return;
 
-            var axisInfo = new clsAxisInfo();
+            var axisInfo = new clsAxisInfo(currentAxis.MajorStep, currentAxis.MinorGridlineThickness, currentAxis.Title);
             clsPlotUtilities.GetAxisFormatInfo(dataPoints, integerData, axisInfo);
 
             currentAxis.StringFormat = axisInfo.StringFormat;
-            currentAxis.MinorGridlineThickness = axisInfo.MajorStep;
-            currentAxis.MajorStep = axisInfo.MinorGridlineThickness;
+            currentAxis.MajorStep = axisInfo.MajorStep;
+            currentAxis.MinorGridlineThickness = axisInfo.MinorGridlineThickness;
         }
 
         public static void ValidateMajorStep(Axis currentAxis)
         {
             if (Math.Abs(currentAxis.ActualMajorStep) > float.Epsilon && currentAxis.ActualMajorStep < 1) {
-                currentAxis.MinorGridlineThickness = 0;
                 currentAxis.MajorStep = 1;
+                currentAxis.MinorGridlineThickness = 0;
             }
         }
 

@@ -187,7 +187,7 @@ namespace MSFileInfoScanner
         // This variable is updated in ProcessMSFileOrFolder
         private string mOutputFolderPath;
 
-        // If blank, then mOutputFolderPath will be used; if mOutputFolderPath is also blank, then the log is created in the same folder as the executing assembly
+        // If blank, mOutputFolderPath will be used; if mOutputFolderPath is also blank, the log is created in the same folder as the executing assembly
         private string mLogFolderPath;
 
         private readonly clsFileIntegrityChecker mFileIntegrityChecker;
@@ -214,7 +214,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// When true, then checks the integrity of every file in every folder processed
+        /// When true, checks the integrity of every file in every folder processed
         /// </summary>
         public override bool CheckFileIntegrity
         {
@@ -290,7 +290,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// When True, then computes an Sha1 hash on every file
+        /// When True, computes an Sha1 hash on every file
         /// </summary>
         public override bool ComputeFileHashes
         {
@@ -1368,8 +1368,8 @@ namespace MSFileInfoScanner
             // Note: strInputFileOrFolderPath must be a known MS data file or MS data folder
             // See function ProcessMSFilesAndRecurseFolders for more details
             // This function returns True if it processed a file (or the dataset was processed previously)
-            // When SKIP_FILES_IN_ERROR = True, then it also returns True if the file type was a known type but the processing failed
-            // If the file type is unknown, or if an error occurs, then it returns false
+            // When SKIP_FILES_IN_ERROR = True, it also returns True if the file type was a known type but the processing failed
+            // If the file type is unknown, or if an error occurs, it returns false
             // eMSFileProcessingState will be updated based on whether the file is processed, skipped, etc.
 
             var success = false;
@@ -1620,7 +1620,7 @@ namespace MSFileInfoScanner
                     if (UseCacheFiles && !ReprocessExistingFiles)
                     {
                         // See if the datasetName in inputFileOrFolderPath is already present in mCachedResults
-                        // If it is present, then don't process it (unless mReprocessIfCachedSizeIsZero = True and it's size is 0)
+                        // If it is present, don't process it (unless mReprocessIfCachedSizeIsZero = True and it's size is 0)
 
                         if (datasetName.Length > 0 && mMSFileInfoDataCache.CachedMSInfoContainsDataset(datasetName, out var objRow))
                         {
