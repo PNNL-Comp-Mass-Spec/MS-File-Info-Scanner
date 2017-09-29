@@ -209,7 +209,7 @@ namespace MSFileInfoScanner
             const int BAD_TIC_OR_BPI = int.MinValue;
 
             // The StartTime value for each frame is the number of minutes since 12:00 am
-            // If acquiring data from 11:59 pm through 12:00 am, then the StartTime will reset to zero
+            // If acquiring data from 11:59 pm through 12:00 am, the StartTime will reset to zero
 
             if (mSaveTICAndBPI)
             {
@@ -676,7 +676,7 @@ namespace MSFileInfoScanner
                         var dblStartTime = objFrameParams.GetValueDouble(FrameParamKeyType.StartTimeMinutes);
 
                         // Get the start time of the last frame
-                        // If the reported start time is zero, then step back until a non-zero start time is reported
+                        // If the reported start time is zero, step back until a non-zero start time is reported
 
                         var frameIndex = intMasterFrameNumList.Length - 1;
                         double dblEndTime;
@@ -702,7 +702,7 @@ namespace MSFileInfoScanner
                             dblRunTime = dtRunTime.Subtract(DateTime.MinValue).TotalMinutes;
 
                             // In some .UIMF files, the DateStarted column in Global_Parameters is simply the date, and not a specific time of day
-                            // If that's the case, then update datasetFileInfo.AcqTimeStart to be based on dblRunTime
+                            // If that's the case, update datasetFileInfo.AcqTimeStart to be based on dblRunTime
                             if (datasetFileInfo.AcqTimeStart.Date == datasetFileInfo.AcqTimeStart)
                             {
                                 var dtReportedDateStarted = DateTime.MinValue.AddTicks((long)dblStartTime);

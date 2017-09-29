@@ -156,7 +156,6 @@ namespace MSFileInfoScanner
             // Note that this operation can be slow if there are over 100,000 data points
             var plotBitmap = OxyPlot.Wpf.PngExporter.ExportToBitmap(Plot, width, height, OxyPlot.OxyColors.White, resolution);
 
-
             var drawVisual = new DrawingVisual();
             using (var drawContext = drawVisual.RenderOpen())
             {
@@ -216,6 +215,7 @@ namespace MSFileInfoScanner
             {
                 encoder.Save(outputStream);
             }
+
         }
 
         public void AddGradients(Dictionary<string, OxyPalette> colorGradients)
