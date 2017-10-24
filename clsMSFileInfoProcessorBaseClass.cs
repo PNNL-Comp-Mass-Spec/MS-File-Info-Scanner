@@ -417,50 +417,7 @@ namespace MSFileInfoScanner
             mLCMS2DPlot.Reset();
             mLCMS2DPlotOverview.Reset();
         }
-
-        protected void ShowProgress(int scanNumber, int scanCount, ref DateTime dtLastProgressTime, int modulusValue = 100, int detailedUpdateIntervalSeconds = 30)
-        {
-            if (modulusValue < 1)
-                modulusValue = 10;
-            if (detailedUpdateIntervalSeconds < 5)
-                detailedUpdateIntervalSeconds = 15;
-
-            if (scanNumber % modulusValue != 0)
-            {
-                return;
-            }
-
-            if (!mShowDebugInfo)
-            {
-                Console.Write(".");
-            }
-
-            if (scanCount <= 0)
-            {
-                return;
-            }
-
-            var sngProgress = scanNumber / (float)scanCount * 100;
-
-            if (!(DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > detailedUpdateIntervalSeconds))
-            {
-                return;
-            }
-
-            dtLastProgressTime = DateTime.UtcNow;
-            var percentComplete = sngProgress.ToString("0.0") + "% ";
-
-            if (mShowDebugInfo)
-            {
-                Console.WriteLine(percentComplete);
-            }
-            else
-            {
-                Console.WriteLine();
-                Console.Write(percentComplete);
-            }
-        }
-
+        
         protected bool UpdateDatasetFileStats(FileInfo fiFileInfo, int datasetID)
         {
 
