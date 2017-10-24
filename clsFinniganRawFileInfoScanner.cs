@@ -161,6 +161,9 @@ namespace MSFileInfoScanner
 
             var dtLastProgressTime = DateTime.UtcNow;
 
+            // Note that this starts at 2 seconds, but is extended after each progress message is shown (maxing out at 30 seconds)
+            var progressThresholdSeconds = 2;
+
             var scanCount = objXcaliburAccessor.GetNumScans();
 
             GetStartAndEndScans(scanCount, out var scanStart, out var scanEnd);
@@ -260,10 +263,15 @@ namespace MSFileInfoScanner
                     OnErrorEvent("Error loading m/z and intensity values for scan " + scanNumber + ": " + ex.Message);
                 }
 
+                if (DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds < progressThresholdSeconds)
+                    continue;
+
+                dtLastProgressTime = DateTime.UtcNow;
+                if (progressThresholdSeconds < 30)
+                    progressThresholdSeconds += 2;
+
                 var percentComplete = scanNumber / (float)scanCount * 100;
                 OnProgressUpdate("Scans processed: " + scanNumber, percentComplete);
-
-                ShowProgress(scanNumber, scanCount, ref dtLastProgressTime);
 
             }
 

@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.5.6506; October 24, 2017
+	- Limit the frequency of calls to OnProgressUpdate while loading scan data
+
 Version 1.5.6477; September 25, 2017
 	- Add option to create plots using Python instead of OxyPlot
 		- Enable with switch /PythonPlot

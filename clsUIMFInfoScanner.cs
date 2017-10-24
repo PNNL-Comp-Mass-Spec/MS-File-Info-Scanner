@@ -236,6 +236,9 @@ namespace MSFileInfoScanner
 
             var dtLastProgressTime = DateTime.UtcNow;
 
+            // Note that this starts at 2 seconds, but is extended after each progress message is shown (maxing out at 30 seconds)
+            var progressThresholdSeconds = 2;
+
             var globalParams = uimfReader.GetGlobalParams();
 
             var intGlobalMaxBins = globalParams.Bins;
@@ -481,12 +484,17 @@ namespace MSFileInfoScanner
                     OnWarningEvent("Error loading header info for frame " + frameNumber + ": " + ex.Message);
                 }
 
+                frameStartTimePrevious = frameStartTimeCurrent;
+
+                if (DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds < progressThresholdSeconds)
+                    continue;
+
+                dtLastProgressTime = DateTime.UtcNow;
+                if (progressThresholdSeconds < 30)
+                    progressThresholdSeconds += 2;
+
                 var percentComplete = masterFrameNumIndex / (float)masterFrameNumList.Count * 100;
                 OnProgressUpdate("Frames processed: " + masterFrameNumIndex, percentComplete);
-
-                ShowProgress(masterFrameNumIndex, masterFrameNumList.Count, ref dtLastProgressTime);
-
-                frameStartTimePrevious = frameStartTimeCurrent;
 
             }
 
