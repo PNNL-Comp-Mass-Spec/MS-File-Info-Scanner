@@ -93,29 +93,29 @@ namespace MSFileInfoScanner
             Reset();
         }
 
-        public void AddData(int intScanNumber, int intMSLevel, float sngScanTimeMinutes, double dblBPI, double dblTIC)
+        public void AddData(int scanNumber, int msLevel, float scanTimeMinutes, double bpi, double tic)
         {
-            mBPI.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblBPI);
-            mTIC.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblTIC);
+            mBPI.AddPoint(scanNumber, msLevel, scanTimeMinutes, bpi);
+            mTIC.AddPoint(scanNumber, msLevel, scanTimeMinutes, tic);
         }
 
-        public void AddDataBPIOnly(int intScanNumber, int intMSLevel, float sngScanTimeMinutes, double dblBPI)
+        public void AddDataBPIOnly(int scanNumber, int msLevel, float scanTimeMinutes, double bpi)
         {
-            mBPI.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblBPI);
+            mBPI.AddPoint(scanNumber, msLevel, scanTimeMinutes, bpi);
         }
 
-        public void AddDataTICOnly(int intScanNumber, int intMSLevel, float sngScanTimeMinutes, double dblTIC)
+        public void AddDataTICOnly(int scanNumber, int msLevel, float scanTimeMinutes, double tic)
         {
-            mTIC.AddPoint(intScanNumber, intMSLevel, sngScanTimeMinutes, dblTIC);
+            mTIC.AddPoint(scanNumber, msLevel, scanTimeMinutes, tic);
         }
 
-        private void AddRecentFile(string strFilePath, eOutputFileTypes eFileType)
+        private void AddRecentFile(string filePath, eOutputFileTypes eFileType)
         {
             var udtOutputFileInfo = default(udtOutputFileInfoType);
 
             udtOutputFileInfo.FileType = eFileType;
-            udtOutputFileInfo.FileName = Path.GetFileName(strFilePath);
-            udtOutputFileInfo.FilePath = strFilePath;
+            udtOutputFileInfo.FileName = Path.GetFileName(filePath);
+            udtOutputFileInfo.FilePath = filePath;
 
             mRecentFiles.Add(udtOutputFileInfo);
         }
@@ -159,11 +159,11 @@ namespace MSFileInfoScanner
         /// <remarks>The list of recent files gets cleared each time you call SaveTICAndBPIPlotFiles() or Reset()</remarks>
         public string GetRecentFileInfo(eOutputFileTypes eFileType)
         {
-            for (var intIndex = 0; intIndex <= mRecentFiles.Count - 1; intIndex++)
+            for (var index = 0; index <= mRecentFiles.Count - 1; index++)
             {
-                if (mRecentFiles[intIndex].FileType == eFileType)
+                if (mRecentFiles[index].FileType == eFileType)
                 {
-                    return mRecentFiles[intIndex].FileName;
+                    return mRecentFiles[index].FileName;
                 }
             }
             return string.Empty;
@@ -173,24 +173,24 @@ namespace MSFileInfoScanner
         /// Returns the file name and path of the recently saved file of the given type
         /// </summary>
         /// <param name="eFileType">File type to find</param>
-        /// <param name="strFileName">File name (output)</param>
-        /// <param name="strFilePath">File Path (output)</param>
+        /// <param name="fileName">File name (output)</param>
+        /// <param name="filePath">File Path (output)</param>
         /// <returns>True if a match was found; otherwise returns false</returns>
         /// <remarks>The list of recent files gets cleared each time you call SaveTICAndBPIPlotFiles() or Reset()</remarks>
-        public bool GetRecentFileInfo(eOutputFileTypes eFileType, out string strFileName, out string strFilePath)
+        public bool GetRecentFileInfo(eOutputFileTypes eFileType, out string fileName, out string filePath)
         {
-            for (var intIndex = 0; intIndex <= mRecentFiles.Count - 1; intIndex++)
+            for (var index = 0; index <= mRecentFiles.Count - 1; index++)
             {
-                if (mRecentFiles[intIndex].FileType == eFileType)
+                if (mRecentFiles[index].FileType == eFileType)
                 {
-                    strFileName = mRecentFiles[intIndex].FileName;
-                    strFilePath = mRecentFiles[intIndex].FilePath;
+                    fileName = mRecentFiles[index].FileName;
+                    filePath = mRecentFiles[index].FilePath;
                     return true;
                 }
             }
 
-            strFileName = string.Empty;
-            strFilePath = string.Empty;
+            fileName = string.Empty;
+            filePath = string.Empty;
 
             return false;
         }
@@ -235,10 +235,10 @@ namespace MSFileInfoScanner
             bool yAxisExponentialNotation)
         {
 
-            var intMinScan = int.MaxValue;
-            var intMaxScan = 0;
-            double dblScanTimeMax = 0;
-            double dblMaxIntensity = 0;
+            var minScan = int.MaxValue;
+            var maxScan = 0;
+            double scanTimeMax = 0;
+            double maxIntensity = 0;
 
             // Instantiate the list to track the data points
             var objPoints = new List<DataPoint>();
@@ -254,24 +254,24 @@ namespace MSFileInfoScanner
 
                 objPoints.Add(new DataPoint(chromDataPoint.ScanNum, chromDataPoint.Intensity));
 
-                if (chromDataPoint.TimeMinutes > dblScanTimeMax)
+                if (chromDataPoint.TimeMinutes > scanTimeMax)
                 {
-                    dblScanTimeMax = chromDataPoint.TimeMinutes;
+                    scanTimeMax = chromDataPoint.TimeMinutes;
                 }
 
-                if (chromDataPoint.ScanNum < intMinScan)
+                if (chromDataPoint.ScanNum < minScan)
                 {
-                    intMinScan = chromDataPoint.ScanNum;
+                    minScan = chromDataPoint.ScanNum;
                 }
 
-                if (chromDataPoint.ScanNum > intMaxScan)
+                if (chromDataPoint.ScanNum > maxScan)
                 {
-                    intMaxScan = chromDataPoint.ScanNum;
+                    maxScan = chromDataPoint.ScanNum;
                 }
 
-                if (chromDataPoint.Intensity > dblMaxIntensity)
+                if (chromDataPoint.Intensity > maxIntensity)
                 {
-                    dblMaxIntensity = chromDataPoint.Intensity;
+                    maxIntensity = chromDataPoint.Intensity;
                 }
             }
 
@@ -283,11 +283,11 @@ namespace MSFileInfoScanner
                 return emptyContainer;
             }
 
-            // Round intMaxScan down to the nearest multiple of 10
-            intMaxScan = (int)Math.Ceiling(intMaxScan / 10.0) * 10;
+            // Round maxScan down to the nearest multiple of 10
+            maxScan = (int)Math.Ceiling(maxScan / 10.0) * 10;
 
-            // Multiple dblMaxIntensity by 2% and then round up to the nearest integer
-            dblMaxIntensity = Math.Ceiling(dblMaxIntensity * 1.02);
+            // Multiple maxIntensity by 2% and then round up to the nearest integer
+            maxIntensity = Math.Ceiling(maxIntensity * 1.02);
 
             var myPlot = clsOxyplotUtilities.GetBasicPlotModel(plotTitle, xAxisLabel, yAxisLabel);
 
@@ -313,23 +313,23 @@ namespace MSFileInfoScanner
             plotContainer.WriteDebugLog(string.Format("Instantiated plotContainer for plot {0}: {1} data points", plotTitle, objPoints.Count));
 
             // Possibly add a label showing the maximum elution time
-            if (dblScanTimeMax > 0)
+            if (scanTimeMax > 0)
             {
-                string strCaption;
-                if (dblScanTimeMax < 2)
+                string caption;
+                if (scanTimeMax < 2)
                 {
-                    strCaption = Math.Round(dblScanTimeMax, 2).ToString("0.00") + " minutes";
+                    caption = Math.Round(scanTimeMax, 2).ToString("0.00") + " minutes";
                 }
-                else if (dblScanTimeMax < 10)
+                else if (scanTimeMax < 10)
                 {
-                    strCaption = Math.Round(dblScanTimeMax, 1).ToString("0.0") + " minutes";
+                    caption = Math.Round(scanTimeMax, 1).ToString("0.0") + " minutes";
                 }
                 else
                 {
-                    strCaption = Math.Round(dblScanTimeMax, 0).ToString("0") + " minutes";
+                    caption = Math.Round(scanTimeMax, 0).ToString("0") + " minutes";
                 }
 
-                plotContainer.AnnotationBottomRight = strCaption;
+                plotContainer.AnnotationBottomRight = caption;
 
                 // Alternative method is to add a TextAnnotation, but these are inside the main plot area
                 // and are tied to a data point
@@ -337,34 +337,34 @@ namespace MSFileInfoScanner
                 // var objScanTimeMaxText = new OxyPlot.Annotations.TextAnnotation
                 // {
                 //     TextRotation = 0,
-                //     Text = strCaption,
+                //     Text = caption,
                 //     Stroke = OxyColors.Black,
                 //     StrokeThickness = 2,
                 //     FontSize = clsPlotContainer.DEFAULT_BASE_FONT_SIZE
                 // };
                 //
-                // objScanTimeMaxText.TextPosition = new DataPoint(intMaxScan, 0);
+                // objScanTimeMaxText.TextPosition = new DataPoint(maxScan, 0);
                 // myPlot.Annotations.Add(objScanTimeMaxText);
 
             }
 
             // Override the auto-computed X axis range
-            if (intMinScan == intMaxScan)
+            if (minScan == maxScan)
             {
-                myPlot.Axes[0].Minimum = intMinScan - 1;
-                myPlot.Axes[0].Maximum = intMinScan + 1;
+                myPlot.Axes[0].Minimum = minScan - 1;
+                myPlot.Axes[0].Maximum = minScan + 1;
             }
             else
             {
                 myPlot.Axes[0].Minimum = 0;
 
-                if (intMaxScan == 0)
+                if (maxScan == 0)
                 {
                     myPlot.Axes[0].Maximum = 1;
                 }
                 else
                 {
-                    myPlot.Axes[0].Maximum = intMaxScan;
+                    myPlot.Axes[0].Maximum = maxScan;
                 }
             }
 
@@ -379,7 +379,7 @@ namespace MSFileInfoScanner
             else
             {
                 myPlot.Axes[1].Minimum = 0;
-                myPlot.Axes[1].Maximum = dblMaxIntensity;
+                myPlot.Axes[1].Maximum = maxIntensity;
             }
 
             // Hide the legend
@@ -409,8 +409,8 @@ namespace MSFileInfoScanner
             bool yAxisExponentialNotation)
         {
 
-            double dblScanTimeMax = 0;
-            double dblMaxIntensity = 0;
+            double scanTimeMax = 0;
+            double maxIntensity = 0;
 
             // Instantiate the list to track the data points
             var objPoints = new List<DataPoint>();
@@ -425,14 +425,14 @@ namespace MSFileInfoScanner
 
                 objPoints.Add(new DataPoint(chromDataPoint.ScanNum, chromDataPoint.Intensity));
 
-                if (chromDataPoint.TimeMinutes > dblScanTimeMax)
+                if (chromDataPoint.TimeMinutes > scanTimeMax)
                 {
-                    dblScanTimeMax = chromDataPoint.TimeMinutes;
+                    scanTimeMax = chromDataPoint.TimeMinutes;
                 }
 
-                if (chromDataPoint.Intensity > dblMaxIntensity)
+                if (chromDataPoint.Intensity > maxIntensity)
                 {
-                    dblMaxIntensity = chromDataPoint.Intensity;
+                    maxIntensity = chromDataPoint.Intensity;
                 }
             }
 
@@ -466,23 +466,23 @@ namespace MSFileInfoScanner
             clsPlotUtilities.GetAxisFormatInfo(yVals, false, plotContainer.YAxisInfo);
 
             // Possibly add a label showing the maximum elution time
-            if (dblScanTimeMax > 0)
+            if (scanTimeMax > 0)
             {
-                string strCaption;
-                if (dblScanTimeMax < 2)
+                string caption;
+                if (scanTimeMax < 2)
                 {
-                    strCaption = Math.Round(dblScanTimeMax, 2).ToString("0.00") + " minutes";
+                    caption = Math.Round(scanTimeMax, 2).ToString("0.00") + " minutes";
                 }
-                else if (dblScanTimeMax < 10)
+                else if (scanTimeMax < 10)
                 {
-                    strCaption = Math.Round(dblScanTimeMax, 1).ToString("0.0") + " minutes";
+                    caption = Math.Round(scanTimeMax, 1).ToString("0.0") + " minutes";
                 }
                 else
                 {
-                    strCaption = Math.Round(dblScanTimeMax, 0).ToString("0") + " minutes";
+                    caption = Math.Round(scanTimeMax, 0).ToString("0") + " minutes";
                 }
 
-                plotContainer.AnnotationBottomRight = strCaption;
+                plotContainer.AnnotationBottomRight = caption;
             }
 
             // Override the auto-computed Y axis range
@@ -492,7 +492,7 @@ namespace MSFileInfoScanner
             }
             else
             {
-                plotContainer.XAxisInfo.SetRange(0, dblMaxIntensity);
+                plotContainer.XAxisInfo.SetRange(0, maxIntensity);
             }
 
             return plotContainer;
@@ -519,12 +519,12 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Save BPI and TIC plots
         /// </summary>
-        /// <param name="strDatasetName"></param>
-        /// <param name="strOutputFolderPath"></param>
+        /// <param name="datasetName"></param>
+        /// <param name="outputFolderPath"></param>
         /// <returns>True if success, false if an error</returns>
-        public bool SaveTICAndBPIPlotFiles(string strDatasetName, string strOutputFolderPath)
+        public bool SaveTICAndBPIPlotFiles(string datasetName, string outputFolderPath)
         {
-            bool blnSuccess;
+            bool success;
 
             try
             {
@@ -543,124 +543,124 @@ namespace MSFileInfoScanner
                     RemoveZeroesAtFrontAndBack(mTIC);
                 }
 
-                var bpiPlotMS1 = InitializePlot(mBPI, strDatasetName + " - " + BPIPlotAbbrev + " - MS Spectra", 1, BPIXAxisLabel, BPIYAxisLabel, BPIAutoMinMaxY, BPIYAxisExponentialNotation);
+                var bpiPlotMS1 = InitializePlot(mBPI, datasetName + " - " + BPIPlotAbbrev + " - MS Spectra", 1, BPIXAxisLabel, BPIYAxisLabel, BPIAutoMinMaxY, BPIYAxisExponentialNotation);
                 RegisterEvents(bpiPlotMS1);
 
                 if (bpiPlotMS1.SeriesCount > 0)
                 {
-                    var strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName + "_" + BPIPlotAbbrev + "_MS.png");
-                    bpiPlotMS1.SaveToPNG(strPNGFilePath, 1024, 600, 96);
-                    AddRecentFile(strPNGFilePath, eOutputFileTypes.BPIMS);
+                    var pngFilePath = Path.Combine(outputFolderPath, datasetName + "_" + BPIPlotAbbrev + "_MS.png");
+                    bpiPlotMS1.SaveToPNG(pngFilePath, 1024, 600, 96);
+                    AddRecentFile(pngFilePath, eOutputFileTypes.BPIMS);
                 }
 
-                var bpiPlotMS2 = InitializePlot(mBPI, strDatasetName + " - " + BPIPlotAbbrev + " - MS2 Spectra", 2, BPIXAxisLabel, BPIYAxisLabel, BPIAutoMinMaxY, BPIYAxisExponentialNotation);
+                var bpiPlotMS2 = InitializePlot(mBPI, datasetName + " - " + BPIPlotAbbrev + " - MS2 Spectra", 2, BPIXAxisLabel, BPIYAxisLabel, BPIAutoMinMaxY, BPIYAxisExponentialNotation);
                 RegisterEvents(bpiPlotMS2);
 
                 if (bpiPlotMS2.SeriesCount > 0)
                 {
-                    var strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName + "_" + BPIPlotAbbrev + "_MSn.png");
-                    bpiPlotMS2.SaveToPNG(strPNGFilePath, 1024, 600, 96);
-                    AddRecentFile(strPNGFilePath, eOutputFileTypes.BPIMSn);
+                    var pngFilePath = Path.Combine(outputFolderPath, datasetName + "_" + BPIPlotAbbrev + "_MSn.png");
+                    bpiPlotMS2.SaveToPNG(pngFilePath, 1024, 600, 96);
+                    AddRecentFile(pngFilePath, eOutputFileTypes.BPIMSn);
                 }
 
-                var ticPlot = InitializePlot(mTIC, strDatasetName + " - " + TICPlotAbbrev + " - All Spectra", 0, TICXAxisLabel, TICYAxisLabel, TICAutoMinMaxY, TICYAxisExponentialNotation);
+                var ticPlot = InitializePlot(mTIC, datasetName + " - " + TICPlotAbbrev + " - All Spectra", 0, TICXAxisLabel, TICYAxisLabel, TICAutoMinMaxY, TICYAxisExponentialNotation);
                 RegisterEvents(ticPlot);
 
                 if (ticPlot.SeriesCount > 0)
                 {
-                    var strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName + "_" + TICPlotAbbrev + ".png");
-                    ticPlot.SaveToPNG(strPNGFilePath, 1024, 600, 96);
-                    AddRecentFile(strPNGFilePath, eOutputFileTypes.TIC);
+                    var pngFilePath = Path.Combine(outputFolderPath, datasetName + "_" + TICPlotAbbrev + ".png");
+                    ticPlot.SaveToPNG(pngFilePath, 1024, 600, 96);
+                    AddRecentFile(pngFilePath, eOutputFileTypes.TIC);
                 }
 
-                blnSuccess = true;
+                success = true;
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error in SaveTICAndBPIPlotFiles", ex);
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
 
         }
 
-        private void RemoveZeroesAtFrontAndBack(clsChromatogramInfo objChrom)
+        private void RemoveZeroesAtFrontAndBack(clsChromatogramInfo chromInfo)
         {
             const int MAX_POINTS_TO_CHECK = 100;
-            var intPointsChecked = 0;
+            var pointsChecked = 0;
 
             // See if the last few values are zero, but the data before them is non-zero
             // If this is the case, remove the final entries
 
-            var intIndexNonZeroValue = -1;
-            var intZeroPointCount = 0;
-            for (var intIndex = objChrom.ScanCount - 1; intIndex >= 0; intIndex += -1)
+            var indexNonZeroValue = -1;
+            var zeroPointCount = 0;
+            for (var index = chromInfo.ScanCount - 1; index >= 0; index += -1)
             {
-                if (Math.Abs(objChrom.GetDataPoint(intIndex).Intensity) < float.Epsilon)
+                if (Math.Abs(chromInfo.GetDataPoint(index).Intensity) < float.Epsilon)
                 {
-                    intZeroPointCount += 1;
+                    zeroPointCount += 1;
                 }
                 else
                 {
-                    intIndexNonZeroValue = intIndex;
+                    indexNonZeroValue = index;
                     break;
                 }
-                intPointsChecked += 1;
-                if (intPointsChecked >= MAX_POINTS_TO_CHECK)
+                pointsChecked += 1;
+                if (pointsChecked >= MAX_POINTS_TO_CHECK)
                     break;
             }
 
-            if (intZeroPointCount > 0 && intIndexNonZeroValue >= 0)
+            if (zeroPointCount > 0 && indexNonZeroValue >= 0)
             {
-                objChrom.RemoveRange(intIndexNonZeroValue + 1, intZeroPointCount);
+                chromInfo.RemoveRange(indexNonZeroValue + 1, zeroPointCount);
             }
 
             // Now check the first few values
-            intIndexNonZeroValue = -1;
-            intZeroPointCount = 0;
-            for (var intIndex = 0; intIndex <= objChrom.ScanCount - 1; intIndex++)
+            indexNonZeroValue = -1;
+            zeroPointCount = 0;
+            for (var index = 0; index <= chromInfo.ScanCount - 1; index++)
             {
-                if (Math.Abs(objChrom.GetDataPoint(intIndex).Intensity) < float.Epsilon)
+                if (Math.Abs(chromInfo.GetDataPoint(index).Intensity) < float.Epsilon)
                 {
-                    intZeroPointCount += 1;
+                    zeroPointCount += 1;
                 }
                 else
                 {
-                    intIndexNonZeroValue = intIndex;
+                    indexNonZeroValue = index;
                     break;
                 }
-                intPointsChecked += 1;
-                if (intPointsChecked >= MAX_POINTS_TO_CHECK)
+                pointsChecked += 1;
+                if (pointsChecked >= MAX_POINTS_TO_CHECK)
                     break;
             }
 
-            if (intZeroPointCount > 0 && intIndexNonZeroValue >= 0)
+            if (zeroPointCount > 0 && indexNonZeroValue >= 0)
             {
-                objChrom.RemoveRange(0, intIndexNonZeroValue);
+                chromInfo.RemoveRange(0, indexNonZeroValue);
             }
 
         }
 
-        private void ValidateMSLevel(clsChromatogramInfo objChrom)
+        private void ValidateMSLevel(clsChromatogramInfo chromInfo)
         {
-            var blnMSLevelDefined = false;
+            var msLevelDefined = false;
 
-            for (var intIndex = 0; intIndex <= objChrom.ScanCount - 1; intIndex++)
+            for (var index = 0; index <= chromInfo.ScanCount - 1; index++)
             {
-                if (objChrom.GetDataPoint(intIndex).MSLevel > 0)
+                if (chromInfo.GetDataPoint(index).MSLevel > 0)
                 {
-                    blnMSLevelDefined = true;
+                    msLevelDefined = true;
                     break;
                 }
             }
 
-            if (!blnMSLevelDefined)
+            if (!msLevelDefined)
             {
                 // Set the MSLevel to 1 for all scans
-                for (var intIndex = 0; intIndex <= objChrom.ScanCount - 1; intIndex++)
+                for (var index = 0; index <= chromInfo.ScanCount - 1; index++)
                 {
-                    objChrom.GetDataPoint(intIndex).MSLevel = 1;
+                    chromInfo.GetDataPoint(index).MSLevel = 1;
                 }
             }
 
@@ -687,19 +687,19 @@ namespace MSFileInfoScanner
                 Initialize();
             }
 
-            public void AddPoint(int intScanNumber, int intMSLevel, float sngScanTimeMinutes, double dblIntensity)
+            public void AddPoint(int scanNumber, int msLevel, float scanTimeMinutes, double intensity)
             {
                 if ((from item in mScans where item.ScanNum == intScanNumber select item).Any())
                 {
-                    throw new Exception("Scan " + intScanNumber + " has already been added to the TIC or BPI; programming error");
+                    throw new Exception("Scan " + scanNumber + " has already been added to the TIC or BPI; programming error");
                 }
 
                 var chromDataPoint = new clsChromatogramDataPoint
                 {
-                    ScanNum = intScanNumber,
-                    TimeMinutes = sngScanTimeMinutes,
-                    Intensity = dblIntensity,
-                    MSLevel = intMSLevel
+                    ScanNum = scanNumber,
+                    TimeMinutes = scanTimeMinutes,
+                    Intensity = intensity,
+                    MSLevel = msLevel
                 };
 
                 mScans.Add(chromDataPoint);
