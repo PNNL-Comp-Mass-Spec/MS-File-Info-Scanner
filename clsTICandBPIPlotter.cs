@@ -681,15 +681,22 @@ namespace MSFileInfoScanner
 
             public IEnumerable<clsChromatogramDataPoint> Scans => mScans;
 
-            private List<clsChromatogramDataPoint> mScans;
+            private readonly List<clsChromatogramDataPoint> mScans;
+
+            private readonly SortedSet<int> mScanNumbers;
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
             public clsChromatogramInfo()
             {
-                Initialize();
+                mScans = new List<clsChromatogramDataPoint>();
+                mScanNumbers = new SortedSet<int>();
             }
 
             public void AddPoint(int scanNumber, int msLevel, float scanTimeMinutes, double intensity)
             {
-                if ((from item in mScans where item.ScanNum == intScanNumber select item).Any())
+                if (mScanNumbers.Contains(scanNumber))
                 {
                     throw new Exception("Scan " + scanNumber + " has already been added to the TIC or BPI; programming error");
                 }
@@ -703,6 +710,7 @@ namespace MSFileInfoScanner
                 };
 
                 mScans.Add(chromDataPoint);
+                mScanNumbers.Add(scanNumber);
             }
 
             public clsChromatogramDataPoint GetDataPoint(int index)
@@ -713,16 +721,20 @@ namespace MSFileInfoScanner
                 }
                 if (index < 0 || index >= mScans.Count)
                 {
-                    throw new Exception("Chromatogram index out of range: " + index + "; should be between 0 and " + (mScans.Count - 1).ToString());
+                    throw new Exception("Chromatogram index out of range: " + index + "; should be between 0 and " + (mScans.Count - 1));
                 }
 
                 return mScans[index];
 
             }
 
+            /// <summary>
+            /// Clear cached data
+            /// </summary>
             public void Initialize()
             {
-                mScans = new List<clsChromatogramDataPoint>();
+                mScans.Clear();
+                mScanNumbers.Clear();
             }
 
             // ReSharper disable once UnusedMember.Local
@@ -733,11 +745,23 @@ namespace MSFileInfoScanner
 
             public void RemoveRange(int index, int count)
             {
-                if (index >= 0 & index < ScanCount & count > 0)
+                if (index < 0 || index >= ScanCount || count <= 0)
+                    return;
+
+                var scansToRemove = new List<int>();
+                var lastIndex = Math.Min(index + count, mScans.Count) - 1;
+
+                for (var i = index; i <= lastIndex; i++)
                 {
-                    mScans.RemoveRange(index, count);
+                    scansToRemove.Add(mScans[i].ScanNum);
                 }
 
+                mScans.RemoveRange(index, count);
+
+                foreach (var scanNumber in scansToRemove)
+                {
+                    mScanNumbers.Remove(scanNumber);
+                }
             }
 
         }
