@@ -329,9 +329,7 @@ namespace MSFileInfoScanner
             //  Read privileges but not Read&Execute privileges, then we will need to copy the file locally
             var xcaliburAccessor = new XRawFileIO();
 
-            // Attach event handlers
-            xcaliburAccessor.ReportError += XcaliburAccessor_ReportError;
-            xcaliburAccessor.ReportWarning += XcaliburAccessor_ReportWarning;
+            RegisterEvents(xcaliburAccessor);
 
             // Open a handle to the data file
             if (!xcaliburAccessor.OpenRawFile(fiRawFile.FullName))
@@ -587,16 +585,6 @@ namespace MSFileInfoScanner
                 // Ignore any errors here
             }
 
-        }
-
-        private void XcaliburAccessor_ReportWarning(string message)
-        {
-            OnWarningEvent(message);
-        }
-
-        private void XcaliburAccessor_ReportError(string message)
-        {
-            OnErrorEvent(message);
         }
 
     }
