@@ -251,7 +251,7 @@ namespace MSFileInfoScanner
 
                                 var centroidingStatus = GetCentroidStatus(scanNumber, scanInfo);
 
-                                mDatasetStatsSummarizer.ClassifySpectrum(lstMZs, scanInfo.MSLevel, centroidingStatus);
+                                mDatasetStatsSummarizer.ClassifySpectrum(lstMZs, scanInfo.MSLevel, centroidingStatus, "Scan " + scanNumber);
                             }
                         }
 

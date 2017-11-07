@@ -235,7 +235,7 @@ namespace MSFileInfoScanner
 
                         ChemstationMSFileReader.clsSpectralRecord oSpectrum = null;
                         List<float> lstMZs = null;
-                        List<Int32> lstIntensities = null;
+                        List<int> lstIntensities = null;
                         const int intMSLevel = 1;
 
                         bool blnValidSpectrum;
@@ -288,7 +288,7 @@ namespace MSFileInfoScanner
                             if (mCheckCentroidingStatus) {
                                 var lstMzDoubles = new List<double>(lstMZs.Count);
                                 lstMzDoubles.AddRange(lstMZs.Select(ion => (double)ion));
-                                mDatasetStatsSummarizer.ClassifySpectrum(lstMzDoubles, intMSLevel);
+                                mDatasetStatsSummarizer.ClassifySpectrum(lstMzDoubles, intMSLevel, "Scan " + objScanStatsEntry.ScanNumber);
                             }
 
                         }

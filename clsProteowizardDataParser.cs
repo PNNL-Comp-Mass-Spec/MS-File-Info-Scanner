@@ -523,17 +523,17 @@ namespace MSFileInfoScanner
 
                         if (mSaveTICAndBPI & !blnTICStored)
                         {
-                            mTICandBPIPlot.AddData(intScanIndex + 1, intMSLevels[intScanIndex], (float)dblScanTimes[intScanIndex], dblBPI, dblTIC);
+                            mTICandBPIPlot.AddData(objScanStatsEntry.ScanNumber, intMSLevels[intScanIndex], (float)dblScanTimes[intScanIndex], dblBPI, dblTIC);
                         }
 
                         if (mSaveLCMS2DPlots)
                         {
-                            mLCMS2DPlot.AddScan(intScanIndex + 1, intMSLevels[intScanIndex], (float)dblScanTimes[intScanIndex], oMSDataSpectrum.Mzs.Length, oMSDataSpectrum.Mzs, oMSDataSpectrum.Intensities);
+                            mLCMS2DPlot.AddScan(objScanStatsEntry.ScanNumber, intMSLevels[intScanIndex], (float)dblScanTimes[intScanIndex], oMSDataSpectrum.Mzs.Length, oMSDataSpectrum.Mzs, oMSDataSpectrum.Intensities);
                         }
 
                         if (mCheckCentroidingStatus)
                         {
-                            mDatasetStatsSummarizer.ClassifySpectrum(oMSDataSpectrum.Mzs, intMSLevels[intScanIndex]);
+                            mDatasetStatsSummarizer.ClassifySpectrum(oMSDataSpectrum.Mzs, intMSLevels[intScanIndex], "Scan " + objScanStatsEntry.ScanNumber);
                         }
 
                     }

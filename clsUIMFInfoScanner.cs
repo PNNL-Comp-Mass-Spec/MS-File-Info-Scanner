@@ -466,7 +466,7 @@ namespace MSFileInfoScanner
 
                                     if (mCheckCentroidingStatus)
                                     {
-                                        mDatasetStatsSummarizer.ClassifySpectrum(intIonCount, dblMZList, msLevel);
+                                        mDatasetStatsSummarizer.ClassifySpectrum(intIonCount, dblMZList, msLevel, "Frame " + frameNumber);
                                     }
                                 }
                             }
