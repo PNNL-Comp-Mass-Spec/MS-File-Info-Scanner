@@ -472,14 +472,6 @@ namespace SpectraTypeClassifier
             CheckPPMDiffs(lstPpmDiffs, msLevel, centroidingStatus);
         }
 
-        public void Reset()
-        {
-            mErrorMessage = string.Empty;
-            mTotalSpectra.Clear();
-            mCentroidedSpectra.Clear();
-            mCentroidedSpectraClassifiedAsProfile.Clear();
-        }
-
         /// <summary>
         /// Computes the median of the ppm m/z difference values in lstPpmDiffs
         /// </summary>
@@ -601,6 +593,16 @@ namespace SpectraTypeClassifier
             return centroided;
         }
 
+
+        /// <summary>
+        /// Clear cached data
+        /// </summary>
+        public void Reset()
+        {
+            mErrorMessage = string.Empty;
+            mTotalSpectra.Clear();
+            mCentroidedSpectra.Clear();
+            mCentroidedSpectraClassifiedAsProfile.Clear();
         }
 
     }
