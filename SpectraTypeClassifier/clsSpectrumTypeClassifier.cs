@@ -21,8 +21,8 @@ namespace SpectraTypeClassifier
 
         #endregion
 
-
         #region "Module Wide Variables"
+
         protected string mErrorMessage;
 
         protected int mPpmDiffThreshold;
@@ -41,7 +41,7 @@ namespace SpectraTypeClassifier
         /// <remarks></remarks>
 
         protected Dictionary<int, int> mCentroidedSpectraClassifiedAsProfile;
-        
+
         /// <summary>
         /// All spectra
         /// </summary>
@@ -49,9 +49,11 @@ namespace SpectraTypeClassifier
         protected Dictionary<int, int> mTotalSpectra;
 
         #endregion
+
         protected readonly clsMedianUtilities mMedianUtils;
 
         #region "Events"
+
         public event ReadingSpectraEventHandler ReadingSpectra;
         public delegate void ReadingSpectraEventHandler(int spectraProcessed);
         public event ProcessingCompleteEventHandler ProcessingComplete;
@@ -59,21 +61,25 @@ namespace SpectraTypeClassifier
 
         public event ErrorEventEventHandler ErrorEvent;
         public delegate void ErrorEventEventHandler(string Message);
+
         #endregion
 
         #region "Properties"
 
-        public string ErrorMessage {
-            get {
+        public string ErrorMessage
+        {
+            get
+            {
                 if (string.IsNullOrWhiteSpace(mErrorMessage))
                     return string.Empty;
                 return mErrorMessage;
             }
         }
 
-        public int PpmDiffThreshold {
-            get { return mPpmDiffThreshold; }
-            set { mPpmDiffThreshold = value; }
+        public int PpmDiffThreshold
+        {
+            get => mPpmDiffThreshold;
+            set => mPpmDiffThreshold = value;
         }
 
         #endregion
@@ -118,24 +124,24 @@ namespace SpectraTypeClassifier
         {
 
             var total = TotalSpectra();
-            if (total == 0) {
+            if (total == 0)
+            {
                 return 0;
-            } else {
-                return CentroidedSpectra() / Convert.ToDouble(total);
             }
 
+            return CentroidedSpectra() / Convert.ToDouble(total);
         }
 
         public double FractionCentroidedMSn()
         {
 
             var total = TotalMSnSpectra();
-            if (total == 0) {
+            if (total == 0)
+            {
                 return 0;
-            } else {
-                return CentroidedMSnSpectra() / Convert.ToDouble(total);
             }
 
+            return CentroidedMSnSpectra() / Convert.ToDouble(total);
         }
 
         public int TotalSpectra()
@@ -167,63 +173,67 @@ namespace SpectraTypeClassifier
 
             var splitChars = new[] { ' ' };
 
-            try {
-                if (!File.Exists(strCDTAPath)) {
+            try
+            {
+                if (!File.Exists(strCDTAPath))
+                {
                     throw new FileNotFoundException("CDTA file not found: " + strCDTAPath);
                 }
 
                 // Read the m/z values in the _dta.txt file
                 // Using a simple text reader here for speed purposes
 
-                using (var srDtaFile = new StreamReader(new FileStream(strCDTAPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))) {
+                using (var srDtaFile = new StreamReader(new FileStream(strCDTAPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                {
 
                     var lstPpmDiffs = new List<double>(2000);
 
-                    double dblPreviousMZ = 0;
+                    double previousMz = 0;
 
                     while (!srDtaFile.EndOfStream)
                     {
-                        var strLineIn = srDtaFile.ReadLine();
+                        var dataLine = srDtaFile.ReadLine();
 
-                        if (!string.IsNullOrEmpty(strLineIn)) {
-                            if (strLineIn.StartsWith("=============")) {
-                                // DTA header line
+                        if (string.IsNullOrEmpty(dataLine))
+                            continue;
 
-                                // Process the data for the previous spectrum
-                                CheckPPMDiffs(lstPpmDiffs, 2, eCentroidStatusConstants.Unknown);
+                        if (dataLine.StartsWith("============="))
+                        {
+                            // DTA header line
 
-                                // Reset the previous m/z value and skip the next line
-                                if (!srDtaFile.EndOfStream)
-                                    srDtaFile.ReadLine();
+                            // Process the data for the previous spectrum
+                            CheckPPMDiffs(lstPpmDiffs, 2, eCentroidStatusConstants.Unknown);
 
-                                dblPreviousMZ = 0;
-                                lstPpmDiffs.Clear();
+                            // Reset the previous m/z value and skip the next line
+                            if (!srDtaFile.EndOfStream)
+                                srDtaFile.ReadLine();
 
-                                if (DateTime.UtcNow.Subtract(dtLastStatusTime).TotalSeconds >= 30) {
-                                    if (ReadingSpectra != null) {
-                                        ReadingSpectra(TotalSpectra());
-                                    }
-                                    dtLastStatusTime = DateTime.UtcNow;
-                                }
+                            previousMz = 0;
+                            lstPpmDiffs.Clear();
 
-                            } else {
-                                var dataColumns = strLineIn.Split(splitChars, 3);
-
-                                double dblMZ;
-                                if (!double.TryParse(dataColumns[0], out dblMZ))
-                                {
-                                    continue;
-                                }
-
-                                if (dblPreviousMZ > 0 && dblMZ > dblPreviousMZ) {
-                                    var delMPPM = 1000000.0 * (dblMZ - dblPreviousMZ) / dblMZ;
-                                    lstPpmDiffs.Add(delMPPM);
-                                }
-                                dblPreviousMZ = dblMZ;
+                            if (DateTime.UtcNow.Subtract(dtLastStatusTime).TotalSeconds >= 30)
+                            {
+                                ReadingSpectra?.Invoke(TotalSpectra());
+                                dtLastStatusTime = DateTime.UtcNow;
                             }
 
                         }
+                        else
+                        {
+                            var dataColumns = dataLine.Split(splitChars, 3);
 
+                            if (!double.TryParse(dataColumns[0], out var mz))
+                            {
+                                continue;
+                            }
+
+                            if (previousMz > 0 && mz > previousMz)
+                            {
+                                var delMPPM = 1000000.0 * (mz - previousMz) / mz;
+                                lstPpmDiffs.Add(delMPPM);
+                            }
+                            previousMz = mz;
+                        }
                     }
 
                     // Process the data for the previous spectrum
@@ -231,17 +241,15 @@ namespace SpectraTypeClassifier
 
                 }
 
-                if (ProcessingComplete != null) {
-                    ProcessingComplete(TotalSpectra());
-                }
+                ProcessingComplete?.Invoke(TotalSpectra());
 
                 return true;
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 mErrorMessage = "Exception in CheckCDTAFile: " + ex.Message;
-                if (ErrorEvent != null) {
-                    ErrorEvent(mErrorMessage);
-                }
+                ErrorEvent?.Invoke(mErrorMessage);
                 return false;
             }
 
@@ -256,15 +264,19 @@ namespace SpectraTypeClassifier
         /// <remarks>Increments class property TotalSpectra if lstPpmDiffs is not empty; increments class property CentroidedSpectra if the data is centroided</remarks>
         protected void CheckPPMDiffs(List<double> lstPpmDiffs, int msLevel, eCentroidStatusConstants centroidingStatus)
         {
-            if (lstPpmDiffs.Count > 0) {
+            if (lstPpmDiffs.Count > 0)
+            {
                 IncrementDictionaryByMSLevel(ref mTotalSpectra, msLevel);
 
                 var empiricalCentroidStatus = eCentroidStatusConstants.Profile;
-                if (IsDataCentroided(lstPpmDiffs)) {
+                if (IsDataCentroided(lstPpmDiffs))
+                {
+                    // Data appears centroided
                     empiricalCentroidStatus = eCentroidStatusConstants.Centroid;
                 }
 
-                if (centroidingStatus == eCentroidStatusConstants.Centroid & empiricalCentroidStatus == eCentroidStatusConstants.Profile) {
+                if (centroidingStatus == eCentroidStatusConstants.Centroid & empiricalCentroidStatus == eCentroidStatusConstants.Profile)
+                {
                     // The empirical algorithm has classified a centroid spectrum as profile
                     // Change it back to centroid
                     empiricalCentroidStatus = eCentroidStatusConstants.Centroid;
@@ -272,7 +284,8 @@ namespace SpectraTypeClassifier
                     IncrementDictionaryByMSLevel(ref mCentroidedSpectraClassifiedAsProfile, msLevel);
                 }
 
-                if (empiricalCentroidStatus == eCentroidStatusConstants.Centroid) {
+                if (empiricalCentroidStatus == eCentroidStatusConstants.Centroid)
+                {
                     IncrementDictionaryByMSLevel(ref mCentroidedSpectra, msLevel);
                 }
             }
@@ -282,11 +295,12 @@ namespace SpectraTypeClassifier
 
         private void IncrementDictionaryByMSLevel(ref Dictionary<int, int> dctSpectrumCounts, int msLevel)
         {
-            int spectraCount;
-
-            if (dctSpectrumCounts.TryGetValue(msLevel, out spectraCount)) {
+            if (dctSpectrumCounts.TryGetValue(msLevel, out var spectraCount))
+            {
                 dctSpectrumCounts[msLevel] = spectraCount + 1;
-            } else {
+            }
+            else
+            {
                 dctSpectrumCounts[msLevel] = 1;
             }
 
@@ -305,10 +319,13 @@ namespace SpectraTypeClassifier
 
         public void CheckSpectrum(List<double> lstMZs, int msLevel, bool assumeSorted, eCentroidStatusConstants centroidingStatus = eCentroidStatusConstants.Unknown)
         {
-            if (!assumeSorted) {
+            if (!assumeSorted)
+            {
                 // Check whether sorting is required
-                for (var i = 1; i <= lstMZs.Count - 1; i++) {
-                    if (lstMZs[i] < lstMZs[i - 1]) {
+                for (var i = 1; i <= lstMZs.Count - 1; i++)
+                {
+                    if (lstMZs[i] < lstMZs[i - 1])
+                    {
                         lstMZs.Sort();
                         break;
                     }
@@ -317,12 +334,14 @@ namespace SpectraTypeClassifier
 
             var lstPpmDiffs = new List<double>(lstMZs.Count);
 
-            for (var i = 1; i <= lstMZs.Count - 1; i++) {
-                var dblMZ = lstMZs[i];
-                var dblPreviousMZ = lstMZs[i - 1];
+            for (var i = 1; i <= lstMZs.Count - 1; i++)
+            {
+                var mz = lstMZs[i];
+                var previousMz = lstMZs[i - 1];
 
-                if (dblPreviousMZ > 0 && dblMZ > dblPreviousMZ) {
-                    var delMppm = 1000000.0 * (dblMZ - dblPreviousMZ) / dblMZ;
+                if (previousMz > 0 && mz > previousMz)
+                {
+                    var delMppm = 1000000.0 * (mz - previousMz) / mz;
                     lstPpmDiffs.Add(delMppm);
                 }
             }
@@ -352,13 +371,16 @@ namespace SpectraTypeClassifier
         /// <remarks>Assumes the ions are sorted</remarks>
         public void CheckSpectrum(int ionCount, double[] dblMZs, int msLevel, eCentroidStatusConstants centroidingStatus = eCentroidStatusConstants.Unknown)
         {
-            if (ionCount < 0) {
+            if (ionCount < 0)
+            {
                 ionCount = dblMZs.Length;
             }
 
             // Possibly sort dblMZs
-            for (var i = 1; i <= ionCount - 1; i++) {
-                if (dblMZs[i] < dblMZs[i - 1]) {
+            for (var i = 1; i <= ionCount - 1; i++)
+            {
+                if (dblMZs[i] < dblMZs[i - 1])
+                {
                     // Sort required
                     Array.Sort(dblMZs);
                     break; // TODO: might not be correct. Was : Exit For
@@ -367,12 +389,14 @@ namespace SpectraTypeClassifier
 
             var lstPpmDiffs = new List<double>(ionCount);
 
-            for (var i = 1; i <= ionCount - 1; i++) {
-                var dblMZ = dblMZs[i];
-                var dblPreviousMZ = dblMZs[i - 1];
+            for (var i = 1; i <= ionCount - 1; i++)
+            {
+                var mz = dblMZs[i];
+                var previousMz = dblMZs[i - 1];
 
-                if (dblPreviousMZ > 0 && dblMZ > dblPreviousMZ) {
-                    var delMppm = 1000000.0 * (dblMZ - dblPreviousMZ) / dblMZ;
+                if (previousMz > 0 && mz > previousMz)
+                {
+                    var delMppm = 1000000.0 * (mz - previousMz) / mz;
                     lstPpmDiffs.Add(delMppm);
                 }
             }
@@ -399,14 +423,14 @@ namespace SpectraTypeClassifier
 
             var medianDelMppm = mMedianUtils.Median(lstPpmDiffs);
 
-            if (medianDelMppm < PpmDiffThreshold) {
+            if (medianDelMppm < PpmDiffThreshold)
+            {
                 // Profile mode data
                 return false;
-            } else {
-                // Centroided data
-                return true;
             }
 
+            // Centroided data
+            return true;
         }
 
     }

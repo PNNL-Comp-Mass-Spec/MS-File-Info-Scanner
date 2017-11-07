@@ -14,7 +14,6 @@ namespace SpectraTypeClassifier
     public class clsMedianUtilities
     {
 
-
         protected readonly Random mRandom;
         public enum eEventListCountBehaviorType
         {
@@ -39,17 +38,20 @@ namespace SpectraTypeClassifier
         /// as median finding algorithms.
         /// Pivot is selected ranodmly if random number generator is supplied else its selected as last element in the list.
         /// Reference: Introduction to Algorithms 3rd Edition, Corman et al, pp 171
-        /// </summary>	
+        /// </summary>
         private int Partition(IList<double> lstData, int startIndex, int endIndex, Random oRandom)
         {
-            if (oRandom != null) {
+            if (oRandom != null)
+            {
                 Swap(lstData, endIndex, oRandom.Next(startIndex, endIndex));
             }
 
             var pivot = lstData[endIndex];
             var lastLow = startIndex - 1;
-            for (var i = startIndex; i <= endIndex - 1; i++) {
-                if (lstData[i].CompareTo(pivot) <= 0) {
+            for (var i = startIndex; i <= endIndex - 1; i++)
+            {
+                if (lstData[i].CompareTo(pivot) <= 0)
+                {
                     lastLow += 1;
                     Swap(lstData, i, lastLow);
                 }
@@ -87,15 +89,20 @@ namespace SpectraTypeClassifier
         /// </summary>
         private double NthOrderStatistic(IList<double> lstData, int n, int startIndex, int endIndex, Random oRandom)
         {
-            while (true) {
+            while (true)
+            {
                 var pivotIndex = Partition(lstData, startIndex, endIndex, oRandom);
-                if (pivotIndex == n) {
+                if (pivotIndex == n)
+                {
                     return lstData[pivotIndex];
                 }
 
-                if (n < pivotIndex) {
+                if (n < pivotIndex)
+                {
                     endIndex = pivotIndex - 1;
-                } else {
+                }
+                else
+                {
                     startIndex = pivotIndex + 1;
                 }
             }
@@ -107,7 +114,8 @@ namespace SpectraTypeClassifier
         /// </summary>
         public void Swap(IList<double> lstData, int i, int j)
         {
-            if (i == j) {
+            if (i == j)
+            {
                 // Swap is not required
                 return;
             }
@@ -123,10 +131,14 @@ namespace SpectraTypeClassifier
         public double Median(IList<double> lstData)
         {
 
-            if (lstData == null || lstData.Count < 1) {
+            if (lstData == null || lstData.Count < 1)
+            {
                 // List is empty
                 return 0;
-            } else if (lstData.Count <= 1) {
+            }
+
+            if (lstData.Count <= 1)
+            {
                 // Only 1 item; the median is the value
                 return lstData.First();
             }
@@ -134,7 +146,8 @@ namespace SpectraTypeClassifier
             var midPoint1 = Convert.ToInt32(Math.Floor((lstData.Count - 1) / 2.0));
             var median1 = NthOrderStatistic(lstData, midPoint1);
 
-            if (lstData.Count % 2 > 0 || EvenNumberedListCountBehavior == eEventListCountBehaviorType.ReportNearest) {
+            if (lstData.Count % 2 > 0 || EvenNumberedListCountBehavior == eEventListCountBehaviorType.ReportNearest)
+            {
                 return median1;
             }
 
