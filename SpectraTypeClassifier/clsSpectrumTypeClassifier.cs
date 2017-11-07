@@ -6,7 +6,7 @@ using System.Linq;
 namespace SpectraTypeClassifier
 {
     [CLSCompliant(true)]
-    public class clsSpectrumTypeClassifier
+    public class clsSpectrumTypeClassifier : clsEventNotifier
     {
 
         #region "Constants and Enums"
@@ -51,11 +51,9 @@ namespace SpectraTypeClassifier
 
         public event ReadingSpectraEventHandler ReadingSpectra;
         public delegate void ReadingSpectraEventHandler(int spectraProcessed);
+
         public event ProcessingCompleteEventHandler ProcessingComplete;
         public delegate void ProcessingCompleteEventHandler(int spectraProcessed);
-
-        public event ErrorEventEventHandler ErrorEvent;
-        public delegate void ErrorEventEventHandler(string Message);
 
         #endregion
 
@@ -280,7 +278,7 @@ namespace SpectraTypeClassifier
             catch (Exception ex)
             {
                 mErrorMessage = "Exception in CheckCDTAFile: " + ex.Message;
-                ErrorEvent?.Invoke(mErrorMessage);
+                OnErrorEvent(mErrorMessage, ex);
                 return false;
             }
 

@@ -103,12 +103,14 @@ namespace MSFileInfoScanner
         /// </summary>
         public clsDatasetStatsSummarizer()
         {
-            FileDate = "May 24, 2016";
+            FileDate = "November 7, 2017";
 
             mErrorMessage = string.Empty;
 
             mMedianUtils = new clsMedianUtilities();
+
             mSpectraTypeClassifier = new clsSpectrumTypeClassifier();
+            RegisterEvents(mSpectraTypeClassifier);
 
             mDatasetScanStats = new List<clsScanStatsEntry>();
             mDatasetSummaryStats = new clsDatasetSummaryStats();
@@ -906,11 +908,6 @@ namespace MSFileInfoScanner
 
             return blnSuccess;
 
-        }
-
-        private void mSpectraTypeClassifier_ErrorEvent(string message)
-        {
-            ReportError("Error in SpectraTypeClassifier: " + message);
         }
 
     }
