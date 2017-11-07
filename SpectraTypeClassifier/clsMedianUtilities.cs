@@ -14,7 +14,7 @@ namespace SpectraTypeClassifier
     public class clsMedianUtilities
     {
 
-        protected readonly Random mRandom;
+        private readonly Random mRandom;
         public enum eEventListCountBehaviorType
         {
             ReportMidpointAverage = 0,

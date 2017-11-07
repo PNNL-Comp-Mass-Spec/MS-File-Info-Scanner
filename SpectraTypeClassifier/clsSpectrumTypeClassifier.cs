@@ -21,36 +21,34 @@ namespace SpectraTypeClassifier
 
         #endregion
 
-        #region "Module Wide Variables"
-
-        protected string mErrorMessage;
+        #region "Class Wide Variables"
 
         protected int mPpmDiffThreshold;
 
         // The following dictionaries keep track of the number of spectra at each MSLevel (1 for MS1, 2 for MS2, etc.)
+        private string mErrorMessage;
 
         /// <summary>
         /// Centroided spectra
         /// </summary>
-        /// <remarks></remarks>
-        protected Dictionary<int, int> mCentroidedSpectra;
+        /// <remarks>Tracks the number of centroided spectra at each MSLevel (1 for MS1, 2 for MS2, etc.)</remarks>
+        private readonly Dictionary<int, int> mCentroidedSpectra;
 
         /// <summary>
         /// Centroided spectra that were mis-classified as profile mode
         /// </summary>
-        /// <remarks></remarks>
-
-        protected Dictionary<int, int> mCentroidedSpectraClassifiedAsProfile;
+        /// <remarks>Tracks the number of spectra at each MSLevel (1 for MS1, 2 for MS2, etc.)</remarks>
+        private readonly Dictionary<int, int> mCentroidedSpectraClassifiedAsProfile;
 
         /// <summary>
         /// All spectra
         /// </summary>
-        /// <remarks></remarks>
-        protected Dictionary<int, int> mTotalSpectra;
+        /// <remarks>Tracks the number of spectra at each MSLevel (1 for MS1, 2 for MS2, etc.)</remarks>
+        private readonly Dictionary<int, int> mTotalSpectra;
 
         #endregion
 
-        protected readonly clsMedianUtilities mMedianUtils;
+        private readonly clsMedianUtilities mMedianUtils;
 
         #region "Events"
 
