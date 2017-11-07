@@ -23,9 +23,6 @@ namespace SpectraTypeClassifier
 
         #region "Class Wide Variables"
 
-        protected int mPpmDiffThreshold;
-
-        // The following dictionaries keep track of the number of spectra at each MSLevel (1 for MS1, 2 for MS2, etc.)
         private string mErrorMessage;
 
         /// <summary>
@@ -64,6 +61,44 @@ namespace SpectraTypeClassifier
 
         #region "Properties"
 
+        /// <summary>
+        /// Number of centroided spectra
+        /// </summary>
+        /// <returns></returns>
+        public int CentroidedSpectra =>
+            mCentroidedSpectra.Sum(item => item.Value);
+
+        /// <summary>
+        /// Number of centroided MS1 spectra
+        /// </summary>
+        /// <returns></returns>
+        public int CentroidedMS1Spectra => (from item in mCentroidedSpectra where item.Key <= 1 select item.Value).Sum();
+
+
+        /// <summary>
+        /// Number of centroided MS2 spectra
+        /// </summary>
+        /// <returns></returns>
+        public int CentroidedMSnSpectra =>
+            (from item in mCentroidedSpectra where item.Key > 1 select item.Value).Sum();
+
+        /// <summary>
+        /// Number of MS1 spectra that empirically appears profile, but the calling class says is centroid
+        /// </summary>
+        /// <returns></returns>
+        public int CentroidedMS1SpectraClassifiedAsProfile =>
+            (from item in mCentroidedSpectraClassifiedAsProfile where item.Key <= 1 select item.Value).Sum();
+
+        /// <summary>
+        /// Number of MSn spectra that empirically appears profile, but the calling class says is centroid
+        /// </summary>
+        /// <returns></returns>
+        public int CentroidedMSnSpectraClassifiedAsProfile =>
+            (from item in mCentroidedSpectraClassifiedAsProfile where item.Key > 1 select item.Value).Sum();
+
+        /// <summary>
+        /// Most recent error message
+        /// </summary>
         public string ErrorMessage
         {
             get
@@ -74,14 +109,77 @@ namespace SpectraTypeClassifier
             }
         }
 
-        public int PpmDiffThreshold
+        /// <summary>
+        /// Fraction of all spectra that are centroided
+        /// </summary>
+        /// <returns></returns>
+        public double FractionCentroided
         {
-            get => mPpmDiffThreshold;
-            set => mPpmDiffThreshold = value;
+            get
+            {
+                var total = TotalSpectra;
+                if (total == 0)
+                {
+                    return 0;
+                }
+
+                return CentroidedSpectra / (double)total;
+            }
         }
+
+        /// <summary>
+        /// Fraction of MSn spectra that are centroided
+        /// </summary>
+        /// <returns></returns>
+        public double FractionCentroidedMSn
+        {
+            get
+            {
+                var total = TotalMSnSpectra;
+                if (total == 0)
+                {
+                    return 0;
+                }
+
+                return CentroidedMSnSpectra / (double)total;
+            }
+        }
+
+        /// <summary>
+        /// Spacing between adjacent data points for deciding that data is thresholded (default is 50 ppm)
+        /// </summary>
+        /// <remarks>If the median spacing between data points is lower than this threshold, the spectrum is considered profile mode data</remarks>
+        public int PpmDiffThreshold { get; set; }
+
+        /// <summary>
+        /// Set to true to enable debug events
+        /// </summary>
+        /// <remarks>Off by default</remarks>
+        public bool RaiseDebugEvents { get; set; }
+
+        /// <summary>
+        /// Number of spectra analyzed
+        /// </summary>
+        /// <returns></returns>
+        public int TotalSpectra => mTotalSpectra.Sum(item => item.Value);
+
+        /// <summary>
+        /// Number of MS1 spectra analyzed
+        /// </summary>
+        /// <returns></returns>
+        public int TotalMS1Spectra => mTotalSpectra.Where(item => item.Key <= 1).Sum(item => item.Value);
+
+        /// <summary>
+        /// Number of MSn spectra analyzed
+        /// </summary>
+        /// <returns></returns>
+        public int TotalMSnSpectra => mTotalSpectra.Where(item => item.Key > 1).Sum(item => item.Value);
 
         #endregion
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public clsSpectrumTypeClassifier()
         {
             mMedianUtils = new clsMedianUtilities();
@@ -90,73 +188,8 @@ namespace SpectraTypeClassifier
             mCentroidedSpectraClassifiedAsProfile = new Dictionary<int, int>();
             mTotalSpectra = new Dictionary<int, int>();
 
-            mPpmDiffThreshold = DEFAULT_PPM_DIFF_THRESHOLD;
+            PpmDiffThreshold = DEFAULT_PPM_DIFF_THRESHOLD;
         }
-
-        public int CentroidedSpectra()
-        {
-            return mCentroidedSpectra.Sum(item => item.Value);
-        }
-
-        public int CentroidedMS1Spectra()
-        {
-            return (from item in mCentroidedSpectra where item.Key <= 1 select item.Value).Sum();
-        }
-
-        public int CentroidedMSnSpectra()
-        {
-            return (from item in mCentroidedSpectra where item.Key > 1 select item.Value).Sum();
-        }
-
-        public int CentroidedMS1SpectraClassifiedAsProfile()
-        {
-            return (from item in mCentroidedSpectraClassifiedAsProfile where item.Key <= 1 select item.Value).Sum();
-        }
-
-        public int CentroidedMSnSpectraClassifiedAsProfile()
-        {
-            return (from item in mCentroidedSpectraClassifiedAsProfile where item.Key > 1 select item.Value).Sum();
-        }
-
-        public double FractionCentroided()
-        {
-
-            var total = TotalSpectra();
-            if (total == 0)
-            {
-                return 0;
-            }
-
-            return CentroidedSpectra() / Convert.ToDouble(total);
-        }
-
-        public double FractionCentroidedMSn()
-        {
-
-            var total = TotalMSnSpectra();
-            if (total == 0)
-            {
-                return 0;
-            }
-
-            return CentroidedMSnSpectra() / Convert.ToDouble(total);
-        }
-
-        public int TotalSpectra()
-        {
-            return mTotalSpectra.Sum(item => item.Value);
-        }
-
-        public int TotalMS1Spectra()
-        {
-            return mTotalSpectra.Where(item => item.Key <= 1).Sum(item => item.Value);
-        }
-
-        public int TotalMSnSpectra()
-        {
-            return mTotalSpectra.Where(item => item.Key > 1).Sum(item => item.Value);
-        }
-
 
         /// <summary>
         /// Examine the spectra in a _DTA.txt file to determine the number of centroided spectra

@@ -69,23 +69,8 @@ namespace MSFileInfoScanner
         private readonly List<clsScanStatsEntry> mDatasetScanStats;
 
         public udtSampleInfoType SampleInfo;
-        private clsSpectrumTypeClassifier mSpectraTypeClassifier;
+        private readonly clsSpectrumTypeClassifier mSpectraTypeClassifier;
 
-        private clsSpectrumTypeClassifier SpectraTypeClassifier {
-            get => mSpectraTypeClassifier;
-            set {
-                if (mSpectraTypeClassifier != null)
-                {
-                    mSpectraTypeClassifier.ErrorEvent -= mSpectraTypeClassifier_ErrorEvent;
-                }
-                mSpectraTypeClassifier = value;
-                if (mSpectraTypeClassifier != null)
-                {
-                    mSpectraTypeClassifier.ErrorEvent += mSpectraTypeClassifier_ErrorEvent;
-                }
-            }
-
-        }
         private bool mDatasetSummaryStatsUpToDate;
 
         private clsDatasetSummaryStats mDatasetSummaryStats;
@@ -465,7 +450,7 @@ namespace MSFileInfoScanner
                 if (objScanStats == mDatasetScanStats) {
                     objSummaryStats = GetDatasetSummaryStats();
 
-                    if (mSpectraTypeClassifier.TotalSpectra() > 0) {
+                    if (mSpectraTypeClassifier.TotalSpectra > 0) {
                         includeCentroidStats = true;
                     }
 
@@ -567,20 +552,20 @@ namespace MSFileInfoScanner
                 objDSInfo.WriteElementString("FileSizeBytes", datasetFileInfo.FileSizeBytes.ToString());
 
                 if (includeCentroidStats) {
-                    var centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedMS1Spectra();
-                    var centroidedMSnSpectra = mSpectraTypeClassifier.CentroidedMSnSpectra();
+                    var centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedMS1Spectra;
+                    var centroidedMSnSpectra = mSpectraTypeClassifier.CentroidedMSnSpectra;
 
-                    var centroidedMS1SpectraClassifiedAsProfile = mSpectraTypeClassifier.CentroidedMS1SpectraClassifiedAsProfile();
-                    var centroidedMSnSpectraClassifiedAsProfile = mSpectraTypeClassifier.CentroidedMSnSpectraClassifiedAsProfile();
+                    var centroidedMS1SpectraClassifiedAsProfile = mSpectraTypeClassifier.CentroidedMS1SpectraClassifiedAsProfile;
+                    var centroidedMSnSpectraClassifiedAsProfile = mSpectraTypeClassifier.CentroidedMSnSpectraClassifiedAsProfile;
 
-                    var totalMS1Spectra = mSpectraTypeClassifier.TotalMS1Spectra();
-                    var totalMSnSpectra = mSpectraTypeClassifier.TotalMSnSpectra();
+                    var totalMS1Spectra = mSpectraTypeClassifier.TotalMS1Spectra;
+                    var totalMSnSpectra = mSpectraTypeClassifier.TotalMSnSpectra;
 
                     if (totalMS1Spectra + totalMSnSpectra == 0) {
                         // None of the spectra had MSLevel 1 or MSLevel 2
                         // This shouldn't normally be the case; nevertheless, we'll report the totals, regardless of MSLevel, using the MS1 elements
-                        centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedSpectra();
-                        totalMS1Spectra = mSpectraTypeClassifier.TotalSpectra();
+                        centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedSpectra;
+                        totalMS1Spectra = mSpectraTypeClassifier.TotalSpectra;
                     }
 
                     objDSInfo.WriteElementString("ProfileScanCountMS1", (totalMS1Spectra - centroidedMS1Spectra).ToString());

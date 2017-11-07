@@ -66,33 +66,33 @@ namespace MSFileInfoScannerUnitTests
                 classifier.CheckSpectrum(updatedCentroidMZs, 2, false, centroidingStatusMS2);
             }
 
-            Console.WriteLine("Total spectra:     {0}", classifier.TotalSpectra());
-            Console.WriteLine("Total MS1 spectra: {0}", classifier.TotalMS1Spectra());
-            Console.WriteLine("Total MSn spectra: {0}", classifier.TotalMSnSpectra());
+            Console.WriteLine("Total spectra:     {0}", classifier.TotalSpectra);
+            Console.WriteLine("Total MS1 spectra: {0}", classifier.TotalMS1Spectra);
+            Console.WriteLine("Total MSn spectra: {0}", classifier.TotalMSnSpectra);
 
-            Console.WriteLine("Total Centroided spectra:     {0}", classifier.CentroidedSpectra());
-            Console.WriteLine("Total Centroided MS1 spectra: {0}", classifier.CentroidedMS1Spectra());
-            Console.WriteLine("Total Centroided MSn spectra: {0}", classifier.CentroidedMSnSpectra());
+            Console.WriteLine("Total Centroided spectra:     {0}", classifier.CentroidedSpectra);
+            Console.WriteLine("Total Centroided MS1 spectra: {0}", classifier.CentroidedMS1Spectra);
+            Console.WriteLine("Total Centroided MSn spectra: {0}", classifier.CentroidedMSnSpectra);
 
-            Console.WriteLine("Total Centroided MS1 spectra classified as profile: {0}", classifier.CentroidedMS1SpectraClassifiedAsProfile());
-            Console.WriteLine("Total Centroided MSn spectra classified as profile: {0}", classifier.CentroidedMSnSpectraClassifiedAsProfile());
+            Console.WriteLine("Total Centroided MS1 spectra classified as profile: {0}", classifier.CentroidedMS1SpectraClassifiedAsProfile);
+            Console.WriteLine("Total Centroided MSn spectra classified as profile: {0}", classifier.CentroidedMSnSpectraClassifiedAsProfile);
 
-            Console.WriteLine("Fraction centroided:     {0}", classifier.FractionCentroided());
-            Console.WriteLine("Fraction centroided MSn: {0}", classifier.FractionCentroidedMSn());
+            Console.WriteLine("Fraction centroided:     {0}", classifier.FractionCentroided);
+            Console.WriteLine("Fraction centroided MSn: {0}", classifier.FractionCentroidedMSn);
 
-            Assert.AreEqual(20, classifier.TotalSpectra(), "Total spectra");
-            Assert.AreEqual(4, classifier.TotalMS1Spectra(), "Total MS1 spectra");
-            Assert.AreEqual(16, classifier.TotalMSnSpectra(), "Total MSn spectra");
+            Assert.AreEqual(20, classifier.TotalSpectra, "Total spectra");
+            Assert.AreEqual(4, classifier.TotalMS1Spectra, "Total MS1 spectra");
+            Assert.AreEqual(16, classifier.TotalMSnSpectra, "Total MSn spectra");
 
-            Assert.AreEqual(17, classifier.CentroidedSpectra(), "Centroided spectra");
-            Assert.AreEqual(1, classifier.CentroidedMS1Spectra(), "Centroided MS1 spectra");
-            Assert.AreEqual(16, classifier.CentroidedMSnSpectra(), "Centroided MSn spectra");
+            Assert.AreEqual(17, classifier.CentroidedSpectra, "Centroided spectra");
+            Assert.AreEqual(1, classifier.CentroidedMS1Spectra, "Centroided MS1 spectra");
+            Assert.AreEqual(16, classifier.CentroidedMSnSpectra, "Centroided MSn spectra");
 
-            Assert.AreEqual(1, classifier.CentroidedMS1SpectraClassifiedAsProfile(), "Centroided MS1 spectra classified as profile");
-            Assert.AreEqual(0, classifier.CentroidedMSnSpectraClassifiedAsProfile(), "Centroided MSn spectra classified as profile");
+            Assert.AreEqual(1, classifier.CentroidedMS1SpectraClassifiedAsProfile, "Centroided MS1 spectra classified as profile");
+            Assert.AreEqual(0, classifier.CentroidedMSnSpectraClassifiedAsProfile, "Centroided MSn spectra classified as profile");
 
-            Assert.AreEqual(0.85, classifier.FractionCentroided(), 0.001, "Fraction centroided");
-            Assert.AreEqual(1, classifier.FractionCentroidedMSn(), 0.001, "Fraction centroided MSn");
+            Assert.AreEqual(0.85, classifier.FractionCentroided, 0.001, "Fraction centroided");
+            Assert.AreEqual(1, classifier.FractionCentroidedMSn, 0.001, "Fraction centroided MSn");
 
         }
 
