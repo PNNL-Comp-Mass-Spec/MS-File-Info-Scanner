@@ -476,16 +476,45 @@ namespace SpectraTypeClassifier
         /// Computes the median of the ppm m/z difference values in lstPpmDiffs
         /// </summary>
         /// <param name="lstPpmDiffs">List of mass difference values between adjacent data points, converted to ppm</param>
+        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         /// <returns>True if the median is at least as large as PpmDiffThreshold</returns>
-        /// <remarks></remarks>
-        public bool IsDataCentroided(IList<double> lstPpmDiffs)
+        /// <remarks>Returns false if lstPpmDiffs has fewer than 4 data points (thus indicating sparse spectra)</remarks>
+        public bool IsDataCentroided(IList<double> lstPpmDiffs, string spectrumTitle = "")
         {
+            if (lstPpmDiffs.Count < 4)
+                return true;
 
             var medianDelMppm = mMedianUtils.Median(lstPpmDiffs);
+            bool centroided;
+            string spectrumDescription;
+            string comparison;
 
             if (medianDelMppm < PpmDiffThreshold)
             {
                 // Profile mode data
+                centroided = false;
+                spectrumDescription = "Profile mode";
+                comparison = "less than";
+            }
+            else
+            {
+
+                // Centroided data
+                centroided = true;
+                spectrumDescription = "Centroided";
+                comparison = "greater than";
+            }
+
+            // Example messages:
+            //  Profile mode spectrum, since 23.3 is less than 50 ppm
+            //  Centroided spectrum, since 78.6 is greater than 50 ppm
+            var msg = string.Format("  {0} spectrum, since {1:F1} is {2} {3} ppm", spectrumDescription, medianDelMppm, comparison, PpmDiffThreshold);
+
+            NotifyDebug(spectrumTitle, msg);
+
+            return centroided;
+
+        }
 
         /// <summary>
         /// Divide the data into 5 regions, then call IsDataCentroided for the data in each region
@@ -593,6 +622,21 @@ namespace SpectraTypeClassifier
             return centroided;
         }
 
+        /// <summary>
+        /// Send a message via a debug event, optionally prepending with a title
+        /// </summary>
+        /// <param name="spectrumTitle"></param>
+        /// <param name="msg"></param>
+        private void NotifyDebug(string spectrumTitle, string msg)
+        {
+            if (!RaiseDebugEvents)
+                return;
+
+            if (string.IsNullOrWhiteSpace(spectrumTitle))
+                OnDebugEvent(msg);
+            else
+                OnDebugEvent(spectrumTitle + ": " + msg);
+        }
 
         /// <summary>
         /// Clear cached data
