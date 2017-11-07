@@ -33,7 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SpectraTypeClassifier, Version=1.1.5990.30465, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="SpectraTypeClassifier, Version=2.0.6520.23941, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Lib\SpectraTypeClassifier.dll</HintPath>
     </Reference>
@@ -49,6 +49,9 @@
   <ItemGroup>
     <PackageReference Include="NUnit">
       <Version>3.8.1</Version>
+    </PackageReference>
+    <PackageReference Include="PRISM-Library">
+      <Version>2.4.40</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
