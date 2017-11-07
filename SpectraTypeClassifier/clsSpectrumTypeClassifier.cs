@@ -11,7 +11,21 @@ namespace SpectraTypeClassifier
 
         #region "Constants and Enums"
 
+        /// <summary>
+        /// Defeault spacing between adjacent data points for deciding that data is thresholded (default is 50 ppm)
+        /// </summary>
         public const int DEFAULT_PPM_DIFF_THRESHOLD = 50;
+
+        /// <summary>
+        /// Default number of regions to divide the data into when confirming that the data is profile mode
+        /// </summary>
+        private const int DEFAULT_REGION_COUNT = 5;
+
+        /// <summary>
+        /// Consider a spectrum to have profile mode data if two thirds of the regions appear to have profile mode data
+        /// </summary>
+        private const double FRACTION_REGIONS_PROFILE = 2.0 / 3.0;
+
         public enum eCentroidStatusConstants
         {
             Unknown = 0,
@@ -287,40 +301,65 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Examines lstPpmDiffs to determine if the data is centroided data
         /// </summary>
+        /// <param name="lstMZs"></param>
         /// <param name="lstPpmDiffs"></param>
         /// <param name="msLevel">1 for MS1, 2 for MS2, etc.</param>
-        /// <param name="centroidingStatus"></param>
-        /// <remarks>Increments class property TotalSpectra if lstPpmDiffs is not empty; increments class property CentroidedSpectra if the data is centroided</remarks>
-        protected void CheckPPMDiffs(List<double> lstPpmDiffs, int msLevel, eCentroidStatusConstants centroidingStatus)
+        /// <param name="centroidingStatus">Expected centroid mode</param>
+        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
+        /// <remarks>
+        /// Increments class property TotalSpectra if lstPpmDiffs is not empty
+        /// Increments class property CentroidedSpectra if the data is centroided
+        /// </remarks>
+        private void CheckPPMDiffs(
+            ICollection<double> lstMZs,
+            IList<double> lstPpmDiffs,
+            int msLevel,
+            eCentroidStatusConstants centroidingStatus,
+            string spectrumTitle = "")
         {
-            if (lstPpmDiffs.Count > 0)
+            if (lstPpmDiffs.Count <= 0)
+                return;
+
+            IncrementDictionaryByMSLevel(mTotalSpectra, msLevel);
+
+            if (RaiseDebugEvents)
             {
-                IncrementDictionaryByMSLevel(ref mTotalSpectra, msLevel);
+                if (string.IsNullOrWhiteSpace(spectrumTitle))
+                    OnDebugEvent(string.Format("Examining MS{0} spectrum", msLevel));
+                else
+                    OnDebugEvent("Examining " + spectrumTitle);
+            }
 
-                var empiricalCentroidStatus = eCentroidStatusConstants.Profile;
-                if (IsDataCentroided(lstPpmDiffs))
+            var empiricalCentroidStatus = eCentroidStatusConstants.Profile;
+            if (IsDataCentroided(lstPpmDiffs, spectrumTitle))
+            {
+                empiricalCentroidStatus = eCentroidStatusConstants.Centroid;
+            }
+            else
+            {
+                // Data appears profile
+                // Examine the data by region to confirm that at least two thirds of the regions have profile mode data
+                if (IsDataCentroidedInRegions(lstMZs, DEFAULT_REGION_COUNT, spectrumTitle))
                 {
-                    // Data appears centroided
+                    // When examining regions, the data appears centroided
                     empiricalCentroidStatus = eCentroidStatusConstants.Centroid;
-                }
-
-                if (centroidingStatus == eCentroidStatusConstants.Centroid & empiricalCentroidStatus == eCentroidStatusConstants.Profile)
-                {
-                    // The empirical algorithm has classified a centroid spectrum as profile
-                    // Change it back to centroid
-                    empiricalCentroidStatus = eCentroidStatusConstants.Centroid;
-
-                    IncrementDictionaryByMSLevel(ref mCentroidedSpectraClassifiedAsProfile, msLevel);
-                }
-
-                if (empiricalCentroidStatus == eCentroidStatusConstants.Centroid)
-                {
-                    IncrementDictionaryByMSLevel(ref mCentroidedSpectra, msLevel);
                 }
             }
 
-        }
+            if (centroidingStatus == eCentroidStatusConstants.Centroid && empiricalCentroidStatus == eCentroidStatusConstants.Profile)
+            {
+                // The empirical algorithm has classified a centroid spectrum as profile
+                // Change it back to centroid
+                empiricalCentroidStatus = eCentroidStatusConstants.Centroid;
 
+                IncrementDictionaryByMSLevel(mCentroidedSpectraClassifiedAsProfile, msLevel);
+            }
+
+            if (empiricalCentroidStatus == eCentroidStatusConstants.Centroid)
+            {
+                IncrementDictionaryByMSLevel(mCentroidedSpectra, msLevel);
+            }
+        }
 
         private void IncrementDictionaryByMSLevel(ref Dictionary<int, int> dctSpectrumCounts, int msLevel)
         {
@@ -455,11 +494,113 @@ namespace SpectraTypeClassifier
             if (medianDelMppm < PpmDiffThreshold)
             {
                 // Profile mode data
+
+        /// <summary>
+        /// Divide the data into 5 regions, then call IsDataCentroided for the data in each region
+        /// </summary>
+        /// <param name="lstMZs">m/z values to examine</param>
+        /// <param name="regionCount">Regions to divide data into</param>
+        /// <param name="spectrumTitle">Regions to divide data into</param>
+        /// <returns>
+        /// True if less than one third of the regions appears to be profile mode
+        /// False if two thirds of the regions is profile mode</returns>
+        private bool IsDataCentroidedInRegions(ICollection<double> lstMZs, int regionCount, string spectrumTitle)
+        {
+            if (lstMZs.Count < 2)
                 return false;
+
+            if (regionCount < 1)
+                regionCount = 1;
+
+            var sortedMZs = lstMZs.Distinct().OrderBy(item => item).ToList();
+
+            var minimumMz = sortedMZs.First();
+            var maximumMz = sortedMZs.Last();
+
+            var mzRange = (int)(Math.Ceiling(maximumMz) - Math.Floor(minimumMz));
+            if (mzRange <= 0)
+                return false;
+
+            var mzBinSize = (int)Math.Ceiling(mzRange / (double)regionCount);
+            if (mzBinSize < 1)
+                mzBinSize = 1;
+
+            var lstPpmDiffs = new List<double>(2000);
+            double previousMz = 0;
+
+            var startMz = minimumMz;
+            var endMz = startMz + mzBinSize;
+
+            var centroidedRegions = 0;
+            var profileModeRegions = 0;
+
+            foreach (var mz in lstMZs)
+            {
+                if (mz >= endMz)
+                {
+                    if (lstPpmDiffs.Count > 0)
+                    {
+                        if (IsDataCentroided(lstPpmDiffs))
+                        {
+                            centroidedRegions += 1;
+                        }
+                        else
+                        {
+                            profileModeRegions += 1;
+                        }
+                    }
+
+                    lstPpmDiffs.Clear();
+                    startMz += mzBinSize;
+                    endMz = startMz + mzBinSize;
+                    continue;
+                }
+
+                if (previousMz > 0 && mz > previousMz)
+                {
+                    var delMPPM = 1000000.0 * (mz - previousMz) / mz;
+                    lstPpmDiffs.Add(delMPPM);
+                }
+                previousMz = mz;
             }
 
-            // Centroided data
-            return true;
+            if (lstPpmDiffs.Count > 0)
+            {
+                if (IsDataCentroided(lstPpmDiffs))
+                {
+                    centroidedRegions += 1;
+                }
+                else
+                {
+                    profileModeRegions += 1;
+                }
+            }
+
+            var regionsWithData = centroidedRegions + profileModeRegions;
+            if (regionsWithData <= 0)
+            {
+                // Very sparse spectrum; treat as centroid
+                return true;
+            }
+
+            var fractionProfile = profileModeRegions / (double)(regionsWithData);
+
+            // If less than two thirds of the spectra appear to be profile mode, assume Centroided data
+            var centroided = fractionProfile < FRACTION_REGIONS_PROFILE;
+
+            string msg;
+
+            if (centroided)
+                msg = string.Format("  Data originally appeared to be profile mode, but {0} / {1} regions appear centroided",
+                    centroidedRegions, regionsWithData);
+            else
+                msg = string.Format("  {0} / {1} regions have profile mode data", profileModeRegions, regionsWithData);
+
+            NotifyDebug(spectrumTitle, msg);
+
+            return centroided;
+        }
+
         }
 
     }
