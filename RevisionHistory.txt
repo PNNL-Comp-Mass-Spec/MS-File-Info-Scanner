@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Vesrion 1.5.6520; November 7, 2017
+	- Improve detection of centroided data for sparse spectra
+	- SpectraTypeClassifier now inherits clsEventNotifier
+
 Version 1.5.6506; October 24, 2017
 	- Limit the frequency of calls to OnProgressUpdate while loading scan data
 
