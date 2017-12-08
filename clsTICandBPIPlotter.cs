@@ -446,8 +446,7 @@ namespace MSFileInfoScanner
             var plotContainer = new clsPythonPlotContainer2D(plotTitle, xAxisLabel, yAxisLabel) {
                 DeleteTempFiles = DeleteTempFiles
             };
-
-
+            
             if (yAxisExponentialNotation)
             {
                 plotContainer.YAxisInfo.StringFormat = clsAxisInfo.EXPONENTIAL_FORMAT;

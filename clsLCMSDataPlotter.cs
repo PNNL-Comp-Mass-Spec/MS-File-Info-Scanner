@@ -1683,7 +1683,7 @@ namespace MSFileInfoScanner
                 yAxisLabel = "m/z";
             }
 
-            var plotContainer = new clsPythonPlotContainer3D(plotTitle, "Scan", yAxisLabel, "Intensity")
+            var plotContainer = new clsPythonPlotContainer3D(plotTitle, "LC Scan Number", yAxisLabel, "Intensity")
             {
                 DeleteTempFiles = Options.DeleteTempFiles
             };
