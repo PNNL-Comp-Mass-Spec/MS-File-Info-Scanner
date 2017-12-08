@@ -2236,7 +2236,7 @@ namespace MSFileInfoScanner
                 blnSuccess = true;
             }
 
-            if (blnSuccess && objXMLReader.NodeType != XmlNodeType.Whitespace & objXMLReader.HasValue)
+            if (blnSuccess && objXMLReader.NodeType != XmlNodeType.Whitespace && objXMLReader.HasValue)
             {
                 strValue = objXMLReader.Value;
             }

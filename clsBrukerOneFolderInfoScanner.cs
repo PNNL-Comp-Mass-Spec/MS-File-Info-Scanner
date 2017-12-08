@@ -494,7 +494,7 @@ namespace MSFileInfoScanner
                         blnSuccess = ParseTICFolder(diZippedSFilesFolderInfo, datasetFileInfo, out dtTICModificationDate);
                     }
 
-                    if (blnSuccess & !blnParsingBrukerOneFolder && dtTICModificationDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                    if (blnSuccess && !blnParsingBrukerOneFolder && dtTICModificationDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
                     {
                         // If dtTICModificationDate is earlier than .AcqTimeStart then update to dtTICMOdificationDate
                         if (dtTICModificationDate < datasetFileInfo.AcqTimeStart)

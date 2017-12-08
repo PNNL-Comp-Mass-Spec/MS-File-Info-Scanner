@@ -451,7 +451,7 @@ namespace MSFileInfoScanner
                     datasetFileInfo.ScanCount = objPWiz.ChromatogramCount;
                 }
 
-                if (objPWiz.SpectrumCount > 0 & !blnSRMDataCached)
+                if (objPWiz.SpectrumCount > 0 && !blnSRMDataCached)
                 {
                     // Process the spectral data (though only if we did not process SRM data)
                     pWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, ref dblRuntimeMinutes);
@@ -987,13 +987,13 @@ namespace MSFileInfoScanner
                         bafFileParsed = ParseBAFFile(fiFileInfo, datasetFileInfo);
                     }
 
-                    if (mSaveTICAndBPI & mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC == 0 || mSaveLCMS2DPlots & mLCMS2DPlot.ScanCountCached == 0)
+                    if (mSaveTICAndBPI && mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC == 0 || mSaveLCMS2DPlots && mLCMS2DPlot.ScanCountCached == 0)
                     {
                         // If a ser or fid file exists, we can read the data from it to create the TIC and BPI plots, plus also the 2D plot
 
                         var serOrFidParsed = ParseSerOrFidFile(fiFileInfo.Directory, scanElutionTimeMap);
 
-                        if (!serOrFidParsed & !bafFileParsed)
+                        if (!serOrFidParsed && !bafFileParsed)
                         {
                             // Look for an analysis.baf file
                             bafFileParsed = ParseBAFFile(fiFileInfo, datasetFileInfo);

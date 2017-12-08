@@ -142,7 +142,7 @@ namespace MSFileInfoScanner
                     }
                 }
 
-                if (blnProcessedFirstMethodLine & !blnEndDateFound)
+                if (blnProcessedFirstMethodLine && !blnEndDateFound)
                 {
                     // Use the last time in the file as the .AcqTimeEnd value
                     if (ExtractMethodLineDate(strMostRecentMethodLine, out dtMethodDate))

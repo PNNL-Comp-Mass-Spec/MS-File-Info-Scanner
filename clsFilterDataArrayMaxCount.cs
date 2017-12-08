@@ -95,7 +95,7 @@ namespace MSFileInfoScanner
 
         public float GetAbundanceByIndex(int intDataPointIndex)
         {
-            if (intDataPointIndex >= 0 & intDataPointIndex < mDataValues.Count)
+            if (intDataPointIndex >= 0 && intDataPointIndex < mDataValues.Count)
             {
                 return mDataValues[intDataPointIndex].Item1;
             }

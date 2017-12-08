@@ -1294,9 +1294,9 @@ namespace MSFileInfoScanner
                         }
                     }
                 }
-            } while (!success & retryCount < MAX_FILE_READ_ACCESS_ATTEMPTS);
+            } while (!success && retryCount < MAX_FILE_READ_ACCESS_ATTEMPTS);
 
-            if (!success & retryCount >= MAX_FILE_READ_ACCESS_ATTEMPTS)
+            if (!success && retryCount >= MAX_FILE_READ_ACCESS_ATTEMPTS)
             {
                 if (!string.IsNullOrWhiteSpace(datasetFileInfo.DatasetName))
                 {
@@ -2124,7 +2124,7 @@ namespace MSFileInfoScanner
                         break;
                 }
 
-                if (mCheckFileIntegrity & !AbortProcessing)
+                if (mCheckFileIntegrity && !AbortProcessing)
                 {
                     CheckIntegrityOfFilesInFolder(diInputFolder.FullName, RecheckFileIntegrityForExistingFolders, processedFileList);
                 }
@@ -2252,7 +2252,7 @@ namespace MSFileInfoScanner
                                     success = RecurseFoldersWork(diSubfolder.FullName, fileNameMatch, outputFolderPath, ref fileProcessCount, ref fileProcessFailCount, recursionLevel + 1, recurseFoldersMaxLevels);
                                 }
 
-                                if (!success & !IgnoreErrorsWhenRecursing)
+                                if (!success && !IgnoreErrorsWhenRecursing)
                                 {
                                     break;
                                 }
@@ -2285,7 +2285,7 @@ namespace MSFileInfoScanner
                             SleepNow(1);
                         } while (retryCount < MAX_ACCESS_ATTEMPTS);
 
-                        if (!success & !IgnoreErrorsWhenRecursing)
+                        if (!success && !IgnoreErrorsWhenRecursing)
                         {
                             break;
                         }

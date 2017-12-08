@@ -521,7 +521,7 @@ namespace MSFileInfoScanner
 
                         mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
 
-                        if (mSaveTICAndBPI & !blnTICStored)
+                        if (mSaveTICAndBPI && !blnTICStored)
                         {
                             mTICandBPIPlot.AddData(objScanStatsEntry.ScanNumber, intMSLevels[intScanIndex], (float)dblScanTimes[intScanIndex], dblBPI, dblTIC);
                         }

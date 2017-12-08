@@ -470,7 +470,7 @@ namespace MSFileInfoScanner
                         ReportError("ComputeScanStatsSummary returned false; unable to continue in CreateDatasetInfoXML");
                         return string.Empty;
                     }
-                    includeCentroidStats = false;
+                    // includeCentroidStats is already false;
                 }
 
                 var objXMLSettings = new XmlWriterSettings
@@ -542,7 +542,7 @@ namespace MSFileInfoScanner
                 objDSInfo.WriteStartElement("AcquisitionInfo");
 
                 var scanCountTotal = objSummaryStats.MSStats.ScanCount + objSummaryStats.MSnStats.ScanCount;
-                if (scanCountTotal == 0 & datasetFileInfo.ScanCount > 0) {
+                if (scanCountTotal == 0 && datasetFileInfo.ScanCount > 0) {
                     scanCountTotal = datasetFileInfo.ScanCount;
                 }
 

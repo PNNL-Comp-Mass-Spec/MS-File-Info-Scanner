@@ -553,7 +553,7 @@ namespace MSFileInfoScanner
             var blnSuccess1 = SaveCachedMSInfoResults(blnClearCachedData);
             var blnSuccess2 = SaveCachedFolderIntegrityInfoResults(blnClearCachedData);
 
-            return blnSuccess1 & blnSuccess2;
+            return blnSuccess1 && blnSuccess2;
 
         }
 

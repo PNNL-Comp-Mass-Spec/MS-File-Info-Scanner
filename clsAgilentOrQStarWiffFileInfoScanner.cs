@@ -130,7 +130,7 @@ namespace MSFileInfoScanner
 
                 }
 
-                if (objPWiz.SpectrumCount > 0 & !blnSRMDataCached)
+                if (objPWiz.SpectrumCount > 0 && !blnSRMDataCached)
                 {
                     // Process the spectral data (though only if we did not process SRM data)
                     pWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, ref dblRuntimeMinutes);

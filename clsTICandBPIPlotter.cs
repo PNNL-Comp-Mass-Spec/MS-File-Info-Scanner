@@ -247,7 +247,7 @@ namespace MSFileInfoScanner
             {
 
                 if (msLevelFilter != 0 && chromDataPoint.MSLevel != msLevelFilter &&
-                    !(msLevelFilter == 2 & chromDataPoint.MSLevel >= 2))
+                    !(msLevelFilter == 2 && chromDataPoint.MSLevel >= 2))
                 {
                     continue;
                 }
@@ -418,7 +418,7 @@ namespace MSFileInfoScanner
             foreach (var chromDataPoint in objData.Scans)
             {
                 if (msLevelFilter != 0 && chromDataPoint.MSLevel != msLevelFilter &&
-                    !(msLevelFilter == 2 & chromDataPoint.MSLevel >= 2))
+                    !(msLevelFilter == 2 && chromDataPoint.MSLevel >= 2))
                 {
                     continue;
                 }

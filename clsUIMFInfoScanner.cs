@@ -700,7 +700,7 @@ namespace MSFileInfoScanner
                         } while (Math.Abs(dblEndTime) < float.Epsilon && frameIndex >= 0);
 
                         // Check whether the StartTime and EndTime values are based on ticks
-                        if (dblStartTime >= 1E+17 & dblEndTime > 1E+17)
+                        if (dblStartTime >= 1E+17 && dblEndTime > 1E+17)
                         {
                             // StartTime and Endtime were stored as the number of ticks (where each tick is 100 ns)
                             // Tick start date is either 1 January 1601 or 1 January 0001
@@ -720,7 +720,7 @@ namespace MSFileInfoScanner
                                     reportedDateStarted = reportedDateStarted.AddYears(1600);
                                 }
 
-                                if (reportedDateStarted.Year >= 2000 & reportedDateStarted.Year <= DateTime.Now.Year + 1)
+                                if (reportedDateStarted.Year >= 2000 && reportedDateStarted.Year <= DateTime.Now.Year + 1)
                                 {
                                     // Date looks valid
                                     if (inaccurateStartTime)

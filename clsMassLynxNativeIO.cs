@@ -512,7 +512,7 @@ namespace MSFileInfoScanner
             {
                 if (ValidateDataFolder(strMLynxDataFolderPath))
                 {
-                    if (lngFunctionNumber >= 1 & lngFunctionNumber <= mMSData.FunctionCount)
+                    if (lngFunctionNumber >= 1 && lngFunctionNumber <= mMSData.FunctionCount)
                     {
                         intAcquisitionDataTypeID = mMSData.FunctionInfo[lngFunctionNumber].AcquisitionDataType;
                     }
@@ -571,7 +571,7 @@ namespace MSFileInfoScanner
                 blnSuccess = ValidateDataFolder(strMLynxDataFolderPath);
                 if (blnSuccess)
                 {
-                    if (lngFunctionNumber >= 1 & lngFunctionNumber <= mMSData.FunctionCount)
+                    if (lngFunctionNumber >= 1 && lngFunctionNumber <= mMSData.FunctionCount)
                     {
                         lngScanCount = mMSData.FunctionInfo[lngFunctionNumber].ScanCount;
                         sngStartRT = mMSData.FunctionInfo[lngFunctionNumber].StartRT;
@@ -612,7 +612,7 @@ namespace MSFileInfoScanner
                 blnSuccess = ValidateDataFolder(strMLynxDataFolderPath);
                 if (blnSuccess)
                 {
-                    if (lngFunctionNumber >= 1 & lngFunctionNumber <= mMSData.FunctionCount)
+                    if (lngFunctionNumber >= 1 && lngFunctionNumber <= mMSData.FunctionCount)
                     {
                         udtFunctionInfo = mMSData.FunctionInfo[lngFunctionNumber];
                     }
@@ -666,7 +666,7 @@ namespace MSFileInfoScanner
             {
                 if (ValidateDataFolder(strMLynxDataFolderPath))
                 {
-                    if (lngFunctionNumber >= 1 & lngFunctionNumber <= mMSData.FunctionCount)
+                    if (lngFunctionNumber >= 1 && lngFunctionNumber <= mMSData.FunctionCount)
                     {
                         lngScanCount = mMSData.FunctionInfo[lngFunctionNumber].ScanCount;
                     }
@@ -750,7 +750,7 @@ namespace MSFileInfoScanner
                 return false;
             }
 
-            if (!(lngFunctionNumber >= 1 & lngFunctionNumber <= mMSData.FunctionCount))
+            if (!(lngFunctionNumber >= 1 && lngFunctionNumber <= mMSData.FunctionCount))
             {
                 return false;
             }
@@ -1514,7 +1514,7 @@ namespace MSFileInfoScanner
                     if (lngScanNumber < 1)
                         lngScanNumber = 1;
 
-                    if (lngNumberOfScansInFunction > 0 & lngScanNumber <= lngNumberOfScansInFunction)
+                    if (lngNumberOfScansInFunction > 0 && lngScanNumber <= lngNumberOfScansInFunction)
                     {
                         // Just read the record for this scan
 
@@ -1688,7 +1688,7 @@ namespace MSFileInfoScanner
                                 if (strLineIn.ToUpper().StartsWith(CAL_FUNCTION_NAME)) {
                                     // Calibration equation for one of the functions
                                     lngFunctionNumber = CLngSafe(strLineIn.Substring(CAL_FUNCTION_NAME.Length, intColonLoc - CAL_FUNCTION_NAME.Length));
-                                    if (lngFunctionNumber >= 1 & lngFunctionNumber <= udtThisMSData.FunctionCount) {
+                                    if (lngFunctionNumber >= 1 && lngFunctionNumber <= udtThisMSData.FunctionCount) {
 
                                         NativeIOParseCalibrationCoeffs(
                                             strKeyValue,
@@ -1702,7 +1702,7 @@ namespace MSFileInfoScanner
                                     }
                                 } else if (strLineIn.ToUpper().StartsWith(CAL_STDDEV_FUNCTION_NAME)) {
                                     lngFunctionNumber = CLngSafe(strLineIn.Substring(CAL_STDDEV_FUNCTION_NAME.Length, intColonLoc - CAL_STDDEV_FUNCTION_NAME.Length));
-                                    if (lngFunctionNumber >= 1 & lngFunctionNumber <= udtThisMSData.FunctionCount)
+                                    if (lngFunctionNumber >= 1 && lngFunctionNumber <= udtThisMSData.FunctionCount)
                                     {
                                         if (double.TryParse(strKeyValue, out var calStdDev))
                                         {
