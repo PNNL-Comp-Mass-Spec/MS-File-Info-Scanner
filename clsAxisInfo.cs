@@ -1,9 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Text;
-using MathNet.Numerics;
-using OxyPlot;
 
 namespace MSFileInfoScanner
 {
@@ -50,7 +47,6 @@ namespace MSFileInfoScanner
             StringFormat = DEFAULT_AXIS_LABEL_FORMAT;
             Title = title;
         }
-
 
         /// <summary>
         /// Get options as a semi colon separated list of key-value pairs
