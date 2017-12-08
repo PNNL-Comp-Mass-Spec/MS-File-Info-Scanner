@@ -37,7 +37,7 @@ def process_file(dataFilePath):
         print('Output:', outputFilePath)
         print()
         print('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '"')            
-        print('  ' + str(len(data.index)) + ' data points')
+        print("  {:,}".format(len(data.index)) + ' data points')
         print()
         plot_lc_intensity(outputFilePath, data.columns, data[data.columns[0]], data[data.columns[1]], plotLabels['Title'], plotLabels['BottomRight'])
         return
@@ -46,7 +46,7 @@ def process_file(dataFilePath):
         print('Output:', outputFilePath)
         print()
         print('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '" vs. "' + data.columns[2] + '"')
-        print('  ' + str(len(data.index)) + ' data points')
+        print("  {:,}".format(len(data.index)) + ' data points')
         print()
         plot_lc_mz(outputFilePath, data.columns, data[data.columns[0]], data[data.columns[1]], data[data.columns[2]], plotLabels['Title'], plotLabels['BottomRight'], plotLabels['BottomLeft'])
         return
@@ -55,7 +55,7 @@ def process_file(dataFilePath):
         print('Output:', outputFilePath)
         print()
         print('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '" vs. "' + data.columns[2] + '" coloring by ' + data.columns[3])
-        print('  ' + str(len(data.index)) + ' data points')
+        print("  {:,}".format(len(data.index)) + ' data points')
         print()
         plot_lc_mz_by_charge(outputFilePath, data.columns, data[data.columns[0]], data[data.columns[1]], data[data.columns[2]], data[data.columns[3]], plotLabels['Title'], plotLabels['BottomRight'], plotLabels['BottomLeft'])
         return
@@ -244,7 +244,7 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
         
         # for textItem in fig.texts:
         #    pprint(vars(textItem))
-        
+                  
     else:        
         sc = ax.scatter(xData, yData, c=zData, vmin=normMin, vmax=normMax, s=1, cmap=cm, alpha=1)
 
