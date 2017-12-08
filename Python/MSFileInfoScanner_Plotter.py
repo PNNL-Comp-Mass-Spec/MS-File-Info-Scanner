@@ -177,12 +177,23 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
 
         colors = ['blue','red','green','hotpink','peru','darkviolet']
         
-        for charge in range(6):
-            indicesToUse = (zData == charge + 1)
-            seriesName = "Charge " + str(charge+1)
+        maxChargeWithData = 1
+        
+        for chargeIndex in range(6):
+            charge = chargeIndex + 1
+            
+            indicesToUse = (zData == charge)
+            seriesName = "Charge " + str(charge)
 
             # Change the alpha value based on the number of points to point
             pointsToPlot = len(xData[indicesToUse])
+            
+            # print ('Charge {0} has {1} points'.format(charge, pointsToPlot))
+            
+            if pointsToPlot < 1:
+                continue
+
+            maxChargeWithData = charge
             
             if pointsToPlot < 10:
                 alpha = 1
@@ -196,7 +207,7 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
 
             # print("{:10,d}".format(pointsToPlot) + " points, alpha " + format(alpha, ".2f"))
             
-            sc = ax.scatter(xData[indicesToUse], yData[indicesToUse], s=1, color=colors[charge], alpha=alpha, label=seriesName)
+            sc = ax.scatter(xData[indicesToUse], yData[indicesToUse], s=1, color=colors[chargeIndex], alpha=alpha, label=seriesName)
 
         # Option 1: Create a legend using the actual symbols and sizes used by the data points
         #           This doesn't work with the small data point sizes that we're using
@@ -213,6 +224,11 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
         
         for plotColor in colors:
             colorRow += 1
+
+            if colorRow > maxChargeWithData:
+                # print ("Legend will not include charge " + str(colorRow) + "+ or higher")
+                break
+                
             legendLabel = str(colorRow) + "+"
             legendPatch = mpatches.Patch(color=plotColor, label=legendLabel)
             legendItems.append(legendPatch)
