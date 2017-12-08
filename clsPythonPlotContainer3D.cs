@@ -95,11 +95,6 @@ namespace MSFileInfoScanner
                     }
                 }
 
-                if (DeleteTempFiles)
-                {
-                    exportFile.Delete();
-                }
-
             }
             catch (Exception ex)
             {
@@ -116,6 +111,12 @@ namespace MSFileInfoScanner
             try
             {
                 var success = GeneratePlotsWithPython(exportFile, pngFile.Directory);
+
+                if (DeleteTempFiles)
+                {
+                    exportFile.Delete();
+                }
+
                 return success;
             }
             catch (Exception ex)
