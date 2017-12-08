@@ -216,18 +216,6 @@ namespace MSFileInfoScanner
                     }
                 }
 
-                const bool USE_LOG = false;
-                if (USE_LOG)
-                {
-                    for (var index = 0; index <= ionCountNew - 1; index++)
-                    {
-                        if (ionsIntensityFiltered[index] > 0)
-                        {
-                            ionsIntensityFiltered[index] = (float)Math.Log10(ionsIntensityFiltered[index]);
-                        }
-                    }
-                }
-
                 AddScanCheckData(scanNumber, msLevel, scanTimeMinutes, ionCountNew, ionsMZFiltered, ionsIntensityFiltered, chargeFiltered);
 
             }
@@ -1848,8 +1836,6 @@ namespace MSFileInfoScanner
         public bool Save2DPlots(string strDatasetName, string strOutputFolderPath, string strFileNameSuffixAddon, string strScanModeSuffixAddon)
         {
 
-            const bool EMBED_FILTER_SETTINGS_IN_NAME = false;
-
             try
             {
                 ClearRecentFileInfo();
@@ -1892,16 +1878,7 @@ namespace MSFileInfoScanner
 
                 if (ms1Plot.SeriesCount > 0)
                 {
-                    string pngFilename;
-
-                    if (EMBED_FILTER_SETTINGS_IN_NAME)
-                    {
-                        pngFilename = strDatasetName + "_" + strFileNameSuffixAddon + "LCMS_" + mOptions.MaxPointsToPlot + "_" + mOptions.MinPointsPerSpectrum + "_" + mOptions.MZResolution.ToString("0.00") + strScanModeSuffixAddon + ".png";
-                    }
-                    else
-                    {
-                        pngFilename = strDatasetName + "_" + strFileNameSuffixAddon + "LCMS" + strScanModeSuffixAddon + ".png";
-                    }
+                    var pngFilename = strDatasetName + "_" + strFileNameSuffixAddon + "LCMS" + strScanModeSuffixAddon + ".png";
                     var pngFile = new FileInfo(Path.Combine(strOutputFolderPath, pngFilename));
                     successMS1 = ms1Plot.SaveToPNG(pngFile, 1024, 700, 96);
                     AddRecentFile(pngFile.FullName, eOutputFileTypes.LCMS);
