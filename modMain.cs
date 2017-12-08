@@ -85,7 +85,7 @@ namespace MSFileInfoScanner
         public static int Main()
         {
 
-            int intReturnCode;
+            int returnCode;
             var objParseCommandLine = new clsParseCommandLine();
 
             mInputDataFilePath = string.Empty;
@@ -208,31 +208,48 @@ namespace MSFileInfoScanner
                     scanner.LoadParameterFileSettings(mParameterFilePath);
                 }
 
+                bool processingError;
+
                 if (mRecurseFolders)
                 {
                     if (scanner.ProcessMSFilesAndRecurseFolders(mInputDataFilePath, mOutputFolderName, mRecurseFoldersMaxLevels))
                     {
-                        intReturnCode = 0;
+                        returnCode = 0;
+                        processingError = false;
                     }
                     else
                     {
-                        intReturnCode = (int)scanner.ErrorCode;
+                        returnCode = (int)scanner.ErrorCode;
+                        processingError = true;
                     }
                 }
                 else
                 {
                     if (scanner.ProcessMSFileOrFolderWildcard(mInputDataFilePath, mOutputFolderName, true))
                     {
-                        intReturnCode = 0;
+                        returnCode = 0;
+                        processingError = false;
                     }
                     else
                     {
-                        intReturnCode = (int)scanner.ErrorCode;
-                        if (intReturnCode != 0)
-                        {
-                            ShowErrorMessage("Error while processing: " + scanner.GetErrorMessage());
-                        }
+                        returnCode = (int)scanner.ErrorCode;
+                        processingError = true;
                     }
+                }
+
+                if (processingError)
+                {
+                    if (returnCode != 0)
+                    {
+                        ShowErrorMessage("Error while processing: " + scanner.GetErrorMessage());
+                    }
+                    else
+                    {
+                        ShowErrorMessage(
+                            "Unknown error while processing (ProcessMSFileOrFolderWildcard returned false but the ErrorCode is 0)");
+                    }
+
+                    System.Threading.Thread.Sleep(1500);
                 }
 
                 scanner.SaveCachedResults();
@@ -240,10 +257,10 @@ namespace MSFileInfoScanner
             catch (Exception ex)
             {
                 ShowErrorMessage("Error occurred in modMain->Main: " + Environment.NewLine + ex.Message);
-                intReturnCode = -1;
+                returnCode = -1;
             }
 
-            return intReturnCode;
+            return returnCode;
 
         }
 

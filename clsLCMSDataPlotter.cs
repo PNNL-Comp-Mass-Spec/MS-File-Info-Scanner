@@ -1783,8 +1783,6 @@ namespace MSFileInfoScanner
 
             const bool EMBED_FILTER_SETTINGS_IN_NAME = false;
 
-            bool blnSuccess;
-
             try
             {
                 ClearRecentFileInfo();
@@ -1822,6 +1820,9 @@ namespace MSFileInfoScanner
                     oxyPlotContainer?.AddGradients(colorGradients);
                 }
 
+                var successMS1 = true;
+                var successMS2 = true;
+
                 if (ms1Plot.SeriesCount > 0)
                 {
                     string pngFilename;
@@ -1834,9 +1835,9 @@ namespace MSFileInfoScanner
                     {
                         pngFilename = strDatasetName + "_" + strFileNameSuffixAddon + "LCMS" + strScanModeSuffixAddon + ".png";
                     }
-                    var strPNGFilePath = Path.Combine(strOutputFolderPath, pngFilename);
-                    ms1Plot.SaveToPNG(strPNGFilePath, 1024, 700, 96);
-                    AddRecentFile(strPNGFilePath, eOutputFileTypes.LCMS);
+                    var pngFile = new FileInfo(Path.Combine(strOutputFolderPath, pngFilename));
+                    successMS1 = ms1Plot.SaveToPNG(pngFile, 1024, 700, 96);
+                    AddRecentFile(pngFile.FullName, eOutputFileTypes.LCMS);
                 }
 
                 var ms2Plot = InitializePlot(strDatasetName + " - " + mOptions.MS2PlotTitle, 2, true);
@@ -1844,21 +1845,19 @@ namespace MSFileInfoScanner
 
                 if (ms2Plot.SeriesCount > 0)
                 {
-                    var strPNGFilePath = Path.Combine(strOutputFolderPath, strDatasetName + "_" + strFileNameSuffixAddon + "LCMS_MSn" + strScanModeSuffixAddon + ".png");
-                    ms2Plot.SaveToPNG(strPNGFilePath, 1024, 700, 96);
-                    AddRecentFile(strPNGFilePath, eOutputFileTypes.LCMSMSn);
+                    var pngFile = new FileInfo(Path.Combine(strOutputFolderPath, strDatasetName + "_" + strFileNameSuffixAddon + "LCMS_MSn" + strScanModeSuffixAddon + ".png"));
+                    successMS2 = ms2Plot.SaveToPNG(pngFile, 1024, 700, 96);
+                    AddRecentFile(pngFile.FullName, eOutputFileTypes.LCMSMSn);
                 }
 
-                blnSuccess = true;
+                return successMS1 && successMS2;
 
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error in clsLCMSDataPlotter.Save2DPlots: " + ex.Message, ex);
-                blnSuccess = false;
+                return false;
             }
-
-            return blnSuccess;
 
         }
 

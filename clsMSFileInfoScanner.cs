@@ -1327,15 +1327,12 @@ namespace MSFileInfoScanner
 
                 if (DSInfoDBPostingEnabled)
                 {
-                    success = PostDatasetInfoToDB(DatasetInfoXML);
-                    if (!success)
+                    var dbSuccess = PostDatasetInfoToDB(DatasetInfoXML);
+                    if (!dbSuccess)
                     {
                         SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
+                        success = false;
                     }
-                }
-                else
-                {
-                    success = true;
                 }
 
             }

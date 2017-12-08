@@ -62,51 +62,56 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Save the plot, along with any defined annotations, to a png file
         /// </summary>
-        /// <param name="pngFilePath">Output file path</param>
+        /// <param name="pngFile">Output PNG file</param>
         /// <param name="width">PNG file width, in pixels</param>
         /// <param name="height">PNG file height, in pixels</param>
         /// <param name="resolution">Image resolution, in dots per inch</param>
         /// <remarks></remarks>
-        public override void SaveToPNG(string pngFilePath, int width, int height, int resolution)
+        public override bool SaveToPNG(FileInfo pngFile, int width, int height, int resolution)
         {
-            if (string.IsNullOrWhiteSpace(pngFilePath))
+            if (pngFile == null)
+                throw new ArgumentNullException(nameof(pngFile), "PNG file instance cannot be blank");
+
+            bool success;
+            if (pngFile.Extension.ToLower() != ".png")
             {
-                throw new ArgumentOutOfRangeException(pngFilePath, "Filename cannot be empty");
+                success = SaveToFileLoop(new FileInfo(pngFile.FullName + ".png"), ImageFileFormat.PNG, width, height, resolution);
+            }
+            else
+            {
+                success = SaveToFileLoop(pngFile, ImageFileFormat.PNG, width, height, resolution);
             }
 
-            if (Path.GetExtension(pngFilePath).ToLower() != ".png")
-            {
-                pngFilePath += ".png";
-            }
-
-            SaveToFileLoop(pngFilePath, ImageFileFormat.PNG, width, height, resolution);
+            return success;
 
         }
 
-        public void SaveToJPG(string jpgFilePath, int width, int height, int resolution)
+        public bool SaveToJPG(FileInfo jpgFile, int width, int height, int resolution)
         {
-            if (string.IsNullOrWhiteSpace(jpgFilePath))
+            if(jpgFile == null)
+                throw new ArgumentNullException(nameof(jpgFile), "JPG file instance cannot be blank");
+
+            bool success;
+            if (jpgFile.Extension.ToLower() != ".jpg")
             {
-                throw new ArgumentOutOfRangeException(jpgFilePath, "Filename cannot be empty");
+                success = SaveToFileLoop(new FileInfo(jpgFile.FullName + ".jpg"), ImageFileFormat.JPG, width, height, resolution);
+            }
+            else
+            {
+                success = SaveToFileLoop(jpgFile, ImageFileFormat.JPG, width, height, resolution);
             }
 
-            if (Path.GetExtension(jpgFilePath).ToLower() != ".png")
-            {
-                jpgFilePath += "" +
-                               ".jpg" +
-                               "";
-            }
-
-            SaveToFileLoop(jpgFilePath, ImageFileFormat.JPG, width, height, resolution);
-
+            return success;
         }
 
-        private void SaveToFileLoop(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
+        private bool SaveToFileLoop(FileInfo imageFile, ImageFileFormat fileFormat, int width, int height, int resolution)
         {
+            var successOverall = false;
+
             if (mColorGradients == null || mColorGradients.Count == 0)
             {
-                SaveToFile(imageFilePath, fileFormat, width, height, resolution);
-                return;
+                var success = SaveToFile(imageFile, fileFormat, width, height, resolution);
+                return success;
             }
 
             foreach (var colorGradient in mColorGradients)
@@ -126,32 +131,40 @@ namespace MSFileInfoScanner
                     newAxis.Palette = colorGradient.Value;
                     newAxis.IsAxisVisible = true;
 
-                    var fiBaseImageFile = new FileInfo(imageFilePath);
+                    var newFileName = Path.GetFileNameWithoutExtension(imageFile.Name) + "_Gradient_" + colorGradient.Key + imageFile.Extension;
+                    FileInfo newFileInfo;
 
-                    var newFileName = Path.GetFileNameWithoutExtension(fiBaseImageFile.Name) + "_Gradient_" + colorGradient.Key + fiBaseImageFile.Extension;
-                    if (fiBaseImageFile.DirectoryName != null)
+                    if (imageFile.DirectoryName != null)
                     {
-                        newFileName = Path.Combine(fiBaseImageFile.DirectoryName, newFileName);
+                        newFileInfo = new FileInfo(Path.Combine(imageFile.DirectoryName, newFileName));
+                    }
+                    else
+                    {
+                        newFileInfo = new FileInfo(newFileName);
                     }
 
-                    SaveToFile(newFileName, fileFormat, width, height, resolution);
+                    var success = SaveToFile(newFileInfo, fileFormat, width, height, resolution);
+                    if (success)
+                        successOverall = true;
+
                 }
 
                 if (!matchFound)
                 {
-                    SaveToFile(imageFilePath, fileFormat, width, height, resolution);
-                    return;
+                    var success = SaveToFile(imageFile, fileFormat, width, height, resolution);
+                    return success;
                 }
             }
 
+            return successOverall;
         }
 
-        private void SaveToFile(string imageFilePath, ImageFileFormat fileFormat, int width, int height, int resolution)
+        private bool SaveToFile(FileInfo imageFile, ImageFileFormat fileFormat, int width, int height, int resolution)
         {
-            if (string.IsNullOrWhiteSpace(imageFilePath))
-                throw new ArgumentOutOfRangeException(nameof(imageFilePath), "imageFilePath cannot be empty");
+            if (imageFile == null)
+                throw new ArgumentNullException(nameof(imageFile), "Image file instance cannot be blank");
 
-            Console.WriteLine("Saving " + Path.GetFileName(imageFilePath));
+            Console.WriteLine("Saving " + Path.GetFileName(imageFile.FullName));
 
             // Note that this operation can be slow if there are over 100,000 data points
             var plotBitmap = OxyPlot.Wpf.PngExporter.ExportToBitmap(Plot, width, height, OxyPlot.OxyColors.White, resolution);
@@ -211,11 +224,12 @@ namespace MSFileInfoScanner
 
             encoder.Frames.Add(BitmapFrame.Create(target));
 
-            using (var outputStream = new FileStream(imageFilePath, FileMode.Create, FileAccess.Write))
+            using (var outputStream = new FileStream(imageFile.FullName, FileMode.Create, FileAccess.Write))
             {
                 encoder.Save(outputStream);
             }
 
+            return true;
         }
 
         public void AddGradients(Dictionary<string, OxyPalette> colorGradients)

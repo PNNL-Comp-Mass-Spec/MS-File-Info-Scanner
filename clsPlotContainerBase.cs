@@ -82,7 +82,7 @@ namespace MSFileInfoScanner
                 mLogWriter.WriteLine();
         }
 
-        public abstract void SaveToPNG(string pngFilePath, int width, int height, int resolution);
+        public abstract bool SaveToPNG(FileInfo pngFile, int width, int height, int resolution);
 
         public void WriteDebugLog(string message)
         {

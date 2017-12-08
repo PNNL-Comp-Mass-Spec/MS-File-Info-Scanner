@@ -524,7 +524,6 @@ namespace MSFileInfoScanner
         /// <returns>True if success, false if an error</returns>
         public bool SaveTICAndBPIPlotFiles(string datasetName, string outputFolderPath)
         {
-            bool success;
 
             try
             {
@@ -546,11 +545,15 @@ namespace MSFileInfoScanner
                 var bpiPlotMS1 = InitializePlot(mBPI, datasetName + " - " + BPIPlotAbbrev + " - MS Spectra", 1, BPIXAxisLabel, BPIYAxisLabel, BPIAutoMinMaxY, BPIYAxisExponentialNotation);
                 RegisterEvents(bpiPlotMS1);
 
+                var successMS1 = true;
+                var successMS2 = true;
+                var successTIC = true;
+
                 if (bpiPlotMS1.SeriesCount > 0)
                 {
-                    var pngFilePath = Path.Combine(outputFolderPath, datasetName + "_" + BPIPlotAbbrev + "_MS.png");
-                    bpiPlotMS1.SaveToPNG(pngFilePath, 1024, 600, 96);
-                    AddRecentFile(pngFilePath, eOutputFileTypes.BPIMS);
+                    var pngFile = new FileInfo(Path.Combine(outputFolderPath, datasetName + "_" + BPIPlotAbbrev + "_MS.png"));
+                    successMS1 = bpiPlotMS1.SaveToPNG(pngFile, 1024, 600, 96);
+                    AddRecentFile(pngFile.FullName, eOutputFileTypes.BPIMS);
                 }
 
                 var bpiPlotMS2 = InitializePlot(mBPI, datasetName + " - " + BPIPlotAbbrev + " - MS2 Spectra", 2, BPIXAxisLabel, BPIYAxisLabel, BPIAutoMinMaxY, BPIYAxisExponentialNotation);
@@ -558,9 +561,9 @@ namespace MSFileInfoScanner
 
                 if (bpiPlotMS2.SeriesCount > 0)
                 {
-                    var pngFilePath = Path.Combine(outputFolderPath, datasetName + "_" + BPIPlotAbbrev + "_MSn.png");
-                    bpiPlotMS2.SaveToPNG(pngFilePath, 1024, 600, 96);
-                    AddRecentFile(pngFilePath, eOutputFileTypes.BPIMSn);
+                    var pngFile = new FileInfo(Path.Combine(outputFolderPath, datasetName + "_" + BPIPlotAbbrev + "_MSn.png"));
+                    successMS2 = bpiPlotMS2.SaveToPNG(pngFile, 1024, 600, 96);
+                    AddRecentFile(pngFile.FullName, eOutputFileTypes.BPIMSn);
                 }
 
                 var ticPlot = InitializePlot(mTIC, datasetName + " - " + TICPlotAbbrev + " - All Spectra", 0, TICXAxisLabel, TICYAxisLabel, TICAutoMinMaxY, TICYAxisExponentialNotation);
@@ -568,20 +571,18 @@ namespace MSFileInfoScanner
 
                 if (ticPlot.SeriesCount > 0)
                 {
-                    var pngFilePath = Path.Combine(outputFolderPath, datasetName + "_" + TICPlotAbbrev + ".png");
-                    ticPlot.SaveToPNG(pngFilePath, 1024, 600, 96);
-                    AddRecentFile(pngFilePath, eOutputFileTypes.TIC);
+                    var pngFile = new FileInfo(Path.Combine(outputFolderPath, datasetName + "_" + TICPlotAbbrev + ".png"));
+                    successTIC = ticPlot.SaveToPNG(pngFile, 1024, 600, 96);
+                    AddRecentFile(pngFile.FullName, eOutputFileTypes.TIC);
                 }
 
-                success = true;
+                return successMS1 && successMS2 && successTIC;
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error in SaveTICAndBPIPlotFiles", ex);
-                success = false;
+                return false;
             }
-
-            return success;
 
         }
 
