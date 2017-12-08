@@ -33,17 +33,17 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Save the plot, along with any defined annotations, to a png file
         /// </summary>
-        /// <param name="pngFilePath">Output file path</param>
+        /// <param name="pngFile">Output PNG file</param>
         /// <param name="width">PNG file width, in pixels</param>
         /// <param name="height">PNG file height, in pixels</param>
         /// <param name="resolution">Image resolution, in dots per inch</param>
         /// <remarks></remarks>
-        public override void SaveToPNG(string pngFilePath, int width, int height, int resolution)
+        public override bool SaveToPNG(FileInfo pngFile, int width, int height, int resolution)
         {
-            if (string.IsNullOrWhiteSpace(pngFilePath))
-                throw new ArgumentException("PNG file path cannot be blank", nameof(pngFilePath));
+            if (pngFile == null)
+                throw new ArgumentNullException(nameof(pngFile), "PNG file instance cannot be blank");
 
-            var exportFile = new FileInfo(Path.ChangeExtension(pngFilePath, null) + "_TmpExportData.txt");
+            var exportFile = new FileInfo(Path.ChangeExtension(pngFile.FullName, null) + TMP_FILE_SUFFIX + ".txt");
 
             try
             {
@@ -53,18 +53,23 @@ namespace MSFileInfoScanner
                     // Plot options: set of square brackets with semicolon separated key/value pairs
                     writer.WriteLine("[" + GetPlotOptions() + "]");
 
-                    // Column options: semicolon separated key/value pairs for each column, e.g.
-                    // Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=0;MajorStep=1
-                    var additionalOptions = new List<string> {
+                    // Column options: semicolon separated key/value pairs for each column, with options for each column separated by a tab
+                    // Note: these options aren't actually used by the Python plotting library
+
+                    // Example XAxis options: Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=1
+                    // Example YAxis options: Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=1
+                    // Example ZAxis options: Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=1;MarkerSize=0.6;ColorScaleMinIntensity=400.3625;ColorScaleMaxIntensity=9152594
+
+                    var additionalZAxisOptions = new List<string> {
                         "MarkerSize=" + MarkerSize
                     };
 
                     if (ColorScaleMinIntensity > 0 || ColorScaleMaxIntensity > 0)
                     {
-                        additionalOptions.Add("ColorScaleMinIntensity=" + ColorScaleMinIntensity);
-                        additionalOptions.Add("ColorScaleMaxIntensity=" + ColorScaleMaxIntensity);
+                        additionalZAxisOptions.Add("ColorScaleMinIntensity=" + ColorScaleMinIntensity);
+                        additionalZAxisOptions.Add("ColorScaleMaxIntensity=" + ColorScaleMaxIntensity);
                     }
-                    writer.WriteLine(XAxisInfo.GetOptions() + "\t" + YAxisInfo.GetOptions() + "\t" + ZAxisInfo.GetOptions(additionalOptions));
+                    writer.WriteLine(XAxisInfo.GetOptions() + "\t" + YAxisInfo.GetOptions() + "\t" + ZAxisInfo.GetOptions(additionalZAxisOptions));
 
                     var charges = PointsByCharge.Keys.ToList();
                     charges.Sort();
@@ -99,26 +104,24 @@ namespace MSFileInfoScanner
             catch (Exception ex)
             {
                 OnErrorEvent("Error exporting data in SaveToPNG", ex);
-                return;
+                return false;
             }
 
             if (string.IsNullOrWhiteSpace(PythonPath) && !FindPython())
             {
-                OnErrorEvent("Cannot export plot data for PNG creation; Python not found");
-                return;
+                NotifyPythonNotFound("Cannot export plot data for PNG creation");
+                return false;
             }
 
             try
             {
-                var args = "";
-
-                var cmdLine = string.Format("{0} {1} {2}", PythonPath, PRISM.clsPathUtils.PossiblyQuotePath(exportFile.FullName), args);
-
-                Console.WriteLine("ToDo: generate 3D plot with " + cmdLine);
+                var success = GeneratePlotsWithPython(exportFile, pngFile.Directory);
+                return success;
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error creating 3D plot with Python using " + exportFile.Name, ex);
+                return false;
             }
 
         }

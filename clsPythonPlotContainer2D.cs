@@ -33,29 +33,32 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Save the plot, along with any defined annotations, to a png file
         /// </summary>
-        /// <param name="pngFilePath">Output file path</param>
+        /// <param name="pngFile">Output PNG file</param>
         /// <param name="width">PNG file width, in pixels</param>
         /// <param name="height">PNG file height, in pixels</param>
         /// <param name="resolution">Image resolution, in dots per inch</param>
         /// <remarks></remarks>
-        public override void SaveToPNG(string pngFilePath, int width, int height, int resolution)
+        public override bool SaveToPNG(FileInfo pngFile, int width, int height, int resolution)
         {
-            if (string.IsNullOrWhiteSpace(pngFilePath))
-                throw new ArgumentException("PNG file path cannot be blank", nameof(pngFilePath));
+            if (pngFile == null)
+                throw new ArgumentNullException(nameof(pngFile), "PNG file instance cannot be blank");
 
-            FileInfo exportFile;
+            var exportFile = new FileInfo(Path.ChangeExtension(pngFile.FullName, null) + TMP_FILE_SUFFIX + ".txt");
 
             try
             {
-                exportFile = new FileInfo(Path.ChangeExtension(pngFilePath, null) + "_TmpExportData.txt");
 
                 using (var writer = new StreamWriter(new FileStream(exportFile.FullName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)))
                 {
                     // Plot options: set of square brackets with semicolon separated key/value pairs
                     writer.WriteLine("[" + GetPlotOptions() + "]");
 
-                    // Column options: semicolon separated key/value pairs for each column, e.g.
-                    // Autoscale=false;Minimum=0;Maximum=4295028224;StringFormat=#,##0;MinorGridlineThickness=0;MajorStep=1
+                    // Column options: semicolon separated key/value pairs for each column, with options for each column separated by a tab
+                    // Note: these options aren't actually used by the Python plotting library
+
+                    // Example XAxis options: Autoscale=false;Minimum=0;Maximum=12135006;StringFormat=#,##0;MinorGridlineThickness=1
+                    // Example YAxis options: Autoscale=true;StringFormat=0.00E+00;MinorGridlineThickness=1
+
                     writer.WriteLine(XAxisInfo.GetOptions() + "\t" + YAxisInfo.GetOptions());
 
                     // Column names
@@ -77,26 +80,24 @@ namespace MSFileInfoScanner
             catch (Exception ex)
             {
                 OnErrorEvent("Error exporting data in SaveToPNG", ex);
-                return;
+                return false;
             }
 
             if (string.IsNullOrWhiteSpace(PythonPath) && !FindPython())
             {
-                OnErrorEvent("Cannot export plot data for PNG creation; Python not found");
-                return;
+                NotifyPythonNotFound("Cannot export plot data for PNG creation");
+                return false;
             }
 
             try
             {
-                var args = "";
-
-                var cmdLine = string.Format("{0} {1} {2}", PythonPath, PRISM.clsPathUtils.PossiblyQuotePath(exportFile.FullName), args);
-
-                Console.WriteLine("ToDo: generate 2D plot with " + cmdLine);
+                var success = GeneratePlotsWithPython(exportFile, pngFile.Directory);
+                return success;
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error creating 2D plot with Python using " + exportFile.Name, ex);
+                return false;
             }
 
         }
