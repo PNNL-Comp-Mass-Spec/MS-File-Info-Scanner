@@ -115,8 +115,6 @@ def set_title_and_labels(ax, plt, baseFontSize, title, xDataMax, xAxisLabel, yAx
     
     if len(l_label) > 0:
         plt.gcf().text(0.01, 0.02, l_label, fontsize=baseFontSize-1)
-        
-    plt.tight_layout()
 
 def plot_lc_intensity(outputFilePath, columnNames, lc_scan_num, intensities, title, r_label):
 
@@ -134,7 +132,8 @@ def plot_lc_intensity(outputFilePath, columnNames, lc_scan_num, intensities, tit
     yAxisLabel = columnNames[1]
 
     set_title_and_labels(ax, plt, baseFontSize, title, np.max(lc_scan_num), xAxisLabel, yAxisLabel, '%.2e', r_label, '')
-    
+    plt.tight_layout()
+
     plt.savefig(outputFilePath)
     
     print('XY plot created')
@@ -209,9 +208,6 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
         legendStartY = 0.85
         plt.figtext(legendStartX, legendStartY, "Charge", color='black', fontsize=baseFontSize-2)
 
-        # Reduce the right margin to make room for the legend text
-        plt.subplots_adjust(right=0.67)
-
         legendItems = []
         colorRow = 0
         
@@ -249,6 +245,11 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
     
     set_title_and_labels(ax, plt, baseFontSize, title, np.max(xData), xAxisLabel, yAxisLabel, '%.0f', r_label, l_label)
    
+    if chargeData:
+        plt.tight_layout(rect=(0,0,0.96,1))
+    else:
+        plt.tight_layout()
+        
     return plt
 
 def plot_lc_mz(outputFilePath, columnNames, lc_scan_num, mz, intensities, title, r_label, l_label):
