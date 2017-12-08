@@ -1715,15 +1715,26 @@ namespace MSFileInfoScanner
                 AddPythonPlotSeriesMzVsScan(plotTitle, lstPointsByCharge.First(), colorScaleMinIntensity, colorScaleMaxIntensity, plotContainer);
             }
 
+            // These track the minimum and maximum values, using the Absolute value of any data in lstPointsByCharge
+            var xMin = double.MaxValue;
+            var xMax = double.MinValue;
+            var yMin = double.MaxValue;
+            var yMax = double.MinValue;
+
+            // Determine min/max values for the X and Y data
+            foreach (var dataSeries in lstPointsByCharge)
+            {
+                UpdateAbsValueRange((from item in dataSeries select item.X).ToList(), ref xMin, ref xMax);
+                UpdateAbsValueRange((from item in dataSeries select item.Y).ToList(), ref yMin, ref yMax);
+            }
+
             // Update the axis format codes if the data values are small or the range of data is small
 
             // Assume the X axis is plotting integers
-            var xVals = (from item in lstPointsByCharge.First() select item.X).ToList();
-            clsPlotUtilities.GetAxisFormatInfo(xVals, true, plotContainer.XAxisInfo);
+            clsPlotUtilities.GetAxisFormatInfo(xMin, xMax, true, plotContainer.XAxisInfo);
 
             // Assume the Y axis is plotting doubles
-            var yVals = (from item in lstPointsByCharge.First() select item.Y).ToList();
-            clsPlotUtilities.GetAxisFormatInfo(yVals, false, plotContainer.YAxisInfo);
+            clsPlotUtilities.GetAxisFormatInfo(yMin, yMax, false, plotContainer.YAxisInfo);
 
             // Add a label showing the number of points displayed
             plotContainer.AnnotationBottomLeft = pointsToPlot.ToString("0,000") + " points plotted";
