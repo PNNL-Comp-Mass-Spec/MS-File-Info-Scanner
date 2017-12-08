@@ -20,13 +20,18 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Path to the python executable
         /// </summary>
-        public string PythonPath { get; private set; }
+        public static string PythonPath { get; private set; }
 
         public override int SeriesCount => mSeriesCount;
 
         public clsAxisInfo XAxisInfo { get; }
 
         public clsAxisInfo YAxisInfo { get; }
+
+        /// <summary>
+        /// True if the Python .exe could be found, otherwise false
+        /// </summary>
+        public static bool PythonInstalled => FindPython();
 
         /// <summary>
         /// Constructor
@@ -46,7 +51,8 @@ namespace MSFileInfoScanner
             DeleteTempFiles = true;
 
             PlotTitle = plotTitle;
-            PythonPath = string.Empty;
+            if (PythonPath == null)
+                PythonPath = string.Empty;
 
             XAxisInfo = new clsAxisInfo(xAxisTitle);
             YAxisInfo = new clsAxisInfo(yAxisTitle);
@@ -54,16 +60,19 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Find the base candidate folder with Python 3.x
+        /// Find the best candidate folder with Python 3.x
         /// </summary>
-        /// <returns></returns>
-        protected bool FindPython()
+        /// <returns>True if Python could be found, otherwise false</returns>
+        protected static bool FindPython()
         {
+            if (!string.IsNullOrWhiteSpace(PythonPath))
+                return true;
+
             var pathsToCheck = PythonPathsToCheck();
 
             foreach (var folderPath in pathsToCheck)
             {
-                var exePath = FindPython(folderPath);
+                var exePath = FindPythonExe(folderPath);
                 if (string.IsNullOrWhiteSpace(exePath))
                     continue;
 
@@ -75,7 +84,11 @@ namespace MSFileInfoScanner
 
         }
 
-        private string FindPython(string folderPath)
+        /// <summary>
+        /// Find the best candidate folder with Python 3.x
+        /// </summary>
+        /// <returns>Path to the python executable, otherwise an empty string</returns>
+        private static string FindPythonExe(string folderPath)
         {
             var directory = new DirectoryInfo(folderPath);
             if (!directory.Exists)

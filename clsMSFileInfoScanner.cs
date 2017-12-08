@@ -615,63 +615,47 @@ namespace MSFileInfoScanner
             return lstExtensionsToParse;
         }
 
+        /// <summary>
+        /// Get the error message, or an empty string if no error
+        /// </summary>
+        /// <returns></returns>
         public override string GetErrorMessage()
         {
-            // Returns String.Empty if no error
-
-            string errorMessage;
 
             switch (mErrorCode)
             {
                 case eMSFileScannerErrorCodes.NoError:
-                    errorMessage = string.Empty;
-                    break;
+                    return string.Empty;
                 case eMSFileScannerErrorCodes.InvalidInputFilePath:
-                    errorMessage = "Invalid input file path";
-                    break;
+                    return "Invalid input file path";
                 case eMSFileScannerErrorCodes.InvalidOutputFolderPath:
-                    errorMessage = "Invalid output folder path";
-                    break;
+                    return "Invalid output folder path";
                 case eMSFileScannerErrorCodes.ParameterFileNotFound:
-                    errorMessage = "Parameter file not found";
-                    break;
+                    return "Parameter file not found";
                 case eMSFileScannerErrorCodes.FilePathError:
-                    errorMessage = "General file path error";
-
-                    break;
+                    return "General file path error";
                 case eMSFileScannerErrorCodes.ParameterFileReadError:
-                    errorMessage = "Parameter file read error";
-                    break;
+                    return "Parameter file read error";
                 case eMSFileScannerErrorCodes.UnknownFileExtension:
-                    errorMessage = "Unknown file extension";
-                    break;
+                    return "Unknown file extension";
                 case eMSFileScannerErrorCodes.InputFileReadError:
-                    errorMessage = "Input file read error";
-                    break;
+                    return "Input file read error";
                 case eMSFileScannerErrorCodes.InputFileAccessError:
-                    errorMessage = "Input file access error";
-                    break;
+                    return "Input file access error";
                 case eMSFileScannerErrorCodes.OutputFileWriteError:
-                    errorMessage = "Error writing output file";
-                    break;
+                    return "Error writing output file";
                 case eMSFileScannerErrorCodes.FileIntegrityCheckError:
-                    errorMessage = "Error checking file integrity";
-                    break;
+                    return "Error checking file integrity";
                 case eMSFileScannerErrorCodes.DatabasePostingError:
-                    errorMessage = "Database posting error";
-
-                    break;
+                    return "Database posting error";
                 case eMSFileScannerErrorCodes.UnspecifiedError:
-                    errorMessage = "Unspecified localized error";
-
-                    break;
+                    return "Unspecified localized error";
                 default:
                     // This shouldn't happen
-                    errorMessage = "Unknown error state";
-                    break;
+                    return "Unknown error state";
+
             }
 
-            return errorMessage;
 
         }
 
@@ -1237,40 +1221,52 @@ namespace MSFileInfoScanner
             if (!string.IsNullOrWhiteSpace(datasetName))
                 datasetFileInfo.DatasetName = datasetName;
 
-            bool success;
+            // Set the processing options
+            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, SaveTICAndBPIPlots);
+            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots, SaveLCMS2DPlots);
+            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus, CheckCentroidingStatus);
+            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, ComputeOverallQualityScores);
+            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, CreateDatasetInfoFile);
+            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile, CreateScanStatsFile);
+            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError, CopyFileLocalOnReadError);
+            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.PlotWithPython, PlotWithPython);
+            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile, UpdateDatasetStatsTextFile);
 
-            // Open the MS datafile (or data folder), read the creation date, and update the status file
+            scanner.DatasetStatsTextFileName = mDatasetStatsTextFileName;
+
+            if (PlotWithPython)
+            {
+                mLCMS2DPlotOptions.PlotWithPython = true;
+
+                if (SaveTICAndBPIPlots || SaveLCMS2DPlots)
+                {
+                    // Make sure that Python exists
+                    if (!clsPythonPlotContainer.PythonInstalled)
+                    {
+                        ReportError("Could not find the python executable");
+                        SetErrorCode(eMSFileScannerErrorCodes.OutputFileWriteError);
+                        return false;
+                    }
+                }
+            }
+
+            if (ShowDebugInfo)
+                mLCMS2DPlotOptions.DeleteTempFiles = false;
+
+            scanner.LCMS2DPlotOptions = mLCMS2DPlotOptions;
+            scanner.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor;
+
+            scanner.ScanStart = ScanStart;
+            scanner.ScanEnd = ScanEnd;
+            scanner.ShowDebugInfo = ShowDebugInfo;
+
+            scanner.DatasetID = DatasetIDOverride;
 
             var retryCount = 0;
+            bool success;
+
             do
             {
-                // Set the processing options
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, SaveTICAndBPIPlots);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots, SaveLCMS2DPlots);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus, CheckCentroidingStatus);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, ComputeOverallQualityScores);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, CreateDatasetInfoFile);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile, CreateScanStatsFile);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError, CopyFileLocalOnReadError);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.PlotWithPython, PlotWithPython);
-                scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile, UpdateDatasetStatsTextFile);
-
-                scanner.DatasetStatsTextFileName = mDatasetStatsTextFileName;
-
-                if (PlotWithPython)
-                    mLCMS2DPlotOptions.PlotWithPython = true;
-
-                if (ShowDebugInfo)
-                    mLCMS2DPlotOptions.DeleteTempFiles = false;
-
-                scanner.LCMS2DPlotOptions = mLCMS2DPlotOptions;
-                scanner.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor;
-
-                scanner.ScanStart = ScanStart;
-                scanner.ScanEnd = ScanEnd;
-                scanner.ShowDebugInfo = ShowDebugInfo;
-
-                scanner.DatasetID = DatasetIDOverride;
 
                 // Process the data file
                 success = scanner.ProcessDataFile(inputFileOrFolderPath, datasetFileInfo);
