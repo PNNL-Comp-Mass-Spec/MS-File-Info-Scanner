@@ -417,7 +417,7 @@ namespace MSFileInfoScanner
             mLCMS2DPlot.Reset();
             mLCMS2DPlotOverview.Reset();
         }
-        
+
         protected bool UpdateDatasetFileStats(FileInfo fiFileInfo, int datasetID)
         {
 

@@ -1050,13 +1050,11 @@ namespace MSFileInfoScanner
                 {
                     MarkerType = MarkerType.Circle,
                     MarkerFill = OxyColor.FromArgb(seriesColor.A, seriesColor.R, seriesColor.G, seriesColor.B),
-                    Title = strTitle
+                    Title = strTitle,
+                    MarkerSize = markerSize
                 };
 
                 // series.MarkerStroke = OxyColor.FromArgb(seriesColor.A, seriesColor.R, seriesColor.G, seriesColor.B)
-
-                // Customize the points
-                series.MarkerSize = markerSize;
 
                 series.Points.AddRange(lstPointsByCharge[charge]);
 
@@ -1202,9 +1200,16 @@ namespace MSFileInfoScanner
             // Instantiate the list to track the data points
             var lstPointsByCharge = new List<List<ScatterPoint>>();
 
+
+            var maxMonoMass = double.MaxValue;
             if (mOptions.PlottingDeisotopedData)
             {
-                lstPointsByCharge = GetMonoMassSeriesByCharge(msLevelFilter, out minMZ, out maxMZ, out scanTimeMax, out minScan, out maxScan);
+                maxMonoMass = mOptions.MaxMonoMassForDeisotopedPlot;
+            }
+
+            if (mOptions.PlottingDeisotopedData)
+            {
+                lstPointsByCharge = GetMonoMassSeriesByCharge(msLevelFilter, maxMonoMass, out minMZ, out maxMZ, out scanTimeMax, out minScan, out maxScan);
             }
             else
             {
@@ -1217,23 +1222,11 @@ namespace MSFileInfoScanner
                 lstPointsByCharge.Add(points);
             }
 
-            var maxMzToUse = double.MaxValue;
-            if (mOptions.PlottingDeisotopedData)
-            {
-                maxMzToUse = mOptions.MaxMonoMassForDeisotopedPlot;
-            }
-
             // Count the actual number of points that will be plotted
             pointsToPlot = 0;
             foreach (var series in lstPointsByCharge)
             {
-                foreach (var item in series)
-                {
-                    if (item.Y < maxMzToUse)
-                    {
-                        pointsToPlot += 1;
-                    }
-                }
+                pointsToPlot += series.Count;
             }
 
             // Round minScan down to the nearest multiple of 10
@@ -1300,6 +1293,7 @@ namespace MSFileInfoScanner
 
         private List<List<ScatterPoint>> GetMonoMassSeriesByCharge(
             int msLevelFilter,
+            double maxMonoMass,
             out double minMZ, out double maxMZ,
             out double scanTimeMax,
             out int minScan, out int maxScan)
@@ -1345,8 +1339,11 @@ namespace MSFileInfoScanner
 
                 for (var ionIndex = 0; ionIndex <= mScans[scanIndex].IonCount - 1; ionIndex++)
                 {
-                    var dataPoint = new ScatterPoint(mScans[scanIndex].ScanNumber,
-                                                     mScans[scanIndex].IonsMZ[ionIndex])
+                    var currentIonMonoMass = mScans[scanIndex].IonsMZ[ionIndex];
+                    if (currentIonMonoMass > maxMonoMass)
+                        continue;
+
+                    var dataPoint = new ScatterPoint(mScans[scanIndex].ScanNumber, currentIonMonoMass)
                     {
                         Value = mScans[scanIndex].IonsIntensity[ionIndex]
                     };
@@ -1484,12 +1481,9 @@ namespace MSFileInfoScanner
             {
                 return InitializePythonPlot(plotTitle, msLevelFilter, skipTrimCachedData);
             }
-            else
-            {
-                return InitializeOxyPlot(plotTitle, msLevelFilter, skipTrimCachedData);
-            }
-        }
 
+            return InitializeOxyPlot(plotTitle, msLevelFilter, skipTrimCachedData);
+        }
 
         /// <summary>
         /// When PlottingDeisotopedData is False, creates a 2D plot of m/z vs. scan number, using Intensity as the 3rd dimension to color the data points
@@ -1849,19 +1843,6 @@ namespace MSFileInfoScanner
                 if (strScanModeSuffixAddon == null)
                     strScanModeSuffixAddon = string.Empty;
 
-                var colorGradients = new Dictionary<string, OxyPalette>
-                {
-                    {"BlackWhiteRed30", OxyPalettes.BlackWhiteRed(30)},
-                    {"BlueWhiteRed30", OxyPalettes.BlueWhiteRed(30)},
-                    {"Cool30", OxyPalettes.Cool(30)},
-                    {"Gray30", OxyPalettes.Gray(30)},
-                    {"Hot30", OxyPalettes.Hot(30)},
-                    {"Hue30", OxyPalettes.Hue(30)},
-                    {"HueDistinct30", OxyPalettes.HueDistinct(30)},
-                    {"Jet30", OxyPalettes.Jet(30)},
-                    {"Rainbow30", OxyPalettes.Rainbow(30)}
-                };
-
                 var ms1Plot = InitializePlot(strDatasetName + " - " + mOptions.MS1PlotTitle, 1, false);
                 RegisterEvents(ms1Plot);
 
@@ -1869,6 +1850,19 @@ namespace MSFileInfoScanner
 
                 if (mOptions.TestGradientColorSchemes)
                 {
+                    var colorGradients = new Dictionary<string, OxyPalette>
+                    {
+                        {"BlackWhiteRed30", OxyPalettes.BlackWhiteRed(30)},
+                        {"BlueWhiteRed30", OxyPalettes.BlueWhiteRed(30)},
+                        {"Cool30", OxyPalettes.Cool(30)},
+                        {"Gray30", OxyPalettes.Gray(30)},
+                        {"Hot30", OxyPalettes.Hot(30)},
+                        {"Hue30", OxyPalettes.Hue(30)},
+                        {"HueDistinct30", OxyPalettes.HueDistinct(30)},
+                        {"Jet30", OxyPalettes.Jet(30)},
+                        {"Rainbow30", OxyPalettes.Rainbow(30)}
+                    };
+
                     var oxyPlotContainer = ms1Plot as clsPlotContainer;
                     oxyPlotContainer?.AddGradients(colorGradients);
                 }
