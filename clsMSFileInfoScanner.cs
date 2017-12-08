@@ -38,7 +38,7 @@ namespace MSFileInfoScanner
             mMSFileInfoDataCache = new clsMSFileInfoDataCache();
             RegisterEvents(mMSFileInfoDataCache);
 
-            mErrorCode = eMSFileScannerErrorCodes.NoError;
+            SetErrorCode(eMSFileScannerErrorCodes.NoError);
 
             IgnoreErrorsWhenRecursing = false;
 
@@ -1802,6 +1802,10 @@ namespace MSFileInfoScanner
                 else
                 {
                     success = ProcessMSFileOrFolder(inputFileOrFolderPath, outputFolderPath, resetErrorCode, out eMSFileProcessingState);
+                    if (!success && mErrorCode == eMSFileScannerErrorCodes.NoError)
+                    {
+                        SetErrorCode(eMSFileScannerErrorCodes.UnspecifiedError);
+                    }
                 }
 
             }
@@ -2363,6 +2367,8 @@ namespace MSFileInfoScanner
             {
                 mErrorCode = eNewErrorCode;
             }
+
+            ErrorCode = mErrorCode;
 
         }
 
