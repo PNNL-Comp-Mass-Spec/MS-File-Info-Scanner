@@ -83,7 +83,26 @@ def read_file(fpath):
 
 def set_title_and_labels(ax, plt, baseFontSize, title, xDataMax, xAxisLabel, yAxisLabel, yAxisFormatString, r_label, l_label):
 
-    plt.title(title, fontsize=baseFontSize+1)
+    MAX_TITLE_LENGTH = 68
+    
+    if len(title) > MAX_TITLE_LENGTH:
+        # Trim out the middle portion of the title
+        # Find the first space
+        spaceIndex = title.find(' ')
+        if spaceIndex > 0:
+            titleSuffix = title[spaceIndex:]
+            charsToKeep = MAX_TITLE_LENGTH - len(titleSuffix)
+            if charsToKeep > 0:
+                titleToUse = title[0:charsToKeep] + titleSuffix
+            else:
+                titleToUse = title[-MAX_TITLE_LENGTH:]
+
+        else:
+            titleToUse = title[-MAX_TITLE_LENGTH:]
+    else:
+        titleToUse = title
+        
+    plt.title(titleToUse, fontsize=baseFontSize+1)
     
     # Assure that the X and Y axis minima are not negative
     xmin, xmax = plt.xlim()
