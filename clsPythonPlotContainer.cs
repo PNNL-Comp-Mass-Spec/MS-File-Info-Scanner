@@ -15,6 +15,9 @@ namespace MSFileInfoScanner
 
         protected int mSeriesCount;
 
+        /// <summary>
+        /// When true, delete the temporary text files that contain data for Python to plot
+        /// </summary>
         public bool DeleteTempFiles { get; set; }
 
         /// <summary>

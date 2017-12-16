@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.5.6558; December 15, 2017
+	- Update parameter PlotWithPython for the instrument specific plot object
+
 Version 1.5.6551; December 8, 2017
 	- Finalize creating plots with Python
 
