@@ -1244,6 +1244,13 @@ namespace MSFileInfoScanner
                     if (!clsPythonPlotContainer.PythonInstalled)
                     {
                         ReportError("Could not find the python executable");
+                        var debugMsg = "Paths searched:";
+                        foreach (var item in clsPythonPlotContainer.PythonPathsToCheck())
+                        {
+                            debugMsg += "\n  " + item;
+                        }
+                        OnDebugEvent(debugMsg);
+
                         SetErrorCode(eMSFileScannerErrorCodes.OutputFileWriteError);
                         return false;
                     }

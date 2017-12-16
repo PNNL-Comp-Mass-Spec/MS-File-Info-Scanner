@@ -121,6 +121,12 @@ namespace MSFileInfoScanner
 
         protected bool GeneratePlotsWithPython(FileInfo exportFile, DirectoryInfo workDir)
         {
+            if (!PythonInstalled)
+            {
+                NotifyPythonNotFound("Could not find the python executable");
+                return false;
+            }
+
             var exeDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             if (exeDirectory == null)
             {
@@ -217,7 +223,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private static IEnumerable<string> PythonPathsToCheck()
+        public static IEnumerable<string> PythonPathsToCheck()
         {
             return new List<string>
             {
