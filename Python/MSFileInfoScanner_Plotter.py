@@ -25,7 +25,7 @@ plt.rcParams["font.family"] = "arial"
 def process_file(dataFilePath):
     dataFile = Path(dataFilePath)
     if not dataFile.is_file():
-        print('Error, file not found: ' + dataFilePath)
+        print('\nError, file not found: ' + dataFilePath)
         return
 
     print('Input: ', dataFile)
@@ -295,8 +295,6 @@ def plot_lc_mz(outputFilePath, columnNames, lc_scan_num, mz, intensities, title,
 def plot_lc_mz_by_charge(outputFilePath, columnNames, lc_scan_num, mz, intensities, charge, title, r_label, l_label):
     plt = generate_heat_map(columnNames, lc_scan_num, mz, charge, title, r_label, l_label, True)
     
-    # ToDo: add charge state legend
-    
     plt.savefig(outputFilePath)
     print('2D plot created')
     
@@ -304,7 +302,7 @@ import sys
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print('Error: please enter the file name to process (wildcards are supported)')
+        print('\nError: please enter the file name to process (wildcards are supported)')
         exit()
     
     fileNameMatchSpec = sys.argv[1]
@@ -315,7 +313,7 @@ if __name__ == '__main__':
         filesProcessed += 1
         
     if filesProcessed == 0:
-        print('No match to:\n' + fileNameMatchSpec)
+        print('\nError: no files match:\n' + fileNameMatchSpec)
 
 
 # Can list fonts with the following
