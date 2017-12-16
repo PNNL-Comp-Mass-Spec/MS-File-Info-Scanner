@@ -555,7 +555,7 @@ namespace MSFileInfoScanner
                     diFolderInfo = new DirectoryInfo(".");
                 }
 
-                mTICandBPIPlot.PlotWithPython = mPlotWithPython;
+                UpdatePlotWithPython();
 
                 if (mPlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
                 {
@@ -908,6 +908,14 @@ namespace MSFileInfoScanner
             }
 
             return (int)Math.Round(value / 1000.0 / 1000, 0) + "M";
+        }
+
+        private void UpdatePlotWithPython()
+        {
+            mTICandBPIPlot.PlotWithPython = mPlotWithPython;
+            mInstrumentSpecificPlots.PlotWithPython = mPlotWithPython;
+            mLCMS2DPlot.Options.PlotWithPython = mPlotWithPython;
+            mLCMS2DPlotOverview.Options.PlotWithPython = mPlotWithPython;
         }
 
     }
