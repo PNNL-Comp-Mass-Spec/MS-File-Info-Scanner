@@ -29,7 +29,6 @@ namespace MSFileInfoScanner
             ClearData();
         }
 
-
         /// <summary>
         /// Save the plot, along with any defined annotations, to a png file
         /// </summary>
@@ -78,7 +77,7 @@ namespace MSFileInfoScanner
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(PythonPath) && !FindPython())
+            if (string.IsNullOrWhiteSpace(PythonPath) && !PythonInstalled)
             {
                 NotifyPythonNotFound("Cannot export plot data for PNG creation");
                 return false;

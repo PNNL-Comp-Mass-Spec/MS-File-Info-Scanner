@@ -102,7 +102,7 @@ namespace MSFileInfoScanner
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(PythonPath) && !FindPython())
+            if (string.IsNullOrWhiteSpace(PythonPath) && !PythonInstalled)
             {
                 NotifyPythonNotFound("Cannot export plot data for PNG creation");
                 return false;
