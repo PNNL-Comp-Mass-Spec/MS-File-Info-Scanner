@@ -104,16 +104,38 @@ def set_title_and_labels(ax, plt, baseFontSize, title, xDataMax, xAxisLabel, yAx
         
     plt.title(titleToUse, fontsize=baseFontSize+1)
     
-    # Assure that the X and Y axis minima are not negative
+    # Assure that the X axis minimimum is not negative
     xmin, xmax = plt.xlim()
-    ymin, ymax = plt.ylim()
     
     if xmin < 0:
         plt.xlim(xmin = 0)
 
-    if ymin < 0:
-        plt.ylim(ymin = 0)
+    # When plotting BPI or TIC, fix the Y axis minimum at 0 and add 5% padding above the Y axis maximum
+    # Otherwise, assure that the Y range isn't too small
+    ymin, ymax = plt.ylim()   
+    
+    if "- TIC -" in title or "- BPI -" in title:
+        ymin = 0
+        ymax += ymax * 0.05
+    else:
+        yRange = ymax - ymin
+        if yRange < ymax * 0.20:
+            # Range is less than 20% of the max value
+            # Pad using 5% of the average of ymin and ymax
+            yPadding = (ymin + ymax)/2.0 * 0.05
+            ymin -= yPadding
+            ymax += yPadding
+        else:
+            # Range is more than 20% of the max value
+            # Pad using 5% of the range
+            ymin -= yRange * 0.05
+            ymax += yRange * 0.05
 
+        if ymin < 0:
+            ymin = 0
+            
+    plt.ylim(ymin = ymin, ymax = ymax)    
+    
     # Set the X axis maximum to the max X value (in other words, we don't want any padding)
     plt.xlim(xmax = xDataMax)
 
