@@ -563,8 +563,6 @@ namespace MSFileInfoScanner
                     mLCMS2DPlot.Options.PlotWithPython = true;
                 }
 
-                mTICandBPIPlot.DeleteTempFiles = !ShowDebugInfo;
-
                 if (mLCMS2DPlot.Options.DeleteTempFiles && ShowDebugInfo)
                 {
                     OnWarningEvent("Updating DeleteTempFiles to False in mLCMS2DPlot; this is typically set by ProcessMSDataset");
@@ -914,8 +912,25 @@ namespace MSFileInfoScanner
         {
             mTICandBPIPlot.PlotWithPython = mPlotWithPython;
             mInstrumentSpecificPlots.PlotWithPython = mPlotWithPython;
-            mLCMS2DPlot.Options.PlotWithPython = mPlotWithPython;
-            mLCMS2DPlotOverview.Options.PlotWithPython = mPlotWithPython;
+
+            if (mPlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
+            {
+                // This code shouldn't be reached; this setting should have already propagated
+                mLCMS2DPlot.Options.PlotWithPython = mPlotWithPython;
+                mLCMS2DPlotOverview.Options.PlotWithPython = mPlotWithPython;
+            }
+
+            mTICandBPIPlot.DeleteTempFiles = !ShowDebugInfo;
+            mInstrumentSpecificPlots.DeleteTempFiles = !ShowDebugInfo;
+
+            if (mPlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
+            {
+                // This code shouldn't be reached; this setting should have already propagated
+                mLCMS2DPlot.Options.DeleteTempFiles = !ShowDebugInfo;
+                mLCMS2DPlotOverview.Options.DeleteTempFiles = !ShowDebugInfo;
+            }
+
+
         }
 
     }
