@@ -77,6 +77,7 @@ namespace SpectraTypeClassifier
         /// Note: specified list will be mutated in the process.
         /// Reference: Introduction to Algorithms 3rd Edition, Corman et al, pp 216
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public double NthOrderStatistic(IList<double> lstData, int n, Random oRandom)
         {
             return NthOrderStatistic(lstData, n, 0, lstData.Count - 1, oRandom);
@@ -163,6 +164,7 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Compute the median of a subset of lstData, selected using getValue
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public double Median(IEnumerable<double> lstData, Func<double, double> getValue)
         {
             var lstDataSubset = lstData.Select(getValue).ToList();

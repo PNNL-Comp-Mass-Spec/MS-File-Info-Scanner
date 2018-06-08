@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using PRISM;
 
+// ReSharper disable UnusedMember.Global
+
 namespace SpectraTypeClassifier
 {
     [CLSCompliant(true)]
@@ -462,7 +464,6 @@ namespace SpectraTypeClassifier
         /// <param name="dblMZs"></param>
         /// <param name="msLevel"></param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
-        /// <remarks>Assumes the ions are sorted</remarks>
         public void CheckSpectrum(double[] dblMZs, int msLevel, string spectrumTitle = "")
         {
             CheckSpectrum(dblMZs.Length, dblMZs, msLevel, eCentroidStatusConstants.Unknown, spectrumTitle);
@@ -476,7 +477,6 @@ namespace SpectraTypeClassifier
         /// <param name="msLevel"></param>
         /// <param name="centroidingStatus"></param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
-        /// <remarks>Assumes the ions are sorted</remarks>
         public void CheckSpectrum(
             int ionCount,
             double[] dblMZs,
