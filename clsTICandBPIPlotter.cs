@@ -62,7 +62,7 @@ namespace MSFileInfoScanner
 
         public bool DeleteTempFiles { get; set; }
 
-        public bool PlotWithPython { get; set;  }
+        public bool PlotWithPython { get; set; }
 
         public bool RemoveZeroesFromEnds { get; set; }
 
@@ -443,7 +443,8 @@ namespace MSFileInfoScanner
                 return emptyContainer;
             }
 
-            var plotContainer = new clsPythonPlotContainer2D(plotTitle, xAxisLabel, yAxisLabel) {
+            var plotContainer = new clsPythonPlotContainer2D(plotTitle, xAxisLabel, yAxisLabel)
+            {
                 DeleteTempFiles = DeleteTempFiles
             };
 

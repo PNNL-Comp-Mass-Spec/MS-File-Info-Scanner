@@ -88,7 +88,7 @@ namespace MSFileInfoScanner
 
         public bool SaveToJPG(FileInfo jpgFile, int width, int height, int resolution)
         {
-            if(jpgFile == null)
+            if (jpgFile == null)
                 throw new ArgumentNullException(nameof(jpgFile), "JPG file instance cannot be blank");
 
             bool success;
@@ -186,11 +186,13 @@ namespace MSFileInfoScanner
 
                 drawContext.DrawRectangle(null, rectPen, myCanvas);
 
-                if (!string.IsNullOrWhiteSpace(AnnotationBottomLeft)) {
+                if (!string.IsNullOrWhiteSpace(AnnotationBottomLeft))
+                {
                     AddText(AnnotationBottomLeft, drawContext, width, height, OxyPlot.HorizontalAlignment.Left, OxyPlot.VerticalAlignment.Bottom, 5);
                 }
 
-                if (!string.IsNullOrWhiteSpace(AnnotationBottomRight)) {
+                if (!string.IsNullOrWhiteSpace(AnnotationBottomRight))
+                {
                     AddText(AnnotationBottomRight, drawContext, width, height, OxyPlot.HorizontalAlignment.Right, OxyPlot.VerticalAlignment.Bottom, 5);
                 }
 

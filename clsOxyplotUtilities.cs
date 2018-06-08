@@ -85,7 +85,8 @@ namespace MSFileInfoScanner
 
         public static void ValidateMajorStep(Axis currentAxis)
         {
-            if (Math.Abs(currentAxis.ActualMajorStep) > float.Epsilon && currentAxis.ActualMajorStep < 1) {
+            if (Math.Abs(currentAxis.ActualMajorStep) > float.Epsilon && currentAxis.ActualMajorStep < 1)
+            {
                 currentAxis.MajorStep = 1;
                 currentAxis.MinorGridlineThickness = 0;
             }
