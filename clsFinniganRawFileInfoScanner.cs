@@ -328,6 +328,7 @@ namespace MSFileInfoScanner
             var deleteLocalFile = false;
             var readError = false;
 
+            // Note: as of June 2018 this only works if you disable "Prefer 32-bit" when compiling as AnyCPU
 
             // Use Xraw to read the .Raw file
             // If reading from a SAMBA-mounted network share, and if the current user has

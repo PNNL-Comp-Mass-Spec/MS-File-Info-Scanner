@@ -162,7 +162,8 @@ namespace MSFileInfoScanner
 
             try
             {
-                // Note: as of May 2016 this only works if you compile as x86 or with "Prefer 32-bit" enabled when compiling as AnyCPU
+                // Note: as of May 2016 this only works if you compile as x86 or if you enable "Prefer 32-bit" when compiling as AnyCPU
+                // In contrast, XRawFileIO in clsFinniganRawFileInfoScanner requires that "Prefer 32-bit" be disabled
 
                 objNETCDFReader = new NetCDFReader.clsMSNetCdf();
                 var blnSuccess = objNETCDFReader.OpenMSCdfFile(Path.Combine(strFolderPath, AGILENT_ANALYSIS_CDF_FILE));
