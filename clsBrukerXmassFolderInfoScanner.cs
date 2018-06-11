@@ -1096,6 +1096,8 @@ namespace MSFileInfoScanner
 
                 // BrukerDataReader.DataReader treats scan 0 as the first scan
 
+                var scansProcessed = 0;
+
                 for (var scanNumber = 0; scanNumber <= scanCount - 1; scanNumber++)
                 {
                     float[] mzValues;
@@ -1165,6 +1167,8 @@ namespace MSFileInfoScanner
 
                     }
 
+                    scansProcessed++;
+
                     if (DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds < progressThresholdSeconds)
                         continue;
 
@@ -1172,8 +1176,8 @@ namespace MSFileInfoScanner
                     if (progressThresholdSeconds < 30)
                         progressThresholdSeconds += 2;
 
-                    var percentComplete = scanNumber / (float)scanCount * 100;
-                    OnProgressUpdate("Scans processed: " + scanNumber, percentComplete);
+                    var percentComplete = scansProcessed / (float)scanCount * 100;
+                    OnProgressUpdate(string.Format("Scans processed: {0:N0}", scansProcessed), percentComplete);
 
                 }
 

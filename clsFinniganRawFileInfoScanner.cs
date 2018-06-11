@@ -167,6 +167,9 @@ namespace MSFileInfoScanner
 
             GetStartAndEndScans(scanCount, out var scanStart, out var scanEnd);
 
+            var scansProcessed = 0;
+            var totalScansToProcess = scanEnd - scanStart + 1;
+
             for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
             {
 
@@ -262,6 +265,8 @@ namespace MSFileInfoScanner
                     OnErrorEvent("Error loading m/z and intensity values for scan " + scanNumber + ": " + ex.Message);
                 }
 
+                scansProcessed++;
+
                 if (DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds < progressThresholdSeconds)
                     continue;
 
@@ -269,8 +274,8 @@ namespace MSFileInfoScanner
                 if (progressThresholdSeconds < 30)
                     progressThresholdSeconds += 2;
 
-                var percentComplete = scanNumber / (float)scanCount * 100;
-                OnProgressUpdate("Scans processed: " + scanNumber, percentComplete);
+                var percentComplete = scansProcessed / (float)totalScansToProcess * 100;
+                OnProgressUpdate(string.Format("Scans processed: {0:N0}", scansProcessed), percentComplete);
 
             }
 
