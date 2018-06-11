@@ -379,7 +379,6 @@ namespace MSFileInfoScanner
                 fiBAFFileInfo = new FileInfo(strNewDataFilePath);
             }
 
-            mDatasetStatsSummarizer.ClearCachedData();
             mLCMS2DPlot.Options.UseObservedMinScan = false;
 
             try
@@ -866,6 +865,8 @@ namespace MSFileInfoScanner
                 // We have to assign a date, so we'll assign the date for the BAF file
                 datasetFileInfo.AcqTimeStart = diDatasetFolder.CreationTime;
                 datasetFileInfo.AcqTimeEnd = diDatasetFolder.CreationTime;
+
+                mDatasetStatsSummarizer.ClearCachedData();
 
                 // Look for the analysis.baf file in diFolderInfo
                 // Use its modification time as the AcqTime start and End values
