@@ -1675,44 +1675,50 @@ namespace MSFileInfoScanner
                     {
                         var strLineIn = srInFile.ReadLine();
 
-                        if ((strLineIn != null)) {
-                            // All valid lines start with $$
-                            if (strLineIn.StartsWith("$$")) {
-                                // Remove the first three characters (we actually remove the first 2 then Trim, since the third character is supposed to be a space)
+                        if (string.IsNullOrWhiteSpace(strLineIn))
+                            continue;
 
-                                strLineIn = strLineIn.Substring(2).Trim();
-                                var intColonLoc = strLineIn.IndexOf(':');
-                                var strKeyValue = strLineIn.Substring(intColonLoc + 1).Trim();
+                        // All valid lines start with $$
+                        if (!strLineIn.StartsWith("$$"))
+                            continue;
 
-                                int lngFunctionNumber;
-                                if (strLineIn.ToUpper().StartsWith(CAL_FUNCTION_NAME)) {
-                                    // Calibration equation for one of the functions
-                                    lngFunctionNumber = CLngSafe(strLineIn.Substring(CAL_FUNCTION_NAME.Length, intColonLoc - CAL_FUNCTION_NAME.Length));
-                                    if (lngFunctionNumber >= 1 && lngFunctionNumber <= udtThisMSData.FunctionCount) {
+                        // Remove the first three characters (we actually remove the first 2 then Trim, since the third character is supposed to be a space)
 
-                                        NativeIOParseCalibrationCoeffs(
-                                            strKeyValue,
-                                            out udtThisMSData.FunctionInfo[lngFunctionNumber].CalibrationCoefficientCount,
-                                            udtThisMSData.FunctionInfo[lngFunctionNumber].CalibrationCoefficients,
-                                            out udtThisMSData.FunctionInfo[lngFunctionNumber].CalTypeID);
+                        strLineIn = strLineIn.Substring(2).Trim();
+                        var intColonLoc = strLineIn.IndexOf(':');
+                        var strKeyValue = strLineIn.Substring(intColonLoc + 1).Trim();
 
-                                    } else {
-                                        // Calibration equation for non-existent function
-                                        // This shouldn't happen
-                                    }
-                                } else if (strLineIn.ToUpper().StartsWith(CAL_STDDEV_FUNCTION_NAME)) {
-                                    lngFunctionNumber = CLngSafe(strLineIn.Substring(CAL_STDDEV_FUNCTION_NAME.Length, intColonLoc - CAL_STDDEV_FUNCTION_NAME.Length));
-                                    if (lngFunctionNumber >= 1 && lngFunctionNumber <= udtThisMSData.FunctionCount)
-                                    {
-                                        if (double.TryParse(strKeyValue, out var calStdDev))
-                                        {
-                                            udtThisMSData.FunctionInfo[lngFunctionNumber].CalStDev = calStdDev;
-                                        }
-                                    }
-                                }
+                        int lngFunctionNumber;
+                        if (strLineIn.ToUpper().StartsWith(CAL_FUNCTION_NAME))
+                        {
+                            // Calibration equation for one of the functions
+                            lngFunctionNumber = CLngSafe(strLineIn.Substring(CAL_FUNCTION_NAME.Length, intColonLoc - CAL_FUNCTION_NAME.Length));
+                            if (lngFunctionNumber >= 1 && lngFunctionNumber <= udtThisMSData.FunctionCount)
+                            {
+
+                                NativeIOParseCalibrationCoeffs(
+                                    strKeyValue,
+                                    out udtThisMSData.FunctionInfo[lngFunctionNumber].CalibrationCoefficientCount,
+                                    udtThisMSData.FunctionInfo[lngFunctionNumber].CalibrationCoefficients,
+                                    out udtThisMSData.FunctionInfo[lngFunctionNumber].CalTypeID);
 
                             }
-
+                            else
+                            {
+                                // Calibration equation for non-existent function
+                                // This shouldn't happen
+                            }
+                        }
+                        else if (strLineIn.ToUpper().StartsWith(CAL_STDDEV_FUNCTION_NAME))
+                        {
+                            lngFunctionNumber = CLngSafe(strLineIn.Substring(CAL_STDDEV_FUNCTION_NAME.Length, intColonLoc - CAL_STDDEV_FUNCTION_NAME.Length));
+                            if (lngFunctionNumber >= 1 && lngFunctionNumber <= udtThisMSData.FunctionCount)
+                            {
+                                if (double.TryParse(strKeyValue, out var calStdDev))
+                                {
+                                    udtThisMSData.FunctionInfo[lngFunctionNumber].CalStDev = calStdDev;
+                                }
+                            }
                         }
                     }
                 }

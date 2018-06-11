@@ -117,21 +117,21 @@ namespace MSFileInfoScanner
                     {
                         var strLineIn = srInFile.ReadLine();
 
-                        if ((strLineIn != null))
-                        {
-                            if (strLineIn.StartsWith(BRUKER_ACQU_FILE_ACQ_LINE_START))
-                            {
-                                // Date line found
-                                // It is of the form: ##$AQ_DATE= <Sat Aug 20 07:56:55 2005>
-                                strLineIn = strLineIn.Substring(BRUKER_ACQU_FILE_ACQ_LINE_START.Length).Trim();
-                                strLineIn = strLineIn.TrimEnd(BRUKER_ACQU_FILE_ACQ_LINE_END);
+                        if (string.IsNullOrWhiteSpace(strLineIn))
+                            continue;
 
-                                blnSuccess = ParseBrukerDateFromArray(strLineIn, out var dtDate);
-                                if (blnSuccess)
-                                    datasetFileInfo.AcqTimeEnd = dtDate;
-                                break;
-                            }
-                        }
+                        if (!strLineIn.StartsWith(BRUKER_ACQU_FILE_ACQ_LINE_START))
+                            continue;
+
+                        // Date line found
+                        // It is of the form: ##$AQ_DATE= <Sat Aug 20 07:56:55 2005>
+                        strLineIn = strLineIn.Substring(BRUKER_ACQU_FILE_ACQ_LINE_START.Length).Trim();
+                        strLineIn = strLineIn.TrimEnd(BRUKER_ACQU_FILE_ACQ_LINE_END);
+
+                        blnSuccess = ParseBrukerDateFromArray(strLineIn, out var dtDate);
+                        if (blnSuccess)
+                            datasetFileInfo.AcqTimeEnd = dtDate;
+                        break;
                     }
                 }
 
