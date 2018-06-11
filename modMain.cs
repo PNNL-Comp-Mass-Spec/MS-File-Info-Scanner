@@ -316,8 +316,8 @@ namespace MSFileInfoScanner
                 // Make sure no invalid parameters are present
                 if (parser.InvalidParametersPresent(lstValidParameters))
                 {
-                    ShowErrorMessage("Invalid commmand line parameters",
-                        (from item in parser.InvalidParameters(lstValidParameters) select "/" + item).ToList());
+                    var invalidArgs = (from item in parser.InvalidParameters(lstValidParameters) select "/" + item).ToList();
+                    ConsoleMsgUtils.ShowErrors("Invalid commmand line parameters", invalidArgs);
                     return false;
                 }
 
@@ -346,6 +346,10 @@ namespace MSFileInfoScanner
                     {
                         mRecurseFoldersMaxLevels = value;
                     }
+                    else
+                    {
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid max depth value for /S: " + strValue);
+                    }
                 }
                 if (parser.RetrieveValueForParameter("IE", out strValue))
                     mIgnoreErrorsWhenRecursing = true;
@@ -360,6 +364,10 @@ namespace MSFileInfoScanner
                     if (int.TryParse(strValue, out value))
                     {
                         mMaximumTextFileLinesToCheck = value;
+                    }
+                    else
+                    {
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid max file lines value for /M: " + strValue);
                     }
                 }
 
@@ -378,6 +386,10 @@ namespace MSFileInfoScanner
                     {
                         mLCMS2DMaxPointsToPlot = value;
                     }
+                    else
+                    {
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid max points value for /LC: " + strValue);
+                    }
                 }
 
                 if (parser.RetrieveValueForParameter("LCDiv", out strValue))
@@ -385,6 +397,10 @@ namespace MSFileInfoScanner
                     if (int.TryParse(strValue, out value))
                     {
                         mLCMS2DOverviewPlotDivisor = value;
+                    }
+                    else
+                    {
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid divisor value for /LCDiv: " + strValue);
                     }
                 }
 
@@ -403,6 +419,10 @@ namespace MSFileInfoScanner
                     {
                         mScanStart = value;
                     }
+                    else
+                    {
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid scan number for /ScanStart: " + strValue);
+                    }
                 }
                 else
                 {
@@ -411,6 +431,10 @@ namespace MSFileInfoScanner
                         if (int.TryParse(strValue, out value))
                         {
                             mScanStart = value;
+                        }
+                        else
+                        {
+                            ConsoleMsgUtils.ShowWarning("Ignoring invalid scan number for /Start: " + strValue);
                         }
                     }
                 }
@@ -421,6 +445,10 @@ namespace MSFileInfoScanner
                     {
                         mScanEnd = value;
                     }
+                    else
+                    {
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid scan number for /ScanEnd: " + strValue);
+                    }
                 }
                 else
                 {
@@ -429,6 +457,10 @@ namespace MSFileInfoScanner
                         if (int.TryParse(strValue, out value))
                         {
                             mScanEnd = value;
+                        }
+                        else
+                        {
+                            ConsoleMsgUtils.ShowWarning("Ignoring invalid scan number for /End: " + strValue);
                         }
                     }
                 }
@@ -443,8 +475,7 @@ namespace MSFileInfoScanner
                 {
                     if (!int.TryParse(strValue, out mDatasetID))
                     {
-                        ShowErrorMessage("DatasetID is not an integer");
-                        return false;
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid dataset ID for /DatasetID: " + strValue);
                     }
                 }
 
