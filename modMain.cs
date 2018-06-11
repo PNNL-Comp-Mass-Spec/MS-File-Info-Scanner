@@ -532,12 +532,21 @@ namespace MSFileInfoScanner
             try
             {
                 var scanner = new clsMSFileInfoScanner();
+                var exePath = PRISM.FileProcessor.ProcessFilesOrFoldersBase.GetAppPath();
 
-                Console.WriteLine("This program will scan a series of MS data files (or data folders) and " + "extract the acquisition start and end times, number of spectra, and the " + "total size of the data, saving the values in the file " + clsMSFileInfoScanner.DefaultAcquisitionTimeFilename + ". " + "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), " + "Agilent or QStar/QTrap .WIFF files, Masslynx .Raw folders, Bruker 1 folders, " + "Bruker XMass analysis.baf files, .UIMF files (IMS), " + "zipped Bruker imaging datasets (with 0_R*.zip files), and " + "DeconTools _isos.csv files");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "This program will scan a series of MS data files (or data folders) and " +
+                                      "extract the acquisition start and end times, number of spectra, and the " +
+                                      "total size of the data, saving the values in the file " +
+                                      clsMSFileInfoScanner.DefaultAcquisitionTimeFilename + ". " +
+                                      "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), " +
+                                      "Agilent or QStar/QTrap .WIFF files, Masslynx .Raw folders, Bruker 1 folders, " +
+                                      "Bruker XMass analysis.baf files, .UIMF files (IMS), " +
+                                      "zipped Bruker imaging datasets (with 0_R*.zip files), and " +
+                                      "DeconTools _isos.csv files"));
 
                 Console.WriteLine();
-
-                Console.WriteLine("Program syntax:" + Environment.NewLine + Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location));
+                Console.WriteLine("Program syntax:" + Environment.NewLine + Path.GetFileName(exePath));
                 Console.WriteLine(" /I:InputFileNameOrFolderPath [/O:OutputFolderName]");
                 Console.WriteLine(" [/P:ParamFilePath] [/S[:MaxLevel]] [/IE] [/L:LogFilePath]");
                 Console.WriteLine(" [/LC[:MaxPointsToPlot]] [/NoTIC] [/LCGrad]");
@@ -549,21 +558,39 @@ namespace MSFileInfoScanner
                 Console.WriteLine(" [/CF] [/R] [/Z]");
                 Console.WriteLine(" [/PostToDMS] [/PythonPlot]");
                 Console.WriteLine();
-                Console.WriteLine("Use /I to specify the name of a file or folder to scan; the path can contain the wildcard character *");
-                Console.WriteLine("The output folder name is optional.  If omitted, the output files will be created in the program directory.");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /I to specify the name of a file or folder to scan; the path can contain the wildcard character *"));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "The output folder name is optional.  If omitted, the output files will be created in the program directory."));
                 Console.WriteLine();
 
-                Console.WriteLine("The param file switch is optional.  If supplied, it should point to a valid XML parameter file.  If omitted, defaults are used.");
-                Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine. Use /IE to ignore errors when recursing.");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "The param file switch is optional. " +
+                                      "If supplied, it should point to a valid XML parameter file. " +
+                                      "If omitted, defaults are used."));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /S to process all valid files in the input folder and subfolders. " +
+                                      "Include a number after /S (like /S:2) to limit the level of subfolders to examine. " +
+                                      "Use /IE to ignore errors when recursing."));
                 Console.WriteLine("Use /L to specify the file path for logging messages.");
                 Console.WriteLine();
 
-                Console.WriteLine("Use /LC to create 2D LCMS plots (this process could take several minutes for each dataset).  By default, plots the top " + clsLCMSDataPlotterOptions.DEFAULT_MAX_POINTS_TO_PLOT + " points.  To plot the top 20000 points, use /LC:20000.");
-                Console.WriteLine("Use /LCDiv to specify the divisor to use when creating the overview 2D LCMS plots.  By default, uses /LCDiv:" + clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR + "; use /LCDiv:0 to disable creation of the overview plots.");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /LC to create 2D LCMS plots (this process could take several minutes for each dataset). " +
+                                      "By default, plots the top " + clsLCMSDataPlotterOptions.DEFAULT_MAX_POINTS_TO_PLOT + " points." +
+                                      "To plot the top 20000 points, use /LC:20000."));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /LCDiv to specify the divisor to use when creating the overview 2D LCMS plots. " +
+                                      "By default, uses /LCDiv:" + clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR + "; " +
+                                      "use /LCDiv:0 to disable creation of the overview plots."));
                 Console.WriteLine("Use /NoTIC to not save TIC and BPI plots.");
-                Console.WriteLine("Use /LCGrad to save a series of 2D LC plots, each using a different color scheme.  The default color scheme is OxyPalettes.Jet");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /LCGrad to save a series of 2D LC plots, each using a different color scheme. " +
+                                      "The default color scheme is OxyPalettes.Jet"));
                 Console.WriteLine();
-                Console.WriteLine("Use /DatasetID:# to define the dataset's DatasetID value (where # is an integer); only appropriate if processing a single dataset");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /DatasetID:# to define the dataset's DatasetID value (where # is an integer); " +
+                                      "only appropriate if processing a single dataset"));
                 Console.WriteLine("Use /DI to create a dataset info XML file for each dataset.");
                 Console.WriteLine();
                 Console.WriteLine("Use /SS to create a _ScanStats.txt  file for each dataset.");
@@ -586,26 +613,45 @@ namespace MSFileInfoScanner
                                       "to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt"));
                 Console.WriteLine();
 
-                Console.WriteLine("Use /ScanStart and /ScanEnd to limit the scan range to process; useful for files where the first few scans are corrupt. " +
-                                  "For example, to start processing at scan 10, use /ScanStart:10");
-                Console.WriteLine("Use /Debug to display debug information at the console, including showing the scan number prior to reading each scan's data");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /ScanStart and /ScanEnd to limit the scan range to process; " +
+                                      "useful for files where the first few scans are corrupt. " +
+                                    "For example, to start processing at scan 10, use /ScanStart:10"));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /Debug to display debug information at the console, " +
+                                      "including showing the scan number prior to reading each scan's data"));
                 Console.WriteLine();
 
-                Console.WriteLine("Use /C to perform an integrity check on all known file types; this process will open known file types and " +
-                                  "verify that they contain the expected   This option is only used if you specify an Input Folder and use a wildcard; you will typically also want to use /S when using /C.");
-                Console.WriteLine(("Use /M to define the maximum number of lines to process when checking text or csv files;" +
-                                           " default is /M:" + clsFileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /C to perform an integrity check on all known file types; " +
+                                      "this process will open known file types and verify that they contain the expected data. " +
+                                      "This option is only used if you specify an Input Folder and use a wildcard; " +
+                                      "you will typically also want to use /S when using /C."));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /M to define the maximum number of lines to process when checking text or csv files; " +
+                                      "default is /M:" + clsFileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK));
                 Console.WriteLine();
 
                 Console.WriteLine("Use /H to compute Sha-1 file hashes when verifying file integrity.");
-                Console.WriteLine("Use /QZ to run a quick zip-file validation test when verifying file integrity (the test does not check all data in the .Zip file).");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /QZ to run a quick zip-file validation test when verifying file integrity " +
+                                      "(the test does not check all data in the .Zip file)."));
                 Console.WriteLine();
 
-                Console.WriteLine("Use /CF to save/load information from the acquisition time file (cache file).  This option is auto-enabled if you use /C.");
-                Console.WriteLine("Use /R to reprocess files that are already defined in the acquisition time file.");
-                Console.WriteLine("Use /Z to reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes.");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph
+                                      ("Use /CF to save/load information from the acquisition time file (cache file). " +
+                                       "This option is auto-enabled if you use /C."));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /R to reprocess files that are already defined in the acquisition time file."));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /Z to reprocess files that are already defined in the acquisition time file " +
+                                      "only if their cached size is 0 bytes."));
                 Console.WriteLine();
-                Console.WriteLine("Use /PostToDMS to store the dataset info in the DMS database.  To customize the server name and/or stored procedure to use for posting, use an XML parameter file with settings DSInfoConnectionString, DSInfoDBPostingEnabled, and DSInfoStoredProcedure");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /PostToDMS to store the dataset info in the DMS database. " +
+                                      "To customize the server name and/or stored procedure to use for posting, " +
+                                      "use an XML parameter file with settings DSInfoConnectionString, " +
+                                      "DSInfoDBPostingEnabled, and DSInfoStoredProcedure"));
                 Console.WriteLine();
                 Console.WriteLine("Use /PythonPlot to create plots with Python instead of OxyPlot");
                 Console.WriteLine();
