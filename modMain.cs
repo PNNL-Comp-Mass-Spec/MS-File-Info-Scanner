@@ -511,7 +511,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                ShowErrorMessage("Error parsing the command line parameters: " + Environment.NewLine + ex.Message);
+                ShowErrorMessage("Error parsing the command line parameters", ex);
                 return false;
             }
 
@@ -522,29 +522,9 @@ namespace MSFileInfoScanner
             return string.Join(", ", lstList);
         }
 
-        private static void ShowErrorMessage(string message)
+        private static void ShowErrorMessage(string message, Exception ex = null)
         {
-            ConsoleMsgUtils.ShowError(message);
-        }
-
-        private static void ShowErrorMessage(string strTitle, IEnumerable<string> items)
-        {
-            const string strSeparator = "------------------------------------------------------------------------------";
-
-            Console.WriteLine();
-            Console.WriteLine(strSeparator);
-            ConsoleMsgUtils.ShowError(strTitle, null, false, false);
-            var strMessage = strTitle + ":";
-
-            foreach (var item in items)
-            {
-                ConsoleMsgUtils.ShowError("   " + item, null, false, false);
-                strMessage += " " + item;
-            }
-            Console.WriteLine(strSeparator);
-            Console.WriteLine();
-
-            WriteToErrorStream(strMessage);
+            ConsoleMsgUtils.ShowError(message, ex);
         }
 
         private static void ShowProgramHelp()
@@ -650,21 +630,6 @@ namespace MSFileInfoScanner
                 ShowErrorMessage("Error displaying the program syntax: " + ex.Message);
             }
 
-        }
-
-        private static void WriteToErrorStream(string strErrorMessage)
-        {
-            try
-            {
-                using (var swErrorStream = new StreamWriter(Console.OpenStandardError()))
-                {
-                    swErrorStream.WriteLine(strErrorMessage);
-                }
-            }
-            catch (Exception)
-            {
-                // Ignore errors here
-            }
         }
 
         private static void mMSFileScanner_DebugEvent(string message)
