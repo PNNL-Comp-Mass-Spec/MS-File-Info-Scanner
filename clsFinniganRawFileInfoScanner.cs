@@ -204,7 +204,9 @@ namespace MSFileInfoScanner
                             BasePeakMZ = scanInfo.BasePeakMZ.ToString("0.0###"),
                             BasePeakSignalToNoiseRatio = "0",
                             IonCount = scanInfo.NumPeaks,
-                            IonCountRaw = scanInfo.NumPeaks
+                            IonCountRaw = scanInfo.NumPeaks,
+                            MzMin = scanInfo.LowMass,
+                            MzMax = scanInfo.HighMass
                         };
 
                         // Store the ScanEvent values in .ExtendedScanInfo

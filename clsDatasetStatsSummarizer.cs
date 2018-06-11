@@ -1041,6 +1041,16 @@ namespace MSFileInfoScanner
 
         public int IonCountRaw;
 
+        /// <summary>
+        /// Smallest m/z value in the scan
+        /// </summary>
+        public double MzMin;
+
+        /// <summary>
+        /// Largest m/z value in the scan
+        /// </summary>
+        public double MzMax;
+
         // Only used for Thermo data
         public udtExtendedStatsInfoType ExtendedScanInfo;
 
@@ -1060,6 +1070,9 @@ namespace MSFileInfoScanner
 
             IonCount = 0;
             IonCountRaw = 0;
+
+            MzMin = 0;
+            MzMax = 0;
 
             ExtendedScanInfo.Clear();
         }
