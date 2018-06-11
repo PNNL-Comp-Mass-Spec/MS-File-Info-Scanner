@@ -290,8 +290,12 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// When True, computes an Sha1 hash on every file
+        /// When True, computes a Sha1 hash on every file using mFileIntegrityChecker
         /// </summary>
+        /// <remarks>
+        /// Note, when this is false, the program computes the Sha1 hash of the primary dataset file (or files),
+        /// unless DisableInstrumentHash is true
+        /// </remarks>
         public override bool ComputeFileHashes
         {
             get
@@ -327,6 +331,12 @@ namespace MSFileInfoScanner
                 }
             }
         }
+
+        /// <summary>
+        /// By default, will compute the Sha1 hash of only the primary dataset file
+        /// Disable by setting this to true
+        /// </summary>
+        public bool DisableInstrumentHash { get; set; }
 
         public override float LCMS2DPlotMZResolution
         {
@@ -858,6 +868,7 @@ namespace MSFileInfoScanner
 
                         LCMS2DPlotMZResolution = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMZResolution", LCMS2DPlotMZResolution);
                         LCMS2DPlotMinPointsPerSpectrum = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinPointsPerSpectrum", LCMS2DPlotMinPointsPerSpectrum);
+                        DisableInstrumentHash = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DisableInstrumentHash", DisableInstrumentHash);
 
                         LCMS2DPlotMaxPointsToPlot = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMaxPointsToPlot", LCMS2DPlotMaxPointsToPlot);
                         LCMS2DPlotMinIntensity = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinIntensity", LCMS2DPlotMinIntensity);
@@ -1231,6 +1242,7 @@ namespace MSFileInfoScanner
             scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError, CopyFileLocalOnReadError);
             scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.PlotWithPython, PlotWithPython);
             scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile, UpdateDatasetStatsTextFile);
+            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.DisableInstrumentHash, DisableInstrumentHash);
 
             scanner.DatasetStatsTextFileName = mDatasetStatsTextFileName;
 

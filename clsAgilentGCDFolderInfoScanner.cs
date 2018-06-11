@@ -378,9 +378,15 @@ namespace MSFileInfoScanner
                     datasetFileInfo.AcqTimeEnd = fiMSDatafile.LastWriteTime;
 
                     // Read the file info from the file system
+                    // This will also compute the Sha1 hash of the Data.MS file and add it to mDatasetStatsSummarizer.DatasetFileInfo
                     UpdateDatasetFileStats(fiMSDatafile, datasetFileInfo.DatasetID);
 
                     blnSuccess = true;
+                }
+                else
+                {
+                    // Compute the hash of the largest file in the .D folder
+                    AddLargestInstrumentFile(diAgilentDFolder);
                 }
 
                 datasetFileInfo.ScanCount = 0;
@@ -475,6 +481,7 @@ namespace MSFileInfoScanner
                 blnSuccess = false;
             }
 
+            PostProcessTasks();
             return blnSuccess;
         }
 

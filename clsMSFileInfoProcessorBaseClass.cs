@@ -1,6 +1,9 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 using MSFileInfoScannerInterfaces;
+using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2007
@@ -63,6 +66,8 @@ namespace MSFileInfoScanner
         protected bool mShowDebugInfo;
 
         private int mDatasetID;
+
+        protected bool mDisableInstrumentHash;
 
         protected bool mCopyFileLocalOnReadError;
 
@@ -168,6 +173,8 @@ namespace MSFileInfoScanner
                     return mCheckCentroidingStatus;
                 case ProcessingOptions.PlotWithPython:
                     return mPlotWithPython;
+                case ProcessingOptions.DisableInstrumentHash:
+                    return mDisableInstrumentHash;
             }
 
             throw new Exception("Unrecognized option, " + eOption);
@@ -204,10 +211,35 @@ namespace MSFileInfoScanner
                 case ProcessingOptions.PlotWithPython:
                     mPlotWithPython = value;
                     break;
+                case ProcessingOptions.DisableInstrumentHash:
+                    mDisableInstrumentHash = value;
+                    break;
                 default:
                     throw new Exception("Unrecognized option, " + eOption);
             }
 
+        }
+
+        /// <summary>
+        /// Find the largest file in the instrument directory
+        /// Compute its sha1 hash then add to mDatasetStatsSummarizer.DatasetFileInfo
+        /// </summary>
+        /// <param name="instrumentDirectory"></param>
+        protected void AddLargestInstrumentFile(DirectoryInfo instrumentDirectory)
+        {
+            var filesBySize = (from item in instrumentDirectory.GetFiles("*") orderby item.Length select item).ToList();
+
+            if (filesBySize.Count > 0)
+            {
+                if (mDisableInstrumentHash)
+                {
+                    mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(filesBySize.Last());
+                }
+                else
+                {
+                    mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(filesBySize.Last());
+                }
+            }
         }
 
         private bool CreateDatasetInfoFile(string inputFileName, string outputFolderPath)
@@ -399,6 +431,7 @@ namespace MSFileInfoScanner
             mShowDebugInfo = false;
 
             mDatasetID = 0;
+            mDisableInstrumentHash = false;
 
             mCopyFileLocalOnReadError = false;
 
@@ -418,35 +451,50 @@ namespace MSFileInfoScanner
             mLCMS2DPlotOverview.Reset();
         }
 
-        protected bool UpdateDatasetFileStats(FileInfo fiFileInfo, int datasetID)
+        protected bool UpdateDatasetFileStats(FileInfo instrumentFile, int datasetID)
+        {
+            return UpdateDatasetFileStats(instrumentFile, datasetID, out _);
+        }
+
+        protected bool UpdateDatasetFileStats(FileInfo instrumentFile, int datasetID, out bool fileAdded)
         {
 
+            fileAdded = false;
             try
             {
-                if (!fiFileInfo.Exists)
+                if (!instrumentFile.Exists)
                     return false;
 
                 // Record the file size and Dataset ID
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = fiFileInfo.CreationTime;
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = fiFileInfo.LastWriteTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = instrumentFile.CreationTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = instrumentFile.LastWriteTime;
 
                 mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
                 mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
 
                 mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetID;
-                mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = Path.GetFileNameWithoutExtension(fiFileInfo.Name);
-                mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = fiFileInfo.Extension;
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = fiFileInfo.Length;
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = Path.GetFileNameWithoutExtension(instrumentFile.Name);
+                mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = instrumentFile.Extension;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = instrumentFile.Length;
 
                 mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
 
+                if (mDisableInstrumentHash)
+                {
+                    mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(instrumentFile);
+                }
+                else
+                {
+                    mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(instrumentFile);
+                }
+                fileAdded = true;
+
+                return true;
             }
             catch (Exception)
             {
                 return false;
             }
-
-            return true;
 
         }
 
@@ -906,6 +954,33 @@ namespace MSFileInfoScanner
             }
 
             return (int)Math.Round(value / 1000.0 / 1000, 0) + "M";
+        }
+
+        protected void PostProcessTasks()
+        {
+            ShowInstrumentFiles();
+        }
+
+        /// <summary>
+        /// Display the instrument file names and stats at the console or via OnDebugEvent
+        /// </summary>
+        protected void ShowInstrumentFiles()
+        {
+            if (mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles.Count <= 0) return;
+            var fileInfo = new StringBuilder();
+
+            if (mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles.Count == 1)
+                fileInfo.AppendLine("Primary instrument file");
+            else
+                fileInfo.AppendLine("Primary instrument files");
+
+            foreach (var instrumentFile in mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles)
+            {
+                fileInfo.AppendLine(string.Format("  {0}  {1,-30}  {2,12:N0} bytes",
+                                                  instrumentFile.Value.Hash, instrumentFile.Key, instrumentFile.Value.Length));
+            }
+
+            OnDebugEvent(fileInfo.ToString());
         }
 
         private void UpdatePlotWithPython()

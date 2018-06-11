@@ -238,6 +238,16 @@ namespace MSFileInfoScanner
                     datasetFileInfo.FileSizeBytes = fiYepFile.Length;
                     datasetFileInfo.AcqTimeStart = fiYepFile.LastWriteTime;
                     datasetFileInfo.AcqTimeEnd = fiYepFile.LastWriteTime;
+
+                    if (mDisableInstrumentHash)
+                    {
+                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(fiYepFile);
+                    }
+                    else
+                    {
+                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(fiYepFile);
+                    }
+
                     blnSuccess = true;
                 }
                 else
@@ -256,6 +266,9 @@ namespace MSFileInfoScanner
                         {
                             datasetFileInfo.FileSizeBytes += datasetFile.Length;
                         }
+
+                        // Compute the sha1 hash of the largest file in instrument directory
+                        AddLargestInstrumentFile(diFolder);
                     }
                 }
 
@@ -277,11 +290,24 @@ namespace MSFileInfoScanner
                     }
                 }
 
+                // Copy over the updated filetime info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetFileInfo.DatasetID;
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
+                mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
+                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
+                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
+                mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
+
             }
             catch (Exception)
             {
                 blnSuccess = false;
             }
+
+            PostProcessTasks();
 
             return blnSuccess;
         }

@@ -880,28 +880,37 @@ namespace MSFileInfoScanner
                     BRUKER_EXTENSION_BAF_FILE_NAME
                 };
 
-                var fiFiles = new List<FileInfo>();
+                // This tracks the first instrument file matched
+                var fiMatchedFiles = new List<FileInfo>();
+
+                // This tracks all instrument files matched
+                var instrumentFilesToAdd = new List<FileInfo>();
 
                 foreach (var instrumentDataFile in lstInstrumentDataFiles)
                 {
-                    fiFiles = diDatasetFolder.GetFiles(instrumentDataFile).ToList();
-                    if (fiFiles.Count > 0)
+                    var fiFiles = diDatasetFolder.GetFiles(instrumentDataFile).ToList();
+                    if (fiFiles.Count == 0)
+                        continue;
+
+                    if (fiMatchedFiles.Count == 0)
                     {
-                        break;
+                        fiMatchedFiles.AddRange(fiFiles);
                     }
+
+                    instrumentFilesToAdd.AddRange(fiFiles);
                 }
 
-                if (fiFiles.Count == 0)
+                if (fiMatchedFiles.Count == 0)
                 {
-                    //.baf files not found; look for any .mcf files
-                    fiFiles = diDatasetFolder.GetFiles("*" + BRUKER_MCF_FILE_EXTENSION).ToList();
+                    // .baf files not found; look for any .mcf files
+                    var mcfFiles = diDatasetFolder.GetFiles("*" + BRUKER_MCF_FILE_EXTENSION).ToList();
 
-                    if (fiFiles.Count > 0)
+                    if (mcfFiles.Count > 0)
                     {
                         // Find the largest .mcf file (not .mcf_idx file)
                         FileInfo fiLargestMCF = null;
 
-                        foreach (var fiMCFFile in fiFiles)
+                        foreach (var fiMCFFile in mcfFiles)
                         {
                             if (fiMCFFile.Extension.ToUpper() == BRUKER_MCF_FILE_EXTENSION)
                             {
@@ -916,20 +925,15 @@ namespace MSFileInfoScanner
                             }
                         }
 
-                        if (fiLargestMCF == null)
+                        if (fiLargestMCF != null)
                         {
-                            // Didn't actually find a .MCF file; clear fiFiles
-                            fiFiles.Clear();
-                        }
-                        else
-                        {
-                            fiFiles.Clear();
-                            fiFiles.Add(fiLargestMCF);
+                            fiMatchedFiles.Add(fiLargestMCF);
+                            instrumentFilesToAdd.Add(fiLargestMCF);
                         }
                     }
                 }
 
-                if (fiFiles.Count == 0)
+                if (fiMatchedFiles.Count == 0)
                 {
                     OnErrorEvent(
                         string.Join(" or ", lstInstrumentDataFiles) + " or " +
@@ -938,25 +942,26 @@ namespace MSFileInfoScanner
                     return false;
                 }
 
-                var fiFileInfo = fiFiles.First();
+                var primaryInstrumentFile = fiMatchedFiles.First();
 
                 // Read the file info from the file system
                 // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
-                UpdateDatasetFileStats(fiFileInfo, datasetFileInfo.DatasetID);
+                // This will also compute the Sha1 hash of the primary instrument file and add it to mDatasetStatsSummarizer.DatasetFileInfo
+                UpdateDatasetFileStats(primaryInstrumentFile, datasetFileInfo.DatasetID, out var primaryFileAdded);
 
                 // Update the dataset name and file extension
                 datasetFileInfo.DatasetName = GetDatasetNameViaPath(diDatasetFolder.FullName);
                 datasetFileInfo.FileExtension = string.Empty;
-                datasetFileInfo.FileSizeBytes = fiFileInfo.Length;
+                datasetFileInfo.FileSizeBytes = primaryInstrumentFile.Length;
 
                 // Find the apexAcquisition.method or submethods.xml file in the XMASS_Method.m subfolder to determine .AcqTimeStart
                 // This function updates datasetFileInfo.AcqTimeEnd and datasetFileInfo.AcqTimeStart to have the same time
                 DetermineAcqStartTime(diDatasetFolder, datasetFileInfo);
 
                 // Update the acquisition end time using the write time of the .baf file
-                if (fiFileInfo.LastWriteTime > datasetFileInfo.AcqTimeEnd)
+                if (primaryInstrumentFile.LastWriteTime > datasetFileInfo.AcqTimeEnd)
                 {
-                    datasetFileInfo.AcqTimeEnd = fiFileInfo.LastWriteTime;
+                    datasetFileInfo.AcqTimeEnd = primaryInstrumentFile.LastWriteTime;
 
                     if (datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes > 60)
                     {
@@ -984,19 +989,19 @@ namespace MSFileInfoScanner
                     {
                         // Use ProteoWizard to extract the scan counts and acquisition time information
                         // If mSaveLCMS2DPlots = True, this method will also read the m/z and intensity values from each scan so that we can make 2D plots
-                        bafFileParsed = ParseBAFFile(fiFileInfo, datasetFileInfo);
+                        bafFileParsed = ParseBAFFile(primaryInstrumentFile, datasetFileInfo);
                     }
 
                     if (mSaveTICAndBPI && mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC == 0 || mSaveLCMS2DPlots && mLCMS2DPlot.ScanCountCached == 0)
                     {
                         // If a ser or fid file exists, we can read the data from it to create the TIC and BPI plots, plus also the 2D plot
 
-                        var serOrFidParsed = ParseSerOrFidFile(fiFileInfo.Directory, scanElutionTimeMap);
+                        var serOrFidParsed = ParseSerOrFidFile(primaryInstrumentFile.Directory, scanElutionTimeMap);
 
                         if (!serOrFidParsed && !bafFileParsed)
                         {
                             // Look for an analysis.baf file
-                            bafFileParsed = ParseBAFFile(fiFileInfo, datasetFileInfo);
+                            bafFileParsed = ParseBAFFile(primaryInstrumentFile, datasetFileInfo);
                         }
 
                     }
@@ -1005,7 +1010,32 @@ namespace MSFileInfoScanner
                 // Parse the AutoMS.txt file (if it exists) to determine which scans are MS and which are MS/MS
                 ParseAutoMSFile(diDatasetFolder);
 
-                // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
+                if (instrumentFilesToAdd.Count == 0 && !primaryFileAdded)
+                {
+                    // Add the largest file in instrument directory
+                    AddLargestInstrumentFile(diDatasetFolder);
+                }
+                else
+                {
+
+                    // Add the files in instrumentFilesToAdd
+                    foreach (var fileToAdd in instrumentFilesToAdd)
+                    {
+                        if (fileToAdd.FullName.Equals(primaryInstrumentFile.FullName))
+                            continue;
+
+                        if (mDisableInstrumentHash)
+                        {
+                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(fileToAdd);
+                        }
+                        else
+                        {
+                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(fileToAdd);
+                        }
+                    }
+                }
+
+                // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
                 mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
                 mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
                 mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
@@ -1013,11 +1043,13 @@ namespace MSFileInfoScanner
                 mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
                 mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
 
+                PostProcessTasks();
                 return true;
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Exception processing BAF data: " + ex.Message, ex);
+                PostProcessTasks();
                 return false;
             }
 

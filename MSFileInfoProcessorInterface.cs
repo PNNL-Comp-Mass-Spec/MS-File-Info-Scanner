@@ -19,7 +19,8 @@ namespace MSFileInfoScanner
             UpdateDatasetStatsTextFile = 5,
             CreateScanStatsFile = 6,
             CheckCentroidingStatus = 7,
-            PlotWithPython = 8
+            PlotWithPython = 8,
+            DisableInstrumentHash = 9
         }
 
         public abstract bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo);

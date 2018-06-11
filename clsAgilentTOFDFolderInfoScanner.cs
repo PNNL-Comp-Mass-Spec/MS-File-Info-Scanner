@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
@@ -15,6 +17,9 @@ namespace MSFileInfoScanner
 
         public const string AGILENT_DATA_FOLDER_D_EXTENSION = ".D";
         public const string AGILENT_ACQDATA_FOLDER_NAME = "AcqData";
+        public const string AGILENT_MS_PEAK_FILE = "MSPeak.bin";
+        public const string AGILENT_MS_PEAK_PERIODIC_ACTUALS_FILE = "MSPeriodicActuals.bin";
+        public const string AGILENT_MS_PROFILE_FILE = "MSProfile.bin";
         public const string AGILENT_MS_SCAN_FILE = "MSScan.bin";
         public const string AGILENT_XML_CONTENTS_FILE = "Contents.xml";
 
@@ -176,7 +181,7 @@ namespace MSFileInfoScanner
                                     if (dblEndTime > dblStartTime)
                                     {
                                         blnSuccess = true;
-                                        dblTotalAcqTimeMinutes += (dblEndTime - dblStartTime);
+                                        dblTotalAcqTimeMinutes += dblEndTime - dblStartTime;
                                     }
 
                                 }
@@ -235,6 +240,8 @@ namespace MSFileInfoScanner
                     // Use its modification time to get an initial estimate for the acquisition end time
                     var fiMSScanfile = new FileInfo(Path.Combine(diAcqDataFolder.FullName, AGILENT_MS_SCAN_FILE));
 
+                    bool primaryFileAdded;
+
                     if (fiMSScanfile.Exists)
                     {
                         datasetFileInfo.AcqTimeStart = fiMSScanfile.LastWriteTime;
@@ -242,13 +249,46 @@ namespace MSFileInfoScanner
 
                         // Read the file info from the file system
                         // Several of these stats will be further updated later
-                        UpdateDatasetFileStats(fiMSScanfile, datasetFileInfo.DatasetID);
+                        // This will also compute the Sha1 hash of the MSScan.bin file and add it to mDatasetStatsSummarizer.DatasetFileInfo
+                        UpdateDatasetFileStats(fiMSScanfile, datasetFileInfo.DatasetID, out primaryFileAdded);
                     }
                     else
                     {
                         // Read the file info from the file system
                         // Several of these stats will be further updated later
                         UpdateDatasetFileStats(diAcqDataFolder, datasetFileInfo.DatasetID);
+                        primaryFileAdded = false;
+                    }
+
+                    var additionalFilesToHash = new List<FileInfo>
+                    {
+                        new FileInfo(Path.Combine(diAcqDataFolder.FullName, AGILENT_MS_PEAK_FILE)),
+                        new FileInfo(Path.Combine(diAcqDataFolder.FullName, AGILENT_MS_PEAK_PERIODIC_ACTUALS_FILE)),
+                        new FileInfo(Path.Combine(diAcqDataFolder.FullName, AGILENT_MS_PROFILE_FILE)),
+                        new FileInfo(Path.Combine(diAcqDataFolder.FullName, AGILENT_XML_CONTENTS_FILE))
+                    };
+
+                    foreach (var addnlFile in additionalFilesToHash)
+                    {
+                        if (!addnlFile.Exists)
+                            continue;
+
+                        if (mDisableInstrumentHash)
+                        {
+                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(addnlFile);
+                        }
+                        else
+                        {
+                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(addnlFile);
+                        }
+                        primaryFileAdded = true;
+
+                    }
+
+                    if (!primaryFileAdded)
+                    {
+                        // Add largest file in the AcqData folder
+                        AddLargestInstrumentFile(diAcqDataFolder);
                     }
 
                     blnSuccess = true;
@@ -284,7 +324,7 @@ namespace MSFileInfoScanner
 
                 if (blnSuccess)
                 {
-                    // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
+                    // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
                     mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
                     mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
@@ -299,6 +339,8 @@ namespace MSFileInfoScanner
                 OnErrorEvent("Exception parsing Agilent TOF .D folder: " + ex.Message, ex);
                 blnSuccess = false;
             }
+
+            PostProcessTasks();
 
             return blnSuccess;
 

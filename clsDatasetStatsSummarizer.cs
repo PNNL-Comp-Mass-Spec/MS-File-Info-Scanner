@@ -556,9 +556,31 @@ namespace MSFileInfoScanner
                 objDSInfo.WriteElementString("StartTime", datasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt"));
                 objDSInfo.WriteElementString("EndTime", datasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt"));
 
+                // For datasets based on a single file, this is the file's size
+                // For datasets stored in a directory, this is the total size of the primary instrument files
                 objDSInfo.WriteElementString("FileSizeBytes", datasetFileInfo.FileSizeBytes.ToString());
 
-                if (includeCentroidStats) {
+                if (datasetFileInfo.InstrumentFiles.Count > 0)
+                {
+
+                    objDSInfo.WriteStartElement("InstrumentFiles");
+
+                    foreach (var instrumentFile in datasetFileInfo.InstrumentFiles)
+                    {
+                        objDSInfo.WriteStartElement("InstrumentFile");
+                        objDSInfo.WriteAttributeString("Hash", FixNull(instrumentFile.Value.Hash));
+                        objDSInfo.WriteAttributeString("HashType", instrumentFile.Value.HashType.ToString());
+                        objDSInfo.WriteAttributeString("Size", instrumentFile.Value.Length.ToString());
+                        objDSInfo.WriteString(instrumentFile.Key);
+                        objDSInfo.WriteEndElement();
+                    }
+
+                    objDSInfo.WriteEndElement();
+                    // InstrumentFiles
+                }
+
+                if (includeCentroidStats)
+                {
                     var centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedMS1Spectra;
                     var centroidedMSnSpectra = mSpectraTypeClassifier.CentroidedMSnSpectra;
 

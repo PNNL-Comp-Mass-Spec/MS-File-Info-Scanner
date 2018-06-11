@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -159,7 +160,7 @@ namespace MSFileInfoScanner
                     if (!srInFile.EndOfStream)
                     {
                         var strLineIn = srInFile.ReadLine();
-                        if ((strLineIn != null))
+                        if (strLineIn != null)
                         {
                             // Date line found
                             // It is of the form: wd37119 2208 WD37119\9TOperator Sat Aug 20 06:10:31 2005
@@ -206,6 +207,16 @@ namespace MSFileInfoScanner
                             datasetFileInfo.FileSizeBytes += objZipEntry.UncompressedSize;
                             datasetFileInfo.ScanCount += 1;
                         }
+                    }
+
+                    if (mDisableInstrumentHash)
+                    {
+                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(zippedSFile);
+                    }
+                    else
+                    {
+                        // Compute the Sha1 hash of the zip file (e.g. s001.zip)
+                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(zippedSFile);
                     }
 
                 }
@@ -399,6 +410,23 @@ namespace MSFileInfoScanner
                     datasetFileInfo.AcqTimeStart = brukerDatasetfile.LastWriteTime;
                     datasetFileInfo.AcqTimeEnd = brukerDatasetfile.LastWriteTime;
 
+                    if (IsZippedSFolder(brukerDatasetfile.FullName))
+                    {
+                        // AddInstrumentFile will be called in ParseBrukerZippedSFolders
+                        // Do not call it now
+                    }
+                    else
+                    {
+                        if (mDisableInstrumentHash)
+                        {
+                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(brukerDatasetfile);
+                        }
+                        else
+                        {
+                            // Compute the Sha1 hash of the bruker dataset file
+                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(brukerDatasetfile);
+                        }
+                    }
                 }
                 else
                 {
@@ -415,6 +443,33 @@ namespace MSFileInfoScanner
                     else
                     {
                         blnSuccess = false;
+                    }
+
+                    var filesToFind = new List<string> {"fid", "ser"};
+                    var instrumentFileAdded = false;
+
+                    foreach (var fileToFind in filesToFind)
+                    {
+                        var instrumentDataFile = new FileInfo(Path.Combine(strDataFilePath, fileToFind));
+                        if (!instrumentDataFile.Exists)
+                            continue;
+
+                        if (mDisableInstrumentHash)
+                        {
+                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(instrumentDataFile);
+                        }
+                        else
+                        {
+                            // Compute the Sha1 hash of the fid or ser file
+                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(instrumentDataFile);
+                        }
+                        instrumentFileAdded = true;
+                    }
+
+                    // Look for a fid or ser file
+                    if (!instrumentFileAdded)
+                    {
+                        AddLargestInstrumentFile(diZippedSFilesFolderInfo);
                     }
                 }
 
@@ -553,6 +608,8 @@ namespace MSFileInfoScanner
                     }
                 }
             }
+
+            PostProcessTasks();
 
             return blnSuccess;
 

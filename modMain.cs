@@ -50,6 +50,8 @@ namespace MSFileInfoScanner
         private static bool mTestLCMSGradientColorSchemes;
 
         private static bool mCheckCentroidingStatus;
+        private static bool mDisableInstrumentHash;
+
         private static int mScanStart;
         private static int mScanEnd;
 
@@ -107,6 +109,7 @@ namespace MSFileInfoScanner
             mTestLCMSGradientColorSchemes = false;
 
             mCheckCentroidingStatus = false;
+            mDisableInstrumentHash = false;
 
             mScanStart = 0;
             mScanEnd = 0;
@@ -174,6 +177,7 @@ namespace MSFileInfoScanner
                 scanner.TestLCMSGradientColorSchemes = mTestLCMSGradientColorSchemes;
 
                 scanner.CheckCentroidingStatus = mCheckCentroidingStatus;
+                scanner.DisableInstrumentHash = mDisableInstrumentHash;
 
                 scanner.ScanStart = mScanStart;
                 scanner.ScanEnd = mScanEnd;
@@ -288,6 +292,7 @@ namespace MSFileInfoScanner
                 "LCDiv",
                 "LCGrad",
                 "CC",
+                "NoHash",
                 "QS",
                 "ScanStart",
                 "ScanEnd",
@@ -388,6 +393,9 @@ namespace MSFileInfoScanner
 
                 if (parser.IsParameterPresent("CC"))
                     mCheckCentroidingStatus = true;
+
+                if (parser.IsParameterPresent("NoHash"))
+                    mDisableInstrumentHash = false;
 
                 if (parser.RetrieveValueForParameter("ScanStart", out strValue))
                 {
@@ -523,6 +531,7 @@ namespace MSFileInfoScanner
                 Console.WriteLine(" [/P:ParamFilePath] [/S[:MaxLevel]] [/IE] [/L:LogFilePath]");
                 Console.WriteLine(" [/LC[:MaxPointsToPlot]] [/NoTIC] [/LCGrad]");
                 Console.WriteLine(" [/DI] [/SS] [/QS] [/CC]");
+                Console.WriteLine(" [/MS2MzMin:MzValue] [/NoHash]");
                 Console.WriteLine(" [/DST:DatasetStatsFileName]");
                 Console.WriteLine(" [/ScanStart:0] [/ScanEnd:0] [/Debug]");
                 Console.WriteLine(" [/C] [/M:nnn] [/H] [/QZ]");
@@ -550,12 +559,20 @@ namespace MSFileInfoScanner
                 Console.WriteLine("Use /QS to compute an overall quality score for the data in each datasets.");
                 Console.WriteLine("Use /CC to check spectral data for whether it is centroided or profile");
                 Console.WriteLine();
-
-                Console.WriteLine("Use /DST to update (or create) a tab-delimited text file with overview stats for the dataset. " +
-                                  "If /DI is used, will include detailed scan counts; otherwise, will just have the dataset name, " +
-                                  "acquisition date, and (if available) sample name and comment. " +
-                                  "By default, the file is named " + clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME + "; " +
-                                  "to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /MS2MzMin to specify a minimum m/z value that all MS/MS spectra should have. " +
+                                      "Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold. " +
+                                      "Useful for validating datasets for iTRAQ or TMT samples."));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "A SHA1 hash is computed for the primary instrument data file(s). " +
+                                      "Use /NoHash to disable this"));
+                Console.WriteLine();
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /DST to update (or create) a tab-delimited text file with overview stats for the dataset. " +
+                                      "If /DI is used, will include detailed scan counts; otherwise, will just have the dataset name, " +
+                                      "acquisition date, and (if available) sample name and comment. " +
+                                      "By default, the file is named " + clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME + "; " +
+                                      "to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt"));
                 Console.WriteLine();
 
                 Console.WriteLine("Use /ScanStart and /ScanEnd to limit the scan range to process; useful for files where the first few scans are corrupt. " +

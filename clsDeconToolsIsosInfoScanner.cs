@@ -250,6 +250,7 @@ namespace MSFileInfoScanner
                 {
                     intRowNumber += 1;
                     var strLineIn = srIsosFile.ReadLine();
+
                     if (string.IsNullOrWhiteSpace(strLineIn))
                         continue;
 
@@ -526,9 +527,10 @@ namespace MSFileInfoScanner
 
             // Read the file info from the file system
             // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
-            UpdateDatasetFileStats(fiIsosFile, intDatasetID);
+            // This will also compute the Sha1 hash of the isos file and add it to mDatasetStatsSummarizer.DatasetFileInfo
+            UpdateDatasetFileStats(isosFile, intDatasetID);
 
-            // Copy over the updated filetime info from datasetFileInfo to mDatasetFileInfo
+            // Copy over the updated filetime info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
             mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
             mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
             mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetFileInfo.DatasetID;
@@ -538,6 +540,8 @@ namespace MSFileInfoScanner
             mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
             mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
             mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
+
+            PostProcessTasks();
 
             return true;
 

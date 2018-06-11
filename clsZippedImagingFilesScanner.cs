@@ -241,6 +241,15 @@ namespace MSFileInfoScanner
                     {
                         // Examine all of the apexAcquisition.method files in this zip file
                         DetermineAcqStartEndTime(fiFileInfo, datasetFileInfo);
+
+                        if (mDisableInstrumentHash)
+                        {
+                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(fiFileInfo);
+                        }
+                        else
+                        {
+                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(fiFileInfo);
+                        }
                     }
 
                     if (datasetFileInfo.AcqTimeEnd == DateTime.MinValue || datasetFileInfo.AcqTimeStart == DateTime.MaxValue)
@@ -251,7 +260,7 @@ namespace MSFileInfoScanner
                         datasetFileInfo.AcqTimeEnd = fiFirstImagingFile.LastWriteTime;
                     }
 
-                    // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
+                    // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
                     mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
                     mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
@@ -268,6 +277,7 @@ namespace MSFileInfoScanner
                 blnSuccess = false;
             }
 
+            PostProcessTasks();
             return blnSuccess;
 
         }

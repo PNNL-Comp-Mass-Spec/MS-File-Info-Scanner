@@ -80,6 +80,11 @@ namespace MSFileInfoScanner
                         datasetFileInfo.AcqTimeEnd = item.LastWriteTime;
                     }
 
+                    if (item.Extension.ToLower().Equals(".dat"))
+                    {
+                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(item);
+                    }
+
                     intFileCount += 1;
                 }
 
@@ -152,6 +157,7 @@ namespace MSFileInfoScanner
                     // Continue anyway since we've populated some of the values
                 }
 
+                PostProcessTasks();
                 return true;
 
             } catch (Exception) {
