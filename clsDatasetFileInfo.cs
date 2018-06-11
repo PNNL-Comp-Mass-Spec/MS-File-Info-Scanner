@@ -25,20 +25,62 @@ namespace MSFileInfoScanner
             /// </summary>
             public HashUtilities.HashTypeConstants HashType;
         }
+
+        /// <summary>
+        /// File creation time (local time)
+        /// </summary>
         public DateTime FileSystemCreationTime { get; set; }
+
+        /// <summary>
+        /// File modification time (local time)
+        /// </summary>
         public DateTime FileSystemModificationTime { get; set; }
+
+        /// <summary>
+        /// Dataset ID
+        /// </summary>
         public int DatasetID { get; set; }
+
+        /// <summary>
+        /// Dataset Name
+        /// </summary>
         public string DatasetName { get; set; }
+
+        /// <summary>
+        /// File extension
+        /// </summary>
         public string FileExtension { get; set; }
+
+        /// <summary>
+        /// Dataset acquisition time start
+        /// </summary>
         public DateTime AcqTimeStart { get; set; }
+
+        /// <summary>
+        /// Dataset acquisition time end
+        /// </summary>
         public DateTime AcqTimeEnd { get; set; }
+
+        /// <summary>
+        /// Number of spectra (scans)
+        /// </summary>
+        /// <remarks>For UIMF files, the number of frames</remarks>
         public int ScanCount { get; set; }
+
+        /// <summary>
+        /// File size, in bytes
+        /// </summary>
         public long FileSizeBytes { get; set; }
+
         /// <summary>
         /// Tracks the file size and hash value for each primary instrument file
         /// </summary>
         public Dictionary<string, InstrumentFileInfo> InstrumentFiles { get; } = new Dictionary<string, InstrumentFileInfo>();
 
+        /// <summary>
+        /// Quality score
+        /// </summary>
+        /// <remarks>For Thermo files, this is simply the average ion intensity</remarks>
         public float OverallQualityScore { get; set; }
 
         /// <summary>
@@ -49,6 +91,11 @@ namespace MSFileInfoScanner
             Clear();
         }
 
+        /// <summary>
+        /// Constructor that takes Dataset ID and Dataset Name
+        /// </summary>
+        /// <param name="datasetId"></param>
+        /// <param name="datasetName"></param>
         public clsDatasetFileInfo(int datasetId, string datasetName)
         {
             Clear();
@@ -56,6 +103,9 @@ namespace MSFileInfoScanner
             DatasetName = datasetName;
         }
 
+        /// <summary>
+        /// Clear all values
+        /// </summary>
         public void Clear()
         {
             FileSystemCreationTime = DateTime.MinValue;

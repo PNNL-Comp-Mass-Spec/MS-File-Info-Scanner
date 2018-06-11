@@ -183,11 +183,16 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Looks for the s*.zip files to determine the total file size (uncompressed) of all files in all the matching .Zip files
+        /// Updates datasetFileInfo.FileSizeBytes with this info, while also updating datasetFileInfo.ScanCount with the total number of files found
+        /// Also computes the Sha1 hash of each file
+        /// </summary>
+        /// <param name="diZippedSFilesFolderInfo"></param>
+        /// <param name="datasetFileInfo"></param>
+        /// <returns>True if success and also if no matching Zip files were found; returns False if error</returns>
         private bool ParseBrukerZippedSFolders(DirectoryInfo diZippedSFilesFolderInfo, clsDatasetFileInfo datasetFileInfo)
         {
-            // Looks through the s*.zip files to determine the total file size (uncompressed) of all files in all the matching .Zip files
-            // Updates datasetFileInfo.FileSizeBytes with this info, while also updating datasetFileInfo.ScanCount with the total number of files found
-            // Returns True if success and also if no matching Zip files were found; returns False if error
 
             bool blnSuccess;
 

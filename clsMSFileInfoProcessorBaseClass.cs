@@ -98,6 +98,9 @@ namespace MSFileInfoScanner
             set => mDatasetID = value;
         }
 
+        /// <summary>
+        /// Dataset stats file name
+        /// </summary>
         public override string DatasetStatsTextFileName
         {
             get => mDatasetStatsTextFileName;
@@ -114,6 +117,9 @@ namespace MSFileInfoScanner
             }
         }
 
+        /// <summary>
+        /// LC/MS 2D plot options
+        /// </summary>
         public override clsLCMSDataPlotterOptions LCMS2DPlotOptions
         {
             get => mLCMS2DPlot.Options;
@@ -124,6 +130,9 @@ namespace MSFileInfoScanner
             }
         }
 
+        /// <summary>
+        /// LC/MS 2D overview plot divisor
+        /// </summary>
         public override int LCMS2DOverviewPlotDivisor
         {
             get => mLCMS2DOverviewPlotDivisor;
@@ -140,10 +149,13 @@ namespace MSFileInfoScanner
             set => mMS2MzMin = value;
         }
 
-        public override bool ShowDebugInfo
+        /// <summary>
+        /// First scan to process
+        /// </summary>
+        public override int ScanStart
         {
-            get => mShowDebugInfo;
-            set => mShowDebugInfo = value;
+            get => mScanStart;
+            set => mScanStart = value;
         }
 
         /// <summary>
@@ -155,8 +167,22 @@ namespace MSFileInfoScanner
             set => mScanEnd = value;
         }
 
+        /// <summary>
+        /// Set to True to show debug info
+        /// </summary>
+        public override bool ShowDebugInfo
+        {
+            get => mShowDebugInfo;
+            set => mShowDebugInfo = value;
+        }
+
         #endregion
 
+        /// <summary>
+        /// Get a processing option
+        /// </summary>
+        /// <param name="eOption"></param>
+        /// <returns></returns>
         public override bool GetOption(ProcessingOptions eOption)
         {
             switch (eOption)
@@ -186,6 +212,11 @@ namespace MSFileInfoScanner
             throw new Exception("Unrecognized option, " + eOption);
         }
 
+        /// <summary>
+        /// Set a processing option
+        /// </summary>
+        /// <param name="eOption"></param>
+        /// <param name="value"></param>
         public override void SetOption(ProcessingOptions eOption, bool value)
         {
             switch (eOption)
@@ -282,6 +313,13 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Creates a tab-delimited text file with details on each scan tracked by this class (stored in mDatasetScanStats)
+        /// </summary>
+        /// <param name="inputFileName">Input file name</param>
+        /// <param name="outputFolderPath">Output directory path</param>
+        /// <returns>True if success; False if failure</returns>
+        /// <remarks></remarks>
         public bool CreateDatasetScanStatsFile(string inputFileName, string outputFolderPath)
         {
 
@@ -315,11 +353,26 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
+        /// </summary>
+        /// <param name="inputFileName">Input file name</param>
+        /// <param name="outputFolderPath">Output directory path</param>
+        /// <returns>True if success; False if failure</returns>
+        /// <remarks></remarks>
         public bool UpdateDatasetStatsTextFile(string inputFileName, string outputFolderPath)
         {
             return UpdateDatasetStatsTextFile(inputFileName, outputFolderPath, clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME);
         }
 
+        /// <summary>
+        /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
+        /// </summary>
+        /// <param name="inputFileName">Input file name</param>
+        /// <param name="outputFolderPath">Output directory path</param>
+        /// <param name="datasetStatsFilename">Dataset stats file name</param>
+        /// <returns>True if success; False if failure</returns>
+        /// <remarks></remarks>
         public bool UpdateDatasetStatsTextFile(string inputFileName, string outputFolderPath, string datasetStatsFilename)
         {
 
@@ -349,6 +402,10 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Get the dataset info as XML
+        /// </summary>
+        /// <returns></returns>
         public override string GetDatasetInfoXML()
         {
 
@@ -578,6 +635,12 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Create the output files
+        /// </summary>
+        /// <param name="inputFileName"></param>
+        /// <param name="outputFolderPath"></param>
+        /// <returns></returns>
         public override bool CreateOutputFiles(string inputFileName, string outputFolderPath)
         {
             bool successOverall;

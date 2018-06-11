@@ -36,6 +36,9 @@ namespace MSFileInfoScanner
 
         #region "Structures"
 
+        /// <summary>
+        /// Sample info
+        /// </summary>
         public struct udtSampleInfoType
         {
             public string SampleName;
@@ -79,6 +82,9 @@ namespace MSFileInfoScanner
 
         #region "Properties"
 
+        /// <summary>
+        /// Dataset file info
+        /// </summary>
         public clsDatasetFileInfo DatasetFileInfo { get; set; }
 
         /// <summary>
@@ -86,6 +92,9 @@ namespace MSFileInfoScanner
         /// </summary>
         public string ErrorMessage { get; private set; }
 
+        /// <summary>
+        /// Dataset file modification time
+        /// </summary>
         public string FileDate { get; }
 
         #endregion
@@ -114,33 +123,82 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Add a new scan
+        /// </summary>
+        /// <param name="objScanStats"></param>
         public void AddDatasetScan(clsScanStatsEntry objScanStats)
         {
             mDatasetScanStats.Add(objScanStats);
             mDatasetSummaryStatsUpToDate = false;
-
         }
 
+        /// <summary>
+        /// Examine the m/z values in the spectrum to determine if the data is centroided
+        /// </summary>
+        /// <param name="lstMZs"></param>
+        /// <param name="msLevel"></param>
+        /// <param name="spectrumTitle"></param>
         public void ClassifySpectrum(List<double> lstMZs, int msLevel, string spectrumTitle)
         {
             ClassifySpectrum(lstMZs, msLevel, clsSpectrumTypeClassifier.eCentroidStatusConstants.Unknown, spectrumTitle);
         }
 
+        /// <summary>
+        /// Examine the m/z values in the spectrum to determine if the data is centroided
+        /// </summary>
+        /// <param name="lstMZs">MZ values</param>
+        /// <param name="msLevel"></param>
+        /// <param name="centroidingStatus"></param>
+        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void ClassifySpectrum(List<double> lstMZs, int msLevel, clsSpectrumTypeClassifier.eCentroidStatusConstants centroidingStatus, string spectrumTitle)
         {
             mSpectraTypeClassifier.CheckSpectrum(lstMZs, msLevel, centroidingStatus, spectrumTitle);
         }
 
+        /// <summary>
+        /// Examine the m/z values in the spectrum to determine if the data is centroided
+        /// </summary>
+        /// <param name="dblMZs">MZ values</param>
+        /// <param name="msLevel"></param>
+        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
+        /// <remarks>
+        /// Increments mSpectraTypeClassifier.TotalSpectra if data is found
+        /// Increments mSpectraTypeClassifier.CentroidedSpectra if the data is centroided
+        /// </remarks>
         public void ClassifySpectrum(double[] dblMZs, int msLevel, string spectrumTitle)
         {
             mSpectraTypeClassifier.CheckSpectrum(dblMZs, msLevel, spectrumTitle);
         }
 
+        /// <summary>
+        /// Examine the m/z values in the spectrum to determine if the data is centroided
+        /// </summary>
+        /// <param name="ionCount">Number of items in dblMZs; if -1, then parses all data in dblMZs</param>
+        /// <param name="dblMZs">MZ values</param>
+        /// <param name="msLevel"></param>
+        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
+        /// <remarks>
+        /// Increments mSpectraTypeClassifier.TotalSpectra if data is found
+        /// Increments mSpectraTypeClassifier.CentroidedSpectra if the data is centroided
+        /// </remarks>
         public void ClassifySpectrum(int ionCount, double[] dblMZs, int msLevel, string spectrumTitle)
         {
             mSpectraTypeClassifier.CheckSpectrum(ionCount, dblMZs, msLevel, clsSpectrumTypeClassifier.eCentroidStatusConstants.Unknown, spectrumTitle);
         }
 
+        /// <summary>
+        /// Examine the m/z values in the spectrum to determine if the data is centroided
+        /// </summary>
+        /// <param name="ionCount">Number of items in dblMZs; if -1, then parses all data in dblMZs</param>
+        /// <param name="dblMZs">MZ values</param>
+        /// <param name="msLevel"></param>
+        /// <param name="centroidingStatus"></param>
+        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
+        /// <remarks>
+        /// Increments mSpectraTypeClassifier.TotalSpectra if data is found
+        /// Increments mSpectraTypeClassifier.CentroidedSpectra if the data is centroided
+        /// </remarks>
         public void ClassifySpectrum(
             int ionCount,
             double[] dblMZs,
@@ -677,7 +735,9 @@ namespace MSFileInfoScanner
                 // Return the XML as text
                 return srStreamReader.ReadToEnd();
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 ReportError("Error in CreateDatasetInfoXML: " + ex.Message);
             }
 
@@ -1082,7 +1142,10 @@ namespace MSFileInfoScanner
 
         public int ScanNumber;
 
-        // 1 for MS, 2 for MS2, 3 for MS3
+        /// <summary>
+        /// Scan Type (aka MSLevel)
+        /// </summary>
+        /// <remarks>1 for MS, 2 for MS2, 3 for MS3</remarks>
         public int ScanType;
 
         // Example values: "FTMS + p NSI Full ms [400.00-2000.00]" or "ITMS + c ESI Full ms [300.00-2000.00]" or "ITMS + p ESI d Z ms [1108.00-1118.00]" or "ITMS + c ESI d Full ms2 342.90@cid35.00"

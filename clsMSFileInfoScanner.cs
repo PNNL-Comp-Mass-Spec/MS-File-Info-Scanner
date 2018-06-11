@@ -1374,12 +1374,25 @@ namespace MSFileInfoScanner
 
         }
 
-        // Main processing function
+        /// <summary>
+        /// Main processing function, with input file / folder path, plus output folder path
+        /// </summary>
+        /// <param name="inputFileOrFolderPath"></param>
+        /// <param name="outputFolderPath"></param>
+        /// <returns></returns>
         public override bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputFolderPath)
         {
             return ProcessMSFileOrFolder(inputFileOrFolderPath, outputFolderPath, true, out _);
         }
 
+        /// <summary>
+        /// Main processing function with input / output paths, error code reset flag, and processing state
+        /// </summary>
+        /// <param name="inputFileOrFolderPath"></param>
+        /// <param name="outputFolderPath"></param>
+        /// <param name="resetErrorCode"></param>
+        /// <param name="eMSFileProcessingState"></param>
+        /// <returns></returns>
         public override bool ProcessMSFileOrFolder(
             string inputFileOrFolderPath,
             string outputFolderPath,
