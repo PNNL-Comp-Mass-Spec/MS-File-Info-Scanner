@@ -63,6 +63,8 @@ namespace MSFileInfoScanner
         private int mScanStart;
         private int mScanEnd;
 
+        private float mMS2MzMin;
+
         protected bool mShowDebugInfo;
 
         private int mDatasetID;
@@ -128,10 +130,14 @@ namespace MSFileInfoScanner
             set => mLCMS2DOverviewPlotDivisor = value;
         }
 
-        public override int ScanStart
+        /// <summary>
+        /// Minimum m/z value that MS/mS spectra should have
+        /// </summary>
+        /// <remarks>Useful for validating datasets for iTRAQ or TMT datasets</remarks>
+        public override float MS2MzMin
         {
-            get => mScanStart;
-            set => mScanStart = value;
+            get => mMS2MzMin;
+            set => mMS2MzMin = value;
         }
 
         public override bool ShowDebugInfo
@@ -426,6 +432,8 @@ namespace MSFileInfoScanner
 
             mScanStart = 0;
             mScanEnd = 0;
+            mMS2MzMin = 0;
+
             mShowDebugInfo = false;
 
             mDatasetID = 0;
@@ -1002,6 +1010,32 @@ namespace MSFileInfoScanner
             }
 
 
+        }
+
+        /// <summary>
+        /// Examine the minimum m/z value in MS2 spectra
+        /// Keep track of the number of spectra where the minimum m/z value is greater than MS2MzMin
+        /// Raise an error if at least 10% of the spectra have a minimum m/z higher than the threshold
+        /// Log a warning if some spectra, but fewer than 10% of the total, have a minimum higher than the threshold
+        /// </summary>
+        /// <returns>True if valid data, false if at least 10% of the spectgra has a minimum m/z higher than the threshold</returns>
+        protected bool ValidateMS2MzMin()
+        {
+            const int MAX_PERCENT_ALLOWED_FAILED = 10;
+
+            var validData = mDatasetStatsSummarizer.ValidateMs2MzMin(MS2MzMin, out var errorOrWarningMsg, MAX_PERCENT_ALLOWED_FAILED);
+
+            if (validData && string.IsNullOrWhiteSpace(errorOrWarningMsg))
+                return true;
+
+            // Note that errorOrWarningMsg will start with "Warning:" or "Error:"
+
+            if (validData)
+                OnWarningEvent(errorOrWarningMsg);
+            else
+                OnErrorEvent(errorOrWarningMsg);
+
+            return validData;
         }
 
     }

@@ -984,6 +984,67 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Examine the minimum m/z value in MS2 spectra
+        /// Keep track of the number of spectra where the minimum m/z value is greater than MS2MzMin
+        /// Raise an error if at least 10% of the spectra have a minimum m/z higher than the threshold
+        /// Log a warning if some spectra, but fewer than 10% of the total, have a minimum higher than the threshold
+        /// </summary>
+        /// <param name="requiredMzMin">Minimum m/z threshold; the </param>
+        /// <param name="errorOrWarningMsg"></param>
+        /// <param name="maxPercentAllowedFailed"></param>
+        /// <returns>True if valid data, false if at least 10% of the spectgra has a minimum m/z higher than the threshold</returns>
+        public bool ValidateMs2MzMin(float requiredMzMin, out string errorOrWarningMsg, int maxPercentAllowedFailed)
+        {
+            var scanCountInvalid = 0;
+            var scanCountWithData = 0;
+
+            foreach (var scan in mDatasetScanStats)
+            {
+                if (scan.ScanType < 2)
+                    continue;
+
+                if (scan.IonCount == 0 && scan.IonCountRaw == 0)
+                    continue;
+
+                scanCountWithData++;
+                if (scan.MzMin > requiredMzMin)
+                {
+                    scanCountInvalid++;
+                }
+
+            }
+
+            if (scanCountWithData == 0)
+            {
+                // No data
+                errorOrWarningMsg = "Error: none of the spectra has data; cannot validate";
+                return false;
+            }
+
+            if (scanCountInvalid == 0)
+            {
+                errorOrWarningMsg = string.Empty;
+                return true;
+            }
+
+            var percentInvalid = scanCountInvalid / (float)scanCountWithData * 100;
+
+            var percentRounded = percentInvalid.ToString(percentInvalid < 10 ? "F1" : "F0");
+
+            errorOrWarningMsg = string.Format("{0}% of the scans have a minimum m/z value larger than {1:F1} m/z ({2} / {3})",
+                                              percentRounded, requiredMzMin, scanCountInvalid, scanCountWithData);
+
+            if (percentInvalid < maxPercentAllowedFailed)
+            {
+                errorOrWarningMsg = "Warning: " + errorOrWarningMsg;
+                return true;
+            }
+
+            errorOrWarningMsg = "Error: " + errorOrWarningMsg;
+            return false;
+        }
+
     }
 
     public class clsScanStatsEntry

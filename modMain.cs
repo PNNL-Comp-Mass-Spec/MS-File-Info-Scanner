@@ -50,6 +50,7 @@ namespace MSFileInfoScanner
         private static bool mTestLCMSGradientColorSchemes;
 
         private static bool mCheckCentroidingStatus;
+        private static float mMS2MzMin;
         private static bool mDisableInstrumentHash;
 
         private static int mScanStart;
@@ -109,6 +110,7 @@ namespace MSFileInfoScanner
             mTestLCMSGradientColorSchemes = false;
 
             mCheckCentroidingStatus = false;
+            mMS2MzMin = 0;
             mDisableInstrumentHash = false;
 
             mScanStart = 0;
@@ -177,6 +179,7 @@ namespace MSFileInfoScanner
                 scanner.TestLCMSGradientColorSchemes = mTestLCMSGradientColorSchemes;
 
                 scanner.CheckCentroidingStatus = mCheckCentroidingStatus;
+                scanner.MS2MzMin = mMS2MzMin;
                 scanner.DisableInstrumentHash = mDisableInstrumentHash;
 
                 scanner.ScanStart = mScanStart;
@@ -292,6 +295,7 @@ namespace MSFileInfoScanner
                 "LCDiv",
                 "LCGrad",
                 "CC",
+                "MS2MzMin",
                 "NoHash",
                 "QS",
                 "ScanStart",
@@ -409,6 +413,18 @@ namespace MSFileInfoScanner
 
                 if (parser.IsParameterPresent("CC"))
                     mCheckCentroidingStatus = true;
+
+                if (parser.RetrieveValueForParameter("MS2MzMin", out strValue))
+                {
+                    if (float.TryParse(strValue, out var mzMin))
+                    {
+                        mMS2MzMin = mzMin;
+                    }
+                    else
+                    {
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid m/z value for /MS2MzMin: " + strValue);
+                    }
+                }
 
                 if (parser.IsParameterPresent("NoHash"))
                     mDisableInstrumentHash = false;

@@ -33,6 +33,7 @@ namespace MSFileInfoScanner
         public abstract int DatasetID { get; set; }
         public abstract int ScanStart { get; set; }
         public abstract int ScanEnd { get; set; }
+        public abstract float MS2MzMin { get; set; }
         public abstract bool ShowDebugInfo { get; set; }
         public abstract bool GetOption(ProcessingOptions eOption);
         public abstract void SetOption(ProcessingOptions eOption, bool blnValue);

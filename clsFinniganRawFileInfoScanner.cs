@@ -420,7 +420,8 @@ namespace MSFileInfoScanner
                         datasetFileInfo.ScanCount = 0;
                     }
 
-                    if (mSaveTICAndBPI || mCreateDatasetInfoFile || mCreateScanStatsFile || mSaveLCMS2DPlots || mCheckCentroidingStatus)
+                    if (mSaveTICAndBPI || mCreateDatasetInfoFile || mCreateScanStatsFile ||
+                        mSaveLCMS2DPlots || mCheckCentroidingStatus || MS2MzMin > 0)
                     {
                         // Load data from each scan
                         // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
@@ -431,6 +432,13 @@ namespace MSFileInfoScanner
                     {
                         // Note that this call will also create the TICs and BPIs
                         ComputeQualityScores(xcaliburAccessor, datasetFileInfo);
+                    }
+
+                    if (MS2MzMin > 0)
+                    {
+                        // Verify that all of the MS2 spectra have m/z values below the required minimum
+                        // Useful for validating that reporter ions can be detected
+                        ValidateMS2MzMin();
                     }
                 }
             }

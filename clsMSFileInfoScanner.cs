@@ -409,6 +409,12 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
+        /// Minimum m/z value that MS/mS spectra should have
+        /// </summary>
+        /// <remarks>Useful for validating datasets for iTRAQ or TMT datasets</remarks>
+        public float MS2MzMin { get; set; }
+
+        /// <summary>
         /// Set to True to print out a series of 2D plots, each using a different color scheme
         /// </summary>
         public bool TestLCMSGradientColorSchemes
@@ -866,6 +872,7 @@ namespace MSFileInfoScanner
                         SaveLCMS2DPlots = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveLCMS2DPlots", SaveLCMS2DPlots);
                         CheckCentroidingStatus = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckCentroidingStatus", CheckCentroidingStatus);
 
+                        MS2MzMin = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MS2MzMin", MS2MzMin);
                         DisableInstrumentHash = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DisableInstrumentHash", DisableInstrumentHash);
 
                         LCMS2DPlotMZResolution = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMZResolution", LCMS2DPlotMZResolution);
@@ -1278,6 +1285,7 @@ namespace MSFileInfoScanner
 
             scanner.ScanStart = ScanStart;
             scanner.ScanEnd = ScanEnd;
+            scanner.MS2MzMin = MS2MzMin;
             scanner.ShowDebugInfo = ShowDebugInfo;
 
             scanner.DatasetID = DatasetIDOverride;
@@ -1323,6 +1331,7 @@ namespace MSFileInfoScanner
 
             if (success)
             {
+
                 success = scanner.CreateOutputFiles(inputFileOrFolderPath, outputFolderPath);
                 if (!success)
                 {
