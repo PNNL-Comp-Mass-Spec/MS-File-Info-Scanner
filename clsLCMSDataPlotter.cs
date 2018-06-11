@@ -636,7 +636,7 @@ namespace MSFileInfoScanner
             try
             {
                 bool mzIgnoreRangleEnabled;
-                if (mzIgnoreRangeStart > 0 | mzIgnoreRangeEnd > 0)
+                if (mzIgnoreRangeStart > 0 || mzIgnoreRangeEnd > 0)
                 {
                     mzIgnoreRangleEnabled = true;
                 }

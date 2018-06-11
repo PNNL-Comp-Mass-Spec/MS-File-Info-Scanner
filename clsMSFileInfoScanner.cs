@@ -597,7 +597,7 @@ namespace MSFileInfoScanner
         {
             var lstExtensionsToParse = new List<string>
             {
-                clsFinniganRawFileInfoScanner.FINNIGAN_RAW_FILE_EXTENSION.ToUpper(),
+                clsFinniganRawFileInfoScanner.THERMO_RAW_FILE_EXTENSION.ToUpper(),
                 clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION.ToUpper(),
                 clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION.ToUpper(),
                 clsBrukerXmassFolderInfoScanner.BRUKER_MCF_FILE_EXTENSION.ToUpper(),
@@ -815,7 +815,7 @@ namespace MSFileInfoScanner
         public override bool LoadParameterFileSettings(string parameterFilePath)
         {
 
-            var objSettingsFile = new XmlSettingsFileAccessor();
+            var settingsFile = new XmlSettingsFileAccessor();
 
             try
             {
@@ -838,69 +838,70 @@ namespace MSFileInfoScanner
                 }
 
                 // Pass False to .LoadSettings() here to turn off case sensitive matching
-                if (objSettingsFile.LoadSettings(parameterFilePath, false))
+                if (settingsFile.LoadSettings(parameterFilePath, false))
                 {
 
-                    if (!objSettingsFile.SectionPresent(XML_SECTION_MSFILESCANNER_SETTINGS))
+                    if (!settingsFile.SectionPresent(XML_SECTION_MSFILESCANNER_SETTINGS))
                     {
                         // MS File Scanner section not found; that's ok
                         ReportWarning("Parameter file " + parameterFilePath + " does not have section \"" + XML_SECTION_MSFILESCANNER_SETTINGS + "\"");
                     }
                     else
                     {
-                        DSInfoConnectionString = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoConnectionString", DSInfoConnectionString);
-                        DSInfoDBPostingEnabled = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoDBPostingEnabled", DSInfoDBPostingEnabled);
-                        DSInfoStoredProcedure = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoStoredProcedure", DSInfoStoredProcedure);
+                        DSInfoConnectionString = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoConnectionString", DSInfoConnectionString);
+                        DSInfoDBPostingEnabled = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoDBPostingEnabled", DSInfoDBPostingEnabled);
+                        DSInfoStoredProcedure = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoStoredProcedure", DSInfoStoredProcedure);
 
-                        LogMessagesToFile = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogMessagesToFile", LogMessagesToFile);
-                        LogFilePath = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogFilePath", LogFilePath);
-                        LogFolderPath = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogFolderPath", LogFolderPath);
+                        LogMessagesToFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogMessagesToFile", LogMessagesToFile);
+                        LogFilePath = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogFilePath", LogFilePath);
+                        LogFolderPath = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogFolderPath", LogFolderPath);
 
-                        UseCacheFiles = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UseCacheFiles", UseCacheFiles);
-                        ReprocessExistingFiles = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessExistingFiles", ReprocessExistingFiles);
-                        ReprocessIfCachedSizeIsZero = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessIfCachedSizeIsZero", ReprocessIfCachedSizeIsZero);
+                        UseCacheFiles = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UseCacheFiles", UseCacheFiles);
+                        ReprocessExistingFiles = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessExistingFiles", ReprocessExistingFiles);
+                        ReprocessIfCachedSizeIsZero = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessIfCachedSizeIsZero", ReprocessIfCachedSizeIsZero);
 
-                        CopyFileLocalOnReadError = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CopyFileLocalOnReadError", CopyFileLocalOnReadError);
+                        CopyFileLocalOnReadError = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CopyFileLocalOnReadError", CopyFileLocalOnReadError);
 
-                        SaveTICAndBPIPlots = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveTICAndBPIPlots", SaveTICAndBPIPlots);
-                        SaveLCMS2DPlots = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveLCMS2DPlots", SaveLCMS2DPlots);
-                        CheckCentroidingStatus = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckCentroidingStatus", CheckCentroidingStatus);
+                        SaveTICAndBPIPlots = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveTICAndBPIPlots", SaveTICAndBPIPlots);
+                        SaveLCMS2DPlots = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveLCMS2DPlots", SaveLCMS2DPlots);
+                        CheckCentroidingStatus = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckCentroidingStatus", CheckCentroidingStatus);
 
-                        LCMS2DPlotMZResolution = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMZResolution", LCMS2DPlotMZResolution);
-                        LCMS2DPlotMinPointsPerSpectrum = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinPointsPerSpectrum", LCMS2DPlotMinPointsPerSpectrum);
                         DisableInstrumentHash = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DisableInstrumentHash", DisableInstrumentHash);
 
-                        LCMS2DPlotMaxPointsToPlot = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMaxPointsToPlot", LCMS2DPlotMaxPointsToPlot);
-                        LCMS2DPlotMinIntensity = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinIntensity", LCMS2DPlotMinIntensity);
+                        LCMS2DPlotMZResolution = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMZResolution", LCMS2DPlotMZResolution);
+                        LCMS2DPlotMinPointsPerSpectrum = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinPointsPerSpectrum", LCMS2DPlotMinPointsPerSpectrum);
 
-                        LCMS2DOverviewPlotDivisor = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DOverviewPlotDivisor", LCMS2DOverviewPlotDivisor);
+                        LCMS2DPlotMaxPointsToPlot = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMaxPointsToPlot", LCMS2DPlotMaxPointsToPlot);
+                        LCMS2DPlotMinIntensity = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinIntensity", LCMS2DPlotMinIntensity);
 
-                        ScanStart = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanStart", ScanStart);
-                        ScanEnd = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanEnd", ScanEnd);
+                        LCMS2DOverviewPlotDivisor = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DOverviewPlotDivisor", LCMS2DOverviewPlotDivisor);
 
-                        ComputeOverallQualityScores = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeOverallQualityScores", ComputeOverallQualityScores);
-                        CreateDatasetInfoFile = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateDatasetInfoFile", CreateDatasetInfoFile);
-                        CreateScanStatsFile = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateScanStatsFile", CreateScanStatsFile);
+                        ScanStart = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanStart", ScanStart);
+                        ScanEnd = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanEnd", ScanEnd);
 
-                        UpdateDatasetStatsTextFile = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UpdateDatasetStatsTextFile", UpdateDatasetStatsTextFile);
-                        DatasetStatsTextFileName = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DatasetStatsTextFileName", DatasetStatsTextFileName);
+                        ComputeOverallQualityScores = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeOverallQualityScores", ComputeOverallQualityScores);
+                        CreateDatasetInfoFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateDatasetInfoFile", CreateDatasetInfoFile);
+                        CreateScanStatsFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateScanStatsFile", CreateScanStatsFile);
 
-                        CheckFileIntegrity = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckFileIntegrity", CheckFileIntegrity);
-                        RecheckFileIntegrityForExistingFolders = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "RecheckFileIntegrityForExistingFolders", RecheckFileIntegrityForExistingFolders);
+                        UpdateDatasetStatsTextFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UpdateDatasetStatsTextFile", UpdateDatasetStatsTextFile);
+                        DatasetStatsTextFileName = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DatasetStatsTextFileName", DatasetStatsTextFileName);
 
-                        MaximumTextFileLinesToCheck = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MaximumTextFileLinesToCheck", MaximumTextFileLinesToCheck);
-                        MaximumXMLElementNodesToCheck = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MaximumXMLElementNodesToCheck", MaximumXMLElementNodesToCheck);
-                        ComputeFileHashes = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeFileHashes", ComputeFileHashes);
-                        ZipFileCheckAllData = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ZipFileCheckAllData", ZipFileCheckAllData);
+                        CheckFileIntegrity = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckFileIntegrity", CheckFileIntegrity);
+                        RecheckFileIntegrityForExistingFolders = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "RecheckFileIntegrityForExistingFolders", RecheckFileIntegrityForExistingFolders);
 
-                        IgnoreErrorsWhenRecursing = objSettingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "IgnoreErrorsWhenRecursing", IgnoreErrorsWhenRecursing);
+                        MaximumTextFileLinesToCheck = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MaximumTextFileLinesToCheck", MaximumTextFileLinesToCheck);
+                        MaximumXMLElementNodesToCheck = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MaximumXMLElementNodesToCheck", MaximumXMLElementNodesToCheck);
+                        ComputeFileHashes = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeFileHashes", ComputeFileHashes);
+                        ZipFileCheckAllData = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ZipFileCheckAllData", ZipFileCheckAllData);
+
+                        IgnoreErrorsWhenRecursing = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "IgnoreErrorsWhenRecursing", IgnoreErrorsWhenRecursing);
 
                     }
 
                 }
                 else
                 {
-                    ReportError("Error calling objSettingsFile.LoadSettings for " + parameterFilePath);
+                    ReportError("Error calling settingsFile.LoadSettings for " + parameterFilePath);
                     return false;
                 }
 
@@ -1509,7 +1510,7 @@ namespace MSFileInfoScanner
                                     break;
                                 default:
                                     // Unknown folder extension (or no extension)
-                                    // See if the folder contains 1 or more 0_R*.zip files
+                                    // See if the folder contains one or more 0_R*.zip files
                                     if (Directory.GetFiles(inputFileOrFolderPath, clsZippedImagingFilesScanner.ZIPPED_IMAGING_FILE_SEARCH_SPEC).Length > 0)
                                     {
                                         mMSInfoScanner = new clsZippedImagingFilesScanner();
@@ -1559,7 +1560,8 @@ namespace MSFileInfoScanner
                             // Examine the extension on inputFileOrFolderPath
                             switch (objFileSystemInfo.Extension.ToUpper())
                             {
-                                case clsFinniganRawFileInfoScanner.FINNIGAN_RAW_FILE_EXTENSION:
+                                case clsFinniganRawFileInfoScanner.THERMO_RAW_FILE_EXTENSION:
+                                    // Thermo .raw file
                                     mMSInfoScanner = new clsFinniganRawFileInfoScanner();
                                     knownMSDataType = true;
 
@@ -2340,7 +2342,7 @@ namespace MSFileInfoScanner
         public override bool SaveParameterFileSettings(string parameterFilePath)
         {
 
-            var objSettingsFile = new XmlSettingsFileAccessor();
+            var settingsFile = new XmlSettingsFileAccessor();
 
             try
             {
@@ -2351,13 +2353,13 @@ namespace MSFileInfoScanner
                 }
 
                 // Pass True to .LoadSettings() here so that newly made Xml files will have the correct capitalization
-                if (objSettingsFile.LoadSettings(parameterFilePath, true))
+                if (settingsFile.LoadSettings(parameterFilePath, true))
                 {
 
                     // General settings
-                    // objSettingsFile.SetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ConnectionString", Me.DatabaseConnectionString)
+                    // settingsFile.SetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ConnectionString", Me.DatabaseConnectionString)
 
-                    objSettingsFile.SaveSettings();
+                    settingsFile.SaveSettings();
 
                 }
 

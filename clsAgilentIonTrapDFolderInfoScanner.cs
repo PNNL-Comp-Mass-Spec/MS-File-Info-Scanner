@@ -95,15 +95,11 @@ namespace MSFileInfoScanner
                     {
                         var strLineIn = srInFile.ReadLine();
 
-                        if (string.IsNullOrEmpty(strLineIn))
-                        {
+                        if (string.IsNullOrWhiteSpace(strLineIn))
                             continue;
-                        }
 
                         if (!strLineIn.StartsWith(RUN_LOG_FILE_METHOD_LINE_START))
-                        {
                             continue;
-                        }
 
                         strMostRecentMethodLine = string.Copy(strLineIn);
 

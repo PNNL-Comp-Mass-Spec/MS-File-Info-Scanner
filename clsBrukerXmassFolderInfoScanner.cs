@@ -315,10 +315,8 @@ namespace MSFileInfoScanner
                     {
                         var strLineIn = srReader.ReadLine();
 
-                        if (string.IsNullOrEmpty(strLineIn))
-                        {
+                        if (string.IsNullOrWhiteSpace(strLineIn))
                             continue;
-                        }
 
                         var strSplitLine = strLineIn.Split('\t');
 
@@ -377,7 +375,7 @@ namespace MSFileInfoScanner
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (blnOverride)
             {
-                var strNewDataFilePath = "c:\\temp\\analysis.baf";
+                var strNewDataFilePath = @"c:\temp\analysis.baf";
                 fiBAFFileInfo = new FileInfo(strNewDataFilePath);
             }
 
@@ -1086,7 +1084,7 @@ namespace MSFileInfoScanner
                     fiSettingsFile = fiAcqusFile;
                 }
 
-                var needToSaveTICAndBPI = (mSaveTICAndBPI && mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC == 0);
+                var needToSaveTICAndBPI = mSaveTICAndBPI && mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC == 0;
                 var dtLastProgressTime = DateTime.UtcNow;
 
                 // Note that this starts at 2 seconds, but is extended after each progress message is shown (maxing out at 30 seconds)

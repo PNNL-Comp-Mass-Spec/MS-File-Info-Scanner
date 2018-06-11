@@ -796,7 +796,7 @@ namespace MSFileInfoScanner
 
             if (GetFunctionInfo(strMLynxDataFolderPath, lngFunctionNumber, out short intFunctionType))
             {
-                return (intFunctionType != 0);
+                return intFunctionType != 0;
             }
 
             return false;
@@ -1133,7 +1133,7 @@ namespace MSFileInfoScanner
 
             if (startBit == 0)
             {
-                thisMask = (long)(Math.Pow(2, (endBit + 1)) - 1);
+                thisMask = (long)(Math.Pow(2, endBit + 1) - 1);
             }
             else
             {
@@ -1263,7 +1263,7 @@ namespace MSFileInfoScanner
                 {
                     lngFunctionCount = (int)(fileInfo.Length / NATIVE_FUNCTION_INFO_SIZE_BYTES);
 
-                    if (udtMSFunctionInfo.FunctionNumber < 1 | udtMSFunctionInfo.FunctionNumber > lngFunctionCount)
+                    if (udtMSFunctionInfo.FunctionNumber < 1 || udtMSFunctionInfo.FunctionNumber > lngFunctionCount)
                     {
                         return false;
                     }
@@ -1780,16 +1780,12 @@ namespace MSFileInfoScanner
                     {
                         var strLineIn = srInFile.ReadLine();
 
-                        if ((string.IsNullOrEmpty(strLineIn)))
-                        {
+                        if (string.IsNullOrWhiteSpace(strLineIn))
                             continue;
-                        }
 
                         // All valid lines start with $$
                         if (!strLineIn.StartsWith("$$"))
-                        {
                             continue;
-                        }
 
                         // Remove the first three characters (we actually remove the first 2 then Trim, since the third character is supposed to be a space)
                         strLineIn = strLineIn.Substring(2).Trim();
@@ -1870,7 +1866,7 @@ namespace MSFileInfoScanner
                                 break;
                             default:
                                 break;
-                            // Ignore it
+                                // Ignore it
                         }
                     }
                 }
@@ -1926,12 +1922,12 @@ namespace MSFileInfoScanner
                     // Note: Only use this function to unpack intensities for data in the .IDX file, not for data in the .DAT file
                     //       See the NativeIOGetSpectrum function for the method of unpacking intensities in .DAT files
 
-                    sngUnpackedIntensity = (float)(PackedBasePeakIntensity * Math.Pow(4, (PackedBasePeakInfo & maskBPIntensityScale)));
+                    sngUnpackedIntensity = (float)(PackedBasePeakIntensity * Math.Pow(4, PackedBasePeakInfo & maskBPIntensityScale));
                     break;
                 //Debug.Assert sngUnpackedIntensity = PackedBasePeakIntensity * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 3)
                 case 0:
                     // Compressed data
-                    sngUnpackedIntensity = (float)((short)(PackedBasePeakInfo & maskBPCompressedDataIntensity) / 8f * Math.Pow(4, (PackedBasePeakInfo & maskBPCompressedDataIntensityScale)));
+                    sngUnpackedIntensity = (float)((short)(PackedBasePeakInfo & maskBPCompressedDataIntensity) / 8f * Math.Pow(4, PackedBasePeakInfo & maskBPCompressedDataIntensityScale));
                     break;
                 //Debug.Assert sngUnpackedIntensity = ExtractFromBitsInt32(PackedBasePeakInfo, 3, 10) * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 2)
                 case 1:
@@ -1942,12 +1938,12 @@ namespace MSFileInfoScanner
                 case 6:
                 case 7:
                     // Standard data and Uncalibrated data
-                    sngUnpackedIntensity = (float)((short)(PackedBasePeakIntensity & maskBPStandardDataIntensity) / 8f * Math.Pow(4, (PackedBasePeakIntensity & maskBPStandardDataIntensityScale)));
+                    sngUnpackedIntensity = (float)((short)(PackedBasePeakIntensity & maskBPStandardDataIntensity) / 8f * Math.Pow(4, PackedBasePeakIntensity & maskBPStandardDataIntensityScale));
                     break;
                 //Debug.Assert sngUnpackedIntensity = ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 3, 15) * 4 ^ ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 0, 2)
                 case 8:
                     //  High intensity calibrated data
-                    sngUnpackedIntensity = (float)(PackedBasePeakIntensity * Math.Pow(4, (PackedBasePeakInfo & maskBPIntensityScale)));
+                    sngUnpackedIntensity = (float)(PackedBasePeakIntensity * Math.Pow(4, PackedBasePeakInfo & maskBPIntensityScale));
                     break;
                 default:
                     sngUnpackedIntensity = 0;
@@ -2001,7 +1997,7 @@ namespace MSFileInfoScanner
                     }
 
                     // Note that we divide by 2^23 to convert the mass mantissa to fractional form
-                    dblUnpackedMass = MassMantissa / 8388608f * (Math.Pow(2, MassExponent));
+                    dblUnpackedMass = MassMantissa / 8388608f * Math.Pow(2, MassExponent);
                     // 8388608 = 2^23
                     break;
                 case 0:
@@ -2013,7 +2009,7 @@ namespace MSFileInfoScanner
                     // We must divide the MassMantissa by 128 to get the mass
                     dblUnpackedMass = (int)(NumConversion.Int32ToUnsigned(PackedBasePeakInfo) / 2048f) / 128f;      // 2048 = 2^11
                     break;
-                    // Debug.Assert(dblUnpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 11, 31) / 128f);
+                // Debug.Assert(dblUnpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 11, 31) / 128f);
                 case 1:
                     // Standard data
                     // We must divide the MassMantissa by 1024 to get the mass
@@ -2036,7 +2032,7 @@ namespace MSFileInfoScanner
                     // We must divide the MassMantissa by 128 to get the mass
                     dblUnpackedMass = (int)(NumConversion.Int32ToUnsigned(PackedBasePeakInfo) / 16f) / 128f;        // 16 = 2^4
                     break;
-                    //Debug.Assert(dblUnpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 4, 31) / 128f);
+                //Debug.Assert(dblUnpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 4, 31) / 128f);
                 default:
                     dblUnpackedMass = 0;
                     break;
@@ -2077,7 +2073,7 @@ namespace MSFileInfoScanner
 
             public static Int16 UnsignedToInt16(Int32 Value)
             {
-                if (Value < 0 | Value >= OFFSET_2)
+                if (Value < 0 || Value >= OFFSET_2)
                     throw new ArgumentOutOfRangeException(nameof(Value));
 
                 if (Value <= MAXINT_2)

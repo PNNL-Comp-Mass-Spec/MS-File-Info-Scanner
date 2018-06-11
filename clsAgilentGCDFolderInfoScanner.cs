@@ -46,8 +46,7 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public clsAgilentGCDFolderInfoScanner()
         {
-            mExtractTime = new Regex("([0-9.]+) min",
-                                     RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            mExtractTime = new Regex("([0-9.]+) min", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
         }
 
         public override string GetDatasetNameViaPath(string strDataFilePath)
@@ -116,9 +115,7 @@ namespace MSFileInfoScanner
                         var strLineIn = srInFile.ReadLine();
 
                         if (string.IsNullOrWhiteSpace(strLineIn))
-                        {
                             continue;
-                        }
 
                         foreach (var strKey in dctRunTimeText.Keys)
                         {
@@ -198,14 +195,10 @@ namespace MSFileInfoScanner
                         var strLineIn = srInFile.ReadLine();
 
                         if (string.IsNullOrWhiteSpace(strLineIn))
-                        {
                             continue;
-                        }
 
                         if (!strLineIn.StartsWith("gc.runlength"))
-                        {
                             continue;
-                        }
 
                         // Runtime is the value after the equals sign
                         var strSplitLine = strLineIn.Split('=');
@@ -353,24 +346,24 @@ namespace MSFileInfoScanner
 
             try
             {
-                var ioFolderInfo = new DirectoryInfo(strDataFilePath);
-                var strMSDataFilePath = Path.Combine(ioFolderInfo.FullName, AGILENT_MS_DATA_FILE);
+                var diAgilentDFolder = new DirectoryInfo(strDataFilePath);
+                var msDataFilePath = Path.Combine(diAgilentDFolder.FullName, AGILENT_MS_DATA_FILE);
 
-                datasetFileInfo.FileSystemCreationTime = ioFolderInfo.CreationTime;
-                datasetFileInfo.FileSystemModificationTime = ioFolderInfo.LastWriteTime;
+                datasetFileInfo.FileSystemCreationTime = diAgilentDFolder.CreationTime;
+                datasetFileInfo.FileSystemModificationTime = diAgilentDFolder.LastWriteTime;
 
                 // The acquisition times will get updated below to more accurate values
                 datasetFileInfo.AcqTimeStart = datasetFileInfo.FileSystemModificationTime;
                 datasetFileInfo.AcqTimeEnd = datasetFileInfo.FileSystemModificationTime;
 
-                datasetFileInfo.DatasetName = GetDatasetNameViaPath(ioFolderInfo.Name);
-                datasetFileInfo.FileExtension = ioFolderInfo.Extension;
+                datasetFileInfo.DatasetName = GetDatasetNameViaPath(diAgilentDFolder.Name);
+                datasetFileInfo.FileExtension = diAgilentDFolder.Extension;
                 datasetFileInfo.FileSizeBytes = 0;
 
                 // Look for the MS file
                 // Use its modification time to get an initial estimate for the acquisition end time
                 // Assign the .MS file's size to .FileSizeBytes
-                var fiMSDatafile = new FileInfo(strMSDataFilePath);
+                var fiMSDatafile = new FileInfo(msDataFilePath);
                 if (fiMSDatafile.Exists)
                 {
                     datasetFileInfo.FileSizeBytes = fiMSDatafile.Length;
@@ -394,7 +387,7 @@ namespace MSFileInfoScanner
                 if (blnSuccess)
                 {
                     // Read the detailed data from the MS file
-                    blnSuccess = ProcessChemstationMSDataFile(strMSDataFilePath, datasetFileInfo);
+                    blnSuccess = ProcessChemstationMSDataFile(msDataFilePath, datasetFileInfo);
 
                     if (blnSuccess)
                     {
@@ -408,10 +401,10 @@ namespace MSFileInfoScanner
                     // MS file not found (or problems parsing); use acqmeth.txt and/or GC.ini
 
                     // The timestamp of the acqmeth.txt file or GC.ini file is more accurate than the GC.ini file, so we'll use that
-                    var fiMethodFile = new FileInfo(Path.Combine(ioFolderInfo.FullName, AGILENT_ACQ_METHOD_FILE));
+                    var fiMethodFile = new FileInfo(Path.Combine(diAgilentDFolder.FullName, AGILENT_ACQ_METHOD_FILE));
                     if (!fiMethodFile.Exists)
                     {
-                        fiMethodFile = new FileInfo(Path.Combine(ioFolderInfo.FullName, AGILENT_GC_INI_FILE));
+                        fiMethodFile = new FileInfo(Path.Combine(diAgilentDFolder.FullName, AGILENT_GC_INI_FILE));
                     }
 
                     if (fiMethodFile.Exists)
@@ -429,7 +422,7 @@ namespace MSFileInfoScanner
                         {
                             // File size was not determined from the MS file
                             // Instead, sum up the sizes of all of the files in this folder
-                            foreach (var item in ioFolderInfo.GetFiles())
+                            foreach (var item in diAgilentDFolder.GetFiles())
                             {
                                 datasetFileInfo.FileSizeBytes += item.Length;
                             }
@@ -465,7 +458,7 @@ namespace MSFileInfoScanner
 
                 if (blnSuccess)
                 {
-                    // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetFileInfo
+                    // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
                     mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
 

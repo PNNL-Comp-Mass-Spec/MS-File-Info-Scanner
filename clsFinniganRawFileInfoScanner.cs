@@ -16,7 +16,7 @@ namespace MSFileInfoScanner
     {
 
         // Note: The extension must be in all caps
-        public const string FINNIGAN_RAW_FILE_EXTENSION = ".RAW";
+        public const string THERMO_RAW_FILE_EXTENSION = ".RAW";
 
         private readonly Regex mIsCentroid;
         private readonly Regex mIsProfileM;
@@ -37,7 +37,6 @@ namespace MSFileInfoScanner
         /// <param name="objXcaliburAccessor"></param>
         /// <param name="datasetFileInfo"></param>
         /// <remarks></remarks>
-
         private void ComputeQualityScores(XRawFileIO objXcaliburAccessor, clsDatasetFileInfo datasetFileInfo)
         {
             float sngOverallScore;
@@ -68,7 +67,7 @@ namespace MSFileInfoScanner
                         continue;
                     }
 
-                    if ((dblMassIntensityPairs == null) || dblMassIntensityPairs.GetLength(1) <= 0)
+                    if (dblMassIntensityPairs == null || dblMassIntensityPairs.GetLength(1) <= 0)
                     {
                         continue;
                     }
@@ -224,7 +223,7 @@ namespace MSFileInfoScanner
 
                 try
                 {
-                    if (mSaveLCMS2DPlots | mCheckCentroidingStatus)
+                    if (mSaveLCMS2DPlots || mCheckCentroidingStatus)
                     {
                         // Also need to load the raw data
 
@@ -321,8 +320,9 @@ namespace MSFileInfoScanner
 
             mDatasetStatsSummarizer.ClearCachedData();
 
-            var blnDeleteLocalFile = false;
-            var blnReadError = false;
+            var deleteLocalFile = false;
+            var readError = false;
+
 
             // Use Xraw to read the .Raw file
             // If reading from a SAMBA-mounted network share, and if the current user has
@@ -336,7 +336,7 @@ namespace MSFileInfoScanner
             {
                 // File open failed
                 OnErrorEvent("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
-                blnReadError = true;
+                readError = true;
 
                 if (!string.Equals(clsMSFileInfoScanner.GetAppFolderPath().Substring(0, 2), fiRawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
                 {
@@ -354,7 +354,7 @@ namespace MSFileInfoScanner
                                 File.Copy(strDataFilePath, strDataFilePathLocal, true);
 
                                 strDataFilePath = string.Copy(strDataFilePathLocal);
-                                blnDeleteLocalFile = true;
+                                deleteLocalFile = true;
 
                                 // Update fiRawFile then try to re-open
                                 fiRawFile = new FileInfo(strDataFilePath);
@@ -363,17 +363,17 @@ namespace MSFileInfoScanner
                                 {
                                     // File open failed
                                     OnErrorEvent("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
-                                    blnReadError = true;
+                                    readError = true;
                                 }
                                 else
                                 {
-                                    blnReadError = false;
+                                    readError = false;
                                 }
                             }
                         }
                         catch (Exception)
                         {
-                            blnReadError = true;
+                            readError = true;
                         }
                     }
 
@@ -381,7 +381,7 @@ namespace MSFileInfoScanner
 
             }
 
-            if (!blnReadError)
+            if (!readError)
             {
                 // Read the file info
                 try
@@ -391,10 +391,10 @@ namespace MSFileInfoScanner
                 catch (Exception)
                 {
                     // Read error
-                    blnReadError = true;
+                    readError = true;
                 }
 
-                if (!blnReadError)
+                if (!readError)
                 {
                     try
                     {
@@ -459,7 +459,7 @@ namespace MSFileInfoScanner
             // This will also compute the Sha1 hash of the .Raw file and add it to mDatasetStatsSummarizer.DatasetFileInfo
             UpdateDatasetFileStats(fiRawFile, intDatasetID);
 
-            // Copy over the updated filetime info from datasetFileInfo to mDatasetFileInfo
+            // Copy over the updated filetime info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
             mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
             mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
             mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetFileInfo.DatasetID;
@@ -471,7 +471,7 @@ namespace MSFileInfoScanner
             mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
 
             // Delete the local copy of the data file
-            if (blnDeleteLocalFile)
+            if (deleteLocalFile)
             {
                 try
                 {

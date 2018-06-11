@@ -35,7 +35,7 @@ namespace MSFileInfoScanner
 
         public const string FILE_EXTENSION_XML = ".XML";
 
-        public const string FINNIGAN_RAW_FILE_EXTENSION = ".RAW";
+        public const string THERMO_RAW_FILE_EXTENSION = ".RAW";
 
         public const string AGILENT_TOF_OR_QTRAP_FILE_EXTENSION = ".WIFF";
 
@@ -681,7 +681,7 @@ namespace MSFileInfoScanner
 
             // This is set to true if strRequiredTextLineHeaders has data
             // However, once all of the expected headers are found, it is changed to false
-            var blnNeedToCheckLineHeaders = (textLineHeaders.Count > 0);
+            var blnNeedToCheckLineHeaders = textLineHeaders.Count > 0;
 
             var intLinesRead = 0;
             int intMaximumTextFileLinesToCheck;
@@ -1030,9 +1030,7 @@ namespace MSFileInfoScanner
                         intLinesRead += 1;
 
                         if (string.IsNullOrWhiteSpace(strLineIn))
-                        {
                             continue;
-                        }
 
                         if (intLinesRead == 1)
                         {
@@ -1536,7 +1534,7 @@ namespace MSFileInfoScanner
 
                 // This is set to true if strRequiredElementNames has data
                 // However, once all of the elements have been found, it is changed to false
-                var blnNeedToCheckElementNames = (requiredElements.Count > 0);
+                var blnNeedToCheckElementNames = requiredElements.Count > 0;
 
                 // Keys in this dictionary are attribute names to find
                 // Values are set to true when the element is found
@@ -1544,7 +1542,7 @@ namespace MSFileInfoScanner
 
                 // This is set to true if strRequiredAttributeNames has data
                 // However, once all of the attributes have been found, it is changed to false
-                var blnNeedToCheckAttributeNames = (requiredAttributes.Count > 0);
+                var blnNeedToCheckAttributeNames = requiredAttributes.Count > 0;
 
                 int intMaximumXMLElementNodesToCheck;
                 if (mMaximumXMLElementNodesToCheck <= 0)
@@ -1705,7 +1703,7 @@ namespace MSFileInfoScanner
             {
                 var filesToIgnoreSorted = new SortedSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
-                if ((filesToIgnore != null) && filesToIgnore.Count > 0)
+                if (filesToIgnore != null && filesToIgnore.Count > 0)
                 {
                     foreach (var item in filesToIgnore)
                     {
@@ -1774,7 +1772,7 @@ namespace MSFileInfoScanner
                                     blnPassedIntegrityCheck = CheckXMLFile(fiFile.FullName);
 
                                     break;
-                                case FINNIGAN_RAW_FILE_EXTENSION:
+                                case THERMO_RAW_FILE_EXTENSION:
                                     // File was not in strFileIgnoreList
                                     // Re-check using clsFinniganRawFileInfoScanner
 
@@ -1866,7 +1864,7 @@ namespace MSFileInfoScanner
         {
             var requiredTextDictionary = new Dictionary<string, bool>();
 
-            if ((requiredTextItems != null) && requiredTextItems.Count > 0)
+            if (requiredTextItems != null && requiredTextItems.Count > 0)
             {
                 foreach (var lineHeader in requiredTextItems)
                 {
@@ -1914,7 +1912,7 @@ namespace MSFileInfoScanner
             ref int intRequiredTextMatchCount,
             bool blnMatchStart)
         {
-            if (!needToCheckItems | requiredTextItems.Count <= 0)
+            if (!needToCheckItems || requiredTextItems.Count <= 0)
             {
                 return;
             }
@@ -2033,9 +2031,8 @@ namespace MSFileInfoScanner
                         intLinesRead += 1;
 
                         if (string.IsNullOrWhiteSpace(strLineIn))
-                        {
                             continue;
-                        }
+
                         strLineIn = strLineIn.Trim().ToLower();
 
                         for (var intIndex = 0; intIndex <= blnElementFound.Length - 1; intIndex++)

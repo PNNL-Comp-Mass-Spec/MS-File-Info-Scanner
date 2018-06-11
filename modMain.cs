@@ -87,7 +87,7 @@ namespace MSFileInfoScanner
         {
 
             int returnCode;
-            var objParseCommandLine = new clsParseCommandLine();
+            var commandLineParser = new clsParseCommandLine();
 
             mInputDataFilePath = string.Empty;
             mOutputFolderName = string.Empty;
@@ -136,9 +136,9 @@ namespace MSFileInfoScanner
             try
             {
                 var blnProceed = false;
-                if (objParseCommandLine.ParseCommandLine())
+                if (commandLineParser.ParseCommandLine())
                 {
-                    if (SetOptionsUsingCommandLineParameters(objParseCommandLine))
+                    if (SetOptionsUsingCommandLineParameters(commandLineParser))
                         blnProceed = true;
                 }
 
@@ -146,7 +146,7 @@ namespace MSFileInfoScanner
                     mInputDataFilePath = string.Empty;
 
 
-                if (!blnProceed || objParseCommandLine.NeedToShowHelp || objParseCommandLine.ParameterCount + objParseCommandLine.NonSwitchParameterCount == 0 || mInputDataFilePath.Length == 0)
+                if (!blnProceed || commandLineParser.NeedToShowHelp || commandLineParser.ParameterCount + commandLineParser.NonSwitchParameterCount == 0 || mInputDataFilePath.Length == 0)
                 {
                     ShowProgramHelp();
                     return -1;
@@ -259,7 +259,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                ShowErrorMessage("Error occurred in modMain->Main: " + Environment.NewLine + ex.Message);
+                ShowErrorMessage("Error occurred in modMain->Main", ex);
                 returnCode = -1;
             }
 
@@ -269,7 +269,7 @@ namespace MSFileInfoScanner
 
         private static string GetAppVersion()
         {
-            return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version + " (" + PROGRAM_DATE + ")";
+            return PRISM.FileProcessor.ProcessFilesOrFoldersBase.GetAppVersion(PROGRAM_DATE);
         }
 
         private static bool SetOptionsUsingCommandLineParameters(clsParseCommandLine parser)

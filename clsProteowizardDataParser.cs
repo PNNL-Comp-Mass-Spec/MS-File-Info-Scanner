@@ -492,7 +492,7 @@ namespace MSFileInfoScanner
                         objScanStatsEntry.IonCount = oMSDataSpectrum.Mzs.Length;
                         objScanStatsEntry.IonCountRaw = objScanStatsEntry.IonCount;
 
-                        if (blnComputeBPI | blnComputeTIC)
+                        if (blnComputeBPI || blnComputeTIC)
                         {
                             // Step through the raw data to compute the BPI and TIC
 

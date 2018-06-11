@@ -404,7 +404,7 @@ namespace MSFileInfoScanner
 
                     mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
 
-                    if (mSaveLCMS2DPlots | mCheckCentroidingStatus)
+                    if (mSaveLCMS2DPlots || mCheckCentroidingStatus)
                     {
                         try
                         {
@@ -638,7 +638,7 @@ namespace MSFileInfoScanner
                                 validStartTime = true;
 
                             }
-                            else if (reportedDateStarted.Year < 2000 | reportedDateStarted.Year > DateTime.Now.Year + 1)
+                            else if (reportedDateStarted.Year < 2000 || reportedDateStarted.Year > DateTime.Now.Year + 1)
                             {
                                 // Invalid date; log a message
                                 OnWarningEvent(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + reportedDateStartedText + "; " +
@@ -857,7 +857,7 @@ namespace MSFileInfoScanner
             // This will also compute the Sha1 hash of the .UIMF file and add it to mDatasetStatsSummarizer.DatasetFileInfo
             UpdateDatasetFileStats(fiFileInfo, intDatasetID);
 
-            // Copy over the updated filetime info from datasetFileInfo to mDatasetFileInfo
+            // Copy over the updated filetime info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
             mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
             mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
             mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetFileInfo.DatasetID;

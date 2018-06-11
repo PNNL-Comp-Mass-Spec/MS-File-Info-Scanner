@@ -245,7 +245,7 @@ namespace MSFileInfoScanner
         private bool CreateDatasetInfoFile(string inputFileName, string outputFolderPath)
         {
 
-            bool blnSuccess;
+            bool success;
 
             try
             {
@@ -258,9 +258,9 @@ namespace MSFileInfoScanner
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID;
                 }
 
-                blnSuccess = mDatasetStatsSummarizer.CreateDatasetInfoFile(datasetName, datasetInfoFilePath);
+                success = mDatasetStatsSummarizer.CreateDatasetInfoFile(datasetName, datasetInfoFilePath);
 
-                if (!blnSuccess)
+                if (!success)
                 {
                     OnErrorEvent("Error calling objDatasetStatsSummarizer.CreateDatasetInfoFile: " + mDatasetStatsSummarizer.ErrorMessage);
                 }
@@ -269,17 +269,17 @@ namespace MSFileInfoScanner
             catch (Exception ex)
             {
                 OnErrorEvent("Error creating dataset info file: " + ex.Message, ex);
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
 
         }
 
         public bool CreateDatasetScanStatsFile(string inputFileName, string outputFolderPath)
         {
 
-            bool blnSuccess;
+            bool success;
 
             try
             {
@@ -291,9 +291,9 @@ namespace MSFileInfoScanner
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID;
                 }
 
-                blnSuccess = mDatasetStatsSummarizer.CreateScanStatsFile(datasetName, scanStatsFilePath);
+                success = mDatasetStatsSummarizer.CreateScanStatsFile(datasetName, scanStatsFilePath);
 
-                if (!blnSuccess)
+                if (!success)
                 {
                     OnErrorEvent("Error calling objDatasetStatsSummarizer.CreateScanStatsFile: " + mDatasetStatsSummarizer.ErrorMessage);
                 }
@@ -302,18 +302,16 @@ namespace MSFileInfoScanner
             catch (Exception ex)
             {
                 OnErrorEvent("Error creating dataset ScanStats file: " + ex.Message, ex);
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
 
         }
 
         public bool UpdateDatasetStatsTextFile(string inputFileName, string outputFolderPath)
         {
-
             return UpdateDatasetStatsTextFile(inputFileName, outputFolderPath, clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME);
-
         }
 
         public bool UpdateDatasetStatsTextFile(string inputFileName, string outputFolderPath, string datasetStatsFilename)
@@ -536,9 +534,7 @@ namespace MSFileInfoScanner
 
         private bool CreateOverview2DPlots(string datasetName, string outputFolderPath, int lcms2DOverviewPlotDivisor)
         {
-
             return CreateOverview2DPlots(datasetName, outputFolderPath, lcms2DOverviewPlotDivisor, string.Empty);
-
         }
 
         private bool CreateOverview2DPlots(string datasetName, string outputFolderPath, int lcms2DOverviewPlotDivisor, string scanModeSuffixAddon)
@@ -568,9 +564,9 @@ namespace MSFileInfoScanner
 
             // Write out the Overview 2D plot of m/z vs. intensity
             // Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-            var blnSuccess = mLCMS2DPlotOverview.Save2DPlots(datasetName, outputFolderPath, "HighAbu_", scanModeSuffixAddon);
+            var success = mLCMS2DPlotOverview.Save2DPlots(datasetName, outputFolderPath, "HighAbu_", scanModeSuffixAddon);
 
-            return blnSuccess;
+            return success;
 
         }
 
@@ -582,7 +578,7 @@ namespace MSFileInfoScanner
             {
                 var strDatasetName = GetDatasetNameViaPath(inputFileName);
                 successOverall = true;
-                var blnCreateQCPlotHtmlFile = false;
+                var createQCPlotHtmlFile = false;
 
                 if (outputFolderPath == null)
                     outputFolderPath = string.Empty;
@@ -617,32 +613,32 @@ namespace MSFileInfoScanner
                     mLCMS2DPlot.Options.DeleteTempFiles = false;
                 }
 
-                bool blnSuccess;
+                bool success;
                 if (mSaveTICAndBPI)
                 {
                     // Write out the TIC and BPI plots
-                    blnSuccess = mTICandBPIPlot.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName);
-                    if (!blnSuccess)
+                    success = mTICandBPIPlot.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName);
+                    if (!success)
                     {
                         successOverall = false;
                     }
 
                     // Write out any instrument-specific plots
-                    blnSuccess = mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName);
-                    if (!blnSuccess)
+                    success = mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName);
+                    if (!success)
                     {
                         successOverall = false;
                     }
 
-                    blnCreateQCPlotHtmlFile = true;
+                    createQCPlotHtmlFile = true;
                 }
 
                 if (mSaveLCMS2DPlots)
                 {
                     // Write out the 2D plot of m/z vs. intensity
                     // Plots will be named Dataset_LCMS.png and Dataset_LCMSn.png
-                    blnSuccess = mLCMS2DPlot.Save2DPlots(strDatasetName, diFolderInfo.FullName);
-                    if (!blnSuccess)
+                    success = mLCMS2DPlot.Save2DPlots(strDatasetName, diFolderInfo.FullName);
+                    if (!success)
                     {
                         successOverall = false;
                     }
@@ -652,8 +648,8 @@ namespace MSFileInfoScanner
                         {
                             // Also save the Overview 2D Plots
                             // Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-                            blnSuccess = CreateOverview2DPlots(strDatasetName, outputFolderPath, mLCMS2DOverviewPlotDivisor);
-                            if (!blnSuccess)
+                            success = CreateOverview2DPlots(strDatasetName, outputFolderPath, mLCMS2DOverviewPlotDivisor);
+                            if (!success)
                             {
                                 successOverall = false;
                             }
@@ -676,25 +672,25 @@ namespace MSFileInfoScanner
                             }
                         }
                     }
-                    blnCreateQCPlotHtmlFile = true;
+                    createQCPlotHtmlFile = true;
                 }
 
                 if (mCreateDatasetInfoFile)
                 {
                     // Create the _DatasetInfo.xml file
-                    blnSuccess = CreateDatasetInfoFile(inputFileName, diFolderInfo.FullName);
-                    if (!blnSuccess)
+                    success = CreateDatasetInfoFile(inputFileName, diFolderInfo.FullName);
+                    if (!success)
                     {
                         successOverall = false;
                     }
-                    blnCreateQCPlotHtmlFile = true;
+                    createQCPlotHtmlFile = true;
                 }
 
                 if (mCreateScanStatsFile)
                 {
                     // Create the _ScanStats.txt file
-                    blnSuccess = CreateDatasetScanStatsFile(inputFileName, diFolderInfo.FullName);
-                    if (!blnSuccess)
+                    success = CreateDatasetScanStatsFile(inputFileName, diFolderInfo.FullName);
+                    if (!success)
                     {
                         successOverall = false;
                     }
@@ -703,17 +699,17 @@ namespace MSFileInfoScanner
                 if (mUpdateDatasetStatsTextFile)
                 {
                     // Add a new row to the MSFileInfo_DatasetStats.txt file
-                    blnSuccess = UpdateDatasetStatsTextFile(inputFileName, diFolderInfo.FullName, mDatasetStatsTextFileName);
-                    if (!blnSuccess)
+                    success = UpdateDatasetStatsTextFile(inputFileName, diFolderInfo.FullName, mDatasetStatsTextFileName);
+                    if (!success)
                     {
                         successOverall = false;
                     }
                 }
 
-                if (blnCreateQCPlotHtmlFile)
+                if (createQCPlotHtmlFile)
                 {
-                    blnSuccess = CreateQCPlotHTMLFile(strDatasetName, diFolderInfo.FullName);
-                    if (!blnSuccess)
+                    success = CreateQCPlotHTMLFile(strDatasetName, diFolderInfo.FullName);
+                    if (!success)
                     {
                         successOverall = false;
                     }

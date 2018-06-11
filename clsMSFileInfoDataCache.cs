@@ -422,10 +422,9 @@ namespace MSFileInfoScanner
                     {
                         var strLineIn = srInFile.ReadLine();
 
-                        if ((strLineIn == null))
-                        {
+                        if (string.IsNullOrWhiteSpace(strLineIn))
                             continue;
-                        }
+
                         var strSplitLine = strLineIn.Split(strSepChars);
 
                         if (strSplitLine.Length < 8)
@@ -561,7 +560,7 @@ namespace MSFileInfoScanner
         {
             bool blnSuccess;
 
-            if ((mFolderIntegrityInfoDataset == null) ||
+            if (mFolderIntegrityInfoDataset == null ||
                 mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].Rows.Count <= 0 ||
                 mFolderIntegrityInfoResultsState != eCachedResultsStateConstants.Modified)
             {
@@ -615,7 +614,7 @@ namespace MSFileInfoScanner
 
             var blnSuccess = false;
 
-            if ((mMSFileInfoDataset != null) &&
+            if (mMSFileInfoDataset != null &&
                 mMSFileInfoDataset.Tables[MS_FILEINFO_DATATABLE].Rows.Count > 0 &&
                 mMSFileInfoCachedResultsState == eCachedResultsStateConstants.Modified)
             {

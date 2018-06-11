@@ -361,7 +361,8 @@ namespace MSFileInfoScanner
                 {
                     intRowNumber += 1;
                     var strLineIn = srIsosFile.ReadLine();
-                    if (strLineIn == null)
+
+                    if (string.IsNullOrWhiteSpace(strLineIn))
                         continue;
 
                     var lstData = strLineIn.Split(',').ToList();
@@ -491,9 +492,9 @@ namespace MSFileInfoScanner
         public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
 
-            var fiIsosFile = new FileInfo(strDataFilePath);
+            var isosFile = new FileInfo(strDataFilePath);
 
-            if (!fiIsosFile.Exists)
+            if (!isosFile.Exists)
             {
                 OnErrorEvent("_isos.csv file not found: " + strDataFilePath);
                 return false;
@@ -502,17 +503,17 @@ namespace MSFileInfoScanner
             var intDatasetID = DatasetID;
 
             // Record the file size and Dataset ID
-            datasetFileInfo.FileSystemCreationTime = fiIsosFile.CreationTime;
-            datasetFileInfo.FileSystemModificationTime = fiIsosFile.LastWriteTime;
+            datasetFileInfo.FileSystemCreationTime = isosFile.CreationTime;
+            datasetFileInfo.FileSystemModificationTime = isosFile.LastWriteTime;
 
             // The acquisition times will get updated below to more accurate values
             datasetFileInfo.AcqTimeStart = datasetFileInfo.FileSystemModificationTime;
             datasetFileInfo.AcqTimeEnd = datasetFileInfo.FileSystemModificationTime;
 
             datasetFileInfo.DatasetID = intDatasetID;
-            datasetFileInfo.DatasetName = GetDatasetNameViaPath(fiIsosFile.Name);
-            datasetFileInfo.FileExtension = fiIsosFile.Extension;
-            datasetFileInfo.FileSizeBytes = fiIsosFile.Length;
+            datasetFileInfo.DatasetName = GetDatasetNameViaPath(isosFile.Name);
+            datasetFileInfo.FileExtension = isosFile.Extension;
+            datasetFileInfo.FileSizeBytes = isosFile.Length;
 
             datasetFileInfo.ScanCount = 0;
 
@@ -522,7 +523,7 @@ namespace MSFileInfoScanner
             {
                 // Load data from each scan
                 // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
-                LoadData(fiIsosFile, datasetFileInfo);
+                LoadData(isosFile, datasetFileInfo);
             }
 
             // Read the file info from the file system

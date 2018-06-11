@@ -82,7 +82,7 @@ namespace MSFileInfoScanner
                 // Examine the range of values between the minimum and the maximum
                 // If the range is small, e.g. between 3.95 and 3.98, then we need to guarantee that we have at least 2 digits of precision
                 // The following combination of Log10 and ceiling determins the minimum needed
-                var minDigitsRangeBased = (int)Math.Ceiling(-(Math.Log10(absValueMax - absValueMin)));
+                var minDigitsRangeBased = (int)Math.Ceiling(-Math.Log10(absValueMax - absValueMin));
 
                 if (minDigitsRangeBased > minDigitsPrecision)
                 {

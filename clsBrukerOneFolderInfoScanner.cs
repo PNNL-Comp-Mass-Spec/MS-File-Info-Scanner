@@ -200,9 +200,9 @@ namespace MSFileInfoScanner
                 {
                     // Get the info on each zip file
 
-                    using (var objZipFile = new Ionic.Zip.ZipFile(zippedSFile.FullName))
+                    using (var zipFileReader = new Ionic.Zip.ZipFile(zippedSFile.FullName))
                     {
-                        foreach (var objZipEntry in objZipFile.Entries)
+                        foreach (var objZipEntry in zipFileReader.Entries)
                         {
                             datasetFileInfo.FileSizeBytes += objZipEntry.UncompressedSize;
                             datasetFileInfo.ScanCount += 1;
@@ -252,12 +252,12 @@ namespace MSFileInfoScanner
                         {
                             var strLineIn = srInFile.ReadLine();
 
-                            if ((strLineIn != null))
+                            if (string.IsNullOrWhiteSpace(strLineIn))
+                                continue;
+
+                            if (strLineIn.StartsWith(PEK_FILE_FILENAME_LINE))
                             {
-                                if (strLineIn.StartsWith(PEK_FILE_FILENAME_LINE))
-                                {
-                                    intFileListCount += 1;
-                                }
+                                intFileListCount += 1;
                             }
                         }
                     }
@@ -306,10 +306,8 @@ namespace MSFileInfoScanner
                         {
                             var strLineIn = srInFile.ReadLine();
 
-                            if ((string.IsNullOrEmpty(strLineIn)))
-                            {
+                            if (string.IsNullOrWhiteSpace(strLineIn))
                                 continue;
-                            }
 
                             if (blnParsingTICFileList)
                             {

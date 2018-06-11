@@ -51,7 +51,8 @@ namespace MSFileInfoScanner
 
             public bool HasData()
             {
-                if (!string.IsNullOrEmpty(SampleName) || !string.IsNullOrEmpty(Comment1) || !string.IsNullOrEmpty(Comment2)) {
+                if (!string.IsNullOrEmpty(SampleName) || !string.IsNullOrEmpty(Comment1) || !string.IsNullOrEmpty(Comment2))
+                {
                     return true;
                 }
 
@@ -65,7 +66,6 @@ namespace MSFileInfoScanner
 
         private string mDatasetStatsSummaryFileName;
 
-        private string mErrorMessage;
         private readonly List<clsScanStatsEntry> mDatasetScanStats;
 
         public udtSampleInfoType SampleInfo;
@@ -91,8 +91,10 @@ namespace MSFileInfoScanner
                 }
             }
         }
-
-        public string ErrorMessage => mErrorMessage;
+        /// <summary>
+        /// Error message
+        /// </summary>
+        public string ErrorMessage { get; private set; }
 
         public string FileDate { get; }
 
@@ -105,7 +107,7 @@ namespace MSFileInfoScanner
         {
             FileDate = "November 7, 2017";
 
-            mErrorMessage = string.Empty;
+            ErrorMessage = string.Empty;
 
             mMedianUtils = new clsMedianUtilities();
 
@@ -190,13 +192,15 @@ namespace MSFileInfoScanner
             // Initialize objSummaryStats
             objSummaryStats = new clsDatasetSummaryStats();
 
-            try {
-                if (objScanStats == null) {
+            try
+            {
+                if (objScanStats == null)
+                {
                     ReportError("objScanStats is Nothing; unable to continue");
                     return false;
                 }
 
-                mErrorMessage = "";
+                ErrorMessage = "";
 
                 var intScanStatsCount = objScanStats.Count;
 
@@ -207,20 +211,27 @@ namespace MSFileInfoScanner
                 var dblTICListMSn = new double[intScanStatsCount];
                 var dblBPIListMSn = new double[intScanStatsCount];
 
-                foreach (var objEntry in objScanStats) {
+                foreach (var objEntry in objScanStats)
+                {
 
-                    if (objEntry.ScanType > 1) {
+                    if (objEntry.ScanType > 1)
+                    {
                         // MSn spectrum
                         ComputeScanStatsUpdateDetails(objEntry, ref objSummaryStats.ElutionTimeMax, ref objSummaryStats.MSnStats, dblTICListMSn, ref intTICListMSnCount, dblBPIListMSn, ref intBPIListMSnCount);
-                    } else {
+                    }
+                    else
+                    {
                         // MS spectrum
                         ComputeScanStatsUpdateDetails(objEntry, ref objSummaryStats.ElutionTimeMax, ref objSummaryStats.MSStats, dblTICListMS, ref intTICListMSCount, dblBPIListMS, ref intBPIListMSCount);
                     }
 
                     var strScanTypeKey = objEntry.ScanTypeName + SCANTYPE_STATS_SEPCHAR + objEntry.ScanFilterText;
-                    if (objSummaryStats.objScanTypeStats.ContainsKey(strScanTypeKey)) {
+                    if (objSummaryStats.objScanTypeStats.ContainsKey(strScanTypeKey))
+                    {
                         objSummaryStats.objScanTypeStats[strScanTypeKey] += 1;
-                    } else {
+                    }
+                    else
+                    {
                         objSummaryStats.objScanTypeStats.Add(strScanTypeKey, 1);
                     }
                 }
@@ -233,7 +244,9 @@ namespace MSFileInfoScanner
 
                 return true;
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 ReportError("Error in ComputeScanStatsSummary: " + ex.Message);
                 return false;
             }
@@ -261,8 +274,10 @@ namespace MSFileInfoScanner
                 }
             }
 
-            if (double.TryParse(objScanStats.TotalIonIntensity, out var dblTIC)) {
-                if (dblTIC > udtSummaryStatDetails.TICMax) {
+            if (double.TryParse(objScanStats.TotalIonIntensity, out var dblTIC))
+            {
+                if (dblTIC > udtSummaryStatDetails.TICMax)
+                {
                     udtSummaryStatDetails.TICMax = dblTIC;
                 }
 
@@ -270,8 +285,10 @@ namespace MSFileInfoScanner
                 intTICListCount += 1;
             }
 
-            if (double.TryParse(objScanStats.BasePeakIntensity, out var dblBPI)) {
-                if (dblBPI > udtSummaryStatDetails.BPIMax) {
+            if (double.TryParse(objScanStats.BasePeakIntensity, out var dblBPI))
+            {
+                if (dblBPI > udtSummaryStatDetails.BPIMax)
+                {
                     udtSummaryStatDetails.BPIMax = dblBPI;
                 }
 
@@ -287,7 +304,8 @@ namespace MSFileInfoScanner
         {
 
             var lstData = new List<double>(intItemCount);
-            for (var i = 0; i <= intItemCount - 1; i++) {
+            for (var i = 0; i <= intItemCount - 1; i++)
+            {
                 lstData.Add(dblList[i]);
             }
 
@@ -306,7 +324,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public bool CreateDatasetInfoFile(string strDatasetName, string strDatasetInfoFilePath)
         {
-
             return CreateDatasetInfoFile(strDatasetName, strDatasetInfoFilePath, mDatasetScanStats, DatasetFileInfo, SampleInfo);
         }
 
@@ -330,17 +347,20 @@ namespace MSFileInfoScanner
 
             bool blnSuccess;
 
-            try {
-                if (objScanStats == null) {
+            try
+            {
+                if (objScanStats == null)
+                {
                     ReportError("objScanStats is Nothing; unable to continue in CreateDatasetInfoFile");
                     return false;
                 }
 
-                mErrorMessage = "";
+                ErrorMessage = "";
 
                 // If CreateDatasetInfoXML() used a StringBuilder to cache the XML data, then we would have to use Encoding.Unicode
                 // However, CreateDatasetInfoXML() now uses a MemoryStream, so we're able to use UTF8
-                using (var swOutFile = new StreamWriter(new FileStream(strDatasetInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read), Encoding.UTF8)) {
+                using (var swOutFile = new StreamWriter(new FileStream(strDatasetInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read), Encoding.UTF8))
+                {
 
                     swOutFile.WriteLine(CreateDatasetInfoXML(strDatasetName, objScanStats, datasetFileInfo, udtSampleInfo));
 
@@ -348,7 +368,9 @@ namespace MSFileInfoScanner
 
                 blnSuccess = true;
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 ReportError("Error in CreateDatasetInfoFile: " + ex.Message);
                 blnSuccess = false;
             }
@@ -445,23 +467,29 @@ namespace MSFileInfoScanner
 
             var includeCentroidStats = false;
 
-            try {
-                if (objScanStats == null) {
+            try
+            {
+                if (objScanStats == null)
+                {
                     ReportError("objScanStats is Nothing; unable to continue in CreateDatasetInfoXML");
                     return string.Empty;
                 }
 
-                mErrorMessage = "";
+                ErrorMessage = "";
 
                 clsDatasetSummaryStats objSummaryStats;
-                if (objScanStats == mDatasetScanStats) {
+                if (objScanStats == mDatasetScanStats)
+                {
                     objSummaryStats = GetDatasetSummaryStats();
 
-                    if (mSpectraTypeClassifier.TotalSpectra > 0) {
+                    if (mSpectraTypeClassifier.TotalSpectra > 0)
+                    {
                         includeCentroidStats = true;
                     }
 
-                } else {
+                }
+                else
+                {
 
                     // Parse the data in objScanStats to compute the bulk values
                     var success = ComputeScanStatsSummary(objScanStats, out objSummaryStats);
@@ -517,14 +545,20 @@ namespace MSFileInfoScanner
                     var intIndexMatch = strScanType.IndexOf(SCANTYPE_STATS_SEPCHAR, StringComparison.Ordinal);
 
                     string strScanFilterText;
-                    if (intIndexMatch >= 0) {
+                    if (intIndexMatch >= 0)
+                    {
                         strScanFilterText = strScanType.Substring(intIndexMatch + SCANTYPE_STATS_SEPCHAR.Length);
-                        if (intIndexMatch > 0) {
+                        if (intIndexMatch > 0)
+                        {
                             strScanType = strScanType.Substring(0, intIndexMatch);
-                        } else {
+                        }
+                        else
+                        {
                             strScanType = string.Empty;
                         }
-                    } else {
+                    }
+                    else
+                    {
                         strScanFilterText = string.Empty;
                     }
 
@@ -542,7 +576,8 @@ namespace MSFileInfoScanner
                 objDSInfo.WriteStartElement("AcquisitionInfo");
 
                 var scanCountTotal = objSummaryStats.MSStats.ScanCount + objSummaryStats.MSnStats.ScanCount;
-                if (scanCountTotal == 0 && datasetFileInfo.ScanCount > 0) {
+                if (scanCountTotal == 0 && datasetFileInfo.ScanCount > 0)
+                {
                     scanCountTotal = datasetFileInfo.ScanCount;
                 }
 
@@ -590,7 +625,8 @@ namespace MSFileInfoScanner
                     var totalMS1Spectra = mSpectraTypeClassifier.TotalMS1Spectra;
                     var totalMSnSpectra = mSpectraTypeClassifier.TotalMSnSpectra;
 
-                    if (totalMS1Spectra + totalMSnSpectra == 0) {
+                    if (totalMS1Spectra + totalMSnSpectra == 0)
+                    {
                         // None of the spectra had MSLevel 1 or MSLevel 2
                         // This shouldn't normally be the case; nevertheless, we'll report the totals, regardless of MSLevel, using the MS1 elements
                         centroidedMS1Spectra = mSpectraTypeClassifier.CentroidedSpectra;
@@ -603,7 +639,8 @@ namespace MSFileInfoScanner
                     objDSInfo.WriteElementString("CentroidScanCountMS1", centroidedMS1Spectra.ToString());
                     objDSInfo.WriteElementString("CentroidScanCountMS2", centroidedMSnSpectra.ToString());
 
-                    if (centroidedMS1SpectraClassifiedAsProfile > 0 || centroidedMSnSpectraClassifiedAsProfile > 0) {
+                    if (centroidedMS1SpectraClassifiedAsProfile > 0 || centroidedMSnSpectraClassifiedAsProfile > 0)
+                    {
                         objDSInfo.WriteElementString("CentroidMS1ScansClassifiedAsProfile", centroidedMS1SpectraClassifiedAsProfile.ToString());
                         objDSInfo.WriteElementString("CentroidMS2ScansClassifiedAsProfile", centroidedMSnSpectraClassifiedAsProfile.ToString());
                     }
@@ -626,7 +663,8 @@ namespace MSFileInfoScanner
                 // TICInfo EndElement
 
                 // Only write the SampleInfo block if udtSampleInfo contains entries
-                if (udtSampleInfo.HasData()) {
+                if (udtSampleInfo.HasData())
+                {
                     objDSInfo.WriteStartElement("SampleInfo");
                     objDSInfo.WriteElementString("SampleName", FixNull(udtSampleInfo.SampleName));
                     objDSInfo.WriteElementString("Comment1", FixNull(udtSampleInfo.Comment1));
@@ -689,13 +727,15 @@ namespace MSFileInfoScanner
             var intDatasetID = datasetFileInfo.DatasetID;
             var sbLineOut = new StringBuilder();
 
-            try {
-                if (objScanStats == null) {
+            try
+            {
+                if (objScanStats == null)
+                {
                     ReportError("objScanStats is Nothing; unable to continue in CreateScanStatsFile");
                     return false;
                 }
 
-                mErrorMessage = "";
+                ErrorMessage = "";
 
                 // Define the path to the extended scan stats file
                 var fiScanStatsFile = new FileInfo(strScanStatsFilePath);
@@ -709,7 +749,8 @@ namespace MSFileInfoScanner
 
                 // Open the output files
                 using (var swOutFile = new StreamWriter(new FileStream(fiScanStatsFile.FullName, FileMode.Create, FileAccess.Write, FileShare.Read)))
-                using (var swScanStatsExFile = new StreamWriter(new FileStream(strScanStatsExFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))) {
+                using (var swScanStatsExFile = new StreamWriter(new FileStream(strScanStatsExFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                {
 
                     // Write the headers
                     sbLineOut.Clear();
@@ -722,7 +763,8 @@ namespace MSFileInfoScanner
 
                     swScanStatsExFile.WriteLine(sbLineOut.ToString());
 
-                    foreach (var objScanStatsEntry in objScanStats) {
+                    foreach (var objScanStatsEntry in objScanStats)
+                    {
                         sbLineOut.Clear();
                         sbLineOut.Append(intDatasetID.ToString() + '\t');
                         // Dataset number (aka Dataset ID)
@@ -775,7 +817,9 @@ namespace MSFileInfoScanner
 
                 return true;
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 ReportError("Error in CreateScanStatsFile: " + ex.Message);
                 return false;
             }
@@ -784,7 +828,8 @@ namespace MSFileInfoScanner
 
         private string FixNull(string strText)
         {
-            if (string.IsNullOrEmpty(strText)) {
+            if (string.IsNullOrEmpty(strText))
+            {
                 return string.Empty;
             }
 
@@ -794,7 +839,8 @@ namespace MSFileInfoScanner
         public clsDatasetSummaryStats GetDatasetSummaryStats()
         {
 
-            if (!mDatasetSummaryStatsUpToDate) {
+            if (!mDatasetSummaryStatsUpToDate)
+            {
                 ComputeScanStatsSummary(mDatasetScanStats, out mDatasetSummaryStats);
                 mDatasetSummaryStatsUpToDate = true;
             }
@@ -805,7 +851,7 @@ namespace MSFileInfoScanner
 
         private void ReportError(string message)
         {
-            mErrorMessage = string.Copy(message);
+            ErrorMessage = string.Copy(message);
             OnErrorEvent(message);
         }
 
@@ -823,8 +869,10 @@ namespace MSFileInfoScanner
             var blnMatchFound = false;
 
             // Look for scan intScanNumber in mDatasetScanStats
-            for (var intIndex = 0; intIndex <= mDatasetScanStats.Count - 1; intIndex++) {
-                if (mDatasetScanStats[intIndex].ScanNumber == intScanNumber) {
+            for (var intIndex = 0; intIndex <= mDatasetScanStats.Count - 1; intIndex++)
+            {
+                if (mDatasetScanStats[intIndex].ScanNumber == intScanNumber)
+                {
                     mDatasetScanStats[intIndex].ScanType = intScanType;
                     mDatasetScanStats[intIndex].ScanTypeName = strScanTypeName;
                     mDatasetSummaryStatsUpToDate = false;
@@ -847,7 +895,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public bool UpdateDatasetStatsTextFile(string strDatasetName, string strDatasetInfoFilePath)
         {
-
             return UpdateDatasetStatsTextFile(strDatasetName, strDatasetInfoFilePath, mDatasetScanStats, DatasetFileInfo, SampleInfo);
         }
 
@@ -873,18 +920,23 @@ namespace MSFileInfoScanner
 
             bool blnSuccess;
 
-            try {
-                if (objScanStats == null) {
+            try
+            {
+                if (objScanStats == null)
+                {
                     ReportError("objScanStats is Nothing; unable to continue in UpdateDatasetStatsTextFile");
                     return false;
                 }
 
-                mErrorMessage = "";
+                ErrorMessage = "";
 
                 clsDatasetSummaryStats objSummaryStats;
-                if (objScanStats == mDatasetScanStats) {
+                if (objScanStats == mDatasetScanStats)
+                {
                     objSummaryStats = GetDatasetSummaryStats();
-                } else {
+                }
+                else
+                {
                     // Parse the data in objScanStats to compute the bulk values
                     var success = ComputeScanStatsSummary(objScanStats, out objSummaryStats);
                     if (!success)
@@ -894,14 +946,17 @@ namespace MSFileInfoScanner
                     }
                 }
 
-                if (!File.Exists(strDatasetStatsFilePath)) {
+                if (!File.Exists(strDatasetStatsFilePath))
+                {
                     blnWriteHeaders = true;
                 }
 
                 // Create or open the output file
-                using (var swOutFile = new StreamWriter(new FileStream(strDatasetStatsFilePath, FileMode.Append, FileAccess.Write, FileShare.Read))) {
+                using (var swOutFile = new StreamWriter(new FileStream(strDatasetStatsFilePath, FileMode.Append, FileAccess.Write, FileShare.Read)))
+                {
                     string strLineOut;
-                    if (blnWriteHeaders) {
+                    if (blnWriteHeaders)
+                    {
                         // Write the header line
                         strLineOut = "Dataset" + '\t' + "ScanCount" + '\t' + "ScanCountMS" + '\t' + "ScanCountMSn" + '\t' + "Elution_Time_Max" + '\t' + "AcqTimeMinutes" + '\t' + "StartTime" + '\t' + "EndTime" + '\t' + "FileSizeBytes" + '\t' + "SampleName" + '\t' + "Comment1" + '\t' + "Comment2";
 
@@ -928,7 +983,9 @@ namespace MSFileInfoScanner
 
                 blnSuccess = true;
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 ReportError("Error in UpdateDatasetStatsTextFile: " + ex.Message);
                 blnSuccess = false;
             }

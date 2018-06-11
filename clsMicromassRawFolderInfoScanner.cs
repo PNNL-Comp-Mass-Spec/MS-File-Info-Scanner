@@ -19,9 +19,12 @@ namespace MSFileInfoScanner
         public override string GetDatasetNameViaPath(string strDataFilePath)
         {
             // The dataset name is simply the folder name without .Raw
-            try {
+            try
+            {
                 return Path.GetFileNameWithoutExtension(strDataFilePath);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 return string.Empty;
             }
         }
@@ -30,12 +33,15 @@ namespace MSFileInfoScanner
         {
             TimeSpan dtTimeSpan;
 
-            try {
+            try
+            {
                 var intMinutes = (int)Math.Floor(dblMinutes);
                 var intSeconds = (int)Math.Round((dblMinutes - intMinutes) * 60, 0);
 
                 dtTimeSpan = new TimeSpan(0, intMinutes, intSeconds);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 dtTimeSpan = new TimeSpan(0, 0, 0);
             }
 
@@ -47,7 +53,8 @@ namespace MSFileInfoScanner
         {
             // Returns True if success, False if an error
 
-            try {
+            try
+            {
                 var ioFolderInfo = new DirectoryInfo(strDataFilePath);
                 datasetFileInfo.FileSystemCreationTime = ioFolderInfo.CreationTime;
                 datasetFileInfo.FileSystemModificationTime = ioFolderInfo.LastWriteTime;
@@ -62,10 +69,12 @@ namespace MSFileInfoScanner
                 // Sum up the sizes of all of the files in this folder
                 datasetFileInfo.FileSizeBytes = 0;
                 var intFileCount = 0;
-                foreach (var item in ioFolderInfo.GetFiles()) {
+                foreach (var item in ioFolderInfo.GetFiles())
+                {
                     datasetFileInfo.FileSizeBytes += item.Length;
 
-                    if (intFileCount == 0) {
+                    if (intFileCount == 0)
+                    {
                         // Assign the first file's modification time to .AcqTimeStart and .AcqTimeEnd
                         // Necessary in case _header.txt is missing
                         datasetFileInfo.AcqTimeStart = item.LastWriteTime;
@@ -160,7 +169,10 @@ namespace MSFileInfoScanner
                 PostProcessTasks();
                 return true;
 
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
+                PostProcessTasks();
                 return false;
             }
         }
