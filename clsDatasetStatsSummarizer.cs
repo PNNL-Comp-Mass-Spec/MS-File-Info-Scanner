@@ -64,8 +64,6 @@ namespace MSFileInfoScanner
 
         #region "Classwide Variables"
 
-        private string mDatasetStatsSummaryFileName;
-
         private readonly List<clsScanStatsEntry> mDatasetScanStats;
 
         public udtSampleInfoType SampleInfo;
@@ -83,14 +81,6 @@ namespace MSFileInfoScanner
 
         public clsDatasetFileInfo DatasetFileInfo { get; set; }
 
-        public string DatasetStatsSummaryFileName {
-            get => mDatasetStatsSummaryFileName;
-            set {
-                if ((value != null)) {
-                    mDatasetStatsSummaryFileName = value;
-                }
-            }
-        }
         /// <summary>
         /// Error message
         /// </summary>
