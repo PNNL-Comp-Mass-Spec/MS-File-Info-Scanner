@@ -17,7 +17,7 @@ using PRISM;
 // Program started in 2005
 // Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 //
-// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
 // Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/ or http://panomics.pnnl.gov/
 // -------------------------------------------------------------------------------
 

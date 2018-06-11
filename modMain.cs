@@ -13,7 +13,7 @@ using PRISM;
 // Program started in 2005
 // Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 //
-// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
 // Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/ or http://panomics.pnnl.gov/
 // -------------------------------------------------------------------------------
 
@@ -22,7 +22,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "December 16, 2017";
+        public const string PROGRAM_DATE = "June 11, 2018";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
@@ -663,7 +663,7 @@ namespace MSFileInfoScanner
                 Console.WriteLine("Version: " + GetAppVersion());
                 Console.WriteLine();
 
-                Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com");
+                Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov");
                 Console.WriteLine("Website: http://omics.pnl.gov/ or http://panomics.pnnl.gov/");
                 Console.WriteLine();
 

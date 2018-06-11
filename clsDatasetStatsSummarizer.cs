@@ -13,7 +13,7 @@ using SpectraTypeClassifier;
 // Program started May 7, 2009
 // Ported from clsMASICScanStatsParser to clsDatasetStatsSummarizer in February 2010
 //
-// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
 // Website: http://panomics.pnnl.gov/ or http://omics.pnl.gov
 // -------------------------------------------------------------------------------
 //
