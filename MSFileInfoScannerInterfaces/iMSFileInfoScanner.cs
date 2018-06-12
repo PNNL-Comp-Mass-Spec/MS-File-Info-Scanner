@@ -26,6 +26,8 @@ namespace MSFileInfoScannerInterfaces
             FileIntegrityCheckError = 512,
 
             DatabasePostingError = 1024,
+            MS2MzMinValidationError = 2048,
+            MS2MzMinValidationWarning = 4096,
 
             UnspecifiedError = -1
         }

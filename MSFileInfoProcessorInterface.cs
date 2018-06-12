@@ -34,6 +34,9 @@ namespace MSFileInfoScanner
         public abstract int ScanStart { get; set; }
         public abstract int ScanEnd { get; set; }
         public abstract float MS2MzMin { get; set; }
+        public abstract bool MS2MzMinValidationError { get; set; }
+        public abstract bool MS2MzMinValidationWarning { get; set; }
+        public abstract string MS2MzMinValidationMessage { get; set; }
         public abstract bool ShowDebugInfo { get; set; }
         public abstract bool GetOption(ProcessingOptions eOption);
         public abstract void SetOption(ProcessingOptions eOption, bool blnValue);
