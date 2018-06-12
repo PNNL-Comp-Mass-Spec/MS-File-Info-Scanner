@@ -1102,7 +1102,7 @@ namespace MSFileInfoScanner
         {
             const int MAX_PERCENT_ALLOWED_FAILED = 10;
 
-            var validData = mDatasetStatsSummarizer.ValidateMs2MzMin(MS2MzMin, out var errorOrWarningMsg, MAX_PERCENT_ALLOWED_FAILED);
+            var validData = mDatasetStatsSummarizer.ValidateMS2MzMin(MS2MzMin, out var errorOrWarningMsg, MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED);
 
             if (validData && string.IsNullOrWhiteSpace(errorOrWarningMsg))
                 return true;

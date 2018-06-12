@@ -1059,7 +1059,7 @@ namespace MSFileInfoScanner
         /// <param name="errorOrWarningMsg"></param>
         /// <param name="maxPercentAllowedFailed"></param>
         /// <returns>True if valid data, false if at least 10% of the spectgra has a minimum m/z higher than the threshold</returns>
-        public bool ValidateMs2MzMin(float requiredMzMin, out string errorOrWarningMsg, int maxPercentAllowedFailed)
+        public bool ValidateMS2MzMin(float requiredMzMin, out string errorOrWarningMsg, int maxPercentAllowedFailed)
         {
             var scanCountInvalid = 0;
             var scanCountWithData = 0;
