@@ -643,6 +643,33 @@ namespace MSFileInfoScanner
                     return "Error checking file integrity";
                 case eMSFileScannerErrorCodes.DatabasePostingError:
                     return "Database posting error";
+                case eMSFileScannerErrorCodes.MS2MzMinValidationError:
+
+                    // "Over 10% of the MS/MS spectra have a minimum m/z value larger than the required minimum
+                    var errorMsg = string.Format("Over {0}% of the MS/MS spectra have a minimum m/z value larger than the required minimum; " +
+                                                 "reporter ion peaks likely could not be detected", clsMSFileInfoProcessorBaseClass.MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED);
+
+                    if (!string.IsNullOrWhiteSpace(MS2MzMinValidationMessage))
+                    {
+                        return errorMsg + "; " + MS2MzMinValidationMessage;
+                    }
+                    else
+                    {
+                        return errorMsg;
+                    }
+                case eMSFileScannerErrorCodes.MS2MzMinValidationWarning:
+                    var warningMsg = "Some of the MS/MS spectra have a minimum m/z value larger than the required minimum; " +
+                                     "reporter ion peaks likely could not be detected";
+
+                    if (!string.IsNullOrWhiteSpace(MS2MzMinValidationMessage))
+                    {
+                        return warningMsg + "; " + MS2MzMinValidationMessage;
+                    }
+                    else
+                    {
+                        return warningMsg;
+                    }
+
                 case eMSFileScannerErrorCodes.UnspecifiedError:
                     return "Unspecified localized error";
                 default:
