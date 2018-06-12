@@ -294,6 +294,8 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
+            ResetResults();
+
             var strDataFilePathLocal = string.Empty;
 
             // Obtain the full path to the file

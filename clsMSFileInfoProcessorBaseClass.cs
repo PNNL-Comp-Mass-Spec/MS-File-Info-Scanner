@@ -1028,6 +1028,13 @@ namespace MSFileInfoScanner
             ShowInstrumentFiles();
         }
 
+        protected void ResetResults()
+        {
+            MS2MzMinValidationError = false;
+            MS2MzMinValidationWarning = false;
+            MS2MzMinValidationMessage = string.Empty;
+        }
+
         /// <summary>
         /// Display the instrument file names and stats at the console or via OnDebugEvent
         /// </summary>

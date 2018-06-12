@@ -505,6 +505,7 @@ namespace MSFileInfoScanner
         public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
             // Returns True if success, False if an error
+            ResetResults();
 
             DataReader uimfReader = null;
             GlobalParams globalParams = null;

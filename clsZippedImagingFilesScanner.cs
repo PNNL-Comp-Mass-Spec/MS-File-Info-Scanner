@@ -182,6 +182,8 @@ namespace MSFileInfoScanner
 
             bool blnSuccess;
 
+            ResetResults();
+
             try
             {
                 // Determine whether strDataFilePath points to a file or a folder

@@ -384,6 +384,7 @@ namespace MSFileInfoScanner
         {
             // Process a Bruker 1 folder or Bruker s001.zip file, specified by strDataFilePath
             // If a Bruker 1 folder, it must contain file acqu and typically contains file LOCK
+            ResetResults();
 
             DirectoryInfo diZippedSFilesFolderInfo = null;
 

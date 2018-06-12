@@ -492,6 +492,8 @@ namespace MSFileInfoScanner
         public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
 
+            ResetResults();
+
             var isosFile = new FileInfo(strDataFilePath);
 
             if (!isosFile.Exists)

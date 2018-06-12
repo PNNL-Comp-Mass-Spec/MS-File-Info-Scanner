@@ -211,6 +211,8 @@ namespace MSFileInfoScanner
 
             var blnSuccess = false;
 
+            ResetResults();
+
             try
             {
                 var diRootFolder = new DirectoryInfo(strDataFilePath);

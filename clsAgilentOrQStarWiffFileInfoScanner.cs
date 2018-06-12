@@ -34,6 +34,7 @@ namespace MSFileInfoScanner
         public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
             // Returns True if success, False if an error
+            ResetResults();
 
             // Override strDataFilePath here, if needed
             // strDataFilePath = strDataFilePath;

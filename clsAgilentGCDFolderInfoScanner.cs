@@ -344,6 +344,8 @@ namespace MSFileInfoScanner
             var blnSuccess = false;
             var blnAcqTimeDetermined = false;
 
+            ResetResults();
+
             try
             {
                 var diAgilentDFolder = new DirectoryInfo(strDataFilePath);

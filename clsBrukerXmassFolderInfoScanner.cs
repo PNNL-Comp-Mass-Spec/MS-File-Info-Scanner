@@ -847,6 +847,7 @@ namespace MSFileInfoScanner
         public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
             // Process a Bruker Xmass folder, specified by strDataFilePath (which can either point to the dataset folder containing the XMass files, or any of the XMass files in the dataset folder)
+            ResetResults();
 
             try
             {
