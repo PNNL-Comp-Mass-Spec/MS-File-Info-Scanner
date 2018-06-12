@@ -1738,7 +1738,7 @@ namespace MSFileInfoScanner
 
                         if (!blnSkipFile)
                         {
-                            iMSFileInfoProcessor objMSInfoScanner;
+                            iMSFileInfoProcessor msInfoScanner;
 
                             switch (fiFile.Extension.ToUpper())
                             {
@@ -1776,32 +1776,24 @@ namespace MSFileInfoScanner
                                     // File was not in strFileIgnoreList
                                     // Re-check using clsFinniganRawFileInfoScanner
 
-                                    objMSInfoScanner = new clsFinniganRawFileInfoScanner();
-                                    objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI,
-                                                               false);
-                                    objMSInfoScanner.SetOption(
-                                        iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, false);
-                                    objMSInfoScanner.SetOption(
-                                        iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, false);
+                                    msInfoScanner = new clsFinniganRawFileInfoScanner();
+                                    msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, false);
+                                    msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, false);
+                                    msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, false);
 
-                                    blnPassedIntegrityCheck = objMSInfoScanner.ProcessDataFile(fiFile.FullName,
-                                                                                               datasetFileInfo);
+                                    blnPassedIntegrityCheck = msInfoScanner.ProcessDataFile(fiFile.FullName, datasetFileInfo);
 
                                     break;
                                 case AGILENT_TOF_OR_QTRAP_FILE_EXTENSION:
                                     // File was not in strFileIgnoreList
                                     // Re-check using clsAgilentTOFOrQTRAPWiffFileInfoScanner
 
-                                    objMSInfoScanner = new clsAgilentTOFOrQStarWiffFileInfoScanner();
-                                    objMSInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI,
-                                                               false);
-                                    objMSInfoScanner.SetOption(
-                                        iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, false);
-                                    objMSInfoScanner.SetOption(
-                                        iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, false);
+                                    msInfoScanner = new clsAgilentTOFOrQStarWiffFileInfoScanner();
+                                    msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, false);
+                                    msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, false);
+                                    msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, false);
 
-                                    blnPassedIntegrityCheck = objMSInfoScanner.ProcessDataFile(fiFile.FullName,
-                                                                                               datasetFileInfo);
+                                    blnPassedIntegrityCheck = msInfoScanner.ProcessDataFile(fiFile.FullName, datasetFileInfo);
 
                                     break;
                                 case ".":
