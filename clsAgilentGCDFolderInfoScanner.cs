@@ -371,7 +371,7 @@ namespace MSFileInfoScanner
                     datasetFileInfo.AcqTimeEnd = fiMSDatafile.LastWriteTime;
 
                     // Read the file info from the file system
-                    // This will also compute the Sha1 hash of the Data.MS file and add it to mDatasetStatsSummarizer.DatasetFileInfo
+                    // This will also compute the SHA-1 hash of the Data.MS file and add it to mDatasetStatsSummarizer.DatasetFileInfo
                     UpdateDatasetFileStats(fiMSDatafile, datasetFileInfo.DatasetID);
 
                     blnSuccess = true;

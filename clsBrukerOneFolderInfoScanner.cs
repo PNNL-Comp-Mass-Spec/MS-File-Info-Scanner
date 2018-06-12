@@ -186,7 +186,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Looks for the s*.zip files to determine the total file size (uncompressed) of all files in all the matching .Zip files
         /// Updates datasetFileInfo.FileSizeBytes with this info, while also updating datasetFileInfo.ScanCount with the total number of files found
-        /// Also computes the Sha1 hash of each file
+        /// Also computes the SHA-1 hash of each file
         /// </summary>
         /// <param name="diZippedSFilesFolderInfo"></param>
         /// <param name="datasetFileInfo"></param>
@@ -220,7 +220,7 @@ namespace MSFileInfoScanner
                     }
                     else
                     {
-                        // Compute the Sha1 hash of the zip file (e.g. s001.zip)
+                        // Compute the SHA-1 hash of the zip file (e.g. s001.zip)
                         mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(zippedSFile);
                     }
 
@@ -426,7 +426,7 @@ namespace MSFileInfoScanner
                         }
                         else
                         {
-                            // Compute the Sha1 hash of the bruker dataset file
+                            // Compute the SHA-1 hash of the bruker dataset file
                             mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(brukerDatasetfile);
                         }
                     }
@@ -463,7 +463,7 @@ namespace MSFileInfoScanner
                         }
                         else
                         {
-                            // Compute the Sha1 hash of the fid or ser file
+                            // Compute the SHA-1 hash of the fid or ser file
                             mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(instrumentDataFile);
                         }
                         instrumentFileAdded = true;

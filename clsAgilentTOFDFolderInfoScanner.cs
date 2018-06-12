@@ -249,7 +249,7 @@ namespace MSFileInfoScanner
 
                         // Read the file info from the file system
                         // Several of these stats will be further updated later
-                        // This will also compute the Sha1 hash of the MSScan.bin file and add it to mDatasetStatsSummarizer.DatasetFileInfo
+                        // This will also compute the SHA-1 hash of the MSScan.bin file and add it to mDatasetStatsSummarizer.DatasetFileInfo
                         UpdateDatasetFileStats(fiMSScanfile, datasetFileInfo.DatasetID, out primaryFileAdded);
                     }
                     else

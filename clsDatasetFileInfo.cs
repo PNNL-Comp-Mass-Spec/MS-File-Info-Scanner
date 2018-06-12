@@ -122,7 +122,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Compute the SHA1 hash of the given file, then add it to InstrumentFiles
+        /// Compute the SHA-1 hash of the given file, then add it to InstrumentFiles
         /// </summary>
         /// <param name="instrumentFile"></param>
         /// <returns></returns>

@@ -290,10 +290,10 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// When True, computes a Sha1 hash on every file using mFileIntegrityChecker
+        /// When True, computes a SHA-1 hash on every file using mFileIntegrityChecker
         /// </summary>
         /// <remarks>
-        /// Note, when this is false, the program computes the Sha1 hash of the primary dataset file (or files),
+        /// Note, when this is false, the program computes the SHA-1 hash of the primary dataset file (or files),
         /// unless DisableInstrumentHash is true
         /// </remarks>
         public override bool ComputeFileHashes
@@ -333,7 +333,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// By default, will compute the Sha1 hash of only the primary dataset file
+        /// By default, will compute the SHA-1 hash of only the primary dataset file
         /// Disable by setting this to true
         /// </summary>
         public bool DisableInstrumentHash { get; set; }

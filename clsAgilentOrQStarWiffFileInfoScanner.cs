@@ -62,7 +62,7 @@ namespace MSFileInfoScanner
 
             // Read the file info from the file system
             // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
-            // This will also compute the Sha1 hash of the .Wiff file and add it to mDatasetStatsSummarizer.DatasetFileInfo
+            // This will also compute the SHA-1 hash of the .Wiff file and add it to mDatasetStatsSummarizer.DatasetFileInfo
             UpdateDatasetFileStats(fiDatasetFile, datasetFileInfo.DatasetID);
 
             // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo

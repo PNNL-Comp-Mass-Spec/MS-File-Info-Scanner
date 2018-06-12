@@ -945,7 +945,7 @@ namespace MSFileInfoScanner
 
                 // Read the file info from the file system
                 // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
-                // This will also compute the Sha1 hash of the primary instrument file and add it to mDatasetStatsSummarizer.DatasetFileInfo
+                // This will also compute the SHA-1 hash of the primary instrument file and add it to mDatasetStatsSummarizer.DatasetFileInfo
                 UpdateDatasetFileStats(primaryInstrumentFile, datasetFileInfo.DatasetID, out var primaryFileAdded);
 
                 // Update the dataset name and file extension

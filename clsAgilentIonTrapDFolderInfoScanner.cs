@@ -264,7 +264,7 @@ namespace MSFileInfoScanner
                             datasetFileInfo.FileSizeBytes += datasetFile.Length;
                         }
 
-                        // Compute the sha1 hash of the largest file in instrument directory
+                        // Compute the SHA-1 hash of the largest file in instrument directory
                         AddLargestInstrumentFile(diFolder);
                     }
                 }

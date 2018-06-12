@@ -259,7 +259,7 @@ namespace MSFileInfoScanner
 
         /// <summary>
         /// Find the largest file in the instrument directory
-        /// Compute its sha1 hash then add to mDatasetStatsSummarizer.DatasetFileInfo
+        /// Compute its SHA-1 hash then add to mDatasetStatsSummarizer.DatasetFileInfo
         /// </summary>
         /// <param name="instrumentDirectory"></param>
         protected void AddLargestInstrumentFile(DirectoryInfo instrumentDirectory)

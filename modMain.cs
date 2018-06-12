@@ -618,7 +618,7 @@ namespace MSFileInfoScanner
                                       "Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold. " +
                                       "Useful for validating datasets for iTRAQ or TMT samples."));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "A SHA1 hash is computed for the primary instrument data file(s). " +
+                                      "A SHA-1 hash is computed for the primary instrument data file(s). " +
                                       "Use /NoHash to disable this"));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
@@ -648,7 +648,7 @@ namespace MSFileInfoScanner
                                       "default is /M:" + clsFileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK));
                 Console.WriteLine();
 
-                Console.WriteLine("Use /H to compute Sha-1 file hashes when verifying file integrity.");
+                Console.WriteLine("Use /H to compute SHA-1 file hashes when verifying file integrity.");
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /QZ to run a quick zip-file validation test when verifying file integrity " +
                                       "(the test does not check all data in the .Zip file)."));
