@@ -1078,7 +1078,7 @@ namespace MSFileInfoScanner
             if (scanCountWithData == 0)
             {
                 // No data
-                errorOrWarningMsg = "Error: none of the spectra has data; cannot validate";
+                errorOrWarningMsg = "None of the spectra has data; cannot validate";
                 return false;
             }
 
@@ -1092,17 +1092,14 @@ namespace MSFileInfoScanner
 
             var percentRounded = percentInvalid.ToString(percentInvalid < 10 ? "F1" : "F0");
 
-            errorOrWarningMsg = string.Format("{0}% of the scans have a minimum m/z value larger than {1:F1} m/z ({2} / {3})",
+            // Example messages:
+            // 3.8% of the scans have a minimum m/z value larger than 113.0 m/z (950 / 25,000)
+            // 100% of the scans have a minimum m/z value larger than 126.0 m/z (32,489 / 32,489)
+
+            errorOrWarningMsg = string.Format("{0}% of the scans have a minimum m/z value larger than {1:F1} m/z ({2:N0} / {3:N0})",
                                               percentRounded, requiredMzMin, scanCountInvalid, scanCountWithData);
 
-            if (percentInvalid < maxPercentAllowedFailed)
-            {
-                errorOrWarningMsg = "Warning: " + errorOrWarningMsg;
-                return true;
-            }
-
-            errorOrWarningMsg = "Error: " + errorOrWarningMsg;
-            return false;
+            return percentInvalid < maxPercentAllowedFailed;
         }
 
     }
