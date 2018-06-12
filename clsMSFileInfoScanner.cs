@@ -112,48 +112,8 @@ namespace MSFileInfoScanner
         private const int FILE_MODIFICATION_WINDOW_MINUTES = 60;
         private const int MAX_FILE_READ_ACCESS_ATTEMPTS = 2;
 
+
         private const bool SKIP_FILES_IN_ERROR = true;
-
-        //Public Enum iMSFileInfoScanner.eMSFileScannerErrorCodes
-        //	NoError = 0
-        //	InvalidInputFilePath = 1
-        //	InvalidOutputFolderPath = 2
-        //	ParameterFileNotFound = 4
-        //	FilePathError = 8
-
-        //	ParameterFileReadError = 16
-        //	UnknownFileExtension = 32
-        //	InputFileAccessError = 64
-        //	InputFileReadError = 128
-        //	OutputFileWriteError = 256
-        //	FileIntegrityCheckError = 512
-
-        //	DatabasePostingError = 1024
-
-        //	UnspecifiedError = -1
-        //End Enum
-
-        //Public Enum iMSFileInfoScanner.eMSFileProcessingStateConstants
-        //	NotProcessed = 0
-        //	SkippedSinceFoundInCache = 1
-        //	FailedProcessing = 2
-        //	ProcessedSuccessfully = 3
-        //End Enum
-
-        //Public Enum eDataFileTypeConstants
-        //	MSFileInfo = 0
-        //	FolderIntegrityInfo = 1
-        //	FileIntegrityDetails = 2
-        //	FileIntegrityErrors = 3
-        //End Enum
-
-        //'Private Enum eMSFileTypeConstants
-        //'    FinniganRawFile = 0
-        //'    BrukerOneFolder = 1
-        //'    AgilentIonTrapDFolder = 2
-        //'    MicromassRawFolder = 3
-        //'    AgilentOrQStarWiffFile = 4
-        //'End Enum
 
         private enum eMessageTypeConstants
         {
@@ -411,8 +371,12 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Minimum m/z value that MS/mS spectra should have
         /// </summary>
-        /// <remarks>Useful for validating datasets for iTRAQ or TMT datasets</remarks>
-        public float MS2MzMin { get; set; }
+        /// <remarks>
+        /// Useful for validating instrument files where the sample is iTRAQ or TMT labelled
+        /// and it is important to detect the reporter ions in the MS/MS spectra
+        /// </remarks>
+        public override float MS2MzMin { get; set; }
+
 
         /// <summary>
         /// Set to True to print out a series of 2D plots, each using a different color scheme
