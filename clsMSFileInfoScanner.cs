@@ -2448,6 +2448,73 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Display the curent processing options at the console
+        /// </summary>
+        /// <remarks>Used by MSFileInfoScaner.exe</remarks>
+        // ReSharper disable once UnusedMember.Global
+        public void ShowCurrentProcessingOptions()
+        {
+            Console.WriteLine("Processing options");
+            Console.WriteLine();
+            if (UseCacheFiles)
+            {
+                Console.WriteLine("CacheFiles are enabled");
+                if (ReprocessExistingFiles)
+                    Console.WriteLine("Will reprocess files that are already defined in the acquisition time file");
+                else if (ReprocessIfCachedSizeIsZero)
+                    Console.WriteLine("Will reprocess files if their cached size is 0 bytes");
+
+                Console.WriteLine();
+            }
+
+            if (PlotWithPython)
+                Console.WriteLine("Plot generator:     Python");
+            else
+                Console.WriteLine("Plot generator:     OxyPlot");
+
+            Console.WriteLine("SaveTICandBPIPlots: {0}", TrueFalseToEnabledDisabled(SaveTICAndBPIPlots));
+            Console.WriteLine("SaveLCMS2DPlots:    {0}", TrueFalseToEnabledDisabled(SaveLCMS2DPlots));
+            if (SaveLCMS2DPlots)
+            {
+                Console.WriteLine("   MaxPointsToPlot:     {0:N0}", LCMS2DPlotMaxPointsToPlot);
+                Console.WriteLine("   OverviewPlotDivisor: {0}", LCMS2DOverviewPlotDivisor);
+            }
+            Console.WriteLine();
+
+            Console.WriteLine("CheckCentroidingStatus:         {0}", TrueFalseToEnabledDisabled(CheckCentroidingStatus));
+            Console.WriteLine("Compute Overall Quality Scores: {0}", TrueFalseToEnabledDisabled(ComputeOverallQualityScores));
+            Console.WriteLine("Create dataset info XML file:   {0}", TrueFalseToEnabledDisabled(CreateDatasetInfoFile));
+            Console.WriteLine("Create scan stats file:         {0}", TrueFalseToEnabledDisabled(CreateScanStatsFile));
+            Console.WriteLine("MS2MzMin:                       {0:N0}", MS2MzMin);
+            Console.WriteLine("SHA-1 hashing:                  {0}", TrueFalseToEnabledDisabled(!DisableInstrumentHash));
+            if (ScanStart > 0 || ScanEnd > 0)
+            {
+                Console.WriteLine("Start Scan:                     {0}", ScanStart);
+                Console.WriteLine("End Scan:                       {0}", ScanEnd);
+            }
+
+            Console.WriteLine("Update dataset stats text file: {0}", TrueFalseToEnabledDisabled(UpdateDatasetStatsTextFile));
+            if (UpdateDatasetStatsTextFile)
+                Console.WriteLine("   Dataset stats file name: {0}", DatasetStatsTextFileName);
+
+            if (CheckFileIntegrity)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Check integrity of all known file types: enabled");
+                Console.WriteLine("   Maximum text file lines to check: {0}", MaximumTextFileLinesToCheck);
+                Console.WriteLine("   Compute the SHA-1 has of every file: {0}", TrueFalseToEnabledDisabled(ComputeFileHashes));
+                Console.WriteLine("   Check data inside .zip files: {0}", TrueFalseToEnabledDisabled(ZipFileCheckAllData));
+            }
+
+            Console.WriteLine();
+        }
+
+        private string TrueFalseToEnabledDisabled(bool option)
+        {
+            return option ? "Enabled" : "Disabled";
+        }
+
         public static bool ValidateDataFilePath(ref string filePath, eDataFileTypeConstants eDataFileType)
         {
             if (string.IsNullOrEmpty(filePath))

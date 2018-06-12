@@ -214,6 +214,8 @@ namespace MSFileInfoScanner
                     scanner.LoadParameterFileSettings(mParameterFilePath);
                 }
 
+                scanner.ShowCurrentProcessingOptions();
+
                 bool processingError;
 
                 if (mRecurseFolders)
