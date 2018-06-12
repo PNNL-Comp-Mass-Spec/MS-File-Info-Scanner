@@ -39,9 +39,15 @@ namespace MSFileInfoScanner
 
         #region "Constants"
 
+        /// <summary>
+        /// Used for checking if over 10% of the spectra failed MS2MzMin validation
+        /// </summary>
+        public const int MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED = 10;
+
         #endregion
 
         #region "Member variables"
+
         protected bool mSaveTICAndBPI;
         protected bool mSaveLCMS2DPlots;
 
@@ -157,6 +163,24 @@ namespace MSFileInfoScanner
             get => mMS2MzMin;
             set => mMS2MzMin = value;
         }
+
+        /// <summary>
+        /// This will be True if the dataset has too many MS/MS spectra
+        /// where the minimum m/z value is larger than MS2MzMin
+        /// </summary>
+        public override bool MS2MzMinValidationError { get; set; }
+
+        /// <summary>
+        /// This will be True if the dataset has some MS/MS spectra
+        /// where the minimum m/z value is larger than MS2MzMin
+        /// (no more than 10% of the spectra)
+        /// </summary>
+        public override bool MS2MzMinValidationWarning { get; set; }
+
+        /// <summary>
+        /// MS2MzMin validation error or warning message
+        /// </summary>
+        public override string MS2MzMinValidationMessage { get; set; }
 
         /// <summary>
         /// First scan to process
@@ -457,6 +481,10 @@ namespace MSFileInfoScanner
             mDisableInstrumentHash = false;
 
             mCopyFileLocalOnReadError = false;
+
+            MS2MzMinValidationError = false;
+            MS2MzMinValidationWarning = false;
+            MS2MzMinValidationMessage = string.Empty;
 
         }
 
@@ -1101,19 +1129,24 @@ namespace MSFileInfoScanner
         /// <returns>True if valid data, false if at least 10% of the spectgra has a minimum m/z higher than the threshold</returns>
         protected bool ValidateMS2MzMin()
         {
-            const int MAX_PERCENT_ALLOWED_FAILED = 10;
 
             var validData = mDatasetStatsSummarizer.ValidateMS2MzMin(MS2MzMin, out var errorOrWarningMsg, MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED);
 
             if (validData && string.IsNullOrWhiteSpace(errorOrWarningMsg))
                 return true;
 
-            // Note that errorOrWarningMsg will start with "Warning:" or "Error:"
-
             if (validData)
+            {
                 OnWarningEvent(errorOrWarningMsg);
+                MS2MzMinValidationWarning = true;
+                MS2MzMinValidationMessage = errorOrWarningMsg;
+            }
             else
+            {
                 OnErrorEvent(errorOrWarningMsg);
+                MS2MzMinValidationError = true;
+                MS2MzMinValidationMessage = errorOrWarningMsg;
+            }
 
             return validData;
         }

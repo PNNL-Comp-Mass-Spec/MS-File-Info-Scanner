@@ -112,6 +112,17 @@ namespace MSFileInfoScanner
         private const int FILE_MODIFICATION_WINDOW_MINUTES = 60;
         private const int MAX_FILE_READ_ACCESS_ATTEMPTS = 2;
 
+        /// <summary>
+        /// Default m/z threshold for iTRAQ labeled samples
+        /// </summary>
+        /// <remarks>All MS/MS spectra should have a scan range that starts below this value</remarks>
+        public const int MINIMUM_MZ_THRESHOLD_ITRAQ = 113;
+
+        /// <summary>
+        /// Default m/z threshold for TMT labeled samples
+        /// </summary>
+        /// <remarks>All MS/MS spectra should have a scan range that starts below this value</remarks>
+        public const int MINIMUM_MZ_THRESHOLD_TMT = 126;
 
         private const bool SKIP_FILES_IN_ERROR = true;
 
@@ -377,6 +388,10 @@ namespace MSFileInfoScanner
         /// </remarks>
         public override float MS2MzMin { get; set; }
 
+        /// <summary>
+        /// MS2MzMin validation error or warning Message
+        /// </summary>
+        public override string MS2MzMinValidationMessage { get; set; }
 
         /// <summary>
         /// Set to True to print out a series of 2D plots, each using a different color scheme
@@ -1324,6 +1339,16 @@ namespace MSFileInfoScanner
                     }
                 }
 
+                if (scanner.MS2MzMinValidationError)
+                {
+                    MS2MzMinValidationMessage = scanner.MS2MzMinValidationMessage;
+                    SetErrorCode(eMSFileScannerErrorCodes.MS2MzMinValidationError);
+                    success = false;
+                } else                 if (scanner.MS2MzMinValidationWarning)
+                {
+                    MS2MzMinValidationMessage = scanner.MS2MzMinValidationMessage;
+                    SetErrorCode(eMSFileScannerErrorCodes.MS2MzMinValidationWarning);
+                }
             }
             else
             {
@@ -1376,6 +1401,7 @@ namespace MSFileInfoScanner
             if (resetErrorCode)
             {
                 SetErrorCode(eMSFileScannerErrorCodes.NoError);
+                MS2MzMinValidationMessage = string.Empty;
             }
 
             eMSFileProcessingState = eMSFileProcessingStateConstants.NotProcessed;
