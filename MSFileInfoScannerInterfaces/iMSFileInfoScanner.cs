@@ -1,5 +1,6 @@
 ﻿
 using PRISM;
+// ReSharper disable UnusedMember.Global
 
 namespace MSFileInfoScannerInterfaces
 {
@@ -62,6 +63,9 @@ namespace MSFileInfoScannerInterfaces
 
         public virtual string AcquisitionTimeFilename { get; set; }
 
+        /// <summary>
+        /// When true, checks the integrity of every file in every folder processed
+        /// </summary>
         public virtual bool CheckFileIntegrity { get; set; }
 
         public virtual bool ComputeOverallQualityScores { get; set; }
@@ -77,6 +81,13 @@ namespace MSFileInfoScannerInterfaces
 
         public virtual bool CheckCentroidingStatus { get; set; }
 
+        /// <summary>
+        /// When True, computes a SHA-1 hash on every file using mFileIntegrityChecker
+        /// </summary>
+        /// <remarks>
+        /// Note, when this is false, the program computes the SHA-1 hash of the primary dataset file (or files),
+        /// unless DisableInstrumentHash is true
+        /// </remarks>
         public virtual bool ComputeFileHashes { get; set; }
 
         /// <summary>
@@ -132,6 +143,20 @@ namespace MSFileInfoScannerInterfaces
         public virtual int MaximumXMLElementNodesToCheck { get; set; }
 
         /// <summary>
+        /// Minimum m/z value that MS/mS spectra should have
+        /// </summary>
+        /// <remarks>
+        /// Useful for validating instrument files where the sample is iTRAQ or TMT labelled
+        /// and it is important to detect the reporter ions in the MS/MS spectra
+        /// </remarks>
+        public virtual float MS2MzMin { get; set; }
+
+        /// <summary>
+        /// MS2MzMin validation error or warning message
+        /// </summary>
+        public virtual string MS2MzMinValidationMessage { get; set; }
+
+        /// <summary>
         /// When true, generate plots using Python
         /// </summary>
         public virtual bool PlotWithPython { get; set; }
@@ -180,30 +205,105 @@ namespace MSFileInfoScannerInterfaces
 
         #region "Methods"
         public abstract string[] GetKnownFileExtensions();
+
         public abstract string[] GetKnownFolderExtensions();
+
         public abstract string GetErrorMessage();
+
         public abstract bool LoadParameterFileSettings(string strParameterFilePath);
+
+        /// <summary>
+        /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
+        /// </summary>
+        /// <returns>True if success; false if failure</returns>
         public abstract bool PostDatasetInfoToDB();
-        public abstract bool PostDatasetInfoToDB(string strDatasetInfoXML);
-        public abstract bool PostDatasetInfoToDB(string strConnectionString, string strStoredProcedure);
-        public abstract bool PostDatasetInfoToDB(string strDatasetInfoXML, string strConnectionString, string strStoredProcedure);
-        public abstract bool PostDatasetInfoUseDatasetID(int intDatasetID, string strConnectionString, string strStoredProcedure);
 
-        public abstract bool PostDatasetInfoUseDatasetID(int intDatasetID, string strDatasetInfoXML, string strConnectionString,
-                                                         string strStoredProcedure);
+        /// <summary>
+        /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
+        /// </summary>
+        /// <param name="dsInfoXML">Database info XML</param>
+        /// <returns>True if success; false if failure</returns>
+        public abstract bool PostDatasetInfoToDB(string dsInfoXML);
 
-        public abstract bool ProcessMSFileOrFolder(string strInputFileOrFolderPath, string strOutputFolderPath);
+        /// <summary>
+        /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
+        /// </summary>
+        /// <param name="connectionString">Database connection string</param>
+        /// <param name="storedProcedureName">Stored procedure</param>
+        /// <returns>True if success; false if failure</returns>
+        public abstract bool PostDatasetInfoToDB(string connectionString, string storedProcedureName);
 
-        public abstract bool ProcessMSFileOrFolder(string strInputFileOrFolderPath, string strOutputFolderPath, bool blnResetErrorCode,
+        /// <summary>
+        /// Post the dataset info in strDatasetInfoXML to the database, using the specified connection string and stored procedure
+        /// </summary>
+        /// <param name="dsInfoXML">Database info XML</param>
+        /// <param name="connectionString">Database connection string</param>
+        /// <param name="storedProcedureName">Stored procedure</param>
+        /// <returns>True if success; false if failure</returns>
+         public abstract bool PostDatasetInfoToDB(string dsInfoXML, string connectionString, string storedProcedureName);
+
+        /// <summary>
+        /// Post the dataset info in strDatasetInfoXML to the database, using the specified connection string and stored procedure
+        /// This version assumes the stored procedure takes DatasetID as the first parameter
+        /// </summary>
+        /// <param name="datasetID">Dataset ID to send to the stored procedure</param>
+        /// <param name="connectionString">Database connection string</param>
+        /// <param name="storedProcedureName">Stored procedure</param>
+        /// <returns>True if success; false if failure</returns>
+        public abstract bool PostDatasetInfoUseDatasetID(int datasetID, string connectionString, string storedProcedureName);
+
+        /// <summary>
+        /// Post the dataset info in strDatasetInfoXML to the database, using the specified connection string and stored procedure
+        /// This version assumes the stored procedure takes DatasetID as the first parameter
+        /// </summary>
+        /// <param name="datasetID">Dataset ID to send to the stored procedure</param>
+        /// <param name="dsInfoXML">Database info XML</param>
+        /// <param name="connectionString">Database connection string</param>
+        /// <param name="storedProcedureName">Stored procedure</param>
+        /// <returns>True if success; false if failure</returns>
+        public abstract bool PostDatasetInfoUseDatasetID(int datasetID, string dsInfoXML, string connectionString, string storedProcedureName);
+
+        /// <summary>
+        /// Main processing function, with input file / folder path, plus output folder path
+        /// </summary>
+        /// <param name="inputFileOrFolderPath"></param>
+        /// <param name="outputFolderPath"></param>
+        /// <returns>True if success, False if an error</returns>
+        public abstract bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputFolderPath);
+
+       /// <summary>
+        /// Main processing function with input / output paths, error code reset flag, and processing state
+        /// </summary>
+        /// <param name="inputFileOrFolderPath"></param>
+        /// <param name="outputFolderPath"></param>
+        /// <param name="resetErrorCode"></param>
+        /// <param name="eMSFileProcessingState"></param>
+        /// <returns>True if success, False if an error</returns>
+        public abstract bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputFolderPath, bool resetErrorCode,
                                                    out eMSFileProcessingStateConstants eMSFileProcessingState);
 
-        public abstract bool ProcessMSFileOrFolderWildcard(string strInputFileOrFolderPath, string strOutputFolderPath, bool blnResetErrorCode);
+        /// <summary>
+        /// Calls ProcessMSFileOrFolder for all files in inputFileOrFolderPath and below having a known extension
+        /// </summary>
+        /// <param name="inputFileOrFolderPath">Path to the input file or folder; can contain a wildcard (* or ?)</param>
+        /// <param name="outputFolderPath">Folder to write any results files to</param>
+        /// <param name="resetErrorCode"></param>
+        /// <returns>True if success, False if an error</returns>
+        public abstract bool ProcessMSFileOrFolderWildcard(string inputFileOrFolderPath, string outputFolderPath, bool resetErrorCode);
 
-        public abstract bool ProcessMSFilesAndRecurseFolders(string strInputFilePathOrFolder, string strOutputFolderPath,
-                                                             int intRecurseFoldersMaxLevels);
+        /// <summary>
+        /// Calls ProcessMSFileOrFolder for all files in inputFilePathOrFolder and below having a known extension
+        /// </summary>
+        /// <param name="inputFilePathOrFolder">Path to the input file or folder; can contain a wildcard (* or ?)</param>
+        /// <param name="outputFolderPath">Folder to write any results files to</param>
+        /// <param name="recurseFoldersMaxLevels">Maximum folder depth to process; Set to 0 to process all folders</param>
+        /// <returns>True if success, False if an error</returns>
+        public abstract bool ProcessMSFilesAndRecurseFolders(string inputFilePathOrFolder, string outputFolderPath, int recurseFoldersMaxLevels);
 
         public abstract bool SaveCachedResults();
+
         public abstract bool SaveCachedResults(bool blnClearCachedData);
+
         public abstract bool SaveParameterFileSettings(string strParameterFilePath);
 
         #endregion
