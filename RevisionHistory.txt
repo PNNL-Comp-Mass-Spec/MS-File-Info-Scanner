@@ -1,5 +1,13 @@
 MS File Info Scanner Change Log
 
+Version 1.5.6736; June 11, 2018
+	- Add option to validate that the majority of the MS/MS spectra have data values below a given m/z value
+		- This is useful for instrument files where the sample is iTRAQ or TMT labelled 
+		  and it is important to detect the reporter ions in the MS/MS spectra
+		- Enable with switch /MS2MzMin
+	- Compute the SHA-1 hash of the primary instrument data file(s)
+		- To disable this, use /NoHash
+
 Version 1.5.6558; December 15, 2017
 	- Update parameter PlotWithPython for the instrument specific plot object
 
