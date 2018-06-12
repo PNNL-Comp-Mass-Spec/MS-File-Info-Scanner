@@ -390,13 +390,16 @@ namespace MSFileInfoScanner
                 if (parser.RetrieveValueForParameter("LC", out strValue))
                 {
                     mSaveLCMS2DPlots = true;
-                    if (int.TryParse(strValue, out value))
+                    if (!string.IsNullOrWhiteSpace(strValue))
                     {
-                        mLCMS2DMaxPointsToPlot = value;
-                    }
-                    else
-                    {
-                        ConsoleMsgUtils.ShowWarning("Ignoring invalid max points value for /LC: " + strValue);
+                        if (int.TryParse(strValue, out value))
+                        {
+                            mLCMS2DMaxPointsToPlot = value;
+                        }
+                        else
+                        {
+                            ConsoleMsgUtils.ShowWarning("Ignoring invalid max points value for /LC: " + strValue);
+                        }
                     }
                 }
 
