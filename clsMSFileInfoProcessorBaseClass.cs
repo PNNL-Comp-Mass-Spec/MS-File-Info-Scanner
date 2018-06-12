@@ -363,55 +363,6 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
-        /// </summary>
-        /// <param name="inputFileName">Input file name</param>
-        /// <param name="outputFolderPath">Output directory path</param>
-        /// <returns>True if success; False if failure</returns>
-        /// <remarks></remarks>
-        public bool UpdateDatasetStatsTextFile(string inputFileName, string outputFolderPath)
-        {
-            return UpdateDatasetStatsTextFile(inputFileName, outputFolderPath, clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME);
-        }
-
-        /// <summary>
-        /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
-        /// </summary>
-        /// <param name="inputFileName">Input file name</param>
-        /// <param name="outputFolderPath">Output directory path</param>
-        /// <param name="datasetStatsFilename">Dataset stats file name</param>
-        /// <returns>True if success; False if failure</returns>
-        /// <remarks></remarks>
-        public bool UpdateDatasetStatsTextFile(string inputFileName, string outputFolderPath, string datasetStatsFilename)
-        {
-
-            bool success;
-
-            try
-            {
-                var datasetName = GetDatasetNameViaPath(inputFileName);
-
-                var datasetStatsFilePath = Path.Combine(outputFolderPath, datasetStatsFilename);
-
-                success = mDatasetStatsSummarizer.UpdateDatasetStatsTextFile(datasetName, datasetStatsFilePath);
-
-                if (!success)
-                {
-                    OnErrorEvent("Error calling objDatasetStatsSummarizer.UpdateDatasetStatsTextFile: " + mDatasetStatsSummarizer.ErrorMessage);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                OnErrorEvent("Error updating the dataset stats text file: " + ex.Message, ex);
-                success = false;
-            }
-
-            return success;
-
-        }
-
-        /// <summary>
         /// Get the dataset info as XML
         /// </summary>
         /// <returns></returns>
@@ -521,89 +472,6 @@ namespace MSFileInfoScanner
             // Initialize var that tracks m/z vs. time
             mLCMS2DPlot.Reset();
             mLCMS2DPlotOverview.Reset();
-        }
-
-        protected bool UpdateDatasetFileStats(FileInfo instrumentFile, int datasetID)
-        {
-            return UpdateDatasetFileStats(instrumentFile, datasetID, out _);
-        }
-
-        protected bool UpdateDatasetFileStats(FileInfo instrumentFile, int datasetID, out bool fileAdded)
-        {
-
-            fileAdded = false;
-            try
-            {
-                if (!instrumentFile.Exists)
-                    return false;
-
-                // Record the file size and Dataset ID
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = instrumentFile.CreationTime;
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = instrumentFile.LastWriteTime;
-
-                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
-                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
-
-                mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetID;
-                mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = Path.GetFileNameWithoutExtension(instrumentFile.Name);
-                mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = instrumentFile.Extension;
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = instrumentFile.Length;
-
-                mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
-
-                if (mDisableInstrumentHash)
-                {
-                    mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(instrumentFile);
-                }
-                else
-                {
-                    mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(instrumentFile);
-                }
-                fileAdded = true;
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-
-        }
-
-        protected bool UpdateDatasetFileStats(DirectoryInfo diFolderInfo, int datasetID)
-        {
-
-            try
-            {
-                if (!diFolderInfo.Exists)
-                    return false;
-
-                // Record the file size and Dataset ID
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = diFolderInfo.CreationTime;
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = diFolderInfo.LastWriteTime;
-
-                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
-                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
-
-                mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetID;
-                mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = Path.GetFileNameWithoutExtension(diFolderInfo.Name);
-                mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = diFolderInfo.Extension;
-
-                foreach (var fiFileInfo in diFolderInfo.GetFiles("*", SearchOption.AllDirectories))
-                {
-                    mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes += fiFileInfo.Length;
-                }
-
-                mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
-
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-
-            return true;
-
         }
 
         private bool CreateOverview2DPlots(string datasetName, string outputFolderPath, int lcms2DOverviewPlotDivisor)
@@ -1064,6 +932,139 @@ namespace MSFileInfoScanner
             }
 
             OnDebugEvent(fileInfo.ToString());
+        }
+
+        protected bool UpdateDatasetFileStats(FileInfo instrumentFile, int datasetID)
+        {
+            return UpdateDatasetFileStats(instrumentFile, datasetID, out _);
+        }
+
+        protected bool UpdateDatasetFileStats(FileInfo instrumentFile, int datasetID, out bool fileAdded)
+        {
+
+            fileAdded = false;
+            try
+            {
+                if (!instrumentFile.Exists)
+                    return false;
+
+                // Record the file size and Dataset ID
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = instrumentFile.CreationTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = instrumentFile.LastWriteTime;
+
+                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
+
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetID;
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = Path.GetFileNameWithoutExtension(instrumentFile.Name);
+                mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = instrumentFile.Extension;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = instrumentFile.Length;
+
+                mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
+
+                if (mDisableInstrumentHash)
+                {
+                    mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(instrumentFile);
+                }
+                else
+                {
+                    mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(instrumentFile);
+                }
+                fileAdded = true;
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+        }
+
+        protected bool UpdateDatasetFileStats(DirectoryInfo diFolderInfo, int datasetID)
+        {
+
+            try
+            {
+                if (!diFolderInfo.Exists)
+                    return false;
+
+                // Record the file size and Dataset ID
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = diFolderInfo.CreationTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = diFolderInfo.LastWriteTime;
+
+                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
+
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetID;
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = Path.GetFileNameWithoutExtension(diFolderInfo.Name);
+                mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = diFolderInfo.Extension;
+
+                foreach (var fiFileInfo in diFolderInfo.GetFiles("*", SearchOption.AllDirectories))
+                {
+                    mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes += fiFileInfo.Length;
+                }
+
+                mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
+
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return true;
+
+        }
+
+        /// <summary>
+        /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
+        /// </summary>
+        /// <param name="inputFileName">Input file name</param>
+        /// <param name="outputFolderPath">Output directory path</param>
+        /// <returns>True if success; False if failure</returns>
+        /// <remarks></remarks>
+        // ReSharper disable once UnusedMember.Global
+        public bool UpdateDatasetStatsTextFile(string inputFileName, string outputFolderPath)
+        {
+            return UpdateDatasetStatsTextFile(inputFileName, outputFolderPath, clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME);
+        }
+
+        /// <summary>
+        /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
+        /// </summary>
+        /// <param name="inputFileName">Input file name</param>
+        /// <param name="outputFolderPath">Output directory path</param>
+        /// <param name="datasetStatsFilename">Dataset stats file name</param>
+        /// <returns>True if success; False if failure</returns>
+        /// <remarks></remarks>
+        public bool UpdateDatasetStatsTextFile(string inputFileName, string outputFolderPath, string datasetStatsFilename)
+        {
+
+            bool success;
+
+            try
+            {
+                var datasetName = GetDatasetNameViaPath(inputFileName);
+
+                var datasetStatsFilePath = Path.Combine(outputFolderPath, datasetStatsFilename);
+
+                success = mDatasetStatsSummarizer.UpdateDatasetStatsTextFile(datasetName, datasetStatsFilePath);
+
+                if (!success)
+                {
+                    OnErrorEvent("Error calling objDatasetStatsSummarizer.UpdateDatasetStatsTextFile: " + mDatasetStatsSummarizer.ErrorMessage);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                OnErrorEvent("Error updating the dataset stats text file: " + ex.Message, ex);
+                success = false;
+            }
+
+            return success;
+
         }
 
         private void UpdatePlotWithPython()
