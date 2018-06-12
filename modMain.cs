@@ -148,7 +148,10 @@ namespace MSFileInfoScanner
                     mInputDataFilePath = string.Empty;
 
 
-                if (!blnProceed || commandLineParser.NeedToShowHelp || commandLineParser.ParameterCount + commandLineParser.NonSwitchParameterCount == 0 || mInputDataFilePath.Length == 0)
+                if (!blnProceed ||
+                    commandLineParser.NeedToShowHelp ||
+                    commandLineParser.ParameterCount + commandLineParser.NonSwitchParameterCount == 0 ||
+                    mInputDataFilePath.Length == 0)
                 {
                     ShowProgramHelp();
                     return -1;
@@ -367,6 +370,7 @@ namespace MSFileInfoScanner
 
                 if (parser.IsParameterPresent("C"))
                     mCheckFileIntegrity = true;
+
                 if (parser.RetrieveValueForParameter("M", out strValue))
                 {
                     if (int.TryParse(strValue, out value))
@@ -423,13 +427,24 @@ namespace MSFileInfoScanner
 
                 if (parser.RetrieveValueForParameter("MS2MzMin", out strValue))
                 {
-                    if (float.TryParse(strValue, out var mzMin))
+                    if (strValue.StartsWith("itraq", StringComparison.OrdinalIgnoreCase))
                     {
-                        mMS2MzMin = mzMin;
+                        mMS2MzMin = clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ;
+                    } else if (strValue.StartsWith("tmt", StringComparison.OrdinalIgnoreCase))
+                    {
+                        mMS2MzMin = clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT;
                     }
                     else
                     {
-                        ConsoleMsgUtils.ShowWarning("Ignoring invalid m/z value for /MS2MzMin: " + strValue);
+
+                        if (float.TryParse(strValue, out var mzMin))
+                        {
+                            mMS2MzMin = mzMin;
+                        }
+                        else
+                        {
+                            ConsoleMsgUtils.ShowWarning("Ignoring invalid m/z value for /MS2MzMin: " + strValue);
+                        }
                     }
                 }
 
@@ -623,7 +638,12 @@ namespace MSFileInfoScanner
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /MS2MzMin to specify a minimum m/z value that all MS/MS spectra should have. " +
                                       "Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold. " +
-                                      "Useful for validating datasets for iTRAQ or TMT samples."));
+                                      "Useful for validating instrument files where the sample is iTRAQ or TMT labelled " +
+                                      "and it is important to detect the reporter ions in the MS/MS spectra"));
+                Console.WriteLine("  - select the default iTRAQ m/z ({0}) using /MS2MzMin:iTRAQ", clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ);
+                Console.WriteLine("  - select the default TMT m/z ({0}) using /MS2MzMin:TMT", clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT);
+                Console.WriteLine("  - specify a m/z value using /MS2MzMin:110");
+                Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "A SHA-1 hash is computed for the primary instrument data file(s). " +
                                       "Use /NoHash to disable this"));
