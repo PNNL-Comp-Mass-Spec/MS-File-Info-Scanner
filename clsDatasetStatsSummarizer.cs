@@ -199,6 +199,7 @@ namespace MSFileInfoScanner
         /// Increments mSpectraTypeClassifier.TotalSpectra if data is found
         /// Increments mSpectraTypeClassifier.CentroidedSpectra if the data is centroided
         /// </remarks>
+        // ReSharper disable once UnusedMember.Global
         public void ClassifySpectrum(
             int ionCount,
             double[] dblMZs,
@@ -444,6 +445,7 @@ namespace MSFileInfoScanner
         /// <param name="strDatasetName">Dataset Name</param>
         /// <returns>XML (as string)</returns>
         /// <remarks></remarks>
+        // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(string strDatasetName)
         {
             return CreateDatasetInfoXML(strDatasetName, mDatasetScanStats, DatasetFileInfo, SampleInfo);
@@ -457,6 +459,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo">Dataset Info</param>
         /// <returns>XML (as string)</returns>
         /// <remarks></remarks>
+        // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(List<clsScanStatsEntry> objScanStats, clsDatasetFileInfo datasetFileInfo)
         {
             var udtSampleInfo = new udtSampleInfoType();
@@ -474,6 +477,7 @@ namespace MSFileInfoScanner
         /// <param name="udtSampleInfo">Sample Info</param>
         /// <returns>XML (as string)</returns>
         /// <remarks></remarks>
+        // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(List<clsScanStatsEntry> objScanStats, clsDatasetFileInfo datasetFileInfo, udtSampleInfoType udtSampleInfo)
         {
 
@@ -488,6 +492,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo">Dataset Info</param>
         /// <returns>XML (as string)</returns>
         /// <remarks></remarks>
+        // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(string strDatasetName, ref List<clsScanStatsEntry> objScanStats, clsDatasetFileInfo datasetFileInfo)
         {
 

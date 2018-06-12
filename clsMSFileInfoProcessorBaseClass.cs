@@ -48,15 +48,21 @@ namespace MSFileInfoScanner
         protected bool mCheckCentroidingStatus;
         protected bool mComputeOverallQualityScores;
 
-        // When True, then creates an XML file with dataset info
+        /// <summary>
+        /// When True, creates an XML file with dataset info
+        /// </summary>
         protected bool mCreateDatasetInfoFile;
 
-        // When True, then creates a _ScanStats.txt file
+        /// <summary>
+        /// When True, creates a _ScanStats.txt file
+        /// </summary>
         protected bool mCreateScanStatsFile;
 
         private int mLCMS2DOverviewPlotDivisor;
 
-        // When True, then adds a new row to a tab-delimited text file that has dataset stats
+        /// <summary>
+        /// When True, adds a new row to a tab-delimited text file that has dataset stats
+        /// </summary>
         private bool mUpdateDatasetStatsTextFile;
 
         private string mDatasetStatsTextFileName;
@@ -142,7 +148,10 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Minimum m/z value that MS/mS spectra should have
         /// </summary>
-        /// <remarks>Useful for validating datasets for iTRAQ or TMT datasets</remarks>
+        /// <remarks>
+        /// Useful for validating instrument files where the sample is iTRAQ or TMT labelled
+        /// and it is important to detect the reporter ions in the MS/MS spectra
+        /// </remarks>
         public override float MS2MzMin
         {
             get => mMS2MzMin;

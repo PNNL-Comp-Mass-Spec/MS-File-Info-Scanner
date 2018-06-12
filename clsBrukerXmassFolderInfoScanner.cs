@@ -844,9 +844,15 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Process a Bruker Xmass folder, specified by strDataFilePath
+        /// </summary>
+        /// <param name="strDataFilePath">Either the dataset folder containing the XMass files, or any of the XMass files in the dataset folder</param>
+        /// <param name="datasetFileInfo"></param>
+        /// <returns>True if success, False if an error</returns>
+        /// <remarks></remarks>
         public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
-            // Process a Bruker Xmass folder, specified by strDataFilePath (which can either point to the dataset folder containing the XMass files, or any of the XMass files in the dataset folder)
             ResetResults();
 
             try

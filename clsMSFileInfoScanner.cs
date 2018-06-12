@@ -1379,7 +1379,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="inputFileOrFolderPath"></param>
         /// <param name="outputFolderPath"></param>
-        /// <returns></returns>
+        /// <returns>True if success, False if an error</returns>
         public override bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputFolderPath)
         {
             return ProcessMSFileOrFolder(inputFileOrFolderPath, outputFolderPath, true, out _);
@@ -1392,7 +1392,7 @@ namespace MSFileInfoScanner
         /// <param name="outputFolderPath"></param>
         /// <param name="resetErrorCode"></param>
         /// <param name="eMSFileProcessingState"></param>
-        /// <returns></returns>
+        /// <returns>True if success, False if an error</returns>
         public override bool ProcessMSFileOrFolder(
             string inputFileOrFolderPath,
             string outputFolderPath,
@@ -1718,6 +1718,13 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Calls ProcessMSFileOrFolder for all files in inputFileOrFolderPath and below having a known extension
+        /// </summary>
+        /// <param name="inputFileOrFolderPath">Path to the input file or folder; can contain a wildcard (* or ?)</param>
+        /// <param name="outputFolderPath">Folder to write any results files to</param>
+        /// <param name="resetErrorCode"></param>
+        /// <returns>True if success, False if an error</returns>
         public override bool ProcessMSFileOrFolderWildcard(string inputFileOrFolderPath, string outputFolderPath, bool resetErrorCode)
         {
             // Returns True if success, False if failure
@@ -1877,8 +1884,7 @@ namespace MSFileInfoScanner
         /// <param name="inputFilePathOrFolder">Path to the input file or folder; can contain a wildcard (* or ?)</param>
         /// <param name="outputFolderPath">Folder to write any results files to</param>
         /// <param name="recurseFoldersMaxLevels">Maximum folder depth to process; Set to 0 to process all folders</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if success, False if an error</returns>
         public override bool ProcessMSFilesAndRecurseFolders(string inputFilePathOrFolder, string outputFolderPath, int recurseFoldersMaxLevels)
         {
             bool success;

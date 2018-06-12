@@ -205,10 +205,15 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Process the dataset
+        /// </summary>
+        /// <param name="strDataFilePath"></param>
+        /// <param name="datasetFileInfo"></param>
+        /// <returns>True if success, False if an error</returns>
+        /// <remarks></remarks>
         public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
-            // Returns True if success, False if an error
-
             var blnSuccess = false;
 
             ResetResults();

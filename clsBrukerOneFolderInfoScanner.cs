@@ -375,15 +375,15 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        ///
+        /// // Process a Bruker 1 folder or Bruker s001.zip file, specified by strDataFilePath
         /// </summary>
         /// <param name="strDataFilePath">Bruker 1 folder path or Bruker s001.zip file</param>
         /// <param name="datasetFileInfo"></param>
-        /// <returns></returns>
+        /// <returns>True if success, False if an error</returns>
+        /// <remarks>If a Bruker 1 folder, it must contain file acqu and typically contains file LOCK</remarks>
         public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
-            // Process a Bruker 1 folder or Bruker s001.zip file, specified by strDataFilePath
-            // If a Bruker 1 folder, it must contain file acqu and typically contains file LOCK
+
             ResetResults();
 
             DirectoryInfo diZippedSFilesFolderInfo = null;
