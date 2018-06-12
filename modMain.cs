@@ -253,22 +253,24 @@ namespace MSFileInfoScanner
                     }
                     else
                     {
-                        ShowErrorMessage(
-                            "Unknown error while processing (ProcessMSFileOrFolderWildcard returned false but the ErrorCode is 0)");
+                        ShowErrorMessage("Unknown error while processing (ProcessMSFileOrFolderWildcard returned false but the ErrorCode is 0)");
                     }
 
                     System.Threading.Thread.Sleep(1500);
+                } else if (scanner.ErrorCode == iMSFileInfoScanner.eMSFileScannerErrorCodes.MS2MzMinValidationWarning)
+                {
+                    ConsoleMsgUtils.ShowWarning("MS2MzMin validation warning: " + scanner.MS2MzMinValidationMessage);
                 }
 
                 scanner.SaveCachedResults();
+
+                return returnCode;
             }
             catch (Exception ex)
             {
                 ShowErrorMessage("Error occurred in modMain->Main", ex);
-                returnCode = -1;
+                return -1;
             }
-
-            return returnCode;
 
         }
 
