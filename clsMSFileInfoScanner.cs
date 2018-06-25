@@ -96,19 +96,16 @@ namespace MSFileInfoScanner
 
         public const string DEFAULT_ACQUISITION_TIME_FILENAME_TXT = "DatasetTimeFile.txt";
 
-        public const string DEFAULT_ACQUISITION_TIME_FILENAME_XML = "DatasetTimeFile.xml";
         public const string DEFAULT_FOLDER_INTEGRITY_INFO_FILENAME_TXT = "FolderIntegrityInfo.txt";
 
-        public const string DEFAULT_FOLDER_INTEGRITY_INFO_FILENAME_XML = "FolderIntegrityInfo.xml";
         public const string DEFAULT_FILE_INTEGRITY_DETAILS_FILENAME_TXT = "FileIntegrityDetails.txt";
 
-        public const string DEFAULT_FILE_INTEGRITY_DETAILS_FILENAME_XML = "FileIntegrityDetails.xml";
         public const string DEFAULT_FILE_INTEGRITY_ERRORS_FILENAME_TXT = "FileIntegrityErrors.txt";
 
-        public const string DEFAULT_FILE_INTEGRITY_ERRORS_FILENAME_XML = "FileIntegrityErrors.xml";
         public const string ABORT_PROCESSING_FILENAME = "AbortProcessing.txt";
 
         public const string XML_SECTION_MSFILESCANNER_SETTINGS = "MSFileInfoScannerSettings";
+
         private const int FILE_MODIFICATION_WINDOW_MINUTES = 60;
         private const int MAX_FILE_READ_ACCESS_ATTEMPTS = 2;
 
