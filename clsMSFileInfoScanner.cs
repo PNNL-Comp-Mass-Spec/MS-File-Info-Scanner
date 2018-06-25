@@ -107,6 +107,7 @@ namespace MSFileInfoScanner
         public const string XML_SECTION_MSFILESCANNER_SETTINGS = "MSFileInfoScannerSettings";
 
         private const int FILE_MODIFICATION_WINDOW_MINUTES = 60;
+
         private const int MAX_FILE_READ_ACCESS_ATTEMPTS = 2;
 
         /// <summary>
@@ -1368,7 +1369,8 @@ namespace MSFileInfoScanner
                     MS2MzMinValidationMessage = scanner.MS2MzMinValidationMessage;
                     SetErrorCode(eMSFileScannerErrorCodes.MS2MzMinValidationError);
                     success = false;
-                } else                 if (scanner.MS2MzMinValidationWarning)
+                }
+                else if (scanner.MS2MzMinValidationWarning)
                 {
                     MS2MzMinValidationMessage = scanner.MS2MzMinValidationMessage;
                     SetErrorCode(eMSFileScannerErrorCodes.MS2MzMinValidationWarning);
