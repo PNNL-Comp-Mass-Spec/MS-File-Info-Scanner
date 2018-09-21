@@ -458,7 +458,7 @@ namespace MSFileInfoScanner
                 }
 
                 objPWiz.Dispose();
-                clsProgRunner.GarbageCollectNow();
+                ProgRunner.GarbageCollectNow();
 
                 blnSuccess = true;
             }

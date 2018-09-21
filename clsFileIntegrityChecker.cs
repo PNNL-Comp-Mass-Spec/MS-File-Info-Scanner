@@ -12,7 +12,7 @@ using PRISM;
 
 namespace MSFileInfoScanner
 {
-    public class clsFileIntegrityChecker : clsEventNotifier
+    public class clsFileIntegrityChecker : EventNotifier
     {
 
         public clsFileIntegrityChecker()

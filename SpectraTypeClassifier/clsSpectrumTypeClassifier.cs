@@ -9,7 +9,7 @@ using PRISM;
 namespace SpectraTypeClassifier
 {
     [CLSCompliant(true)]
-    public class clsSpectrumTypeClassifier : clsEventNotifier
+    public class clsSpectrumTypeClassifier : EventNotifier
     {
 
         #region "Constants and Enums"

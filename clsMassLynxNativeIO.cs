@@ -19,7 +19,7 @@ namespace MSFileInfoScanner
 
         // This class can read data from MassLynx data files using native disk access,
         //  obviating the need to have MassLynx installed
-        // Note that native file IO is signficantly slower than utilizing the
+        // Note that native file IO is significantly slower than utilizing the
         //  MassLynx API access functions (see clsMassLynxReader3 and clsMassLynxReader4)
         //
         // Written by Matthew Monroe for PNNL in Jan 2004

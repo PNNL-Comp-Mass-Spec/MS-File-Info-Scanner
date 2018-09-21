@@ -7,7 +7,7 @@ using PRISM;
 
 namespace MSFileInfoScanner
 {
-    public abstract class iMSFileInfoProcessor : clsEventNotifier
+    public abstract class iMSFileInfoProcessor : EventNotifier
     {
         public enum ProcessingOptions
         {

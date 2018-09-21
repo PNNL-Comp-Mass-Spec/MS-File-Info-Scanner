@@ -25,7 +25,7 @@ using SpectraTypeClassifier;
 namespace MSFileInfoScanner
 {
 
-    public class clsDatasetStatsSummarizer : clsEventNotifier
+    public class clsDatasetStatsSummarizer : EventNotifier
     {
 
         #region "Constants and Enums"

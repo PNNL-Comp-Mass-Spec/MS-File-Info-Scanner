@@ -8,7 +8,7 @@ using PRISM;
 
 namespace MSFileInfoScanner
 {
-    public class clsTICandBPIPlotter : clsEventNotifier
+    public class clsTICandBPIPlotter : EventNotifier
     {
 
         #region "Constants, Enums, Structures"

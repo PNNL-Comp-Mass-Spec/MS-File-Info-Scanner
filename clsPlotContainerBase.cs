@@ -5,7 +5,7 @@ using PRISM;
 
 namespace MSFileInfoScanner
 {
-    internal abstract class clsPlotContainerBase : clsEventNotifier
+    internal abstract class clsPlotContainerBase : EventNotifier
     {
         protected StreamWriter mLogWriter;
 

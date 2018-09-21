@@ -1091,13 +1091,13 @@ namespace MSFileInfoScanner
                 command.Parameters["@DatasetInfoXML"].Direction = ParameterDirection.Input;
                 command.Parameters["@DatasetInfoXML"].Value = dsInfoXMLClean;
 
-                var executeSP = new clsExecuteDatabaseSP(connectionString);
+                var executeSP = new ExecuteDatabaseSP(connectionString);
 
                 executeSP.ErrorEvent += mExecuteSP_DBErrorEvent;
 
                 var result = executeSP.ExecuteSP(command, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES);
 
-                if (result == clsExecuteDatabaseSP.RET_VAL_OK)
+                if (result == ExecuteDatabaseSP.RET_VAL_OK)
                 {
                     // No errors
                     success = true;
@@ -1210,11 +1210,11 @@ namespace MSFileInfoScanner
                 command.Parameters["@DatasetInfoXML"].Direction = ParameterDirection.Input;
                 command.Parameters["@DatasetInfoXML"].Value = dsInfoXMLClean;
 
-                var executeSP = new clsExecuteDatabaseSP(connectionString);
+                var executeSP = new ExecuteDatabaseSP(connectionString);
 
                 var result = executeSP.ExecuteSP(command, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES);
 
-                if (result == clsExecuteDatabaseSP.RET_VAL_OK)
+                if (result == ExecuteDatabaseSP.RET_VAL_OK)
                 {
                     // No errors
                     success = true;

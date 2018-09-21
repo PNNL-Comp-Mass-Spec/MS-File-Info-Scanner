@@ -4,7 +4,7 @@ using PRISM;
 
 namespace MSFileInfoScannerInterfaces
 {
-    public abstract class iMSFileInfoScanner : clsEventNotifier
+    public abstract class iMSFileInfoScanner : EventNotifier
     {
         #region "Enums"
 

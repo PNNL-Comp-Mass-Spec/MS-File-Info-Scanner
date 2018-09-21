@@ -6,7 +6,7 @@ using PRISM;
 
 namespace MSFileInfoScanner
 {
-    public class clsMSFileInfoDataCache : clsEventNotifier
+    public class clsMSFileInfoDataCache : EventNotifier
     {
 
         #region "Constants and Enums"

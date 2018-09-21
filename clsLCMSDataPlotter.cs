@@ -17,7 +17,7 @@ namespace MSFileInfoScanner
     /// Furthermore, it will bin the data by MZResolution m/z units (necessary if the data is not centroided)
     /// </summary>
     /// <remarks></remarks>
-    public class clsLCMSDataPlotter : clsEventNotifier
+    public class clsLCMSDataPlotter : EventNotifier
     {
 
         #region "Constants, Enums, Structures"
@@ -948,7 +948,7 @@ namespace MSFileInfoScanner
                             {
                                 // Perform garbage collection every 60 seconds
                                 mLastGCTime = DateTime.UtcNow;
-                                clsProgRunner.GarbageCollectNow();
+                                ProgRunner.GarbageCollectNow();
                             }
 
                         }

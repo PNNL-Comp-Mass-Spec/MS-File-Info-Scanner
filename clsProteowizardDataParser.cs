@@ -7,7 +7,7 @@ using PRISM;
 namespace MSFileInfoScanner
 {
     [CLSCompliant(false)]
-    public class clsProteowizardDataParser : clsEventNotifier
+    public class clsProteowizardDataParser : EventNotifier
     {
 
         private readonly pwiz.ProteowizardWrapper.MSDataFileReader mPWiz;

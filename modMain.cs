@@ -22,7 +22,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "June 25, 2018";
+        public const string PROGRAM_DATE = "September 20, 2018";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
@@ -328,7 +328,7 @@ namespace MSFileInfoScanner
                 if (parser.InvalidParametersPresent(lstValidParameters))
                 {
                     var invalidArgs = (from item in parser.InvalidParameters(lstValidParameters) select "/" + item).ToList();
-                    ConsoleMsgUtils.ShowErrors("Invalid commmand line parameters", invalidArgs);
+                    ConsoleMsgUtils.ShowErrors("Invalid command line parameters", invalidArgs);
                     return false;
                 }
 
