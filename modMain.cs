@@ -22,7 +22,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "September 20, 2018";
+        public const string PROGRAM_DATE = "October 10, 2018";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
@@ -42,7 +42,7 @@ namespace MSFileInfoScanner
         private static bool mReprocessIfCachedSizeIsZero;
 
         private static bool mUseCacheFiles;
-        private static bool mSaveTICandBPIPlots;
+        private static bool mSaveTICAndBPIPlots;
         private static bool mSaveLCMS2DPlots;
         private static int mLCMS2DMaxPointsToPlot;
         private static int mLCMS2DOverviewPlotDivisor;
@@ -86,8 +86,6 @@ namespace MSFileInfoScanner
         [STAThread]
         public static int Main()
         {
-
-            int returnCode;
             var commandLineParser = new clsParseCommandLine();
 
             mInputDataFilePath = string.Empty;
@@ -103,7 +101,7 @@ namespace MSFileInfoScanner
             mReprocessIfCachedSizeIsZero = false;
             mUseCacheFiles = false;
 
-            mSaveTICandBPIPlots = true;
+            mSaveTICAndBPIPlots = true;
             mSaveLCMS2DPlots = false;
             mLCMS2DMaxPointsToPlot = clsLCMSDataPlotterOptions.DEFAULT_MAX_POINTS_TO_PLOT;
             mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR;
@@ -159,11 +157,11 @@ namespace MSFileInfoScanner
 
                 var scanner = new clsMSFileInfoScanner();
 
-                scanner.DebugEvent += mMSFileScanner_DebugEvent;
-                scanner.ErrorEvent += mMSFileScanner_ErrorEvent;
-                scanner.WarningEvent += mMSFileScanner_WarningEvent;
-                scanner.StatusEvent += mMSFileScanner_MessageEvent;
-                scanner.ProgressUpdate += mMSFileScanner_ProgressUpdate;
+                scanner.DebugEvent += MSFileScanner_DebugEvent;
+                scanner.ErrorEvent += MSFileScanner_ErrorEvent;
+                scanner.WarningEvent += MSFileScanner_WarningEvent;
+                scanner.StatusEvent += MSFileScanner_MessageEvent;
+                scanner.ProgressUpdate += MSFileScanner_ProgressUpdate;
 
                 if (mCheckFileIntegrity)
                     mUseCacheFiles = true;
@@ -175,7 +173,7 @@ namespace MSFileInfoScanner
                 scanner.ReprocessIfCachedSizeIsZero = mReprocessIfCachedSizeIsZero;
 
                 scanner.PlotWithPython = mPlotWithPython;
-                scanner.SaveTICAndBPIPlots = mSaveTICandBPIPlots;
+                scanner.SaveTICAndBPIPlots = mSaveTICAndBPIPlots;
                 scanner.SaveLCMS2DPlots = mSaveLCMS2DPlots;
                 scanner.LCMS2DPlotMaxPointsToPlot = mLCMS2DMaxPointsToPlot;
                 scanner.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor;
@@ -221,6 +219,7 @@ namespace MSFileInfoScanner
 
                 bool processingError;
 
+                int returnCode;
                 if (mRecurseFolders)
                 {
                     if (scanner.ProcessMSFilesAndRecurseFolders(mInputDataFilePath, mOutputFolderName, mRecurseFoldersMaxLevels))
@@ -279,7 +278,7 @@ namespace MSFileInfoScanner
 
         private static string GetAppVersion()
         {
-            return PRISM.FileProcessor.ProcessFilesOrFoldersBase.GetAppVersion(PROGRAM_DATE);
+            return PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppVersion(PROGRAM_DATE);
         }
 
         private static bool SetOptionsUsingCommandLineParameters(clsParseCommandLine parser)
@@ -389,7 +388,7 @@ namespace MSFileInfoScanner
                     mZipFileCheckAllData = false;
 
                 if (parser.IsParameterPresent("NoTIC"))
-                    mSaveTICandBPIPlots = false;
+                    mSaveTICAndBPIPlots = false;
 
                 if (parser.RetrieveValueForParameter("LC", out strValue))
                 {
@@ -570,15 +569,15 @@ namespace MSFileInfoScanner
             try
             {
                 var scanner = new clsMSFileInfoScanner();
-                var exePath = PRISM.FileProcessor.ProcessFilesOrFoldersBase.GetAppPath();
+                var exePath = PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppPath();
 
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "This program will scan a series of MS data files (or data folders) and " +
                                       "extract the acquisition start and end times, number of spectra, and the " +
                                       "total size of the data, saving the values in the file " +
                                       clsMSFileInfoScanner.DefaultAcquisitionTimeFilename + ". " +
-                                      "Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), " +
-                                      "Agilent or QStar/QTrap .WIFF files, Masslynx .Raw folders, Bruker 1 folders, " +
+                                      "Supported file types are Thermo .RAW files, Agilent Ion Trap (.D folders), " +
+                                      "Agilent or QStar/QTrap .WIFF files, MassLynx .Raw folders, Bruker 1 folders, " +
                                       "Bruker XMass analysis.baf files, .UIMF files (IMS), " +
                                       "zipped Bruker imaging datasets (with 0_R*.zip files), and " +
                                       "DeconTools _isos.csv files"));
@@ -638,7 +637,7 @@ namespace MSFileInfoScanner
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /MS2MzMin to specify a minimum m/z value that all MS/MS spectra should have. " +
                                       "Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold. " +
-                                      "Useful for validating instrument files where the sample is iTRAQ or TMT labelled " +
+                                      "Useful for validating instrument files where the sample is iTRAQ or TMT labeled " +
                                       "and it is important to detect the reporter ions in the MS/MS spectra"));
                 Console.WriteLine("  - select the default iTRAQ m/z ({0}) using /MS2MzMin:iTRAQ", clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ);
                 Console.WriteLine("  - select the default TMT m/z ({0}) using /MS2MzMin:TMT", clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT);
@@ -721,32 +720,32 @@ namespace MSFileInfoScanner
 
         }
 
-        private static void mMSFileScanner_DebugEvent(string message)
+        private static void MSFileScanner_DebugEvent(string message)
         {
             ConsoleMsgUtils.ShowDebug(message);
         }
 
-        private static void mMSFileScanner_ErrorEvent(string message, Exception ex)
+        private static void MSFileScanner_ErrorEvent(string message, Exception ex)
         {
             ConsoleMsgUtils.ShowError(message, ex, false);
         }
 
-        private static void mMSFileScanner_MessageEvent(string message)
+        private static void MSFileScanner_MessageEvent(string message)
         {
             Console.WriteLine(message);
         }
 
-        private static void mMSFileScanner_ProgressUpdate(string progressMessage, float percentComplete)
+        private static void MSFileScanner_ProgressUpdate(string progressMessage, float percentComplete)
         {
             if (DateTime.UtcNow.Subtract(mLastProgressTime).TotalSeconds < 5)
                 return;
 
             Console.WriteLine();
             mLastProgressTime = DateTime.UtcNow;
-            mMSFileScanner_DebugEvent(percentComplete.ToString("0.0") + "%, " + progressMessage);
+            MSFileScanner_DebugEvent(percentComplete.ToString("0.0") + "%, " + progressMessage);
         }
 
-        private static void mMSFileScanner_WarningEvent(string message)
+        private static void MSFileScanner_WarningEvent(string message)
         {
             ConsoleMsgUtils.ShowWarning(message);
         }
