@@ -334,7 +334,7 @@ namespace MSFileInfoScanner
 
             // Note: as of June 2018 this only works if you disable "Prefer 32-bit" when compiling as AnyCPU
 
-            // Use Xraw to read the .Raw file
+            // Use XRaw to read the .Raw file
             // If reading from a SAMBA-mounted network share, and if the current user has
             //  Read privileges but not Read&Execute privileges, then we will need to copy the file locally
             var xcaliburAccessor = new XRawFileIO();
@@ -477,7 +477,7 @@ namespace MSFileInfoScanner
             // This will also compute the SHA-1 hash of the .Raw file and add it to mDatasetStatsSummarizer.DatasetFileInfo
             UpdateDatasetFileStats(fiRawFile, intDatasetID);
 
-            // Copy over the updated filetime info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
+            // Copy over the updated file time info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
             mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
             mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
             mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetFileInfo.DatasetID;

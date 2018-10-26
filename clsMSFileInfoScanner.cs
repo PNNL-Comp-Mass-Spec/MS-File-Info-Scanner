@@ -11,14 +11,14 @@ using PRISM;
 // number of spectra, and the total size of the Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
 //
 // Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D folders), Agilent or QStar/QTrap .WIFF files,
-// Masslynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, and .UIMF files (IMS)
+// MassLynx .Raw folders, Bruker 1 folders, Bruker XMass analysis.baf files, and .UIMF files (IMS)
 //
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Program started in 2005
 // Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 //
 // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
-// Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/ or http://panomics.pnnl.gov/
+// Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
 // -------------------------------------------------------------------------------
 
 namespace MSFileInfoScanner
@@ -381,7 +381,7 @@ namespace MSFileInfoScanner
         /// Minimum m/z value that MS/mS spectra should have
         /// </summary>
         /// <remarks>
-        /// Useful for validating instrument files where the sample is iTRAQ or TMT labelled
+        /// Useful for validating instrument files where the sample is iTRAQ or TMT labeled
         /// and it is important to detect the reporter ions in the MS/MS spectra
         /// </remarks>
         public override float MS2MzMin { get; set; }
@@ -422,7 +422,7 @@ namespace MSFileInfoScanner
 
         #endregion
 
-        private void AutosaveCachedResults()
+        private void AutoSaveCachedResults()
         {
             if (UseCacheFiles)
             {
@@ -1351,7 +1351,7 @@ namespace MSFileInfoScanner
                     mMSFileInfoDataCache.UpdateCachedMSFileInfo(datasetFileInfo);
 
                     // Possibly auto-save the cached results
-                    AutosaveCachedResults();
+                    AutoSaveCachedResults();
                 }
 
                 if (DSInfoDBPostingEnabled)
@@ -1473,7 +1473,7 @@ namespace MSFileInfoScanner
 
                     if (!GetFileOrFolderInfo(inputFileOrFolderPath, out var isFolder, out var objFileSystemInfo))
                     {
-                        ReportError("File or folder not found: " + objFileSystemInfo.FullName);
+                        ReportError("File or directory not found: " + objFileSystemInfo.FullName);
 
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if (SKIP_FILES_IN_ERROR)
@@ -1706,7 +1706,7 @@ namespace MSFileInfoScanner
                         }
                     }
 
-                    // Process the data file or folder
+                    // Process the data file or directory
                     success = ProcessMSDataset(inputFileOrFolderPath, mMSInfoScanner, datasetName, outputFolderPath);
                     if (success)
                     {
@@ -1737,7 +1737,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Calls ProcessMSFileOrFolder for all files in inputFileOrFolderPath and below having a known extension
         /// </summary>
-        /// <param name="inputFileOrFolderPath">Path to the input file or folder; can contain a wildcard (* or ?)</param>
+        /// <param name="inputFileOrFolderPath">Path to the input file or directory; can contain a wildcard (* or ?)</param>
         /// <param name="outputFolderPath">Folder to write any results files to</param>
         /// <param name="resetErrorCode"></param>
         /// <returns>True if success, False if an error</returns>
@@ -1897,7 +1897,7 @@ namespace MSFileInfoScanner
         ///   Folders matching *.D for Agilent Ion Trap data
         ///   A folder named 1 for Bruker FTICR-MS data
         /// </summary>
-        /// <param name="inputFilePathOrFolder">Path to the input file or folder; can contain a wildcard (* or ?)</param>
+        /// <param name="inputFilePathOrFolder">Path to the input file or directory; can contain a wildcard (* or ?)</param>
         /// <param name="outputFolderPath">Folder to write any results files to</param>
         /// <param name="recurseFoldersMaxLevels">Maximum folder depth to process; Set to 0 to process all folders</param>
         /// <returns>True if success, False if an error</returns>
@@ -2501,9 +2501,9 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Display the curent processing options at the console
+        /// Display the current processing options at the console
         /// </summary>
-        /// <remarks>Used by MSFileInfoScaner.exe</remarks>
+        /// <remarks>Used by MSFileInfoScanner.exe</remarks>
         // ReSharper disable once UnusedMember.Global
         public void ShowCurrentProcessingOptions()
         {
@@ -2525,7 +2525,7 @@ namespace MSFileInfoScanner
             else
                 Console.WriteLine("Plot generator:     OxyPlot");
 
-            Console.WriteLine("SaveTICandBPIPlots: {0}", TrueFalseToEnabledDisabled(SaveTICAndBPIPlots));
+            Console.WriteLine("SaveTICAndBPIPlots: {0}", TrueFalseToEnabledDisabled(SaveTICAndBPIPlots));
             Console.WriteLine("SaveLCMS2DPlots:    {0}", TrueFalseToEnabledDisabled(SaveLCMS2DPlots));
             if (SaveLCMS2DPlots)
             {

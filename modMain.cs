@@ -6,7 +6,7 @@ using MSFileInfoScannerInterfaces;
 using PRISM;
 
 // -------------------------------------------------------------------------------
-// This program scans a series of MS data files (or data folders) and extracts the acquisition start and end times,
+// This program scans a series of MS data files (or data directories) and extracts the acquisition start and end times,
 // number of spectra, and the total size of the Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
 //
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -14,7 +14,7 @@ using PRISM;
 // Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
 //
 // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
-// Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/ or http://panomics.pnnl.gov/
+// Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
 // -------------------------------------------------------------------------------
 
 namespace MSFileInfoScanner
@@ -22,20 +22,20 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "October 15, 2018";
+        public const string PROGRAM_DATE = "October 26, 2018";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
 
         // Optional
-        private static string mOutputFolderName;
+        private static string mOutputDirectoryName;
 
         // Optional
         private static string mParameterFilePath;
 
         private static string mLogFilePath;
-        private static bool mRecurseFolders;
-        private static int mRecurseFoldersMaxLevels;
+        private static bool mRecurseDirectories;
+        private static int mMaxLevelsToRecurse;
 
         private static bool mIgnoreErrorsWhenRecursing;
         private static bool mReprocessingExistingFiles;
@@ -89,12 +89,12 @@ namespace MSFileInfoScanner
             var commandLineParser = new clsParseCommandLine();
 
             mInputDataFilePath = string.Empty;
-            mOutputFolderName = string.Empty;
+            mOutputDirectoryName = string.Empty;
             mParameterFilePath = string.Empty;
             mLogFilePath = string.Empty;
 
-            mRecurseFolders = false;
-            mRecurseFoldersMaxLevels = 2;
+            mRecurseDirectories = false;
+            mMaxLevelsToRecurse = 2;
             mIgnoreErrorsWhenRecursing = false;
 
             mReprocessingExistingFiles = false;
@@ -220,9 +220,9 @@ namespace MSFileInfoScanner
                 bool processingError;
 
                 int returnCode;
-                if (mRecurseFolders)
+                if (mRecurseDirectories)
                 {
-                    if (scanner.ProcessMSFilesAndRecurseFolders(mInputDataFilePath, mOutputFolderName, mRecurseFoldersMaxLevels))
+                    if (scanner.ProcessMSFilesAndRecurseFolders(mInputDataFilePath, mOutputDirectoryName, mMaxLevelsToRecurse))
                     {
                         returnCode = 0;
                         processingError = false;
@@ -235,7 +235,7 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    if (scanner.ProcessMSFileOrFolderWildcard(mInputDataFilePath, mOutputFolderName, true))
+                    if (scanner.ProcessMSFileOrFolderWildcard(mInputDataFilePath, mOutputDirectoryName, true))
                     {
                         returnCode = 0;
                         processingError = false;
@@ -345,16 +345,16 @@ namespace MSFileInfoScanner
                 }
 
                 if (parser.RetrieveValueForParameter("O", out strValue))
-                    mOutputFolderName = strValue;
+                    mOutputDirectoryName = strValue;
                 if (parser.RetrieveValueForParameter("P", out strValue))
                     mParameterFilePath = strValue;
 
                 if (parser.RetrieveValueForParameter("S", out strValue))
                 {
-                    mRecurseFolders = true;
+                    mRecurseDirectories = true;
                     if (int.TryParse(strValue, out value))
                     {
-                        mRecurseFoldersMaxLevels = value;
+                        mMaxLevelsToRecurse = value;
                     }
                     else
                     {
@@ -572,19 +572,19 @@ namespace MSFileInfoScanner
                 var exePath = PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppPath();
 
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "This program will scan a series of MS data files (or data folders) and " +
+                                      "This program will scan a series of MS data files (or data directories) and " +
                                       "extract the acquisition start and end times, number of spectra, and the " +
                                       "total size of the data, saving the values in the file " +
                                       clsMSFileInfoScanner.DefaultAcquisitionTimeFilename + ". " +
-                                      "Supported file types are Thermo .RAW files, Agilent Ion Trap (.D folders), " +
-                                      "Agilent or QStar/QTrap .WIFF files, MassLynx .Raw folders, Bruker 1 folders, " +
+                                      "Supported file types are Thermo .RAW files, Agilent Ion Trap (.D directories), " +
+                                      "Agilent or QStar/QTrap .WIFF files, MassLynx .Raw directories, Bruker 1 directories, " +
                                       "Bruker XMass analysis.baf files, .UIMF files (IMS), " +
                                       "zipped Bruker imaging datasets (with 0_R*.zip files), and " +
                                       "DeconTools _isos.csv files"));
 
                 Console.WriteLine();
                 Console.WriteLine("Program syntax:" + Environment.NewLine + Path.GetFileName(exePath));
-                Console.WriteLine(" /I:InputFileNameOrFolderPath [/O:OutputFolderName]");
+                Console.WriteLine(" /I:InputFileNameOrDirectoryPath [/O:OutputDirectoryName]");
                 Console.WriteLine(" [/P:ParamFilePath] [/S[:MaxLevel]] [/IE] [/L:LogFilePath]");
                 Console.WriteLine(" [/LC[:MaxPointsToPlot]] [/NoTIC] [/LCGrad]");
                 Console.WriteLine(" [/DI] [/SS] [/QS] [/CC]");
@@ -596,9 +596,9 @@ namespace MSFileInfoScanner
                 Console.WriteLine(" [/PostToDMS] [/PythonPlot]");
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "Use /I to specify the name of a file or folder to scan; the path can contain the wildcard character *"));
+                                      "Use /I to specify the name of a file or directory to scan; the path can contain the wildcard character *"));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "The output folder name is optional.  If omitted, the output files will be created in the program directory."));
+                                      "The output directory name is optional.  If omitted, the output files will be created in the program directory."));
                 Console.WriteLine();
 
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
@@ -606,8 +606,8 @@ namespace MSFileInfoScanner
                                       "If supplied, it should point to a valid XML parameter file. " +
                                       "If omitted, defaults are used."));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "Use /S to process all valid files in the input folder and subfolders. " +
-                                      "Include a number after /S (like /S:2) to limit the level of subfolders to examine. " +
+                                      "Use /S to process all valid files in the input directory and subdirectories. " +
+                                      "Include a number after /S (like /S:2) to limit the level of subdirectories to examine. " +
                                       "Use /IE to ignore errors when recursing."));
                 Console.WriteLine("Use /L to specify the file path for logging messages.");
                 Console.WriteLine();
@@ -667,7 +667,7 @@ namespace MSFileInfoScanner
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /C to perform an integrity check on all known file types; " +
                                       "this process will open known file types and verify that they contain the expected data. " +
-                                      "This option is only used if you specify an Input Folder and use a wildcard; " +
+                                      "This option is only used if you specify an Input Directory and use a wildcard; " +
                                       "you will typically also want to use /S when using /C."));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /M to define the maximum number of lines to process when checking text or csv files; " +
@@ -698,7 +698,7 @@ namespace MSFileInfoScanner
                 Console.WriteLine("Use /PythonPlot to create plots with Python instead of OxyPlot");
                 Console.WriteLine();
                 Console.WriteLine("Known file extensions: " + CollapseList(scanner.GetKnownFileExtensionsList()));
-                Console.WriteLine("Known folder extensions: " + CollapseList(scanner.GetKnownFolderExtensionsList()));
+                Console.WriteLine("Known directory extensions: " + CollapseList(scanner.GetKnownFolderExtensionsList()));
                 Console.WriteLine();
 
                 Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005");
@@ -706,7 +706,7 @@ namespace MSFileInfoScanner
                 Console.WriteLine();
 
                 Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov");
-                Console.WriteLine("Website: http://omics.pnl.gov/ or http://panomics.pnnl.gov/");
+                Console.WriteLine("Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/");
                 Console.WriteLine();
 
                 // Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
