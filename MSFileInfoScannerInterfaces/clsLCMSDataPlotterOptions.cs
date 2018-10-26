@@ -1,4 +1,5 @@
 ﻿
+// ReSharper disable UnusedMember.Global
 namespace MSFileInfoScannerInterfaces
 {
     /// <summary>
@@ -13,21 +14,27 @@ namespace MSFileInfoScannerInterfaces
         public const int DEFAULT_MIN_POINTS_PER_SPECTRUM = 2;
 
         public const int DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR = 10;
+
         public const float DEFAULT_MZ_RESOLUTION = 0.4f;
 
         public const float DEFAULT_MIN_INTENSITY = 0;
+
         protected const string DEFAULT_MS1_PLOT_TITLE = "MS Spectra";
 
         protected const string DEFAULT_MS2_PLOT_TITLE = "MS2 Spectra";
+
         public const double DEFAULT_MAX_MONO_MASS_FOR_DEISOTOPED_PLOT = 12000;
 
         public const double DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT = 4000;
+
         protected int mMaxPointsToPlot;
 
         protected int mMinPointsPerSpectrum;
+
         protected float mMZResolution;
 
         protected float mMinIntensity;
+
         protected string mMS1PlotTitle;
 
         protected string mMS2PlotTitle;
@@ -39,6 +46,9 @@ namespace MSFileInfoScannerInterfaces
 
         public bool DeleteTempFiles { get; set; }
 
+        /// <summary>
+        /// Maximum number of points to plot
+        /// </summary>
         public int MaxPointsToPlot {
             get => mMaxPointsToPlot;
             set {
@@ -48,6 +58,9 @@ namespace MSFileInfoScannerInterfaces
             }
         }
 
+        /// <summary>
+        /// Minimum points per spectrum
+        /// </summary>
         public int MinPointsPerSpectrum {
             get => mMinPointsPerSpectrum;
             set {
@@ -67,6 +80,9 @@ namespace MSFileInfoScannerInterfaces
             }
         }
 
+        /// <summary>
+        /// MS2 plot title
+        /// </summary>
         public string MS2PlotTitle {
             get => mMS2PlotTitle;
             set {
@@ -77,6 +93,9 @@ namespace MSFileInfoScannerInterfaces
             }
         }
 
+        /// <summary>
+        /// m/z resolution
+        /// </summary>
         public float MZResolution {
             get => mMZResolution;
             set {
@@ -86,6 +105,9 @@ namespace MSFileInfoScannerInterfaces
             }
         }
 
+        /// <summary>
+        /// Minimum intensity
+        /// </summary>
         public float MinIntensity {
             get => mMinIntensity;
             set {
@@ -95,6 +117,9 @@ namespace MSFileInfoScannerInterfaces
             }
         }
 
+        /// <summary>
+        /// Maximum monoisotopic mass for the deisotoped plot
+        /// </summary>
         public double MaxMonoMassForDeisotopedPlot {
             get => mMaxMonoMass;
             set {
@@ -104,6 +129,9 @@ namespace MSFileInfoScannerInterfaces
             }
         }
 
+        /// <summary>
+        /// Set to true when plotting deisotoped data
+        /// </summary>
         public bool PlottingDeisotopedData { get; set; }
 
         public bool PlotWithPython { get; set; }
@@ -113,13 +141,20 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         public bool TestGradientColorSchemes { get; set; }
 
+        /// <summary>
+        /// True if we should use the observed minimum scan
+        /// </summary>
         public bool UseObservedMinScan { get; set; }
 
         #endregion
 
+        /// <summary>
+        /// Clone the options
+        /// </summary>
+        /// <returns></returns>
         public clsLCMSDataPlotterOptions Clone()
         {
-            var objClone = new clsLCMSDataPlotterOptions
+            var newOptions = new clsLCMSDataPlotterOptions
             {
                 DeleteTempFiles = DeleteTempFiles,
                 MaxPointsToPlot = MaxPointsToPlot,
@@ -134,7 +169,7 @@ namespace MSFileInfoScannerInterfaces
                 MaxMonoMassForDeisotopedPlot = MaxMonoMassForDeisotopedPlot
             };
 
-            return objClone;
+            return newOptions;
 
         }
 
