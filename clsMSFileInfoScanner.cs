@@ -571,6 +571,22 @@ namespace MSFileInfoScanner
             return Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
         }
 
+        public override string[] GetKnownDirectoryExtensions()
+        {
+            return GetKnownDirectoryExtensionsList().ToArray();
+        }
+
+        public List<string> GetKnownDirectoryExtensionsList()
+        {
+            var lstExtensionsToParse = new List<string>
+            {
+                clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION.ToUpper(),
+                clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION.ToUpper()
+            };
+
+            return lstExtensionsToParse;
+        }
+
         public override string[] GetKnownFileExtensions()
         {
             return GetKnownFileExtensionsList().ToArray();
@@ -592,20 +608,16 @@ namespace MSFileInfoScanner
             return lstExtensionsToParse;
         }
 
+        [Obsolete("Use GetKnownDirectoryExtensions")]
         public override string[] GetKnownFolderExtensions()
         {
-            return GetKnownFolderExtensionsList().ToArray();
+            return GetKnownDirectoryExtensionsList().ToArray();
         }
 
+        [Obsolete("Use GetKnownDirectoryExtensionsList")]
         public List<string> GetKnownFolderExtensionsList()
         {
-            var lstExtensionsToParse = new List<string>
-            {
-                clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION.ToUpper(),
-                clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION.ToUpper()
-            };
-
-            return lstExtensionsToParse;
+            return GetKnownDirectoryExtensionsList();
         }
 
         /// <summary>
