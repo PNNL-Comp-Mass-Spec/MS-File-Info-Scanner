@@ -222,7 +222,7 @@ namespace MSFileInfoScanner
                 int returnCode;
                 if (mRecurseDirectories)
                 {
-                    if (scanner.ProcessMSFilesAndRecurseFolders(mInputDataFilePath, mOutputDirectoryName, mMaxLevelsToRecurse))
+                    if (scanner.ProcessMSFilesAndRecurseDirectories(mInputDataFilePath, mOutputDirectoryName, mMaxLevelsToRecurse))
                     {
                         returnCode = 0;
                         processingError = false;
@@ -235,7 +235,7 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    if (scanner.ProcessMSFileOrFolderWildcard(mInputDataFilePath, mOutputDirectoryName, true))
+                    if (scanner.ProcessMSFileOrDirectoryWildcard(mInputDataFilePath, mOutputDirectoryName, true))
                     {
                         returnCode = 0;
                         processingError = false;
@@ -255,7 +255,7 @@ namespace MSFileInfoScanner
                     }
                     else
                     {
-                        ShowErrorMessage("Unknown error while processing (ProcessMSFileOrFolderWildcard returned false but the ErrorCode is 0)");
+                        ShowErrorMessage("Unknown error while processing (ProcessMSFileOrDirectoryWildcard returned false but the ErrorCode is 0)");
                     }
 
                     System.Threading.Thread.Sleep(1500);
@@ -698,7 +698,7 @@ namespace MSFileInfoScanner
                 Console.WriteLine("Use /PythonPlot to create plots with Python instead of OxyPlot");
                 Console.WriteLine();
                 Console.WriteLine("Known file extensions: " + CollapseList(scanner.GetKnownFileExtensionsList()));
-                Console.WriteLine("Known directory extensions: " + CollapseList(scanner.GetKnownFolderExtensionsList()));
+                Console.WriteLine("Known directory extensions: " + CollapseList(scanner.GetKnownDirectoryExtensionsList()));
                 Console.WriteLine();
 
                 Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005");

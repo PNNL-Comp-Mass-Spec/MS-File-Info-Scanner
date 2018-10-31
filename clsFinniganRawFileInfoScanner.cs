@@ -348,7 +348,7 @@ namespace MSFileInfoScanner
                 OnErrorEvent("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
                 readError = true;
 
-                if (!string.Equals(clsMSFileInfoScanner.GetAppFolderPath().Substring(0, 2), fiRawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
+                if (!string.Equals(clsMSFileInfoScanner.GetAppDirectoryPath().Substring(0, 2), fiRawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
                 {
                     if (mCopyFileLocalOnReadError)
                     {
@@ -356,7 +356,7 @@ namespace MSFileInfoScanner
 
                         try
                         {
-                            strDataFilePathLocal = Path.Combine(clsMSFileInfoScanner.GetAppFolderPath(), Path.GetFileName(strDataFilePath));
+                            strDataFilePathLocal = Path.Combine(clsMSFileInfoScanner.GetAppDirectoryPath(), Path.GetFileName(strDataFilePath));
 
                             if (!string.Equals(strDataFilePathLocal, strDataFilePath, StringComparison.InvariantCultureIgnoreCase))
                             {

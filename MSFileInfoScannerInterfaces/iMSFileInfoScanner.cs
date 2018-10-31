@@ -309,6 +309,7 @@ namespace MSFileInfoScannerInterfaces
         /// <returns>True if success, False if an error</returns>
         public abstract bool ProcessMSFileOrDirectory(string inputFileOrDirectoryPath, string outputDirectoryPath, bool resetErrorCode,
                                                       out eMSFileProcessingStateConstants eMSFileProcessingState);
+
         /// <summary>
         /// Main processing function with input / output paths, error code reset flag, and processing state
         /// </summary>
@@ -328,7 +329,7 @@ namespace MSFileInfoScannerInterfaces
         /// <param name="outputDirectoryPath">Directory to write any results files to</param>
         /// <param name="resetErrorCode"></param>
         /// <returns>True if success, False if an error</returns>
-        public abstract bool ProcessMSFileODirectoryWildcard(string inputFileOrDirectoryPath, string outputDirectoryPath, bool resetErrorCode);
+        public abstract bool ProcessMSFileOrDirectoryWildcard(string inputFileOrDirectoryPath, string outputDirectoryPath, bool resetErrorCode);
 
         /// <summary>
         /// Calls ProcessMSFileOrFolder for all files in inputFileOrFolderPath and below having a known extension

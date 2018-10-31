@@ -154,23 +154,23 @@ namespace MSFileInfoScanner
             return DatasetTableContainsPrimaryKeyValue(mMSFileInfoDataset, MS_FILEINFO_DATATABLE, strDatasetName, out objRowMatch);
         }
 
-        public bool CachedFolderIntegrityInfoContainsFolder(string strFolderPath, out int intFolderID)
+        public bool CachedFolderIntegrityInfoContainsDirectory(string folderPath, out int folderID)
         {
-            return CachedFolderIntegrityInfoContainsFolder(strFolderPath, out intFolderID, out _);
+            return CachedFolderIntegrityInfoContainsDirectory(folderPath, out folderID, out _);
         }
 
-        public bool CachedFolderIntegrityInfoContainsFolder(
-            string strFolderPath,
-            out int intFolderID,
+        public bool CachedFolderIntegrityInfoContainsDirectory(
+            string directoryPath,
+            out int directoryID,
             out DataRow objRowMatch)
         {
-            if (DatasetTableContainsPrimaryKeyValue(mFolderIntegrityInfoDataset, FOLDER_INTEGRITY_INFO_DATATABLE, strFolderPath, out objRowMatch))
+            if (DatasetTableContainsPrimaryKeyValue(mFolderIntegrityInfoDataset, FOLDER_INTEGRITY_INFO_DATATABLE, directoryPath, out objRowMatch))
             {
-                intFolderID = Convert.ToInt32(objRowMatch[COL_NAME_FOLDER_ID]);
+                directoryID = Convert.ToInt32(objRowMatch[COL_NAME_FOLDER_ID]);
                 return true;
             }
 
-            intFolderID = 0;
+            directoryID = 0;
             objRowMatch = null;
             return false;
         }
@@ -212,21 +212,21 @@ namespace MSFileInfoScanner
         }
 
         private bool DatasetTableContainsPrimaryKeyValue(
-            DataSet dsDataset, string strTableName, string strValueToFind, out DataRow objRowMatch)
+            DataSet dsDataset, string tableName, string valueToFind, out DataRow objRowMatch)
         {
 
             try
             {
-                if (dsDataset == null || dsDataset.Tables[strTableName].Rows.Count == 0)
+                if (dsDataset == null || dsDataset.Tables[tableName].Rows.Count == 0)
                 {
                     objRowMatch = null;
                     return false;
                 }
 
-                // Look for strValueToFind in dsDataset
+                // Look for valueToFind in dsDataset
                 try
                 {
-                    objRowMatch = dsDataset.Tables[strTableName].Rows.Find(strValueToFind);
+                    objRowMatch = dsDataset.Tables[tableName].Rows.Find(valueToFind);
 
                     if (objRowMatch == null)
                     {
@@ -256,19 +256,19 @@ namespace MSFileInfoScanner
             mCachedMSInfoResultsLastSaveTime = DateTime.UtcNow;
             mCachedFolderIntegrityInfoLastSaveTime = DateTime.UtcNow;
 
-            mFolderIntegrityInfoFilePath = Path.Combine(clsMSFileInfoScanner.GetAppFolderPath(), clsMSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo));
+            mFolderIntegrityInfoFilePath = Path.Combine(clsMSFileInfoScanner.GetAppDirectoryPath(), clsMSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo));
 
-            mAcquisitionTimeFilePath = Path.Combine(clsMSFileInfoScanner.GetAppFolderPath(), clsMSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo));
+            mAcquisitionTimeFilePath = Path.Combine(clsMSFileInfoScanner.GetAppDirectoryPath(), clsMSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo));
             clsMSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo);
 
             InitializeDatasets();
         }
 
-        private bool IsNumber(string strValue)
+        private bool IsNumber(string value)
         {
             try
             {
-                return double.TryParse(strValue, out _);
+                return double.TryParse(value, out _);
             }
             catch (Exception)
             {
@@ -280,10 +280,10 @@ namespace MSFileInfoScanner
         {
             var dtDefaultDate = DateTime.Now;
 
-            // Make the MSFileInfo datatable
+            // Make the MSFileInfo DataTable
             var dtMSFileInfo = new DataTable(MS_FILEINFO_DATATABLE);
 
-            // Add the columns to the datatable
+            // Add the columns to the DataTable
             SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(ref dtMSFileInfo, COL_NAME_DATASET_ID);
             SharedVBNetRoutines.ADONetRoutines.AppendColumnStringToTable(ref dtMSFileInfo, COL_NAME_DATASET_NAME);
             SharedVBNetRoutines.ADONetRoutines.AppendColumnStringToTable(ref dtMSFileInfo, COL_NAME_FILE_EXTENSION);
@@ -298,17 +298,17 @@ namespace MSFileInfoScanner
             var MSInfoPrimaryKeyColumn = new[] { dtMSFileInfo.Columns[COL_NAME_DATASET_NAME] };
             dtMSFileInfo.PrimaryKey = MSInfoPrimaryKeyColumn;
 
-            // Make the Folder Integrity Info datatable
+            // Make the Folder Integrity Info DataTable
             var dtFolderIntegrityInfo = new DataTable(FOLDER_INTEGRITY_INFO_DATATABLE);
 
-            // Add the columns to the datatable
+            // Add the columns to the DataTable
             SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(ref dtFolderIntegrityInfo, COL_NAME_FOLDER_ID);
             SharedVBNetRoutines.ADONetRoutines.AppendColumnStringToTable(ref dtFolderIntegrityInfo, COL_NAME_FOLDER_PATH);
             SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(ref dtFolderIntegrityInfo, COL_NAME_FILE_COUNT);
             SharedVBNetRoutines.ADONetRoutines.AppendColumnIntegerToTable(ref dtFolderIntegrityInfo, COL_NAME_COUNT_FAIL_INTEGRITY);
             SharedVBNetRoutines.ADONetRoutines.AppendColumnDateToTable(ref dtFolderIntegrityInfo, COL_NAME_INFO_LAST_MODIFIED, dtDefaultDate);
 
-            // Use the folder path as the primary key
+            // Use the directory path as the primary key
             var FolderInfoPrimaryKeyColumn = new[] {
                 dtFolderIntegrityInfo.Columns[COL_NAME_FOLDER_PATH]
             };
@@ -365,27 +365,27 @@ namespace MSFileInfoScanner
                         if (strSplitLine.Length < 5)
                             continue;
 
-                        var strFolderPath = strSplitLine[(int)eFolderIntegrityInfoFileColumns.FolderPath];
+                        var folderPath = strSplitLine[(int)eFolderIntegrityInfoFileColumns.FolderPath];
 
                         if (!IsNumber(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FolderID]))
                             continue;
 
-                        if (CachedFolderIntegrityInfoContainsFolder(strFolderPath, out var intFolderID))
+                        if (CachedFolderIntegrityInfoContainsDirectory(folderPath, out var folderID))
                             continue;
 
                         try
                         {
                             var objNewRow = mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].NewRow();
 
-                            intFolderID = Convert.ToInt32(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FolderID]);
-                            udtFolderStats.FolderPath = strFolderPath;
+                            folderID = Convert.ToInt32(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FolderID]);
+                            udtFolderStats.FolderPath = folderPath;
                             udtFolderStats.FileCount = Convert.ToInt32(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FileCount]);
                             udtFolderStats.FileCountFailIntegrity =
                                 Convert.ToInt32(strSplitLine[(int)eFolderIntegrityInfoFileColumns.FileCountFailedIntegrity]);
 
                             var dtInfoLastModified = ParseDate(strSplitLine[(int)eFolderIntegrityInfoFileColumns.InfoLastModified]);
 
-                            PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objNewRow, dtInfoLastModified);
+                            PopulateFolderIntegrityInfoDataRow(folderID, udtFolderStats, objNewRow, dtInfoLastModified);
                             mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].Rows.Add(objNewRow);
 
                         }
@@ -512,28 +512,28 @@ namespace MSFileInfoScanner
         }
 
         private void PopulateFolderIntegrityInfoDataRow(
-            int intFolderID,
-            clsFileIntegrityChecker.udtFolderStatsType udtFolderStats,
+            int folderID,
+            clsFileIntegrityChecker.udtFolderStatsType directoryStats,
             DataRow objRow)
         {
-            PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow, DateTime.Now);
+            PopulateFolderIntegrityInfoDataRow(folderID, directoryStats, objRow, DateTime.Now);
         }
 
         private void PopulateFolderIntegrityInfoDataRow(
-            int intFolderID,
-            clsFileIntegrityChecker.udtFolderStatsType udtFolderStats,
+            int folderID,
+            clsFileIntegrityChecker.udtFolderStatsType directoryStats,
             DataRow objRow,
             DateTime dtInfoLastModified)
         {
-            objRow[COL_NAME_FOLDER_ID] = intFolderID;
-            objRow[COL_NAME_FOLDER_PATH] = udtFolderStats.FolderPath;
-            objRow[COL_NAME_FILE_COUNT] = udtFolderStats.FileCount;
-            objRow[COL_NAME_COUNT_FAIL_INTEGRITY] = udtFolderStats.FileCountFailIntegrity;
+            objRow[COL_NAME_FOLDER_ID] = folderID;
+            objRow[COL_NAME_FOLDER_PATH] = directoryStats.FolderPath;
+            objRow[COL_NAME_FILE_COUNT] = directoryStats.FileCount;
+            objRow[COL_NAME_COUNT_FAIL_INTEGRITY] = directoryStats.FileCountFailIntegrity;
             objRow[COL_NAME_INFO_LAST_MODIFIED] = AssureMinimumDate(dtInfoLastModified, DateTime.MinValue);
 
-            if (intFolderID > mMaximumFolderIntegrityInfoFolderID)
+            if (folderID > mMaximumFolderIntegrityInfoFolderID)
             {
-                mMaximumFolderIntegrityInfoFolderID = intFolderID;
+                mMaximumFolderIntegrityInfoFolderID = folderID;
             }
         }
 
@@ -705,14 +705,14 @@ namespace MSFileInfoScanner
         }
 
         public bool UpdateCachedFolderIntegrityInfo(
-            clsFileIntegrityChecker.udtFolderStatsType udtFolderStats,
-            out int intFolderID)
+            clsFileIntegrityChecker.udtFolderStatsType directoryStats,
+            out int folderID)
         {
             // Update the entry for this dataset in mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE)
 
             bool blnSuccess;
 
-            intFolderID = -1;
+            folderID = -1;
 
             try
             {
@@ -724,12 +724,12 @@ namespace MSFileInfoScanner
                 }
 
                 // Examine the data in memory and add or update the data for strDataset
-                if (CachedFolderIntegrityInfoContainsFolder(udtFolderStats.FolderPath, out intFolderID, out var objRow))
+                if (CachedFolderIntegrityInfoContainsDirectory(directoryStats.FolderPath, out folderID, out var objRow))
                 {
                     // Item already present; update it
                     try
                     {
-                        PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow);
+                        PopulateFolderIntegrityInfoDataRow(folderID, directoryStats, objRow);
                     }
                     catch (Exception)
                     {
@@ -741,10 +741,10 @@ namespace MSFileInfoScanner
                     // Item not present; add it
 
                     // Auto-assign the next available FolderID value
-                    intFolderID = mMaximumFolderIntegrityInfoFolderID + 1;
+                    folderID = mMaximumFolderIntegrityInfoFolderID + 1;
 
                     objRow = mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].NewRow();
-                    PopulateFolderIntegrityInfoDataRow(intFolderID, udtFolderStats, objRow);
+                    PopulateFolderIntegrityInfoDataRow(folderID, directoryStats, objRow);
                     mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATATABLE].Rows.Add(objRow);
                 }
 

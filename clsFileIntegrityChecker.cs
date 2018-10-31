@@ -1676,19 +1676,19 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Checks the integrity of each file in the given folder (provided the extension is recognized)
-        /// Will populate udtFolderStats with stats on the files in this folder
+        /// Checks the integrity of each file in the given directory (provided the extension is recognized)
+        /// Will populate udtDirectoryStats with stats on the files in this directory
         /// Will populate udtFileDetails with the name of each file parsed, plus details on the files
         /// </summary>
-        /// <param name="strFolderPath">Folder to examine</param>
-        /// <param name="udtFolderStats">Stats on the folder, including number of files and number of files that failed the integrity check</param>
+        /// <param name="directoryPath">Directory to examine</param>
+        /// <param name="udtDirectoryStats">Stats on the directory, including number of files and number of files that failed the integrity check</param>
         /// <param name="udtFileStats">Details on each file checked; use udtFolderStatsType.FileCount to determine the number of entries in udtFileStats </param>
         /// <param name="filesToIgnore">List of files to skip; can be file names or full file paths</param>
         /// <returns>Returns True if all files pass the integrity checks; otherwise, returns False</returns>
         /// <remarks>Note that udtFileStats will never be shrunk in size; only increased as needed</remarks>
-        public bool CheckIntegrityOfFilesInFolder(
-            string strFolderPath,
-            out udtFolderStatsType udtFolderStats,
+        public bool CheckIntegrityOfFilesInDirectory(
+            string directoryPath,
+            out udtFolderStatsType udtDirectoryStats,
             out List<udtFileStatsType> udtFileStats,
             List<string> filesToIgnore)
         {
@@ -1696,7 +1696,7 @@ namespace MSFileInfoScanner
 
             var blnUseIgnoreList = false;
 
-            udtFolderStats = new udtFolderStatsType();
+            udtDirectoryStats = new udtFolderStatsType();
             udtFileStats = new List<udtFileStatsType>();
 
             try
@@ -1714,11 +1714,11 @@ namespace MSFileInfoScanner
                     blnUseIgnoreList = true;
                 }
 
-                var diFolderInfo = new DirectoryInfo(strFolderPath);
+                var directoryInfo = new DirectoryInfo(directoryPath);
 
-                udtFolderStats = GetNewFolderStats(diFolderInfo.FullName);
+                udtDirectoryStats = GetNewFolderStats(directoryInfo.FullName);
 
-                foreach (var fiFile in diFolderInfo.GetFiles())
+                foreach (var fiFile in directoryInfo.GetFiles())
                 {
 
                     try
@@ -1824,16 +1824,16 @@ namespace MSFileInfoScanner
 
                         udtFileStats.Add(udtNewFile);
 
-                        udtFolderStats.FileCount += 1;
+                        udtDirectoryStats.FileCount += 1;
                         if (!blnPassedIntegrityCheck)
                         {
-                            udtFolderStats.FileCountFailIntegrity += 1;
+                            udtDirectoryStats.FileCountFailIntegrity += 1;
                         }
 
                     }
                     catch (Exception ex)
                     {
-                        LogErrors("CheckIntegrityOfFilesInFolder", "Error checking file " + fiFile.FullName, ex);
+                        LogErrors("CheckIntegrityOfFilesInDirectory", "Error checking file " + fiFile.FullName, ex);
                     }
 
                 }
@@ -1841,15 +1841,36 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                LogErrors("CheckIntegrityOfFilesInFolder", "Error in CheckIntegrityOfFilesInFolder", ex);
+                LogErrors("CheckIntegrityOfFilesInFolder", "Error in CheckIntegrityOfFilesInDirectory", ex);
             }
 
-            if (udtFolderStats.FileCountFailIntegrity == 0)
+            if (udtDirectoryStats.FileCountFailIntegrity == 0)
             {
                 return true;
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Checks the integrity of each file in the given folder (provided the extension is recognized)
+        /// Will populate udtFolderStats with stats on the files in this folder
+        /// Will populate udtFileDetails with the name of each file parsed, plus details on the files
+        /// </summary>
+        /// <param name="strFolderPath">Folder to examine</param>
+        /// <param name="udtFolderStats">Stats on the folder, including number of files and number of files that failed the integrity check</param>
+        /// <param name="udtFileStats">Details on each file checked; use udtFolderStatsType.FileCount to determine the number of entries in udtFileStats </param>
+        /// <param name="filesToIgnore">List of files to skip; can be file names or full file paths</param>
+        /// <returns>Returns True if all files pass the integrity checks; otherwise, returns False</returns>
+        /// <remarks>Note that udtFileStats will never be shrunk in size; only increased as needed</remarks>
+        [Obsolete("Use CheckIntegrityOfFilesInDirectory")]
+        public bool CheckIntegrityOfFilesInFolder(
+            string strFolderPath,
+            out udtFolderStatsType udtFolderStats,
+            out List<udtFileStatsType> udtFileStats,
+            List<string> filesToIgnore)
+        {
+            return CheckIntegrityOfFilesInDirectory(strFolderPath, out udtFolderStats, out udtFileStats, filesToIgnore);
         }
 
         private Dictionary<string, bool> ConvertTextListToDictionary(IReadOnlyCollection<string> requiredTextItems)

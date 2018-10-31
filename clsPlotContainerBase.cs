@@ -60,7 +60,7 @@ namespace MSFileInfoScanner
 
         protected void OpenDebugFile(string dataSource)
         {
-            var logFolder = clsMSFileInfoScanner.GetAppDataFolderPath();
+            var logDirectory = clsMSFileInfoScanner.GetAppDataDirectoryPath();
 
             string logFileName;
             if (string.IsNullOrWhiteSpace(dataSource))
@@ -70,7 +70,7 @@ namespace MSFileInfoScanner
                 logFileName = dataSource + ".txt";
             }
 
-            var logFile = new FileInfo(Path.Combine(logFolder, logFileName));
+            var logFile = new FileInfo(Path.Combine(logDirectory, logFileName));
             var addBlankLink = logFile.Exists;
 
             mLogWriter = new StreamWriter(new FileStream(logFile.FullName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))

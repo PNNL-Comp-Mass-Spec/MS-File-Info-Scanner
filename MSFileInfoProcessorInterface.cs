@@ -23,10 +23,10 @@ namespace MSFileInfoScanner
             DisableInstrumentHash = 9
         }
 
-        public abstract bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo);
-        public abstract bool CreateOutputFiles(string strInputFileName, string strOutputFolderPath);
+        public abstract bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo);
+        public abstract bool CreateOutputFiles(string inputFileName, string outputDirectoryPath);
         public abstract string GetDatasetInfoXML();
-        public abstract string GetDatasetNameViaPath(string strDataFilePath);
+        public abstract string GetDatasetNameViaPath(string dataFilePath);
         public abstract clsLCMSDataPlotterOptions LCMS2DPlotOptions { get; set; }
         public abstract int LCMS2DOverviewPlotDivisor { get; set; }
         public abstract string DatasetStatsTextFileName { get; set; }
@@ -39,7 +39,7 @@ namespace MSFileInfoScanner
         public abstract string MS2MzMinValidationMessage { get; set; }
         public abstract bool ShowDebugInfo { get; set; }
         public abstract bool GetOption(ProcessingOptions eOption);
-        public abstract void SetOption(ProcessingOptions eOption, bool blnValue);
+        public abstract void SetOption(ProcessingOptions eOption, bool value);
 
     }
 }
