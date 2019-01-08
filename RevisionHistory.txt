@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.5.6943; January 4, 2019
+	- New version of ThermoRawFileReader that uses ThermoFisher.CommonCore.RawFileReader.dll
+
 Version 1.5.6736; June 11, 2018
 	- Add option to validate that the majority of the MS/MS spectra have data values below a given m/z value
 		- This is useful for instrument files where the sample is iTRAQ or TMT labelled 
