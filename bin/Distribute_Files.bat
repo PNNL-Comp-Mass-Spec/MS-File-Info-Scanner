@@ -13,35 +13,38 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScann
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\SpectraTypeClassifier.dll"       \\floyd\Software\MSFileInfoScanner\Exe_Only /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScannerInterfaces.*"   \\floyd\Software\MSFileInfoScanner\Exe_Only /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                 \\floyd\Software\MSFileInfoScanner\Exe_Only /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py     \\floyd\Software\MSFileInfoScanner\Exe_Only /y
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"    \\floyd\Software\MSFileInfoScanner\Exe_Only /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\UIMFLibrary.*"                   \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MathNet.Numerics.*"              \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\PRISM.dll"                   \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\ThermoRawFileReader.*"       \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\Thermo*.dll"                 \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
 
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.dll"           c:\dms_programs\MSFileInfoScanner /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.xml"           c:\dms_programs\MSFileInfoScanner /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.pdb"           c:\dms_programs\MSFileInfoScanner /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\SpectraTypeClassifier.dll"       c:\dms_programs\MSFileInfoScanner /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.*"   c:\dms_programs\MSFileInfoScanner /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     c:\dms_programs\MSFileInfoScanner /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"        c:\dms_programs\MSFileInfoScanner /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\UIMFLibrary.*"                   c:\dms_programs\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MathNet.Numerics.*"              c:\dms_programs\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\PRISM.dll"                       c:\dms_programs\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\ThermoRawFileReader.*"           c:\dms_programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.dll"           C:\DMS_Programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.xml"           C:\DMS_Programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.pdb"           C:\DMS_Programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\SpectraTypeClassifier.dll"       C:\DMS_Programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.*"   C:\DMS_Programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     C:\DMS_Programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"        C:\DMS_Programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\UIMFLibrary.*"                   C:\DMS_Programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MathNet.Numerics.*"              C:\DMS_Programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\PRISM.dll"                       C:\DMS_Programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\ThermoRawFileReader.*"           C:\DMS_Programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\Thermo*.dll"                     C:\DMS_Programs\MSFileInfoScanner /y /d
 
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner.exe"           C:\DMS_Programs\MSFileInfoScannerExe /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner.xml"           C:\DMS_Programs\MSFileInfoScannerExe /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner.pdb"           C:\DMS_Programs\MSFileInfoScannerExe /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\SpectraTypeClassifier.dll"       C:\DMS_Programs\MSFileInfoScannerExe /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScannerInterfaces.*"   C:\DMS_Programs\MSFileInfoScannerExe /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                 C:\DMS_Programs\MSFileInfoScannerExe /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"    c:\dms_programs\MSFileInfoScannerExe /y
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner.exe"           C:\DMS_Programs\MSFileInfoScannerExe /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner.xml"           C:\DMS_Programs\MSFileInfoScannerExe /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner.pdb"           C:\DMS_Programs\MSFileInfoScannerExe /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\SpectraTypeClassifier.dll"       C:\DMS_Programs\MSFileInfoScannerExe /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScannerInterfaces.*"   C:\DMS_Programs\MSFileInfoScannerExe /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                 C:\DMS_Programs\MSFileInfoScannerExe /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"    C:\DMS_Programs\MSFileInfoScannerExe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\UIMFLibrary.*"                   C:\DMS_Programs\MSFileInfoScannerExe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MathNet.Numerics.*"              C:\DMS_Programs\MSFileInfoScannerExe /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\PRISM.dll"                   c:\dms_programs\MSFileInfoScannerExe /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\ThermoRawFileReader.*"       c:\dms_programs\MSFileInfoScannerExe /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\PRISM.dll"                   C:\DMS_Programs\MSFileInfoScannerExe /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\ThermoRawFileReader.*"       C:\DMS_Programs\MSFileInfoScannerExe /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\Thermo*.dll"                 C:\DMS_Programs\MSFileInfoScannerExe /y /d
 
 @echo off
 echo About to copy to \\pnl\projects\OmicsSW\DMS_Programs
@@ -54,11 +57,12 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoS
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\SpectraTypeClassifier.dll"       \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.*"   \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"        \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"        \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\UIMFLibrary.*"                   \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MathNet.Numerics.*"              \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\PRISM.dll"                       \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\ThermoRawFileReader.*"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\Thermo*.dll"                     \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.dll" \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution /y
 
@@ -68,10 +72,11 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoS
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\SpectraTypeClassifier.dll"       \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.*"   \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"        \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"        \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\UIMFLibrary.*"                   \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MathNet.Numerics.*"              \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\PRISM.dll"                       \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\ThermoRawFileReader.*"           \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\Thermo*.dll"                     \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 
 pause
