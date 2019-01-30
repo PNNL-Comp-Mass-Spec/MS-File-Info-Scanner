@@ -14,10 +14,6 @@ Supported file types are:
 * .UIMF files (IMS)
 * DeconTools _isos.csv files (uses the _scans.csv file for elution time info)
 
-Note that Thermo's MSFileReader software needs to be installed in order to read 
-Thermo .Raw files. Create an account at https://thermo.flexnetoperations.com/control/thmo/login 
-then login and choose "Utility Software".
-
 ## Console Switches
 
 MSFileInfoScanner is a command line application.  Syntax:
@@ -138,8 +134,8 @@ Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
 
 ## License
 
-Licensed under the 2-Clause BSD License; you may not use this file except 
-in compliance with the License.  You may obtain a copy of the License at 
+MS File Info Scanner is licensed under the 2-Clause BSD License; you may not use this file 
+except in compliance with the License. You may obtain a copy of the License at 
 https://opensource.org/licenses/BSD-2-Clause
 
 Copyright 2018 Battelle Memorial Institute
