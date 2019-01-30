@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.5.6969; January 30, 2019
+	- Update PRISM.dll, UIMFLibrary, and MathNet.Numerics from NuGet
+		- PRISM.dll now references System.IO.Compression in the .NET Framework instead of via NuGet
+
 Version 1.5.6943; January 4, 2019
 	- New version of ThermoRawFileReader that uses ThermoFisher.CommonCore.RawFileReader.dll
 
