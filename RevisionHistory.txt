@@ -1,5 +1,12 @@
 MS File Info Scanner Change Log
 
+Version 1.5.6976; February 6, 2019
+	- Skip checks if the dataset has no spectra
+	- Check file integrity when processing a single input file (if /C is used)
+	- Set RecheckFileIntegrityForExistingDirectories to true when /R is used to reprocess files that are already defined in the acquisition time file
+	- Change MSFileScanner error codes to be sequentially numbered, not powers of 2
+	- Use FindItemNameInList when comparing an XML element name or attribute name to the list of required items
+
 Version 1.5.6969; January 30, 2019
 	- Update PRISM.dll, UIMFLibrary, and MathNet.Numerics from NuGet
 		- PRISM.dll now references System.IO.Compression in the .NET Framework instead of via NuGet
