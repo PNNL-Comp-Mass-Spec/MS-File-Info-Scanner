@@ -88,14 +88,19 @@ namespace MSFileInfoScanner
 
             // 2 bytes
             public short PackedFunctionInfo;
+
             // 4 bytes (in seconds)
             public float CycleTime;
+
             // 4 bytes (in seconds)
             public float InterScanDelay;
+
             // 4 bytes (in minutes)
             public float StartRT;
+
             // 4 bytes (in minutes)
             public float EndRT;
+
             // 4 bytes; unfortunately, this is always 0 and thus we cannot trust it
             public int ScanCount;
 
@@ -132,6 +137,7 @@ namespace MSFileInfoScanner
         {
             // 4 bytes
             public int StartScanOffset;
+
             // The next 4 bytes are stored as a Long Integer, but are in fact
             //   seven different numbers packed into one Long Integer:
             //   bits 0-21: number of spectral peaks in scan
@@ -144,8 +150,10 @@ namespace MSFileInfoScanner
             //
             // 4 bytes
             public int PackedScanInfo;
+
             // 4 bytes
             public float TicValue;
+
             // 4 bytes, time in minutes
             public float ScanTime;
 
@@ -181,6 +189,7 @@ namespace MSFileInfoScanner
 
             // 2 bytes
             public short PackedBasePeakIntensity;
+
             // 4 bytes
             public int PackedBasePeakInfo;
         }
@@ -189,10 +198,13 @@ namespace MSFileInfoScanner
         {
             // 4 bytes
             public int StartScanOffset;
+
             // 4 bytes
             public int PackedScanInfo;
+
             // 4 bytes
             public float TicValue;
+
             // 4 bytes, time in minutes
             public float ScanTime;
 
@@ -211,6 +223,7 @@ namespace MSFileInfoScanner
 
             // 4 bytes
             public int PackedBasePeakInfo;
+
             // 2 bytes, unused
             public short Spare;
         }
@@ -223,7 +236,7 @@ namespace MSFileInfoScanner
             public int NumSpectralPeaks;
             public short SegmentNumber;
             public bool UseFollowingContinuum;
-            public bool ContiuumDataOverride;
+            public bool ContinuumDataOverride;
             public bool ScanContainsMolecularMasses;
             public bool ScanContainsCalibratedMasses;
             public bool ScanOverload;
@@ -248,7 +261,7 @@ namespace MSFileInfoScanner
         private int maskSpectralPeak;
         private int maskSegment;
         private int maskUseFollowingContinuum;
-        private int maskContiuumDataOverride;
+        private int maskContinuumDataOverride;
         private int maskScanContainsMolecularMasses;
 
         private int maskScanContainsCalibratedMasses;
@@ -299,13 +312,13 @@ namespace MSFileInfoScanner
             public int MuxStream;
             public int VersionMajor;
             public int VersionMinor;
-            public short CalMS1StaticCoeffCount;
-            public double[] CalMS1StaticCoeffs;
+            public short CalMS1StaticCoefficientCount;
+            public double[] CalMS1StaticCoefficients;
 
             // 0 = normal, 1 = Root mass
             public short CalMS1StaticTypeID;
-            public short CalMS2StaticCoeffCount;
-            public double[] CalMS2StaticCoeffs;
+            public short CalMS2StaticCoefficientCount;
+            public double[] CalMS2StaticCoefficients;
 
             // 0 = normal, 1 = Root mass
             public short CalMS2StaticTypeID;
@@ -329,7 +342,7 @@ namespace MSFileInfoScanner
             // Base peak mass
             public float BPIMass;
             public float TIC;
-            public float RetnTime;
+            public float RetentionTime;
         }
 
         public struct udtMSFunctionInfoType
@@ -405,91 +418,91 @@ namespace MSFileInfoScanner
         private eErrorCodeConstants mErrorCode;
         public string GetErrorMessage()
         {
-            string strError;
+            string message;
 
             switch (mErrorCode)
             {
                 case eErrorCodeConstants.NoError:
-                    strError = "";
+                    message = "";
                     break;
                 case eErrorCodeConstants.InvalidDataFolderPath:
-                    strError = "Invalid data folder path";
+                    message = "Invalid data folder path";
                     break;
                 case eErrorCodeConstants.DataFolderHeaderReadError:
-                    strError = "The data folder header read error";
+                    message = "The data folder header read error";
                     break;
                 case eErrorCodeConstants.DataFolderReadError:
-                    strError = "Data folder read error";
+                    message = "Data folder read error";
                     break;
                 default:
-                    strError = "Unknown error";
+                    message = "Unknown error";
                     break;
             }
 
-            return strError;
+            return message;
         }
 
         public bool GetFileInfo(
-            string strMLynxDataFolderPath,
-            out string strAcquDate,
-            out string strAcquName,
-            out string strInstrument,
-            out string strInstrumentType,
-            out string strSampleDesc,
-            out int lngVersionMajor,
-            out int lngVersionMinor)
+            string massLynxDataDirectoryPath,
+            out string acquDate,
+            out string acquName,
+            out string instrument,
+            out string instrumentType,
+            out string sampleDesc,
+            out int versionMajor,
+            out int versionMinor)
         {
             // Returns information on the given MassLynx data file (actually a folder)
             // Returns True if success, false if failure
 
-            bool blnSuccess;
+            bool success;
 
-            strAcquDate = string.Empty;
-            strAcquName = string.Empty;
-            strInstrument = string.Empty;
-            strInstrumentType = string.Empty;
-            strSampleDesc = string.Empty;
-            lngVersionMajor = 0;
-            lngVersionMinor = 0;
+            acquDate = string.Empty;
+            acquName = string.Empty;
+            instrument = string.Empty;
+            instrumentType = string.Empty;
+            sampleDesc = string.Empty;
+            versionMajor = 0;
+            versionMinor = 0;
 
             try
             {
-                blnSuccess = ValidateDataFolder(strMLynxDataFolderPath);
-                if (blnSuccess)
+                success = ValidateDataFolder(massLynxDataDirectoryPath);
+                if (success)
                 {
-                    strAcquDate = mMSData.HeaderInfo.AcquDate + " " + mMSData.HeaderInfo.AcquTime;
-                    strAcquName = mMSData.HeaderInfo.AcquName;
-                    strInstrument = mMSData.HeaderInfo.Instrument;
-                    strInstrumentType = mMSData.HeaderInfo.InstrumentType;
-                    strSampleDesc = mMSData.HeaderInfo.SampleDesc;
-                    lngVersionMajor = mMSData.HeaderInfo.VersionMajor;
-                    lngVersionMinor = mMSData.HeaderInfo.VersionMinor;
+                    acquDate = mMSData.HeaderInfo.AcquDate + " " + mMSData.HeaderInfo.AcquTime;
+                    acquName = mMSData.HeaderInfo.AcquName;
+                    instrument = mMSData.HeaderInfo.Instrument;
+                    instrumentType = mMSData.HeaderInfo.InstrumentType;
+                    sampleDesc = mMSData.HeaderInfo.SampleDesc;
+                    versionMajor = mMSData.HeaderInfo.VersionMajor;
+                    versionMinor = mMSData.HeaderInfo.VersionMinor;
                 }
 
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error in clsMassLynxNativeIO.GetFileInfo:" + ex.Message);
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
 
         }
 
-        public bool GetFileInfo(string strMLynxDataFolderPath, out udtMSHeaderInfoType udtHeaderInfo)
+        public bool GetFileInfo(string massLynxDataDirectoryPath, out udtMSHeaderInfoType udtHeaderInfo)
         {
             // Returns information on the given MassLynx data file (actually a folder)
             // Returns True if success, false if failure
 
-            bool blnSuccess;
+            bool success;
 
             udtHeaderInfo = new udtMSHeaderInfoType();
 
             try
             {
-                blnSuccess = ValidateDataFolder(strMLynxDataFolderPath);
-                if (blnSuccess)
+                success = ValidateDataFolder(massLynxDataDirectoryPath);
+                if (success)
                 {
                     udtHeaderInfo = mMSData.HeaderInfo;
                 }
@@ -497,24 +510,24 @@ namespace MSFileInfoScanner
             catch (Exception ex)
             {
                 Console.WriteLine("Error in clsMassLynxNativeIO.GetFileInfo:" + ex.Message);
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
 
         }
 
-        public short GetFunctionAcquisitionDataType(string strMLynxDataFolderPath, int lngFunctionNumber)
+        public short GetFunctionAcquisitionDataType(string massLynxDataDirectoryPath, int functionNumber)
         {
-            short intAcquisitionDataTypeID = -1;
+            short acquisitionDataTypeID = -1;
 
             try
             {
-                if (ValidateDataFolder(strMLynxDataFolderPath))
+                if (ValidateDataFolder(massLynxDataDirectoryPath))
                 {
-                    if (lngFunctionNumber >= 1 && lngFunctionNumber <= mMSData.FunctionCount)
+                    if (functionNumber >= 1 && functionNumber <= mMSData.FunctionCount)
                     {
-                        intAcquisitionDataTypeID = mMSData.FunctionInfo[lngFunctionNumber].AcquisitionDataType;
+                        acquisitionDataTypeID = mMSData.FunctionInfo[functionNumber].AcquisitionDataType;
                     }
                 }
             }
@@ -523,127 +536,127 @@ namespace MSFileInfoScanner
                 // Ignore errors here
             }
 
-            return intAcquisitionDataTypeID;
+            return acquisitionDataTypeID;
 
         }
 
         public bool GetFunctionInfo(
-            string strMLynxDataFolderPath,
-            int lngFunctionNumber,
-            out short intFunctionType)
+            string massLynxDataDirectoryPath,
+            int functionNumber,
+            out short functionType)
         {
 
-            return GetFunctionInfo(strMLynxDataFolderPath, lngFunctionNumber,
+            return GetFunctionInfo(massLynxDataDirectoryPath, functionNumber,
                                    out _, out _, out _,
                                    out _, out _,
-                                   out intFunctionType, out _,
+                                   out functionType, out _,
                                    out _);
         }
 
         public bool GetFunctionInfo(
-            string strMLynxDataFolderPath,
-            int lngFunctionNumber,
-            out int lngScanCount,
-            out float sngStartRT,
-            out float sngEndRT,
-            out float sngStartMass,
-            out float sngEndMass,
-            out short intFunctionType,
-            out string strFunctionTypeText,
-            out double dblFunctionSetMass)
+            string massLynxDataDirectoryPath,
+            int functionNumber,
+            out int scanCount,
+            out float startRT,
+            out float endRT,
+            out float startMass,
+            out float endMass,
+            out short functionType,
+            out string functionTypeText,
+            out double functionSetMass)
         {
             // Returns information on the given function
             // Returns True if success, false if failure
 
-            bool blnSuccess;
+            bool success;
 
-            lngScanCount = 0;
-            sngStartRT = 0;
-            sngEndRT = 0;
-            sngStartMass = 0;
-            sngEndMass = 0;
-            intFunctionType = 0;
-            dblFunctionSetMass = 0;
-            strFunctionTypeText = "";
+            scanCount = 0;
+            startRT = 0;
+            endRT = 0;
+            startMass = 0;
+            endMass = 0;
+            functionType = 0;
+            functionSetMass = 0;
+            functionTypeText = "";
 
             try
             {
-                blnSuccess = ValidateDataFolder(strMLynxDataFolderPath);
-                if (blnSuccess)
+                success = ValidateDataFolder(massLynxDataDirectoryPath);
+                if (success)
                 {
-                    if (lngFunctionNumber >= 1 && lngFunctionNumber <= mMSData.FunctionCount)
+                    if (functionNumber >= 1 && functionNumber <= mMSData.FunctionCount)
                     {
-                        lngScanCount = mMSData.FunctionInfo[lngFunctionNumber].ScanCount;
-                        sngStartRT = mMSData.FunctionInfo[lngFunctionNumber].StartRT;
-                        sngEndRT = mMSData.FunctionInfo[lngFunctionNumber].EndRT;
-                        sngStartMass = mMSData.FunctionInfo[lngFunctionNumber].StartMass;
-                        sngEndMass = mMSData.FunctionInfo[lngFunctionNumber].EndMass;
-                        intFunctionType = mMSData.FunctionInfo[lngFunctionNumber].FunctionType;
-                        dblFunctionSetMass = mMSData.FunctionInfo[lngFunctionNumber].FunctionSetMass;
-                        strFunctionTypeText = mMSData.FunctionInfo[lngFunctionNumber].FunctionTypeText;
+                        scanCount = mMSData.FunctionInfo[functionNumber].ScanCount;
+                        startRT = mMSData.FunctionInfo[functionNumber].StartRT;
+                        endRT = mMSData.FunctionInfo[functionNumber].EndRT;
+                        startMass = mMSData.FunctionInfo[functionNumber].StartMass;
+                        endMass = mMSData.FunctionInfo[functionNumber].EndMass;
+                        functionType = mMSData.FunctionInfo[functionNumber].FunctionType;
+                        functionSetMass = mMSData.FunctionInfo[functionNumber].FunctionSetMass;
+                        functionTypeText = mMSData.FunctionInfo[functionNumber].FunctionTypeText;
                     }
                     else
                     {
-                        blnSuccess = false;
+                        success = false;
                     }
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error in clsMassLynxNativeIO.GetFunctionInfo:" + ex.Message);
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
 
         }
 
-        public bool GetFunctionInfo(string strMLynxDataFolderPath, int lngFunctionNumber, out udtMSFunctionInfoType udtFunctionInfo)
+        public bool GetFunctionInfo(string massLynxDataDirectoryPath, int functionNumber, out udtMSFunctionInfoType udtFunctionInfo)
         {
             // Returns information on the given function
             // Returns True if success, false if failure
 
-            bool blnSuccess;
+            bool success;
 
             udtFunctionInfo = new udtMSFunctionInfoType();
 
             try
             {
-                blnSuccess = ValidateDataFolder(strMLynxDataFolderPath);
-                if (blnSuccess)
+                success = ValidateDataFolder(massLynxDataDirectoryPath);
+                if (success)
                 {
-                    if (lngFunctionNumber >= 1 && lngFunctionNumber <= mMSData.FunctionCount)
+                    if (functionNumber >= 1 && functionNumber <= mMSData.FunctionCount)
                     {
-                        udtFunctionInfo = mMSData.FunctionInfo[lngFunctionNumber];
+                        udtFunctionInfo = mMSData.FunctionInfo[functionNumber];
                     }
                     else
                     {
-                        blnSuccess = false;
+                        success = false;
                     }
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error in clsMassLynxNativeIO.GetFunctionInfo:" + ex.Message);
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
 
         }
 
-        public int GetFunctionCount(string strMLynxDataFolderPath)
+        public int GetFunctionCount(string massLynxDataDirectoryPath)
         {
             // Function returns the number of functions in the datafile
             // Returns 0 if an error
 
-            var lngFunctionCount = 0;
+            var functionCount = 0;
 
             try
             {
-                if (ValidateDataFolder(strMLynxDataFolderPath))
+                if (ValidateDataFolder(massLynxDataDirectoryPath))
                 {
-                    lngFunctionCount = mMSData.FunctionCount;
+                    functionCount = mMSData.FunctionCount;
                 }
             }
             catch
@@ -651,28 +664,28 @@ namespace MSFileInfoScanner
                 // Ignore errors here
             }
 
-            return lngFunctionCount;
+            return functionCount;
 
         }
 
-        public int GetNumScans(string strMLynxDataFolderPath, int lngFunctionNumber = 1)
+        public int GetNumScans(string massLynxDataDirectoryPath, int functionNumber = 1)
         {
             // Function returns the number of scans for the given function
             // Returns 0 if an error
 
-            var lngScanCount = 0;
+            var scanCount = 0;
 
             try
             {
-                if (ValidateDataFolder(strMLynxDataFolderPath))
+                if (ValidateDataFolder(massLynxDataDirectoryPath))
                 {
-                    if (lngFunctionNumber >= 1 && lngFunctionNumber <= mMSData.FunctionCount)
+                    if (functionNumber >= 1 && functionNumber <= mMSData.FunctionCount)
                     {
-                        lngScanCount = mMSData.FunctionInfo[lngFunctionNumber].ScanCount;
+                        scanCount = mMSData.FunctionInfo[functionNumber].ScanCount;
                     }
                     else
                     {
-                        lngScanCount = 0;
+                        scanCount = 0;
                     }
                 }
             }
@@ -681,19 +694,19 @@ namespace MSFileInfoScanner
                 // Ignore errors here
             }
 
-            return lngScanCount;
+            return scanCount;
         }
 
         public bool GetScanInfo(
-            string strMLynxDataFolderPath,
-            int lngFunctionNumber,
-            int lngScanNumber,
-            out int lngScanType,
-            out float sngBasePeakMZ,
-            out float sngParentIonMZ,
-            out float sngRT,
-            out float sngBasePeakIntensity,
-            out float sngTotalIonCurrent)
+            string massLynxDataDirectoryPath,
+            int functionNumber,
+            int scanNumber,
+            out int scanType,
+            out float basePeakMZ,
+            out float parentIonMZ,
+            out float retentionTime,
+            out float basePeakIntensity,
+            out float totalIonCurrent)
         {
             // Returns scan information in the ByRef variables
             // Function returns True if no error, False if an error
@@ -701,27 +714,27 @@ namespace MSFileInfoScanner
             // Note that ScanType = 0 means MS-only scan (survey scan)
             // ScanType > 0 means ms/ms scan
 
-            return GetScanInfoEx(strMLynxDataFolderPath, lngFunctionNumber, lngScanNumber,
-                                 out lngScanType, out sngBasePeakMZ, out sngParentIonMZ, out sngRT,
-                                 out sngBasePeakIntensity, out sngTotalIonCurrent, out _,
+            return GetScanInfoEx(massLynxDataDirectoryPath, functionNumber, scanNumber,
+                                 out scanType, out basePeakMZ, out parentIonMZ, out retentionTime,
+                                 out basePeakIntensity, out totalIonCurrent, out _,
                                  out _, out _, out _, out _);
         }
 
         public bool GetScanInfoEx(
-            string strMLynxDataFolderPath,
-            int lngFunctionNumber,
-            int lngScanNumber,
-            out int lngScanType,
-            out float sngBasePeakMZ,
-            out float sngParentIonMZ,
-            out float sngRT,
-            out float sngBasePeakIntensity,
-            out float sngTotalIonCurrent,
-            out bool blnCalibrated,
-            out bool blnContinuum,
-            out bool blnOverload,
-            out float sngMassStart,
-            out float sngMassEnd)
+            string massLynxDataDirectoryPath,
+            int functionNumber,
+            int scanNumber,
+            out int scanType,
+            out float basePeakMZ,
+            out float parentIonMZ,
+            out float retentionTime,
+            out float basePeakIntensity,
+            out float totalIonCurrent,
+            out bool calibrated,
+            out bool continuum,
+            out bool overload,
+            out float massStart,
+            out float massEnd)
         {
 
             // Returns scan information in the ByRef variables
@@ -733,47 +746,47 @@ namespace MSFileInfoScanner
 
             var udtScanStatsSingleScan = default(udtScanStatsType);
 
-            lngScanType = 0;
-            sngBasePeakMZ = 0;
-            sngParentIonMZ = 0;
-            sngRT = 0;
-            sngBasePeakIntensity = 0;
-            sngTotalIonCurrent = 0;
-            blnCalibrated = false;
-            blnContinuum = false;
-            blnOverload = false;
-            sngMassStart = 0;
-            sngMassEnd = 0;
+            scanType = 0;
+            basePeakMZ = 0;
+            parentIonMZ = 0;
+            retentionTime = 0;
+            basePeakIntensity = 0;
+            totalIonCurrent = 0;
+            calibrated = false;
+            continuum = false;
+            overload = false;
+            massStart = 0;
+            massEnd = 0;
 
-            if (!ValidateDataFolder(strMLynxDataFolderPath))
+            if (!ValidateDataFolder(massLynxDataDirectoryPath))
             {
                 return false;
             }
 
-            if (!(lngFunctionNumber >= 1 && lngFunctionNumber <= mMSData.FunctionCount))
+            if (!(functionNumber >= 1 && functionNumber <= mMSData.FunctionCount))
             {
                 return false;
             }
 
-            LoadMSScanHeader(ref udtScanStatsSingleScan, mMSData, lngFunctionNumber, lngScanNumber);
+            LoadMSScanHeader(ref udtScanStatsSingleScan, mMSData, functionNumber, scanNumber);
 
-            lngScanType = mMSData.FunctionInfo[lngFunctionNumber].FunctionType;
-            sngBasePeakMZ = udtScanStatsSingleScan.BPIMass;
-            sngParentIonMZ = udtScanStatsSingleScan.SetMass;
-            sngRT = udtScanStatsSingleScan.RetnTime;
-            sngBasePeakIntensity = udtScanStatsSingleScan.BPI;
-            sngTotalIonCurrent = udtScanStatsSingleScan.TIC;
-            blnCalibrated = udtScanStatsSingleScan.Calibrated;
-            blnContinuum = udtScanStatsSingleScan.Continuum;
-            blnOverload = udtScanStatsSingleScan.Overload;
-            sngMassStart = udtScanStatsSingleScan.MassStart;
-            sngMassEnd = udtScanStatsSingleScan.MassEnd;
+            scanType = mMSData.FunctionInfo[functionNumber].FunctionType;
+            basePeakMZ = udtScanStatsSingleScan.BPIMass;
+            parentIonMZ = udtScanStatsSingleScan.SetMass;
+            retentionTime = udtScanStatsSingleScan.RetentionTime;
+            basePeakIntensity = udtScanStatsSingleScan.BPI;
+            totalIonCurrent = udtScanStatsSingleScan.TIC;
+            calibrated = udtScanStatsSingleScan.Calibrated;
+            continuum = udtScanStatsSingleScan.Continuum;
+            overload = udtScanStatsSingleScan.Overload;
+            massStart = udtScanStatsSingleScan.MassStart;
+            massEnd = udtScanStatsSingleScan.MassEnd;
             return true;
         }
 
-        private void InitializeFunctionInfo(ref udtMSFunctionInfoType udtMSFunctionInfo, int lngFunctionNumber)
+        private void InitializeFunctionInfo(ref udtMSFunctionInfoType udtMSFunctionInfo, int functionNumber)
         {
-            udtMSFunctionInfo.FunctionNumber = lngFunctionNumber;
+            udtMSFunctionInfo.FunctionNumber = functionNumber;
             udtMSFunctionInfo.ProcessNumber = 0;
 
             udtMSFunctionInfo.CalibrationCoefficientCount = 0;
@@ -791,38 +804,38 @@ namespace MSFileInfoScanner
 
         }
 
-        public bool IsFunctionMsMs(string strMLynxDataFolderPath, int lngFunctionNumber)
+        public bool IsFunctionMsMs(string massLynxDataDirectoryPath, int functionNumber)
         {
 
-            if (GetFunctionInfo(strMLynxDataFolderPath, lngFunctionNumber, out short intFunctionType))
+            if (GetFunctionInfo(massLynxDataDirectoryPath, functionNumber, out short functionType))
             {
-                return intFunctionType != 0;
+                return functionType != 0;
             }
 
             return false;
         }
 
-        public bool IsSpectrumContinuumData(string strMLynxDataFolderPath, int lngFunctionNumber, int lngScanNumber = 1)
+        public bool IsSpectrumContinuumData(string massLynxDataDirectoryPath, int functionNumber, int scanNumber = 1)
         {
 
-            if (GetScanInfoEx(strMLynxDataFolderPath, lngFunctionNumber, lngScanNumber,
+            if (GetScanInfoEx(massLynxDataDirectoryPath, functionNumber, scanNumber,
                               out _, out _, out _, out _,
                               out _, out _, out _,
-                              out var blnContinuum, out _, out _, out _))
+                              out var continuum, out _, out _, out _))
             {
-                return blnContinuum;
+                return continuum;
             }
 
             return false;
         }
 
-        public bool IsMassLynxData(string strMLynxDataFolderPath)
+        public bool IsMassLynxData(string massLynxDataDirectoryPath)
         {
-            // strMLynxDataFolderPath should contain the path to a folder that ends in the text .RAW
-            // If strMLynxDataFolderPath contains the path to a file, then the ValidateDataFolder function
+            // massLynxDataDirectoryPath should contain the path to a folder that ends in the text .RAW
+            // If massLynxDataDirectoryPath contains the path to a file, then the ValidateDataFolder function
             //  will strip off the filename and only examine the folder
 
-            return ValidateDataFolder(strMLynxDataFolderPath);
+            return ValidateDataFolder(massLynxDataDirectoryPath);
 
         }
 
@@ -833,22 +846,22 @@ namespace MSFileInfoScanner
             return true;
         }
 
-        private bool LoadMSFileHeader(ref udtMSDataType udtThisMSData, string strMLynxDataFolderPath)
+        private bool LoadMSFileHeader(ref udtMSDataType udtThisMSData, string massLynxDataDirectoryPath)
         {
 
-            // Verifies that strMLynxDataFolderPath exists
+            // Verifies that massLynxDataDirectoryPath exists
             // Loads the header information for the given MassLynx folder path
             // Returns True if success, false if failure
 
-            var blnSuccess = false;
+            var success = false;
 
             try
             {
 
-                if (Directory.Exists(strMLynxDataFolderPath))
+                if (Directory.Exists(massLynxDataDirectoryPath))
                 {
                     // Read the header information from the current file
-                    blnSuccess = NativeIOReadHeader(strMLynxDataFolderPath, out udtThisMSData.HeaderInfo);
+                    success = NativeIOReadHeader(massLynxDataDirectoryPath, out udtThisMSData.HeaderInfo);
 
                     udtThisMSData.FunctionCount = 0;
                 }
@@ -863,7 +876,7 @@ namespace MSFileInfoScanner
             {
                 Console.WriteLine("Error in clsMassLynxNativeIO.LoadMSFileHeader:" + ex.Message);
 
-                if (!blnSuccess)
+                if (!success)
                 {
                     // Assume invalid data file
                     SetErrorCode(eErrorCodeConstants.DataFolderReadError);
@@ -871,10 +884,10 @@ namespace MSFileInfoScanner
                 }
             }
 
-            return blnSuccess;
+            return success;
         }
 
-        private int LoadMSFunctionInfo(ref udtMSDataType udtThisMSData, string strMLynxDataFolderPath)
+        private int LoadMSFunctionInfo(ref udtMSDataType udtThisMSData, string massLynxDataDirectoryPath)
         {
 
             // Determines the number of functions in the given data file
@@ -882,86 +895,92 @@ namespace MSFileInfoScanner
 
             var udtScanIndexRecord = default(udtScanIndexRecordType);
 
-            var blnFileValidated = false;
+            var fileValidated = false;
 
             try
             {
 
-                var ioFileInfo = new FileInfo(strMLynxDataFolderPath);
-                string strCleanMLynxDataFolderPath;
+                var massLynxFile = new FileInfo(massLynxDataDirectoryPath);
+                string cleanMassLynxDataFolderPath;
 
-                if (ioFileInfo.Exists)
+                if (massLynxFile.Exists)
                 {
-                    // strMLynxDataFolderPath contains a file; remove the filename from strMLynxDataFolderPath
-                    strCleanMLynxDataFolderPath = ioFileInfo.Directory.FullName;
+                    // massLynxDataDirectoryPath contains a file; remove the filename from massLynxDataDirectoryPath
+                    if (massLynxFile.Directory == null)
+                    {
+                        Console.WriteLine("Unable to determine the parent directory of " + massLynxFile.FullName);
+                        return 0;
+                    }
+
+                    cleanMassLynxDataFolderPath = massLynxFile.Directory.FullName;
                 }
                 else
                 {
-                    strCleanMLynxDataFolderPath = string.Copy(strMLynxDataFolderPath);
+                    cleanMassLynxDataFolderPath = string.Copy(massLynxDataDirectoryPath);
                 }
 
-                if (LoadMSFileHeader(ref udtThisMSData, strCleanMLynxDataFolderPath))
+                if (LoadMSFileHeader(ref udtThisMSData, cleanMassLynxDataFolderPath))
                 {
-                    udtThisMSData.UserSuppliedDataDirPath = strMLynxDataFolderPath;
-                    udtThisMSData.CurrentDataDirPath = strCleanMLynxDataFolderPath;
+                    udtThisMSData.UserSuppliedDataDirPath = massLynxDataDirectoryPath;
+                    udtThisMSData.CurrentDataDirPath = cleanMassLynxDataFolderPath;
 
                     // Use sFuncInfo to read the header information from the current file
-                    udtThisMSData.FunctionCount = NativeIOGetFunctionCount(ref strCleanMLynxDataFolderPath);
+                    udtThisMSData.FunctionCount = NativeIOGetFunctionCount(ref cleanMassLynxDataFolderPath);
 
                     if (udtThisMSData.FunctionCount > 0)
                     {
-                        blnFileValidated = true;
+                        fileValidated = true;
                         udtThisMSData.FunctionInfo = new udtMSFunctionInfoType[udtThisMSData.FunctionCount + 1];
 
                         // Note that the function array is 1-based
-                        for (var lngFunctionNumber = 1; lngFunctionNumber <= udtThisMSData.FunctionCount; lngFunctionNumber++)
+                        for (var functionNumber = 1; functionNumber <= udtThisMSData.FunctionCount; functionNumber++)
                         {
-                            InitializeFunctionInfo(ref udtThisMSData.FunctionInfo[lngFunctionNumber], lngFunctionNumber);
+                            InitializeFunctionInfo(ref udtThisMSData.FunctionInfo[functionNumber], functionNumber);
 
-                            if (NativeIOGetFunctionInfo(strCleanMLynxDataFolderPath, ref udtThisMSData.FunctionInfo[lngFunctionNumber]))
+                            if (NativeIOGetFunctionInfo(cleanMassLynxDataFolderPath, ref udtThisMSData.FunctionInfo[functionNumber]))
                             {
-                                float sngStartMass;
-                                float sngEndMass;
-                                if (udtThisMSData.FunctionInfo[lngFunctionNumber].ScanCount > 0)
+                                float startMass;
+                                float endMass;
+                                if (udtThisMSData.FunctionInfo[functionNumber].ScanCount > 0)
                                 {
-                                    NativeIOGetScanInfo(strCleanMLynxDataFolderPath, udtThisMSData.FunctionInfo[lngFunctionNumber], 1, ref udtScanIndexRecord);
+                                    NativeIOGetScanInfo(cleanMassLynxDataFolderPath, udtThisMSData.FunctionInfo[functionNumber], 1, ref udtScanIndexRecord);
 
                                     // ToDo: Get the Start and End mass for the given scan
-                                    sngStartMass = 0;
-                                    sngEndMass = 0;
+                                    startMass = 0;
+                                    endMass = 0;
 
                                     // Since the first scan may not have the full mass range, we'll also check a scan
                                     // in the middle of the file as a random comparison
-                                    if (udtThisMSData.FunctionInfo[lngFunctionNumber].ScanCount >= 3)
+                                    if (udtThisMSData.FunctionInfo[functionNumber].ScanCount >= 3)
                                     {
-                                        //Call sScanStats.GetScanStats(strCleanMLynxDataFolderPath, lngFunctionNumber, .ProcessNumber, CLng(.ScanCount / 3))
-                                        //If sScanStats.LoMass < sngStartMass Then sngStartMass = sScanStats.LoMass
-                                        //If sScanStats.HiMass > sngEndMass Then sngEndMass = sScanStats.HiMass
+                                        //Call sScanStats.GetScanStats(cleanMassLynxDataFolderPath, functionNumber, .ProcessNumber, CLng(.ScanCount / 3))
+                                        //If sScanStats.LoMass < startMass Then startMass = scanStats.LoMass
+                                        //If sScanStats.HiMass > endMass Then endMass = scanStats.HiMass
                                     }
 
-                                    if (udtThisMSData.FunctionInfo[lngFunctionNumber].ScanCount >= 2)
+                                    if (udtThisMSData.FunctionInfo[functionNumber].ScanCount >= 2)
                                     {
-                                        //Call sScanStats.GetScanStats(strCleanMLynxDataFolderPath, lngFunctionNumber, .ProcessNumber, CLng(.ScanCount / 2))
-                                        //If sScanStats.LoMass < sngStartMass Then sngStartMass = sScanStats.LoMass
-                                        //If sScanStats.HiMass > sngEndMass Then sngEndMass = sScanStats.HiMass
+                                        //Call sScanStats.GetScanStats(cleanMassLynxDataFolderPath, functionNumber, .ProcessNumber, CLng(.ScanCount / 2))
+                                        //If sScanStats.LoMass < startMass Then startMass = scanStats.LoMass
+                                        //If sScanStats.HiMass > endMass Then endMass = scanStats.HiMass
                                     }
 
-                                    //Call sScanStats.GetScanStats(strCleanMLynxDataFolderPath, lngFunctionNumber, .ProcessNumber, .ScanCount)
-                                    //If sScanStats.LoMass < sngStartMass Then sngStartMass = sScanStats.LoMass
-                                    //If sScanStats.HiMass > sngEndMass Then sngEndMass = sScanStats.HiMass
+                                    //Call sScanStats.GetScanStats(cleanMassLynxDataFolderPath, functionNumber, .ProcessNumber, .ScanCount)
+                                    //If sScanStats.LoMass < startMass Then startMass = scanStats.LoMass
+                                    //If sScanStats.HiMass > endMass Then endMass = scanStats.HiMass
                                 }
                                 else
                                 {
-                                    sngStartMass = 0;
-                                    sngEndMass = 0;
+                                    startMass = 0;
+                                    endMass = 0;
                                 }
 
-                                udtThisMSData.FunctionInfo[lngFunctionNumber].StartMass = sngStartMass;
-                                udtThisMSData.FunctionInfo[lngFunctionNumber].EndMass = sngEndMass;
+                                udtThisMSData.FunctionInfo[functionNumber].StartMass = startMass;
+                                udtThisMSData.FunctionInfo[functionNumber].EndMass = endMass;
                             }
                             else
                             {
-                                udtThisMSData.FunctionInfo[lngFunctionNumber].ScanCount = 0;
+                                udtThisMSData.FunctionInfo[functionNumber].ScanCount = 0;
                             }
                         }
                     }
@@ -987,7 +1006,7 @@ namespace MSFileInfoScanner
             {
                 Console.WriteLine("Error in clsMassLynxNativeIO.LoadMSFunctionInfo:" + ex.Message);
 
-                if (!blnFileValidated)
+                if (!fileValidated)
                 {
                     // Assume invalid data file
                     SetErrorCode(eErrorCodeConstants.DataFolderReadError);
@@ -999,12 +1018,12 @@ namespace MSFileInfoScanner
 
         }
 
-        private void LoadMSScanHeader(ref udtScanStatsType udtScanStatsSingleScan, udtMSDataType udtThisMSData, int lngFunctionNumber, int lngScanNumber)
+        private void LoadMSScanHeader(ref udtScanStatsType udtScanStatsSingleScan, udtMSDataType udtThisMSData, int functionNumber, int scanNumber)
         {
             // Loads information on the given scan for the given function
             // Returns the number of peaks in the scan; returns 0 if an error
             //
-            // Note that the calling function must validate that lngFunctionNumber is valid
+            // Note that the calling function must validate that functionNumber is valid
             // Since this function uses mMSData.FunctionInfo, one must call NativeIOGetFunctionInfo
             //  to populate .FunctionInfo before calling this function
 
@@ -1028,12 +1047,12 @@ namespace MSFileInfoScanner
                 udtScanStatsSingleScan.TIC = 0;
 
                 udtScanStatsSingleScan.PeakCount = 0;
-                udtScanStatsSingleScan.RetnTime = 0;
+                udtScanStatsSingleScan.RetentionTime = 0;
 
-                if (NativeIOGetScanInfo(udtThisMSData.CurrentDataDirPath, udtThisMSData.FunctionInfo[lngFunctionNumber], lngScanNumber, ref udtScanIndexRecord))
+                if (NativeIOGetScanInfo(udtThisMSData.CurrentDataDirPath, udtThisMSData.FunctionInfo[functionNumber], scanNumber, ref udtScanIndexRecord))
                 {
                     udtScanStatsSingleScan.Calibrated = udtScanIndexRecord.ScanContainsCalibratedMasses;
-                    udtScanStatsSingleScan.Continuum = udtScanIndexRecord.ContiuumDataOverride;
+                    udtScanStatsSingleScan.Continuum = udtScanIndexRecord.ContinuumDataOverride;
                     udtScanStatsSingleScan.Overload = udtScanIndexRecord.ScanOverload;
 
                     udtScanStatsSingleScan.MassStart = udtScanIndexRecord.LoMass;
@@ -1044,7 +1063,7 @@ namespace MSFileInfoScanner
                     udtScanStatsSingleScan.TIC = udtScanIndexRecord.TicValue;
 
                     udtScanStatsSingleScan.PeakCount = udtScanIndexRecord.NumSpectralPeaks;
-                    udtScanStatsSingleScan.RetnTime = udtScanIndexRecord.ScanTime;
+                    udtScanStatsSingleScan.RetentionTime = udtScanIndexRecord.ScanTime;
 
                     udtScanStatsSingleScan.SetMass = udtScanIndexRecord.SetMass;
 
@@ -1061,32 +1080,32 @@ namespace MSFileInfoScanner
             mErrorCode = eNewErrorCode;
         }
 
-        private bool ValidateDataFolder(string strMLynxDataFolderPath)
+        private bool ValidateDataFolder(string massLynxDataDirectoryPath)
         {
             // Returns True if valid, False if not valid
 
             mErrorCode = eErrorCodeConstants.NoError;
-            var blnValidDataFolder = false;
+            var validDataFolder = false;
 
-            if (string.IsNullOrEmpty(strMLynxDataFolderPath))
+            if (string.IsNullOrEmpty(massLynxDataDirectoryPath))
             {
                 return false;
             }
             else
             {
-                strMLynxDataFolderPath = strMLynxDataFolderPath.Trim();
+                massLynxDataDirectoryPath = massLynxDataDirectoryPath.Trim();
             }
             if (mMSData.UserSuppliedDataDirPath == null)
             {
                 mMSData.UserSuppliedDataDirPath = string.Empty;
             }
 
-            if (mMSData.FunctionCount == 0 || mMSData.UserSuppliedDataDirPath.ToLower() != strMLynxDataFolderPath.ToLower())
+            if (mMSData.FunctionCount == 0 || mMSData.UserSuppliedDataDirPath.ToLower() != massLynxDataDirectoryPath.ToLower())
             {
-                var lngNumFunctions = LoadMSFunctionInfo(ref mMSData, strMLynxDataFolderPath);
-                if (lngNumFunctions > 0)
+                var numFunctions = LoadMSFunctionInfo(ref mMSData, massLynxDataDirectoryPath);
+                if (numFunctions > 0)
                 {
-                    blnValidDataFolder = true;
+                    validDataFolder = true;
                 }
                 else
                 {
@@ -1096,11 +1115,11 @@ namespace MSFileInfoScanner
             }
             else
             {
-                blnValidDataFolder = true;
+                validDataFolder = true;
                 mErrorCode = eErrorCodeConstants.NoError;
             }
 
-            return blnValidDataFolder;
+            return validDataFolder;
 
         }
 
@@ -1108,18 +1127,18 @@ namespace MSFileInfoScanner
         // The following functions are used for Native file IO
         //---------------------------------------------------------
 
-        private bool ConstructValidDataFilePath(string strDesiredDataFilePath, out string dataFilePath)
+        private bool ConstructValidDataFilePath(string desiredDataFilePath, out string dataFilePath)
         {
 
             // Make sure the dataFilePath contains ".raw"
-            if (strDesiredDataFilePath.ToLower().IndexOf(".raw", StringComparison.Ordinal) < 0)
+            if (desiredDataFilePath.ToLower().IndexOf(".raw", StringComparison.Ordinal) < 0)
             {
                 SetErrorCode(eErrorCodeConstants.InvalidDataFolderPath);
                 dataFilePath = string.Empty;
                 return false;
             }
 
-            dataFilePath = strDesiredDataFilePath;
+            dataFilePath = desiredDataFilePath;
             return true;
         }
 
@@ -1163,7 +1182,7 @@ namespace MSFileInfoScanner
             maskSpectralPeak = (int)CreateMask(0, 21);
             maskSegment = (int)CreateMask(22, 26);
             maskUseFollowingContinuum = (int)CreateMask(27, 27);
-            maskContiuumDataOverride = (int)CreateMask(28, 28);
+            maskContinuumDataOverride = (int)CreateMask(28, 28);
             maskScanContainsMolecularMasses = (int)CreateMask(29, 29);
             maskScanContainsCalibratedMasses = (int)CreateMask(30, 30);
 
@@ -1188,45 +1207,45 @@ namespace MSFileInfoScanner
 
         }
 
-        private int CLngSafe(string strValue)
+        private int CIntSafe(string valueText)
         {
-            if (int.TryParse(strValue, out var value))
+            if (int.TryParse(valueText, out var value))
             {
                 return value;
             }
             return 0;
         }
 
-        private float CSngSafe(string strValue)
+        private float CFloatSafe(string valueText)
         {
-            if (float.TryParse(strValue, out var value))
+            if (float.TryParse(valueText, out var value))
             {
                 return value;
             }
             return 0;
         }
 
-        private string GetFunctionNumberZeroPadded(int lngFunctionNumber)
+        private string GetFunctionNumberZeroPadded(int functionNumber)
         {
-            return lngFunctionNumber.ToString().PadLeft(3, '0');
+            return functionNumber.ToString().PadLeft(3, '0');
         }
 
-        private int NativeIOGetFunctionCount(ref string DataDirPath)
+        private int NativeIOGetFunctionCount(ref string dataDirPath)
         {
             // Returns the number of functions, 0 if an error
-            var lngFunctionCount = 0;
+            var functionCount = 0;
 
             try
             {
 
-                var strFunctnsFile = Path.Combine(DataDirPath, "_functns.inf");
-                var fileInfo = new FileInfo(strFunctnsFile);
+                var functionsFilePath = Path.Combine(dataDirPath, "_functns.inf");
+                var functionsFile = new FileInfo(functionsFilePath);
 
-                lngFunctionCount = 0;
+                functionCount = 0;
 
-                if (fileInfo.Exists)
+                if (functionsFile.Exists)
                 {
-                    lngFunctionCount = (int)(fileInfo.Length / NATIVE_FUNCTION_INFO_SIZE_BYTES);
+                    functionCount = (int)(functionsFile.Length / NATIVE_FUNCTION_INFO_SIZE_BYTES);
                 }
 
             }
@@ -1235,7 +1254,7 @@ namespace MSFileInfoScanner
                 Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOGetFunctionCount:" + ex.Message);
             }
 
-            return lngFunctionCount;
+            return functionCount;
 
         }
 
@@ -1249,21 +1268,21 @@ namespace MSFileInfoScanner
             try
             {
 
-                var strFunctnsFile = Path.Combine(dataDirPath, "_functns.inf");
-                var fileInfo = new FileInfo(strFunctnsFile);
+                var functionsFilePath = Path.Combine(dataDirPath, "_functns.inf");
+                var functionsFile = new FileInfo(functionsFilePath);
 
-                int lngFunctionCount;
+                int functionCount;
 
-                if (!fileInfo.Exists)
+                if (!functionsFile.Exists)
                 {
                     return false;
                 }
 
-                using (var brInFile = new BinaryReader(new FileStream(strFunctnsFile, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using (var reader = new BinaryReader(new FileStream(functionsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
-                    lngFunctionCount = (int)(fileInfo.Length / NATIVE_FUNCTION_INFO_SIZE_BYTES);
+                    functionCount = (int)(functionsFile.Length / NATIVE_FUNCTION_INFO_SIZE_BYTES);
 
-                    if (udtMSFunctionInfo.FunctionNumber < 1 || udtMSFunctionInfo.FunctionNumber > lngFunctionCount)
+                    if (udtMSFunctionInfo.FunctionNumber < 1 || udtMSFunctionInfo.FunctionNumber > functionCount)
                     {
                         return false;
                     }
@@ -1272,57 +1291,57 @@ namespace MSFileInfoScanner
                     // The first byte is 1, and that is where Function 1 can be found
                     // Function 2 can be found NATIVE_FUNCTION_INFO_SIZE_BYTES+1 bytes into the file
 
-                    brInFile.BaseStream.Seek((udtMSFunctionInfo.FunctionNumber - 1) * NATIVE_FUNCTION_INFO_SIZE_BYTES,
+                    reader.BaseStream.Seek((udtMSFunctionInfo.FunctionNumber - 1) * NATIVE_FUNCTION_INFO_SIZE_BYTES,
                                              SeekOrigin.Begin);
 
-                    udtNativeFunctionInfo.PackedFunctionInfo = brInFile.ReadInt16();
-                    udtNativeFunctionInfo.CycleTime = brInFile.ReadSingle();
-                    udtNativeFunctionInfo.InterScanDelay = brInFile.ReadSingle();
-                    udtNativeFunctionInfo.StartRT = brInFile.ReadSingle();
-                    udtNativeFunctionInfo.EndRT = brInFile.ReadSingle();
-                    udtNativeFunctionInfo.ScanCount = brInFile.ReadInt32();
+                    udtNativeFunctionInfo.PackedFunctionInfo = reader.ReadInt16();
+                    udtNativeFunctionInfo.CycleTime = reader.ReadSingle();
+                    udtNativeFunctionInfo.InterScanDelay = reader.ReadSingle();
+                    udtNativeFunctionInfo.StartRT = reader.ReadSingle();
+                    udtNativeFunctionInfo.EndRT = reader.ReadSingle();
+                    udtNativeFunctionInfo.ScanCount = reader.ReadInt32();
 
                     // Packed MS/MS Info:
                     //   bits 0-7: collision energy
                     //   bits 8-15: segment/channel count
-                    udtNativeFunctionInfo.PackedMSMSInfo = brInFile.ReadInt16();
+                    udtNativeFunctionInfo.PackedMSMSInfo = reader.ReadInt16();
 
                     // The following are more MS/MS parameters
-                    udtNativeFunctionInfo.FunctionSetMass = brInFile.ReadSingle();
-                    udtNativeFunctionInfo.InterSegmentChannelTime = brInFile.ReadSingle();
+                    udtNativeFunctionInfo.FunctionSetMass = reader.ReadSingle();
+                    udtNativeFunctionInfo.InterSegmentChannelTime = reader.ReadSingle();
 
                     // Up to 32 segment scans can be conducted for a MS/MS run
                     // The following three arrays store the segment times, start, and end masses
-                    for (var intIndex = 0; intIndex <= 31; intIndex++)
+                    for (var index = 0; index <= 31; index++)
                     {
-                        udtNativeFunctionInfo.SegmentScanTimes[intIndex] = brInFile.ReadInt32();
+                        udtNativeFunctionInfo.SegmentScanTimes[index] = reader.ReadInt32();
                     }
-                    for (var intIndex = 0; intIndex <= 31; intIndex++)
+                    for (var index = 0; index <= 31; index++)
                     {
-                        udtNativeFunctionInfo.SegmentStartMasses[intIndex] = brInFile.ReadInt32();
+                        udtNativeFunctionInfo.SegmentStartMasses[index] = reader.ReadInt32();
                     }
-                    for (var intIndex = 0; intIndex <= 31; intIndex++)
+                    for (var index = 0; index <= 31; index++)
                     {
-                        udtNativeFunctionInfo.SegmentEndMasses[intIndex] = brInFile.ReadInt32();
+                        udtNativeFunctionInfo.SegmentEndMasses[index] = reader.ReadInt32();
                     }
 
                 } // end using
 
-                var blnSuccess = true;
+                var success = true;
 
                 if (udtNativeFunctionInfo.PackedFunctionInfo == 0 &&
                     Math.Abs(udtNativeFunctionInfo.CycleTime) < float.Epsilon &&
                     Math.Abs(udtNativeFunctionInfo.InterScanDelay) < float.Epsilon)
                 {
                     // Empty function record; see if file even exists
-                    if (File.Exists(Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(lngFunctionCount + 1) + ".dat")))
+                    if (File.Exists(Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(functionCount + 1) + ".dat")))
                     {
                         // Nope, file does not exist, function is invalid
-                        blnSuccess = false;
+                        success = false;
                     }
                 }
 
-                if (blnSuccess)
+                if (success)
                 {
                     // Copy data from udtNativeFunctionInfo to udtFunctionInfo
                     udtMSFunctionInfo.FunctionTypeID = (short)(udtNativeFunctionInfo.PackedFunctionInfo & maskFunctionType);
@@ -1404,14 +1423,14 @@ namespace MSFileInfoScanner
                     udtMSFunctionInfo.EndRT = udtNativeFunctionInfo.EndRT;
 
                     udtMSFunctionInfo.MsMsCollisionEnergy = (short)(udtNativeFunctionInfo.PackedMSMSInfo & maskCollisionEnergy);
-                    udtMSFunctionInfo.MSMSSegmentOrChannelCount = (short)(NumConversion.Int32ToUnsigned(udtNativeFunctionInfo.PackedMSMSInfo) / 256f);      // 256 = 2^8
+                    udtMSFunctionInfo.MSMSSegmentOrChannelCount = (short)(NumberConversion.Int32ToUnsigned(udtNativeFunctionInfo.PackedMSMSInfo) / 256f);      // 256 = 2^8
 
                     udtMSFunctionInfo.FunctionSetMass = udtNativeFunctionInfo.FunctionSetMass;
                     udtMSFunctionInfo.InterSegmentChannelTime = udtNativeFunctionInfo.InterSegmentChannelTime;
 
                     // Since udtNativeFunctionInfo.ScanCount is always 0, we need to use NativeIOGetScanCount instead
-                    var lngScanCount = NativeIOGetScanCount(dataDirPath, ref udtMSFunctionInfo);
-                    if (udtMSFunctionInfo.ScanCount != lngScanCount)
+                    var scanCount = NativeIOGetScanCount(dataDirPath, ref udtMSFunctionInfo);
+                    if (udtMSFunctionInfo.ScanCount != scanCount)
                     {
                         // This is unexpected
                         Debug.WriteLine("Scan count values do not agree in NativeIOGetFunctionInfo");
@@ -1419,7 +1438,7 @@ namespace MSFileInfoScanner
 
                 }
 
-                return blnSuccess;
+                return success;
             }
             catch (Exception ex)
             {
@@ -1440,22 +1459,22 @@ namespace MSFileInfoScanner
             try
             {
 
-                var strFuncIdxFile = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(udtMSFunctionInfo.FunctionNumber) + ".idx");
-                var ioFileInfo = new FileInfo(strFuncIdxFile);
+                var indexFilePath = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(udtMSFunctionInfo.FunctionNumber) + ".idx");
+                var indexFile = new FileInfo(indexFilePath);
 
-                var lngNumberOfScansInFunction = 0;
-                if (ioFileInfo.Exists)
+                var numberOfScansInFunction = 0;
+                if (indexFile.Exists)
                 {
                     // The ScanCount stored in the function index file is always 0 rather than the correct number of scans
                     // Thus, we can determine the number of scans in the function by dividing the size of the file (in bytes)
                     //  by the size of each udtRawScanIndexRecordType
 
-                    lngNumberOfScansInFunction = (int)(ioFileInfo.Length / RAW_SCAN_INDEX_RECORD_SIZE);
-                    udtMSFunctionInfo.ScanCount = lngNumberOfScansInFunction;
+                    numberOfScansInFunction = (int)(indexFile.Length / RAW_SCAN_INDEX_RECORD_SIZE);
+                    udtMSFunctionInfo.ScanCount = numberOfScansInFunction;
 
                 }
 
-                return lngNumberOfScansInFunction;
+                return numberOfScansInFunction;
             }
             catch (Exception ex)
             {
@@ -1468,9 +1487,9 @@ namespace MSFileInfoScanner
         private bool NativeIOGetScanInfo(
             string dataDirPath,
             udtMSFunctionInfoType udtMSFunctionInfo,
-            int lngScanNumber,
+            int scanNumber,
             ref udtScanIndexRecordType udtScanIndexRecord,
-            bool blnScanOffsetAndPeakCountOnly = false)
+            bool scanOffsetAndPeakCountOnly = false)
         {
 
             // Returns information on the given scan for the given function
@@ -1487,50 +1506,50 @@ namespace MSFileInfoScanner
             // When this udt is used, its values are copied to udtNativeScanIndexRecord directly after reading
             var udtNativeScanIndexRecordCompressedScan = default(udtRawScanIndexRecordCompressedScanType);
 
-            var blnSuccess = false;
+            var success = false;
 
             try
             {
 
-                var strFuncIdxFile = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(udtMSFunctionInfo.FunctionNumber) + ".idx");
-                // strFuncStsFile = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(ref udtMSFunctionInfo.FunctionNumber) + ".sts");
+                var indexFilePath = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(udtMSFunctionInfo.FunctionNumber) + ".idx");
+                // indexFilePath  = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(ref udtMSFunctionInfo.FunctionNumber) + ".sts");
 
-                var ioFileInfo = new FileInfo(strFuncIdxFile);
+                var indexFile = new FileInfo(indexFilePath);
 
-                if (!ioFileInfo.Exists)
+                if (!indexFile.Exists)
                 {
                     return false;
                 }
 
-                var lngNumberOfScansInFunction = (int)(ioFileInfo.Length / RAW_SCAN_INDEX_RECORD_SIZE);
+                var numberOfScansInFunction = (int)(indexFile.Length / RAW_SCAN_INDEX_RECORD_SIZE);
 
-                using (var brInFile = new BinaryReader(new FileStream(strFuncIdxFile, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using (var reader = new BinaryReader(new FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
 
                     // The ScanCount stored in the function index file is always 0 rather than the correct number of scans
                     // Thus, we can determine the number of scans in the function by dividing the size of the file (in bytes)
                     //  by the size of each udtRawScanIndexRecordType
 
-                    if (lngScanNumber < 1)
-                        lngScanNumber = 1;
+                    if (scanNumber < 1)
+                        scanNumber = 1;
 
-                    if (lngNumberOfScansInFunction > 0 && lngScanNumber <= lngNumberOfScansInFunction)
+                    if (numberOfScansInFunction > 0 && scanNumber <= numberOfScansInFunction)
                     {
                         // Just read the record for this scan
 
-                        // Jump to the appropriate file offset based on lngScanNumber
-                        brInFile.BaseStream.Seek((lngScanNumber - 1) * RAW_SCAN_INDEX_RECORD_SIZE, SeekOrigin.Begin);
+                        // Jump to the appropriate file offset based on scanNumber
+                        reader.BaseStream.Seek((scanNumber - 1) * RAW_SCAN_INDEX_RECORD_SIZE, SeekOrigin.Begin);
 
                         if (udtMSFunctionInfo.AcquisitionDataType == 0)
                         {
                             // File saved with Acquisition Data Type 0
 
-                            udtNativeScanIndexRecordCompressedScan.StartScanOffset = brInFile.ReadInt32();
-                            udtNativeScanIndexRecordCompressedScan.PackedScanInfo = brInFile.ReadInt32();
-                            udtNativeScanIndexRecordCompressedScan.TicValue = brInFile.ReadSingle();
-                            udtNativeScanIndexRecordCompressedScan.ScanTime = brInFile.ReadSingle();
-                            udtNativeScanIndexRecordCompressedScan.PackedBasePeakInfo = brInFile.ReadInt32();
-                            udtNativeScanIndexRecordCompressedScan.Spare = brInFile.ReadInt16();
+                            udtNativeScanIndexRecordCompressedScan.StartScanOffset = reader.ReadInt32();
+                            udtNativeScanIndexRecordCompressedScan.PackedScanInfo = reader.ReadInt32();
+                            udtNativeScanIndexRecordCompressedScan.TicValue = reader.ReadSingle();
+                            udtNativeScanIndexRecordCompressedScan.ScanTime = reader.ReadSingle();
+                            udtNativeScanIndexRecordCompressedScan.PackedBasePeakInfo = reader.ReadInt32();
+                            udtNativeScanIndexRecordCompressedScan.Spare = reader.ReadInt16();
 
                             // Copy from udtNativeScanIndexRecordCompressedScan to udtNativeScanIndexRecord
                             udtNativeScanIndexRecord.StartScanOffset = udtNativeScanIndexRecordCompressedScan.StartScanOffset;
@@ -1547,33 +1566,33 @@ namespace MSFileInfoScanner
                         else
                         {
                             // File saved with Acquisition Data Type other than 0
-                            udtNativeScanIndexRecord.StartScanOffset = brInFile.ReadInt32();
-                            udtNativeScanIndexRecord.PackedScanInfo = brInFile.ReadInt32();
-                            udtNativeScanIndexRecord.TicValue = brInFile.ReadSingle();
-                            udtNativeScanIndexRecord.ScanTime = brInFile.ReadSingle();
-                            udtNativeScanIndexRecord.PackedBasePeakIntensity = brInFile.ReadInt16();
-                            udtNativeScanIndexRecord.PackedBasePeakInfo = brInFile.ReadInt32();
+                            udtNativeScanIndexRecord.StartScanOffset = reader.ReadInt32();
+                            udtNativeScanIndexRecord.PackedScanInfo = reader.ReadInt32();
+                            udtNativeScanIndexRecord.TicValue = reader.ReadSingle();
+                            udtNativeScanIndexRecord.ScanTime = reader.ReadSingle();
+                            udtNativeScanIndexRecord.PackedBasePeakIntensity = reader.ReadInt16();
+                            udtNativeScanIndexRecord.PackedBasePeakInfo = reader.ReadInt32();
                         }
 
-                        blnSuccess = true;
+                        success = true;
                     }
                 }
 
-                if (blnSuccess)
+                if (success)
                 {
                     udtScanIndexRecord.StartScanOffset = udtNativeScanIndexRecord.StartScanOffset;
 
                     udtScanIndexRecord.NumSpectralPeaks = udtNativeScanIndexRecord.PackedScanInfo & maskSpectralPeak;
 
-                    if (!blnScanOffsetAndPeakCountOnly)
+                    if (!scanOffsetAndPeakCountOnly)
                     {
                         // 4194304 = 2^22
                         udtScanIndexRecord.SegmentNumber = (short)((short)(udtNativeScanIndexRecord.PackedScanInfo & maskSegment) / 4194304);
 
-                        udtScanIndexRecord.UseFollowingContinuum = NumConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskUseFollowingContinuum);
-                        udtScanIndexRecord.ContiuumDataOverride = NumConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskContiuumDataOverride);
-                        udtScanIndexRecord.ScanContainsMolecularMasses = NumConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskScanContainsMolecularMasses);
-                        udtScanIndexRecord.ScanContainsCalibratedMasses = NumConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskScanContainsCalibratedMasses);
+                        udtScanIndexRecord.UseFollowingContinuum = NumberConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskUseFollowingContinuum);
+                        udtScanIndexRecord.ContinuumDataOverride = NumberConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskContinuumDataOverride);
+                        udtScanIndexRecord.ScanContainsMolecularMasses = NumberConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskScanContainsMolecularMasses);
+                        udtScanIndexRecord.ScanContainsCalibratedMasses = NumberConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskScanContainsCalibratedMasses);
                         if (udtNativeScanIndexRecord.PackedScanInfo != Math.Abs(udtNativeScanIndexRecord.PackedScanInfo))
                         {
                             udtScanIndexRecord.ScanOverload = true;
@@ -1598,7 +1617,7 @@ namespace MSFileInfoScanner
                     }
 
                 }
-                return blnSuccess;
+                return success;
             }
             catch (Exception ex)
             {
@@ -1608,22 +1627,22 @@ namespace MSFileInfoScanner
 
         }
 
-        private void NativeIOParseCalibrationCoeffs(
-            string strTextToParse,
-            out short intCalibrationCoeffCount,
-            IList<double> dblCalibrationCoeffs,
-            out short intCalibrationTypeID)
+        private void NativeIOParseCalibrationCoefficients(
+            string textToParse,
+            out short calibrationCoefficientCount,
+            IList<double> calibrationCoefficients,
+            out short calibrationTypeID)
         {
-            var strCalParameters = strTextToParse.Split(',');
-            intCalibrationCoeffCount = 0;
-            intCalibrationTypeID = 0;
+            var calibrationParameters = textToParse.Split(',');
+            calibrationCoefficientCount = 0;
+            calibrationTypeID = 0;
 
-            for (var intCalIndex = 0; intCalIndex <= strCalParameters.Length - 1; intCalIndex++)
+            for (var calIndex = 0; calIndex <= calibrationParameters.Length - 1; calIndex++)
             {
-                if (double.TryParse(strCalParameters[intCalIndex], out var paramValue))
+                if (double.TryParse(calibrationParameters[calIndex], out var paramValue))
                 {
-                    dblCalibrationCoeffs[intCalIndex] = paramValue;
-                    intCalibrationCoeffCount++;
+                    calibrationCoefficients[calIndex] = paramValue;
+                    calibrationCoefficientCount++;
                 }
                 else
                 {
@@ -1632,14 +1651,14 @@ namespace MSFileInfoScanner
                 }
             }
 
-            for (var intCalIndex = strCalParameters.Length - 1; intCalIndex >= 0; intCalIndex += -1)
+            for (var calIndex = calibrationParameters.Length - 1; calIndex >= 0; calIndex += -1)
             {
-                if (strCalParameters[intCalIndex].ToUpper().StartsWith("T"))
+                if (calibrationParameters[calIndex].ToUpper().StartsWith("T"))
                 {
-                    strCalParameters[intCalIndex] = strCalParameters[intCalIndex].Substring(1);
-                    if (short.TryParse(strCalParameters[intCalIndex], out var calTypeID))
+                    calibrationParameters[calIndex] = calibrationParameters[calIndex].Substring(1);
+                    if (short.TryParse(calibrationParameters[calIndex], out var calTypeID))
                     {
-                        intCalibrationTypeID = calTypeID;
+                        calibrationTypeID = calTypeID;
                     }
                     break;
                 }
@@ -1661,46 +1680,46 @@ namespace MSFileInfoScanner
             try
             {
 
-                var strFilePath = Path.Combine(udtThisMSData.CurrentDataDirPath, "_HEADER.TXT");
-                var fileInfo = new FileInfo(strFilePath);
+                var headerFilePath = Path.Combine(udtThisMSData.CurrentDataDirPath, "_HEADER.TXT");
+                var headerFile = new FileInfo(headerFilePath);
 
-                if (!fileInfo.Exists)
+                if (!headerFile.Exists)
                 {
                     return false;
                 }
 
-                using (var srInFile = new StreamReader(strFilePath))
+                using (var reader = new StreamReader(headerFilePath))
                 {
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var strLineIn = srInFile.ReadLine();
+                        var dataLine = reader.ReadLine();
 
-                        if (string.IsNullOrWhiteSpace(strLineIn))
+                        if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
 
                         // All valid lines start with $$
-                        if (!strLineIn.StartsWith("$$"))
+                        if (!dataLine.StartsWith("$$"))
                             continue;
 
                         // Remove the first three characters (we actually remove the first 2 then Trim, since the third character is supposed to be a space)
 
-                        strLineIn = strLineIn.Substring(2).Trim();
-                        var intColonLoc = strLineIn.IndexOf(':');
-                        var strKeyValue = strLineIn.Substring(intColonLoc + 1).Trim();
+                        dataLine = dataLine.Substring(2).Trim();
+                        var colonIndex = dataLine.IndexOf(':');
+                        var keyValue = dataLine.Substring(colonIndex + 1).Trim();
 
-                        int lngFunctionNumber;
-                        if (strLineIn.ToUpper().StartsWith(CAL_FUNCTION_NAME))
+                        int functionNumber;
+                        if (dataLine.ToUpper().StartsWith(CAL_FUNCTION_NAME))
                         {
                             // Calibration equation for one of the functions
-                            lngFunctionNumber = CLngSafe(strLineIn.Substring(CAL_FUNCTION_NAME.Length, intColonLoc - CAL_FUNCTION_NAME.Length));
-                            if (lngFunctionNumber >= 1 && lngFunctionNumber <= udtThisMSData.FunctionCount)
+                            functionNumber = CIntSafe(dataLine.Substring(CAL_FUNCTION_NAME.Length, colonIndex - CAL_FUNCTION_NAME.Length));
+                            if (functionNumber >= 1 && functionNumber <= udtThisMSData.FunctionCount)
                             {
 
-                                NativeIOParseCalibrationCoeffs(
-                                    strKeyValue,
-                                    out udtThisMSData.FunctionInfo[lngFunctionNumber].CalibrationCoefficientCount,
-                                    udtThisMSData.FunctionInfo[lngFunctionNumber].CalibrationCoefficients,
-                                    out udtThisMSData.FunctionInfo[lngFunctionNumber].CalTypeID);
+                                NativeIOParseCalibrationCoefficients(
+                                    keyValue,
+                                    out udtThisMSData.FunctionInfo[functionNumber].CalibrationCoefficientCount,
+                                    udtThisMSData.FunctionInfo[functionNumber].CalibrationCoefficients,
+                                    out udtThisMSData.FunctionInfo[functionNumber].CalTypeID);
 
                             }
                             else
@@ -1709,14 +1728,14 @@ namespace MSFileInfoScanner
                                 // This shouldn't happen
                             }
                         }
-                        else if (strLineIn.ToUpper().StartsWith(CAL_STDDEV_FUNCTION_NAME))
+                        else if (dataLine.ToUpper().StartsWith(CAL_STDDEV_FUNCTION_NAME))
                         {
-                            lngFunctionNumber = CLngSafe(strLineIn.Substring(CAL_STDDEV_FUNCTION_NAME.Length, intColonLoc - CAL_STDDEV_FUNCTION_NAME.Length));
-                            if (lngFunctionNumber >= 1 && lngFunctionNumber <= udtThisMSData.FunctionCount)
+                            functionNumber = CIntSafe(dataLine.Substring(CAL_STDDEV_FUNCTION_NAME.Length, colonIndex - CAL_STDDEV_FUNCTION_NAME.Length));
+                            if (functionNumber >= 1 && functionNumber <= udtThisMSData.FunctionCount)
                             {
-                                if (double.TryParse(strKeyValue, out var calStdDev))
+                                if (double.TryParse(keyValue, out var calStdDev))
                                 {
-                                    udtThisMSData.FunctionInfo[lngFunctionNumber].CalStDev = calStdDev;
+                                    udtThisMSData.FunctionInfo[functionNumber].CalStDev = calStdDev;
                                 }
                             }
                         }
@@ -1760,11 +1779,11 @@ namespace MSFileInfoScanner
                 MuxStream = 0,
                 VersionMajor = 0,
                 VersionMinor = 0,
-                CalMS1StaticCoeffCount = 0,
-                CalMS1StaticCoeffs = new double[7],
+                CalMS1StaticCoefficientCount = 0,
+                CalMS1StaticCoefficients = new double[7],
                 CalMS1StaticTypeID = 0,
-                CalMS2StaticCoeffCount = 0,
-                CalMS2StaticCoeffs = new double[7],
+                CalMS2StaticCoefficientCount = 0,
+                CalMS2StaticCoefficients = new double[7],
                 CalMS2StaticTypeID = 0
             };
 
@@ -1772,107 +1791,108 @@ namespace MSFileInfoScanner
             {
 
 
-                var strFilePath = Path.Combine(dataDirPath, "_HEADER.TXT");
-                var fiHeaderFile = new FileInfo(strFilePath);
+                var headerFilePath = Path.Combine(dataDirPath, "_HEADER.TXT");
+                var headerFile = new FileInfo(headerFilePath);
 
-                if (!fiHeaderFile.Exists)
+                if (!headerFile.Exists)
                 {
                     return false;
                 }
 
-                using (var srInFile = new StreamReader(strFilePath))
+                using (var reader = new StreamReader(headerFilePath))
                 {
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var strLineIn = srInFile.ReadLine();
+                        var dataLine = reader.ReadLine();
 
-                        if (string.IsNullOrWhiteSpace(strLineIn))
+                        if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
 
                         // All valid lines start with $$
-                        if (!strLineIn.StartsWith("$$"))
+                        if (!dataLine.StartsWith("$$"))
                             continue;
 
                         // Remove the first three characters (we actually remove the first 2 then Trim, since the third character is supposed to be a space)
-                        strLineIn = strLineIn.Substring(2).Trim();
-                        var intColonLoc = strLineIn.IndexOf(':');
-                        var strKeyName = strLineIn.Substring(0, intColonLoc).ToUpper();
-                        var strKeyValue = strLineIn.Substring(intColonLoc + 1).Trim();
+                        dataLine = dataLine.Substring(2).Trim();
+                        var colonIndex = dataLine.IndexOf(':');
+                        var keyName = dataLine.Substring(0, colonIndex).ToUpper();
+                        var keyValue = dataLine.Substring(colonIndex + 1).Trim();
 
-                        switch (strKeyName)
+                        switch (keyName)
                         {
                             case "VERSION":
-                                if (short.TryParse(strKeyValue, out var versionMajor))
+                                if (short.TryParse(keyValue, out var versionMajor))
                                 {
                                     headerInfo.VersionMajor = versionMajor;
-                                    headerInfo.VersionMinor = (int)(Convert.ToSingle(strKeyValue) - headerInfo.VersionMajor);
+                                    headerInfo.VersionMinor = (int)(Convert.ToSingle(keyValue) - headerInfo.VersionMajor);
                                 }
                                 break;
                             case "ACQUIRED NAME":
-                                headerInfo.AcquName = strKeyValue;
+                                headerInfo.AcquName = keyValue;
                                 break;
                             case "ACQUIRED DATE":
-                                headerInfo.AcquDate = strKeyValue;
+                                headerInfo.AcquDate = keyValue;
                                 break;
                             case "ACQUIRED TIME":
-                                headerInfo.AcquTime = strKeyValue;
+                                headerInfo.AcquTime = keyValue;
                                 break;
                             case "JOB CODE":
-                                headerInfo.JobCode = strKeyValue;
+                                headerInfo.JobCode = keyValue;
                                 break;
                             case "TASK CODE":
-                                headerInfo.TaskCode = strKeyValue;
+                                headerInfo.TaskCode = keyValue;
                                 break;
                             case "USER NAME":
-                                headerInfo.UserName = strKeyValue;
+                                headerInfo.UserName = keyValue;
                                 break;
                             case "INSTRUMENT":
-                                headerInfo.Instrument = strKeyValue;
+                                headerInfo.Instrument = keyValue;
                                 break;
                             case "CONDITIONS":
-                                headerInfo.Conditions = strKeyValue;
+                                headerInfo.Conditions = keyValue;
                                 break;
                             case "LABORATORY NAME":
-                                headerInfo.LabName = strKeyValue;
+                                headerInfo.LabName = keyValue;
                                 break;
                             case "SAMPLE DESCRIPTION":
-                                headerInfo.SampleDesc = strKeyValue;
+                                headerInfo.SampleDesc = keyValue;
                                 break;
                             case "SOLVENT DELAY":
-                                headerInfo.SolventDelay = CSngSafe(strKeyValue);
+                                headerInfo.SolventDelay = CFloatSafe(keyValue);
                                 break;
                             case "SUBMITTER":
-                                headerInfo.Submitter = strKeyValue;
+                                headerInfo.Submitter = keyValue;
                                 break;
+                            // ReSharper disable once StringLiteralTypo
                             case "SAMPLEID":
-                                headerInfo.SampleID = strKeyValue;
+                                headerInfo.SampleID = keyValue;
                                 break;
                             case "BOTTLE NUMBER":
-                                headerInfo.BottleNumber = strKeyValue;
+                                headerInfo.BottleNumber = keyValue;
                                 break;
                             case "PLATE DESC":
-                                headerInfo.PlateDesc = strKeyValue;
+                                headerInfo.PlateDesc = keyValue;
                                 break;
                             case "MUX STREAM":
-                                headerInfo.MuxStream = CLngSafe(strKeyValue);
+                                headerInfo.MuxStream = CIntSafe(keyValue);
                                 break;
                             case "CAL MS1 STATIC":
-                                NativeIOParseCalibrationCoeffs(
-                                    strKeyValue,
-                                    out headerInfo.CalMS1StaticCoeffCount,
-                                    headerInfo.CalMS1StaticCoeffs,
+                                NativeIOParseCalibrationCoefficients(
+                                    keyValue,
+                                    out headerInfo.CalMS1StaticCoefficientCount,
+                                    headerInfo.CalMS1StaticCoefficients,
                                     out headerInfo.CalMS1StaticTypeID);
                                 break;
                             case "CAL MS2 STATIC":
-                                NativeIOParseCalibrationCoeffs(
-                                    strKeyValue,
-                                    out headerInfo.CalMS2StaticCoeffCount,
-                                    headerInfo.CalMS2StaticCoeffs,
+                                NativeIOParseCalibrationCoefficients(
+                                    keyValue,
+                                    out headerInfo.CalMS2StaticCoefficientCount,
+                                    headerInfo.CalMS2StaticCoefficients,
                                     out headerInfo.CalMS2StaticTypeID);
                                 break;
                             default:
-                                break;
                                 // Ignore it
+                                break;
                         }
                     }
                 }
@@ -1888,36 +1908,36 @@ namespace MSFileInfoScanner
 
         }
 
-        private Int32 ExtractFromBitsInt32(int lngPackedValue, byte intStartBit, byte intEndBit)
+        private Int32 ExtractFromBitsInt32(int packedValue, byte startBit, byte endBit)
         {
 
-            int intUnpackedValue;
+            int unpackedValue;
 
-            if (intEndBit < 31)
+            if (endBit < 31)
             {
-                if (intStartBit == 0)
+                if (startBit == 0)
                 {
-                    intUnpackedValue = (int)(lngPackedValue & CreateMask(0, intEndBit));
+                    unpackedValue = (int)(packedValue & CreateMask(0, endBit));
                 }
                 else
                 {
-                    intUnpackedValue = (int)((long)(lngPackedValue / Math.Pow(2, intStartBit)) & CreateMask(0, (byte)(intEndBit - intStartBit)));
+                    unpackedValue = (int)((long)(packedValue / Math.Pow(2, startBit)) & CreateMask(0, (byte)(endBit - startBit)));
                 }
             }
             else
             {
-                intUnpackedValue = (int)(NumConversion.Int32ToUnsigned(lngPackedValue) / Math.Pow(2, intStartBit));
+                unpackedValue = (int)(NumberConversion.Int32ToUnsigned(packedValue) / Math.Pow(2, startBit));
             }
 
-            return intUnpackedValue;
+            return unpackedValue;
         }
 
-        private float UnpackIntensity(short PackedBasePeakIntensity, int PackedBasePeakInfo, short intAcquisitionDataType)
+        private float UnpackIntensity(short PackedBasePeakIntensity, int PackedBasePeakInfo, short acquisitionDataType)
         {
             // See note for Acquisition Data Types 9 to 12 below
-            float sngUnpackedIntensity;
+            float unpackedIntensity;
 
-            switch (intAcquisitionDataType)
+            switch (acquisitionDataType)
             {
                 case 9:
                 case 10:
@@ -1928,14 +1948,14 @@ namespace MSFileInfoScanner
                     // Note: Only use this function to unpack intensities for data in the .IDX file, not for data in the .DAT file
                     //       See the NativeIOGetSpectrum function for the method of unpacking intensities in .DAT files
 
-                    sngUnpackedIntensity = (float)(PackedBasePeakIntensity * Math.Pow(4, PackedBasePeakInfo & maskBPIntensityScale));
+                    unpackedIntensity = (float)(PackedBasePeakIntensity * Math.Pow(4, PackedBasePeakInfo & maskBPIntensityScale));
                     break;
-                //Debug.Assert sngUnpackedIntensity = PackedBasePeakIntensity * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 3)
+                //Debug.Assert unpackedIntensity = PackedBasePeakIntensity * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 3)
                 case 0:
                     // Compressed data
-                    sngUnpackedIntensity = (float)((short)(PackedBasePeakInfo & maskBPCompressedDataIntensity) / 8f * Math.Pow(4, PackedBasePeakInfo & maskBPCompressedDataIntensityScale));
+                    unpackedIntensity = (float)((short)(PackedBasePeakInfo & maskBPCompressedDataIntensity) / 8f * Math.Pow(4, PackedBasePeakInfo & maskBPCompressedDataIntensityScale));
                     break;
-                //Debug.Assert sngUnpackedIntensity = ExtractFromBitsInt32(PackedBasePeakInfo, 3, 10) * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 2)
+                //Debug.Assert unpackedIntensity = ExtractFromBitsInt32(PackedBasePeakInfo, 3, 10) * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 2)
                 case 1:
                 case 2:
                 case 3:
@@ -1944,27 +1964,27 @@ namespace MSFileInfoScanner
                 case 6:
                 case 7:
                     // Standard data and Uncalibrated data
-                    sngUnpackedIntensity = (float)((short)(PackedBasePeakIntensity & maskBPStandardDataIntensity) / 8f * Math.Pow(4, PackedBasePeakIntensity & maskBPStandardDataIntensityScale));
+                    unpackedIntensity = (float)((short)(PackedBasePeakIntensity & maskBPStandardDataIntensity) / 8f * Math.Pow(4, PackedBasePeakIntensity & maskBPStandardDataIntensityScale));
                     break;
-                //Debug.Assert sngUnpackedIntensity = ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 3, 15) * 4 ^ ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 0, 2)
+                //Debug.Assert unpackedIntensity = ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 3, 15) * 4 ^ ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 0, 2)
                 case 8:
                     //  High intensity calibrated data
-                    sngUnpackedIntensity = (float)(PackedBasePeakIntensity * Math.Pow(4, PackedBasePeakInfo & maskBPIntensityScale));
+                    unpackedIntensity = (float)(PackedBasePeakIntensity * Math.Pow(4, PackedBasePeakInfo & maskBPIntensityScale));
                     break;
                 default:
-                    sngUnpackedIntensity = 0;
+                    unpackedIntensity = 0;
                     break;
             }
-            return sngUnpackedIntensity;
+            return unpackedIntensity;
 
         }
 
-        private double UnpackMass(int PackedBasePeakInfo, short intAcquisitionDataType, bool blnProcessingFunctionIndexFile)
+        private double UnpackMass(int PackedBasePeakInfo, short acquisitionDataType, bool processingFunctionIndexFile)
         {
             // See note for Acquisition Data Types 9 to 12 below
-            double dblUnpackedMass;
+            double unpackedMass;
 
-            switch (intAcquisitionDataType)
+            switch (acquisitionDataType)
             {
                 case 9:
                 case 10:
@@ -1972,28 +1992,28 @@ namespace MSFileInfoScanner
                 case 12:
                     // Includes type 9, 11, and 12; type 10 is officially unused
                     //  (9=High accuracy calibrated data, 11=Enhanced uncalibrated data, and 12=Enhanced calibrated data)
-                    // Note: Only use this function to unpack massees for data in the .IDX file, not for data in the .DAT file
+                    // Note: Only use this function to unpack masses for data in the .IDX file, not for data in the .DAT file
                     //       See the NativeIOGetSpectrum function for the method of unpacking masses in .DAT files
 
-                    // Compute the MassMantissa Value by converting the Packed Value to an Unsigned Int32 (and storing in a long),
+                    // Compute the MassMantissa value by converting the Packed value to an Unsigned Int32 (and storing in a long),
                     //  then right shifting 9 bits by dividing by 2^9
                     // It would be more straightforward to use PackedBasePeakInfo And CreateMask(9, 31) but VB won't let us
-                    //  And a Currency Value with a Long; this gives an OverFlow error
-                    var MassMantissa = (int)(NumConversion.Int32ToUnsigned(PackedBasePeakInfo) / 512f);
+                    //  And a Currency value with a Long; this gives an OverFlow error
+                    var MassMantissa = (int)(NumberConversion.Int32ToUnsigned(PackedBasePeakInfo) / 512f);
                     // 512 = 2^9
 
-                    // Compute the MassExponent value by multiplying the Packed Value by the appropriate BitMask, then right shifting 4 bits by dividing by 2^4
+                    // Compute the MassExponent value by multiplying the Packed value by the appropriate BitMask, then right shifting 4 bits by dividing by 2^4
                     var MassExponent = (short)(PackedBasePeakInfo & maskBPMassExponent) / 16f;
                     // 16 = 2^4
 
-                    if (blnProcessingFunctionIndexFile)
+                    if (processingFunctionIndexFile)
                     {
                         // When computing the BasePeakMass based on data in the _func001.idx
                         //  file, must bump up the Mass Exponent by 8 in order to multiply the
                         //  Mass Mantissa by an additional value of 256 to get the correct value
                         if (MassExponent < 6)
                         {
-                            if (intAcquisitionDataType == 9)
+                            if (acquisitionDataType == 9)
                             {
                                 // This only seems to be necessary for files with Acquisition data type 9
                                 // The following Assertion is here to test for that
@@ -2003,23 +2023,23 @@ namespace MSFileInfoScanner
                     }
 
                     // Note that we divide by 2^23 to convert the mass mantissa to fractional form
-                    dblUnpackedMass = MassMantissa / 8388608f * Math.Pow(2, MassExponent);
+                    unpackedMass = MassMantissa / 8388608f * Math.Pow(2, MassExponent);
                     // 8388608 = 2^23
                     break;
                 case 0:
                     // Compressed data
-                    // Compute the MassMantissa Value by converting the Packed Value to an Unsigned Int32 (and storing in a long),
+                    // Compute the MassMantissa value by converting the Packed value to an Unsigned Int32 (and storing in a long),
                     //  then right shifting 11 bits by dividing by 2^11
                     // It would be more straightforward to use PackedBasePeakInfo And CreateMask(11, 31) but VB won't let us
-                    //  And a Currency Value with a Long; this gives an OverFlow error
+                    //  And a Currency value with a Long; this gives an OverFlow error
                     // We must divide the MassMantissa by 128 to get the mass
-                    dblUnpackedMass = (int)(NumConversion.Int32ToUnsigned(PackedBasePeakInfo) / 2048f) / 128f;      // 2048 = 2^11
+                    unpackedMass = (int)(NumberConversion.Int32ToUnsigned(PackedBasePeakInfo) / 2048f) / 128f;      // 2048 = 2^11
                     break;
-                // Debug.Assert(dblUnpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 11, 31) / 128f);
+                // Debug.Assert(unpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 11, 31) / 128f);
                 case 1:
                     // Standard data
                     // We must divide the MassMantissa by 1024 to get the mass
-                    dblUnpackedMass = (short)(PackedBasePeakInfo & maskBPStandardDataMass) / 1024f;
+                    unpackedMass = (short)(PackedBasePeakInfo & maskBPStandardDataMass) / 1024f;
                     break;
                 case 2:
                 case 3:
@@ -2029,25 +2049,25 @@ namespace MSFileInfoScanner
                 case 7:
                     // Uncalibrated data
                     // This type of data doesn't have a base peak mass
-                    dblUnpackedMass = 0;
+                    unpackedMass = 0;
                     break;
                 case 8:
                     // High intensity calibrated data
-                    // Compute the MassMantissa Value by converting the Packed Value to an Unsigned Int32 (and storing in a long),
+                    // Compute the MassMantissa value by converting the Packed value to an Unsigned Int32 (and storing in a long),
                     //  then right shifting 4 bits by dividing by 2^4
                     // We must divide the MassMantissa by 128 to get the mass
-                    dblUnpackedMass = (int)(NumConversion.Int32ToUnsigned(PackedBasePeakInfo) / 16f) / 128f;        // 16 = 2^4
+                    unpackedMass = (int)(NumberConversion.Int32ToUnsigned(PackedBasePeakInfo) / 16f) / 128f;        // 16 = 2^4
                     break;
-                //Debug.Assert(dblUnpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 4, 31) / 128f);
+                //Debug.Assert(unpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 4, 31) / 128f);
                 default:
-                    dblUnpackedMass = 0;
+                    unpackedMass = 0;
                     break;
             }
-            return dblUnpackedMass;
+            return unpackedMass;
 
         }
 
-        private class NumConversion
+        private static class NumberConversion
         {
 
             private const long OFFSET_4 = 4294967296L;
@@ -2055,51 +2075,51 @@ namespace MSFileInfoScanner
             private const Int32 OFFSET_2 = 65536;
 
             private const Int16 MAXINT_2 = 32767;
-            public static Int32 UnsignedToInt32(long Value)
+            public static Int32 UnsignedToInt32(long value)
             {
-                if (Value <= MAXINT_4)
+                if (value <= MAXINT_4)
                 {
-                    return (Int32)Value;
+                    return (Int32)value;
                 }
                 else
                 {
-                    return (Int32)(Value - OFFSET_4);
+                    return (Int32)(value - OFFSET_4);
                 }
             }
 
-            public static long Int32ToUnsigned(Int32 Value)
+            public static long Int32ToUnsigned(Int32 value)
             {
-                if (Value < 0)
+                if (value < 0)
                 {
-                    return Value + OFFSET_4;
+                    return value + OFFSET_4;
                 }
 
-                return Value;
+                return value;
             }
 
-            public static Int16 UnsignedToInt16(Int32 Value)
+            public static Int16 UnsignedToInt16(Int32 value)
             {
-                if (Value < 0 || Value >= OFFSET_2)
-                    throw new ArgumentOutOfRangeException(nameof(Value));
+                if (value < 0 || value >= OFFSET_2)
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
-                if (Value <= MAXINT_2)
+                if (value <= MAXINT_2)
                 {
-                    return (Int16)Value;
+                    return (Int16)value;
                 }
                 else
                 {
-                    return (Int16)(Value - OFFSET_2);
+                    return (Int16)(value - OFFSET_2);
                 }
             }
 
-            public static Int32 Int16ToUnsigned(Int16 Value)
+            public static Int32 Int16ToUnsigned(Int16 value)
             {
-                if (Value < 0)
+                if (value < 0)
                 {
-                    return Value + OFFSET_2;
+                    return value + OFFSET_2;
                 }
 
-                return Value;
+                return value;
             }
 
             public static bool ValueToBool(int value)

@@ -120,18 +120,18 @@ namespace MSFileInfoScanner
             mRecentFiles.Add(udtOutputFileInfo);
         }
 
-        private void AddOxyPlotSeries(PlotModel myplot, IReadOnlyCollection<DataPoint> objPoints)
+        private void AddOxyPlotSeries(PlotModel myPlot, IReadOnlyCollection<DataPoint> points)
         {
             // Generate a black curve with no symbols
             var series = new LineSeries();
 
-            if (objPoints.Count <= 0)
+            if (points.Count <= 0)
             {
                 return;
             }
 
             var eSymbolType = MarkerType.None;
-            if (objPoints.Count == 1)
+            if (points.Count == 1)
             {
                 eSymbolType = MarkerType.Circle;
             }
@@ -140,15 +140,15 @@ namespace MSFileInfoScanner
             series.StrokeThickness = 1;
             series.MarkerType = eSymbolType;
 
-            if (objPoints.Count == 1)
+            if (points.Count == 1)
             {
                 series.MarkerSize = 8;
                 series.MarkerFill = OxyColors.DarkRed;
             }
 
-            series.Points.AddRange(objPoints);
+            series.Points.AddRange(points);
 
-            myplot.Series.Add(series);
+            myPlot.Series.Add(series);
         }
 
         /// <summary>
@@ -196,7 +196,7 @@ namespace MSFileInfoScanner
         }
 
         private clsPlotContainerBase InitializePlot(
-            clsChromatogramInfo objData,
+            clsChromatogramInfo chromatogramData,
             string plotTitle,
             int msLevelFilter,
             string xAxisLabel,
@@ -206,18 +206,18 @@ namespace MSFileInfoScanner
         {
             if (PlotWithPython)
             {
-                return InitializePythonPlot(objData, plotTitle, msLevelFilter, xAxisLabel, yAxisLabel, autoMinMaxY, yAxisExponentialNotation);
+                return InitializePythonPlot(chromatogramData, plotTitle, msLevelFilter, xAxisLabel, yAxisLabel, autoMinMaxY, yAxisExponentialNotation);
             }
             else
             {
-                return InitializeOxyPlot(objData, plotTitle, msLevelFilter, xAxisLabel, yAxisLabel, autoMinMaxY, yAxisExponentialNotation);
+                return InitializeOxyPlot(chromatogramData, plotTitle, msLevelFilter, xAxisLabel, yAxisLabel, autoMinMaxY, yAxisExponentialNotation);
             }
         }
 
         /// <summary>
         /// Plots a BPI or TIC chromatogram
         /// </summary>
-        /// <param name="objData">Data to display</param>
+        /// <param name="chromatogramData">Data to display</param>
         /// <param name="plotTitle">Title of the plot</param>
         /// <param name="msLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
         /// <param name="xAxisLabel"></param>
@@ -226,7 +226,7 @@ namespace MSFileInfoScanner
         /// <param name="yAxisExponentialNotation"></param>
         /// <returns>OxyPlot PlotContainer</returns>
         private clsPlotContainer InitializeOxyPlot(
-            clsChromatogramInfo objData,
+            clsChromatogramInfo chromatogramData,
             string plotTitle,
             int msLevelFilter,
             string xAxisLabel,
@@ -241,45 +241,45 @@ namespace MSFileInfoScanner
             double maxIntensity = 0;
 
             // Instantiate the list to track the data points
-            var objPoints = new List<DataPoint>();
+            var points = new List<DataPoint>();
 
-            foreach (var chromDataPoint in objData.Scans)
+            foreach (var dataPoint in chromatogramData.Scans)
             {
 
-                if (msLevelFilter != 0 && chromDataPoint.MSLevel != msLevelFilter &&
-                    !(msLevelFilter == 2 && chromDataPoint.MSLevel >= 2))
+                if (msLevelFilter != 0 && dataPoint.MSLevel != msLevelFilter &&
+                    !(msLevelFilter == 2 && dataPoint.MSLevel >= 2))
                 {
                     continue;
                 }
 
-                objPoints.Add(new DataPoint(chromDataPoint.ScanNum, chromDataPoint.Intensity));
+                points.Add(new DataPoint(dataPoint.ScanNum, dataPoint.Intensity));
 
-                if (chromDataPoint.TimeMinutes > scanTimeMax)
+                if (dataPoint.TimeMinutes > scanTimeMax)
                 {
-                    scanTimeMax = chromDataPoint.TimeMinutes;
+                    scanTimeMax = dataPoint.TimeMinutes;
                 }
 
-                if (chromDataPoint.ScanNum < minScan)
+                if (dataPoint.ScanNum < minScan)
                 {
-                    minScan = chromDataPoint.ScanNum;
+                    minScan = dataPoint.ScanNum;
                 }
 
-                if (chromDataPoint.ScanNum > maxScan)
+                if (dataPoint.ScanNum > maxScan)
                 {
-                    maxScan = chromDataPoint.ScanNum;
+                    maxScan = dataPoint.ScanNum;
                 }
 
-                if (chromDataPoint.Intensity > maxIntensity)
+                if (dataPoint.Intensity > maxIntensity)
                 {
-                    maxIntensity = chromDataPoint.Intensity;
+                    maxIntensity = dataPoint.Intensity;
                 }
             }
 
-            if (objPoints.Count == 0)
+            if (points.Count == 0)
             {
                 // Nothing to plot
                 var emptyContainer = new clsPlotContainer(new PlotModel(), mWriteDebug, mDataSource);
-                emptyContainer.WriteDebugLog("objPoints.Count == 0 in InitializeOxyPlot for plot " + plotTitle);
+                emptyContainer.WriteDebugLog("points.Count == 0 in InitializeOxyPlot for plot " + plotTitle);
                 return emptyContainer;
             }
 
@@ -296,13 +296,13 @@ namespace MSFileInfoScanner
                 myPlot.Axes[1].StringFormat = clsAxisInfo.EXPONENTIAL_FORMAT;
             }
 
-            AddOxyPlotSeries(myPlot, objPoints);
+            AddOxyPlotSeries(myPlot, points);
 
             // Update the axis format codes if the data values are small or the range of data is small
-            var xVals = (from item in objPoints select item.X).ToList();
+            var xVals = (from item in points select item.X).ToList();
             clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[0], xVals, true);
 
-            var yVals = (from item in objPoints select item.Y).ToList();
+            var yVals = (from item in points select item.Y).ToList();
             clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
 
             var plotContainer = new clsPlotContainer(myPlot, mWriteDebug, mDataSource)
@@ -310,7 +310,7 @@ namespace MSFileInfoScanner
                 FontSizeBase = clsPlotContainer.DEFAULT_BASE_FONT_SIZE
             };
 
-            plotContainer.WriteDebugLog(string.Format("Instantiated plotContainer for plot {0}: {1} data points", plotTitle, objPoints.Count));
+            plotContainer.WriteDebugLog(string.Format("Instantiated plotContainer for plot {0}: {1} data points", plotTitle, points.Count));
 
             // Possibly add a label showing the maximum elution time
             if (scanTimeMax > 0)
@@ -334,7 +334,7 @@ namespace MSFileInfoScanner
                 // Alternative method is to add a TextAnnotation, but these are inside the main plot area
                 // and are tied to a data point
                 //
-                // var objScanTimeMaxText = new OxyPlot.Annotations.TextAnnotation
+                // var scanTimeMaxText = new OxyPlot.Annotations.TextAnnotation
                 // {
                 //     TextRotation = 0,
                 //     Text = caption,
@@ -343,8 +343,8 @@ namespace MSFileInfoScanner
                 //     FontSize = clsPlotContainer.DEFAULT_BASE_FONT_SIZE
                 // };
                 //
-                // objScanTimeMaxText.TextPosition = new DataPoint(maxScan, 0);
-                // myPlot.Annotations.Add(objScanTimeMaxText);
+                // scanTimeMaxText.TextPosition = new DataPoint(maxScan, 0);
+                // myPlot.Annotations.Add(scanTimeMaxText);
 
             }
 
@@ -391,7 +391,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Plots a BPI or TIC chromatogram
         /// </summary>
-        /// <param name="objData">Data to display</param>
+        /// <param name="chromatogramData">Data to display</param>
         /// <param name="plotTitle">Title of the plot</param>
         /// <param name="msLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
         /// <param name="xAxisLabel"></param>
@@ -400,7 +400,7 @@ namespace MSFileInfoScanner
         /// <param name="yAxisExponentialNotation"></param>
         /// <returns>Python PlotContainer</returns>
         private clsPythonPlotContainer InitializePythonPlot(
-            clsChromatogramInfo objData,
+            clsChromatogramInfo chromatogramData,
             string plotTitle,
             int msLevelFilter,
             string xAxisLabel,
@@ -413,30 +413,30 @@ namespace MSFileInfoScanner
             double maxIntensity = 0;
 
             // Instantiate the list to track the data points
-            var objPoints = new List<DataPoint>();
+            var points = new List<DataPoint>();
 
-            foreach (var chromDataPoint in objData.Scans)
+            foreach (var dataPoint in chromatogramData.Scans)
             {
-                if (msLevelFilter != 0 && chromDataPoint.MSLevel != msLevelFilter &&
-                    !(msLevelFilter == 2 && chromDataPoint.MSLevel >= 2))
+                if (msLevelFilter != 0 && dataPoint.MSLevel != msLevelFilter &&
+                    !(msLevelFilter == 2 && dataPoint.MSLevel >= 2))
                 {
                     continue;
                 }
 
-                objPoints.Add(new DataPoint(chromDataPoint.ScanNum, chromDataPoint.Intensity));
+                points.Add(new DataPoint(dataPoint.ScanNum, dataPoint.Intensity));
 
-                if (chromDataPoint.TimeMinutes > scanTimeMax)
+                if (dataPoint.TimeMinutes > scanTimeMax)
                 {
-                    scanTimeMax = chromDataPoint.TimeMinutes;
+                    scanTimeMax = dataPoint.TimeMinutes;
                 }
 
-                if (chromDataPoint.Intensity > maxIntensity)
+                if (dataPoint.Intensity > maxIntensity)
                 {
-                    maxIntensity = chromDataPoint.Intensity;
+                    maxIntensity = dataPoint.Intensity;
                 }
             }
 
-            if (objPoints.Count == 0)
+            if (points.Count == 0)
             {
                 // Nothing to plot
                 var emptyContainer = new clsPythonPlotContainer2D();
@@ -453,16 +453,16 @@ namespace MSFileInfoScanner
                 plotContainer.YAxisInfo.StringFormat = clsAxisInfo.EXPONENTIAL_FORMAT;
             }
 
-            plotContainer.SetData(objPoints);
+            plotContainer.SetData(points);
 
             // Update the axis format codes if the data values are small or the range of data is small
 
             // Assume the X axis is plotting integers
-            var xVals = (from item in objPoints select item.X).ToList();
+            var xVals = (from item in points select item.X).ToList();
             clsPlotUtilities.GetAxisFormatInfo(xVals, true, plotContainer.XAxisInfo);
 
             // Assume the Y axis is plotting doubles
-            var yVals = (from item in objPoints select item.Y).ToList();
+            var yVals = (from item in points select item.Y).ToList();
             clsPlotUtilities.GetAxisFormatInfo(yVals, false, plotContainer.YAxisInfo);
 
             // Possibly add a label showing the maximum elution time
@@ -586,7 +586,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private void RemoveZeroesAtFrontAndBack(clsChromatogramInfo chromInfo)
+        private void RemoveZeroesAtFrontAndBack(clsChromatogramInfo chromatogramInfo)
         {
             const int MAX_POINTS_TO_CHECK = 100;
             var pointsChecked = 0;
@@ -596,9 +596,9 @@ namespace MSFileInfoScanner
 
             var indexNonZeroValue = -1;
             var zeroPointCount = 0;
-            for (var index = chromInfo.ScanCount - 1; index >= 0; index += -1)
+            for (var index = chromatogramInfo.ScanCount - 1; index >= 0; index += -1)
             {
-                if (Math.Abs(chromInfo.GetDataPoint(index).Intensity) < float.Epsilon)
+                if (Math.Abs(chromatogramInfo.GetDataPoint(index).Intensity) < float.Epsilon)
                 {
                     zeroPointCount += 1;
                 }
@@ -614,15 +614,15 @@ namespace MSFileInfoScanner
 
             if (zeroPointCount > 0 && indexNonZeroValue >= 0)
             {
-                chromInfo.RemoveRange(indexNonZeroValue + 1, zeroPointCount);
+                chromatogramInfo.RemoveRange(indexNonZeroValue + 1, zeroPointCount);
             }
 
             // Now check the first few values
             indexNonZeroValue = -1;
             zeroPointCount = 0;
-            for (var index = 0; index <= chromInfo.ScanCount - 1; index++)
+            for (var index = 0; index <= chromatogramInfo.ScanCount - 1; index++)
             {
-                if (Math.Abs(chromInfo.GetDataPoint(index).Intensity) < float.Epsilon)
+                if (Math.Abs(chromatogramInfo.GetDataPoint(index).Intensity) < float.Epsilon)
                 {
                     zeroPointCount += 1;
                 }
@@ -638,18 +638,18 @@ namespace MSFileInfoScanner
 
             if (zeroPointCount > 0 && indexNonZeroValue >= 0)
             {
-                chromInfo.RemoveRange(0, indexNonZeroValue);
+                chromatogramInfo.RemoveRange(0, indexNonZeroValue);
             }
 
         }
 
-        private void ValidateMSLevel(clsChromatogramInfo chromInfo)
+        private void ValidateMSLevel(clsChromatogramInfo chromatogramInfo)
         {
             var msLevelDefined = false;
 
-            for (var index = 0; index <= chromInfo.ScanCount - 1; index++)
+            for (var index = 0; index <= chromatogramInfo.ScanCount - 1; index++)
             {
-                if (chromInfo.GetDataPoint(index).MSLevel > 0)
+                if (chromatogramInfo.GetDataPoint(index).MSLevel > 0)
                 {
                     msLevelDefined = true;
                     break;
@@ -659,9 +659,9 @@ namespace MSFileInfoScanner
             if (!msLevelDefined)
             {
                 // Set the MSLevel to 1 for all scans
-                for (var index = 0; index <= chromInfo.ScanCount - 1; index++)
+                for (var index = 0; index <= chromatogramInfo.ScanCount - 1; index++)
                 {
-                    chromInfo.GetDataPoint(index).MSLevel = 1;
+                    chromatogramInfo.GetDataPoint(index).MSLevel = 1;
                 }
             }
 
@@ -702,7 +702,7 @@ namespace MSFileInfoScanner
                     throw new Exception("Scan " + scanNumber + " has already been added to the TIC or BPI; programming error");
                 }
 
-                var chromDataPoint = new clsChromatogramDataPoint
+                var dataPoint = new clsChromatogramDataPoint
                 {
                     ScanNum = scanNumber,
                     TimeMinutes = scanTimeMinutes,
@@ -710,7 +710,7 @@ namespace MSFileInfoScanner
                     MSLevel = msLevel
                 };
 
-                mScans.Add(chromDataPoint);
+                mScans.Add(dataPoint);
                 mScanNumbers.Add(scanNumber);
             }
 

@@ -49,12 +49,12 @@ namespace MSFileInfoScanner
             mExtractTime = new Regex("([0-9.]+) min", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
         }
 
-        public override string GetDatasetNameViaPath(string strDataFilePath)
+        public override string GetDatasetNameViaPath(string dataFilePath)
         {
             // The dataset name is simply the folder name without .D
             try
             {
-                return Path.GetFileNameWithoutExtension(strDataFilePath);
+                return Path.GetFileNameWithoutExtension(dataFilePath);
             }
             catch (Exception)
             {
@@ -62,36 +62,36 @@ namespace MSFileInfoScanner
             }
         }
 
-        private bool ExtractRunTime(string strText, out double dblRunTimeMinutes)
+        private bool ExtractRunTime(string runTimeText, out double runTimeMinutes)
         {
 
-            var reMatch = mExtractTime.Match(strText);
+            var reMatch = mExtractTime.Match(runTimeText);
 
             if (reMatch.Success)
             {
-                if (double.TryParse(reMatch.Groups[1].Value, out dblRunTimeMinutes))
+                if (double.TryParse(reMatch.Groups[1].Value, out runTimeMinutes))
                 {
                     return true;
                 }
             }
 
-            dblRunTimeMinutes = 0;
+            runTimeMinutes = 0;
             return false;
 
         }
 
-        private bool ParseAcqMethodFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseAcqMethodFile(string directoryPath, clsDatasetFileInfo datasetFileInfo)
         {
-            double dblTotalRuntime = 0;
+            double totalRuntime = 0;
 
-            var blnRunTimeFound = false;
-            bool blnSuccess;
+            var runTimeFound = false;
+            bool success;
 
             try
             {
                 // Open the acqmeth.txt file
-                var strFilePath = Path.Combine(strFolderPath, AGILENT_ACQ_METHOD_FILE);
-                if (!File.Exists(strFilePath))
+                var filePath = Path.Combine(directoryPath, AGILENT_ACQ_METHOD_FILE);
+                if (!File.Exists(filePath))
                 {
                     return false;
                 }
@@ -107,109 +107,109 @@ namespace MSFileInfoScanner
                 // We could also add in the "Post Run" time for determining total acquisition time, but we don't do this, to stay consistent with run times reported by the MS file
                 // dctRunTimeText.Add(ACQ_METHOD_FILE_POST_RUN_LINE, New clsLineMatchSearchInfo(False))
 
-                using (var srInFile = new StreamReader(strFilePath))
+                using (var reader = new StreamReader(filePath))
                 {
 
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var strLineIn = srInFile.ReadLine();
+                        var dataLine = reader.ReadLine();
 
-                        if (string.IsNullOrWhiteSpace(strLineIn))
+                        if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
 
-                        foreach (var strKey in dctRunTimeText.Keys)
+                        foreach (var key in dctRunTimeText.Keys)
                         {
-                            if (dctRunTimeText[strKey].Matched)
+                            if (dctRunTimeText[key].Matched)
                             {
                                 continue;
                             }
 
-                            bool blnMatchSuccess;
-                            if (dctRunTimeText[strKey].MatchLineStart)
+                            bool matchSuccess;
+                            if (dctRunTimeText[key].MatchLineStart)
                             {
-                                blnMatchSuccess = strLineIn.StartsWith(strKey);
+                                matchSuccess = dataLine.StartsWith(key);
                             }
                             else
                             {
-                                blnMatchSuccess = strLineIn.Contains(strKey);
+                                matchSuccess = dataLine.Contains(key);
                             }
 
-                            if (!blnMatchSuccess)
+                            if (!matchSuccess)
                             {
                                 continue;
                             }
 
-                            if (!ExtractRunTime(strLineIn, out var dblRunTime))
+                            if (!ExtractRunTime(dataLine, out var runTime))
                             {
                                 continue;
                             }
 
-                            dctRunTimeText[strKey].Matched = true;
-                            dblTotalRuntime += dblRunTime;
-                            blnRunTimeFound = true;
+                            dctRunTimeText[key].Matched = true;
+                            totalRuntime += runTime;
+                            runTimeFound = true;
                             break;
                         }
                     }
                 }
 
-                blnSuccess = blnRunTimeFound;
+                success = runTimeFound;
 
             }
             catch (Exception ex)
             {
                 // Exception reading file
                 OnErrorEvent("Exception reading " + AGILENT_ACQ_METHOD_FILE + ": " + ex.Message, ex);
-                blnSuccess = false;
+                success = false;
             }
 
-            if (blnSuccess)
+            if (success)
             {
                 // Update the acquisition start time
-                datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.AddMinutes(-dblTotalRuntime);
+                datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.AddMinutes(-totalRuntime);
             }
 
-            return blnSuccess;
+            return success;
 
         }
 
-        private bool ParseGCIniFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseGCIniFile(string directoryPath, clsDatasetFileInfo datasetFileInfo)
         {
-            double dblTotalRuntime = 0;
+            double totalRuntime = 0;
 
-            var blnSuccess = false;
+            var success = false;
 
             try
             {
                 // Open the GC.ini file
-                var strFilePath = Path.Combine(strFolderPath, AGILENT_GC_INI_FILE);
-                if (!File.Exists(strFilePath))
+                var filePath = Path.Combine(directoryPath, AGILENT_GC_INI_FILE);
+                if (!File.Exists(filePath))
                 {
                     return false;
                 }
 
-                using (var srInFile = new StreamReader(strFilePath))
+                using (var reader = new StreamReader(filePath))
                 {
 
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var strLineIn = srInFile.ReadLine();
+                        var dataLine = reader.ReadLine();
 
-                        if (string.IsNullOrWhiteSpace(strLineIn))
+                        if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
 
-                        if (!strLineIn.StartsWith("gc.runlength"))
+                        if (!dataLine.StartsWith("gc.runlength"))
                             continue;
 
                         // Runtime is the value after the equals sign
-                        var strSplitLine = strLineIn.Split('=');
-                        if (strSplitLine.Length <= 1)
+                        var splitLine = dataLine.Split('=');
+                        if (splitLine.Length <= 1)
                         {
                             continue;
                         }
 
-                        if (double.TryParse(strSplitLine[1], out dblTotalRuntime))
+                        if (double.TryParse(splitLine[1], out totalRuntime))
                         {
-                            blnSuccess = true;
+                            success = true;
                         }
                     }
                 }
@@ -219,27 +219,27 @@ namespace MSFileInfoScanner
             {
                 // Exception reading file
                 OnErrorEvent("Exception reading " + AGILENT_GC_INI_FILE + ": " + ex.Message, ex);
-                blnSuccess = false;
+                success = false;
             }
 
-            if (blnSuccess)
+            if (success)
             {
                 // Update the acquisition start time
-                datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.AddMinutes(-dblTotalRuntime);
+                datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.AddMinutes(-totalRuntime);
             }
 
-            return blnSuccess;
+            return success;
 
         }
 
-        private bool ProcessChemstationMSDataFile(string strDatafilePath, clsDatasetFileInfo datasetFileInfo)
+        private bool ProcessChemstationMSDataFile(string datafilePath, clsDatasetFileInfo datasetFileInfo)
         {
-            bool blnSuccess;
-            var intCurrentIndex = 0;
+            bool success;
+            var currentIndex = 0;
 
             try
             {
-                using (var oReader = new ChemstationMSFileReader.clsChemstationDataMSFileReader(strDatafilePath))
+                using (var oReader = new ChemstationMSFileReader.clsChemstationDataMSFileReader(datafilePath))
                 {
 
                     datasetFileInfo.AcqTimeStart = oReader.Header.AcqDate;
@@ -247,35 +247,35 @@ namespace MSFileInfoScanner
 
                     datasetFileInfo.ScanCount = oReader.Header.SpectraCount;
 
-                    for (var intSpectrumIndex = 0; intSpectrumIndex <= datasetFileInfo.ScanCount - 1; intSpectrumIndex++)
+                    for (var spectrumIndex = 0; spectrumIndex <= datasetFileInfo.ScanCount - 1; spectrumIndex++)
                     {
-                        intCurrentIndex = intSpectrumIndex;
+                        currentIndex = spectrumIndex;
 
                         ChemstationMSFileReader.clsSpectralRecord oSpectrum = null;
-                        List<float> lstMZs = null;
-                        List<int> lstIntensities = null;
-                        const int intMSLevel = 1;
+                        List<float> mzList = null;
+                        List<int> intensityList = null;
+                        const int msLevel = 1;
 
-                        bool blnValidSpectrum;
+                        bool validSpectrum;
                         try
                         {
-                            oReader.GetSpectrum(intSpectrumIndex, ref oSpectrum);
-                            lstMZs = oSpectrum.Mzs;
-                            lstIntensities = oSpectrum.Intensities;
-                            blnValidSpectrum = true;
+                            oReader.GetSpectrum(spectrumIndex, ref oSpectrum);
+                            mzList = oSpectrum.Mzs;
+                            intensityList = oSpectrum.Intensities;
+                            validSpectrum = true;
                         }
                         catch (Exception ex)
                         {
-                            OnWarningEvent("Exception obtaining data from the MS file for spectrum index " + intCurrentIndex + ": " + ex.Message);
-                            blnValidSpectrum = false;
+                            OnWarningEvent("Exception obtaining data from the MS file for spectrum index " + currentIndex + ": " + ex.Message);
+                            validSpectrum = false;
                         }
 
-                        if (blnValidSpectrum)
+                        if (validSpectrum)
                         {
-                            var objScanStatsEntry = new clsScanStatsEntry
+                            var scanStatsEntry = new clsScanStatsEntry
                             {
-                                ScanNumber = intSpectrumIndex + 1,
-                                ScanType = intMSLevel,
+                                ScanNumber = spectrumIndex + 1,
+                                ScanType = msLevel,
                                 ScanTypeName = "GC-MS",
                                 ScanFilterText = "",
                                 ElutionTime = oSpectrum.RetentionTimeMinutes.ToString("0.0###"),
@@ -283,38 +283,38 @@ namespace MSFileInfoScanner
                                 BasePeakIntensity = StringUtilities.ValueToString(oSpectrum.BasePeakAbundance, 1),
                                 BasePeakMZ = oSpectrum.BasePeakMZ.ToString("0.0###"),
                                 BasePeakSignalToNoiseRatio = "0",
-                                IonCount = lstMZs.Count
+                                IonCount = mzList.Count
                             };
 
-                            objScanStatsEntry.IonCountRaw = objScanStatsEntry.IonCount;
+                            scanStatsEntry.IonCountRaw = scanStatsEntry.IonCount;
 
-                            mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
+                            mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
 
                             if (mSaveTICAndBPI)
                             {
-                                mTICandBPIPlot.AddData(objScanStatsEntry.ScanNumber, intMSLevel, oSpectrum.RetentionTimeMinutes, oSpectrum.BasePeakAbundance, oSpectrum.TIC);
+                                mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevel, oSpectrum.RetentionTimeMinutes, oSpectrum.BasePeakAbundance, oSpectrum.TIC);
 
-                                if (lstMZs.Count > 0)
+                                if (mzList.Count > 0)
                                 {
-                                    var dblIonsMZ = new double[lstMZs.Count];
-                                    var dblIonsIntensity = new double[lstMZs.Count];
+                                    var ionsMZ = new double[mzList.Count];
+                                    var ionsIntensity = new double[mzList.Count];
 
-                                    for (var intIndex = 0; intIndex <= lstMZs.Count - 1; intIndex++)
+                                    for (var index = 0; index <= mzList.Count - 1; index++)
                                     {
-                                        dblIonsMZ[intIndex] = lstMZs[intIndex];
-                                        dblIonsIntensity[intIndex] = lstIntensities[intIndex];
+                                        ionsMZ[index] = mzList[index];
+                                        ionsIntensity[index] = intensityList[index];
                                     }
 
-                                    mLCMS2DPlot.AddScan(objScanStatsEntry.ScanNumber, intMSLevel, oSpectrum.RetentionTimeMinutes, dblIonsMZ.Length, dblIonsMZ, dblIonsIntensity);
+                                    mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevel, oSpectrum.RetentionTimeMinutes, ionsMZ.Length, ionsMZ, ionsIntensity);
                                 }
 
                             }
 
                             if (mCheckCentroidingStatus)
                             {
-                                var lstMzDoubles = new List<double>(lstMZs.Count);
-                                lstMzDoubles.AddRange(lstMZs.Select(ion => (double)ion));
-                                mDatasetStatsSummarizer.ClassifySpectrum(lstMzDoubles, intMSLevel, "Scan " + objScanStatsEntry.ScanNumber);
+                                var mzDoubles = new List<double>(mzList.Count);
+                                mzDoubles.AddRange(mzList.Select(ion => (double)ion));
+                                mDatasetStatsSummarizer.ClassifySpectrum(mzDoubles, msLevel, "Scan " + scanStatsEntry.ScanNumber);
                             }
 
                         }
@@ -323,114 +323,114 @@ namespace MSFileInfoScanner
 
                 }
 
-                blnSuccess = true;
+                success = true;
 
             }
             catch (Exception ex)
             {
                 // Exception reading file
-                OnWarningEvent("Exception reading data from the MS file at spectrum index " + intCurrentIndex + ": " + ex.Message);
-                blnSuccess = false;
+                OnWarningEvent("Exception reading data from the MS file at spectrum index " + currentIndex + ": " + ex.Message);
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
 
         }
 
         /// <summary>
         /// Process the dataset
         /// </summary>
-        /// <param name="strDataFilePath"></param>
+        /// <param name="dataFilePath"></param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
         /// <remarks></remarks>
-        public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
 
-            var blnSuccess = false;
-            var blnAcqTimeDetermined = false;
+            var success = false;
+            var acqTimeDetermined = false;
 
             ResetResults();
 
             try
             {
-                var diAgilentDFolder = new DirectoryInfo(strDataFilePath);
-                var msDataFilePath = Path.Combine(diAgilentDFolder.FullName, AGILENT_MS_DATA_FILE);
+                var agilentDFolder = new DirectoryInfo(dataFilePath);
+                var msDataFilePath = Path.Combine(agilentDFolder.FullName, AGILENT_MS_DATA_FILE);
 
-                datasetFileInfo.FileSystemCreationTime = diAgilentDFolder.CreationTime;
-                datasetFileInfo.FileSystemModificationTime = diAgilentDFolder.LastWriteTime;
+                datasetFileInfo.FileSystemCreationTime = agilentDFolder.CreationTime;
+                datasetFileInfo.FileSystemModificationTime = agilentDFolder.LastWriteTime;
 
                 // The acquisition times will get updated below to more accurate values
                 datasetFileInfo.AcqTimeStart = datasetFileInfo.FileSystemModificationTime;
                 datasetFileInfo.AcqTimeEnd = datasetFileInfo.FileSystemModificationTime;
 
-                datasetFileInfo.DatasetName = GetDatasetNameViaPath(diAgilentDFolder.Name);
-                datasetFileInfo.FileExtension = diAgilentDFolder.Extension;
+                datasetFileInfo.DatasetName = GetDatasetNameViaPath(agilentDFolder.Name);
+                datasetFileInfo.FileExtension = agilentDFolder.Extension;
                 datasetFileInfo.FileSizeBytes = 0;
 
                 // Look for the MS file
                 // Use its modification time to get an initial estimate for the acquisition end time
                 // Assign the .MS file's size to .FileSizeBytes
-                var fiMSDatafile = new FileInfo(msDataFilePath);
-                if (fiMSDatafile.Exists)
+                var msDatafile = new FileInfo(msDataFilePath);
+                if (msDatafile.Exists)
                 {
-                    datasetFileInfo.FileSizeBytes = fiMSDatafile.Length;
-                    datasetFileInfo.AcqTimeStart = fiMSDatafile.LastWriteTime;
-                    datasetFileInfo.AcqTimeEnd = fiMSDatafile.LastWriteTime;
+                    datasetFileInfo.FileSizeBytes = msDatafile.Length;
+                    datasetFileInfo.AcqTimeStart = msDatafile.LastWriteTime;
+                    datasetFileInfo.AcqTimeEnd = msDatafile.LastWriteTime;
 
                     // Read the file info from the file system
                     // This will also compute the SHA-1 hash of the Data.MS file and add it to mDatasetStatsSummarizer.DatasetFileInfo
-                    UpdateDatasetFileStats(fiMSDatafile, datasetFileInfo.DatasetID);
+                    UpdateDatasetFileStats(msDatafile, datasetFileInfo.DatasetID);
 
-                    blnSuccess = true;
+                    success = true;
                 }
                 else
                 {
                     // Compute the hash of the largest file in the .D folder
-                    AddLargestInstrumentFile(diAgilentDFolder);
+                    AddLargestInstrumentFile(agilentDFolder);
                 }
 
                 datasetFileInfo.ScanCount = 0;
 
-                if (blnSuccess)
+                if (success)
                 {
                     // Read the detailed data from the MS file
-                    blnSuccess = ProcessChemstationMSDataFile(msDataFilePath, datasetFileInfo);
+                    success = ProcessChemstationMSDataFile(msDataFilePath, datasetFileInfo);
 
-                    if (blnSuccess)
+                    if (success)
                     {
-                        blnAcqTimeDetermined = true;
+                        acqTimeDetermined = true;
                     }
 
                 }
 
-                if (!blnSuccess)
+                if (!success)
                 {
                     // MS file not found (or problems parsing); use acqmeth.txt and/or GC.ini
 
                     // The timestamp of the acqmeth.txt file or GC.ini file is more accurate than the GC.ini file, so we'll use that
-                    var fiMethodFile = new FileInfo(Path.Combine(diAgilentDFolder.FullName, AGILENT_ACQ_METHOD_FILE));
-                    if (!fiMethodFile.Exists)
+                    var methodFile = new FileInfo(Path.Combine(agilentDFolder.FullName, AGILENT_ACQ_METHOD_FILE));
+                    if (!methodFile.Exists)
                     {
-                        fiMethodFile = new FileInfo(Path.Combine(diAgilentDFolder.FullName, AGILENT_GC_INI_FILE));
+                        methodFile = new FileInfo(Path.Combine(agilentDFolder.FullName, AGILENT_GC_INI_FILE));
                     }
 
-                    if (fiMethodFile.Exists)
+                    if (methodFile.Exists)
                     {
 
                         // Update the AcqTimes only if the LastWriteTime of the acqmeth.txt or GC.ini file is within the next 60 minutes of .AcqTimeEnd
-                        if (!blnSuccess || fiMethodFile.LastWriteTime.Subtract(datasetFileInfo.AcqTimeEnd).TotalMinutes < 60)
+                        if (!success || methodFile.LastWriteTime.Subtract(datasetFileInfo.AcqTimeEnd).TotalMinutes < 60)
                         {
-                            datasetFileInfo.AcqTimeStart = fiMethodFile.LastWriteTime;
-                            datasetFileInfo.AcqTimeEnd = fiMethodFile.LastWriteTime;
-                            blnSuccess = true;
+                            datasetFileInfo.AcqTimeStart = methodFile.LastWriteTime;
+                            datasetFileInfo.AcqTimeEnd = methodFile.LastWriteTime;
+                            success = true;
                         }
 
                         if (datasetFileInfo.FileSizeBytes == 0)
                         {
                             // File size was not determined from the MS file
                             // Instead, sum up the sizes of all of the files in this folder
-                            foreach (var item in diAgilentDFolder.GetFiles())
+                            foreach (var item in agilentDFolder.GetFiles())
                             {
                                 datasetFileInfo.FileSizeBytes += item.Length;
                             }
@@ -441,17 +441,17 @@ namespace MSFileInfoScanner
                     }
                 }
 
-                if (!blnAcqTimeDetermined)
+                if (!acqTimeDetermined)
                 {
                     try
                     {
                         // Parse the acqmeth.txt file to determine the actual values for .AcqTimeStart and .AcqTimeEnd
-                        blnSuccess = ParseAcqMethodFile(strDataFilePath, datasetFileInfo);
+                        success = ParseAcqMethodFile(dataFilePath, datasetFileInfo);
 
-                        if (!blnSuccess)
+                        if (!success)
                         {
                             // Try to extract Runtime from the GC.ini file
-                            blnSuccess = ParseGCIniFile(strDataFilePath, datasetFileInfo);
+                            success = ParseGCIniFile(dataFilePath, datasetFileInfo);
                         }
 
                     }
@@ -460,13 +460,13 @@ namespace MSFileInfoScanner
                         // Error parsing the acqmeth.txt file or GC.in file; do not abort
                     }
 
-                    // We set blnSuccess to true, even if either of the above functions fail
-                    blnSuccess = true;
+                    // We set success to true, even if either of the above functions fail
+                    success = true;
                 }
 
-                if (blnSuccess)
+                if (success)
                 {
-                    // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
+                    // Copy over the updated file time info and scan info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
                     mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
 
@@ -479,11 +479,11 @@ namespace MSFileInfoScanner
             catch (Exception ex)
             {
                 OnErrorEvent("Exception parsing GC .D folder: " + ex.Message, ex);
-                blnSuccess = false;
+                success = false;
             }
 
             PostProcessTasks();
-            return blnSuccess;
+            return success;
         }
 
     }

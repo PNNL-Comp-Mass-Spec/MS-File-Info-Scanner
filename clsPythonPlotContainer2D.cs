@@ -108,15 +108,15 @@ namespace MSFileInfoScanner
             mSeriesCount = 0;
         }
 
-        public void SetData(List<DataPoint> objPoints)
+        public void SetData(List<DataPoint> points)
         {
-            if (objPoints.Count == 0)
+            if (points.Count == 0)
             {
                 ClearData();
                 return;
             }
 
-            Data = objPoints;
+            Data = points;
             mSeriesCount = 1;
         }
     }

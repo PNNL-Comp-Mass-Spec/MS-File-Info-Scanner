@@ -135,18 +135,18 @@ namespace MSFileInfoScanner
 
             try
             {
-                var blnProceed = false;
+                var proceed = false;
                 if (commandLineParser.ParseCommandLine())
                 {
                     if (SetOptionsUsingCommandLineParameters(commandLineParser))
-                        blnProceed = true;
+                        proceed = true;
                 }
 
                 if (mInputDataFilePath == null)
                     mInputDataFilePath = string.Empty;
 
 
-                if (!blnProceed ||
+                if (!proceed ||
                     commandLineParser.NeedToShowHelp ||
                     commandLineParser.ParameterCount + commandLineParser.NonSwitchParameterCount == 0 ||
                     mInputDataFilePath.Length == 0)
@@ -285,7 +285,7 @@ namespace MSFileInfoScanner
         {
             // Returns True if no problems; otherwise, returns false
 
-            var lstValidParameters = new List<string> {
+            var validParameters = new List<string> {
                 "I",
                 "O",
                 "P",
@@ -324,19 +324,17 @@ namespace MSFileInfoScanner
             try
             {
                 // Make sure no invalid parameters are present
-                if (parser.InvalidParametersPresent(lstValidParameters))
+                if (parser.InvalidParametersPresent(validParameters))
                 {
-                    var invalidArgs = (from item in parser.InvalidParameters(lstValidParameters) select "/" + item).ToList();
+                    var invalidArgs = (from item in parser.InvalidParameters(validParameters) select "/" + item).ToList();
                     ConsoleMsgUtils.ShowErrors("Invalid command line parameters", invalidArgs);
                     return false;
                 }
 
-                int value;
-
                 // Query parser to see if various parameters are present
-                if (parser.RetrieveValueForParameter("I", out var strValue))
+                if (parser.RetrieveValueForParameter("I", out var value))
                 {
-                    mInputDataFilePath = strValue;
+                    mInputDataFilePath = value;
                 }
                 else if (parser.NonSwitchParameterCount > 0)
                 {
@@ -344,41 +342,41 @@ namespace MSFileInfoScanner
                     mInputDataFilePath = parser.RetrieveNonSwitchParameter(0);
                 }
 
-                if (parser.RetrieveValueForParameter("O", out strValue))
-                    mOutputDirectoryName = strValue;
-                if (parser.RetrieveValueForParameter("P", out strValue))
-                    mParameterFilePath = strValue;
+                if (parser.RetrieveValueForParameter("O", out value))
+                    mOutputDirectoryName = value;
+                if (parser.RetrieveValueForParameter("P", out value))
+                    mParameterFilePath = value;
 
-                if (parser.RetrieveValueForParameter("S", out strValue))
+                if (parser.RetrieveValueForParameter("S", out value))
                 {
                     mRecurseDirectories = true;
-                    if (int.TryParse(strValue, out value))
+                    if (int.TryParse(value, out var maxLevels))
                     {
-                        mMaxLevelsToRecurse = value;
+                        mMaxLevelsToRecurse = maxLevels;
                     }
                     else
                     {
-                        ConsoleMsgUtils.ShowWarning("Ignoring invalid max depth value for /S: " + strValue);
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid max depth value for /S: " + value);
                     }
                 }
-                if (parser.RetrieveValueForParameter("IE", out strValue))
+                if (parser.RetrieveValueForParameter("IE", out value))
                     mIgnoreErrorsWhenRecursing = true;
 
-                if (parser.RetrieveValueForParameter("L", out strValue))
-                    mLogFilePath = strValue;
+                if (parser.RetrieveValueForParameter("L", out value))
+                    mLogFilePath = value;
 
                 if (parser.IsParameterPresent("C"))
                     mCheckFileIntegrity = true;
 
-                if (parser.RetrieveValueForParameter("M", out strValue))
+                if (parser.RetrieveValueForParameter("M", out value))
                 {
-                    if (int.TryParse(strValue, out value))
+                    if (int.TryParse(value, out var maxLines))
                     {
-                        mMaximumTextFileLinesToCheck = value;
+                        mMaximumTextFileLinesToCheck = maxLines;
                     }
                     else
                     {
-                        ConsoleMsgUtils.ShowWarning("Ignoring invalid max file lines value for /M: " + strValue);
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid max file lines value for /M: " + value);
                     }
                 }
 
@@ -390,31 +388,31 @@ namespace MSFileInfoScanner
                 if (parser.IsParameterPresent("NoTIC"))
                     mSaveTICAndBPIPlots = false;
 
-                if (parser.RetrieveValueForParameter("LC", out strValue))
+                if (parser.RetrieveValueForParameter("LC", out value))
                 {
                     mSaveLCMS2DPlots = true;
-                    if (!string.IsNullOrWhiteSpace(strValue))
+                    if (!string.IsNullOrWhiteSpace(value))
                     {
-                        if (int.TryParse(strValue, out value))
+                        if (int.TryParse(value, out var maxPoints))
                         {
-                            mLCMS2DMaxPointsToPlot = value;
+                            mLCMS2DMaxPointsToPlot = maxPoints;
                         }
                         else
                         {
-                            ConsoleMsgUtils.ShowWarning("Ignoring invalid max points value for /LC: " + strValue);
+                            ConsoleMsgUtils.ShowWarning("Ignoring invalid max points value for /LC: " + value);
                         }
                     }
                 }
 
-                if (parser.RetrieveValueForParameter("LCDiv", out strValue))
+                if (parser.RetrieveValueForParameter("LCDiv", out value))
                 {
-                    if (int.TryParse(strValue, out value))
+                    if (int.TryParse(value, out var plotDivisor))
                     {
-                        mLCMS2DOverviewPlotDivisor = value;
+                        mLCMS2DOverviewPlotDivisor = plotDivisor;
                     }
                     else
                     {
-                        ConsoleMsgUtils.ShowWarning("Ignoring invalid divisor value for /LCDiv: " + strValue);
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid divisor value for /LCDiv: " + value);
                     }
                 }
 
@@ -424,25 +422,25 @@ namespace MSFileInfoScanner
                 if (parser.IsParameterPresent("CC"))
                     mCheckCentroidingStatus = true;
 
-                if (parser.RetrieveValueForParameter("MS2MzMin", out strValue))
+                if (parser.RetrieveValueForParameter("MS2MzMin", out value))
                 {
-                    if (strValue.StartsWith("itraq", StringComparison.OrdinalIgnoreCase))
+                    if (value.StartsWith("itraq", StringComparison.OrdinalIgnoreCase))
                     {
                         mMS2MzMin = clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ;
-                    } else if (strValue.StartsWith("tmt", StringComparison.OrdinalIgnoreCase))
+                    } else if (value.StartsWith("tmt", StringComparison.OrdinalIgnoreCase))
                     {
                         mMS2MzMin = clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT;
                     }
                     else
                     {
 
-                        if (float.TryParse(strValue, out var mzMin))
+                        if (float.TryParse(value, out var mzMin))
                         {
                             mMS2MzMin = mzMin;
                         }
                         else
                         {
-                            ConsoleMsgUtils.ShowWarning("Ignoring invalid m/z value for /MS2MzMin: " + strValue);
+                            ConsoleMsgUtils.ShowWarning("Ignoring invalid m/z value for /MS2MzMin: " + value);
                         }
                     }
                 }
@@ -450,54 +448,54 @@ namespace MSFileInfoScanner
                 if (parser.IsParameterPresent("NoHash"))
                     mDisableInstrumentHash = false;
 
-                if (parser.RetrieveValueForParameter("ScanStart", out strValue))
+                if (parser.RetrieveValueForParameter("ScanStart", out value))
                 {
-                    if (int.TryParse(strValue, out value))
+                    if (int.TryParse(value, out var scanStart))
                     {
-                        mScanStart = value;
+                        mScanStart = scanStart;
                     }
                     else
                     {
-                        ConsoleMsgUtils.ShowWarning("Ignoring invalid scan number for /ScanStart: " + strValue);
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid scan number for /ScanStart: " + value);
                     }
                 }
                 else
                 {
-                    if (parser.RetrieveValueForParameter("Start", out strValue))
+                    if (parser.RetrieveValueForParameter("Start", out value))
                     {
-                        if (int.TryParse(strValue, out value))
+                        if (int.TryParse(value, out var scanStart))
                         {
-                            mScanStart = value;
+                            mScanStart = scanStart;
                         }
                         else
                         {
-                            ConsoleMsgUtils.ShowWarning("Ignoring invalid scan number for /Start: " + strValue);
+                            ConsoleMsgUtils.ShowWarning("Ignoring invalid scan number for /Start: " + value);
                         }
                     }
                 }
 
-                if (parser.RetrieveValueForParameter("ScanEnd", out strValue))
+                if (parser.RetrieveValueForParameter("ScanEnd", out value))
                 {
-                    if (int.TryParse(strValue, out value))
+                    if (int.TryParse(value, out var scanEnd))
                     {
-                        mScanEnd = value;
+                        mScanEnd = scanEnd;
                     }
                     else
                     {
-                        ConsoleMsgUtils.ShowWarning("Ignoring invalid scan number for /ScanEnd: " + strValue);
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid scan number for /ScanEnd: " + value);
                     }
                 }
                 else
                 {
-                    if (parser.RetrieveValueForParameter("End", out strValue))
+                    if (parser.RetrieveValueForParameter("End", out value))
                     {
-                        if (int.TryParse(strValue, out value))
+                        if (int.TryParse(value, out var scanEnd))
                         {
-                            mScanEnd = value;
+                            mScanEnd = scanEnd;
                         }
                         else
                         {
-                            ConsoleMsgUtils.ShowWarning("Ignoring invalid scan number for /End: " + strValue);
+                            ConsoleMsgUtils.ShowWarning("Ignoring invalid scan number for /End: " + value);
                         }
                     }
                 }
@@ -508,11 +506,11 @@ namespace MSFileInfoScanner
                 if (parser.IsParameterPresent("QS"))
                     mComputeOverallQualityScores = true;
 
-                if (parser.RetrieveValueForParameter("DatasetID", out strValue))
+                if (parser.RetrieveValueForParameter("DatasetID", out value))
                 {
-                    if (!int.TryParse(strValue, out mDatasetID))
+                    if (!int.TryParse(value, out mDatasetID))
                     {
-                        ConsoleMsgUtils.ShowWarning("Ignoring invalid dataset ID for /DatasetID: " + strValue);
+                        ConsoleMsgUtils.ShowWarning("Ignoring invalid dataset ID for /DatasetID: " + value);
                     }
                 }
 
@@ -522,19 +520,21 @@ namespace MSFileInfoScanner
                 if (parser.IsParameterPresent("SS"))
                     mCreateScanStatsFile = true;
 
-                if (parser.RetrieveValueForParameter("DST", out strValue))
+                if (parser.RetrieveValueForParameter("DST", out value))
                 {
                     mUpdateDatasetStatsTextFile = true;
-                    if (!string.IsNullOrEmpty(strValue))
+                    if (!string.IsNullOrEmpty(value))
                     {
-                        mDatasetStatsTextFileName = strValue;
+                        mDatasetStatsTextFileName = value;
                     }
                 }
 
                 if (parser.IsParameterPresent("CF"))
                     mUseCacheFiles = true;
+
                 if (parser.IsParameterPresent("R"))
                     mReprocessingExistingFiles = true;
+
                 if (parser.IsParameterPresent("Z"))
                     mReprocessIfCachedSizeIsZero = true;
 
@@ -554,9 +554,9 @@ namespace MSFileInfoScanner
 
         }
 
-        private static string CollapseList(List<string> lstList)
+        private static string CollapseList(List<string> itemList)
         {
-            return string.Join(", ", lstList);
+            return string.Join(", ", itemList);
         }
 
         private static void ShowErrorMessage(string message, Exception ex = null)

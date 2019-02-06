@@ -9,12 +9,12 @@ namespace MSFileInfoScanner
     public class clsOxyplotUtilities
     {
 
-        public static PlotModel GetBasicPlotModel(string strTitle, string xAxisLabel, string yAxisLabel)
+        public static PlotModel GetBasicPlotModel(string title, string xAxisLabel, string yAxisLabel)
         {
 
             var myPlot = new PlotModel
             {
-                Title = string.Copy(strTitle),
+                Title = string.Copy(title),
                 TitleFont = "Arial",
                 TitleFontSize = clsPlotContainer.DEFAULT_BASE_FONT_SIZE + 4,
                 TitleFontWeight = FontWeights.Normal

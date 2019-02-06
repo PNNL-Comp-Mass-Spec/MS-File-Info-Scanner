@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using MSFileInfoScannerInterfaces;
-using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2007
@@ -19,8 +18,8 @@ namespace MSFileInfoScanner
         /// </summary>
         protected clsMSFileInfoProcessorBaseClass()
         {
-            mTICandBPIPlot = new clsTICandBPIPlotter("TICandBPIPlot", true);
-            RegisterEvents(mTICandBPIPlot);
+            mTICAndBPIPlot = new clsTICandBPIPlotter("TICAndBPIPlot", true);
+            RegisterEvents(mTICAndBPIPlot);
 
             mInstrumentSpecificPlots = new clsTICandBPIPlotter("InstrumentSpecificPlots", true);
             RegisterEvents(mInstrumentSpecificPlots);
@@ -42,6 +41,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Used for checking if over 10% of the spectra failed MS2MzMin validation
         /// </summary>
+        // ReSharper disable once IdentifierTypo
         public const int MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED = 10;
 
         #endregion
@@ -87,7 +87,7 @@ namespace MSFileInfoScanner
 
         private bool mPlotWithPython;
 
-        protected readonly clsTICandBPIPlotter mTICandBPIPlot;
+        protected readonly clsTICandBPIPlotter mTICAndBPIPlot;
 
         protected readonly clsTICandBPIPlotter mInstrumentSpecificPlots;
 
@@ -312,7 +312,7 @@ namespace MSFileInfoScanner
             }
         }
 
-        private bool CreateDatasetInfoFile(string inputFileName, string outputFolderPath)
+        private bool CreateDatasetInfoFile(string inputFileName, string outputDirectoryPath)
         {
 
             bool success;
@@ -320,7 +320,7 @@ namespace MSFileInfoScanner
             try
             {
                 var datasetName = GetDatasetNameViaPath(inputFileName);
-                var datasetInfoFilePath = Path.Combine(outputFolderPath, datasetName);
+                var datasetInfoFilePath = Path.Combine(outputDirectoryPath, datasetName);
                 datasetInfoFilePath += clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
 
                 if (mDatasetStatsSummarizer.DatasetFileInfo.DatasetID == 0 && mDatasetID > 0)
@@ -332,7 +332,7 @@ namespace MSFileInfoScanner
 
                 if (!success)
                 {
-                    OnErrorEvent("Error calling objDatasetStatsSummarizer.CreateDatasetInfoFile: " + mDatasetStatsSummarizer.ErrorMessage);
+                    OnErrorEvent("Error calling DatasetStatsSummarizer.CreateDatasetInfoFile: " + mDatasetStatsSummarizer.ErrorMessage);
                 }
 
             }
@@ -350,10 +350,10 @@ namespace MSFileInfoScanner
         /// Creates a tab-delimited text file with details on each scan tracked by this class (stored in mDatasetScanStats)
         /// </summary>
         /// <param name="inputFileName">Input file name</param>
-        /// <param name="outputFolderPath">Output directory path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
         /// <returns>True if success; False if failure</returns>
         /// <remarks></remarks>
-        public bool CreateDatasetScanStatsFile(string inputFileName, string outputFolderPath)
+        public bool CreateDatasetScanStatsFile(string inputFileName, string outputDirectoryPath)
         {
 
             bool success;
@@ -361,7 +361,7 @@ namespace MSFileInfoScanner
             try
             {
                 var datasetName = GetDatasetNameViaPath(inputFileName);
-                var scanStatsFilePath = Path.Combine(outputFolderPath, datasetName) + "_ScanStats.txt";
+                var scanStatsFilePath = Path.Combine(outputDirectoryPath, datasetName) + "_ScanStats.txt";
 
                 if (mDatasetStatsSummarizer.DatasetFileInfo.DatasetID == 0 && mDatasetID > 0)
                 {
@@ -372,7 +372,7 @@ namespace MSFileInfoScanner
 
                 if (!success)
                 {
-                    OnErrorEvent("Error calling objDatasetStatsSummarizer.CreateScanStatsFile: " + mDatasetStatsSummarizer.ErrorMessage);
+                    OnErrorEvent("Error calling DatasetStatsSummarizer.CreateScanStatsFile: " + mDatasetStatsSummarizer.ErrorMessage);
                 }
 
             }
@@ -417,7 +417,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="scanCount">Number of scans in the file</param>
         /// <param name="scanStart">1 if mScanStart is zero; otherwise mScanStart</param>
-        /// <param name="scanEnd">intScanCount if mScanEnd is zero; otherwise Min(mScanEnd, scanCount)</param>
+        /// <param name="scanEnd">scanCount if mScanEnd is zero; otherwise Min(mScanEnd, scanCount)</param>
         /// <remarks></remarks>
         protected void GetStartAndEndScans(int scanCount, out int scanStart, out int scanEnd)
         {
@@ -430,7 +430,7 @@ namespace MSFileInfoScanner
         /// <param name="scanCount">Number of scans in the file</param>
         /// <param name="scanNumFirst">The first scan number in the file (typically 1)</param>
         /// <param name="scanStart">1 if mScanStart is zero; otherwise mScanStart</param>
-        /// <param name="scanEnd">intScanCount if mScanEnd is zero; otherwise Min(mScanEnd, scanCount)</param>
+        /// <param name="scanEnd">scanCount if mScanEnd is zero; otherwise Min(mScanEnd, scanCount)</param>
         /// <remarks></remarks>
         private void GetStartAndEndScans(int scanCount, int scanNumFirst, out int scanStart, out int scanEnd)
         {
@@ -486,12 +486,13 @@ namespace MSFileInfoScanner
             MS2MzMinValidationWarning = false;
             MS2MzMinValidationMessage = string.Empty;
 
+            ErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError;
         }
 
         protected void InitializeTICAndBPI()
         {
             // Initialize TIC, BPI, and m/z vs. time arrays
-            mTICandBPIPlot.Reset();
+            mTICAndBPIPlot.Reset();
             mInstrumentSpecificPlots.Reset();
         }
 
@@ -502,12 +503,12 @@ namespace MSFileInfoScanner
             mLCMS2DPlotOverview.Reset();
         }
 
-        private bool CreateOverview2DPlots(string datasetName, string outputFolderPath, int lcms2DOverviewPlotDivisor)
+        private bool CreateOverview2DPlots(string datasetName, string outputDirectoryPath, int lcms2DOverviewPlotDivisor)
         {
-            return CreateOverview2DPlots(datasetName, outputFolderPath, lcms2DOverviewPlotDivisor, string.Empty);
+            return CreateOverview2DPlots(datasetName, outputDirectoryPath, lcms2DOverviewPlotDivisor, string.Empty);
         }
 
-        private bool CreateOverview2DPlots(string datasetName, string outputFolderPath, int lcms2DOverviewPlotDivisor, string scanModeSuffixAddon)
+        private bool CreateOverview2DPlots(string datasetName, string outputDirectoryPath, int lcms2DOverviewPlotDivisor, string scanModeSuffixAddon)
         {
             if (lcms2DOverviewPlotDivisor <= 1)
             {
@@ -527,14 +528,14 @@ namespace MSFileInfoScanner
             // mLCMS2DPlotOverview will auto-filter the data to track, at most, mLCMS2DPlotOverview.Options.MaxPointsToPlot points
             for (var index = 0; index <= mLCMS2DPlot.ScanCountCached - 1; index++)
             {
-                var objScan = mLCMS2DPlot.GetCachedScanByIndex(index);
+                var scan = mLCMS2DPlot.GetCachedScanByIndex(index);
 
-                mLCMS2DPlotOverview.AddScanSkipFilters(objScan);
+                mLCMS2DPlotOverview.AddScanSkipFilters(scan);
             }
 
             // Write out the Overview 2D plot of m/z vs. intensity
             // Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-            var success = mLCMS2DPlotOverview.Save2DPlots(datasetName, outputFolderPath, "HighAbu_", scanModeSuffixAddon);
+            var success = mLCMS2DPlotOverview.Save2DPlots(datasetName, outputDirectoryPath, "HighAbu_", scanModeSuffixAddon);
 
             return success;
 
@@ -544,35 +545,35 @@ namespace MSFileInfoScanner
         /// Create the output files
         /// </summary>
         /// <param name="inputFileName"></param>
-        /// <param name="outputFolderPath"></param>
+        /// <param name="outputDirectoryPath"></param>
         /// <returns></returns>
-        public override bool CreateOutputFiles(string inputFileName, string outputFolderPath)
+        public override bool CreateOutputFiles(string inputFileName, string outputDirectoryPath)
         {
             bool successOverall;
 
             try
             {
-                var strDatasetName = GetDatasetNameViaPath(inputFileName);
+                var datasetName = GetDatasetNameViaPath(inputFileName);
                 successOverall = true;
                 var createQCPlotHtmlFile = false;
 
-                if (outputFolderPath == null)
-                    outputFolderPath = string.Empty;
+                if (outputDirectoryPath == null)
+                    outputDirectoryPath = string.Empty;
 
-                DirectoryInfo diFolderInfo;
-                if (outputFolderPath.Length > 0)
+                DirectoryInfo outputDirectory;
+                if (outputDirectoryPath.Length > 0)
                 {
-                    // Make sure the output folder exists
-                    diFolderInfo = new DirectoryInfo(outputFolderPath);
+                    // Make sure the output directory exists
+                    outputDirectory = new DirectoryInfo(outputDirectoryPath);
 
-                    if (!diFolderInfo.Exists)
+                    if (!outputDirectory.Exists)
                     {
-                        diFolderInfo.Create();
+                        outputDirectory.Create();
                     }
                 }
                 else
                 {
-                    diFolderInfo = new DirectoryInfo(".");
+                    outputDirectory = new DirectoryInfo(".");
                 }
 
                 UpdatePlotWithPython();
@@ -593,14 +594,14 @@ namespace MSFileInfoScanner
                 if (mSaveTICAndBPI)
                 {
                     // Write out the TIC and BPI plots
-                    success = mTICandBPIPlot.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName);
+                    success = mTICAndBPIPlot.SaveTICAndBPIPlotFiles(datasetName, outputDirectory.FullName);
                     if (!success)
                     {
                         successOverall = false;
                     }
 
                     // Write out any instrument-specific plots
-                    success = mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles(strDatasetName, diFolderInfo.FullName);
+                    success = mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles(datasetName, outputDirectory.FullName);
                     if (!success)
                     {
                         successOverall = false;
@@ -613,7 +614,7 @@ namespace MSFileInfoScanner
                 {
                     // Write out the 2D plot of m/z vs. intensity
                     // Plots will be named Dataset_LCMS.png and Dataset_LCMSn.png
-                    success = mLCMS2DPlot.Save2DPlots(strDatasetName, diFolderInfo.FullName);
+                    success = mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName);
                     if (!success)
                     {
                         successOverall = false;
@@ -624,7 +625,7 @@ namespace MSFileInfoScanner
                         {
                             // Also save the Overview 2D Plots
                             // Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-                            success = CreateOverview2DPlots(strDatasetName, outputFolderPath, mLCMS2DOverviewPlotDivisor);
+                            success = CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DOverviewPlotDivisor);
                             if (!success)
                             {
                                 successOverall = false;
@@ -641,10 +642,10 @@ namespace MSFileInfoScanner
                             mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
                             mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
 
-                            mLCMS2DPlot.Save2DPlots(strDatasetName, diFolderInfo.FullName, "", "_zoom");
+                            mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName, "", "_zoom");
                             if (mLCMS2DOverviewPlotDivisor > 0)
                             {
-                                CreateOverview2DPlots(strDatasetName, outputFolderPath, mLCMS2DOverviewPlotDivisor, "_zoom");
+                                CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DOverviewPlotDivisor, "_zoom");
                             }
                         }
                     }
@@ -654,7 +655,7 @@ namespace MSFileInfoScanner
                 if (mCreateDatasetInfoFile)
                 {
                     // Create the _DatasetInfo.xml file
-                    success = CreateDatasetInfoFile(inputFileName, diFolderInfo.FullName);
+                    success = CreateDatasetInfoFile(inputFileName, outputDirectory.FullName);
                     if (!success)
                     {
                         successOverall = false;
@@ -665,7 +666,7 @@ namespace MSFileInfoScanner
                 if (mCreateScanStatsFile)
                 {
                     // Create the _ScanStats.txt file
-                    success = CreateDatasetScanStatsFile(inputFileName, diFolderInfo.FullName);
+                    success = CreateDatasetScanStatsFile(inputFileName, outputDirectory.FullName);
                     if (!success)
                     {
                         successOverall = false;
@@ -675,7 +676,7 @@ namespace MSFileInfoScanner
                 if (mUpdateDatasetStatsTextFile)
                 {
                     // Add a new row to the MSFileInfo_DatasetStats.txt file
-                    success = UpdateDatasetStatsTextFile(inputFileName, diFolderInfo.FullName, mDatasetStatsTextFileName);
+                    success = UpdateDatasetStatsTextFile(inputFileName, outputDirectory.FullName, mDatasetStatsTextFileName);
                     if (!success)
                     {
                         successOverall = false;
@@ -684,7 +685,7 @@ namespace MSFileInfoScanner
 
                 if (createQCPlotHtmlFile)
                 {
-                    success = CreateQCPlotHTMLFile(strDatasetName, diFolderInfo.FullName);
+                    success = CreateQCPlotHTMLFile(datasetName, outputDirectory.FullName);
                     if (!success)
                     {
                         successOverall = false;
@@ -702,28 +703,29 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool CreateQCPlotHTMLFile(string datasetName, string outputFolderPath)
+        private bool CreateQCPlotHTMLFile(string datasetName, string outputDirectoryPath)
         {
             try
             {
                 // Obtain the dataset summary stats (they will be auto-computed if not up to date)
-                var objSummaryStats = mDatasetStatsSummarizer.GetDatasetSummaryStats();
+                var summaryStats = mDatasetStatsSummarizer.GetDatasetSummaryStats();
 
-                var strHTMLFilePath = Path.Combine(outputFolderPath, "index.html");
+                var htmlFilePath = Path.Combine(outputDirectoryPath, "index.html");
 
-                using (var swOutFile = new StreamWriter(new FileStream(strHTMLFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                using (var writer = new StreamWriter(new FileStream(htmlFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
 
-                    swOutFile.WriteLine("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 3.2//EN\">");
-                    swOutFile.WriteLine("<html>");
-                    swOutFile.WriteLine("<head>");
-                    swOutFile.WriteLine("  <title>" + datasetName + "</title>");
-                    swOutFile.WriteLine("</head>");
-                    swOutFile.WriteLine("");
-                    swOutFile.WriteLine("<body>");
-                    swOutFile.WriteLine("  <h2>" + datasetName + "</h2>");
-                    swOutFile.WriteLine("");
-                    swOutFile.WriteLine("  <table>");
+                    // ReSharper disable once StringLiteralTypo
+                    writer.WriteLine("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 3.2//EN\">");
+                    writer.WriteLine("<html>");
+                    writer.WriteLine("<head>");
+                    writer.WriteLine("  <title>" + datasetName + "</title>");
+                    writer.WriteLine("</head>");
+                    writer.WriteLine("");
+                    writer.WriteLine("<body>");
+                    writer.WriteLine("  <h2>" + datasetName + "</h2>");
+                    writer.WriteLine("");
+                    writer.WriteLine("  <table>");
 
                     // First the plots with the top 50,000 points
                     var file1 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS);
@@ -742,12 +744,12 @@ namespace MSFileInfoScanner
 
                     if (file1.Length > 0 || file2.Length > 0)
                     {
-                        swOutFile.WriteLine("    <tr>");
-                        swOutFile.WriteLine("      <td valign=\"middle\">LCMS<br>(Top " + top + ")</td>");
-                        swOutFile.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
-                        swOutFile.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
-                        swOutFile.WriteLine("    </tr>");
-                        swOutFile.WriteLine("");
+                        writer.WriteLine("    <tr>");
+                        writer.WriteLine("      <td valign=\"middle\">LCMS<br>(Top " + top + ")</td>");
+                        writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
+                        writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
+                        writer.WriteLine("    </tr>");
+                        writer.WriteLine("");
                     }
 
                     // Now the plots with the top 500,000 points
@@ -766,24 +768,24 @@ namespace MSFileInfoScanner
 
                     if (file1.Length > 0 || file2.Length > 0)
                     {
-                        swOutFile.WriteLine("    <tr>");
-                        swOutFile.WriteLine("      <td valign=\"middle\">LCMS<br>(Top " + top + ")</td>");
-                        swOutFile.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
-                        swOutFile.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
-                        swOutFile.WriteLine("    </tr>");
-                        swOutFile.WriteLine("");
+                        writer.WriteLine("    <tr>");
+                        writer.WriteLine("      <td valign=\"middle\">LCMS<br>(Top " + top + ")</td>");
+                        writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
+                        writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
+                        writer.WriteLine("    </tr>");
+                        writer.WriteLine("");
                     }
 
-                    file1 = mTICandBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS);
-                    file2 = mTICandBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn);
+                    file1 = mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS);
+                    file2 = mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn);
                     if (file1.Length > 0 || file2.Length > 0)
                     {
-                        swOutFile.WriteLine("    <tr>");
-                        swOutFile.WriteLine("      <td valign=\"middle\">BPI</td>");
-                        swOutFile.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
-                        swOutFile.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
-                        swOutFile.WriteLine("    </tr>");
-                        swOutFile.WriteLine("");
+                        writer.WriteLine("    <tr>");
+                        writer.WriteLine("      <td valign=\"middle\">BPI</td>");
+                        writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
+                        writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
+                        writer.WriteLine("    </tr>");
+                        writer.WriteLine("");
                     }
 
                     file1 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC);
@@ -792,56 +794,56 @@ namespace MSFileInfoScanner
 
                     if (file1.Length > 0 || file2.Length > 0 || file3.Length > 0)
                     {
-                        swOutFile.WriteLine("    <tr>");
-                        swOutFile.WriteLine("      <td valign=\"middle\">Addnl Plots</td>");
+                        writer.WriteLine("    <tr>");
+                        writer.WriteLine("      <td valign=\"middle\">Addnl Plots</td>");
                         if (file1.Length > 0)
-                            swOutFile.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
+                            writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
                         else
-                            swOutFile.WriteLine("      <td></td>");
+                            writer.WriteLine("      <td></td>");
                         if (file2.Length > 0)
-                            swOutFile.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
+                            writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
                         else
-                            swOutFile.WriteLine("      <td></td>");
+                            writer.WriteLine("      <td></td>");
                         if (file3.Length > 0)
-                            swOutFile.WriteLine("      <td>" + GenerateQCFigureHTML(file3, 250) + "</td>");
+                            writer.WriteLine("      <td>" + GenerateQCFigureHTML(file3, 250) + "</td>");
                         else
-                            swOutFile.WriteLine("      <td></td>");
-                        swOutFile.WriteLine("    </tr>");
-                        swOutFile.WriteLine("");
+                            writer.WriteLine("      <td></td>");
+                        writer.WriteLine("    </tr>");
+                        writer.WriteLine("");
                     }
 
-                    swOutFile.WriteLine("    <tr>");
-                    swOutFile.WriteLine("      <td valign=\"middle\">TIC</td>");
-                    swOutFile.WriteLine("      <td>" + GenerateQCFigureHTML(mTICandBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC), 250) + "</td>");
-                    swOutFile.WriteLine("      <td valign=\"middle\">");
+                    writer.WriteLine("    <tr>");
+                    writer.WriteLine("      <td valign=\"middle\">TIC</td>");
+                    writer.WriteLine("      <td>" + GenerateQCFigureHTML(mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC), 250) + "</td>");
+                    writer.WriteLine("      <td valign=\"middle\">");
 
-                    GenerateQCScanTypeSummaryHTML(swOutFile, objSummaryStats, "        ");
+                    GenerateQCScanTypeSummaryHTML(writer, summaryStats, "        ");
 
-                    swOutFile.WriteLine("      </td>");
-                    swOutFile.WriteLine("    </tr>");
+                    writer.WriteLine("      </td>");
+                    writer.WriteLine("    </tr>");
 
-                    swOutFile.WriteLine("    <tr>");
-                    swOutFile.WriteLine("      <td>&nbsp;</td>");
-                    swOutFile.WriteLine("      <td align=\"center\">DMS <a href=\"http://dms2.pnl.gov/dataset/show/" + datasetName + "\">Dataset Detail Report</a></td>");
+                    writer.WriteLine("    <tr>");
+                    writer.WriteLine("      <td>&nbsp;</td>");
+                    writer.WriteLine("      <td align=\"center\">DMS <a href=\"http://dms2.pnl.gov/dataset/show/" + datasetName + "\">Dataset Detail Report</a></td>");
 
-                    var dsnfoFileName = datasetName + clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
-                    if (mCreateDatasetInfoFile || File.Exists(Path.Combine(outputFolderPath, dsnfoFileName)))
+                    var datasetInfoFileName = datasetName + clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
+                    if (mCreateDatasetInfoFile || File.Exists(Path.Combine(outputDirectoryPath, datasetInfoFileName)))
                     {
-                        swOutFile.WriteLine("      <td align=\"center\"><a href=\"" + dsnfoFileName + "\">Dataset Info XML file</a></td>");
+                        writer.WriteLine("      <td align=\"center\"><a href=\"" + datasetInfoFileName + "\">Dataset Info XML file</a></td>");
                     }
                     else
                     {
-                        swOutFile.WriteLine("      <td>&nbsp;</td>");
+                        writer.WriteLine("      <td>&nbsp;</td>");
                     }
 
-                    swOutFile.WriteLine("    </tr>");
+                    writer.WriteLine("    </tr>");
 
-                    swOutFile.WriteLine("");
-                    swOutFile.WriteLine("  </table>");
-                    swOutFile.WriteLine("");
-                    swOutFile.WriteLine("</body>");
-                    swOutFile.WriteLine("</html>");
-                    swOutFile.WriteLine("");
+                    writer.WriteLine("");
+                    writer.WriteLine("  </table>");
+                    writer.WriteLine("");
+                    writer.WriteLine("</body>");
+                    writer.WriteLine("</html>");
+                    writer.WriteLine("");
 
                 }
 
@@ -866,23 +868,23 @@ namespace MSFileInfoScanner
             return string.Format("<a href=\"{0}\"><img src=\"{0}\" width=\"{1}\" border=\"0\"></a>", filename, widthPixels);
         }
 
-        private void GenerateQCScanTypeSummaryHTML(TextWriter swOutFile, clsDatasetSummaryStats objDatasetSummaryStats, string indent)
+        private void GenerateQCScanTypeSummaryHTML(TextWriter writer, clsDatasetSummaryStats datasetSummaryStats, string indent)
         {
             if (indent == null)
                 indent = string.Empty;
 
-            swOutFile.WriteLine(indent + @"<table border=""1"">");
-            swOutFile.WriteLine(indent + "  <tr><th>Scan Type</th><th>Scan Count</th><th>Scan Filter Text</th></tr>");
+            writer.WriteLine(indent + @"<table border=""1"">");
+            writer.WriteLine(indent + "  <tr><th>Scan Type</th><th>Scan Count</th><th>Scan Filter Text</th></tr>");
 
-            foreach (var scanTypeEntry in objDatasetSummaryStats.objScanTypeStats)
+            foreach (var scanTypeEntry in datasetSummaryStats.ScanTypeStats)
             {
                 var scanType = scanTypeEntry.Key;
-                var indexMatch = scanType.IndexOf(clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR, StringComparison.Ordinal);
+                var indexMatch = scanType.IndexOf(clsDatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR, StringComparison.Ordinal);
 
                 string scanFilterText;
                 if (indexMatch >= 0)
                 {
-                    scanFilterText = scanType.Substring(indexMatch + clsDatasetStatsSummarizer.SCANTYPE_STATS_SEPCHAR.Length);
+                    scanFilterText = scanType.Substring(indexMatch + clsDatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR.Length);
                     if (indexMatch > 0)
                     {
                         scanType = scanType.Substring(0, indexMatch);
@@ -898,11 +900,11 @@ namespace MSFileInfoScanner
                 }
                 var scanCount = scanTypeEntry.Value;
 
-                swOutFile.WriteLine(indent + "  <tr><td>" + scanType + "</td>" + "<td align=\"center\">" + scanCount + "</td>" + "<td>" + scanFilterText + "</td></tr>");
+                writer.WriteLine(indent + "  <tr><td>" + scanType + "</td>" + "<td align=\"center\">" + scanCount + "</td>" + "<td>" + scanFilterText + "</td></tr>");
 
             }
 
-            swOutFile.WriteLine(indent + "</table>");
+            writer.WriteLine(indent + "</table>");
 
         }
 
@@ -1009,28 +1011,28 @@ namespace MSFileInfoScanner
 
         }
 
-        protected bool UpdateDatasetFileStats(DirectoryInfo diFolderInfo, int datasetID)
+        protected bool UpdateDatasetFileStats(DirectoryInfo outputDirectory, int datasetID)
         {
 
             try
             {
-                if (!diFolderInfo.Exists)
+                if (!outputDirectory.Exists)
                     return false;
 
                 // Record the file size and Dataset ID
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = diFolderInfo.CreationTime;
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = diFolderInfo.LastWriteTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = outputDirectory.CreationTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = outputDirectory.LastWriteTime;
 
                 mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
                 mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
 
                 mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetID;
-                mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = Path.GetFileNameWithoutExtension(diFolderInfo.Name);
-                mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = diFolderInfo.Extension;
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = Path.GetFileNameWithoutExtension(outputDirectory.Name);
+                mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = outputDirectory.Extension;
 
-                foreach (var fiFileInfo in diFolderInfo.GetFiles("*", SearchOption.AllDirectories))
+                foreach (var outputFile in outputDirectory.GetFiles("*", SearchOption.AllDirectories))
                 {
-                    mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes += fiFileInfo.Length;
+                    mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes += outputFile.Length;
                 }
 
                 mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
@@ -1049,24 +1051,24 @@ namespace MSFileInfoScanner
         /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
         /// </summary>
         /// <param name="inputFileName">Input file name</param>
-        /// <param name="outputFolderPath">Output directory path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
         /// <returns>True if success; False if failure</returns>
         /// <remarks></remarks>
         // ReSharper disable once UnusedMember.Global
-        public bool UpdateDatasetStatsTextFile(string inputFileName, string outputFolderPath)
+        public bool UpdateDatasetStatsTextFile(string inputFileName, string outputDirectoryPath)
         {
-            return UpdateDatasetStatsTextFile(inputFileName, outputFolderPath, clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME);
+            return UpdateDatasetStatsTextFile(inputFileName, outputDirectoryPath, clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME);
         }
 
         /// <summary>
         /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
         /// </summary>
         /// <param name="inputFileName">Input file name</param>
-        /// <param name="outputFolderPath">Output directory path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
         /// <param name="datasetStatsFilename">Dataset stats file name</param>
         /// <returns>True if success; False if failure</returns>
         /// <remarks></remarks>
-        public bool UpdateDatasetStatsTextFile(string inputFileName, string outputFolderPath, string datasetStatsFilename)
+        public bool UpdateDatasetStatsTextFile(string inputFileName, string outputDirectoryPath, string datasetStatsFilename)
         {
 
             bool success;
@@ -1075,13 +1077,13 @@ namespace MSFileInfoScanner
             {
                 var datasetName = GetDatasetNameViaPath(inputFileName);
 
-                var datasetStatsFilePath = Path.Combine(outputFolderPath, datasetStatsFilename);
+                var datasetStatsFilePath = Path.Combine(outputDirectoryPath, datasetStatsFilename);
 
                 success = mDatasetStatsSummarizer.UpdateDatasetStatsTextFile(datasetName, datasetStatsFilePath);
 
                 if (!success)
                 {
-                    OnErrorEvent("Error calling objDatasetStatsSummarizer.UpdateDatasetStatsTextFile: " + mDatasetStatsSummarizer.ErrorMessage);
+                    OnErrorEvent("Error calling datasetStatsSummarizer.UpdateDatasetStatsTextFile: " + mDatasetStatsSummarizer.ErrorMessage);
                 }
 
             }
@@ -1097,7 +1099,7 @@ namespace MSFileInfoScanner
 
         private void UpdatePlotWithPython()
         {
-            mTICandBPIPlot.PlotWithPython = mPlotWithPython;
+            mTICAndBPIPlot.PlotWithPython = mPlotWithPython;
             mInstrumentSpecificPlots.PlotWithPython = mPlotWithPython;
 
             if (mPlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
@@ -1107,7 +1109,7 @@ namespace MSFileInfoScanner
                 mLCMS2DPlotOverview.Options.PlotWithPython = mPlotWithPython;
             }
 
-            mTICandBPIPlot.DeleteTempFiles = !ShowDebugInfo;
+            mTICAndBPIPlot.DeleteTempFiles = !ShowDebugInfo;
             mInstrumentSpecificPlots.DeleteTempFiles = !ShowDebugInfo;
 
             if (mPlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
@@ -1117,7 +1119,6 @@ namespace MSFileInfoScanner
                 mLCMS2DPlotOverview.Options.DeleteTempFiles = !ShowDebugInfo;
             }
 
-
         }
 
         /// <summary>
@@ -1126,7 +1127,7 @@ namespace MSFileInfoScanner
         /// Raise an error if at least 10% of the spectra have a minimum m/z higher than the threshold
         /// Log a warning if some spectra, but fewer than 10% of the total, have a minimum higher than the threshold
         /// </summary>
-        /// <returns>True if valid data, false if at least 10% of the spectgra has a minimum m/z higher than the threshold</returns>
+        /// <returns>True if valid data, false if at least 10% of the spectra has a minimum m/z higher than the threshold</returns>
         protected bool ValidateMS2MzMin()
         {
 

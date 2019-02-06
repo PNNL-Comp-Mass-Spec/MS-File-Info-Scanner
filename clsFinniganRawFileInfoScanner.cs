@@ -34,40 +34,40 @@ namespace MSFileInfoScanner
         /// <summary>
         /// This function is used to determine one or more overall quality scores
         /// </summary>
-        /// <param name="objXcaliburAccessor"></param>
+        /// <param name="xcaliburAccessor"></param>
         /// <param name="datasetFileInfo"></param>
         /// <remarks></remarks>
-        private void ComputeQualityScores(XRawFileIO objXcaliburAccessor, clsDatasetFileInfo datasetFileInfo)
+        private void ComputeQualityScores(XRawFileIO xcaliburAccessor, clsDatasetFileInfo datasetFileInfo)
         {
-            float sngOverallScore;
+            float overallScore;
 
-            double dblOverallAvgIntensitySum = 0;
-            var intOverallAvgCount = 0;
+            double overallAvgIntensitySum = 0;
+            var overallAvgCount = 0;
 
             if (mLCMS2DPlot.ScanCountCached > 0)
             {
                 // Obtain the overall average intensity value using the data cached in mLCMS2DPlot
-                // This avoids having to reload all of the data using objXcaliburAccessor
-                const int intMSLevelFilter = 1;
-                sngOverallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(intMSLevelFilter);
+                // This avoids having to reload all of the data using xcaliburAccessor
+                const int msLevelFilter = 1;
+                overallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(msLevelFilter);
 
             }
             else
             {
-                var intScanCount = objXcaliburAccessor.GetNumScans();
-                GetStartAndEndScans(intScanCount, out var intScanStart, out var intScanEnd);
+                var scanCount = xcaliburAccessor.GetNumScans();
+                GetStartAndEndScans(scanCount, out var scanStart, out var scanEnd);
 
-                for (var intScanNumber = intScanStart; intScanNumber <= intScanEnd; intScanNumber++)
+                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-                    // This function returns the number of points in dblMassIntensityPairs()
-                    var intReturnCode = objXcaliburAccessor.GetScanData2D(intScanNumber, out var dblMassIntensityPairs);
+                    // This function returns the number of points in massIntensityPairs()
+                    var returnCode = xcaliburAccessor.GetScanData2D(scanNumber, out var massIntensityPairs);
 
-                    if (intReturnCode <= 0)
+                    if (returnCode <= 0)
                     {
                         continue;
                     }
 
-                    if (dblMassIntensityPairs == null || dblMassIntensityPairs.GetLength(1) <= 0)
+                    if (massIntensityPairs == null || massIntensityPairs.GetLength(1) <= 0)
                     {
                         continue;
                     }
@@ -75,34 +75,34 @@ namespace MSFileInfoScanner
                     // Keep track of the quality scores and then store one or more overall quality scores in datasetFileInfo.OverallQualityScore
                     // For now, this just computes the average intensity for each scan and then computes and overall average intensity value
 
-                    double dblIntensitySum = 0;
-                    for (var intIonIndex = 0; intIonIndex <= dblMassIntensityPairs.GetUpperBound(1); intIonIndex++)
+                    double intensitySum = 0;
+                    for (var ionIndex = 0; ionIndex <= massIntensityPairs.GetUpperBound(1); ionIndex++)
                     {
-                        dblIntensitySum += dblMassIntensityPairs[1, intIonIndex];
+                        intensitySum += massIntensityPairs[1, ionIndex];
                     }
 
-                    dblOverallAvgIntensitySum += dblIntensitySum / dblMassIntensityPairs.GetLength(1);
+                    overallAvgIntensitySum += intensitySum / massIntensityPairs.GetLength(1);
 
-                    intOverallAvgCount += 1;
+                    overallAvgCount += 1;
                 }
 
-                if (intOverallAvgCount > 0)
+                if (overallAvgCount > 0)
                 {
-                    sngOverallScore = (float)(dblOverallAvgIntensitySum / intOverallAvgCount);
+                    overallScore = (float)(overallAvgIntensitySum / overallAvgCount);
                 }
                 else
                 {
-                    sngOverallScore = 0;
+                    overallScore = 0;
                 }
 
             }
 
-            datasetFileInfo.OverallQualityScore = sngOverallScore;
+            datasetFileInfo.OverallQualityScore = overallScore;
 
         }
 
         private clsSpectrumTypeClassifier.eCentroidStatusConstants GetCentroidStatus(
-            int intScanNumber,
+            int scanNumber,
             clsScanInfo scanInfo)
         {
 
@@ -110,7 +110,7 @@ namespace MSFileInfoScanner
             {
                 if (mIsProfileM.IsMatch(scanInfo.FilterText))
                 {
-                    OnWarningEvent("Warning: Scan " + intScanNumber + " appears to be profile mode data, yet XRawFileIO reported it to be centroid");
+                    OnWarningEvent("Warning: Scan " + scanNumber + " appears to be profile mode data, yet XRawFileIO reported it to be centroid");
                 }
 
                 return clsSpectrumTypeClassifier.eCentroidStatusConstants.Centroid;
@@ -118,7 +118,7 @@ namespace MSFileInfoScanner
 
             if (mIsCentroid.IsMatch(scanInfo.FilterText))
             {
-                OnWarningEvent("Warning: Scan " + intScanNumber + " appears to be centroided data, yet XRawFileIO reported it to be profile");
+                OnWarningEvent("Warning: Scan " + scanNumber + " appears to be centroided data, yet XRawFileIO reported it to be profile");
             }
 
             return clsSpectrumTypeClassifier.eCentroidStatusConstants.Profile;
@@ -127,15 +127,15 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Returns the dataset name for the given file
         /// </summary>
-        /// <param name="strDataFilePath"></param>
+        /// <param name="dataFilePath"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public override string GetDatasetNameViaPath(string strDataFilePath)
+        public override string GetDatasetNameViaPath(string dataFilePath)
         {
             try
             {
                 // The dataset name is simply the file name without .Raw
-                return Path.GetFileNameWithoutExtension(strDataFilePath);
+                return Path.GetFileNameWithoutExtension(dataFilePath);
             }
             catch (Exception)
             {
@@ -143,7 +143,7 @@ namespace MSFileInfoScanner
             }
         }
 
-        private void LoadScanDetails(XRawFileIO objXcaliburAccessor)
+        private void LoadScanDetails(XRawFileIO xcaliburAccessor)
         {
             OnStatusEvent("  Loading scan details");
 
@@ -158,12 +158,12 @@ namespace MSFileInfoScanner
                 InitializeLCMS2DPlot();
             }
 
-            var dtLastProgressTime = DateTime.UtcNow;
+            var lastProgressTime = DateTime.UtcNow;
 
             // Note that this starts at 2 seconds, but is extended after each progress message is shown (maxing out at 30 seconds)
             var progressThresholdSeconds = 2;
 
-            var scanCount = objXcaliburAccessor.GetNumScans();
+            var scanCount = xcaliburAccessor.GetNumScans();
 
             GetStartAndEndScans(scanCount, out var scanStart, out var scanEnd);
 
@@ -178,13 +178,13 @@ namespace MSFileInfoScanner
                 try
                 {
 
-                    var blnSuccess = objXcaliburAccessor.GetScanInfo(scanNumber, out scanInfo);
+                    var success = xcaliburAccessor.GetScanInfo(scanNumber, out scanInfo);
 
-                    if (blnSuccess)
+                    if (success)
                     {
                         if (mSaveTICAndBPI)
                         {
-                            mTICandBPIPlot.AddData(
+                            mTICAndBPIPlot.AddData(
                                 scanNumber,
                                 scanInfo.MSLevel,
                                 (float)scanInfo.RetentionTime,
@@ -192,7 +192,7 @@ namespace MSFileInfoScanner
                                 scanInfo.TotalIonCurrent);
                         }
 
-                        var objScanStatsEntry = new clsScanStatsEntry
+                        var scanStatsEntry = new clsScanStatsEntry
                         {
                             ScanNumber = scanNumber,
                             ScanType = scanInfo.MSLevel,
@@ -210,13 +210,13 @@ namespace MSFileInfoScanner
                         };
 
                         // Store the ScanEvent values in .ExtendedScanInfo
-                        StoreExtendedScanInfo(ref objScanStatsEntry.ExtendedScanInfo, scanInfo.ScanEvents);
+                        StoreExtendedScanInfo(ref scanStatsEntry.ExtendedScanInfo, scanInfo.ScanEvents);
 
                         // Store the collision mode and the scan filter text
-                        objScanStatsEntry.ExtendedScanInfo.CollisionMode = scanInfo.CollisionMode;
-                        objScanStatsEntry.ExtendedScanInfo.ScanFilterText = scanInfo.FilterText;
+                        scanStatsEntry.ExtendedScanInfo.CollisionMode = scanInfo.CollisionMode;
+                        scanStatsEntry.ExtendedScanInfo.ScanFilterText = scanInfo.FilterText;
 
-                        mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
+                        mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
 
                     }
                 }
@@ -233,29 +233,29 @@ namespace MSFileInfoScanner
                         // Also need to load the raw data
 
                         // Load the ions for this scan
-                        var intIonCount = objXcaliburAccessor.GetScanData2D(scanNumber, out var dblMassIntensityPairs);
+                        var ionCount = xcaliburAccessor.GetScanData2D(scanNumber, out var massIntensityPairs);
 
-                        if (intIonCount > 0)
+                        if (ionCount > 0)
                         {
                             if (mSaveLCMS2DPlots)
                             {
-                                mLCMS2DPlot.AddScan2D(scanNumber, scanInfo.MSLevel, (float)scanInfo.RetentionTime, intIonCount, dblMassIntensityPairs);
+                                mLCMS2DPlot.AddScan2D(scanNumber, scanInfo.MSLevel, (float)scanInfo.RetentionTime, ionCount, massIntensityPairs);
                             }
 
                             if (mCheckCentroidingStatus)
                             {
-                                var mzCount = dblMassIntensityPairs.GetLength(1);
+                                var mzCount = massIntensityPairs.GetLength(1);
 
-                                var lstMZs = new List<double>(mzCount);
+                                var mzList = new List<double>(mzCount);
 
                                 for (var i = 0; i <= mzCount - 1; i++)
                                 {
-                                    lstMZs.Add(dblMassIntensityPairs[0, i]);
+                                    mzList.Add(massIntensityPairs[0, i]);
                                 }
 
                                 var centroidingStatus = GetCentroidStatus(scanNumber, scanInfo);
 
-                                mDatasetStatsSummarizer.ClassifySpectrum(lstMZs, scanInfo.MSLevel, centroidingStatus, "Scan " + scanNumber);
+                                mDatasetStatsSummarizer.ClassifySpectrum(mzList, scanInfo.MSLevel, centroidingStatus, "Scan " + scanNumber);
                             }
                         }
 
@@ -269,10 +269,10 @@ namespace MSFileInfoScanner
 
                 scansProcessed++;
 
-                if (DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds < progressThresholdSeconds)
+                if (DateTime.UtcNow.Subtract(lastProgressTime).TotalSeconds < progressThresholdSeconds)
                     continue;
 
-                dtLastProgressTime = DateTime.UtcNow;
+                lastProgressTime = DateTime.UtcNow;
                 if (progressThresholdSeconds < 30)
                     progressThresholdSeconds += 2;
 
@@ -288,42 +288,42 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Process the dataset
         /// </summary>
-        /// <param name="strDataFilePath"></param>
+        /// <param name="dataFilePath"></param>
         /// <param name="datasetFileInfo"></param>
-        /// <returns>True if success, False if an error</returns>
+        /// <returns>True if success, False if an error or if the file has no scans</returns>
         /// <remarks></remarks>
-        public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
             ResetResults();
 
-            var strDataFilePathLocal = string.Empty;
+            var dataFilePathLocal = string.Empty;
 
             // Obtain the full path to the file
-            var fiRawFile = new FileInfo(strDataFilePath);
+            var rawFile = new FileInfo(dataFilePath);
 
-            if (!fiRawFile.Exists)
+            if (!rawFile.Exists)
             {
-                OnErrorEvent(".Raw file not found: " + strDataFilePath);
+                OnErrorEvent(".Raw file not found: " + dataFilePath);
                 return false;
             }
 
             // Future, optional: Determine the DatasetID
             // Unfortunately, this is not present in metadata.txt
-            // intDatasetID = LookupDatasetID(strDatasetName)
-            var intDatasetID = DatasetID;
+            // datasetID = LookupDatasetID(datasetName)
+            var datasetID = DatasetID;
 
             // Record the file size and Dataset ID
-            datasetFileInfo.FileSystemCreationTime = fiRawFile.CreationTime;
-            datasetFileInfo.FileSystemModificationTime = fiRawFile.LastWriteTime;
+            datasetFileInfo.FileSystemCreationTime = rawFile.CreationTime;
+            datasetFileInfo.FileSystemModificationTime = rawFile.LastWriteTime;
 
             // The acquisition times will get updated below to more accurate values
             datasetFileInfo.AcqTimeStart = datasetFileInfo.FileSystemModificationTime;
             datasetFileInfo.AcqTimeEnd = datasetFileInfo.FileSystemModificationTime;
 
-            datasetFileInfo.DatasetID = intDatasetID;
-            datasetFileInfo.DatasetName = GetDatasetNameViaPath(fiRawFile.Name);
-            datasetFileInfo.FileExtension = fiRawFile.Extension;
-            datasetFileInfo.FileSizeBytes = fiRawFile.Length;
+            datasetFileInfo.DatasetID = datasetID;
+            datasetFileInfo.DatasetName = GetDatasetNameViaPath(rawFile.Name);
+            datasetFileInfo.FileExtension = rawFile.Extension;
+            datasetFileInfo.FileSizeBytes = rawFile.Length;
 
             datasetFileInfo.ScanCount = 0;
 
@@ -342,13 +342,13 @@ namespace MSFileInfoScanner
             RegisterEvents(xcaliburAccessor);
 
             // Open a handle to the data file
-            if (!xcaliburAccessor.OpenRawFile(fiRawFile.FullName))
+            if (!xcaliburAccessor.OpenRawFile(rawFile.FullName))
             {
                 // File open failed
-                OnErrorEvent("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
+                OnErrorEvent("Call to .OpenRawFile failed for: " + rawFile.FullName);
                 readError = true;
 
-                if (!string.Equals(clsMSFileInfoScanner.GetAppDirectoryPath().Substring(0, 2), fiRawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
+                if (!string.Equals(clsMSFileInfoScanner.GetAppDirectoryPath().Substring(0, 2), rawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
                 {
                     if (mCopyFileLocalOnReadError)
                     {
@@ -356,23 +356,23 @@ namespace MSFileInfoScanner
 
                         try
                         {
-                            strDataFilePathLocal = Path.Combine(clsMSFileInfoScanner.GetAppDirectoryPath(), Path.GetFileName(strDataFilePath));
+                            dataFilePathLocal = Path.Combine(clsMSFileInfoScanner.GetAppDirectoryPath(), Path.GetFileName(dataFilePath));
 
-                            if (!string.Equals(strDataFilePathLocal, strDataFilePath, StringComparison.InvariantCultureIgnoreCase))
+                            if (!string.Equals(dataFilePathLocal, dataFilePath, StringComparison.InvariantCultureIgnoreCase))
                             {
-                                OnDebugEvent("Copying file " + Path.GetFileName(strDataFilePath) + " to the working folder");
-                                File.Copy(strDataFilePath, strDataFilePathLocal, true);
+                                OnDebugEvent("Copying file " + Path.GetFileName(dataFilePath) + " to the working folder");
+                                File.Copy(dataFilePath, dataFilePathLocal, true);
 
-                                strDataFilePath = string.Copy(strDataFilePathLocal);
+                                dataFilePath = string.Copy(dataFilePathLocal);
                                 deleteLocalFile = true;
 
-                                // Update fiRawFile then try to re-open
-                                fiRawFile = new FileInfo(strDataFilePath);
+                                // Update rawFile then try to re-open
+                                rawFile = new FileInfo(dataFilePath);
 
-                                if (!xcaliburAccessor.OpenRawFile(fiRawFile.FullName))
+                                if (!xcaliburAccessor.OpenRawFile(rawFile.FullName))
                                 {
                                     // File open failed
-                                    OnErrorEvent("Call to .OpenRawFile failed for: " + fiRawFile.FullName);
+                                    OnErrorEvent("Call to .OpenRawFile failed for: " + rawFile.FullName);
                                     readError = true;
                                 }
                                 else
@@ -475,7 +475,7 @@ namespace MSFileInfoScanner
             // Read the file info from the file system
             // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
             // This will also compute the SHA-1 hash of the .Raw file and add it to mDatasetStatsSummarizer.DatasetFileInfo
-            UpdateDatasetFileStats(fiRawFile, intDatasetID);
+            UpdateDatasetFileStats(rawFile, datasetID);
 
             // Copy over the updated file time info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
             mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
@@ -493,12 +493,12 @@ namespace MSFileInfoScanner
             {
                 try
                 {
-                    File.Delete(strDataFilePathLocal);
+                    File.Delete(dataFilePathLocal);
                 }
                 catch (Exception)
                 {
                     // Deletion failed
-                    OnErrorEvent("Deletion failed for: " + Path.GetFileName(strDataFilePathLocal));
+                    OnErrorEvent("Deletion failed for: " + Path.GetFileName(dataFilePathLocal));
                 }
             }
 
@@ -508,16 +508,16 @@ namespace MSFileInfoScanner
 
         }
 
-        private void StoreExtendedScanInfo(ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo, string strEntryName, string strEntryValue)
+        private void StoreExtendedScanInfo(ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo, string entryName, string entryValue)
         {
-            if (strEntryValue == null)
+            if (entryValue == null)
             {
-                strEntryValue = string.Empty;
+                entryValue = string.Empty;
             }
 
             var scanEvents = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>(strEntryName, strEntryValue)
+                new KeyValuePair<string, string>(entryName, entryValue)
             };
 
             StoreExtendedScanInfo(ref udtExtendedScanInfo, scanEvents);
@@ -551,49 +551,49 @@ namespace MSFileInfoScanner
                     // We're only storing certain scan events
                     var entryNameLCase = scanEvent.Key.ToLower().TrimEnd(cTrimChars);
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_ION_INJECTION_TIME,
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_ION_INJECTION_TIME,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         udtExtendedScanInfo.IonInjectionTime = scanEvent.Value;
                         break;
                     }
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_SCAN_SEGMENT,
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_SCAN_SEGMENT,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         udtExtendedScanInfo.ScanSegment = scanEvent.Value;
                         break;
                     }
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_SCAN_EVENT,
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_SCAN_EVENT,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         udtExtendedScanInfo.ScanEvent = scanEvent.Value;
                         break;
                     }
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_CHARGE_STATE,
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_CHARGE_STATE,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         udtExtendedScanInfo.ChargeState = scanEvent.Value;
                         break;
                     }
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_MONOISOTOPIC_MZ,
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_MONOISOTOPIC_MZ,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         udtExtendedScanInfo.MonoisotopicMZ = scanEvent.Value;
                         break;
                     }
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_COLLISION_MODE,
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_COLLISION_MODE,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         udtExtendedScanInfo.CollisionMode = scanEvent.Value;
                         break;
                     }
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCANSTATS_COL_SCAN_FILTER_TEXT,
+                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_SCAN_FILTER_TEXT,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         udtExtendedScanInfo.ScanFilterText = scanEvent.Value;

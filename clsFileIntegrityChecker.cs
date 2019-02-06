@@ -95,7 +95,7 @@ namespace MSFileInfoScanner
         private udtZipFileWorkParamsType mZipFileWorkParams;
 
         public event FileIntegrityFailureEventHandler FileIntegrityFailure;
-        public delegate void FileIntegrityFailureEventHandler(string strFilePath, string strMessage);
+        public delegate void FileIntegrityFailureEventHandler(string filePath, string message);
 
         #endregion
 
@@ -149,37 +149,37 @@ namespace MSFileInfoScanner
         {
             // Converts a byte array into a hex string
 
-            var strOutput = new System.Text.StringBuilder(arrInput.Length);
+            var hexBuilder = new System.Text.StringBuilder(arrInput.Length);
 
             for (var i = 0; i <= arrInput.Length - 1; i++)
             {
-                strOutput.Append(arrInput[i].ToString("X2"));
+                hexBuilder.Append(arrInput[i].ToString("X2"));
             }
 
-            return strOutput.ToString().ToLower();
+            return hexBuilder.ToString().ToLower();
 
         }
 
         /// <summary>
         /// Checks the integrity of a text file
         /// </summary>
-        /// <param name="strFilePath">File path to check</param>
+        /// <param name="filePath">File path to check</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         /// <remarks></remarks>
-        private bool CheckTextFile(string strFilePath)
+        private bool CheckTextFile(string filePath)
         {
-            var blnFileIsValid = true;
+            var fileIsValid = true;
 
-            var fileName = Path.GetFileName(strFilePath);
+            var fileName = Path.GetFileName(filePath);
             if (fileName == null)
             {
                 return false;
             }
 
-            var strFileNameLower = fileName.ToLower();
+            var fileNameLower = fileName.ToLower();
 
             // Analysis Manager Summary File
-            if (strFileNameLower == "analysissummary.txt")
+            if (fileNameLower == "AnalysisSummary.txt".ToLower())
             {
                 // Free form text file
                 // Example contents:
@@ -187,7 +187,7 @@ namespace MSFileInfoScanner
                 //  Date	5/16/2008 7:49:00 PM
                 //  Processor	SeqCluster2
                 //  Tool	Sequest
-                blnFileIsValid = CheckTextFileWork(strFilePath, 10, 0, new List<string>
+                fileIsValid = CheckTextFileWork(filePath, 10, 0, new List<string>
                 {
                     "Job",
                     "Date",
@@ -197,14 +197,14 @@ namespace MSFileInfoScanner
 
                 // DEX Manager Summary File
             }
-            else if (strFileNameLower == "dataextractionsummary.txt")
+            else if (fileNameLower == "DataExtractionSummary.txt".ToLower())
             {
                 // Free form text file
                 // Example contents:
                 //  Job Number: 306839
                 //  Date: 5/16/2008 7:53:50 PM
                 //  Processor: Mash-01
-                blnFileIsValid = CheckTextFileWork(strFilePath, 5, 0, new List<string>
+                fileIsValid = CheckTextFileWork(filePath, 5, 0, new List<string>
                 {
                     "Job",
                     "Date",
@@ -214,7 +214,7 @@ namespace MSFileInfoScanner
 
                 // Analysis Manager MetaData file
             }
-            else if (strFileNameLower == "metadata.txt")
+            else if (fileNameLower == "metadata.txt")
             {
                 // Free form text file
                 // Example contents (I'm not sure if this file always looks like this):
@@ -223,41 +223,41 @@ namespace MSFileInfoScanner
                 //  OU_CN32_002_run3_3Apr08_Draco_07-12-25
                 //  Apr  4 2008 10:01AM
                 //  LTQ_Orb_1
-                blnFileIsValid = CheckTextFileWork(strFilePath, 2, 0, "Proteomics", false, false);
+                fileIsValid = CheckTextFileWork(filePath, 2, 0, "Proteomics", false, false);
 
                 // MASIC
             }
-            else if (strFileNameLower.EndsWith("_scanstats.txt"))
+            else if (fileNameLower.EndsWith("_ScanStats.txt".ToLower()))
             {
                 // Note: Header line could be missing, but the file should always contain data
                 // Example contents:
                 //  Dataset	ScanNumber	ScanTime	ScanType	TotalIonIntensity	BasePeakIntensity	BasePeakMZ	BasePeakSignalToNoiseRatio	IonCount	IonCountRaw
                 //  113591	1	0.00968	1	145331	12762	531.0419	70.11	3147	3147
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 6, true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 6, true);
 
                 // MASIC
             }
-            else if (strFileNameLower.EndsWith("_scanstatsconstant.txt"))
+            else if (fileNameLower.EndsWith("_ScanStatsConstant.txt".ToLower()))
             {
                 // Note: Header line could be missing, but the file should always contain data
                 // Example contents:
                 //  Setting	Value
                 //  AGC	On
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 1, true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 1, true);
 
                 // MASIC
             }
-            else if (strFileNameLower.EndsWith("_scanstatsex.txt"))
+            else if (fileNameLower.EndsWith("_ScanStatsEx.txt".ToLower()))
             {
                 // Note: Header line could be missing, but the file should always contain data
                 // Example contents:
                 //  Dataset	ScanNumber	Ion Injection Time (ms)	Scan Segment	Scan Event	Master Index	Elapsed Scan Time (sec)	Charge State	Monoisotopic M/Z	MS2 Isolation Width	FT Analyzer Settings	FT Analyzer Message	FT Resolution	Conversion Parameter B	Conversion Parameter C	Conversion Parameter D	Conversion Parameter E	Collision Mode	Scan Filter Text
                 //  113591	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 1, true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 1, true);
 
                 // MASIC
             }
-            else if (strFileNameLower.EndsWith("_msmethod.txt"))
+            else if (fileNameLower.EndsWith("_MSMethod.txt".ToLower()))
             {
                 // Free form text file
                 // Example contents:
@@ -270,7 +270,7 @@ namespace MSFileInfoScanner
                 //  Last modified: 12/10/2007 by LTQ
                 //
                 //  MS Run Time (min): 99.50
-                blnFileIsValid = CheckTextFileWork(strFilePath, 10, 0, new List<string>
+                fileIsValid = CheckTextFileWork(filePath, 10, 0, new List<string>
                 {
                     "Instrument",
                     "Creator"
@@ -278,22 +278,22 @@ namespace MSFileInfoScanner
 
                 // MASIC
             }
-            else if (strFileNameLower.EndsWith("_sicstats.txt"))
+            else if (fileNameLower.EndsWith("_SICStats.txt".ToLower()))
             {
                 // Note: Header line could be missing, but the file will usually (but not always) contain data
                 // Example contents:
                 //  Dataset	ParentIonIndex	MZ	SurveyScanNumber	FragScanNumber	OptimalPeakApexScanNumber	PeakApexOverrideParentIonIndex	CustomSICPeak	PeakScanStart	PeakScanEnd	PeakScanMaxIntensity	PeakMaxIntensity	PeakSignalToNoiseRatio	FWHMInScans	PeakArea	ParentIonIntensity	PeakBaselineNoiseLevel	PeakBaselineNoiseStDev	PeakBaselinePointsUsed	StatMomentsArea	CenterOfMassScan	PeakStDev	PeakSkew	PeakKSStat	StatMomentsDataCountUsed
                 //  113591	0	445.12	8	9	133	79	0	3	86	66	14881	0.4267	78	906920	11468	34870	22736	768	293248	68	6.36	-0.16	0.4162	5
-                blnFileIsValid = CheckTextFileWork(strFilePath, 0, 10, true);
+                fileIsValid = CheckTextFileWork(filePath, 0, 10, true);
 
                 // SEQUEST
             }
-            else if (strFileNameLower.StartsWith("cat_log"))
+            else if (fileNameLower.StartsWith("cat_log"))
             {
                 // Example contents:
                 //  5/16/2008 7:41:55 PM, 14418 'dta' files were concatenated to 'D:\DMS_Work\OU_CN32_002_run3_3Apr08_Draco_07-12-25_dta.txt', Normal,
                 //  5/16/2008 7:48:47 PM, 14418 'out' files were concatenated to 'D:\DMS_Work\OU_CN32_002_run3_3Apr08_Draco_07-12-25_out.txt', Normal,
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 0, new List<string>
+                fileIsValid = CheckTextFileWork(filePath, 1, 0, new List<string>
                 {
                     "were concatenated",
                     "_dta.txt",
@@ -302,66 +302,71 @@ namespace MSFileInfoScanner
 
                 // SEQUEST
             }
-            else if (strFileNameLower.EndsWith("_fht.txt"))
+            else if (fileNameLower.EndsWith("_fht.txt"))
+            {
+                // ReSharper disable CommentTypo
+                // Note: Header line could be missing, but the file should always contain data (unless no data was above the XCorr threshold (rare, but happens))
+                // Example contents:
+                //  HitNum	ScanNum	ScanCount	ChargeState	MH	XCorr	DelCn	Sp	Reference	MultiProtein	Peptide	DelCn2	RankSp	RankXc	DelM	XcRatio	PassFilt	MScore	NumTrypticEnds
+                //  1	10221	1	3	2618.37592	8.4305	0.0000	3751.6	P005|G3P_RABIT	+1	K.VIHDHFGIVEGLMTTVHAITATQK.T	0.5745	1	1	-0.00040	1.000	1	12.02	2
+                fileIsValid = CheckTextFileWork(filePath, 0, 10, true, true);
+
+                // SEQUEST
+            }
+            else if (fileNameLower.EndsWith("_syn.txt"))
             {
                 // Note: Header line could be missing, but the file should always contain data (unless no data was above the XCorr threshold (rare, but happens))
                 // Example contents:
                 //  HitNum	ScanNum	ScanCount	ChargeState	MH	XCorr	DelCn	Sp	Reference	MultiProtein	Peptide	DelCn2	RankSp	RankXc	DelM	XcRatio	PassFilt	MScore	NumTrypticEnds
                 //  1	10221	1	3	2618.37592	8.4305	0.0000	3751.6	P005|G3P_RABIT	+1	K.VIHDHFGIVEGLMTTVHAITATQK.T	0.5745	1	1	-0.00040	1.000	1	12.02	2
-                blnFileIsValid = CheckTextFileWork(strFilePath, 0, 10, true, true);
+                fileIsValid = CheckTextFileWork(filePath, 0, 10, true, true);
 
                 // SEQUEST
             }
-            else if (strFileNameLower.EndsWith("_syn.txt"))
-            {
-                // Note: Header line could be missing, but the file should always contain data (unless no data was above the XCorr threshold (rare, but happens))
-                // Example contents:
-                //  HitNum	ScanNum	ScanCount	ChargeState	MH	XCorr	DelCn	Sp	Reference	MultiProtein	Peptide	DelCn2	RankSp	RankXc	DelM	XcRatio	PassFilt	MScore	NumTrypticEnds
-                //  1	10221	1	3	2618.37592	8.4305	0.0000	3751.6	P005|G3P_RABIT	+1	K.VIHDHFGIVEGLMTTVHAITATQK.T	0.5745	1	1	-0.00040	1.000	1	12.02	2
-                blnFileIsValid = CheckTextFileWork(strFilePath, 0, 10, true, true);
-
-                // SEQUEST
-            }
-            else if (strFileNameLower.EndsWith("_fht_prot.txt"))
+            else if (fileNameLower.EndsWith("_fht_prot.txt"))
             {
                 // Header line should always be present
                 // Example contents:
                 //  RankXc	ScanNum	ChargeState	MultiProteinID	Reference
                 //  1	9	1	1	CN32_0001
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 4, "RankXc", true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 4, "RankXc", true);
 
                 // SEQUEST
             }
-            else if (strFileNameLower.EndsWith("_irr.txt"))
+            else if (fileNameLower.EndsWith("_irr.txt"))
             {
                 // Header line should always be present
                 // Example contents:
                 //  Scannum	CS	RankXc	ObservedIons	PossibleIons
                 //  9	1	1	4	6
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 4, "Scannum", true);
+
+                // ReSharper disable once StringLiteralTypo
+                fileIsValid = CheckTextFileWork(filePath, 1, 4, "Scannum", true);
 
                 // SEQUEST
             }
-            else if (strFileNameLower.EndsWith("_nli.txt"))
+            else if (fileNameLower.EndsWith("_nli.txt"))
             {
                 // Note: Header line could be missing
                 // Example contents:
                 //  Scannum	NL1_Intensity	NL2_Intensity	NL3_Intensity
                 //  9	0	0	0
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 3, true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 3, true);
 
                 // X!Tandem
             }
-            else if (strFileNameLower.EndsWith("_xt.txt"))
+            else if (fileNameLower.EndsWith("_xt.txt"))
             {
                 // Header line should always be present
                 // Example contents:
                 //  Result_ID	Group_ID	Scan	Charge	Peptide_MH	Peptide_Hyperscore	Peptide_Expectation_Value_Log(e)	Multiple_Protein_Count	Peptide_Sequence	DeltaCn2	y_score	y_ions	b_score	b_ions	Delta_Mass	Peptide_Intensity_Log(I)
                 //  1	3125	3541	2	1990.0049	74.4	-10.174	0	R.TDMESALPVTVLSAEDIAK.T	0.6949	12.9	11	11.7	11	-0.0054	6.22
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 10, true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 10, true);
+
+                // ReSharper restore CommentTypo
 
             }
-            else if (strFileNameLower == "lcq_dta.txt")
+            else if (fileNameLower == "lcq_dta.txt")
             {
                 // Free form text file
                 // Example contents:
@@ -379,7 +384,7 @@ namespace MSFileInfoScanner
                 //
                 //     #     Scan   MasterScan   Precursor   Charge     (M+H)+
                 //  ------  ------  ----------  -----------  ------  -----------
-                blnFileIsValid = CheckTextFileWork(strFilePath, 6, 0, new List<string>
+                fileIsValid = CheckTextFileWork(filePath, 6, 0, new List<string>
                 {
                     "group scan",
                     "mass range",
@@ -388,32 +393,32 @@ namespace MSFileInfoScanner
                 }, false, false, 1);
 
             }
-            else if (strFileNameLower == "lcq_profile.txt")
+            else if (fileNameLower == "lcq_profile.txt")
             {
                 // Example contents:
                 //  Datafile FullScanSumBP FullScanMaxBP ZoomScanSumBP ZoomScanMaxBP SumTIC MaxTIC
                 //  OU_CN32_002_run3_3Apr08_Draco_07-12-25.9.9.1.dta 11861 11861 0 0 13482 13482
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 0, "Datafile", false);
+                fileIsValid = CheckTextFileWork(filePath, 1, 0, "Datafile", false);
 
             }
-            else if (strFileNameLower == "xtandem_processing_log.txt")
+            else if (fileName.Equals( "XTandem_Processing_Log.txt", StringComparison.OrdinalIgnoreCase))
             {
                 // Example contents:
                 //  2008-05-16 10:48:19	X! Tandem starting
                 //  2008-05-16 10:48:19	loading spectra
                 //  2008-05-16 10:48:23	.
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 1, true, true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 1, true, true);
 
             }
-            else if (strFileNameLower == "mass_correction_tags.txt")
+            else if (fileNameLower == "mass_correction_tags.txt")
             {
                 // Example contents:
                 //  6C13    	6.02013	-
                 //  6C132N15	8.0143	-
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 1, true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 1, true);
 
             }
-            else if (strFileNameLower.EndsWith("_moddefs.txt"))
+            else if (fileNameLower.EndsWith("_ModDefs.txt".ToLower()))
             {
                 // Note: File could be empty
                 // Example contents:
@@ -422,36 +427,36 @@ namespace MSFileInfoScanner
                 //  @	57.0215	C	D	IodoAcet
                 //  &	-17.026549	Q	D	NH3_Loss
                 //  $	-18.0106	E	D	MinusH2O
-                blnFileIsValid = CheckTextFileWork(strFilePath, 0, 4, true);
+                fileIsValid = CheckTextFileWork(filePath, 0, 4, true);
 
                 // PHRP
             }
-            else if (strFileNameLower.EndsWith("_moddetails.txt"))
+            else if (fileNameLower.EndsWith("_ModDetails.txt".ToLower()))
             {
                 // Example contents:
                 //  Unique_Seq_ID	Mass_Correction_Tag	Position
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 2, "Unique_Seq_ID", true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 2, "Unique_Seq_ID", true);
 
                 // PHRP
             }
-            else if (strFileNameLower.EndsWith("_modsummary.txt"))
+            else if (fileNameLower.EndsWith("_ModSummary.txt".ToLower()))
             {
                 // Example contents:
                 //  Modification_Symbol	Modification_Mass	Target_Residues	Modification_Type	Mass_Correction_Tag	Occurence_Count
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 4, "Modification_Symbol", true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 4, "Modification_Symbol", true);
 
                 // PHRP
             }
-            else if (strFileNameLower.EndsWith("_resulttoseqmap.txt"))
+            else if (fileNameLower.EndsWith("_ResultToSeqMap.txt".ToLower()))
             {
                 // Example contents:
                 //  Result_ID	Unique_Seq_ID
                 //  1	1
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 1, "Result_ID", true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 1, "Result_ID", true);
 
                 // PHRP
             }
-            else if (strFileNameLower.EndsWith("_seqinfo.txt"))
+            else if (fileNameLower.EndsWith("_SeqInfo.txt".ToLower()))
             {
                 // Example contents:
                 //  Unique_Seq_ID	Mod_Count	Mod_Description	Monoisotopic_Mass
@@ -462,36 +467,36 @@ namespace MSFileInfoScanner
                 // Row_ID	Unique_Seq_ID	Cleavage_State	Terminus_State	Mod_Count	Mod_Description	Monoisotopic_Mass
                 // 1	1	2	0	2	IodoAcet:3,IodoAcet:30	4436.0728061
 
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 3, "Unique_Seq_ID", true, false);
+                fileIsValid = CheckTextFileWork(filePath, 1, 3, "Unique_Seq_ID", true, false);
 
                 // PHRP
             }
-            else if (strFileNameLower.EndsWith("_seqtoproteinmap.txt"))
+            else if (fileNameLower.EndsWith("_SeqToProteinMap.txt".ToLower()))
             {
                 // Example contents:
                 //  Unique_Seq_ID	Cleavage_State	Terminus_State	Protein_Name	Protein_Expectation_Value_Log(e)	Protein_Intensity_Log(I)
                 //  1	2	0	P005|G3P_RABIT
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 5, "Unique_Seq_ID", true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 5, "Unique_Seq_ID", true);
 
                 // Peptide Prophet
             }
-            else if (strFileNameLower.EndsWith("_pepprophet.txt"))
+            else if (fileNameLower.EndsWith("_PepProphet.txt".ToLower()))
             {
                 // Example contents:
                 //  HitNum	FScore	Probability	negOnly
                 //  1	9.5844	1	0
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 3, "HitNum", true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 3, "HitNum", true);
 
             }
-            else if (strFileNameLower == "PeptideProphet_Coefficients.txt")
+            else if (fileNameLower == "PeptideProphet_Coefficients.txt")
             {
                 // Example contents:
                 //  CS	Xcorr	DeltaCn2	RankSp	DelM	Const
                 //  1	5.49	4.643	-0.455	-0.84	0.646
-                blnFileIsValid = CheckTextFileWork(strFilePath, 1, 5, "CS", true);
+                fileIsValid = CheckTextFileWork(filePath, 1, 5, "CS", true);
 
             }
-            else if (strFileNameLower == "sequest.log")
+            else if (fileNameLower == "sequest.log")
             {
                 // Free form text file
                 // Example contents:
@@ -503,11 +508,11 @@ namespace MSFileInfoScanner
                 //
                 //    Arch:WIN32  CPU:1  Tid:40000  Name:p1
                 //    Arch:LINUXI386  CPU:4  Tid:80000  Name:node18
-                blnFileIsValid = CheckTextFileWork(strFilePath, 5, 0);
+                fileIsValid = CheckTextFileWork(filePath, 5, 0);
 
             }
 
-            return blnFileIsValid;
+            return fileIsValid;
 
         }
 
@@ -515,103 +520,103 @@ namespace MSFileInfoScanner
         /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, and minimum tab count
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount, int intMinimumTabCount)
+        private bool CheckTextFileWork(string filePath, int minimumLineCount, int minimumTabCount)
         {
-            return CheckTextFileWork(strFilePath, intMinimumLineCount, intMinimumTabCount, 0, false, false,
+            return CheckTextFileWork(filePath, minimumLineCount, minimumTabCount, 0, false, false,
                                      new List<string>(), true, false, 0);
         }
 
         /// <summary>
-        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, and blnRequireEqualTabsPerLine
+        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, and requireEqualTabsPerLine
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount, int intMinimumTabCount,
-                                       bool blnRequireEqualTabsPerLine)
+        private bool CheckTextFileWork(string filePath, int minimumLineCount, int minimumTabCount,
+                                       bool requireEqualTabsPerLine)
         {
-            return CheckTextFileWork(strFilePath, intMinimumLineCount, intMinimumTabCount, 0, blnRequireEqualTabsPerLine,
+            return CheckTextFileWork(filePath, minimumLineCount, minimumTabCount, 0, requireEqualTabsPerLine,
                                      false, new List<string>(), true, false, 0);
         }
 
         /// <summary>
-        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, blnRequireEqualTabsPerLine, and blnCharCountSkipsBlankLines
+        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, requireEqualTabsPerLine, and charCountSkipsBlankLines
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount, int intMinimumTabCount,
-                                       bool blnRequireEqualTabsPerLine, bool blnCharCountSkipsBlankLines)
+        private bool CheckTextFileWork(string filePath, int minimumLineCount, int minimumTabCount,
+                                       bool requireEqualTabsPerLine, bool charCountSkipsBlankLines)
         {
-            return CheckTextFileWork(strFilePath, intMinimumLineCount, intMinimumTabCount, 0, blnRequireEqualTabsPerLine,
-                                     false, new List<string>(), true, blnCharCountSkipsBlankLines, 0);
+            return CheckTextFileWork(filePath, minimumLineCount, minimumTabCount, 0, requireEqualTabsPerLine,
+                                     false, new List<string>(), true, charCountSkipsBlankLines, 0);
         }
 
         /// <summary>
-        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, single required text line header, and blnRequireEqualTabsPerLine
+        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, single required text line header, and requireEqualTabsPerLine
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount, int intMinimumTabCount,
-                                       string strRequiredTextLineHeader, bool blnRequireEqualTabsPerLine)
+        private bool CheckTextFileWork(string filePath, int minimumLineCount, int minimumTabCount,
+                                       string requiredTextLineHeader, bool requireEqualTabsPerLine)
         {
-            return CheckTextFileWork(strFilePath, intMinimumLineCount, intMinimumTabCount, 0, blnRequireEqualTabsPerLine,
-                                     false, new List<string> { strRequiredTextLineHeader }, true, false, 0);
+            return CheckTextFileWork(filePath, minimumLineCount, minimumTabCount, 0, requireEqualTabsPerLine,
+                                     false, new List<string> { requiredTextLineHeader }, true, false, 0);
         }
 
         /// <summary>
-        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, single required text line header, blnRequireEqualTabsPerLine, and blnRequiredTextMatchesLineStart
+        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, single required text line header, requireEqualTabsPerLine, and requiredTextMatchesLineStart
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount, int intMinimumTabCount,
-                                       string strRequiredTextLineHeader, bool blnRequireEqualTabsPerLine,
-                                       bool blnRequiredTextMatchesLineStart)
+        private bool CheckTextFileWork(string filePath, int minimumLineCount, int minimumTabCount,
+                                       string requiredTextLineHeader, bool requireEqualTabsPerLine,
+                                       bool requiredTextMatchesLineStart)
         {
-            return CheckTextFileWork(strFilePath, intMinimumLineCount, intMinimumTabCount, 0, blnRequireEqualTabsPerLine,
-                                     false, new List<string> { strRequiredTextLineHeader },
-                                     blnRequiredTextMatchesLineStart, false, 0);
+            return CheckTextFileWork(filePath, minimumLineCount, minimumTabCount, 0, requireEqualTabsPerLine,
+                                     false, new List<string> { requiredTextLineHeader },
+                                     requiredTextMatchesLineStart, false, 0);
         }
 
         /// <summary>
-        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, array of required text line headers, and blnRequireEqualTabsPerLine
+        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, array of required text line headers, and requireEqualTabsPerLine
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount, int intMinimumTabCount,
-                                       IReadOnlyCollection<string> strRequiredTextLineHeaders, bool blnRequireEqualTabsPerLine)
+        private bool CheckTextFileWork(string filePath, int minimumLineCount, int minimumTabCount,
+                                       IReadOnlyCollection<string> requiredTextLineHeaders, bool requireEqualTabsPerLine)
         {
-            return CheckTextFileWork(strFilePath, intMinimumLineCount, intMinimumTabCount, 0, blnRequireEqualTabsPerLine,
-                                     false, strRequiredTextLineHeaders, true, false, 0);
+            return CheckTextFileWork(filePath, minimumLineCount, minimumTabCount, 0, requireEqualTabsPerLine,
+                                     false, requiredTextLineHeaders, true, false, 0);
         }
 
         /// <summary>
-        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, array of required text line headers, blnRequireEqualTabsPerLine, and blnRequiredTextMatchesLineStart
+        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, array of required text line headers, requireEqualTabsPerLine, and requiredTextMatchesLineStart
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount, int intMinimumTabCount,
-                                       IReadOnlyCollection<string> strRequiredTextLineHeaders, bool blnRequireEqualTabsPerLine,
-                                       bool blnRequiredTextMatchesLineStart, int intRequiredTextMinMatchCount)
+        private bool CheckTextFileWork(string filePath, int minimumLineCount, int minimumTabCount,
+                                       IReadOnlyCollection<string> requiredTextLineHeaders, bool requireEqualTabsPerLine,
+                                       bool requiredTextMatchesLineStart, int requiredTextMinMatchCount)
         {
-            return CheckTextFileWork(strFilePath, intMinimumLineCount, intMinimumTabCount, 0, blnRequireEqualTabsPerLine,
-                                     false, strRequiredTextLineHeaders, blnRequiredTextMatchesLineStart, false,
-                                     intRequiredTextMinMatchCount);
+            return CheckTextFileWork(filePath, minimumLineCount, minimumTabCount, 0, requireEqualTabsPerLine,
+                                     false, requiredTextLineHeaders, requiredTextMatchesLineStart, false,
+                                     requiredTextMinMatchCount);
         }
 
         /// <summary>
         /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, and minimum comma count
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount, int intMinimumTabCount,
-                                       int intMinimumCommaCount)
+        private bool CheckTextFileWork(string filePath, int minimumLineCount, int minimumTabCount,
+                                       int minimumCommaCount)
         {
-            return CheckTextFileWork(strFilePath, intMinimumLineCount, intMinimumTabCount, intMinimumCommaCount, false,
+            return CheckTextFileWork(filePath, minimumLineCount, minimumTabCount, minimumCommaCount, false,
                                      false, new List<string>(), true, false, 0);
         }
 
         /// <summary>
-        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, minimum comma count, blnRequireEqualTabsPerLine, and blnRequireEqualCommasPerLine
+        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, minimum comma count, requireEqualTabsPerLine, and requireEqualCommasPerLine
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount, int intMinimumTabCount,
-                                       int intMinimumCommaCount, bool blnRequireEqualTabsPerLine,
-                                       bool blnRequireEqualCommasPerLine)
+        private bool CheckTextFileWork(string filePath, int minimumLineCount, int minimumTabCount,
+                                       int minimumCommaCount, bool requireEqualTabsPerLine,
+                                       bool requireEqualCommasPerLine)
         {
-            return CheckTextFileWork(strFilePath, intMinimumLineCount, intMinimumTabCount, intMinimumCommaCount,
-                                     blnRequireEqualTabsPerLine, blnRequireEqualCommasPerLine, new List<string>(), true,
+            return CheckTextFileWork(filePath, minimumLineCount, minimumTabCount, minimumCommaCount,
+                                     requireEqualTabsPerLine, requireEqualCommasPerLine, new List<string>(), true,
                                      false, 0);
         }
 
@@ -619,11 +624,11 @@ namespace MSFileInfoScanner
         /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, and single required text line header
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount, string strRequiredTextLineHeader,
-                                       bool blnRequiredTextMatchesLineStart)
+        private bool CheckTextFileWork(string filePath, int minimumLineCount, string requiredTextLineHeader,
+                                       bool requiredTextMatchesLineStart)
         {
-            return CheckTextFileWork(strFilePath, intMinimumLineCount, 0, 0, false, false,
-                                     new List<string> { strRequiredTextLineHeader }, blnRequiredTextMatchesLineStart,
+            return CheckTextFileWork(filePath, minimumLineCount, 0, 0, false, false,
+                                     new List<string> { requiredTextLineHeader }, requiredTextMatchesLineStart,
                                      false, 0);
         }
 
@@ -631,151 +636,148 @@ namespace MSFileInfoScanner
         /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, and array of required text line headers
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string strFilePath, int intMinimumLineCount,
-                                       IReadOnlyCollection<string> strRequiredTextLineHeaders, bool blnRequiredTextMatchesLineStart)
+        private bool CheckTextFileWork(string filePath, int minimumLineCount,
+                                       IReadOnlyCollection<string> requiredTextLineHeaders, bool requiredTextMatchesLineStart)
         {
-            return CheckTextFileWork(strFilePath, intMinimumLineCount, 0, 0, false, false, strRequiredTextLineHeaders,
-                                     blnRequiredTextMatchesLineStart, false, 0);
+            return CheckTextFileWork(filePath, minimumLineCount, 0, 0, false, false, requiredTextLineHeaders,
+                                     requiredTextMatchesLineStart, false, 0);
         }
 
         /// <summary>
         /// Checks the integrity of a text file
         /// </summary>
-        /// <param name="strFilePath">File path to check</param>
-        /// <param name="intMinimumLineCount">Minimum number of lines to examine; maximum number of lines is defined by mMaximumTextFileLinesToCheck</param>
-        /// <param name="intMinimumTabCount">Minimum number of tabs to require in each line</param>
-        /// <param name="intMinimumCommaCount">Minimum number of commas to require in each line</param>
-        /// <param name="blnRequireEqualTabsPerLine">If True, then requires that every line have an equal number of Tab characters</param>
-        /// <param name="blnRequireEqualCommasPerLine">If True, then requires that every line have an equal number of commas</param>
-        /// <param name="strRequiredTextLineHeaders">Optional list of text that must be found at the start of any of the text lines (within the first mMaximumTextFileLinesToCheck lines); the search text is case-sensitive</param>
-        /// <param name="blnRequiredTextMatchesLineStart">When True, then only examine the start of the line for the text in strRequiredTextLineHeaders</param>
-        /// <param name="blnCharCountSkipsBlankLines"></param>
-        /// <param name="intRequiredTextMinMatchCount"></param>
+        /// <param name="filePath">File path to check</param>
+        /// <param name="minimumLineCount">Minimum number of lines to examine; maximum number of lines is defined by mMaximumTextFileLinesToCheck</param>
+        /// <param name="minimumTabCount">Minimum number of tabs to require in each line</param>
+        /// <param name="minimumCommaCount">Minimum number of commas to require in each line</param>
+        /// <param name="requireEqualTabsPerLine">If True, then requires that every line have an equal number of Tab characters</param>
+        /// <param name="requireEqualCommasPerLine">If True, then requires that every line have an equal number of commas</param>
+        /// <param name="requiredTextLineHeaders">Optional list of text that must be found at the start of any of the text lines (within the first mMaximumTextFileLinesToCheck lines); the search text is case-sensitive</param>
+        /// <param name="requiredTextMatchesLineStart">When True, then only examine the start of the line for the text in requiredTextLineHeaders</param>
+        /// <param name="charCountSkipsBlankLines"></param>
+        /// <param name="requiredTextMinMatchCount"></param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         /// <remarks></remarks>
         private bool CheckTextFileWork(
-            string strFilePath,
-            int intMinimumLineCount,
-            int intMinimumTabCount,
-            int intMinimumCommaCount,
-            bool blnRequireEqualTabsPerLine,
-            bool blnRequireEqualCommasPerLine,
-            IReadOnlyCollection<string> strRequiredTextLineHeaders,
-            bool blnRequiredTextMatchesLineStart,
-            bool blnCharCountSkipsBlankLines,
-            int intRequiredTextMinMatchCount)
+            string filePath,
+            int minimumLineCount,
+            int minimumTabCount,
+            int minimumCommaCount,
+            bool requireEqualTabsPerLine,
+            bool requireEqualCommasPerLine,
+            IReadOnlyCollection<string> requiredTextLineHeaders,
+            bool requiredTextMatchesLineStart,
+            bool charCountSkipsBlankLines,
+            int requiredTextMinMatchCount)
         {
 
             // Open the text file and read the text line-by-line
             // Check for a minimum number of lines being present, a minimum number of tab characters, and a minimum number of commas
-            // Additionally, look for lines that start with the text defined in strRequiredTextLineHeaders()
+            // Additionally, look for lines that start with the text defined in requiredTextLineHeaders()
             // File will fail the check if all of these conditions are not met
 
             // This counts the number of line headers that have been found
             // Using a variable for speed (vs. checking all of the items in the dictionary over and over)
-            var intLineHeaderMatchCount = 0;
+            var lineHeaderMatchCount = 0;
 
             // Keys in this dictionary are line headers to find
             // Values are set to true when the line header is found
-            var textLineHeaders = ConvertTextListToDictionary(strRequiredTextLineHeaders);
+            var textLineHeaders = ConvertTextListToDictionary(requiredTextLineHeaders);
 
-            // This is set to true if strRequiredTextLineHeaders has data
+            // This is set to true if requiredTextLineHeaders has data
             // However, once all of the expected headers are found, it is changed to false
-            var blnNeedToCheckLineHeaders = textLineHeaders.Count > 0;
+            var needToCheckLineHeaders = textLineHeaders.Count > 0;
 
-            var intLinesRead = 0;
-            int intMaximumTextFileLinesToCheck;
+            var linesRead = 0;
+            int maximumTextFileLinesToCheck;
 
-            var blnBlankLineRead = false;
+            var blankLineRead = false;
 
-            var intExpectedTabCount = 0;
-            var intExpectedCommaCount = 0;
+            var expectedTabCount = 0;
+            var expectedCommaCount = 0;
 
-            string strErrorMessage;
-            var blnErrorLogged = false;
+            string errorMessage;
+            var errorLogged = false;
 
             if (mMaximumTextFileLinesToCheck <= 0)
             {
-                intMaximumTextFileLinesToCheck = int.MaxValue;
+                maximumTextFileLinesToCheck = int.MaxValue;
             }
             else
             {
-                intMaximumTextFileLinesToCheck = mMaximumTextFileLinesToCheck;
+                maximumTextFileLinesToCheck = mMaximumTextFileLinesToCheck;
             }
 
-            if (intMaximumTextFileLinesToCheck < 1)
-                intMaximumTextFileLinesToCheck = 1;
-            if (intMaximumTextFileLinesToCheck < intMinimumLineCount)
+            if (maximumTextFileLinesToCheck < 1)
+                maximumTextFileLinesToCheck = 1;
+            if (maximumTextFileLinesToCheck < minimumLineCount)
             {
-                intMaximumTextFileLinesToCheck = intMinimumLineCount;
+                maximumTextFileLinesToCheck = minimumLineCount;
             }
 
             try
             {
                 // '' FHT protein files may have an extra tab at the end of the header line; need to account for this
-                //'If strFilePath.EndsWith("_fht_prot.txt") Then
-                //'    blnFhtProtFile = True
+                //'If filePath.EndsWith("_fht_prot.txt") Then
+                //'    fhtProtFile = True
                 //'End If
 
                 // Open the file
-                using (
-                    var srInFile =
-                        new StreamReader(new FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
 
                     // Read each line and examine it
-                    while (!srInFile.EndOfStream && intLinesRead < intMaximumTextFileLinesToCheck)
+                    while (!reader.EndOfStream && linesRead < maximumTextFileLinesToCheck)
                     {
-                        var strLineIn = srInFile.ReadLine();
-                        intLinesRead += 1;
+                        var dataLine = reader.ReadLine();
+                        linesRead += 1;
 
-                        bool blnSuccess;
-                        if (blnCharCountSkipsBlankLines && strLineIn.Trim().Length == 0)
+                        bool success;
+                        if (charCountSkipsBlankLines && dataLine.Trim().Length == 0)
                         {
-                            blnSuccess = true;
+                            success = true;
                         }
                         else
                         {
-                            if (intMinimumTabCount > 0)
+                            if (minimumTabCount > 0)
                             {
                                 // Count the number of tabs
-                                blnSuccess = CheckTextFileCountChars(strLineIn, ref blnBlankLineRead, intLinesRead,
-                                                                     ref intExpectedTabCount, '\t', "Tab",
-                                                                     intMinimumTabCount, blnRequireEqualTabsPerLine,
-                                                                     out strErrorMessage);
+                                success = CheckTextFileCountChars(dataLine, ref blankLineRead, linesRead,
+                                                                  ref expectedTabCount, '\t', "Tab",
+                                                                  minimumTabCount, requireEqualTabsPerLine,
+                                                                  out errorMessage);
 
-                                if (!blnSuccess)
+                                if (!success)
                                 {
-                                    LogFileIntegrityError(strFilePath, strErrorMessage);
-                                    blnErrorLogged = true;
+                                    LogFileIntegrityError(filePath, errorMessage);
+                                    errorLogged = true;
                                     break;
                                 }
 
                             }
 
-                            if (intMinimumCommaCount > 0)
+                            if (minimumCommaCount > 0)
                             {
                                 // Count the number of commas
-                                blnSuccess = CheckTextFileCountChars(strLineIn, ref blnBlankLineRead, intLinesRead,
-                                                                     ref intExpectedCommaCount, ',', "Comma",
-                                                                     intMinimumCommaCount, blnRequireEqualCommasPerLine,
-                                                                     out strErrorMessage);
+                                success = CheckTextFileCountChars(dataLine, ref blankLineRead, linesRead,
+                                                                  ref expectedCommaCount, ',', "Comma",
+                                                                  minimumCommaCount, requireEqualCommasPerLine,
+                                                                  out errorMessage);
 
-                                if (!blnSuccess)
+                                if (!success)
                                 {
-                                    LogFileIntegrityError(strFilePath, strErrorMessage);
-                                    blnErrorLogged = true;
+                                    LogFileIntegrityError(filePath, errorMessage);
+                                    errorLogged = true;
                                     break;
                                 }
 
                             }
 
-                            if (blnNeedToCheckLineHeaders)
+                            if (needToCheckLineHeaders)
                             {
-                                FindRequiredTextInLine(strLineIn, ref blnNeedToCheckLineHeaders, textLineHeaders, ref intLineHeaderMatchCount, blnRequiredTextMatchesLineStart);
+                                FindRequiredTextInLine(dataLine, ref needToCheckLineHeaders, textLineHeaders, ref lineHeaderMatchCount, requiredTextMatchesLineStart);
                             }
-                            else if (intMinimumTabCount == 0 && intMinimumCommaCount == 0 &&
-                                     intLinesRead > intMinimumLineCount)
+                            else if (minimumTabCount == 0 && minimumCommaCount == 0 && linesRead > minimumLineCount)
                             {
                                 // All conditions have been met; no need to continue reading the file
                                 break;
@@ -787,196 +789,196 @@ namespace MSFileInfoScanner
 
                 }
 
-                if (textLineHeaders.Count > 0 && !blnErrorLogged)
+                if (textLineHeaders.Count > 0 && !errorLogged)
                 {
                     // Make sure that all of the required line headers were found; log an error if any were missing
-                    ValidateRequiredTextFound(strFilePath, "line headers", blnNeedToCheckLineHeaders, textLineHeaders,
-                                              intRequiredTextMinMatchCount, ref blnErrorLogged);
+                    ValidateRequiredTextFound(filePath, "line headers", needToCheckLineHeaders, textLineHeaders,
+                                              requiredTextMinMatchCount, ref errorLogged);
                 }
 
-                if (!blnErrorLogged && intLinesRead < intMinimumLineCount)
+                if (!errorLogged && linesRead < minimumLineCount)
                 {
-                    strErrorMessage = "File contains " + intLinesRead + " lines of text, but the required minimum is " +
-                                      intMinimumLineCount;
-                    LogFileIntegrityError(strFilePath, strErrorMessage);
-                    blnErrorLogged = true;
+                    errorMessage = "File contains " + linesRead + " lines of text, but the required minimum is " +
+                                      minimumLineCount;
+                    LogFileIntegrityError(filePath, errorMessage);
+                    errorLogged = true;
                 }
 
             }
             catch (Exception ex)
             {
-                strErrorMessage = "Error checking file: " + strFilePath + "; " + ex.Message;
-                LogFileIntegrityError(strFilePath, strErrorMessage);
-                blnErrorLogged = true;
+                errorMessage = "Error checking file: " + filePath + "; " + ex.Message;
+                LogFileIntegrityError(filePath, errorMessage);
+                errorLogged = true;
             }
 
-            return !blnErrorLogged;
+            return !errorLogged;
 
         }
 
         /// <summary>
-        /// Counts the number of occurrences of a given character in strLineIn
+        /// Counts the number of occurrences of a given character in dataLine
         /// </summary>
-        /// <param name="strLineIn">Line to check</param>
-        /// <param name="blnBlankLineRead">Set to true if a blank line is read; however, if already true, and a non-blank line with an insufficient number of characters is read, then this function will return an error</param>
-        /// <param name="intLinesRead">Number of lines that have been read; when first calling this function for a new file, set this to 1 so that intExpectedCharCount will be initialized </param>
-        /// <param name="intExpectedCharCount">The number of occurrences of the given character in the previous line; used when blnRequireEqualCharsPerLine is True</param>
-        /// <param name="chCharToCount">The character to look for</param>
-        /// <param name="strCharDescription">A description of the character (used to populate strMessage when an error occurs)</param>
-        /// <param name="intMinimumCharCount">Minimum character count</param>
-        /// <param name="blnRequireEqualCharsPerLine">If True, then each line must contain an equal occurrence count of the given character (based on the first line in the file)</param>
-        /// <param name="strErrorMessage">Error message</param>
-        /// <returns>True if the line is valid; otherwise False; when False, then updates strErrorMessage</returns>
+        /// <param name="dataLine">Line to check</param>
+        /// <param name="blankLineRead">Set to true if a blank line is read; however, if already true, and a non-blank line with an insufficient number of characters is read, then this function will return an error</param>
+        /// <param name="linesRead">Number of lines that have been read; when first calling this function for a new file, set this to 1 so that expectedCharCount will be initialized </param>
+        /// <param name="expectedCharCount">The number of occurrences of the given character in the previous line; used when requireEqualCharsPerLine is True</param>
+        /// <param name="charToCount">The character to look for</param>
+        /// <param name="charDescription">A description of the character (used to populate message when an error occurs)</param>
+        /// <param name="minimumCharCount">Minimum character count</param>
+        /// <param name="requireEqualCharsPerLine">If True, then each line must contain an equal occurrence count of the given character (based on the first line in the file)</param>
+        /// <param name="errorMessage">Error message</param>
+        /// <returns>True if the line is valid; otherwise False; when False, then updates errorMessage</returns>
         /// <remarks></remarks>
-        private bool CheckTextFileCountChars(string strLineIn, ref bool blnBlankLineRead, int intLinesRead,
-                                             ref int intExpectedCharCount, char chCharToCount, string strCharDescription,
-                                             int intMinimumCharCount, bool blnRequireEqualCharsPerLine,
-                                             out string strErrorMessage)
+        private bool CheckTextFileCountChars(string dataLine, ref bool blankLineRead, int linesRead,
+                                             ref int expectedCharCount, char charToCount, string charDescription,
+                                             int minimumCharCount, bool requireEqualCharsPerLine,
+                                             out string errorMessage)
         {
-            var blnLineIsValid = true;
-            strErrorMessage = string.Empty;
+            var lineIsValid = true;
+            errorMessage = string.Empty;
 
-            // Count the number of chCharToCount characters
-            var intCharCount = CountChars(strLineIn, chCharToCount);
+            // Count the number of charToCount characters
+            var charCount = CountChars(dataLine, charToCount);
 
-            if (strLineIn.EndsWith(chCharToCount.ToString()) && intCharCount > 1 && intCharCount > intMinimumCharCount)
+            if (dataLine.EndsWith(charToCount.ToString()) && charCount > 1 && charCount > minimumCharCount)
             {
                 // Decrement the char count by one since the line ends in the character we're counting
-                intCharCount -= 1;
+                charCount -= 1;
             }
 
-            if (intCharCount < intMinimumCharCount)
+            if (charCount < minimumCharCount)
             {
                 // Character not found the minimum number of times
 
-                if (strLineIn.Length == 0 && !blnBlankLineRead)
+                if (dataLine.Length == 0 && !blankLineRead)
                 {
-                    blnBlankLineRead = true;
+                    blankLineRead = true;
                 }
-                else if (blnBlankLineRead && strLineIn.Length > 0)
+                else if (blankLineRead && dataLine.Length > 0)
                 {
                     // Previously read a blank line; now found a line that's not blank
-                    strErrorMessage = "Line " + intLinesRead + " has " + intCharCount + " " + strCharDescription +
-                                      "s, but the required minimum is " + intMinimumCharCount;
-                    blnLineIsValid = false;
+                    errorMessage = "Line " + linesRead + " has " + charCount + " " + charDescription +
+                                      "s, but the required minimum is " + minimumCharCount;
+                    lineIsValid = false;
                 }
                 else
                 {
-                    strErrorMessage = "Line " + intLinesRead + " has " + intCharCount + " " + strCharDescription +
-                                      "s, but the required minimum is " + intMinimumCharCount;
-                    blnLineIsValid = false;
+                    errorMessage = "Line " + linesRead + " has " + charCount + " " + charDescription +
+                                      "s, but the required minimum is " + minimumCharCount;
+                    lineIsValid = false;
                 }
             }
 
-            if (!blnLineIsValid || !blnRequireEqualCharsPerLine)
+            if (!lineIsValid || !requireEqualCharsPerLine)
             {
-                return blnLineIsValid;
+                return lineIsValid;
             }
 
-            if (intLinesRead <= 1)
+            if (linesRead <= 1)
             {
-                intExpectedCharCount = intCharCount;
+                expectedCharCount = charCount;
             }
             else
             {
-                if (intCharCount != intExpectedCharCount)
+                if (charCount != expectedCharCount)
                 {
-                    if (strLineIn.Length > 0)
+                    if (dataLine.Length > 0)
                     {
-                        strErrorMessage = "Line " + intLinesRead + " has " + intCharCount + " " + strCharDescription +
-                                          "s, but previous line has " + intExpectedCharCount + " tabs";
-                        blnLineIsValid = false;
+                        errorMessage = "Line " + linesRead + " has " + charCount + " " + charDescription +
+                                          "s, but previous line has " + expectedCharCount + " tabs";
+                        lineIsValid = false;
                     }
                 }
             }
 
-            return blnLineIsValid;
+            return lineIsValid;
 
         }
 
         /// <summary>
         /// Checks the integrity of files without an extension
         /// </summary>
-        /// <param name="strFilePath"></param>
+        /// <param name="filePath"></param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         /// <remarks></remarks>
-        private bool CheckExtensionFreeFile(string strFilePath)
+        private bool CheckExtensionFreeFile(string filePath)
         {
-            var blnLineIsValid = true;
+            var lineIsValid = true;
 
-            switch (Path.GetFileNameWithoutExtension(strFilePath)?.ToLower())
+            switch (Path.GetFileNameWithoutExtension(filePath)?.ToLower())
             {
                 case "acqu":
                 case "acqus":
-                    blnLineIsValid = CheckTextFileWork(strFilePath, 50, new List<string>
+                    lineIsValid = CheckTextFileWork(filePath, 50, new List<string>
                     {
                         "##TITLE",
                         "##DATA"
                     }, true);
-
                     break;
+
                 case "lock":
-                    blnLineIsValid = CheckTextFileWork(strFilePath, 1, new List<string> { "ftms" }, true);
-
+                    lineIsValid = CheckTextFileWork(filePath, 1, new List<string> { "ftms" }, true);
                     break;
+
                 case "sptype":
                     // Skip this file
-                    blnLineIsValid = true;
+                    lineIsValid = true;
                     break;
             }
 
-            return blnLineIsValid;
+            return lineIsValid;
         }
 
         /// <summary>
         /// Checks the integrity of a Sequest Params file
         /// </summary>
-        /// <param name="strFilePath"></param>
+        /// <param name="filePath"></param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         /// <remarks></remarks>
-        private bool CheckParamsFile(string strFilePath)
+        private bool CheckParamsFile(string filePath)
         {
 
             const string MASS_TOLERANCE_LINE = "peptide_mass_tolerance";
             const string FRAGMENT_TOLERANCE_LINE = "fragment_ion_tolerance";
             const int MAX_LINES_TO_READ = 50;
 
-            var intLinesRead = 0;
+            var linesRead = 0;
 
-            var blnMassToleranceFound = false;
-            var blnFragmentToleranceFound = false;
-            var blnFileIsValid = false;
+            var massToleranceFound = false;
+            var fragmentToleranceFound = false;
+            var fileIsValid = false;
 
             try
             {
                 // Open the file
                 using (
-                    var srInFile =
-                        new StreamReader(new FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                    var reader =
+                        new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
 
                     // Read each line in the file and look for the expected parameter lines
-                    while (!srInFile.EndOfStream && intLinesRead < MAX_LINES_TO_READ)
+                    while (!reader.EndOfStream && linesRead < MAX_LINES_TO_READ)
                     {
-                        var strLineIn = srInFile.ReadLine();
-                        intLinesRead += 1;
+                        var dataLine = reader.ReadLine();
+                        linesRead += 1;
 
-                        if (string.IsNullOrWhiteSpace(strLineIn))
+                        if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
 
-                        if (strLineIn.StartsWith(MASS_TOLERANCE_LINE))
+                        if (dataLine.StartsWith(MASS_TOLERANCE_LINE))
                         {
-                            blnMassToleranceFound = true;
+                            massToleranceFound = true;
                         }
 
-                        if (strLineIn.StartsWith(FRAGMENT_TOLERANCE_LINE))
+                        if (dataLine.StartsWith(FRAGMENT_TOLERANCE_LINE))
                         {
-                            blnFragmentToleranceFound = true;
+                            fragmentToleranceFound = true;
                         }
 
-                        if (blnMassToleranceFound && blnFragmentToleranceFound)
+                        if (massToleranceFound && fragmentToleranceFound)
                         {
-                            blnFileIsValid = true;
+                            fileIsValid = true;
                             break;
                         }
                     }
@@ -986,65 +988,65 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                LogFileIntegrityError(strFilePath,
-                                      "Error checking Sequest params file: " + strFilePath + "; " + ex.Message);
-                blnFileIsValid = false;
+                LogFileIntegrityError(filePath,
+                                      "Error checking Sequest params file: " + filePath + "; " + ex.Message);
+                fileIsValid = false;
             }
 
-            return blnFileIsValid;
+            return fileIsValid;
 
         }
 
         /// <summary>
         /// Checks the integrity of an ICR-2LS TIC file
         /// </summary>
-        /// <param name="strFilePath"></param>
+        /// <param name="filePath"></param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         /// <remarks></remarks>
-        private bool CheckTICFile(string strFilePath)
+        private bool CheckTICFile(string filePath)
         {
 
             const string ICR2LS_LINE_START = "ICR-2LS";
             const string VERSION_LINE_START = "VERSION";
 
-            var intLinesRead = 0;
+            var linesRead = 0;
 
             // Assume True for now
-            var blnFileIsValid = true;
+            var fileIsValid = true;
 
             try
             {
                 // Open the file
                 using (
-                    var srInFile =
-                        new StreamReader(new FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                    var reader =
+                        new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
 
                     // Confirm that the first two lines look like:
                     //  ICR-2LS Data File (GA Anderson & JE Bruce); output from MASIC by Matthew E Monroe
                     //  Version 2.4.2974.38283; February 22, 2008
 
-                    while (!srInFile.EndOfStream && intLinesRead < 2)
+                    while (!reader.EndOfStream && linesRead < 2)
                     {
-                        var strLineIn = srInFile.ReadLine();
-                        intLinesRead += 1;
+                        var dataLine = reader.ReadLine();
+                        linesRead += 1;
 
-                        if (string.IsNullOrWhiteSpace(strLineIn))
+                        if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
 
-                        if (intLinesRead == 1)
+                        if (linesRead == 1)
                         {
-                            if (!strLineIn.ToUpper().StartsWith(ICR2LS_LINE_START))
+                            if (!dataLine.ToUpper().StartsWith(ICR2LS_LINE_START))
                             {
-                                blnFileIsValid = false;
+                                fileIsValid = false;
                                 break;
                             }
                         }
-                        else if (intLinesRead == 2)
+                        else if (linesRead == 2)
                         {
-                            if (!strLineIn.ToUpper().StartsWith(VERSION_LINE_START))
+                            if (!dataLine.ToUpper().StartsWith(VERSION_LINE_START))
                             {
-                                blnFileIsValid = false;
+                                fileIsValid = false;
                                 break;
                             }
                         }
@@ -1061,21 +1063,21 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                LogFileIntegrityError(strFilePath, "Error checking TIC file: " + strFilePath + "; " + ex.Message);
-                blnFileIsValid = false;
+                LogFileIntegrityError(filePath, "Error checking TIC file: " + filePath + "; " + ex.Message);
+                fileIsValid = false;
             }
 
-            return blnFileIsValid;
+            return fileIsValid;
 
         }
 
         /// <summary>
         /// Opens the given zip file and uses Ionic Zip's .TestArchive function to validate that it is valid
         /// </summary>
-        /// <param name="strFilePath">File path to check</param>
+        /// <param name="filePath">File path to check</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         /// <remarks></remarks>
-        private bool CheckZIPFile(string strFilePath)
+        private bool CheckZIPFile(string filePath)
         {
 
             // minutes/MB
@@ -1084,45 +1086,45 @@ namespace MSFileInfoScanner
             // minutes/MB
             const float MAX_THREAD_RATE_QUICK_CHECK = 0.125f;
 
-            float sngMaxExecutionTimeMinutes;
+            float maxExecutionTimeMinutes;
 
-            var blnZipFileCheckAllData = mZipFileCheckAllData;
+            var zipFileCheckAllData = mZipFileCheckAllData;
 
             // Either run a fast check, or entirely skip this .Zip file if it's too large
-            var objFileInfo = new FileInfo(strFilePath);
-            var dblFileSizeMB = objFileInfo.Length / 1024.0 / 1024.0;
+            var fileInfo = new FileInfo(filePath);
+            var fileSizeMB = fileInfo.Length / 1024.0 / 1024.0;
 
-            if (blnZipFileCheckAllData && mZipFileLargeSizeThresholdMB > 0)
+            if (zipFileCheckAllData && mZipFileLargeSizeThresholdMB > 0)
             {
-                if (dblFileSizeMB > mZipFileLargeSizeThresholdMB)
+                if (fileSizeMB > mZipFileLargeSizeThresholdMB)
                 {
-                    blnZipFileCheckAllData = false;
+                    zipFileCheckAllData = false;
                 }
             }
 
-            if (blnZipFileCheckAllData && mFastZippedSFileCheck)
+            if (zipFileCheckAllData && mFastZippedSFileCheck)
             {
-                var fileName = Path.GetFileName(strFilePath);
+                var fileName = Path.GetFileName(filePath);
 
-                var strFileNameLCase = fileName.ToLower();
-                if (strFileNameLCase == "0.ser.zip")
+                var fileNameLCase = fileName.ToLower();
+                if (fileNameLCase == "0.ser.zip")
                 {
                     // Do not run a full check on 0.ser.zip files
-                    blnZipFileCheckAllData = false;
+                    zipFileCheckAllData = false;
                 }
-                else if (strFileNameLCase.Length > 2 && strFileNameLCase.StartsWith("s") &&
-                         char.IsNumber(strFileNameLCase[1]))
+                else if (fileNameLCase.Length > 2 && fileNameLCase.StartsWith("s") &&
+                         char.IsNumber(fileNameLCase[1]))
                 {
                     // Run a full check on s001.zip but not the other s*.zip files
-                    if (strFileNameLCase != "s001.zip")
+                    if (fileNameLCase != "s001.zip")
                     {
-                        blnZipFileCheckAllData = false;
+                        zipFileCheckAllData = false;
                     }
                 }
             }
 
-            mZipFileWorkParams.FilePath = strFilePath;
-            mZipFileWorkParams.CheckAllData = blnZipFileCheckAllData;
+            mZipFileWorkParams.FilePath = filePath;
+            mZipFileWorkParams.CheckAllData = zipFileCheckAllData;
             mZipFileWorkParams.ZipIsValid = false;
             if (mZipFileWorkParams.CheckAllData)
             {
@@ -1133,42 +1135,42 @@ namespace MSFileInfoScanner
                 mZipFileWorkParams.FailureMessage = "Zip file failed quick check";
             }
 
-            if (blnZipFileCheckAllData)
+            if (zipFileCheckAllData)
             {
-                sngMaxExecutionTimeMinutes = (float)(dblFileSizeMB * MAX_THREAD_RATE_CHECK_ALL_DATA);
+                maxExecutionTimeMinutes = (float)(fileSizeMB * MAX_THREAD_RATE_CHECK_ALL_DATA);
             }
             else
             {
-                sngMaxExecutionTimeMinutes = (float)(dblFileSizeMB * MAX_THREAD_RATE_QUICK_CHECK);
+                maxExecutionTimeMinutes = (float)(fileSizeMB * MAX_THREAD_RATE_QUICK_CHECK);
             }
 
-            var objZipLibTest = new Thread(CheckZipFileWork);
-            var dtStartTime = DateTime.UtcNow;
+            var zipLibTest = new Thread(CheckZipFileWork);
+            var startTime = DateTime.UtcNow;
 
-            objZipLibTest.Start();
+            zipLibTest.Start();
             do
             {
-                objZipLibTest.Join(250);
+                zipLibTest.Join(250);
 
-                if (objZipLibTest.ThreadState == ThreadState.Aborted)
+                if (zipLibTest.ThreadState == ThreadState.Aborted)
                 {
                     break;
                 }
 
-                if (DateTime.UtcNow.Subtract(dtStartTime).TotalMinutes >= sngMaxExecutionTimeMinutes)
+                if (DateTime.UtcNow.Subtract(startTime).TotalMinutes >= maxExecutionTimeMinutes)
                 {
                     // Execution took too long; abort
-                    objZipLibTest.Abort();
-                    objZipLibTest.Join(250);
+                    zipLibTest.Abort();
+                    zipLibTest.Join(250);
 
-                    var strMessage = mZipFileWorkParams.FailureMessage + "; over " +
-                                     sngMaxExecutionTimeMinutes.ToString("0.0") +
+                    var message = mZipFileWorkParams.FailureMessage + "; over " +
+                                     maxExecutionTimeMinutes.ToString("0.0") +
                                      " minutes have elapsed, which is longer than the expected processing time";
-                    LogFileIntegrityError(mZipFileWorkParams.FilePath, strMessage);
+                    LogFileIntegrityError(mZipFileWorkParams.FilePath, message);
 
                     break;
                 }
-            } while (objZipLibTest.ThreadState != ThreadState.Stopped);
+            } while (zipLibTest.ThreadState != ThreadState.Stopped);
 
             return mZipFileWorkParams.ZipIsValid;
 
@@ -1176,26 +1178,26 @@ namespace MSFileInfoScanner
 
         private void CheckZipFileWork()
         {
-            var blnZipIsValid = false;
+            var zipIsValid = false;
 
             try
             {
-                blnZipIsValid = CheckZipFileIntegrity(mZipFileWorkParams.FilePath, mZipFileWorkParams.CheckAllData,
-                                                      blnThrowExceptionIfInvalid: true);
+                zipIsValid = CheckZipFileIntegrity(mZipFileWorkParams.FilePath, mZipFileWorkParams.CheckAllData,
+                                                      throwExceptionIfInvalid: true);
 
-                if (!blnZipIsValid)
+                if (!zipIsValid)
                 {
-                    string strMessage;
+                    string message;
                     if (mZipFileWorkParams.CheckAllData)
                     {
-                        strMessage = "Zip file failed exhaustive CRC check";
+                        message = "Zip file failed exhaustive CRC check";
                     }
                     else
                     {
-                        strMessage = "Zip file failed quick check";
+                        message = "Zip file failed quick check";
                     }
 
-                    LogFileIntegrityError(mZipFileWorkParams.FilePath, strMessage);
+                    LogFileIntegrityError(mZipFileWorkParams.FilePath, message);
                 }
 
             }
@@ -1205,30 +1207,30 @@ namespace MSFileInfoScanner
                 LogFileIntegrityError(mZipFileWorkParams.FilePath, ex.Message);
             }
 
-            mZipFileWorkParams.ZipIsValid = blnZipIsValid;
+            mZipFileWorkParams.ZipIsValid = zipIsValid;
 
         }
 
         /// <summary>
-        /// Validate every entry in strZipFilePath
+        /// Validate every entry in zipFilePath
         /// </summary>
-        /// <param name="strZipFilePath">Path to the zip file to validate</param>
-        /// <param name="blnCheckAllData"></param>
-        /// <param name="blnThrowExceptionIfInvalid">If True, then throws exceptions, otherwise simply returns True or False</param>
+        /// <param name="zipFilePath">Path to the zip file to validate</param>
+        /// <param name="checkAllData"></param>
+        /// <param name="throwExceptionIfInvalid">If True, then throws exceptions, otherwise simply returns True or False</param>
         /// <returns>True if the file is Valid; false if an error</returns>
         /// <remarks>Extracts each file in the zip file to a temporary file.  Will return false if you run out of disk space</remarks>
-        private bool CheckZipFileIntegrity(string strZipFilePath, bool blnCheckAllData, bool blnThrowExceptionIfInvalid)
+        private bool CheckZipFileIntegrity(string zipFilePath, bool checkAllData, bool throwExceptionIfInvalid)
         {
 
-            var strTempPath = string.Empty;
-            bool blnZipIsValid;
+            var tempPath = string.Empty;
+            bool zipIsValid;
 
-            if (!File.Exists(strZipFilePath))
+            if (!File.Exists(zipFilePath))
             {
                 // Zip file not found
-                if (blnThrowExceptionIfInvalid)
+                if (throwExceptionIfInvalid)
                 {
-                    throw new FileNotFoundException("File not found", strZipFilePath);
+                    throw new FileNotFoundException("File not found", zipFilePath);
                 }
                 return false;
             }
@@ -1236,56 +1238,56 @@ namespace MSFileInfoScanner
             try
             {
 
-                if (blnCheckAllData)
+                if (checkAllData)
                 {
                     // Obtain a random file name
-                    strTempPath = Path.GetTempFileName();
+                    tempPath = Path.GetTempFileName();
 
                     // Open the zip file
-                    using (var objZipFile = new Ionic.Zip.ZipFile(strZipFilePath))
+                    using (var zipFile = new Ionic.Zip.ZipFile(zipFilePath))
                     {
 
-                        // Extract each file to strTempPath
-                        foreach (var objEntry in objZipFile.Entries)
+                        // Extract each file to tempPath
+                        foreach (var fileEntry in zipFile.Entries)
                         {
-                            objEntry.ZipErrorAction = Ionic.Zip.ZipErrorAction.Throw;
+                            fileEntry.ZipErrorAction = Ionic.Zip.ZipErrorAction.Throw;
 
-                            if (!objEntry.IsDirectory)
+                            if (!fileEntry.IsDirectory)
                             {
-                                var swTestStream = new FileStream(strTempPath, FileMode.Create, FileAccess.Write,
-                                                                  FileShare.ReadWrite);
-                                objEntry.Extract(swTestStream);
-                                swTestStream.Close();
+                                var testStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write,
+                                                                FileShare.ReadWrite);
+                                fileEntry.Extract(testStream);
+                                testStream.Close();
 
                             }
                         }
 
                     }
 
-                    blnZipIsValid = true;
+                    zipIsValid = true;
 
                 }
                 else
                 {
-                    blnZipIsValid = Ionic.Zip.ZipFile.CheckZip(strZipFilePath);
+                    zipIsValid = Ionic.Zip.ZipFile.CheckZip(zipFilePath);
                 }
 
             }
             catch (Exception)
             {
-                if (blnThrowExceptionIfInvalid)
+                if (throwExceptionIfInvalid)
                 {
                     throw;
                 }
-                blnZipIsValid = false;
+                zipIsValid = false;
             }
             finally
             {
                 try
                 {
-                    if (!string.IsNullOrEmpty(strTempPath) && File.Exists(strTempPath))
+                    if (!string.IsNullOrEmpty(tempPath) && File.Exists(tempPath))
                     {
-                        File.Delete(strTempPath);
+                        File.Delete(tempPath);
                     }
                 }
                 catch (Exception)
@@ -1294,52 +1296,52 @@ namespace MSFileInfoScanner
                 }
             }
 
-            return blnZipIsValid;
+            return zipIsValid;
 
         }
 
         /// <summary>
         /// Checks the integrity of a CSV file
         /// </summary>
-        /// <param name="strFilePath"></param>
+        /// <param name="filePath"></param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         /// <remarks></remarks>
-        private bool CheckCSVFile(string strFilePath)
+        private bool CheckCSVFile(string filePath)
         {
-            int intMinimumCommaCount;
-            var strHeaderRequired = string.Empty;
+            int minimumCommaCount;
+            var headerRequired = string.Empty;
 
-            var strFileNameLower = Path.GetFileName(strFilePath)?.ToLower();
+            var fileNameLower = Path.GetFileName(filePath)?.ToLower();
 
-            if (string.IsNullOrWhiteSpace(strFileNameLower))
+            if (string.IsNullOrWhiteSpace(fileNameLower))
             {
-                OnWarningEvent("Could not extract the filename from path sent to CheckCSVFile: " + strFilePath);
+                OnWarningEvent("Could not extract the filename from path sent to CheckCSVFile: " + filePath);
                 return false;
             }
 
-            if (strFileNameLower.EndsWith("_isos.csv"))
+            if (fileNameLower.EndsWith("_isos.csv"))
             {
                 // scan_num,charge,abundance,mz,fit,average_mw,monoisotopic_mw,mostabundant_mw,fwhm,signal_noise,mono_abundance,mono_plus2_abundance
-                strHeaderRequired = "scan_num";
-                intMinimumCommaCount = 10;
+                headerRequired = "scan_num";
+                minimumCommaCount = 10;
 
             }
-            else if (strFileNameLower.EndsWith("_scans.csv"))
+            else if (fileNameLower.EndsWith("_scans.csv"))
             {
                 // scan_num,scan_time,type,bpi,bpi_mz,tic,num_peaks,num_deisotoped
-                strHeaderRequired = "scan_num";
-                intMinimumCommaCount = 7;
+                headerRequired = "scan_num";
+                minimumCommaCount = 7;
             }
             else
             {
                 // Unknown CSV file; do not check it
-                intMinimumCommaCount = 0;
+                minimumCommaCount = 0;
             }
 
-            if (intMinimumCommaCount > 0)
+            if (minimumCommaCount > 0)
             {
-                return CheckTextFileWork(strFilePath, 1, 0, intMinimumCommaCount, false, true,
-                                         new List<string> { strHeaderRequired }, true, false, 0);
+                return CheckTextFileWork(filePath, 1, 0, minimumCommaCount, false, true,
+                                         new List<string> { headerRequired }, true, false, 0);
             }
 
             return true;
@@ -1348,27 +1350,34 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Validates the given XML file; tries to determine the expected element names based on the file name and its parent folder
         /// </summary>
-        /// <param name="strFilePath">File Path</param>
+        /// <param name="filePath">File Path</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckXMLFile(string strFilePath)
+        private bool CheckXMLFile(string filePath)
         {
-            // Examine the parent folder name to determine the type of XML file strFilePath most likely is
+            // Examine the parent folder name to determine the type of XML file filePath most likely is
 
-            bool blnXMLIsValid;
+            bool xmlIsValid;
 
-            var fiFile = new FileInfo(strFilePath);
+            var file = new FileInfo(filePath);
 
-            var strFileNameLCase = fiFile.Name.ToLower();
-            var strParentFolderName = fiFile.Directory.Name;
+            var fileName = file.Name;
+            if (file.Directory == null)
+            {
+                var errorMessage = "Unable to determine the parent directory of the XML file";
+                LogFileIntegrityError(filePath, errorMessage);
+                return false;
+            }
 
-            switch (strParentFolderName.Substring(0, 3).ToUpper())
+            var parentFolderName = file.Directory.Name;
+
+            switch (parentFolderName.Substring(0, 3).ToUpper())
             {
                 case "SIC":
                 case "DLS":
-                    // MASIC or Decon2LS folder
-                    if (FileIsXMLSettingsFile(fiFile.FullName))
+                    // MASIC or DeconTools folder
+                    if (FileIsXMLSettingsFile(file.FullName))
                     {
-                        blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, new List<string>
+                        xmlIsValid = CheckXMLFileWork(filePath, 5, new List<string>
                         {
                             "section",
                             "item"
@@ -1378,9 +1387,9 @@ namespace MSFileInfoScanner
                             "value"
                         });
                     }
-                    else if (FileIsDecon2LSXMLSettingsFile(fiFile.FullName))
+                    else if (FileIsDeconToolsXMLSettingsFile(file.FullName))
                     {
-                        blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, new List<string>
+                        xmlIsValid = CheckXMLFileWork(filePath, 5, new List<string>
                         {
                             "parameters",
                             "PeakParameters"
@@ -1389,15 +1398,15 @@ namespace MSFileInfoScanner
                     else
                     {
                         // Unknown XML file; just check for one element
-                        blnXMLIsValid = CheckXMLFileWork(strFilePath, 1);
+                        xmlIsValid = CheckXMLFileWork(filePath, 1);
                     }
-
                     break;
+
                 case "SEQ":
                     // Sequest folder
-                    if (strFileNameLCase == "finnigandefsettings.xml" || FileIsXMLSettingsFile(fiFile.FullName))
+                    if (fileName.Equals("FinniganDefSettings.xml", StringComparison.OrdinalIgnoreCase) || FileIsXMLSettingsFile(file.FullName))
                     {
-                        blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, new List<string>
+                        xmlIsValid = CheckXMLFileWork(filePath, 5, new List<string>
                         {
                             "section",
                             "item"
@@ -1410,16 +1419,16 @@ namespace MSFileInfoScanner
                     else
                     {
                         // Unknown XML file; just check for one element
-                        blnXMLIsValid = CheckXMLFileWork(strFilePath, 1);
+                        xmlIsValid = CheckXMLFileWork(filePath, 1);
                     }
-
                     break;
+
                 case "XTM":
-                    // Xtandem folder
-                    switch (strFileNameLCase)
+                    // XTandem folder
+                    switch (fileName.ToLower())
                     {
                         case "default_input.xml":
-                            blnXMLIsValid = CheckXMLFileWork(strFilePath, 10, new List<string>
+                            xmlIsValid = CheckXMLFileWork(filePath, 10, new List<string>
                             {
                                 "bioml",
                                 "note"
@@ -1428,10 +1437,10 @@ namespace MSFileInfoScanner
                                 "type",
                                 "label"
                             });
-
                             break;
+
                         case "input.xml":
-                            blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, new List<string>
+                            xmlIsValid = CheckXMLFileWork(filePath, 5, new List<string>
                             {
                                 "bioml",
                                 "note"
@@ -1440,10 +1449,10 @@ namespace MSFileInfoScanner
                                 "type",
                                 "label"
                             });
-
                             break;
+
                         case "taxonomy.xml":
-                            blnXMLIsValid = CheckXMLFileWork(strFilePath, 3, new List<string>
+                            xmlIsValid = CheckXMLFileWork(filePath, 3, new List<string>
                             {
                                 "bioml",
                                 "taxon"
@@ -1452,12 +1461,12 @@ namespace MSFileInfoScanner
                                 "label",
                                 "format"
                             });
-
                             break;
+
                         default:
-                            if (strFileNameLCase == "iontrapdefsettings.xml" || FileIsXMLSettingsFile(fiFile.FullName))
+                            if (fileName.Equals("IonTrapDefSettings.xml", StringComparison.OrdinalIgnoreCase) || FileIsXMLSettingsFile(file.FullName))
                             {
-                                blnXMLIsValid = CheckXMLFileWork(strFilePath, 5, new List<string>
+                                xmlIsValid = CheckXMLFileWork(filePath, 5, new List<string>
                                 {
                                     "section",
                                     "item"
@@ -1467,9 +1476,9 @@ namespace MSFileInfoScanner
                                     "value"
                                 });
                             }
-                            else if (strFileNameLCase.StartsWith("xtandem_"))
+                            else if (fileName.StartsWith("XTandem_", StringComparison.OrdinalIgnoreCase))
                             {
-                                blnXMLIsValid = CheckXMLFileWork(strFilePath, 2, new List<string>
+                                xmlIsValid = CheckXMLFileWork(filePath, 2, new List<string>
                                 {
                                     "bioml",
                                     "note"
@@ -1478,19 +1487,19 @@ namespace MSFileInfoScanner
                             else
                             {
                                 // Unknown XML file; just check for one element
-                                blnXMLIsValid = CheckXMLFileWork(strFilePath, 1);
+                                xmlIsValid = CheckXMLFileWork(filePath, 1);
                             }
                             break;
                     }
-
                     break;
+
                 default:
                     // Unknown XML file; just check for one element
-                    blnXMLIsValid = CheckXMLFileWork(strFilePath, 1);
+                    xmlIsValid = CheckXMLFileWork(filePath, 1);
                     break;
             }
 
-            return blnXMLIsValid;
+            return xmlIsValid;
 
         }
 
@@ -1498,93 +1507,83 @@ namespace MSFileInfoScanner
         /// Overloaded version of CheckXMLFileWork; takes filename and minimum element count
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckXMLFileWork(string strFilePath, int intMinimumElementCount)
+        private bool CheckXMLFileWork(string filePath, int minimumElementCount)
         {
-            return CheckXMLFileWork(strFilePath, intMinimumElementCount, new List<string>(), new List<string>());
+            return CheckXMLFileWork(filePath, minimumElementCount, new List<string>(), new List<string>());
         }
 
         /// <summary>
         /// Validates the contents of the given XML file
         /// </summary>
-        /// <param name="strFilePath">File Path</param>
-        /// <param name="intMinimumElementCount">Minimum number of XML elements that must be in the file; maximum number of elements is defined by mMaximumXMLElementNodesToCheck</param>
-        /// <param name="strRequiredElementNames">Optional list of element names that must be found (within the first mMaximumXMLElementNodesToCheck elements); the names are case-sensitive</param>
-        /// <param name="strRequiredAttributeNames">Optional list of attribute names that must be found  (within the first mMaximumXMLElementNodesToCheck elements); the names are case-sensitive</param>
+        /// <param name="filePath">File Path</param>
+        /// <param name="minimumElementCount">Minimum number of XML elements that must be in the file; maximum number of elements is defined by mMaximumXMLElementNodesToCheck</param>
+        /// <param name="requiredElementNames">Optional list of element names that must be found (within the first mMaximumXMLElementNodesToCheck elements); the names are case-sensitive</param>
+        /// <param name="requiredAttributeNames">Optional list of attribute names that must be found  (within the first mMaximumXMLElementNodesToCheck elements); the names are case-sensitive</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         /// <remarks></remarks>
         private bool CheckXMLFileWork(
-            string strFilePath,
-            int intMinimumElementCount,
-            IReadOnlyCollection<string> strRequiredElementNames,
-            IReadOnlyCollection<string> strRequiredAttributeNames)
+            string filePath,
+            int minimumElementCount,
+            IReadOnlyCollection<string> requiredElementNames,
+            IReadOnlyCollection<string> requiredAttributeNames)
         {
 
-            var intElementNameMatchCount = 0;
-            var intAttributeNameMatchCount = 0;
+            var elementsRead = 0;
 
-            var intElementsRead = 0;
-
-            var blnErrorLogged = false;
+            var errorLogged = false;
 
             try
             {
                 // Keys in this dictionary are element names to find
                 // Values are set to true when the element is found
-                var requiredElements = ConvertTextListToDictionary(strRequiredElementNames);
+                var requiredElements = ConvertTextListToDictionary(requiredElementNames);
 
-                // This is set to true if strRequiredElementNames has data
+                // This is set to true if requiredElementNames has data
                 // However, once all of the elements have been found, it is changed to false
-                var blnNeedToCheckElementNames = requiredElements.Count > 0;
+                var needToCheckElementNames = requiredElements.Count > 0;
 
                 // Keys in this dictionary are attribute names to find
                 // Values are set to true when the element is found
-                var requiredAttributes = ConvertTextListToDictionary(strRequiredAttributeNames);
+                var requiredAttributes = ConvertTextListToDictionary(requiredAttributeNames);
 
-                // This is set to true if strRequiredAttributeNames has data
+                // This is set to true if requiredAttributeNames has data
                 // However, once all of the attributes have been found, it is changed to false
-                var blnNeedToCheckAttributeNames = requiredAttributes.Count > 0;
+                var needToCheckAttributeNames = requiredAttributes.Count > 0;
 
-                int intMaximumXMLElementNodesToCheck;
-                if (mMaximumXMLElementNodesToCheck <= 0)
-                {
-                    intMaximumXMLElementNodesToCheck = int.MaxValue;
-                }
-                else
-                {
-                    intMaximumXMLElementNodesToCheck = mMaximumXMLElementNodesToCheck;
-                }
+                var maximumXMLElementNodesToCheck = mMaximumXMLElementNodesToCheck <= 0 ? int.MaxValue : mMaximumXMLElementNodesToCheck;
 
-                if (intMaximumXMLElementNodesToCheck < 1)
-                    intMaximumXMLElementNodesToCheck = 1;
-                if (intMaximumXMLElementNodesToCheck < intMinimumElementCount)
+                if (maximumXMLElementNodesToCheck < 1)
+                    maximumXMLElementNodesToCheck = 1;
+
+                if (maximumXMLElementNodesToCheck < minimumElementCount)
                 {
-                    intMaximumXMLElementNodesToCheck = intMinimumElementCount;
+                    maximumXMLElementNodesToCheck = minimumElementCount;
                 }
 
                 try
                 {
                     // Initialize the stream reader and the XML Text Reader
-                    using (var srInFile = new StreamReader(strFilePath))
+                    using (var reader = new StreamReader(filePath))
                     {
-                        using (var objXMLReader = new XmlTextReader(srInFile))
+                        using (var xmlReader = new XmlTextReader(reader))
                         {
 
                             // Read each of the nodes and examine them
 
-                            while (objXMLReader.Read())
+                            while (xmlReader.Read())
                             {
-                                XMLTextReaderSkipWhitespace(objXMLReader);
-                                if (objXMLReader.ReadState != ReadState.Interactive)
+                                XMLTextReaderSkipWhitespace(xmlReader);
+                                if (xmlReader.ReadState != ReadState.Interactive)
                                     break;
 
-                                if (objXMLReader.NodeType != XmlNodeType.Element)
+                                if (xmlReader.NodeType != XmlNodeType.Element)
                                 {
                                     continue;
                                 }
 
-                                // Note: If needed, read the element's value using XMLTextReaderGetInnerText(objXMLReader)
+                                // Note: If needed, read the element's value using XMLTextReaderGetInnerText(xmlReader)
 
-                                if (blnNeedToCheckElementNames)
+                                if (needToCheckElementNames)
                                 {
                                     FindRequiredTextInLine(
                                         objXMLReader.Name,
@@ -1594,7 +1593,7 @@ namespace MSFileInfoScanner
                                         true);
                                 }
 
-                                if (blnNeedToCheckAttributeNames && objXMLReader.HasAttributes)
+                                if (needToCheckAttributeNames && xmlReader.HasAttributes)
                                 {
                                     if (objXMLReader.MoveToFirstAttribute())
                                     {
@@ -1614,15 +1613,13 @@ namespace MSFileInfoScanner
                                     }
                                 }
 
-                                intElementsRead += 1;
-                                if (intMaximumXMLElementNodesToCheck > 0 &&
-                                    intElementsRead >= MaximumXMLElementNodesToCheck)
+                                elementsRead += 1;
+                                if (maximumXMLElementNodesToCheck > 0 && elementsRead >= MaximumXMLElementNodesToCheck)
                                 {
                                     break;
                                 }
 
-                                if (!blnNeedToCheckElementNames && !blnNeedToCheckAttributeNames &&
-                                         intElementsRead > intMinimumElementCount)
+                                if (!needToCheckElementNames && !needToCheckAttributeNames && elementsRead > minimumElementCount)
                                 {
                                     // All conditions have been met; no need to continue reading the file
                                     break;
@@ -1630,48 +1627,48 @@ namespace MSFileInfoScanner
                             }
 
                         }
-                        // objXMLReader
+                        // xmlReader
                     }
-                    // srInFile
+                    // reader
 
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                    if (requiredElements.Count > 0 && !blnErrorLogged)
+                    if (requiredElements.Count > 0 && !errorLogged)
                     {
                         // Make sure that all of the required element names were found; log an error if any were missing
-                        ValidateRequiredTextFound(strFilePath, "XML elements", blnNeedToCheckElementNames, requiredElements,
-                                                  requiredElements.Count, ref blnErrorLogged);
+                        ValidateRequiredTextFound(filePath, "XML elements", needToCheckElementNames,
+                                                  requiredElements, requiredElements.Count, ref errorLogged);
                     }
 
-                    if (requiredAttributes.Count > 0 && !blnErrorLogged)
+                    if (requiredAttributes.Count > 0 && !errorLogged)
                     {
                         // Make sure that all of the required attribute names were found; log an error if any were missing
-                        ValidateRequiredTextFound(strFilePath, "XML attributes", blnNeedToCheckAttributeNames, requiredAttributes,
-                                                  requiredAttributes.Count, ref blnErrorLogged);
+                        ValidateRequiredTextFound(filePath, "XML attributes", needToCheckAttributeNames,
+                                                  requiredAttributes, requiredAttributes.Count, ref errorLogged);
                     }
 
-                    if (!blnErrorLogged && intElementsRead < intMinimumElementCount)
+                    if (!errorLogged && elementsRead < minimumElementCount)
                     {
-                        var strErrorMessage = "File contains " + intElementsRead + " XML elements, but the required minimum is " + intMinimumElementCount;
-                        LogFileIntegrityError(strFilePath, strErrorMessage);
-                        blnErrorLogged = true;
+                        var errorMessage = "File contains " + elementsRead + " XML elements, but the required minimum is " + minimumElementCount;
+                        LogFileIntegrityError(filePath, errorMessage);
+                        errorLogged = true;
                     }
 
                 }
                 catch (Exception ex)
                 {
                     // Error opening file or stepping through file
-                    LogFileIntegrityError(strFilePath, ex.Message);
-                    blnErrorLogged = true;
+                    LogFileIntegrityError(filePath, ex.Message);
+                    errorLogged = true;
                 }
 
             }
             catch (Exception ex)
             {
-                LogErrors("CheckXMLFileWork", "Error opening XML file: " + strFilePath, ex);
-                blnErrorLogged = true;
+                LogErrors("CheckXMLFileWork", "Error opening XML file: " + filePath, ex);
+                errorLogged = true;
             }
 
-            return !blnErrorLogged;
+            return !errorLogged;
 
         }
 
@@ -1694,7 +1691,7 @@ namespace MSFileInfoScanner
         {
             var datasetFileInfo = new clsDatasetFileInfo();
 
-            var blnUseIgnoreList = false;
+            var useIgnoreList = false;
 
             udtDirectoryStats = new udtFolderStatsType();
             udtFileStats = new List<udtFileStatsType>();
@@ -1711,69 +1708,68 @@ namespace MSFileInfoScanner
                             filesToIgnoreSorted.Add(item);
                     }
 
-                    blnUseIgnoreList = true;
+                    useIgnoreList = true;
                 }
 
                 var directoryInfo = new DirectoryInfo(directoryPath);
 
                 udtDirectoryStats = GetNewFolderStats(directoryInfo.FullName);
 
-                foreach (var fiFile in directoryInfo.GetFiles())
+                foreach (var dataFile in directoryInfo.GetFiles())
                 {
 
                     try
                     {
                         // Assume True for now
-                        var blnPassedIntegrityCheck = true;
-                        var blnSkipFile = false;
+                        var passedIntegrityCheck = true;
+                        var skipFile = false;
 
-                        if (blnUseIgnoreList)
+                        if (useIgnoreList)
                         {
-                            if (filesToIgnoreSorted.Contains(fiFile.FullName) ||
-                                filesToIgnoreSorted.Contains(fiFile.Name))
+                            if (filesToIgnoreSorted.Contains(dataFile.FullName) ||
+                                filesToIgnoreSorted.Contains(dataFile.Name))
                             {
-                                blnSkipFile = true;
+                                skipFile = true;
                             }
                         }
 
-                        if (!blnSkipFile)
+                        if (!skipFile)
                         {
                             iMSFileInfoProcessor msInfoScanner;
 
-                            switch (fiFile.Extension.ToUpper())
+                            switch (dataFile.Extension.ToUpper())
                             {
                                 case FILE_EXTENSION_TXT:
                                 case FILE_EXTENSION_LOG:
-                                    blnPassedIntegrityCheck = CheckTextFile(fiFile.FullName);
-
+                                    passedIntegrityCheck = CheckTextFile(dataFile.FullName);
                                     break;
 
                                 case FILE_EXTENSION_PARAMS:
-                                    blnPassedIntegrityCheck = CheckParamsFile(fiFile.FullName);
+                                    passedIntegrityCheck = CheckParamsFile(dataFile.FullName);
+                                    break;
 
-                                    break;
                                 case FILE_EXTENSION_DAT:
+                                    // ToDo: Possibly check these files (Decon2LS DAT files)
                                     break;
-                                // ToDo: Possibly check these files (Decon2LS DAT files)
 
                                 case FILE_EXTENSION_TIC:
-                                    blnPassedIntegrityCheck = CheckTICFile(fiFile.FullName);
-
+                                    passedIntegrityCheck = CheckTICFile(dataFile.FullName);
                                     break;
+
                                 case FILE_EXTENSION_ZIP:
-                                    blnPassedIntegrityCheck = CheckZIPFile(fiFile.FullName);
-
+                                    passedIntegrityCheck = CheckZIPFile(dataFile.FullName);
                                     break;
+
                                 case FILE_EXTENSION_CSV:
-                                    blnPassedIntegrityCheck = CheckCSVFile(fiFile.FullName);
-
+                                    passedIntegrityCheck = CheckCSVFile(dataFile.FullName);
                                     break;
+
                                 case FILE_EXTENSION_XML:
-                                    blnPassedIntegrityCheck = CheckXMLFile(fiFile.FullName);
-
+                                    passedIntegrityCheck = CheckXMLFile(dataFile.FullName);
                                     break;
+
                                 case THERMO_RAW_FILE_EXTENSION:
-                                    // File was not in strFileIgnoreList
+                                    // File was not in fileIgnoreList
                                     // Re-check using clsFinniganRawFileInfoScanner
 
                                     msInfoScanner = new clsFinniganRawFileInfoScanner();
@@ -1781,11 +1777,11 @@ namespace MSFileInfoScanner
                                     msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, false);
                                     msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, false);
 
-                                    blnPassedIntegrityCheck = msInfoScanner.ProcessDataFile(fiFile.FullName, datasetFileInfo);
-
+                                    passedIntegrityCheck = msInfoScanner.ProcessDataFile(dataFile.FullName, datasetFileInfo);
                                     break;
+
                                 case AGILENT_TOF_OR_QTRAP_FILE_EXTENSION:
-                                    // File was not in strFileIgnoreList
+                                    // File was not in fileIgnoreList
                                     // Re-check using clsAgilentTOFOrQTRAPWiffFileInfoScanner
 
                                     msInfoScanner = new clsAgilentTOFOrQStarWiffFileInfoScanner();
@@ -1793,39 +1789,38 @@ namespace MSFileInfoScanner
                                     msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, false);
                                     msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, false);
 
-                                    blnPassedIntegrityCheck = msInfoScanner.ProcessDataFile(fiFile.FullName, datasetFileInfo);
-
+                                    passedIntegrityCheck = msInfoScanner.ProcessDataFile(dataFile.FullName, datasetFileInfo);
                                     break;
+
                                 case ".":
                                     // No extension
-                                    blnPassedIntegrityCheck = CheckExtensionFreeFile(fiFile.FullName);
+                                    passedIntegrityCheck = CheckExtensionFreeFile(dataFile.FullName);
+                                    break;
 
-                                    break;
                                 default:
+                                    // Do not check this file (but add it to udtFileStats anyway)
                                     break;
-                                // Do not check this file (but add it to udtFileStats anyway)
 
                             }
                         }
 
                         var udtNewFile = new udtFileStatsType
                         {
-                            FileName = fiFile.FullName,
-                            ModificationDate = fiFile.LastWriteTime,
-                            SizeBytes = fiFile.Length,
-                            FailIntegrity = !blnPassedIntegrityCheck
+                            FileName = dataFile.FullName,
+                            ModificationDate = dataFile.LastWriteTime,
+                            SizeBytes = dataFile.Length,
+                            FailIntegrity = !passedIntegrityCheck
                         };
 
                         if (mComputeFileHashes)
                         {
-                            //.FileHash = MD5CalcFile(fiFile.FullName)
-                            udtNewFile.FileHash = Sha1CalcFile(fiFile.FullName);
+                            udtNewFile.FileHash = Sha1CalcFile(dataFile.FullName);
                         }
 
                         udtFileStats.Add(udtNewFile);
 
                         udtDirectoryStats.FileCount += 1;
-                        if (!blnPassedIntegrityCheck)
+                        if (!passedIntegrityCheck)
                         {
                             udtDirectoryStats.FileCountFailIntegrity += 1;
                         }
@@ -1833,7 +1828,7 @@ namespace MSFileInfoScanner
                     }
                     catch (Exception ex)
                     {
-                        LogErrors("CheckIntegrityOfFilesInDirectory", "Error checking file " + fiFile.FullName, ex);
+                        LogErrors("CheckIntegrityOfFilesInDirectory", "Error checking file " + dataFile.FullName, ex);
                     }
 
                 }
@@ -1857,7 +1852,7 @@ namespace MSFileInfoScanner
         /// Will populate udtFolderStats with stats on the files in this folder
         /// Will populate udtFileDetails with the name of each file parsed, plus details on the files
         /// </summary>
-        /// <param name="strFolderPath">Folder to examine</param>
+        /// <param name="directoryPath">Folder to examine</param>
         /// <param name="udtFolderStats">Stats on the folder, including number of files and number of files that failed the integrity check</param>
         /// <param name="udtFileStats">Details on each file checked; use udtFolderStatsType.FileCount to determine the number of entries in udtFileStats </param>
         /// <param name="filesToIgnore">List of files to skip; can be file names or full file paths</param>
@@ -1865,12 +1860,12 @@ namespace MSFileInfoScanner
         /// <remarks>Note that udtFileStats will never be shrunk in size; only increased as needed</remarks>
         [Obsolete("Use CheckIntegrityOfFilesInDirectory")]
         public bool CheckIntegrityOfFilesInFolder(
-            string strFolderPath,
+            string directoryPath,
             out udtFolderStatsType udtFolderStats,
             out List<udtFileStatsType> udtFileStats,
             List<string> filesToIgnore)
         {
-            return CheckIntegrityOfFilesInDirectory(strFolderPath, out udtFolderStats, out udtFileStats, filesToIgnore);
+            return CheckIntegrityOfFilesInDirectory(directoryPath, out udtFolderStats, out udtFileStats, filesToIgnore);
         }
 
         private Dictionary<string, bool> ConvertTextListToDictionary(IReadOnlyCollection<string> requiredTextItems)
@@ -1888,17 +1883,17 @@ namespace MSFileInfoScanner
             return requiredTextDictionary;
         }
 
-        private int CountChars(string strText, char chSearchChar)
+        private int CountChars(string text, char searchChar)
         {
-            var intCharCount = 0;
-            var intMatchIndex = -1;
+            var charCount = 0;
+            var matchIndex = -1;
 
             do
             {
-                intMatchIndex = strText.IndexOf(chSearchChar, intMatchIndex + 1);
-                if (intMatchIndex >= 0)
+                matchIndex = text.IndexOf(searchChar, matchIndex + 1);
+                if (matchIndex >= 0)
                 {
-                    intCharCount += 1;
+                    charCount += 1;
                 }
                 else
                 {
@@ -1906,24 +1901,24 @@ namespace MSFileInfoScanner
                 }
             } while (true);
 
-            return intCharCount;
+            return charCount;
         }
 
         /// <summary>
-        /// Searches strLineToSearch for each of the items in strRequiredText; if blnMatchStart = True, then only checks the start of the line
+        /// Searches lineToSearch for each of the items in requiredText; if matchStart = True, then only checks the start of the line
         /// </summary>
         /// <param name="textToSearch">Text to search</param>
         /// <param name="needToCheckItems">True if we have not yet found all of the items</param>
         /// <param name="requiredTextItems">List of items to look for; values are set to True as each item is found</param>
-        /// <param name="intRequiredTextMatchCount">Total number of items that have been matched; equivalent to the number of True entries in textLineHeaders</param>
-        /// <param name="blnMatchStart"></param>
+        /// <param name="requiredTextMatchCount">Total number of items that have been matched; equivalent to the number of True entries in textLineHeaders</param>
+        /// <param name="matchStart"></param>
         /// <remarks></remarks>
         private void FindRequiredTextInLine(
             string textToSearch,
             ref bool needToCheckItems,
             Dictionary<string, bool> requiredTextItems,
-            ref int intRequiredTextMatchCount,
-            bool blnMatchStart)
+            ref int requiredTextMatchCount,
+            bool matchStart)
         {
             if (!needToCheckItems || requiredTextItems.Count <= 0)
             {
@@ -1939,12 +1934,12 @@ namespace MSFileInfoScanner
                         continue;
                     }
 
-                    if (blnMatchStart)
+                    if (matchStart)
                     {
                         if (textToSearch.StartsWith(lineHeaderEnum.Current.Key))
                         {
                             requiredTextItems[lineHeaderEnum.Current.Key] = true;
-                            intRequiredTextMatchCount += 1;
+                            requiredTextMatchCount += 1;
                             break;
                         }
                     }
@@ -1953,14 +1948,14 @@ namespace MSFileInfoScanner
                         if (textToSearch.Contains(lineHeaderEnum.Current.Key))
                         {
                             requiredTextItems[lineHeaderEnum.Current.Key] = true;
-                            intRequiredTextMatchCount += 1;
+                            requiredTextMatchCount += 1;
                             break;
                         }
                     }
                 }
             }
 
-            if (intRequiredTextMatchCount >= requiredTextItems.Count)
+            if (requiredTextMatchCount >= requiredTextItems.Count)
             {
                 // All required text has been found
                 // No need to continue checking additional lines
@@ -1972,26 +1967,27 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Opens the file using a text reader and looks for XML elements parameters and PeakParameters
         /// </summary>
-        /// <returns>True if this file contains the XML elements that indicate this is an Decon2LS XML settings file</returns>
+        /// <returns>True if this file contains the XML elements that indicate this is a Decon2LS XML settings file</returns>
         /// <remarks></remarks>
-        private bool FileIsDecon2LSXMLSettingsFile(string strFilePath)
+        private bool FileIsDeconToolsXMLSettingsFile(string filePath)
         {
-            return XMLFileContainsElements(strFilePath, new[]
+            return XMLFileContainsElements(filePath, new[]
             {
                 "<parameters>",
-                "<peakparameters>"
+                "<PeakParameters>"
             });
         }
 
         /// <summary>
         /// Opens the file using a text reader and looks for XML elements "sections" and "section"
         /// </summary>
-        /// <param name="strFilePath">File to examine</param>
+        /// <param name="filePath">File to examine</param>
         /// <returns>True if this file contains the XML elements that indicate this is an XML settings file</returns>
         /// <remarks></remarks>
-        private bool FileIsXMLSettingsFile(string strFilePath)
+        private bool FileIsXMLSettingsFile(string filePath)
         {
-            return XMLFileContainsElements(strFilePath, new[]
+            // Note that section and item only have a less than sign because XMLFileContainsElements uses a simple stream reader and not an XmlTextReader
+            return XMLFileContainsElements(filePath, new[]
             {
                 "<sections>",
                 "<section",
@@ -2001,77 +1997,83 @@ namespace MSFileInfoScanner
 
         /// <summary>
         /// Opens the file using a text reader and looks for XML elements specified in strElementsToMatch()
+        /// <summary>
+        /// Opens the file using a text reader and looks for XML elements specified in elementsToMatch()
+        /// This method intentionally uses a StreamReader and not an XmlTextReader
         /// </summary>
-        /// <param name="strFilePath">File to examine</param>
-        /// <param name="strElementsToMatch">Element text to match; item text must include the desired element Less Than Signs to match; items must be all lower-case</param>
-        /// <param name="intMaximumTextFileLinesToCheck"></param>
+        /// <param name="filePath">File to examine</param>
+        /// <param name="elementsToMatch">Element names to match; item text must start with a less than sign followed by the element name</param>
+        /// <param name="maximumTextFileLinesToCheck"></param>
+        /// <param name="caseSensitiveElementNames">True if element names should be case sensitive</param>
         /// <returns>True if this file contains the required element text</returns>
-        /// <remarks></remarks>
-        private bool XMLFileContainsElements(string strFilePath, IReadOnlyList<string> strElementsToMatch,
-                                             int intMaximumTextFileLinesToCheck = 50)
+        /// <remarks>Requires that the element names to match are at the start of the line in the text file</remarks>
+        private bool XMLFileContainsElements(string filePath,
+                                             IReadOnlyList<string> elementsToMatch,
+                                             int maximumTextFileLinesToCheck = 50,
+                                             bool caseSensitiveElementNames = false)
         {
 
-            var intLinesRead = 0;
+            var linesRead = 0;
 
-            var blnAllElementsFound = false;
+            var allElementsFound = false;
 
             try
             {
-                if (strElementsToMatch == null || strElementsToMatch.Count == 0)
+                if (elementsToMatch == null || elementsToMatch.Count == 0)
                 {
                     return false;
                 }
 
-                var intElementMatchCount = 0;
-                var blnElementFound = new bool[strElementsToMatch.Count];
+                var elementMatchCount = 0;
+                var elementFound = new bool[elementsToMatch.Count];
 
-                // Read, at most, the first intMaximumTextFileLinesToCheck lines to determine if this is an XML settings file
-                if (intMaximumTextFileLinesToCheck < 10)
+                // Read, at most, the first maximumTextFileLinesToCheck lines to determine if this is an XML settings file
+                if (maximumTextFileLinesToCheck < 10)
                 {
-                    intMaximumTextFileLinesToCheck = 50;
+                    maximumTextFileLinesToCheck = 50;
                 }
 
+                var comparisonType = caseSensitiveElementNames ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
                 // Open the file
-                using (
-                    var srInFile =
-                        new StreamReader(new FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
 
                     // Read each line and examine it
-                    while (!srInFile.EndOfStream && intLinesRead < intMaximumTextFileLinesToCheck)
+                    while (!reader.EndOfStream && linesRead < maximumTextFileLinesToCheck)
                     {
-                        var strLineIn = srInFile.ReadLine();
-                        intLinesRead += 1;
+                        var dataLine = reader.ReadLine();
+                        linesRead += 1;
 
-                        if (string.IsNullOrWhiteSpace(strLineIn))
+                        if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
 
-                        strLineIn = strLineIn.Trim().ToLower();
+                        dataLine = dataLine.Trim().ToLower();
 
-                        for (var intIndex = 0; intIndex <= blnElementFound.Length - 1; intIndex++)
+                        for (var index = 0; index < elementFound.Length; index++)
                         {
-                            if (blnElementFound[intIndex])
+                            if (elementFound[index])
                             {
                                 continue;
                             }
 
-                            if (!strLineIn.Trim().StartsWith(strElementsToMatch[intIndex]))
+                            if (dataLine.IndexOf(elementsToMatch[index], comparisonType) < 0)
                             {
                                 continue;
                             }
 
-                            blnElementFound[intIndex] = true;
-                            intElementMatchCount += 1;
+                            elementFound[index] = true;
+                            elementMatchCount += 1;
 
-                            if (intElementMatchCount == blnElementFound.Length)
+                            if (elementMatchCount == elementFound.Length)
                             {
-                                blnAllElementsFound = true;
+                                allElementsFound = true;
                             }
-
                             break;
+
                         }
 
-                        if (blnAllElementsFound)
+                        if (allElementsFound)
                             break;
                     }
 
@@ -2080,24 +2082,23 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                LogErrors("XMLFileContainsElements", "Error checking XML file for desired elements: " + strFilePath, ex);
+                LogErrors("XMLFileContainsElements", "Error checking XML file for desired elements: " + filePath, ex);
             }
 
-            return blnAllElementsFound;
+            return allElementsFound;
 
         }
 
-        public static udtFolderStatsType GetNewFolderStats(string strFolderPath)
+        public static udtFolderStatsType GetNewFolderStats(string directoryPath)
         {
             var udtFolderStats = new udtFolderStatsType
             {
-                FolderPath = strFolderPath,
+                FolderPath = directoryPath,
                 FileCount = 0,
                 FileCountFailIntegrity = 0
             };
 
             return udtFolderStats;
-
         }
 
         private void InitializeLocalVariables()
@@ -2116,32 +2117,32 @@ namespace MSFileInfoScanner
 
         }
 
-        private void LogErrors(string strSource, string strMessage, Exception ex)
+        private void LogErrors(string source, string message, Exception ex)
         {
-            mStatusMessage = string.Copy(strMessage);
+            mStatusMessage = string.Copy(message);
 
-            var strMessageWithoutCRLF = mStatusMessage.Replace(Environment.NewLine, "; ");
+            var messageWithoutCRLF = mStatusMessage.Replace(Environment.NewLine, "; ");
 
-            if (string.IsNullOrEmpty(strSource))
-                strSource = "Unknown_Source";
+            if (string.IsNullOrEmpty(source))
+                source = "Unknown_Source";
 
             if (ex == null)
             {
-                OnErrorEvent(strSource + ": " + strMessageWithoutCRLF);
+                OnErrorEvent(source + ": " + messageWithoutCRLF);
             }
             else
             {
-                OnErrorEvent(strSource + ": " + strMessageWithoutCRLF, ex);
+                OnErrorEvent(source + ": " + messageWithoutCRLF, ex);
             }
 
         }
 
-        private void LogFileIntegrityError(string strFilePath, string strErrorMessage)
+        private void LogFileIntegrityError(string filePath, string errorMessage)
         {
-            FileIntegrityFailure?.Invoke(strFilePath, strErrorMessage);
+            FileIntegrityFailure?.Invoke(filePath, errorMessage);
         }
 
-        public string MD5CalcFile(string strPath)
+        public string MD5CalcFile(string path)
         {
             // Calculates the MD5 hash of a given file
             // Code from Tim Hastings, at http://www.nonhostile.com/page000017.asp
@@ -2162,7 +2163,7 @@ namespace MSFileInfoScanner
 
         }
 
-        public string Sha1CalcFile(string strPath)
+        public string Sha1CalcFile(string path)
         {
             // Calculates the Sha-1 hash of a given file
 
@@ -2183,83 +2184,83 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// If blnCheckRequiredTextThisFile = True, then makes logs an error if any of the items in blnRequiredTextFound() were not found
+        /// If needToCheckItem is True, logs an error if any of the items in requiredItemNames() were not found
         /// </summary>
-        /// <param name="strFilePath">File path</param>
-        /// <param name="strItemDescription">Description of the types of items that were searched</param>
-        /// <param name="blnNeedToCheckLineHeaders">True if we were still checking for items when this code was reached; if True, then indicates that not all of the items were found</param>
-        /// <param name="textLineHeaders">Text to find; values are True if found</param>
-        /// <param name="intRequiredTextMinMatchCount"></param>
-        /// <param name="blnErrorLogged">Set to True if any items were missing</param>
+        /// <param name="filePath">File path</param>
+        /// <param name="itemDescription">Description of the types of items that were searched</param>
+        /// <param name="needToCheckItem">True if we were still checking for items when this code was reached; if True, then indicates that not all of the items were found</param>
+        /// <param name="requiredItemNames">Names to find; values are True if found</param>
+        /// <param name="requiredItemMatchCountMinimum">Minimum number of items in requiredItemNames that needed to be found; 0 to require all items to be found</param>
+        /// <param name="errorLogged">Set to True if any items were missing</param>
         /// <remarks></remarks>
         private void ValidateRequiredTextFound(
-            string strFilePath,
-            string strItemDescription,
-            bool blnNeedToCheckLineHeaders,
-            Dictionary<string, bool> textLineHeaders,
-            int intRequiredTextMinMatchCount,
-            ref bool blnErrorLogged)
+            string filePath,
+            string itemDescription,
+            bool needToCheckItem,
+            Dictionary<string, bool> requiredItemNames,
+            int requiredItemMatchCountMinimum,
+            ref bool errorLogged)
         {
-            var intMatchCount = 0;
+            var matchCount = 0;
 
-            if (!blnNeedToCheckLineHeaders)
+            if (!needToCheckItem)
             {
                 return;
             }
 
-            var strErrorMessage = "File did not contain all of the expected " + strItemDescription;
-            foreach (var lineHeader in textLineHeaders)
+            var errorMessage = "File did not contain all of the expected " + itemDescription;
+            foreach (var requiredItem in requiredItemNames)
             {
-                if (lineHeader.Value)
+                if (requiredItem.Value)
                 {
-                    intMatchCount += 1;
+                    matchCount += 1;
                 }
                 else
                 {
-                    strErrorMessage += "; missing '" + lineHeader.Key + "'";
+                    errorMessage += "; missing '" + requiredItem.Key + "'";
                 }
             }
 
-            if (intRequiredTextMinMatchCount > 0 && intMatchCount >= intRequiredTextMinMatchCount)
+            if (requiredItemMatchCountMinimum > 0 && matchCount >= requiredItemMatchCountMinimum)
             {
-                // Not all of the items in strRequiredText() were matched, but at least intRequiredTextMinMatchCount were, so all is fine
+                // Not all of the items in requiredItemNames were matched, but at least requiredTextMinMatchCount were, so all is fine
             }
             else
             {
-                LogFileIntegrityError(strFilePath, strErrorMessage);
-                blnErrorLogged = true;
+                LogFileIntegrityError(filePath, errorMessage);
+                errorLogged = true;
             }
         }
 
-        private string XMLTextReaderGetInnerText(XmlReader objXMLReader)
+        private string XMLTextReaderGetInnerText(XmlReader xmlReader)
         {
-            var strValue = string.Empty;
-            bool blnSuccess;
+            var value = string.Empty;
+            bool success;
 
-            if (objXMLReader.NodeType == XmlNodeType.Element)
+            if (xmlReader.NodeType == XmlNodeType.Element)
             {
                 // Advance the reader so that we can read the value
-                blnSuccess = objXMLReader.Read();
+                success = xmlReader.Read();
             }
             else
             {
-                blnSuccess = true;
+                success = true;
             }
 
-            if (blnSuccess && objXMLReader.NodeType != XmlNodeType.Whitespace && objXMLReader.HasValue)
+            if (success && xmlReader.NodeType != XmlNodeType.Whitespace && xmlReader.HasValue)
             {
-                strValue = objXMLReader.Value;
+                value = xmlReader.Value;
             }
 
-            return strValue;
+            return value;
         }
 
-        private void XMLTextReaderSkipWhitespace(XmlReader objXMLReader)
+        private void XMLTextReaderSkipWhitespace(XmlReader xmlReader)
         {
-            if (objXMLReader.NodeType == XmlNodeType.Whitespace)
+            if (xmlReader.NodeType == XmlNodeType.Whitespace)
             {
-                // Whitspace; read the next node
-                objXMLReader.Read();
+                // Whitespace; read the next node
+                xmlReader.Read();
             }
         }
 

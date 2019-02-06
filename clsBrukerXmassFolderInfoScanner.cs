@@ -23,14 +23,17 @@ namespace MSFileInfoScanner
         public const string BRUKER_ANALYSIS_YEP_FILE_NAME = "analysis.yep";
 
         public const string BRUKER_SQLITE_INDEX_FILE_NAME = "Storage.mcf_idx";
+
         // Note: The extension must be in all caps
         public const string BRUKER_BAF_FILE_EXTENSION = ".BAF";
+
         public const string BRUKER_MCF_FILE_EXTENSION = ".MCF";
 
         public const string BRUKER_SQLITE_INDEX_EXTENSION = ".MCF_IDX";
         private const string BRUKER_SCANINFO_XML_FILE = "scan.xml";
         private const string BRUKER_XMASS_LOG_FILE = "log.txt";
 
+        // ReSharper disable once IdentifierTypo
         private const string BRUKER_AUTOMS_FILE = "AutoMS.txt";
 
         private struct udtMCFScanInfoType
@@ -58,43 +61,40 @@ namespace MSFileInfoScanner
         }
 
         private void AddDatasetScan(
-            int intScanNumber,
-            int intMSLevel,
-            float sngElutionTime,
-            double dblBPI,
-            double dblTIC,
-            string strScanTypeName,
-            ref double dblMaxRunTimeMinutes)
+            int scanNumber,
+            int msLevel,
+            float elutionTime,
+            double bpi,
+            double tic,
+            string scanTypeName,
+            ref double maxRunTimeMinutes)
         {
-            if (mSaveTICAndBPI && intScanNumber > 0)
+            if (mSaveTICAndBPI && scanNumber > 0)
             {
-                mTICandBPIPlot.AddData(intScanNumber, intMSLevel, sngElutionTime, dblBPI, dblTIC);
+                mTICAndBPIPlot.AddData(scanNumber, msLevel, elutionTime, bpi, tic);
             }
 
-            var objScanStatsEntry = new clsScanStatsEntry
+            var scanStatsEntry = new clsScanStatsEntry
             {
-                ScanNumber = intScanNumber,
-                ScanType = intMSLevel,
-                ScanTypeName = strScanTypeName,
+                ScanNumber = scanNumber,
+                ScanType = msLevel,
+                ScanTypeName = scanTypeName,
                 ScanFilterText = "",
-                ElutionTime = sngElutionTime.ToString("0.0###"),
-                TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5),
-                BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5),
+                ElutionTime = elutionTime.ToString("0.0###"),
+                TotalIonIntensity = StringUtilities.ValueToString(tic, 5),
+                BasePeakIntensity = StringUtilities.ValueToString(bpi, 5),
                 BasePeakMZ = "0",
                 BasePeakSignalToNoiseRatio = "0",
                 IonCount = 0,
                 IonCountRaw = 0
             };
 
-            if (double.TryParse(objScanStatsEntry.ElutionTime, out var dblElutionTime))
+            if (elutionTime > maxRunTimeMinutes)
             {
-                if (dblElutionTime > dblMaxRunTimeMinutes)
-                {
-                    dblMaxRunTimeMinutes = dblElutionTime;
-                }
+                maxRunTimeMinutes = elutionTime;
             }
 
-            mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
+            mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
 
         }
 
@@ -103,28 +103,28 @@ namespace MSFileInfoScanner
         /// Uses the file modification time as the run start time
         /// Also looks for the .hdx file in the dataset folder and examine its modification time
         /// </summary>
-        /// <param name="diDatasetFolder"></param>
+        /// <param name="datasetDirectory"></param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if a valid file is found; otherwise false</returns>
         /// <remarks></remarks>
-        private void DetermineAcqStartTime(DirectoryInfo diDatasetFolder, clsDatasetFileInfo datasetFileInfo)
+        private void DetermineAcqStartTime(DirectoryInfo datasetDirectory, clsDatasetFileInfo datasetFileInfo)
         {
 
-            var blnSuccess = false;
+            var success = false;
 
             try
             {
                 // Look for the method folder (folder name should end in .m)
-                var diSubFolders = diDatasetFolder.GetDirectories("*.m").ToList();
+                var subDirectories = datasetDirectory.GetDirectories("*.m").ToList();
 
-                if (diSubFolders.Count == 0)
+                if (subDirectories.Count == 0)
                 {
                     // Match not found
-                    // Look for any XMass folders
-                    diSubFolders = diDatasetFolder.GetDirectories("XMass*").ToList();
+                    // Look for any XMass directories
+                    subDirectories = datasetDirectory.GetDirectories("XMass*").ToList();
                 }
 
-                if (diSubFolders.Count > 0)
+                if (subDirectories.Count > 0)
                 {
                     // Look for the apexAcquisition.method in each matching subfolder
                     // We have historically used that file's modification time as the acquisition start time for the dataset
@@ -132,30 +132,30 @@ namespace MSFileInfoScanner
 
                     // Note that the submethods.xml file sometimes gets modified after the run starts, so it should not be used to determine run start time
 
-                    foreach (var diSubFolder in diSubFolders)
+                    foreach (var subdirectory in subDirectories)
                     {
-                        foreach (var fiFile in diSubFolder.GetFiles("apexAcquisition.method"))
+                        foreach (var methodFile in subdirectory.GetFiles("apexAcquisition.method"))
                         {
-                            datasetFileInfo.AcqTimeStart = fiFile.LastWriteTime;
-                            blnSuccess = true;
+                            datasetFileInfo.AcqTimeStart = methodFile.LastWriteTime;
+                            success = true;
                             break;
                         }
-                        if (blnSuccess)
+                        if (success)
                             break;
                     }
 
-                    if (!blnSuccess)
+                    if (!success)
                     {
                         // apexAcquisition.method not found; try submethods.xml instead
-                        foreach (var diSubFolder in diSubFolders)
+                        foreach (var subdirectory in subDirectories)
                         {
-                            foreach (var fiFile in diSubFolder.GetFiles("submethods.xml"))
+                            foreach (var methodFile in subdirectory.GetFiles("submethods.xml"))
                             {
-                                datasetFileInfo.AcqTimeStart = fiFile.LastWriteTime;
-                                blnSuccess = true;
+                                datasetFileInfo.AcqTimeStart = methodFile.LastWriteTime;
+                                success = true;
                                 break;
                             }
-                            if (blnSuccess)
+                            if (success)
                                 break;
                         }
                     }
@@ -165,13 +165,12 @@ namespace MSFileInfoScanner
                 // Also look for the .hdx file
                 // Its file modification time typically also matches the run start time
 
-                foreach (var fiFile in diDatasetFolder.GetFiles("*.hdx"))
+                foreach (var hdxFile in datasetDirectory.GetFiles("*.hdx"))
                 {
-                    if (!blnSuccess || fiFile.LastWriteTime < datasetFileInfo.AcqTimeStart)
+                    if (!success || hdxFile.LastWriteTime < datasetFileInfo.AcqTimeStart)
                     {
-                        datasetFileInfo.AcqTimeStart = fiFile.LastWriteTime;
+                        datasetFileInfo.AcqTimeStart = hdxFile.LastWriteTime;
                     }
-
                     break;
                 }
 
@@ -186,26 +185,26 @@ namespace MSFileInfoScanner
 
         }
 
-        private FileInfo FindBrukerSettingsFile(DirectoryInfo diDotDFolder)
+        private FileInfo FindBrukerSettingsFile(DirectoryInfo dotDFolder)
         {
 
-            var dotMethodFiles = diDotDFolder.GetFiles("*.method", SearchOption.AllDirectories);
+            var dotMethodFiles = dotDFolder.GetFiles("*.method", SearchOption.AllDirectories);
 
             if (dotMethodFiles.Length == 0)
             {
                 return null;
             }
 
-            var acquistionMethodFiles = (from methodFile in dotMethodFiles where methodFile.Name.ToLower().EndsWith("apexacquisition.method") select methodFile).ToList();
+            var acquisitionMethodFiles = (from methodFile in dotMethodFiles where methodFile.Name.ToLower().EndsWith("apexacquisition.method") select methodFile).ToList();
 
-            if (acquistionMethodFiles.Count == 0)
+            if (acquisitionMethodFiles.Count == 0)
             {
                 return null;
             }
 
-            if (acquistionMethodFiles.Count == 1)
+            if (acquisitionMethodFiles.Count == 1)
             {
-                return acquistionMethodFiles.First();
+                return acquisitionMethodFiles.First();
             }
 
             OnErrorEvent("Multiple 'apexAcquisition.method' files were found in the .D folder; not sure which to use");
@@ -213,10 +212,10 @@ namespace MSFileInfoScanner
 
         }
 
-        private FileInfo FindBrukerAcqusFile(DirectoryInfo diDotDFolder)
+        private FileInfo FindBrukerAcqusFile(DirectoryInfo dotDFolder)
         {
 
-            var acqusFiles = diDotDFolder.GetFiles("acqus", SearchOption.AllDirectories);
+            var acqusFiles = dotDFolder.GetFiles("acqus", SearchOption.AllDirectories);
 
             if (acqusFiles.Length == 0)
             {
@@ -234,7 +233,7 @@ namespace MSFileInfoScanner
 
             foreach (var acquFile in acqusFiles)
             {
-                if (acquFile.Directory != null && acquFile.Directory.Name.Equals(diDotDFolder.Name, StringComparison.OrdinalIgnoreCase))
+                if (acquFile.Directory != null && acquFile.Directory.Name.Equals(dotDFolder.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     return acquFile;
                 }
@@ -245,87 +244,87 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool GetMetaDataFieldAndTable(eMcfMetadataFields eMcfMetadataField, out string strField, out string strTable)
+        private bool GetMetaDataFieldAndTable(eMcfMetadataFields eMcfMetadataField, out string fieldName, out string tableName)
         {
 
             switch (eMcfMetadataField)
             {
                 case eMcfMetadataFields.ScanMode:
-                    strField = "pScanMode";
-                    strTable = "MetaDataInt";
-
+                    fieldName = "pScanMode";
+                    tableName = "MetaDataInt";
                     break;
+
                 case eMcfMetadataFields.MSLevel:
-                    strField = "pMSLevel";
-                    strTable = "MetaDataInt";
-
+                    fieldName = "pMSLevel";
+                    tableName = "MetaDataInt";
                     break;
+
                 case eMcfMetadataFields.RT:
-                    strField = "pRT";
-                    strTable = "MetaDataDouble";
-
+                    fieldName = "pRT";
+                    tableName = "MetaDataDouble";
                     break;
+
                 case eMcfMetadataFields.BPI:
-                    strField = "pIntMax";
-                    strTable = "MetaDataDouble";
-
+                    fieldName = "pIntMax";
+                    tableName = "MetaDataDouble";
                     break;
+
                 case eMcfMetadataFields.TIC:
-                    strField = "pTic";
-                    strTable = "MetaDataDouble";
-
+                    fieldName = "pTic";
+                    tableName = "MetaDataDouble";
                     break;
+
                 case eMcfMetadataFields.AcqTime:
-                    strField = "pDateTime";
-                    strTable = "MetaDataString";
-
+                    fieldName = "pDateTime";
+                    tableName = "MetaDataString";
                     break;
+
                 case eMcfMetadataFields.SpotNumber:
-                    strField = "pSpotNo";
-                    strTable = "MetaDataString";
-
+                    fieldName = "pSpotNo";
+                    tableName = "MetaDataString";
                     break;
+
                 default:
                     // Unknown field
-                    strField = string.Empty;
-                    strTable = string.Empty;
+                    fieldName = string.Empty;
+                    tableName = string.Empty;
                     return false;
             }
 
             return true;
         }
 
-        private void ParseAutoMSFile(FileSystemInfo diDatasetFolder)
+        private void ParseAutoMSFile(FileSystemInfo datasetDirectory)
         {
 
             try
             {
-                var strAutoMSFilePath = Path.Combine(diDatasetFolder.FullName, BRUKER_AUTOMS_FILE);
-                var fiFileInfo = new FileInfo(strAutoMSFilePath);
+                var autoMSFilePath = Path.Combine(datasetDirectory.FullName, BRUKER_AUTOMS_FILE);
+                var autoMSFile = new FileInfo(autoMSFilePath);
 
-                if (!fiFileInfo.Exists)
+                if (!autoMSFile.Exists)
                 {
                     return;
                 }
 
-                using (var srReader = new StreamReader(new FileStream(fiFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using (var reader = new StreamReader(new FileStream(autoMSFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
 
-                    while (!srReader.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var strLineIn = srReader.ReadLine();
+                        var dataLine = reader.ReadLine();
 
-                        if (string.IsNullOrWhiteSpace(strLineIn))
+                        if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
 
-                        var strSplitLine = strLineIn.Split('\t');
+                        var splitLine = dataLine.Split('\t');
 
-                        if (strSplitLine.Length < 2)
+                        if (splitLine.Length < 2)
                         {
                             continue;
                         }
 
-                        if (!int.TryParse(strSplitLine[0], out var intScanNumber))
+                        if (!int.TryParse(splitLine[0], out var scanNumber))
                         {
                             continue;
                         }
@@ -333,25 +332,25 @@ namespace MSFileInfoScanner
                         // First column contains a number
                         // See if the second column is a known scan type
 
-                        var intMSLevel = 0;
+                        var msLevel = 0;
 
-                        string strScanTypeName;
-                        switch (strSplitLine[1])
+                        string scanTypeName;
+                        switch (splitLine[1])
                         {
                             case "MS":
-                                strScanTypeName = "HMS";
-                                intMSLevel = 1;
+                                scanTypeName = "HMS";
+                                msLevel = 1;
                                 break;
                             case "MSMS":
-                                strScanTypeName = "HMSn";
-                                intMSLevel = 2;
+                                scanTypeName = "HMSn";
+                                msLevel = 2;
                                 break;
                             default:
-                                strScanTypeName = string.Empty;
+                                scanTypeName = string.Empty;
                                 break;
                         }
 
-                        mDatasetStatsSummarizer.UpdateDatasetScanType(intScanNumber, intMSLevel, strScanTypeName);
+                        mDatasetStatsSummarizer.UpdateDatasetScanType(scanNumber, msLevel, scanTypeName);
                     }
 
                 }
@@ -364,31 +363,32 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ParseBAFFile(FileInfo fiBAFFileInfo, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseBAFFile(FileInfo bafFileInfo, clsDatasetFileInfo datasetFileInfo)
         {
 
-            bool blnSuccess;
+            bool success;
 
-            // Override strDataFilePath here, if needed
-            var blnOverride = false;
+            // Override dataFilePath here, if needed
+            var manualOverride = false;
 
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (blnOverride)
+            if (manualOverride)
             {
-                var strNewDataFilePath = @"c:\temp\analysis.baf";
-                fiBAFFileInfo = new FileInfo(strNewDataFilePath);
+                // ReSharper disable once StringLiteralTypo
+                var newDataFilePath = @"c:\temp\analysis.baf";
+                bafFileInfo = new FileInfo(newDataFilePath);
             }
 
             mLCMS2DPlot.Options.UseObservedMinScan = false;
 
             try
             {
-                if (fiBAFFileInfo.Length > 1024 * 1024 * 1024)
+                if (bafFileInfo.Length > 1024 * 1024 * 1024)
                 {
                     OnWarningEvent("analysis.baf file is over 1 GB; ProteoWizard typically cannot handle .baf files this large");
 
                     // Look for a ser file
-                    if (fiBAFFileInfo.Directory != null && File.Exists(Path.Combine(fiBAFFileInfo.Directory.FullName, "ser")))
+                    if (bafFileInfo.Directory != null && File.Exists(Path.Combine(bafFileInfo.Directory.FullName, "ser")))
                     {
                         OnStatusEvent("Will parse the ser file instead");
                         return false;
@@ -398,22 +398,22 @@ namespace MSFileInfoScanner
                 }
 
                 // Open the analysis.baf (or extension.baf) file using the ProteoWizardWrapper
-                OnDebugEvent("Determining acquisition info using Proteowizard");
+                OnDebugEvent("Determining acquisition info using ProteoWizard");
 
-                var objPWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(fiBAFFileInfo.FullName);
+                var pWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(bafFileInfo.FullName);
 
                 try
                 {
-                    var dtRunStartTime = Convert.ToDateTime(objPWiz.RunStartTime);
+                    var runStartTime = Convert.ToDateTime(pWiz.RunStartTime);
 
                     // Update AcqTimeEnd if possible
                     // Found out by trial and error that we need to use .ToUniversalTime() to adjust the time reported by ProteoWizard
-                    dtRunStartTime = dtRunStartTime.ToUniversalTime();
-                    if (dtRunStartTime < datasetFileInfo.AcqTimeEnd)
+                    runStartTime = runStartTime.ToUniversalTime();
+                    if (runStartTime < datasetFileInfo.AcqTimeEnd)
                     {
-                        if (datasetFileInfo.AcqTimeEnd.Subtract(dtRunStartTime).TotalDays < 1)
+                        if (datasetFileInfo.AcqTimeEnd.Subtract(runStartTime).TotalDays < 1)
                         {
-                            datasetFileInfo.AcqTimeStart = dtRunStartTime;
+                            datasetFileInfo.AcqTimeStart = runStartTime;
                         }
                     }
 
@@ -423,8 +423,8 @@ namespace MSFileInfoScanner
                     datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd;
                 }
 
-                // Instantiate the Proteowizard Data Parser class
-                var pWizParser = new clsProteowizardDataParser(objPWiz, mDatasetStatsSummarizer, mTICandBPIPlot, mLCMS2DPlot,
+                // Instantiate the ProteoWizard Data Parser class
+                var pWizParser = new clsProteoWizardDataParser(pWiz, mDatasetStatsSummarizer, mTICAndBPIPlot, mLCMS2DPlot,
                                                             mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus)
                 {
                     HighResMS1 = true,
@@ -435,50 +435,50 @@ namespace MSFileInfoScanner
 
                 // Note that SRM .Wiff files will only have chromatograms, and no spectra
 
-                var blnTICStored = false;
-                var blnSRMDataCached = false;
-                double dblRuntimeMinutes = 0;
+                var ticStored = false;
+                var srmDataCached = false;
+                double runtimeMinutes = 0;
 
-                if (objPWiz.ChromatogramCount > 0)
+                if (pWiz.ChromatogramCount > 0)
                 {
                     // Process the chromatograms
-                    pWizParser.StoreChromatogramInfo(datasetFileInfo, out blnTICStored, out blnSRMDataCached, out dblRuntimeMinutes);
-                    pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
+                    pWizParser.StoreChromatogramInfo(datasetFileInfo, out ticStored, out srmDataCached, out runtimeMinutes);
+                    pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
 
-                    datasetFileInfo.ScanCount = objPWiz.ChromatogramCount;
+                    datasetFileInfo.ScanCount = pWiz.ChromatogramCount;
                 }
 
-                if (objPWiz.SpectrumCount > 0 && !blnSRMDataCached)
+                if (pWiz.SpectrumCount > 0 && !srmDataCached)
                 {
                     // Process the spectral data (though only if we did not process SRM data)
-                    pWizParser.StoreMSSpectraInfo(datasetFileInfo, blnTICStored, ref dblRuntimeMinutes);
-                    pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, dblRuntimeMinutes);
+                    pWizParser.StoreMSSpectraInfo(datasetFileInfo, ticStored, ref runtimeMinutes);
+                    pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
 
-                    datasetFileInfo.ScanCount = objPWiz.SpectrumCount;
+                    datasetFileInfo.ScanCount = pWiz.SpectrumCount;
                 }
 
-                objPWiz.Dispose();
+                pWiz.Dispose();
                 ProgRunner.GarbageCollectNow();
 
-                blnSuccess = true;
+                success = true;
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error using ProteoWizard reader: " + ex.Message, ex);
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
 
         }
 
-        private bool ParseMcfIndexFiles(DirectoryInfo diDatasetFolder, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseMcfIndexFiles(DirectoryInfo datasetDirectory, clsDatasetFileInfo datasetFileInfo)
         {
 
             try
             {
-                var lstMetadataNameToID = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
-                var lstScanData = new Dictionary<string, udtMCFScanInfoType>();
+                var metadataNameToID = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
+                var scanData = new Dictionary<string, udtMCFScanInfoType>();
 
                 if (mSaveTICAndBPI)
                 {
@@ -491,20 +491,20 @@ namespace MSFileInfoScanner
                     InitializeLCMS2DPlot();
                 }
 
-                var strMetadataFile = Path.Combine(diDatasetFolder.FullName, BRUKER_SQLITE_INDEX_FILE_NAME);
-                var fiFileInfo = new FileInfo(strMetadataFile);
+                var metadataFilePath = Path.Combine(datasetDirectory.FullName, BRUKER_SQLITE_INDEX_FILE_NAME);
+                var metadataFile = new FileInfo(metadataFilePath);
 
-                if (!fiFileInfo.Exists)
+                if (!metadataFile.Exists)
                 {
                     // Storage.mcf_idx not found
                     OnWarningEvent("Note: " + BRUKER_SQLITE_INDEX_FILE_NAME + " file does not exist");
                     return false;
                 }
 
-                var strConnectionString = "Data Source = " + fiFileInfo.FullName + "; Version=3; DateTimeFormat=Ticks;";
+                var connectionString = "Data Source = " + metadataFile.FullName + "; Version=3; DateTimeFormat=Ticks;";
 
                 // Open the Storage.mcf_idx file to lookup the metadata name to ID mapping
-                using (var cnDB = new SQLiteConnection(strConnectionString, true))
+                using (var cnDB = new SQLiteConnection(connectionString, true))
                 {
                     cnDB.Open();
 
@@ -513,19 +513,19 @@ namespace MSFileInfoScanner
                         CommandText = "SELECT metadataId, permanentName, displayName FROM MetadataId"
                     };
 
-                    using (var drReader = cmd.ExecuteReader())
+                    using (var reader = cmd.ExecuteReader())
                     {
 
-                        while (drReader.Read())
+                        while (reader.Read())
                         {
-                            var intMetadataId = ReadDbInt(drReader, "metadataId");
-                            var strMetadataName = ReadDbString(drReader, "permanentName");
-                            // var strMetadataDescription = ReadDbString(drReader, "displayName");
+                            var metadataId = ReadDbInt(reader, "metadataId");
+                            var metadataName = ReadDbString(reader, "permanentName");
+                            // var metadataDescription = ReadDbString(drReader, "displayName");
 
-                            if (intMetadataId > 0)
+                            if (metadataId > 0)
                             {
-                                lstMetadataNameToID.Add(strMetadataName, intMetadataId);
-                                // lstMetadataNameToDescription.Add(strMetadataName, strMetadataDescription);
+                                metadataNameToID.Add(metadataName, metadataId);
+                                // metadataNameToDescription.Add(metadataName, metadataDescription);
                             }
                         }
                     }
@@ -533,105 +533,106 @@ namespace MSFileInfoScanner
                     cnDB.Close();
                 }
 
-                var fiFiles = diDatasetFolder.GetFiles("*_1.mcf_idx").ToList();
+                var mcfIndexFiles = datasetDirectory.GetFiles("*_1.mcf_idx").ToList();
 
-                if (fiFiles.Count == 0)
+                if (mcfIndexFiles.Count == 0)
                 {
                     // Storage.mcf_idx not found
                     OnWarningEvent("Note: " + BRUKER_SQLITE_INDEX_FILE_NAME + " file was found but _1.mcf_idx file does not exist");
                     return false;
                 }
 
-                strConnectionString = "Data Source = " + fiFiles.First().FullName + "; Version=3; DateTimeFormat=Ticks;";
+                connectionString = "Data Source = " + mcfIndexFiles.First().FullName + "; Version=3; DateTimeFormat=Ticks;";
 
                 // Open the .mcf file to read the scan info
-                using (var cnDB = new SQLiteConnection(strConnectionString, true))
+                using (var cnDB = new SQLiteConnection(connectionString, true))
                 {
                     cnDB.Open();
 
-                    ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.AcqTime);
-                    ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.ScanMode);
-                    ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.MSLevel);
-                    ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.RT);
-                    ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.BPI);
-                    ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.TIC);
-                    ReadAndStoreMcfIndexData(cnDB, lstMetadataNameToID, lstScanData, eMcfMetadataFields.SpotNumber);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.AcqTime);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.ScanMode);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.MSLevel);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.RT);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.BPI);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.TIC);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.SpotNumber);
 
                     cnDB.Close();
                 }
 
-                // Parse each entry in lstScanData
+                // Parse each entry in scanData
                 // Copy the values to a generic list so that we can sort them
-                var oScanDataSorted = new udtMCFScanInfoType[lstScanData.Count];
-                lstScanData.Values.CopyTo(oScanDataSorted, 0);
+                var scanDataSorted = new udtMCFScanInfoType[scanData.Count];
+                scanData.Values.CopyTo(scanDataSorted, 0);
 
-                var oScanDataSortComparer = new clsScanDataSortComparer();
-                Array.Sort(oScanDataSorted, oScanDataSortComparer);
+                var scanDataComparer = new clsScanDataSortComparer();
+                Array.Sort(scanDataSorted, scanDataComparer);
 
-                var dtAcqTimeStart = DateTime.MaxValue;
-                var dtAcqTimeEnd = DateTime.MinValue;
+                var acqTimeStart = DateTime.MaxValue;
+                var acqTimeEnd = DateTime.MinValue;
 
-                var intScanCount = 0;
-                double dblMaxRunTimeMinutes = 0;
+                var scanCount = 0;
+                double maxRunTimeMinutes = 0;
 
-                for (var intIndex = 0; intIndex <= oScanDataSorted.Length - 1; intIndex++)
+                for (var index = 0; index <= scanDataSorted.Length - 1; index++)
                 {
-                    intScanCount += 1;
-                    var intScanNumber = intScanCount;
+                    scanCount += 1;
+                    var scanNumber = scanCount;
 
-                    if (oScanDataSorted[intIndex].AcqTime < dtAcqTimeStart)
+                    if (scanDataSorted[index].AcqTime < acqTimeStart)
                     {
-                        if (oScanDataSorted[intIndex].AcqTime > DateTime.MinValue)
+                        if (scanDataSorted[index].AcqTime > DateTime.MinValue)
                         {
-                            dtAcqTimeStart = oScanDataSorted[intIndex].AcqTime;
+                            acqTimeStart = scanDataSorted[index].AcqTime;
                         }
                     }
 
-                    if (oScanDataSorted[intIndex].AcqTime > dtAcqTimeEnd)
+                    if (scanDataSorted[index].AcqTime > acqTimeEnd)
                     {
-                        if (oScanDataSorted[intIndex].AcqTime < DateTime.MaxValue)
+                        if (scanDataSorted[index].AcqTime < DateTime.MaxValue)
                         {
-                            dtAcqTimeEnd = oScanDataSorted[intIndex].AcqTime;
+                            acqTimeEnd = scanDataSorted[index].AcqTime;
                         }
                     }
 
-                    if (oScanDataSorted[intIndex].MSLevel == 0)
-                        oScanDataSorted[intIndex].MSLevel = 1;
-                    var sngElutionTime = (float)(oScanDataSorted[intIndex].RT / 60.0);
-                    string strScanTypeName;
+                    if (scanDataSorted[index].MSLevel == 0)
+                        scanDataSorted[index].MSLevel = 1;
 
-                    if (string.IsNullOrEmpty(oScanDataSorted[intIndex].SpotNumber))
+                    var elutionTime = (float)(scanDataSorted[index].RT / 60.0);
+
+                    string scanTypeName;
+                    if (string.IsNullOrEmpty(scanDataSorted[index].SpotNumber))
                     {
-                        strScanTypeName = "HMS";
+                        scanTypeName = "HMS";
                     }
                     else
                     {
-                        strScanTypeName = "MALDI-HMS";
+                        scanTypeName = "MALDI-HMS";
                     }
 
                     AddDatasetScan(
-                        intScanNumber, oScanDataSorted[intIndex].MSLevel, sngElutionTime,
-                        oScanDataSorted[intIndex].BPI, oScanDataSorted[intIndex].TIC,
-                        strScanTypeName, ref dblMaxRunTimeMinutes);
+                        scanNumber, scanDataSorted[index].MSLevel, elutionTime,
+                        scanDataSorted[index].BPI, scanDataSorted[index].TIC,
+                        scanTypeName, ref maxRunTimeMinutes);
 
                 }
 
-                if (intScanCount > 0)
+                if (scanCount > 0)
                 {
-                    datasetFileInfo.ScanCount = intScanCount;
+                    datasetFileInfo.ScanCount = scanCount;
 
-                    if (dblMaxRunTimeMinutes > 0)
+                    if (maxRunTimeMinutes > 0)
                     {
-                        datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.AddMinutes(-dblMaxRunTimeMinutes);
+                        datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.AddMinutes(-maxRunTimeMinutes);
                     }
 
-                    if (dtAcqTimeStart > DateTime.MinValue && dtAcqTimeEnd < DateTime.MaxValue)
+                    if (acqTimeStart > DateTime.MinValue && acqTimeEnd < DateTime.MaxValue)
                     {
                         // Update the acquisition times if they are within 7 days of datasetFileInfo.AcqTimeEnd
-                        if (Math.Abs(datasetFileInfo.AcqTimeEnd.Subtract(dtAcqTimeEnd).TotalDays) <= 7)
+                        if (Math.Abs(datasetFileInfo.AcqTimeEnd.Subtract(acqTimeEnd).TotalDays) <= 7)
                         {
-                            datasetFileInfo.AcqTimeStart = dtAcqTimeStart;
-                            datasetFileInfo.AcqTimeEnd = dtAcqTimeEnd;
+                            datasetFileInfo.AcqTimeStart = acqTimeStart;
+                            datasetFileInfo.AcqTimeEnd = acqTimeEnd;
                         }
 
                     }
@@ -652,7 +653,7 @@ namespace MSFileInfoScanner
         }
 
         private bool ParseScanXMLFile(
-            FileSystemInfo diDatasetFolder,
+            FileSystemInfo datasetDirectory,
             clsDatasetFileInfo datasetFileInfo,
             out Dictionary<int, float> scanElutionTimeMap)
         {
@@ -667,95 +668,101 @@ namespace MSFileInfoScanner
                     InitializeTICAndBPI();
                 }
 
-                var strScanXMLFilePath = Path.Combine(diDatasetFolder.FullName, BRUKER_SCANINFO_XML_FILE);
-                var fiFileInfo = new FileInfo(strScanXMLFilePath);
+                var scanXMLFilePath = Path.Combine(datasetDirectory.FullName, BRUKER_SCANINFO_XML_FILE);
+                var scanXMLFile = new FileInfo(scanXMLFilePath);
 
-                if (!fiFileInfo.Exists)
+                if (!scanXMLFile.Exists)
                 {
                     return false;
                 }
 
-                var intScanCount = 0;
-                double dblMaxRunTimeMinutes = 0;
+                var scanCount = 0;
+                double maxRunTimeMinutes = 0;
                 var validFile = false;
 
-                using (var srReader = new XmlTextReader(new FileStream(fiFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using (var reader = new XmlTextReader(new FileStream(scanXMLFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
 
-                    var blnSkipRead = false;
-                    var blnInScanNode = false;
+                    var skipRead = false;
+                    var inScanNode = false;
 
-                    var intScanNumber = 0;
-                    float sngElutionTime = 0;
-                    double dblTIC = 0;
-                    double dblBPI = 0;
-                    var intMSLevel = 0;
+                    var scanNumber = 0;
+                    float elutionTime = 0;
+                    double tic = 0;
+                    double bpi = 0;
+                    var msLevel = 0;
 
-                    while (!srReader.EOF)
+                    while (!reader.EOF)
                     {
-                        if (blnSkipRead)
+                        if (skipRead)
                         {
-                            blnSkipRead = false;
+                            skipRead = false;
                         }
                         else
                         {
-                            srReader.Read();
+                            reader.Read();
                         }
 
-                        switch (srReader.NodeType)
+                        switch (reader.NodeType)
                         {
                             case XmlNodeType.Element:
-                                if (blnInScanNode)
+                                if (inScanNode)
                                 {
-                                    switch (srReader.Name)
+                                    switch (reader.Name)
                                     {
                                         case "count":
-                                            intScanNumber = srReader.ReadElementContentAsInt();
-                                            blnSkipRead = true;
+                                            scanNumber = reader.ReadElementContentAsInt();
+                                            skipRead = true;
                                             break;
+
                                         case "minutes":
-                                            sngElutionTime = srReader.ReadElementContentAsFloat();
-                                            blnSkipRead = true;
+                                            elutionTime = reader.ReadElementContentAsFloat();
+                                            skipRead = true;
                                             break;
+
                                         case "tic":
-                                            dblTIC = srReader.ReadElementContentAsFloat();
-                                            blnSkipRead = true;
+                                            tic = reader.ReadElementContentAsFloat();
+                                            skipRead = true;
                                             break;
+
+                                        // ReSharper disable once StringLiteralTypo
                                         case "maxpeak":
-                                            dblBPI = srReader.ReadElementContentAsFloat();
-                                            blnSkipRead = true;
+                                            bpi = reader.ReadElementContentAsFloat();
+                                            skipRead = true;
                                             break;
+
                                         default:
+                                            // Ignore it
                                             break;
-                                        // Ignore it
                                     }
                                 }
                                 else
                                 {
-                                    if (srReader.Name == "scanlist")
+                                    if (reader.Name == "scanlist")
                                     {
                                         validFile = true;
                                     }
-                                    else if (srReader.Name == "scan")
+                                    else if (reader.Name == "scan")
                                     {
-                                        blnInScanNode = true;
-                                        intScanNumber = 0;
-                                        sngElutionTime = 0;
-                                        dblTIC = 0;
-                                        dblBPI = 0;
-                                        intMSLevel = 1;
+                                        inScanNode = true;
+                                        scanNumber = 0;
+                                        elutionTime = 0;
+                                        tic = 0;
+                                        bpi = 0;
+                                        msLevel = 1;
 
-                                        intScanCount += 1;
+                                        scanCount += 1;
                                     }
                                 }
                                 break;
-                            case XmlNodeType.EndElement:
-                                if (srReader.Name == "scan")
-                                {
-                                    blnInScanNode = false;
 
-                                    scanElutionTimeMap.Add(intScanNumber, sngElutionTime);
-                                    AddDatasetScan(intScanNumber, intMSLevel, sngElutionTime, dblBPI, dblTIC, "HMS", ref dblMaxRunTimeMinutes);
+                            case XmlNodeType.EndElement:
+                                if (reader.Name == "scan")
+                                {
+                                    inScanNode = false;
+
+                                    scanElutionTimeMap.Add(scanNumber, elutionTime);
+                                    AddDatasetScan(scanNumber, msLevel, elutionTime, bpi, tic, "HMS", ref maxRunTimeMinutes);
 
                                 }
                                 break;
@@ -765,19 +772,19 @@ namespace MSFileInfoScanner
 
                 }
 
-                if (intScanCount > 0)
+                if (scanCount > 0)
                 {
-                    datasetFileInfo.ScanCount = intScanCount;
+                    datasetFileInfo.ScanCount = scanCount;
 
-                    if (dblMaxRunTimeMinutes > 0)
+                    if (maxRunTimeMinutes > 0)
                     {
-                        if (Math.Abs(datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes) < dblMaxRunTimeMinutes)
+                        if (Math.Abs(datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes) < maxRunTimeMinutes)
                         {
-                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(dblMaxRunTimeMinutes);
+                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(maxRunTimeMinutes);
                         }
                         else
                         {
-                            datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.AddMinutes(-dblMaxRunTimeMinutes);
+                            datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.AddMinutes(-maxRunTimeMinutes);
                         }
                     }
 
@@ -802,36 +809,36 @@ namespace MSFileInfoScanner
 
         }
 
-        private DirectoryInfo GetDatasetFolder(string strDataFilePath)
+        private DirectoryInfo GetDatasetFolder(string dataFilePath)
         {
 
-            // First see if strFileOrFolderPath points to a valid file
-            var fiFileInfo = new FileInfo(strDataFilePath);
+            // First see if dataFilePath points to a valid file
+            var datasetFile = new FileInfo(dataFilePath);
 
-            if (fiFileInfo.Exists)
+            if (datasetFile.Exists)
             {
                 // User specified a file; assume the parent folder of this file is the dataset folder
-                return fiFileInfo.Directory;
+                return datasetFile.Directory;
             }
 
-            // Assume this is the path to the dataset folder
-            return new DirectoryInfo(strDataFilePath);
+            // Assume this is the path to the dataset directory
+            return new DirectoryInfo(dataFilePath);
         }
 
-        public override string GetDatasetNameViaPath(string strDataFilePath)
+        public override string GetDatasetNameViaPath(string dataFilePath)
         {
-            var strDatasetName = string.Empty;
+            var datasetName = string.Empty;
 
             try
             {
                 // The dataset name for a Bruker Xmass folder is the name of the parent directory
-                // However, strDataFilePath could be a file or a folder path, so use GetDatasetFolder to get the dataset folder
-                var diDatasetFolder = GetDatasetFolder(strDataFilePath);
-                strDatasetName = diDatasetFolder.Name;
+                // However, dataFilePath could be a file or a folder path, so use GetDatasetFolder to get the dataset folder
+                var datasetDirectory = GetDatasetFolder(dataFilePath);
+                datasetName = datasetDirectory.Name;
 
-                if (strDatasetName.ToLower().EndsWith(".d"))
+                if (datasetName.ToLower().EndsWith(".d"))
                 {
-                    strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - 2);
+                    datasetName = datasetName.Substring(0, datasetName.Length - 2);
                 }
 
             }
@@ -840,46 +847,46 @@ namespace MSFileInfoScanner
                 // Ignore errors
             }
 
-            return strDatasetName;
+            return datasetName;
 
         }
 
         /// <summary>
-        /// Process a Bruker Xmass folder, specified by strDataFilePath
+        /// Process a Bruker Xmass folder, specified by dataFilePath
         /// </summary>
-        /// <param name="strDataFilePath">Either the dataset folder containing the XMass files, or any of the XMass files in the dataset folder</param>
+        /// <param name="dataFilePath">Either the dataset folder containing the XMass files, or any of the XMass files in the dataset folder</param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
         /// <remarks></remarks>
-        public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
             ResetResults();
 
             try
             {
-                // Determine whether strDataFilePath points to a file or a folder
+                // Determine whether dataFilePath points to a file or a folder
 
-                var diDatasetFolder = GetDatasetFolder(strDataFilePath);
+                var datasetDirectory = GetDatasetFolder(dataFilePath);
 
                 // Validate that we have selected a valid folder
-                if (!diDatasetFolder.Exists)
+                if (!datasetDirectory.Exists)
                 {
-                    OnErrorEvent("File/folder not found: " + strDataFilePath);
+                    OnErrorEvent("File/folder not found: " + dataFilePath);
                     return false;
                 }
 
                 // In case we cannot find a .BAF file, update the .AcqTime values to the folder creation date
                 // We have to assign a date, so we'll assign the date for the BAF file
-                datasetFileInfo.AcqTimeStart = diDatasetFolder.CreationTime;
-                datasetFileInfo.AcqTimeEnd = diDatasetFolder.CreationTime;
+                datasetFileInfo.AcqTimeStart = datasetDirectory.CreationTime;
+                datasetFileInfo.AcqTimeEnd = datasetDirectory.CreationTime;
 
                 mDatasetStatsSummarizer.ClearCachedData();
 
-                // Look for the analysis.baf file in diFolderInfo
+                // Look for the analysis.baf file in datasetDirectory
                 // Use its modification time as the AcqTime start and End values
-                // If we cannot find the anslysis.baf file, then look for a ser file or a fid file
+                // If we cannot find the analysis.baf file, then look for a ser file or a fid file
 
-                var lstInstrumentDataFiles = new List<string> {
+                var instrumentDataFiles = new List<string> {
                     BRUKER_BAF_FILE_NAME,
                     BRUKER_SER_FILE_NAME,
                     BRUKER_FID_FILE_NAME,
@@ -887,68 +894,68 @@ namespace MSFileInfoScanner
                 };
 
                 // This tracks the first instrument file matched
-                var fiMatchedFiles = new List<FileInfo>();
+                var matchedFiles = new List<FileInfo>();
 
                 // This tracks all instrument files matched
                 var instrumentFilesToAdd = new List<FileInfo>();
 
-                foreach (var instrumentDataFile in lstInstrumentDataFiles)
+                foreach (var instrumentDataFile in instrumentDataFiles)
                 {
-                    var fiFiles = diDatasetFolder.GetFiles(instrumentDataFile).ToList();
-                    if (fiFiles.Count == 0)
+                    var candidateFiles = datasetDirectory.GetFiles(instrumentDataFile).ToList();
+                    if (candidateFiles.Count == 0)
                         continue;
 
-                    if (fiMatchedFiles.Count == 0)
+                    if (matchedFiles.Count == 0)
                     {
-                        fiMatchedFiles.AddRange(fiFiles);
+                        matchedFiles.AddRange(candidateFiles);
                     }
 
-                    instrumentFilesToAdd.AddRange(fiFiles);
+                    instrumentFilesToAdd.AddRange(candidateFiles);
                 }
 
-                if (fiMatchedFiles.Count == 0)
+                if (matchedFiles.Count == 0)
                 {
                     // .baf files not found; look for any .mcf files
-                    var mcfFiles = diDatasetFolder.GetFiles("*" + BRUKER_MCF_FILE_EXTENSION).ToList();
+                    var mcfFiles = datasetDirectory.GetFiles("*" + BRUKER_MCF_FILE_EXTENSION).ToList();
 
                     if (mcfFiles.Count > 0)
                     {
                         // Find the largest .mcf file (not .mcf_idx file)
-                        FileInfo fiLargestMCF = null;
+                        FileInfo largestMCF = null;
 
-                        foreach (var fiMCFFile in mcfFiles)
+                        foreach (var mcfFile in mcfFiles)
                         {
-                            if (fiMCFFile.Extension.ToUpper() == BRUKER_MCF_FILE_EXTENSION)
+                            if (mcfFile.Extension.ToUpper() == BRUKER_MCF_FILE_EXTENSION)
                             {
-                                if (fiLargestMCF == null)
+                                if (largestMCF == null)
                                 {
-                                    fiLargestMCF = fiMCFFile;
+                                    largestMCF = mcfFile;
                                 }
-                                else if (fiMCFFile.Length > fiLargestMCF.Length)
+                                else if (mcfFile.Length > largestMCF.Length)
                                 {
-                                    fiLargestMCF = fiMCFFile;
+                                    largestMCF = mcfFile;
                                 }
                             }
                         }
 
-                        if (fiLargestMCF != null)
+                        if (largestMCF != null)
                         {
-                            fiMatchedFiles.Add(fiLargestMCF);
-                            instrumentFilesToAdd.Add(fiLargestMCF);
+                            matchedFiles.Add(largestMCF);
+                            instrumentFilesToAdd.Add(largestMCF);
                         }
                     }
                 }
 
-                if (fiMatchedFiles.Count == 0)
+                if (matchedFiles.Count == 0)
                 {
                     OnErrorEvent(
-                        string.Join(" or ", lstInstrumentDataFiles) + " or " +
+                        string.Join(" or ", instrumentDataFiles) + " or " +
                         BRUKER_MCF_FILE_EXTENSION + " or " +
-                        BRUKER_SQLITE_INDEX_EXTENSION + " file not found in " + diDatasetFolder.FullName);
+                        BRUKER_SQLITE_INDEX_EXTENSION + " file not found in " + datasetDirectory.FullName);
                     return false;
                 }
 
-                var primaryInstrumentFile = fiMatchedFiles.First();
+                var primaryInstrumentFile = matchedFiles.First();
 
                 // Read the file info from the file system
                 // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
@@ -956,13 +963,13 @@ namespace MSFileInfoScanner
                 UpdateDatasetFileStats(primaryInstrumentFile, datasetFileInfo.DatasetID, out var primaryFileAdded);
 
                 // Update the dataset name and file extension
-                datasetFileInfo.DatasetName = GetDatasetNameViaPath(diDatasetFolder.FullName);
+                datasetFileInfo.DatasetName = GetDatasetNameViaPath(datasetDirectory.FullName);
                 datasetFileInfo.FileExtension = string.Empty;
                 datasetFileInfo.FileSizeBytes = primaryInstrumentFile.Length;
 
                 // Find the apexAcquisition.method or submethods.xml file in the XMASS_Method.m subfolder to determine .AcqTimeStart
                 // This function updates datasetFileInfo.AcqTimeEnd and datasetFileInfo.AcqTimeStart to have the same time
-                DetermineAcqStartTime(diDatasetFolder, datasetFileInfo);
+                DetermineAcqStartTime(datasetDirectory, datasetFileInfo);
 
                 // Update the acquisition end time using the write time of the .baf file
                 if (primaryInstrumentFile.LastWriteTime > datasetFileInfo.AcqTimeEnd)
@@ -978,7 +985,7 @@ namespace MSFileInfoScanner
 
                 // Look for the Storage.mcf_idx file and the corresponding .mcf_idx file
                 // If they exist, we can extract information from them using SqLite
-                var success = ParseMcfIndexFiles(diDatasetFolder, datasetFileInfo);
+                var success = ParseMcfIndexFiles(datasetDirectory, datasetFileInfo);
 
                 if (!success)
                 {
@@ -987,7 +994,7 @@ namespace MSFileInfoScanner
                     // We can also obtain TIC and elution time values from this file
                     // However, it does not track whether a scan is MS or MSn
                     // If the scans.xml file contains runtime entries (e.g. <minutes>100.0456</minutes>) then .AcqTimeEnd is updated using .AcqTimeStart + RunTimeMinutes
-                    success = ParseScanXMLFile(diDatasetFolder, datasetFileInfo, out var scanElutionTimeMap);
+                    success = ParseScanXMLFile(datasetDirectory, datasetFileInfo, out var scanElutionTimeMap);
 
                     var bafFileParsed = false;
 
@@ -998,7 +1005,7 @@ namespace MSFileInfoScanner
                         bafFileParsed = ParseBAFFile(primaryInstrumentFile, datasetFileInfo);
                     }
 
-                    if (mSaveTICAndBPI && mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC == 0 || mSaveLCMS2DPlots && mLCMS2DPlot.ScanCountCached == 0)
+                    if (mSaveTICAndBPI && mTICAndBPIPlot.CountBPI + mTICAndBPIPlot.CountTIC == 0 || mSaveLCMS2DPlots && mLCMS2DPlot.ScanCountCached == 0)
                     {
                         // If a ser or fid file exists, we can read the data from it to create the TIC and BPI plots, plus also the 2D plot
 
@@ -1014,12 +1021,12 @@ namespace MSFileInfoScanner
                 }
 
                 // Parse the AutoMS.txt file (if it exists) to determine which scans are MS and which are MS/MS
-                ParseAutoMSFile(diDatasetFolder);
+                ParseAutoMSFile(datasetDirectory);
 
                 if (instrumentFilesToAdd.Count == 0 && !primaryFileAdded)
                 {
                     // Add the largest file in instrument directory
-                    AddLargestInstrumentFile(diDatasetFolder);
+                    AddLargestInstrumentFile(datasetDirectory);
                 }
                 else
                 {
@@ -1041,7 +1048,7 @@ namespace MSFileInfoScanner
                     }
                 }
 
-                // Copy over the updated filetime info and scan info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
+                // Copy over the updated file time info and scan info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
                 mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
                 mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
                 mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
@@ -1061,44 +1068,44 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ParseSerOrFidFile(DirectoryInfo diDotDFolder, IReadOnlyDictionary<int, float> scanElutionTimeMap)
+        private bool ParseSerOrFidFile(DirectoryInfo dotDFolder, IReadOnlyDictionary<int, float> scanElutionTimeMap)
         {
 
             try
             {
-                var fiSerOrFidFile = new FileInfo(Path.Combine(diDotDFolder.FullName, "ser"));
+                var serOrFidFile = new FileInfo(Path.Combine(dotDFolder.FullName, "ser"));
 
-                if (!fiSerOrFidFile.Exists)
+                if (!serOrFidFile.Exists)
                 {
-                    fiSerOrFidFile = new FileInfo(Path.Combine(diDotDFolder.FullName, "fid"));
-                    if (!fiSerOrFidFile.Exists)
+                    serOrFidFile = new FileInfo(Path.Combine(dotDFolder.FullName, "fid"));
+                    if (!serOrFidFile.Exists)
                         return false;
                 }
 
                 // Look for the apexAcquisition.method
-                var fiSettingsFile = FindBrukerSettingsFile(diDotDFolder);
+                var settingsFile = FindBrukerSettingsFile(dotDFolder);
 
-                if (fiSettingsFile == null)
+                if (settingsFile == null)
                 {
                     // Not found; look for an acqus file
-                    var fiAcqusFile = FindBrukerAcqusFile(diDotDFolder);
+                    var acqusFile = FindBrukerAcqusFile(dotDFolder);
 
-                    if (fiAcqusFile == null)
+                    if (acqusFile == null)
                     {
                         // Not found; cannot parse the ser file
                         return false;
                     }
 
-                    fiSettingsFile = fiAcqusFile;
+                    settingsFile = acqusFile;
                 }
 
-                var needToSaveTICAndBPI = mSaveTICAndBPI && mTICandBPIPlot.CountBPI + mTICandBPIPlot.CountTIC == 0;
-                var dtLastProgressTime = DateTime.UtcNow;
+                var needToSaveTICAndBPI = mSaveTICAndBPI && mTICAndBPIPlot.CountBPI + mTICAndBPIPlot.CountTIC == 0;
+                var lastProgressTime = DateTime.UtcNow;
 
                 // Note that this starts at 2 seconds, but is extended after each progress message is shown (maxing out at 30 seconds)
                 var progressThresholdSeconds = 2;
 
-                var serReader = new BrukerDataReader.DataReader(fiSerOrFidFile.FullName, fiSettingsFile.FullName);
+                var serReader = new BrukerDataReader.DataReader(serOrFidFile.FullName, settingsFile.FullName);
 
                 var scanCount = serReader.GetNumMSScans();
 
@@ -1108,12 +1115,12 @@ namespace MSFileInfoScanner
 
                 for (var scanNumber = 0; scanNumber <= scanCount - 1; scanNumber++)
                 {
-                    float[] mzValues;
-                    float[] intensities;
+                    float[] mzList;
+                    float[] intensityList;
 
                     try
                     {
-                        serReader.GetMassSpectrum(scanNumber, out mzValues, out intensities);
+                        serReader.GetMassSpectrum(scanNumber, out mzList, out intensityList);
 
                     }
                     catch (Exception ex)
@@ -1149,38 +1156,38 @@ namespace MSFileInfoScanner
                         double basePeakIntensity = 0;
                         double totalIonCurrent = 0;
 
-                        if (intensities.Length > 0)
+                        if (intensityList.Length > 0)
                         {
-                            basePeakIntensity = intensities.Max();
-                            totalIonCurrent = intensities.Sum();
+                            basePeakIntensity = intensityList.Max();
+                            totalIonCurrent = intensityList.Sum();
                         }
 
-                        mTICandBPIPlot.AddData(scanNumber, msLevel, elutionTime, basePeakIntensity, totalIonCurrent);
+                        mTICAndBPIPlot.AddData(scanNumber, msLevel, elutionTime, basePeakIntensity, totalIonCurrent);
                     }
 
-                    if (mzValues.Length > 0)
+                    if (mzList.Length > 0)
                     {
                         if (mSaveLCMS2DPlots)
                         {
-                            var dblMassIntensityPairs = new double[2, mzValues.Length + 1];
+                            var massIntensityPairs = new double[2, mzList.Length + 1];
 
-                            for (var i = 0; i <= mzValues.Length - 1; i++)
+                            for (var i = 0; i <= mzList.Length - 1; i++)
                             {
-                                dblMassIntensityPairs[0, i] = mzValues[i];
-                                dblMassIntensityPairs[1, i] = intensities[i];
+                                massIntensityPairs[0, i] = mzList[i];
+                                massIntensityPairs[1, i] = intensityList[i];
                             }
 
-                            mLCMS2DPlot.AddScan2D(scanNumber, msLevel, elutionTime, mzValues.Length, dblMassIntensityPairs);
+                            mLCMS2DPlot.AddScan2D(scanNumber, msLevel, elutionTime, mzList.Length, massIntensityPairs);
                         }
 
                     }
 
                     scansProcessed++;
 
-                    if (DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds < progressThresholdSeconds)
+                    if (DateTime.UtcNow.Subtract(lastProgressTime).TotalSeconds < progressThresholdSeconds)
                         continue;
 
-                    dtLastProgressTime = DateTime.UtcNow;
+                    lastProgressTime = DateTime.UtcNow;
                     if (progressThresholdSeconds < 30)
                         progressThresholdSeconds += 2;
 
@@ -1202,50 +1209,50 @@ namespace MSFileInfoScanner
 
         private void ReadAndStoreMcfIndexData(
             SQLiteConnection cnDB,
-            IReadOnlyDictionary<string, int> lstMetadataNameToID,
-            IDictionary<string, udtMCFScanInfoType> lstScanData,
+            IReadOnlyDictionary<string, int> metadataNameToID,
+            IDictionary<string, udtMCFScanInfoType> scanData,
             eMcfMetadataFields eMcfMetadataField)
         {
 
             var cmd = new SQLiteCommand(cnDB);
 
-            if (!GetMetaDataFieldAndTable(eMcfMetadataField, out var strField, out var strTable))
+            if (!GetMetaDataFieldAndTable(eMcfMetadataField, out var fieldName, out var tableName))
             {
                 return;
             }
 
-            if (lstMetadataNameToID.TryGetValue(strField, out var intMetadataId))
+            if (metadataNameToID.TryGetValue(fieldName, out var metadataId))
             {
-                cmd.CommandText = "SELECT GuidA, MetaDataId, Value FROM " + strTable + " WHERE MetaDataId = " + intMetadataId;
+                cmd.CommandText = "SELECT GuidA, MetaDataId, Value FROM " + tableName + " WHERE MetaDataId = " + metadataId;
 
                 using (var drReader = cmd.ExecuteReader())
                 {
 
                     while (drReader.Read())
                     {
-                        var strGuid = ReadDbString(drReader, "GuidA");
-                        var strValue = ReadDbString(drReader, "Value");
+                        var scanGuid = ReadDbString(drReader, "GuidA");
+                        var metaDataValue = ReadDbString(drReader, "Value");
 
-                        bool blnNewEntry;
-                        if (lstScanData.TryGetValue(strGuid, out var udtScanInfo))
+                        bool newEntry;
+                        if (scanData.TryGetValue(scanGuid, out var udtScanInfo))
                         {
-                            blnNewEntry = false;
+                            newEntry = false;
                         }
                         else
                         {
                             udtScanInfo = new udtMCFScanInfoType();
-                            blnNewEntry = true;
+                            newEntry = true;
                         }
 
-                        UpdateScanInfo(eMcfMetadataField, strValue, ref udtScanInfo);
+                        UpdateScanInfo(eMcfMetadataField, metaDataValue, ref udtScanInfo);
 
-                        if (blnNewEntry)
+                        if (newEntry)
                         {
-                            lstScanData.Add(strGuid, udtScanInfo);
+                            scanData.Add(scanGuid, udtScanInfo);
                         }
                         else
                         {
-                            lstScanData[strGuid] = udtScanInfo;
+                            scanData[scanGuid] = udtScanInfo;
                         }
 
                     }
@@ -1255,37 +1262,37 @@ namespace MSFileInfoScanner
 
         }
 
-        private string ReadDbString(IDataRecord drReader, string strColumnName)
+        private string ReadDbString(IDataRecord drReader, string columnName)
         {
-            return ReadDbString(drReader, strColumnName, strValueIfNotFound: string.Empty);
+            return ReadDbString(drReader, columnName, valueIfNotFound: string.Empty);
         }
 
-        private string ReadDbString(IDataRecord drReader, string strColumnName, string strValueIfNotFound)
+        private string ReadDbString(IDataRecord drReader, string columnName, string valueIfNotFound)
         {
-            string strValue;
+            string dataValue;
 
             try
             {
-                strValue = drReader[strColumnName].ToString();
+                dataValue = drReader[columnName].ToString();
             }
             catch (Exception)
             {
-                strValue = strValueIfNotFound;
+                dataValue = valueIfNotFound;
             }
 
-            return strValue;
+            return dataValue;
         }
 
-        private int ReadDbInt(IDataRecord drReader, string strColumnName)
+        private int ReadDbInt(IDataRecord drReader, string columnName)
         {
             try
             {
-                var strValue = drReader[strColumnName].ToString();
-                if (!string.IsNullOrEmpty(strValue))
+                var dataValue = drReader[columnName].ToString();
+                if (!string.IsNullOrEmpty(dataValue))
                 {
-                    if (int.TryParse(strValue, out var intValue))
+                    if (int.TryParse(dataValue, out var numericValue))
                     {
-                        return intValue;
+                        return numericValue;
                     }
                 }
             }
@@ -1298,61 +1305,60 @@ namespace MSFileInfoScanner
 
         }
 
-        private void UpdateScanInfo(eMcfMetadataFields eMcfMetadataField, string strValue, ref udtMCFScanInfoType udtScanInfo)
+        private void UpdateScanInfo(eMcfMetadataFields eMcfMetadataField, string dataValue, ref udtMCFScanInfoType udtScanInfo)
         {
-            int intValue;
-            double dblValue;
-
             switch (eMcfMetadataField)
             {
                 case eMcfMetadataFields.ScanMode:
-                    if (int.TryParse(strValue, out intValue))
+                    if (int.TryParse(dataValue, out var scanMode))
                     {
-                        udtScanInfo.ScanMode = intValue;
+                        udtScanInfo.ScanMode = scanMode;
                     }
-
                     break;
+
                 case eMcfMetadataFields.MSLevel:
-                    if (int.TryParse(strValue, out intValue))
+                    if (int.TryParse(dataValue, out var msLevel))
                     {
-                        udtScanInfo.MSLevel = intValue;
+                        udtScanInfo.MSLevel = msLevel;
                     }
-
                     break;
+
                 case eMcfMetadataFields.RT:
-                    if (double.TryParse(strValue, out dblValue))
+                    if (double.TryParse(dataValue, out var retentionTime))
                     {
-                        udtScanInfo.RT = dblValue;
+                        udtScanInfo.RT = retentionTime;
                     }
-
                     break;
+
                 case eMcfMetadataFields.BPI:
-                    if (double.TryParse(strValue, out dblValue))
+                    if (double.TryParse(dataValue, out var bpi))
                     {
-                        udtScanInfo.BPI = dblValue;
+                        udtScanInfo.BPI = bpi;
                     }
-
                     break;
+
                 case eMcfMetadataFields.TIC:
-                    if (double.TryParse(strValue, out dblValue))
+                    if (double.TryParse(dataValue, out var tic))
                     {
-                        udtScanInfo.TIC = dblValue;
+                        udtScanInfo.TIC = tic;
                     }
-
                     break;
+
                 case eMcfMetadataFields.AcqTime:
-                    if (DateTime.TryParse(strValue, out var dtValue))
+                    if (DateTime.TryParse(dataValue, out var acqTime))
                     {
-                        udtScanInfo.AcqTime = dtValue;
+                        udtScanInfo.AcqTime = acqTime;
                     }
+                    break;
 
-                    break;
                 case eMcfMetadataFields.SpotNumber:
-                    udtScanInfo.SpotNumber = strValue;
+                    udtScanInfo.SpotNumber = dataValue;
                     break;
+
                 default:
+                    // Unknown field
                     break;
-                // Unknown field
+
             }
 
         }

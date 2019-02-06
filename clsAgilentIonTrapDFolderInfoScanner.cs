@@ -22,18 +22,18 @@ namespace MSFileInfoScanner
 
         private const string RUN_LOG_INSTRUMENT_RUN_COMPLETED = "Instrument run completed";
 
-        private bool ExtractMethodLineDate(string strLineIn, out DateTime dtDate)
+        private bool ExtractMethodLineDate(string dataLine, out DateTime methodDate)
         {
 
-            var blnSuccess = false;
-            dtDate = DateTime.MinValue;
+            var success = false;
+            methodDate = DateTime.MinValue;
 
             try
             {
-                var strSplitLine = strLineIn.Trim().Split(' ');
-                if (strSplitLine.Length >= 2)
+                var splitLine = dataLine.Trim().Split(' ');
+                if (splitLine.Length >= 2)
                 {
-                    blnSuccess = DateTime.TryParse(strSplitLine[strSplitLine.Length - 1] + " " + strSplitLine[strSplitLine.Length - 2], out dtDate);
+                    success = DateTime.TryParse(splitLine[splitLine.Length - 1] + " " + splitLine[splitLine.Length - 2], out methodDate);
                 }
             }
             catch (Exception)
@@ -41,15 +41,15 @@ namespace MSFileInfoScanner
                 // Ignore errors
             }
 
-            return blnSuccess;
+            return success;
         }
 
-        public override string GetDatasetNameViaPath(string strDataFilePath)
+        public override string GetDatasetNameViaPath(string dataFilePath)
         {
             // The dataset name is simply the folder name without .D
             try
             {
-                return Path.GetFileNameWithoutExtension(strDataFilePath);
+                return Path.GetFileNameWithoutExtension(dataFilePath);
             }
             catch (Exception)
             {
@@ -57,93 +57,93 @@ namespace MSFileInfoScanner
             }
         }
 
-        private TimeSpan SecondsToTimeSpan(double dblSeconds)
+        private TimeSpan SecondsToTimeSpan(double seconds)
         {
 
-            TimeSpan dtTimeSpan;
+            TimeSpan timeSpanItem;
 
             try
             {
-                dtTimeSpan = new TimeSpan(0, 0, (int)dblSeconds);
+                timeSpanItem = new TimeSpan(0, 0, (int)seconds);
             }
             catch (Exception)
             {
-                dtTimeSpan = new TimeSpan(0, 0, 0);
+                timeSpanItem = new TimeSpan(0, 0, 0);
             }
 
-            return dtTimeSpan;
+            return timeSpanItem;
 
         }
 
-        private void ParseRunLogFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo)
+        private void ParseRunLogFile(string directoryPath, clsDatasetFileInfo datasetFileInfo)
         {
-            var strMostRecentMethodLine = string.Empty;
+            var mostRecentMethodLine = string.Empty;
 
             try
             {
                 // Try to open the Run.Log file
-                bool blnProcessedFirstMethodLine;
-                bool blnEndDateFound;
-                DateTime dtMethodDate;
+                bool processedFirstMethodLine;
+                bool endDateFound;
+                DateTime methodDate;
 
-                using (var srInFile = new StreamReader(Path.Combine(strFolderPath, AGILENT_RUN_LOG_FILE)))
+                using (var reader = new StreamReader(Path.Combine(directoryPath, AGILENT_RUN_LOG_FILE)))
                 {
 
-                    blnProcessedFirstMethodLine = false;
-                    blnEndDateFound = false;
-                    while (!srInFile.EndOfStream)
+                    processedFirstMethodLine = false;
+                    endDateFound = false;
+                    while (!reader.EndOfStream)
                     {
-                        var strLineIn = srInFile.ReadLine();
+                        var dataLine = reader.ReadLine();
 
-                        if (string.IsNullOrWhiteSpace(strLineIn))
+                        if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
 
-                        if (!strLineIn.StartsWith(RUN_LOG_FILE_METHOD_LINE_START))
+                        if (!dataLine.StartsWith(RUN_LOG_FILE_METHOD_LINE_START))
                             continue;
 
-                        strMostRecentMethodLine = string.Copy(strLineIn);
+                        mostRecentMethodLine = string.Copy(dataLine);
 
                         // Method line found
                         // See if the line contains a key phrase
-                        var intCharLoc = strLineIn.IndexOf(RUN_LOG_FILE_INSTRUMENT_RUNNING, StringComparison.Ordinal);
-                        if (intCharLoc > 0)
+                        var charIndex = dataLine.IndexOf(RUN_LOG_FILE_INSTRUMENT_RUNNING, StringComparison.Ordinal);
+                        if (charIndex > 0)
                         {
-                            if (ExtractMethodLineDate(strLineIn, out dtMethodDate))
+                            if (ExtractMethodLineDate(dataLine, out methodDate))
                             {
-                                datasetFileInfo.AcqTimeStart = dtMethodDate;
+                                datasetFileInfo.AcqTimeStart = methodDate;
                             }
-                            blnProcessedFirstMethodLine = true;
+                            processedFirstMethodLine = true;
                         }
                         else
                         {
-                            intCharLoc = strLineIn.IndexOf(RUN_LOG_INSTRUMENT_RUN_COMPLETED, StringComparison.Ordinal);
-                            if (intCharLoc > 0)
+                            charIndex = dataLine.IndexOf(RUN_LOG_INSTRUMENT_RUN_COMPLETED, StringComparison.Ordinal);
+                            if (charIndex > 0)
                             {
-                                if (ExtractMethodLineDate(strLineIn, out dtMethodDate))
+                                if (ExtractMethodLineDate(dataLine, out methodDate))
                                 {
-                                    datasetFileInfo.AcqTimeEnd = dtMethodDate;
-                                    blnEndDateFound = true;
+                                    datasetFileInfo.AcqTimeEnd = methodDate;
+                                    endDateFound = true;
                                 }
                             }
                         }
 
                         // If this is the first method line, then parse out the date and store in .AcqTimeStart
-                        if (!blnProcessedFirstMethodLine)
+                        if (!processedFirstMethodLine)
                         {
-                            if (ExtractMethodLineDate(strLineIn, out dtMethodDate))
+                            if (ExtractMethodLineDate(dataLine, out methodDate))
                             {
-                                datasetFileInfo.AcqTimeStart = dtMethodDate;
+                                datasetFileInfo.AcqTimeStart = methodDate;
                             }
                         }
                     }
                 }
 
-                if (blnProcessedFirstMethodLine && !blnEndDateFound)
+                if (processedFirstMethodLine && !endDateFound)
                 {
                     // Use the last time in the file as the .AcqTimeEnd value
-                    if (ExtractMethodLineDate(strMostRecentMethodLine, out dtMethodDate))
+                    if (ExtractMethodLineDate(mostRecentMethodLine, out methodDate))
                     {
-                        datasetFileInfo.AcqTimeEnd = dtMethodDate;
+                        datasetFileInfo.AcqTimeEnd = methodDate;
                     }
                 }
 
@@ -156,31 +156,31 @@ namespace MSFileInfoScanner
 
         }
 
-        private void ParseAnalysisCDFFile(string strFolderPath, clsDatasetFileInfo datasetFileInfo)
+        private void ParseAnalysisCDFFile(string directoryPath, clsDatasetFileInfo datasetFileInfo)
         {
-            NetCDFReader.clsMSNetCdf objNETCDFReader = null;
+            NetCDFReader.clsMSNetCdf netCDFReader = null;
 
             try
             {
                 // Note: as of May 2016 this only works if you compile as x86 or if you enable "Prefer 32-bit" when compiling as AnyCPU
                 // In contrast, XRawFileIO in clsFinniganRawFileInfoScanner requires that "Prefer 32-bit" be disabled
 
-                objNETCDFReader = new NetCDFReader.clsMSNetCdf();
-                var blnSuccess = objNETCDFReader.OpenMSCdfFile(Path.Combine(strFolderPath, AGILENT_ANALYSIS_CDF_FILE));
-                if (blnSuccess)
+                netCDFReader = new NetCDFReader.clsMSNetCdf();
+                var success = netCDFReader.OpenMSCdfFile(Path.Combine(directoryPath, AGILENT_ANALYSIS_CDF_FILE));
+                if (success)
                 {
-                    var intScanCount = objNETCDFReader.GetScanCount();
+                    var scanCount = netCDFReader.GetScanCount();
 
-                    if (intScanCount > 0)
+                    if (scanCount > 0)
                     {
                         // Lookup the scan time of the final scan
 
-                        if (objNETCDFReader.GetScanInfo(intScanCount - 1, out var intScanNumber,
-                            out _, out var dblScanTime, out _, out _))
+                        if (netCDFReader.GetScanInfo(scanCount - 1, out var scanNumber,
+                            out _, out var scanTime, out _, out _))
                         {
-                            // Add 1 to intScanNumber since the scan number is off by one in the CDF file
-                            datasetFileInfo.ScanCount = intScanNumber + 1;
-                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.Add(SecondsToTimeSpan(dblScanTime));
+                            // Add 1 to scanNumber since the scan number is off by one in the CDF file
+                            datasetFileInfo.ScanCount = scanNumber + 1;
+                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.Add(SecondsToTimeSpan(scanTime));
                         }
                     }
                     else
@@ -195,7 +195,7 @@ namespace MSFileInfoScanner
             }
             finally
             {
-                objNETCDFReader?.CloseMSCdfFile();
+                netCDFReader?.CloseMSCdfFile();
             }
 
         }
@@ -203,83 +203,83 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Process the data file
         /// </summary>
-        /// <param name="strDataFilePath">Dataset folder ptah</param>
+        /// <param name="dataFilePath">Dataset folder ptah</param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
-        public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
-            var blnSuccess = false;
+            var success = false;
 
             ResetResults();
 
             try
             {
-                var diFolder = new DirectoryInfo(strDataFilePath);
+                var datasetDirectory = new DirectoryInfo(dataFilePath);
 
-                datasetFileInfo.FileSystemCreationTime = diFolder.CreationTime;
-                datasetFileInfo.FileSystemModificationTime = diFolder.LastWriteTime;
+                datasetFileInfo.FileSystemCreationTime = datasetDirectory.CreationTime;
+                datasetFileInfo.FileSystemModificationTime = datasetDirectory.LastWriteTime;
 
                 // The acquisition times will get updated below to more accurate values
                 datasetFileInfo.AcqTimeStart = datasetFileInfo.FileSystemModificationTime;
                 datasetFileInfo.AcqTimeEnd = datasetFileInfo.FileSystemModificationTime;
 
-                datasetFileInfo.DatasetName = GetDatasetNameViaPath(diFolder.Name);
-                datasetFileInfo.FileExtension = diFolder.Extension;
+                datasetFileInfo.DatasetName = GetDatasetNameViaPath(datasetDirectory.Name);
+                datasetFileInfo.FileExtension = datasetDirectory.Extension;
 
                 // Look for the Analysis.yep file
                 // Use its modification time to get an initial estimate for the acquisition time
                 // Assign the .Yep file's size to .FileSizeBytes
-                var fiYepFile = new FileInfo(Path.Combine(diFolder.FullName, AGILENT_YEP_FILE));
-                if (fiYepFile.Exists)
+                var yepFile = new FileInfo(Path.Combine(datasetDirectory.FullName, AGILENT_YEP_FILE));
+                if (yepFile.Exists)
                 {
-                    datasetFileInfo.FileSizeBytes = fiYepFile.Length;
-                    datasetFileInfo.AcqTimeStart = fiYepFile.LastWriteTime;
-                    datasetFileInfo.AcqTimeEnd = fiYepFile.LastWriteTime;
+                    datasetFileInfo.FileSizeBytes = yepFile.Length;
+                    datasetFileInfo.AcqTimeStart = yepFile.LastWriteTime;
+                    datasetFileInfo.AcqTimeEnd = yepFile.LastWriteTime;
 
                     if (mDisableInstrumentHash)
                     {
-                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(fiYepFile);
+                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(yepFile);
                     }
                     else
                     {
-                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(fiYepFile);
+                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(yepFile);
                     }
 
-                    blnSuccess = true;
+                    success = true;
                 }
                 else
                 {
                     // Analysis.yep not found; look for Run.log
-                    var fiRunLog = new FileInfo(Path.Combine(diFolder.FullName, AGILENT_RUN_LOG_FILE));
-                    if (fiRunLog.Exists)
+                    var runLog = new FileInfo(Path.Combine(datasetDirectory.FullName, AGILENT_RUN_LOG_FILE));
+                    if (runLog.Exists)
                     {
-                        datasetFileInfo.AcqTimeStart = fiRunLog.LastWriteTime;
-                        datasetFileInfo.AcqTimeEnd = fiRunLog.LastWriteTime;
-                        blnSuccess = true;
+                        datasetFileInfo.AcqTimeStart = runLog.LastWriteTime;
+                        datasetFileInfo.AcqTimeEnd = runLog.LastWriteTime;
+                        success = true;
 
                         // Sum up the sizes of all of the files in this folder
                         datasetFileInfo.FileSizeBytes = 0;
-                        foreach (var datasetFile in diFolder.GetFiles())
+                        foreach (var datasetFile in datasetDirectory.GetFiles())
                         {
                             datasetFileInfo.FileSizeBytes += datasetFile.Length;
                         }
 
                         // Compute the SHA-1 hash of the largest file in instrument directory
-                        AddLargestInstrumentFile(diFolder);
+                        AddLargestInstrumentFile(datasetDirectory);
                     }
                 }
 
                 datasetFileInfo.ScanCount = 0;
 
-                if (blnSuccess)
+                if (success)
                 {
                     try
                     {
                         // Parse the Run Log file to determine the actual values for .AcqTimeStart and .AcqTimeEnd
-                        ParseRunLogFile(strDataFilePath, datasetFileInfo);
+                        ParseRunLogFile(dataFilePath, datasetFileInfo);
 
                         // Parse the Analysis.cdf file to determine the scan count and to further refine .AcqTimeStart
-                        ParseAnalysisCDFFile(strDataFilePath, datasetFileInfo);
+                        ParseAnalysisCDFFile(dataFilePath, datasetFileInfo);
                     }
                     catch (Exception)
                     {
@@ -287,7 +287,7 @@ namespace MSFileInfoScanner
                     }
                 }
 
-                // Copy over the updated filetime info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
+                // Copy over the updated file time info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
                 mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
                 mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
                 mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetFileInfo.DatasetID;
@@ -301,12 +301,12 @@ namespace MSFileInfoScanner
             }
             catch (Exception)
             {
-                blnSuccess = false;
+                success = false;
             }
 
             PostProcessTasks();
 
-            return blnSuccess;
+            return success;
         }
 
     }

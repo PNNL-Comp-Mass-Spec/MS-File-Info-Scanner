@@ -16,12 +16,12 @@ namespace MSFileInfoScanner
 
         private readonly DateTime MINIMUM_ACCEPTABLE_ACQ_START_TIME = new DateTime(1975, 1, 1);
 
-        public override string GetDatasetNameViaPath(string strDataFilePath)
+        public override string GetDatasetNameViaPath(string dataFilePath)
         {
             // The dataset name is simply the folder name without .Raw
             try
             {
-                return Path.GetFileNameWithoutExtension(strDataFilePath);
+                return Path.GetFileNameWithoutExtension(dataFilePath);
             }
             catch (Exception)
             {
@@ -29,58 +29,54 @@ namespace MSFileInfoScanner
             }
         }
 
-        private TimeSpan MinutesToTimeSpan(double dblMinutes)
+        private TimeSpan MinutesToTimeSpan(double decimalMinutes)
         {
-            TimeSpan dtTimeSpan;
-
             try
             {
-                var intMinutes = (int)Math.Floor(dblMinutes);
-                var intSeconds = (int)Math.Round((dblMinutes - intMinutes) * 60, 0);
+                var minutes = (int)Math.Floor(decimalMinutes);
+                var seconds = (int)Math.Round((decimalMinutes - minutes) * 60, 0);
 
-                dtTimeSpan = new TimeSpan(0, intMinutes, intSeconds);
+                return new TimeSpan(0, minutes, seconds);
             }
             catch (Exception)
             {
-                dtTimeSpan = new TimeSpan(0, 0, 0);
+                return new TimeSpan(0, 0, 0);
             }
-
-            return dtTimeSpan;
 
         }
 
         /// <summary>
         /// Process the dataset
         /// </summary>
-        /// <param name="strDataFilePath"></param>
+        /// <param name="dataFilePath"></param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
         /// <remarks></remarks>
-        public override bool ProcessDataFile(string strDataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
             ResetResults();
 
             try
             {
-                var ioFolderInfo = new DirectoryInfo(strDataFilePath);
-                datasetFileInfo.FileSystemCreationTime = ioFolderInfo.CreationTime;
-                datasetFileInfo.FileSystemModificationTime = ioFolderInfo.LastWriteTime;
+                var datasetDirectory = new DirectoryInfo(dataFilePath);
+                datasetFileInfo.FileSystemCreationTime = datasetDirectory.CreationTime;
+                datasetFileInfo.FileSystemModificationTime = datasetDirectory.LastWriteTime;
 
                 // The acquisition times will get updated below to more accurate values
                 datasetFileInfo.AcqTimeStart = datasetFileInfo.FileSystemModificationTime;
                 datasetFileInfo.AcqTimeEnd = datasetFileInfo.FileSystemModificationTime;
 
-                datasetFileInfo.DatasetName = GetDatasetNameViaPath(ioFolderInfo.Name);
-                datasetFileInfo.FileExtension = ioFolderInfo.Extension;
+                datasetFileInfo.DatasetName = GetDatasetNameViaPath(datasetDirectory.Name);
+                datasetFileInfo.FileExtension = datasetDirectory.Extension;
 
                 // Sum up the sizes of all of the files in this folder
                 datasetFileInfo.FileSizeBytes = 0;
-                var intFileCount = 0;
-                foreach (var item in ioFolderInfo.GetFiles())
+                var fileCount = 0;
+                foreach (var item in datasetDirectory.GetFiles())
                 {
                     datasetFileInfo.FileSizeBytes += item.Length;
 
-                    if (intFileCount == 0)
+                    if (fileCount == 0)
                     {
                         // Assign the first file's modification time to .AcqTimeStart and .AcqTimeEnd
                         // Necessary in case _header.txt is missing
@@ -101,43 +97,43 @@ namespace MSFileInfoScanner
                         mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(item);
                     }
 
-                    intFileCount += 1;
+                    fileCount += 1;
                 }
 
                 datasetFileInfo.ScanCount = 0;
 
-                var objNativeFileIO = new clsMassLynxNativeIO();
+                var nativeFileIO = new clsMassLynxNativeIO();
 
-                if (objNativeFileIO.GetFileInfo(ioFolderInfo.FullName, out var udtHeaderInfo))
+                if (nativeFileIO.GetFileInfo(datasetDirectory.FullName, out var udtHeaderInfo))
                 {
-                    var dtNewStartDate = DateTime.Parse(udtHeaderInfo.AcquDate + " " + udtHeaderInfo.AcquTime);
+                    var newStartDate = DateTime.Parse(udtHeaderInfo.AcquDate + " " + udtHeaderInfo.AcquTime);
 
-                    var intFunctionCount = objNativeFileIO.GetFunctionCount(ioFolderInfo.FullName);
+                    var functionCount = nativeFileIO.GetFunctionCount(datasetDirectory.FullName);
 
-                    if (intFunctionCount > 0)
+                    if (functionCount > 0)
                     {
                         // Sum up the scan count of all of the functions
                         // Additionally, find the largest EndRT value in all of the functions
-                        float sngEndRT = 0;
-                        for (var intFunctionNumber = 1; intFunctionNumber <= intFunctionCount; intFunctionNumber++)
+                        float endRT = 0;
+                        for (var functionNumber = 1; functionNumber <= functionCount; functionNumber++)
                         {
-                            if (objNativeFileIO.GetFunctionInfo(ioFolderInfo.FullName, 1, out clsMassLynxNativeIO.udtMSFunctionInfoType udtFunctionInfo))
+                            if (nativeFileIO.GetFunctionInfo(datasetDirectory.FullName, 1, out clsMassLynxNativeIO.udtMSFunctionInfoType udtFunctionInfo))
                             {
                                 datasetFileInfo.ScanCount += udtFunctionInfo.ScanCount;
-                                if (udtFunctionInfo.EndRT > sngEndRT)
+                                if (udtFunctionInfo.EndRT > endRT)
                                 {
-                                    sngEndRT = udtFunctionInfo.EndRT;
+                                    endRT = udtFunctionInfo.EndRT;
                                 }
                             }
                         }
 
-                        if (dtNewStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                        if (newStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
                         {
-                            datasetFileInfo.AcqTimeStart = dtNewStartDate;
+                            datasetFileInfo.AcqTimeStart = newStartDate;
 
-                            if (sngEndRT > 0)
+                            if (endRT > 0)
                             {
-                                datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.Add(MinutesToTimeSpan(sngEndRT));
+                                datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.Add(MinutesToTimeSpan(endRT));
                             }
                             else
                             {
@@ -148,9 +144,9 @@ namespace MSFileInfoScanner
                         {
                             // Keep .AcqTimeEnd as the file modification date
                             // Set .AcqTimeStart based on .AcqEndTime
-                            if (sngEndRT > 0)
+                            if (endRT > 0)
                             {
-                                datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.Subtract(MinutesToTimeSpan(sngEndRT));
+                                datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.Subtract(MinutesToTimeSpan(endRT));
                             }
                             else
                             {
@@ -160,9 +156,9 @@ namespace MSFileInfoScanner
                     }
                     else
                     {
-                        if (dtNewStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                        if (newStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
                         {
-                            datasetFileInfo.AcqTimeStart = dtNewStartDate;
+                            datasetFileInfo.AcqTimeStart = newStartDate;
                         }
                     }
 

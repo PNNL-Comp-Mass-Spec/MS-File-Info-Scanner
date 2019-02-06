@@ -7,13 +7,13 @@ using PRISM;
 namespace MSFileInfoScanner
 {
     [CLSCompliant(false)]
-    public class clsProteowizardDataParser : EventNotifier
+    public class clsProteoWizardDataParser : EventNotifier
     {
 
         private readonly pwiz.ProteowizardWrapper.MSDataFileReader mPWiz;
 
         private readonly clsDatasetStatsSummarizer mDatasetStatsSummarizer;
-        private readonly clsTICandBPIPlotter mTICandBPIPlot;
+        private readonly clsTICandBPIPlotter mTICAndBPIPlot;
 
         private readonly clsLCMSDataPlotter mLCMS2DPlot;
         private readonly bool mSaveLCMS2DPlots;
@@ -41,30 +41,30 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="objPWiz"></param>
-        /// <param name="objDatasetStatsSummarizer"></param>
-        /// <param name="objTICandBPIPlot"></param>
-        /// <param name="objLCMS2DPlot"></param>
-        /// <param name="blnSaveLCMS2DPlots"></param>
-        /// <param name="blnSaveTICandBPI"></param>
-        /// <param name="blnCheckCentroidingStatus"></param>
-        public clsProteowizardDataParser(
-            pwiz.ProteowizardWrapper.MSDataFileReader objPWiz,
-            clsDatasetStatsSummarizer objDatasetStatsSummarizer,
-            clsTICandBPIPlotter objTICandBPIPlot,
-            clsLCMSDataPlotter objLCMS2DPlot,
-            bool blnSaveLCMS2DPlots,
-            bool blnSaveTICandBPI,
-            bool blnCheckCentroidingStatus)
+        /// <param name="pWiz"></param>
+        /// <param name="datasetStatsSummarizer"></param>
+        /// <param name="ticAndBPIPlot"></param>
+        /// <param name="lcms2DPlot"></param>
+        /// <param name="saveLCMS2DPlots"></param>
+        /// <param name="saveTICAndBPI"></param>
+        /// <param name="checkCentroidingStatus"></param>
+        public clsProteoWizardDataParser(
+            pwiz.ProteowizardWrapper.MSDataFileReader pWiz,
+            clsDatasetStatsSummarizer datasetStatsSummarizer,
+            clsTICandBPIPlotter ticAndBPIPlot,
+            clsLCMSDataPlotter lcms2DPlot,
+            bool saveLCMS2DPlots,
+            bool saveTICAndBPI,
+            bool checkCentroidingStatus)
         {
-            mPWiz = objPWiz;
-            mDatasetStatsSummarizer = objDatasetStatsSummarizer;
-            mTICandBPIPlot = objTICandBPIPlot;
-            mLCMS2DPlot = objLCMS2DPlot;
+            mPWiz = pWiz;
+            mDatasetStatsSummarizer = datasetStatsSummarizer;
+            mTICAndBPIPlot = ticAndBPIPlot;
+            mLCMS2DPlot = lcms2DPlot;
 
-            mSaveLCMS2DPlots = blnSaveLCMS2DPlots;
-            mSaveTICAndBPI = blnSaveTICandBPI;
-            mCheckCentroidingStatus = blnCheckCentroidingStatus;
+            mSaveLCMS2DPlots = saveLCMS2DPlots;
+            mSaveTICAndBPI = saveTICAndBPI;
+            mCheckCentroidingStatus = checkCentroidingStatus;
 
             mGetQ1MZ = new Regex("Q[0-9]=([0-9.]+)", RegexOptions.Compiled);
 
@@ -72,172 +72,172 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ExtractQ1MZ(string strChromID, out double dblMZ)
+        private bool ExtractQ1MZ(string chromatogramID, out double mz)
         {
-            return ExtractQMZ(mGetQ1MZ, strChromID, out dblMZ);
+            return ExtractQMZ(mGetQ1MZ, chromatogramID, out mz);
 
         }
 
-        private bool ExtractQ3MZ(string strChromID, out double dblMZ)
+        private bool ExtractQ3MZ(string chromatogramID, out double mz)
         {
 
-            return ExtractQMZ(mGetQ3MZ, strChromID, out dblMZ);
+            return ExtractQMZ(mGetQ3MZ, chromatogramID, out mz);
 
         }
 
-        private bool ExtractQMZ(Regex reGetMZ, string strChromID, out double dblMZ)
+        private bool ExtractQMZ(Regex reGetMZ, string chromatogramID, out double mz)
         {
-            var reMatch = reGetMZ.Match(strChromID);
+            var reMatch = reGetMZ.Match(chromatogramID);
             if (reMatch.Success)
             {
-                if (double.TryParse(reMatch.Groups[1].Value, out dblMZ))
+                if (double.TryParse(reMatch.Groups[1].Value, out mz))
                 {
                     return true;
                 }
             }
 
-            dblMZ = 0;
+            mz = 0;
             return false;
         }
 
-        private int FindNearestInList(List<float> lstItems, float sngValToFind)
+        private int FindNearestInList(List<float> items, float valToFind)
         {
-            var intIndexMatch = lstItems.BinarySearch(sngValToFind);
-            if (intIndexMatch >= 0)
+            var indexMatch = items.BinarySearch(valToFind);
+            if (indexMatch >= 0)
             {
                 // Exact match found
             }
             else
             {
                 // Find the nearest match
-                intIndexMatch = intIndexMatch ^ -1;
-                if (intIndexMatch == lstItems.Count)
+                indexMatch = indexMatch ^ -1;
+                if (indexMatch == items.Count)
                 {
-                    intIndexMatch -= 1;
+                    indexMatch -= 1;
                 }
 
-                if (intIndexMatch > 0)
+                if (indexMatch > 0)
                 {
-                    // Possibly decrement intIndexMatch
-                    if (Math.Abs(lstItems[intIndexMatch - 1] - sngValToFind) < Math.Abs(lstItems[intIndexMatch] - sngValToFind))
+                    // Possibly decrement indexMatch
+                    if (Math.Abs(items[indexMatch - 1] - valToFind) < Math.Abs(items[indexMatch] - valToFind))
                     {
-                        intIndexMatch -= 1;
+                        indexMatch -= 1;
                     }
                 }
 
-                if (intIndexMatch < lstItems.Count)
+                if (indexMatch < items.Count)
                 {
-                    // Possible increment intIndexMatch
-                    if (Math.Abs(lstItems[intIndexMatch + 1] - sngValToFind) < Math.Abs(lstItems[intIndexMatch] - sngValToFind))
+                    // Possible increment indexMatch
+                    if (Math.Abs(items[indexMatch + 1] - valToFind) < Math.Abs(items[indexMatch] - valToFind))
                     {
-                        intIndexMatch += 1;
+                        indexMatch += 1;
                     }
                 }
 
-                if (intIndexMatch < 0)
+                if (indexMatch < 0)
                 {
-                    intIndexMatch = 0;
+                    indexMatch = 0;
                 }
-                else if (intIndexMatch == lstItems.Count)
+                else if (indexMatch == items.Count)
                 {
-                    intIndexMatch = lstItems.Count - 1;
+                    indexMatch = items.Count - 1;
                 }
 
             }
 
-            return intIndexMatch;
+            return indexMatch;
         }
 
-        public void PossiblyUpdateAcqTimeStart(clsDatasetFileInfo datasetFileInfo, double dblRuntimeMinutes)
+        public void PossiblyUpdateAcqTimeStart(clsDatasetFileInfo datasetFileInfo, double runtimeMinutes)
         {
-            if (dblRuntimeMinutes > 0)
+            if (runtimeMinutes > 0)
             {
-                var dtAcqTimeStartAlt = datasetFileInfo.AcqTimeEnd.AddMinutes(-dblRuntimeMinutes);
+                var acqTimeStartAlt = datasetFileInfo.AcqTimeEnd.AddMinutes(-runtimeMinutes);
 
-                if (dtAcqTimeStartAlt < datasetFileInfo.AcqTimeStart && datasetFileInfo.AcqTimeStart.Subtract(dtAcqTimeStartAlt).TotalDays < 1)
+                if (acqTimeStartAlt < datasetFileInfo.AcqTimeStart && datasetFileInfo.AcqTimeStart.Subtract(acqTimeStartAlt).TotalDays < 1)
                 {
-                    datasetFileInfo.AcqTimeStart = dtAcqTimeStartAlt;
+                    datasetFileInfo.AcqTimeStart = acqTimeStartAlt;
                 }
             }
         }
 
         private void ProcessSRM(
-            string strChromID,
-            float[] sngTimes,
-            float[] sngIntensities,
-            List<float> lstTICScanTimes,
-            IReadOnlyList<int> lstTICScanNumbers,
-            ref double dblRuntimeMinutes,
+            string chromatogramID,
+            float[] scanTimes,
+            float[] intensities,
+            List<float> ticScanTimes,
+            IReadOnlyList<int> ticScanNumbers,
+            ref double runtimeMinutes,
             IDictionary<int, Dictionary<double, double>> dct2DDataParent,
             IDictionary<int, Dictionary<double, double>> dct2DDataProduct,
             IDictionary<int, float> dct2DDataScanTimes)
         {
 
             // Attempt to parse out the product m/z
-            var blnParentMZFound = ExtractQ1MZ(strChromID, out var dblParentMZ);
-            var blnProductMZFound = ExtractQ3MZ(strChromID, out var dblProductMZ);
+            var parentMZFound = ExtractQ1MZ(chromatogramID, out var parentMZ);
+            var productMZFound = ExtractQ3MZ(chromatogramID, out var productMZ);
 
-            for (var intIndex = 0; intIndex <= sngTimes.Length - 1; intIndex++)
+            for (var index = 0; index <= scanTimes.Length - 1; index++)
             {
-                // Find the ScanNumber in the TIC nearest to sngTimes[intIndex]
-                var intIndexMatch = FindNearestInList(lstTICScanTimes, sngTimes[intIndex]);
-                var intScanNumber = lstTICScanNumbers[intIndexMatch];
+                // Find the ScanNumber in the TIC nearest to scanTimes[index]
+                var indexMatch = FindNearestInList(ticScanTimes, scanTimes[index]);
+                var scanNumber = ticScanNumbers[indexMatch];
 
-                // Bump up dblRuntimeMinutes if necessary
-                if (sngTimes[intIndex] > dblRuntimeMinutes)
+                // Bump up runtimeMinutes if necessary
+                if (scanTimes[index] > runtimeMinutes)
                 {
-                    dblRuntimeMinutes = sngTimes[intIndex];
+                    runtimeMinutes = scanTimes[index];
                 }
 
-                var objScanStatsEntry = new clsScanStatsEntry
+                var scanStatsEntry = new clsScanStatsEntry
                 {
-                    ScanNumber = intScanNumber,
+                    ScanNumber = scanNumber,
                     ScanType = 1,
                     ScanTypeName = "SRM",
-                    ScanFilterText = StripExtraFromChromID(strChromID),
-                    ElutionTime = sngTimes[intIndex].ToString("0.0###"),
-                    TotalIonIntensity = sngIntensities[intIndex].ToString("0.0"),
-                    BasePeakIntensity = sngIntensities[intIndex].ToString("0.0")
+                    ScanFilterText = StripExtraFromChromatogramID(chromatogramID),
+                    ElutionTime = scanTimes[index].ToString("0.0###"),
+                    TotalIonIntensity = intensities[index].ToString("0.0"),
+                    BasePeakIntensity = intensities[index].ToString("0.0")
                 };
 
-                if (blnParentMZFound)
+                if (parentMZFound)
                 {
-                    objScanStatsEntry.BasePeakMZ = dblParentMZ.ToString("0.0###");
+                    scanStatsEntry.BasePeakMZ = parentMZ.ToString("0.0###");
                 }
-                else if (blnProductMZFound)
+                else if (productMZFound)
                 {
-                    objScanStatsEntry.BasePeakMZ = dblProductMZ.ToString("0.0###");
+                    scanStatsEntry.BasePeakMZ = productMZ.ToString("0.0###");
                 }
                 else
                 {
-                    objScanStatsEntry.BasePeakMZ = "0";
+                    scanStatsEntry.BasePeakMZ = "0";
                 }
 
                 // Base peak signal to noise ratio
-                objScanStatsEntry.BasePeakSignalToNoiseRatio = "0";
+                scanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
-                objScanStatsEntry.IonCount = 1;
-                objScanStatsEntry.IonCountRaw = 1;
+                scanStatsEntry.IonCount = 1;
+                scanStatsEntry.IonCountRaw = 1;
 
-                mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
+                mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
 
-                if (mSaveLCMS2DPlots && sngIntensities[intIndex] > 0)
+                if (mSaveLCMS2DPlots && intensities[index] > 0)
                 {
                     // Store the m/z and intensity values in dct2DDataParent and dct2DDataProduct
 
-                    if (blnParentMZFound)
+                    if (parentMZFound)
                     {
-                        Store2DPlotDataPoint(dct2DDataParent, intScanNumber, dblParentMZ, sngIntensities[intIndex]);
+                        Store2DPlotDataPoint(dct2DDataParent, scanNumber, parentMZ, intensities[index]);
                     }
 
-                    if (blnProductMZFound)
+                    if (productMZFound)
                     {
-                        Store2DPlotDataPoint(dct2DDataProduct, intScanNumber, dblProductMZ, sngIntensities[intIndex]);
+                        Store2DPlotDataPoint(dct2DDataProduct, scanNumber, productMZ, intensities[index]);
                     }
 
-                    if (!dct2DDataScanTimes.ContainsKey(intScanNumber))
+                    if (!dct2DDataScanTimes.ContainsKey(scanNumber))
                     {
-                        dct2DDataScanTimes[intScanNumber] = sngTimes[intIndex];
+                        dct2DDataScanTimes[scanNumber] = scanTimes[index];
                     }
 
                 }
@@ -247,71 +247,70 @@ namespace MSFileInfoScanner
         }
 
         private void ProcessTIC(
-            IReadOnlyList<float> sngTimes,
-            IReadOnlyList<float> sngIntensities,
-            List<float> lstTICScanTimes,
-            List<int> lstTICScanNumbers,
-            ref double dblRuntimeMinutes,
-            bool blnStoreInTICandBPIPlot)
+            IReadOnlyList<float> scanTimes,
+            IReadOnlyList<float> intensities,
+            List<float> ticScanTimes,
+            List<int> ticScanNumbers,
+            ref double runtimeMinutes,
+            bool storeInTICAndBPIPlot)
         {
-            for (var intIndex = 0; intIndex <= sngTimes.Count - 1; intIndex++)
+            for (var index = 0; index <= scanTimes.Count - 1; index++)
             {
-                lstTICScanTimes.Add(sngTimes[intIndex]);
-                lstTICScanNumbers.Add(intIndex + 1);
+                ticScanTimes.Add(scanTimes[index]);
+                ticScanNumbers.Add(index + 1);
 
-                // Bump up dblRuntimeMinutes if necessary
-                if (sngTimes[intIndex] > dblRuntimeMinutes)
+                // Bump up runtimeMinutes if necessary
+                if (scanTimes[index] > runtimeMinutes)
                 {
-                    dblRuntimeMinutes = sngTimes[intIndex];
+                    runtimeMinutes = scanTimes[index];
                 }
 
-                if (blnStoreInTICandBPIPlot)
+                if (storeInTICAndBPIPlot)
                 {
                     // Use this TIC chromatogram for this dataset since there are no normal Mass Spectra
-                    mTICandBPIPlot.AddDataTICOnly(intIndex + 1, 1, sngTimes[intIndex], sngIntensities[intIndex]);
-
+                    mTICAndBPIPlot.AddDataTICOnly(index + 1, 1, scanTimes[index], intensities[index]);
                 }
 
             }
 
-            // Make sure lstTICScanTimes is sorted
-            var blnNeedToSort = false;
-            for (var intIndex = 1; intIndex <= lstTICScanTimes.Count - 1; intIndex++)
+            // Make sure ticScanTimes is sorted
+            var needToSort = false;
+            for (var index = 1; index <= ticScanTimes.Count - 1; index++)
             {
-                if (lstTICScanTimes[intIndex] < lstTICScanTimes[intIndex - 1])
+                if (ticScanTimes[index] < ticScanTimes[index - 1])
                 {
-                    blnNeedToSort = true;
+                    needToSort = true;
                     break;
                 }
             }
 
-            if (blnNeedToSort)
+            if (needToSort)
             {
-                var sngTICScanTimes = new float[lstTICScanTimes.Count];
-                var intTICScanNumbers = new int[lstTICScanTimes.Count];
+                var ticScanTimesArray = new float[ticScanTimes.Count];
+                var ticScanNumbersArray = new int[ticScanTimes.Count];
 
-                lstTICScanTimes.CopyTo(sngTICScanTimes);
-                lstTICScanNumbers.CopyTo(intTICScanNumbers);
+                ticScanTimes.CopyTo(ticScanTimesArray);
+                ticScanNumbers.CopyTo(ticScanNumbersArray);
 
-                Array.Sort(sngTICScanTimes, intTICScanNumbers);
+                Array.Sort(ticScanTimesArray, ticScanNumbersArray);
 
-                lstTICScanTimes.Clear();
-                lstTICScanNumbers.Clear();
+                ticScanTimes.Clear();
+                ticScanNumbers.Clear();
 
-                for (var intIndex = 0; intIndex <= sngTICScanTimes.Length - 1; intIndex++)
+                for (var index = 0; index <= ticScanTimesArray.Length - 1; index++)
                 {
-                    lstTICScanTimes.Add(sngTICScanTimes[intIndex]);
-                    lstTICScanNumbers.Add(intTICScanNumbers[intIndex]);
+                    ticScanTimes.Add(ticScanTimesArray[index]);
+                    ticScanNumbers.Add(ticScanNumbersArray[index]);
                 }
 
             }
 
         }
 
-        public void StoreChromatogramInfo(clsDatasetFileInfo datasetFileInfo, out bool blnTICStored, out bool blnSRMDataCached, out double dblRuntimeMinutes)
+        public void StoreChromatogramInfo(clsDatasetFileInfo datasetFileInfo, out bool ticStored, out bool srmDataCached, out double runtimeMinutes)
         {
-            var lstTICScanTimes = new List<float>();
-            var lstTICScanNumbers = new List<int>();
+            var ticScanTimes = new List<float>();
+            var ticScanNumbers = new List<int>();
 
             // This dictionary tracks the m/z and intensity values for parent (Q1) ions of each scan
             // Key is ScanNumber; Value is a dictionary holding m/z and intensity values for that scan
@@ -327,52 +326,52 @@ namespace MSFileInfoScanner
             // The chromatogram at index 0 should be the TIC
             // The chromatogram at index >=1 will be each SRM
 
-            dblRuntimeMinutes = 0;
-            blnTICStored = false;
-            blnSRMDataCached = false;
+            runtimeMinutes = 0;
+            ticStored = false;
+            srmDataCached = false;
 
-            for (var intChromIndex = 0; intChromIndex <= mPWiz.ChromatogramCount - 1; intChromIndex++)
+            for (var chromatogramIndex = 0; chromatogramIndex <= mPWiz.ChromatogramCount - 1; chromatogramIndex++)
             {
                 try
                 {
-                    if (intChromIndex == 0)
+                    if (chromatogramIndex == 0)
                     {
                         OnStatusEvent("Obtaining chromatograms (this could take as long as 60 seconds)");
                     }
-                    mPWiz.GetChromatogram(intChromIndex, out var strChromID, out var sngTimes, out var sngIntensities);
+                    mPWiz.GetChromatogram(chromatogramIndex, out var chromatogramID, out var scanTimes, out var intensities);
 
-                    if (strChromID == null)
-                        strChromID = string.Empty;
+                    if (chromatogramID == null)
+                        chromatogramID = string.Empty;
 
-                    var oCVParams = mPWiz.GetChromatogramCVParams(intChromIndex);
+                    var cvParams = mPWiz.GetChromatogramCVParams(chromatogramIndex);
 
-                    if (TryGetCVParam(oCVParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out var _))
+                    if (TryGetCVParam(cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out var _))
                     {
                         // This chromatogram is the TIC
 
-                        var blnStoreInTICandBPIPlot = (mSaveTICAndBPI && mPWiz.SpectrumCount == 0);
+                        var storeInTICAndBPIPlot = (mSaveTICAndBPI && mPWiz.SpectrumCount == 0);
 
-                        ProcessTIC(sngTimes, sngIntensities, lstTICScanTimes, lstTICScanNumbers, ref dblRuntimeMinutes, blnStoreInTICandBPIPlot);
+                        ProcessTIC(scanTimes, intensities, ticScanTimes, ticScanNumbers, ref runtimeMinutes, storeInTICAndBPIPlot);
 
-                        blnTICStored = blnStoreInTICandBPIPlot;
+                        ticStored = storeInTICAndBPIPlot;
 
-                        datasetFileInfo.ScanCount = sngTimes.Length;
+                        datasetFileInfo.ScanCount = scanTimes.Length;
 
                     }
 
-                    if (TryGetCVParam(oCVParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out _))
+                    if (TryGetCVParam(cvParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out _))
                     {
                         // This chromatogram is an SRM scan
 
-                        ProcessSRM(strChromID, sngTimes, sngIntensities, lstTICScanTimes, lstTICScanNumbers, ref dblRuntimeMinutes, dct2DDataParent, dct2DDataProduct, dct2DDataScanTimes);
+                        ProcessSRM(chromatogramID, scanTimes, intensities, ticScanTimes, ticScanNumbers, ref runtimeMinutes, dct2DDataParent, dct2DDataProduct, dct2DDataScanTimes);
 
-                        blnSRMDataCached = true;
+                        srmDataCached = true;
                     }
 
                 }
                 catch (Exception ex)
                 {
-                    OnErrorEvent("Error processing chromatogram " + intChromIndex + ": " + ex.Message, ex);
+                    OnErrorEvent("Error processing chromatogram " + chromatogramIndex + ": " + ex.Message, ex);
                 }
 
             }
@@ -394,158 +393,158 @@ namespace MSFileInfoScanner
             Store2DPlotData(dct2DDataScanTimes, dct2DDataParent, dct2DDataProduct);
         }
 
-        public void StoreMSSpectraInfo(clsDatasetFileInfo datasetFileInfo, bool blnTICStored, ref double dblRuntimeMinutes)
+        public void StoreMSSpectraInfo(clsDatasetFileInfo datasetFileInfo, bool ticStored, ref double runtimeMinutes)
         {
             try
             {
-                double dblTIC = 0;
-                double dblBPI = 0;
+                double tic = 0;
+                double bpi = 0;
 
                 OnStatusEvent("Obtaining scan times and MSLevels (this could take several minutes)");
 
-                mPWiz.GetScanTimesAndMsLevels(out var dblScanTimes, out var intMSLevels);
+                mPWiz.GetScanTimesAndMsLevels(out var scanTimes, out var msLevels);
 
                 // The scan times returned by .GetScanTimesAndMsLevels() are the acquisition time in seconds from the start of the analysis
                 // Convert these to minutes
-                for (var intScanIndex = 0; intScanIndex <= dblScanTimes.Length - 1; intScanIndex++)
+                for (var scanIndex = 0; scanIndex <= scanTimes.Length - 1; scanIndex++)
                 {
-                    dblScanTimes[intScanIndex] /= 60.0;
+                    scanTimes[scanIndex] /= 60.0;
                 }
 
                 OnStatusEvent("Reading spectra");
-                var dtLastProgressTime = DateTime.UtcNow;
+                var lastProgressTime = DateTime.UtcNow;
 
-                for (var intScanIndex = 0; intScanIndex <= dblScanTimes.Length - 1; intScanIndex++)
+                for (var scanIndex = 0; scanIndex <= scanTimes.Length - 1; scanIndex++)
                 {
 
                     try
                     {
-                        var blnComputeTIC = true;
-                        var blnComputeBPI = true;
+                        var computeTIC = true;
+                        var computeBPI = true;
 
                         // Obtain the raw mass spectrum
-                        var oMSDataSpectrum = mPWiz.GetSpectrum(intScanIndex);
+                        var msDataSpectrum = mPWiz.GetSpectrum(scanIndex);
 
-                        var objScanStatsEntry = new clsScanStatsEntry
+                        var scanStatsEntry = new clsScanStatsEntry
                         {
-                            ScanNumber = intScanIndex + 1,
-                            ScanType = oMSDataSpectrum.Level
+                            ScanNumber = scanIndex + 1,
+                            ScanType = msDataSpectrum.Level
                         };
 
-                        if (intMSLevels[intScanIndex] > 1)
+                        if (msLevels[scanIndex] > 1)
                         {
                             if (mHighResMS2)
                             {
-                                objScanStatsEntry.ScanTypeName = "HMSn";
+                                scanStatsEntry.ScanTypeName = "HMSn";
                             }
                             else
                             {
-                                objScanStatsEntry.ScanTypeName = "MSn";
+                                scanStatsEntry.ScanTypeName = "MSn";
                             }
                         }
                         else
                         {
                             if (mHighResMS1)
                             {
-                                objScanStatsEntry.ScanTypeName = "HMS";
+                                scanStatsEntry.ScanTypeName = "HMS";
                             }
                             else
                             {
-                                objScanStatsEntry.ScanTypeName = "MS";
+                                scanStatsEntry.ScanTypeName = "MS";
                             }
 
                         }
 
-                        objScanStatsEntry.ScanFilterText = "";
-                        objScanStatsEntry.ElutionTime = dblScanTimes[intScanIndex].ToString("0.0###");
+                        scanStatsEntry.ScanFilterText = "";
+                        scanStatsEntry.ElutionTime = scanTimes[scanIndex].ToString("0.0###");
 
-                        // Bump up dblRuntimeMinutes if necessary
-                        if (dblScanTimes[intScanIndex] > dblRuntimeMinutes)
+                        // Bump up runtimeMinutes if necessary
+                        if (scanTimes[scanIndex] > runtimeMinutes)
                         {
-                            dblRuntimeMinutes = dblScanTimes[intScanIndex];
+                            runtimeMinutes = scanTimes[scanIndex];
                         }
 
-                        var oSpectrum = mPWiz.GetSpectrumObject(intScanIndex);
+                        var oSpectrum = mPWiz.GetSpectrumObject(scanIndex);
 
                         if (TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out var param))
                         {
-                            dblTIC = param.value;
-                            objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5);
-                            blnComputeTIC = false;
+                            tic = param.value;
+                            scanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(tic, 5);
+                            computeTIC = false;
                         }
 
                         if (TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, out param))
                         {
-                            dblBPI = param.value;
-                            objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5);
+                            bpi = param.value;
+                            scanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(bpi, 5);
 
                             if (TryGetCVParam(oSpectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, out param))
                             {
-                                objScanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(param.value, 5);
-                                blnComputeBPI = false;
+                                scanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(param.value, 5);
+                                computeBPI = false;
                             }
                         }
 
                         // Base peak signal to noise ratio
-                        objScanStatsEntry.BasePeakSignalToNoiseRatio = "0";
+                        scanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
-                        objScanStatsEntry.IonCount = oMSDataSpectrum.Mzs.Length;
-                        objScanStatsEntry.IonCountRaw = objScanStatsEntry.IonCount;
+                        scanStatsEntry.IonCount = msDataSpectrum.Mzs.Length;
+                        scanStatsEntry.IonCountRaw = scanStatsEntry.IonCount;
 
-                        if (blnComputeBPI || blnComputeTIC)
+                        if (computeBPI || computeTIC)
                         {
                             // Step through the raw data to compute the BPI and TIC
 
-                            var dblMZs = oMSDataSpectrum.Mzs;
-                            var dblIntensities = oMSDataSpectrum.Intensities;
+                            var mzList = msDataSpectrum.Mzs;
+                            var intensities = msDataSpectrum.Intensities;
 
-                            dblTIC = 0;
-                            dblBPI = 0;
-                            double dblBasePeakMZ = 0;
+                            tic = 0;
+                            bpi = 0;
+                            double basePeakMZ = 0;
 
-                            for (var intIndex = 0; intIndex <= dblMZs.Length - 1; intIndex++)
+                            for (var index = 0; index <= mzList.Length - 1; index++)
                             {
-                                dblTIC += dblIntensities[intIndex];
-                                if (dblIntensities[intIndex] > dblBPI)
+                                tic += intensities[index];
+                                if (intensities[index] > bpi)
                                 {
-                                    dblBPI = dblIntensities[intIndex];
-                                    dblBasePeakMZ = dblMZs[intIndex];
+                                    bpi = intensities[index];
+                                    basePeakMZ = mzList[index];
                                 }
                             }
 
-                            objScanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(dblTIC, 5);
-                            objScanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(dblBPI, 5);
-                            objScanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(dblBasePeakMZ, 5);
+                            scanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(tic, 5);
+                            scanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(bpi, 5);
+                            scanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(basePeakMZ, 5);
 
                         }
 
-                        mDatasetStatsSummarizer.AddDatasetScan(objScanStatsEntry);
+                        mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
 
-                        if (mSaveTICAndBPI && !blnTICStored)
+                        if (mSaveTICAndBPI && !ticStored)
                         {
-                            mTICandBPIPlot.AddData(objScanStatsEntry.ScanNumber, intMSLevels[intScanIndex], (float)dblScanTimes[intScanIndex], dblBPI, dblTIC);
+                            mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimes[scanIndex], bpi, tic);
                         }
 
                         if (mSaveLCMS2DPlots)
                         {
-                            mLCMS2DPlot.AddScan(objScanStatsEntry.ScanNumber, intMSLevels[intScanIndex], (float)dblScanTimes[intScanIndex], oMSDataSpectrum.Mzs.Length, oMSDataSpectrum.Mzs, oMSDataSpectrum.Intensities);
+                            mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimes[scanIndex], msDataSpectrum.Mzs.Length, msDataSpectrum.Mzs, msDataSpectrum.Intensities);
                         }
 
                         if (mCheckCentroidingStatus)
                         {
-                            mDatasetStatsSummarizer.ClassifySpectrum(oMSDataSpectrum.Mzs, intMSLevels[intScanIndex], "Scan " + objScanStatsEntry.ScanNumber);
+                            mDatasetStatsSummarizer.ClassifySpectrum(msDataSpectrum.Mzs, msLevels[scanIndex], "Scan " + scanStatsEntry.ScanNumber);
                         }
 
                     }
                     catch (Exception ex)
                     {
-                        OnErrorEvent("Error loading header info for scan " + intScanIndex + 1 + ": " + ex.Message);
+                        OnErrorEvent("Error loading header info for scan " + scanIndex + 1 + ": " + ex.Message);
                     }
 
-                    if (DateTime.UtcNow.Subtract(dtLastProgressTime).TotalSeconds > 60)
+                    if (DateTime.UtcNow.Subtract(lastProgressTime).TotalSeconds > 60)
                     {
-                        OnDebugEvent(" ... " + ((intScanIndex + 1) / (double)dblScanTimes.Length * 100).ToString("0.0") + "% complete");
-                        dtLastProgressTime = DateTime.UtcNow;
+                        OnDebugEvent(" ... " + ((scanIndex + 1) / (double)scanTimes.Length * 100).ToString("0.0") + "% complete");
+                        lastProgressTime = DateTime.UtcNow;
                     }
 
                 }
@@ -564,57 +563,57 @@ namespace MSFileInfoScanner
             Dictionary<int, Dictionary<double, double>> dct2DDataProduct)
         {
             // This variable keeps track of the length of the largest Dictionary(Of Double, Double) var in dct2DData
-            var intMax2DDataCount = 1;
+            var max2DDataCount = 1;
 
-            var int2DScanNumMin = int.MaxValue;
-            var int2DScanNumMax = 0;
+            var scanNumMin2D = int.MaxValue;
+            var scanNumMax2D = 0;
 
             // Determine the min/max scan numbers in dct2DDataParent
-            // Also determine intMax2DDataCount
+            // Also determine max2DDataCount
 
-            UpdateDataRanges(dct2DDataParent, ref intMax2DDataCount, ref int2DScanNumMin, ref int2DScanNumMax);
-            UpdateDataRanges(dct2DDataProduct, ref intMax2DDataCount, ref int2DScanNumMin, ref int2DScanNumMax);
+            UpdateDataRanges(dct2DDataParent, ref max2DDataCount, ref scanNumMin2D, ref scanNumMax2D);
+            UpdateDataRanges(dct2DDataProduct, ref max2DDataCount, ref scanNumMin2D, ref scanNumMax2D);
 
-            Store2DPlotDataWork(dct2DDataParent, dct2DDataScanTimes, 1, intMax2DDataCount, int2DScanNumMin, int2DScanNumMax);
-            Store2DPlotDataWork(dct2DDataProduct, dct2DDataScanTimes, 2, intMax2DDataCount, int2DScanNumMin, int2DScanNumMax);
+            Store2DPlotDataWork(dct2DDataParent, dct2DDataScanTimes, 1, max2DDataCount, scanNumMin2D, scanNumMax2D);
+            Store2DPlotDataWork(dct2DDataProduct, dct2DDataScanTimes, 2, max2DDataCount, scanNumMin2D, scanNumMax2D);
 
         }
 
-        private void Store2DPlotDataPoint(IDictionary<int, Dictionary<double, double>> dct2DData, int intScanNumber, double dblMZ, double dblIntensity)
+        private void Store2DPlotDataPoint(IDictionary<int, Dictionary<double, double>> dct2DData, int scanNumber, double mz, double intensity)
         {
 
-            if (dct2DData.TryGetValue(intScanNumber, out var obj2DMzAndIntensity))
+            if (dct2DData.TryGetValue(scanNumber, out var obj2DMzAndIntensity))
             {
-                if (obj2DMzAndIntensity.TryGetValue(dblMZ, out var dblCurrentIntensity))
+                if (obj2DMzAndIntensity.TryGetValue(mz, out var currentIntensity))
                 {
-                    // Bump up the stored intensity at dblProductMZ
-                    obj2DMzAndIntensity[dblMZ] = dblCurrentIntensity + dblIntensity;
+                    // Bump up the stored intensity at productMZ
+                    obj2DMzAndIntensity[mz] = currentIntensity + intensity;
                 }
                 else
                 {
-                    obj2DMzAndIntensity.Add(dblMZ, dblIntensity);
+                    obj2DMzAndIntensity.Add(mz, intensity);
                 }
             }
             else
             {
-                obj2DMzAndIntensity = new Dictionary<double, double> { { dblMZ, dblIntensity } };
+                obj2DMzAndIntensity = new Dictionary<double, double> { { mz, intensity } };
             }
 
             // Store the data for this scan
-            dct2DData[intScanNumber] = obj2DMzAndIntensity;
+            dct2DData[scanNumber] = obj2DMzAndIntensity;
 
         }
 
         private void Store2DPlotDataWork(
             Dictionary<int, Dictionary<double, double>> dct2DData,
             IReadOnlyDictionary<int, float> dct2DDataScanTimes,
-            int intMSLevel,
-            int intMax2DDataCount,
-            int int2DScanNumMin,
-            int int2DScanNumMax)
+            int msLevel,
+            int max2DDataCount,
+            int scanNumMin2D,
+            int scanNumMax2D)
         {
-            var dblMZList = new double[intMax2DDataCount];
-            var dblIntensityList = new double[intMax2DDataCount];
+            var mzList = new double[max2DDataCount];
+            var intensityList = new double[max2DDataCount];
 
             if (dct2DData == null)
             {
@@ -629,19 +628,19 @@ namespace MSFileInfoScanner
 
                     var obj2DMzAndIntensity = dct2DEnum.Current.Value;
 
-                    obj2DMzAndIntensity.Keys.CopyTo(dblMZList, 0);
-                    obj2DMzAndIntensity.Values.CopyTo(dblIntensityList, 0);
+                    obj2DMzAndIntensity.Keys.CopyTo(mzList, 0);
+                    obj2DMzAndIntensity.Values.CopyTo(intensityList, 0);
 
                     // Make sure the data is sorted
-                    Array.Sort(dblMZList, dblIntensityList, 0, obj2DMzAndIntensity.Count);
+                    Array.Sort(mzList, intensityList, 0, obj2DMzAndIntensity.Count);
 
                     // Store the data
-                    mLCMS2DPlot.AddScan(dct2DEnum.Current.Key, intMSLevel, dct2DDataScanTimes[int2DPlotScanNum], obj2DMzAndIntensity.Count, dblMZList,
-                                        dblIntensityList);
+                    mLCMS2DPlot.AddScan(dct2DEnum.Current.Key, msLevel, dct2DDataScanTimes[int2DPlotScanNum], obj2DMzAndIntensity.Count, mzList,
+                                        intensityList);
                 }
             }
 
-            if (int2DScanNumMin / (double)int2DScanNumMax > 0.5)
+            if (scanNumMin2D / (double)scanNumMax2D > 0.5)
             {
                 // Zoom in the 2D plot to prevent all of the the data from being scrunched to the right
                 mLCMS2DPlot.Options.UseObservedMinScan = true;
@@ -649,27 +648,25 @@ namespace MSFileInfoScanner
 
         }
 
-        private string StripExtraFromChromID(string strText)
+        private string StripExtraFromChromatogramID(string chromatogramIdText)
         {
 
-            // If strText looks like:
+            // If text looks like:
             // SRM SIC Q1=506.6 Q3=132.1 sample=1 period=1 experiment=1 transition=0
 
             // then remove text from sample= on
 
-            var intCharIndex = strText.IndexOf("sample=", StringComparison.InvariantCultureIgnoreCase);
-            if (intCharIndex > 0)
-            {
-                strText = strText.Substring(0, intCharIndex).TrimEnd();
-            }
+            var charIndex = chromatogramIdText.IndexOf("sample=", StringComparison.InvariantCultureIgnoreCase);
+            if (charIndex <= 0)
+                return chromatogramIdText;
 
-            return strText;
+            return chromatogramIdText.Substring(0, charIndex).TrimEnd();
 
         }
 
-        public static bool TryGetCVParam(CVParamList oCVParams, pwiz.CLI.cv.CVID cvidToFind, out CVParam paramMatch)
+        public static bool TryGetCVParam(CVParamList cvParams, pwiz.CLI.cv.CVID cvidToFind, out CVParam paramMatch)
         {
-            foreach (var param in oCVParams)
+            foreach (var param in cvParams)
             {
                 if (param.cvid == cvidToFind)
                 {
@@ -686,9 +683,9 @@ namespace MSFileInfoScanner
 
         private void UpdateDataRanges(
             Dictionary<int, Dictionary<double, double>> dct2DData,
-            ref int intMax2DDataCount,
-            ref int int2DScanNumMin,
-            ref int int2DScanNumMax)
+            ref int max2DDataCount,
+            ref int scanNumMin2D,
+            ref int scanNumMax2D)
         {
             if (dct2DData == null)
                 return;
@@ -699,19 +696,19 @@ namespace MSFileInfoScanner
                 {
                     var int2DPlotScanNum = dct2DEnum.Current.Key;
 
-                    if (dct2DEnum.Current.Value.Count > intMax2DDataCount)
+                    if (dct2DEnum.Current.Value.Count > max2DDataCount)
                     {
-                        intMax2DDataCount = dct2DEnum.Current.Value.Count;
+                        max2DDataCount = dct2DEnum.Current.Value.Count;
                     }
 
-                    if (int2DPlotScanNum < int2DScanNumMin)
+                    if (int2DPlotScanNum < scanNumMin2D)
                     {
-                        int2DScanNumMin = int2DPlotScanNum;
+                        scanNumMin2D = int2DPlotScanNum;
                     }
 
-                    if (int2DPlotScanNum > int2DScanNumMax)
+                    if (int2DPlotScanNum > scanNumMax2D)
                     {
-                        int2DScanNumMax = int2DPlotScanNum;
+                        scanNumMax2D = int2DPlotScanNum;
                     }
                 }
             }
