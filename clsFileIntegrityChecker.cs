@@ -2175,19 +2175,16 @@ namespace MSFileInfoScanner
             // Calculates the MD5 hash of a given file
             // Code from Tim Hastings, at http://www.nonhostile.com/page000017.asp
 
-            var objMD5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+            var md5Hasher = new System.Security.Cryptography.MD5CryptoServiceProvider();
 
-            // open file (as read-only)
-            var objReader = new FileStream(strPath, FileMode.Open, FileAccess.Read);
+            using (var reader = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                // Hash contents of this stream
+                var arrHash = md5Hasher.ComputeHash(reader);
 
-            // hash contents of this stream
-            var arrHash = objMD5.ComputeHash(objReader);
-
-            // Cleanup the vars
-            objReader.Close();
-
-            // Return the hash, formatted as a string
-            return ByteArrayToString(arrHash);
+                // Return the hash, formatted as a string
+                return ByteArrayToString(arrHash);
+            }
 
         }
 
@@ -2195,19 +2192,16 @@ namespace MSFileInfoScanner
         {
             // Calculates the Sha-1 hash of a given file
 
-            var objSha1 = new System.Security.Cryptography.SHA1CryptoServiceProvider();
+            var sha1Hasher = new System.Security.Cryptography.SHA1CryptoServiceProvider();
 
-            // open file (as read-only)
-            var objReader = new FileStream(strPath, FileMode.Open, FileAccess.Read);
+            using (var reader = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                // Hash contents of this stream
+                var arrHash = sha1Hasher.ComputeHash(reader);
 
-            // hash contents of this stream
-            var arrHash = objSha1.ComputeHash(objReader);
-
-            // Cleanup the vars
-            objReader.Close();
-
-            // Return the hash, formatted as a string
-            return ByteArrayToString(arrHash);
+                // Return the hash, formatted as a string
+                return ByteArrayToString(arrHash);
+            }
 
         }
 
