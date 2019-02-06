@@ -1892,6 +1892,35 @@ namespace MSFileInfoScanner
                     {
                         SetErrorCode(eMSFileScannerErrorCodes.UnspecifiedError);
                     }
+
+                    if (AbortProcessing)
+                        return false;
+
+                    if (mCheckFileIntegrity && inputFileOrDirectoryPath != null)
+                    {
+                        string directoryPath;
+
+                        var candidateDirectory = new DirectoryInfo(inputFileOrDirectoryPath);
+                        if (candidateDirectory.Exists)
+                        {
+                            directoryPath = candidateDirectory.FullName;
+                        }
+                        else
+                        {
+                            var dataFile = new FileInfo(inputFileOrDirectoryPath);
+                            directoryPath = dataFile.Directory?.FullName;
+                        }
+
+                        if (directoryPath == null)
+                        {
+                            ReportError("Unable to determine the parent directory of " + inputFileOrDirectoryPath);
+                        }
+                        else
+                        {
+                            CheckIntegrityOfFilesInDirectory(directoryPath, RecheckFileIntegrityForExistingDirectories, processedFileList);
+                        }
+
+                    }
                 }
 
             }
