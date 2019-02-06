@@ -411,12 +411,21 @@ namespace MSFileInfoScanner
                 {
                     try
                     {
-                        // Look up the end scan time then compute .AcqTimeEnd
-                        var intScanEnd = xcaliburAccessor.FileInfo.ScanEnd;
-                        xcaliburAccessor.GetScanInfo(intScanEnd, out clsScanInfo scanInfo);
-
-                        datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(scanInfo.RetentionTime);
                         datasetFileInfo.ScanCount = xcaliburAccessor.GetNumScans();
+
+                        if (datasetFileInfo.ScanCount > 0)
+                        {
+                            // Look up the end scan time then compute .AcqTimeEnd
+                            var scanEnd = xcaliburAccessor.FileInfo.ScanEnd;
+                            xcaliburAccessor.GetScanInfo(scanEnd, out clsScanInfo scanInfo);
+
+                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(scanInfo.RetentionTime);
+                        }
+                        else
+                        {
+                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
+                        }
+
                     }
                     catch (Exception)
                     {
@@ -433,13 +442,14 @@ namespace MSFileInfoScanner
                         LoadScanDetails(xcaliburAccessor);
                     }
 
+
                     if (mComputeOverallQualityScores)
                     {
                         // Note that this call will also create the TICs and BPIs
                         ComputeQualityScores(xcaliburAccessor, datasetFileInfo);
                     }
 
-                    if (MS2MzMin > 0)
+                    if (MS2MzMin > 0 && datasetFileInfo.ScanCount > 0)
                     {
                         // Verify that all of the MS2 spectra have m/z values below the required minimum
                         // Useful for validating that reporter ions can be detected
