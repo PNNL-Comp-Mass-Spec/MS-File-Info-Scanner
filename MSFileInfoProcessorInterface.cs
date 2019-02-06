@@ -41,6 +41,7 @@ namespace MSFileInfoScanner
         public abstract bool GetOption(ProcessingOptions eOption);
         public abstract void SetOption(ProcessingOptions eOption, bool value);
 
+        public virtual iMSFileInfoScanner.eMSFileScannerErrorCodes ErrorCode { get; set; }
     }
 }
 

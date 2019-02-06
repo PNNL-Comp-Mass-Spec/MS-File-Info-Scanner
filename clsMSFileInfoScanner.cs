@@ -1395,6 +1395,12 @@ namespace MSFileInfoScanner
                     SetErrorCode(eMSFileScannerErrorCodes.MS2MzMinValidationWarning);
                 }
 
+                if (datasetFileInfo.ScanCount == 0 && ErrorCode == eMSFileScannerErrorCodes.NoError)
+                {
+                    OnWarningEvent( "Dataset has no spectra: " + inputFileOrFolderPath);
+                    SetErrorCode(eMSFileScannerErrorCodes.DatasetHasNoSpectra);
+                }
+
             }
             else
             {

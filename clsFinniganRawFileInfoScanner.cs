@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using MSFileInfoScannerInterfaces;
 using PRISM;
 using SpectraTypeClassifier;
 using ThermoRawFileReader;
@@ -346,6 +347,7 @@ namespace MSFileInfoScanner
             {
                 // File open failed
                 OnErrorEvent("Call to .OpenRawFile failed for: " + rawFile.FullName);
+                ErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.ThermoRawFileReaderError;
                 readError = true;
 
                 if (!string.Equals(clsMSFileInfoScanner.GetAppDirectoryPath().Substring(0, 2), rawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
@@ -373,6 +375,7 @@ namespace MSFileInfoScanner
                                 {
                                     // File open failed
                                     OnErrorEvent("Call to .OpenRawFile failed for: " + rawFile.FullName);
+                                    ErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.ThermoRawFileReaderError;
                                     readError = true;
                                 }
                                 else
