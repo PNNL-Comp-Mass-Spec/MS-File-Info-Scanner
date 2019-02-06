@@ -1585,31 +1585,22 @@ namespace MSFileInfoScanner
 
                                 if (needToCheckElementNames)
                                 {
-                                    FindRequiredTextInLine(
-                                        objXMLReader.Name,
-                                        ref blnNeedToCheckElementNames,
-                                        requiredElements,
-                                        ref intElementNameMatchCount,
-                                        true);
+                                    var totalMatchesInList = FindItemNameInList(xmlReader.Name, requiredElements);
+                                    if (totalMatchesInList == requiredElements.Count)
+                                        needToCheckElementNames = false;
                                 }
 
                                 if (needToCheckAttributeNames && xmlReader.HasAttributes)
                                 {
-                                    if (objXMLReader.MoveToFirstAttribute())
+
+                                    while (xmlReader.MoveToNextAttribute())
                                     {
-                                        do
+                                        var totalMatchesInList = FindItemNameInList(xmlReader.Name, requiredAttributes);
+                                        if (totalMatchesInList == requiredAttributes.Count)
                                         {
-                                            FindRequiredTextInLine(
-                                                objXMLReader.Name,
-                                                ref blnNeedToCheckAttributeNames,
-                                                requiredAttributes,
-                                                ref intAttributeNameMatchCount,
-                                                true);
-
-                                            if (!blnNeedToCheckAttributeNames)
-                                                break;
-                                        } while (objXMLReader.MoveToNextAttribute());
-
+                                            needToCheckAttributeNames = false;
+                                            break;
+                                        }
                                     }
                                 }
 
@@ -1996,7 +1987,44 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Opens the file using a text reader and looks for XML elements specified in strElementsToMatch()
+        /// Look for currentItemName in requiredItemNames; if found, set the entry to true
+        /// </summary>
+        /// <param name="currentItemName"></param>
+        /// <param name="requiredItemNames"></param>
+        /// <returns>
+        /// If requiredItemNames contains currentItemName, returns the number of items in requiredItemNames that are true
+        /// If not found, returns 0
+        /// </returns>
+        private int FindItemNameInList(string currentItemName, Dictionary<string, bool> requiredItemNames)
+        {
+            var matchFound = false;
+
+            using (var elementNames = requiredItemNames.GetEnumerator())
+            {
+                while (elementNames.MoveNext())
+                {
+                    if (elementNames.Current.Key.Equals(currentItemName))
+                    {
+                        requiredItemNames[elementNames.Current.Key] = true;
+                        matchFound = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!matchFound)
+                return 0;
+
+            var nameMatchCount = 0;
+            foreach (var requiredItem in requiredItemNames)
+            {
+                if (requiredItem.Value)
+                    nameMatchCount++;
+            }
+
+            return nameMatchCount;
+        }
+
         /// <summary>
         /// Opens the file using a text reader and looks for XML elements specified in elementsToMatch()
         /// This method intentionally uses a StreamReader and not an XmlTextReader
