@@ -597,6 +597,8 @@ namespace MSFileInfoScanner
                         Array.Sort(masterFrameNumList);
                     }
 
+                    // ReSharper disable CommentTypo
+
                     // Extract the acquisition time information
                     // The Global_Parameters table records the start time of the entire dataset in field DateStarted
                     // The Frame_Parameters table records the start time of reach frame in field StartTime
@@ -614,6 +616,8 @@ namespace MSFileInfoScanner
                     //      Examine values: Frame 1 has StartTime = -479.993 and Frame 1177 has StartTime = -417.509
                     //   A positive integer representing number of minutes since the start of the run
                     //      Theoretically, this will be the case for IMS_TOF_4 acquired after 12/14/2011
+
+                    // ReSharper restore CommentTypo
 
                     double runTimeMinutes = 0;
 

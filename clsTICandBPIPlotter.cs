@@ -8,6 +8,7 @@ using PRISM;
 
 namespace MSFileInfoScanner
 {
+    // ReSharper disable once IdentifierTypo
     public class clsTICandBPIPlotter : EventNotifier
     {
 
@@ -50,11 +51,15 @@ namespace MSFileInfoScanner
 
         public string BPIPlotAbbrev { get; set; } = "BPI";
 
+        // ReSharper disable IdentifierTypo
+
         public string BPIXAxisLabel { get; set; } = "LC Scan Number";
 
         public string BPIYAxisLabel { get; set; } = "Intensity";
 
         public bool BPIYAxisExponentialNotation { get; set; } = true;
+
+        // ReSharper restore IdentifierTypo
 
         public int CountBPI => mBPI.ScanCount;
 
@@ -70,11 +75,15 @@ namespace MSFileInfoScanner
 
         public string TICPlotAbbrev { get; set; } = "TIC";
 
+        // ReSharper disable IdentifierTypo
+
         public string TICXAxisLabel { get; set; } = "LC Scan Number";
 
         public string TICYAxisLabel { get; set; } = "Intensity";
 
         public bool TICYAxisExponentialNotation { get; set; } = true;
+
+        // ReSharper restore IdentifierTypo
 
         #endregion
 
@@ -83,6 +92,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="dataSource"></param>
         /// <param name="writeDebug"></param>
+        // ReSharper disable once IdentifierTypo
         public clsTICandBPIPlotter(string dataSource = "", bool writeDebug = false)
         {
             mRecentFiles = new List<udtOutputFileInfoType>();

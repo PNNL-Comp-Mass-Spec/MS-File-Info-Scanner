@@ -6,13 +6,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using OxyPlot;
 using OxyPlot.Axes;
+// ReSharper disable RedundantNameQualifier
 
 namespace MSFileInfoScanner
 {
     using System.Globalization;
 
     /// <summary>
-    /// Oxyplot container
+    /// OxyPlot container
     /// </summary>
     internal class clsPlotContainer : clsPlotContainerBase
     {
@@ -86,6 +87,7 @@ namespace MSFileInfoScanner
 
         }
 
+        // ReSharper disable once UnusedMember.Global
         public bool SaveToJPG(FileInfo jpgFile, int width, int height, int resolution)
         {
             if (jpgFile == null)
@@ -213,7 +215,6 @@ namespace MSFileInfoScanner
             {
                 case ImageFileFormat.PNG:
                     encoder = new PngBitmapEncoder();
-
                     break;
                 case ImageFileFormat.JPG:
                     encoder = new JpegBitmapEncoder();
@@ -222,6 +223,7 @@ namespace MSFileInfoScanner
                     throw new ArgumentOutOfRangeException(fileFormat.ToString(), "Unrecognized value: " + fileFormat);
             }
 
+            // ReSharper disable once UnusedVariable
             var bitMap = BitmapFrame.Create(target);
 
             encoder.Frames.Add(BitmapFrame.Create(target));
@@ -299,11 +301,9 @@ namespace MSFileInfoScanner
             {
                 case OxyPlot.HorizontalAlignment.Left:
                     position.X += padding;
-
                     break;
                 case OxyPlot.HorizontalAlignment.Center:
                     position.X += (textRect.Width - newText.Width) / 2;
-
                     break;
                 case OxyPlot.HorizontalAlignment.Right:
                     position.X += textRect.Width - newText.Width - padding;
@@ -314,11 +314,9 @@ namespace MSFileInfoScanner
             {
                 case OxyPlot.VerticalAlignment.Top:
                     position.Y += padding;
-
                     break;
                 case OxyPlot.VerticalAlignment.Middle:
                     position.Y += (textRect.Height - newText.Height) / 2;
-
                     break;
                 case OxyPlot.VerticalAlignment.Bottom:
                     position.Y += textRect.Height - newText.Height - padding;
@@ -366,12 +364,14 @@ namespace MSFileInfoScanner
 
         }
 
+        // ReSharper disable once UnusedMember.Local
         private double PointSizeToEm(int fontSizePoints)
         {
             var fontSizeEm = fontSizePoints / 12;
             return fontSizeEm;
         }
 
+        // ReSharper disable once UnusedMember.Local
         private int PointSizeToPixels(int fontSizePoints)
         {
             var fontSizePixels = fontSizePoints * 1.33;
