@@ -195,6 +195,8 @@ namespace MSFileInfoScanner
                 scanner.DatasetStatsTextFileName = mDatasetStatsTextFileName;
 
                 scanner.CheckFileIntegrity = mCheckFileIntegrity;
+                scanner.RecheckFileIntegrityForExistingDirectories = mReprocessingExistingFiles;
+
                 scanner.MaximumTextFileLinesToCheck = mMaximumTextFileLinesToCheck;
                 scanner.ComputeFileHashes = mComputeFileHashes;
                 scanner.ZipFileCheckAllData = mZipFileCheckAllData;
@@ -293,6 +295,7 @@ namespace MSFileInfoScanner
                 "IE",
                 "L",
                 "C",
+                "CheckIntegrity",
                 "M",
                 "H",
                 "QZ",
@@ -365,7 +368,7 @@ namespace MSFileInfoScanner
                 if (parser.RetrieveValueForParameter("L", out value))
                     mLogFilePath = value;
 
-                if (parser.IsParameterPresent("C"))
+                if (parser.IsParameterPresent("C") || parser.IsParameterPresent("CheckIntegrity"))
                     mCheckFileIntegrity = true;
 
                 if (parser.RetrieveValueForParameter("M", out value))
