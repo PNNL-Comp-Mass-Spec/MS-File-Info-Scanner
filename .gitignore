@@ -14,3 +14,4 @@ packages/*
 /Old
 **/.vs/
 *.user
+/MSFileInfoScanner_Installer/Output/
