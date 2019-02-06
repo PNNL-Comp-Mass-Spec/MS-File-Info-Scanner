@@ -7,6 +7,7 @@ namespace MSFileInfoScannerInterfaces
 {
     public abstract class iMSFileInfoScanner : EventNotifier
     {
+
         #region "Enums"
 
         /// <summary>
@@ -17,19 +18,22 @@ namespace MSFileInfoScannerInterfaces
             NoError = 0,
             InvalidInputFilePath = 1,
             InvalidOutputFolderPath = 2,
-            ParameterFileNotFound = 4,
-            FilePathError = 8,
+            ParameterFileNotFound = 3,
+            FilePathError = 4,
 
-            ParameterFileReadError = 16,
-            UnknownFileExtension = 32,
-            InputFileAccessError = 64,
-            InputFileReadError = 128,
-            OutputFileWriteError = 256,
-            FileIntegrityCheckError = 512,
+            ParameterFileReadError = 5,
+            UnknownFileExtension = 6,
+            InputFileAccessError = 7,
+            InputFileReadError = 8,
+            OutputFileWriteError = 9,
+            FileIntegrityCheckError = 10,
 
-            DatabasePostingError = 1024,
-            MS2MzMinValidationError = 2048,
-            MS2MzMinValidationWarning = 4096,
+            DatabasePostingError = 11,
+            MS2MzMinValidationError = 12,
+            MS2MzMinValidationWarning = 13,
+
+            ThermoRawFileReaderError = 14,
+            DatasetHasNoSpectra = 15,
 
             UnspecifiedError = -1
         }
