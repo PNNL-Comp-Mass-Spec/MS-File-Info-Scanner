@@ -1005,11 +1005,13 @@ namespace MSFileInfoScanner
                         bafFileParsed = ParseBAFFile(primaryInstrumentFile, datasetFileInfo);
                     }
 
-                    if (mSaveTICAndBPI && mTICAndBPIPlot.CountBPI + mTICAndBPIPlot.CountTIC == 0 || mSaveLCMS2DPlots && mLCMS2DPlot.ScanCountCached == 0)
+                    if (datasetFileInfo.ScanCount == 0 ||
+                        mSaveTICAndBPI && mTICAndBPIPlot.CountBPI + mTICAndBPIPlot.CountTIC == 0 ||
+                        mSaveLCMS2DPlots && mLCMS2DPlot.ScanCountCached == 0)
                     {
                         // If a ser or fid file exists, we can read the data from it to create the TIC and BPI plots, plus also the 2D plot
 
-                        var serOrFidParsed = ParseSerOrFidFile(primaryInstrumentFile.Directory, scanElutionTimeMap);
+                        var serOrFidParsed = ParseSerOrFidFile(primaryInstrumentFile.Directory, scanElutionTimeMap, datasetFileInfo);
 
                         if (!serOrFidParsed && !bafFileParsed)
                         {
@@ -1068,7 +1070,10 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ParseSerOrFidFile(DirectoryInfo dotDFolder, IReadOnlyDictionary<int, float> scanElutionTimeMap)
+        private bool ParseSerOrFidFile(
+            DirectoryInfo dotDFolder,
+            IReadOnlyDictionary<int, float> scanElutionTimeMap,
+            clsDatasetFileInfo datasetFileInfo)
         {
 
             try
@@ -1108,6 +1113,17 @@ namespace MSFileInfoScanner
                 var serReader = new BrukerDataReader.DataReader(serOrFidFile.FullName, settingsFile.FullName);
 
                 var scanCount = serReader.GetNumMSScans();
+
+                if (datasetFileInfo.ScanCount == 0)
+                {
+                    datasetFileInfo.ScanCount = scanCount;
+                }
+                else if (datasetFileInfo.ScanCount != scanCount)
+                {
+                    OnWarningEvent(string.Format(
+                                       "Scan count from the {0} file differs from the scan count determined via ProteoWizard: {1} vs. {2}",
+                                       serOrFidFile.Name, scanCount, datasetFileInfo.ScanCount));
+                }
 
                 // BrukerDataReader.DataReader treats scan 0 as the first scan
 
