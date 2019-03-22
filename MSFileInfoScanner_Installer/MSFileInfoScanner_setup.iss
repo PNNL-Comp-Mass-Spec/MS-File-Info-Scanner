@@ -25,7 +25,6 @@ Source: ..\bin\OxyPlot.dll                           ; DestDir: {app}
 Source: ..\bin\OxyPlot.Wpf.dll                       ; DestDir: {app}
 Source: ..\bin\PRISM.dll                             ; DestDir: {app}
 Source: ..\bin\ProteowizardWrapper.dll               ; DestDir: {app}
-Source: ..\bin\SharedVBNetRoutines.dll               ; DestDir: {app}
 Source: ..\bin\SpectraTypeClassifier.dll             ; DestDir: {app}
 Source: ..\bin\System.Data.SQLite.dll                ; DestDir: {app}
 Source: ..\lib\RawFileReaderLicense.doc              ; DestDir: {app}

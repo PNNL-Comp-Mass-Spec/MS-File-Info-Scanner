@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.5.7019; March 22, 2019
+	- Remove SharedVBNetRoutines.dll and use use migrated methods in PRISM-Library
+
 Version 1.5.6976; February 6, 2019
 	- Skip checks if the dataset has no spectra
 	- Check file integrity when processing a single input file (if /C is used)
