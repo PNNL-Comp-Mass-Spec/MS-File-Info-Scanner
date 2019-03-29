@@ -1,5 +1,8 @@
 MS File Info Scanner Change Log
 
+Version 1.5.7027; March 29, 2019
+	- Check for duplicate scan numbers in Bruker scan.xml files
+
 Version 1.5.7019; March 22, 2019
 	- Remove SharedVBNetRoutines.dll and use use migrated methods in PRISM-Library
 

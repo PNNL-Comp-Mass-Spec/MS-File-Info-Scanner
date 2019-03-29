@@ -655,10 +655,12 @@ namespace MSFileInfoScanner
         private bool ParseScanXMLFile(
             FileSystemInfo datasetDirectory,
             clsDatasetFileInfo datasetFileInfo,
-            out Dictionary<int, float> scanElutionTimeMap)
+            out Dictionary<int, float> scanElutionTimeMap,
+            out int duplicateScanCount)
         {
 
             scanElutionTimeMap = new Dictionary<int, float>();
+            duplicateScanCount = 0;
 
             try
             {
@@ -761,8 +763,16 @@ namespace MSFileInfoScanner
                                 {
                                     inScanNode = false;
 
-                                    scanElutionTimeMap.Add(scanNumber, elutionTime);
-                                    AddDatasetScan(scanNumber, msLevel, elutionTime, bpi, tic, "HMS", ref maxRunTimeMinutes);
+                                    if (scanElutionTimeMap.ContainsKey(scanNumber))
+                                    {
+                                        OnWarningEvent(string.Format("Skipping duplicate scan number: {0}", scanNumber));
+                                        duplicateScanCount++;
+                                    }
+                                    else
+                                    {
+                                        scanElutionTimeMap.Add(scanNumber, elutionTime);
+                                        AddDatasetScan(scanNumber, msLevel, elutionTime, bpi, tic, "HMS", ref maxRunTimeMinutes);
+                                    }
 
                                 }
                                 break;
@@ -994,7 +1004,7 @@ namespace MSFileInfoScanner
                     // We can also obtain TIC and elution time values from this file
                     // However, it does not track whether a scan is MS or MSn
                     // If the scans.xml file contains runtime entries (e.g. <minutes>100.0456</minutes>) then .AcqTimeEnd is updated using .AcqTimeStart + RunTimeMinutes
-                    success = ParseScanXMLFile(datasetDirectory, datasetFileInfo, out var scanElutionTimeMap);
+                    success = ParseScanXMLFile(datasetDirectory, datasetFileInfo, out var scanElutionTimeMap, out var duplicateScanCount);
 
                     var bafFileParsed = false;
 
@@ -1011,7 +1021,7 @@ namespace MSFileInfoScanner
                     {
                         // If a ser or fid file exists, we can read the data from it to create the TIC and BPI plots, plus also the 2D plot
 
-                        var serOrFidParsed = ParseSerOrFidFile(primaryInstrumentFile.Directory, scanElutionTimeMap, datasetFileInfo);
+                        var serOrFidParsed = ParseSerOrFidFile(primaryInstrumentFile.Directory, scanElutionTimeMap, datasetFileInfo, duplicateScanCount);
 
                         if (!serOrFidParsed && !bafFileParsed)
                         {
@@ -1073,7 +1083,8 @@ namespace MSFileInfoScanner
         private bool ParseSerOrFidFile(
             DirectoryInfo dotDFolder,
             IReadOnlyDictionary<int, float> scanElutionTimeMap,
-            clsDatasetFileInfo datasetFileInfo)
+            clsDatasetFileInfo datasetFileInfo,
+            int duplicateScanCount)
         {
 
             try
@@ -1120,9 +1131,27 @@ namespace MSFileInfoScanner
                 }
                 else if (datasetFileInfo.ScanCount != scanCount)
                 {
-                    OnWarningEvent(string.Format(
-                                       "Scan count from the {0} file differs from the scan count determined via ProteoWizard: {1} vs. {2}",
-                                       serOrFidFile.Name, scanCount, datasetFileInfo.ScanCount));
+                    var mismatchMessage = string.Format(
+                        "Scan count from the {0} file differs from the scan count determined via ProteoWizard: {1} vs. {2}",
+                        serOrFidFile.Name, scanCount, datasetFileInfo.ScanCount);
+
+                    // Scan count mismatch between the scan.xml file and ProteoWizard
+                    if (datasetFileInfo.ScanCount == scanCount + duplicateScanCount)
+                    {
+                        // Scan count mismatch can be attributed to duplicate scans; report this as a debug event
+
+                        // ReSharper disable once CommentTypo
+                        // See, for example, scan.xml for dataset 20190319_WK_SRFA_0pt1m_000002
+
+                        var scanText = duplicateScanCount == 1 ? "scan" : "scans";
+                        OnDebugEvent(string.Format(
+                                         "{0}; the mismatch can be attributed to the {1} duplicate {2}",
+                                         mismatchMessage, duplicateScanCount, scanText));
+                    }
+                    else
+                    {
+                        OnWarningEvent(mismatchMessage);
+                    }
                 }
 
                 // BrukerDataReader.DataReader treats scan 0 as the first scan
