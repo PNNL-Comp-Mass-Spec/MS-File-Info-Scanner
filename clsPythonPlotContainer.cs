@@ -7,7 +7,7 @@ using PRISM;
 namespace MSFileInfoScanner
 {
     /// <summary>
-    /// Python data container base clase
+    /// Python data container base class
     /// </summary>
     internal abstract class clsPythonPlotContainer : clsPlotContainerBase
     {
