@@ -486,21 +486,21 @@ namespace MSFileInfoScanner
                             runtimeMinutes = scanTimes[scanIndex];
                         }
 
-                        var oSpectrum = mPWiz.GetSpectrumObject(scanIndex);
+                        var spectrum = mPWiz.GetSpectrumObject(scanIndex);
 
-                        if (TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out var param))
+                        if (TryGetCVParam(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out var param))
                         {
                             tic = param.value;
                             scanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(tic, 5);
                             computeTIC = false;
                         }
 
-                        if (TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, out param))
+                        if (TryGetCVParam(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, out param))
                         {
                             bpi = param.value;
                             scanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(bpi, 5);
 
-                            if (TryGetCVParam(oSpectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, out param))
+                            if (TryGetCVParam(spectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, out param))
                             {
                                 scanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(param.value, 5);
                                 computeBPI = false;

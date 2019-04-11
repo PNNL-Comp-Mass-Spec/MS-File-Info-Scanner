@@ -239,19 +239,19 @@ namespace MSFileInfoScanner
 
             try
             {
-                using (var oReader = new ChemstationMSFileReader.clsChemstationDataMSFileReader(datafilePath))
+                using (var reader = new ChemstationMSFileReader.clsChemstationDataMSFileReader(datafilePath))
                 {
 
-                    datasetFileInfo.AcqTimeStart = oReader.Header.AcqDate;
-                    datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(oReader.Header.RetentionTimeMinutesEnd);
+                    datasetFileInfo.AcqTimeStart = reader.Header.AcqDate;
+                    datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(reader.Header.RetentionTimeMinutesEnd);
 
-                    datasetFileInfo.ScanCount = oReader.Header.SpectraCount;
+                    datasetFileInfo.ScanCount = reader.Header.SpectraCount;
 
                     for (var spectrumIndex = 0; spectrumIndex <= datasetFileInfo.ScanCount - 1; spectrumIndex++)
                     {
                         currentIndex = spectrumIndex;
 
-                        ChemstationMSFileReader.clsSpectralRecord oSpectrum = null;
+                        ChemstationMSFileReader.clsSpectralRecord spectrum = null;
                         List<float> mzList = null;
                         List<int> intensityList = null;
                         const int msLevel = 1;
@@ -259,9 +259,9 @@ namespace MSFileInfoScanner
                         bool validSpectrum;
                         try
                         {
-                            oReader.GetSpectrum(spectrumIndex, ref oSpectrum);
-                            mzList = oSpectrum.Mzs;
-                            intensityList = oSpectrum.Intensities;
+                            reader.GetSpectrum(spectrumIndex, ref spectrum);
+                            mzList = spectrum.Mzs;
+                            intensityList = spectrum.Intensities;
                             validSpectrum = true;
                         }
                         catch (Exception ex)
@@ -278,10 +278,10 @@ namespace MSFileInfoScanner
                                 ScanType = msLevel,
                                 ScanTypeName = "GC-MS",
                                 ScanFilterText = "",
-                                ElutionTime = oSpectrum.RetentionTimeMinutes.ToString("0.0###"),
-                                TotalIonIntensity = StringUtilities.ValueToString(oSpectrum.TIC, 1),
-                                BasePeakIntensity = StringUtilities.ValueToString(oSpectrum.BasePeakAbundance, 1),
-                                BasePeakMZ = oSpectrum.BasePeakMZ.ToString("0.0###"),
+                                ElutionTime = spectrum.RetentionTimeMinutes.ToString("0.0###"),
+                                TotalIonIntensity = StringUtilities.ValueToString(spectrum.TIC, 1),
+                                BasePeakIntensity = StringUtilities.ValueToString(spectrum.BasePeakAbundance, 1),
+                                BasePeakMZ = spectrum.BasePeakMZ.ToString("0.0###"),
                                 BasePeakSignalToNoiseRatio = "0",
                                 IonCount = mzList.Count
                             };
@@ -292,7 +292,7 @@ namespace MSFileInfoScanner
 
                             if (mSaveTICAndBPI)
                             {
-                                mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevel, oSpectrum.RetentionTimeMinutes, oSpectrum.BasePeakAbundance, oSpectrum.TIC);
+                                mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevel, spectrum.RetentionTimeMinutes, spectrum.BasePeakAbundance, spectrum.TIC);
 
                                 if (mzList.Count > 0)
                                 {
@@ -305,7 +305,7 @@ namespace MSFileInfoScanner
                                         ionsIntensity[index] = intensityList[index];
                                     }
 
-                                    mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevel, oSpectrum.RetentionTimeMinutes, ionsMZ.Length, ionsMZ, ionsIntensity);
+                                    mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevel, spectrum.RetentionTimeMinutes, ionsMZ.Length, ionsMZ, ionsIntensity);
                                 }
 
                             }

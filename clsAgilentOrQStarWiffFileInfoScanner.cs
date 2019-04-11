@@ -174,12 +174,12 @@ namespace MSFileInfoScanner
 
                     do
                     {
-                        var oSpectrum = pWiz2.run.spectrumList.spectrum(spectrumIndex, getBinaryData: true);
+                        var spectrum = pWiz2.run.spectrumList.spectrum(spectrumIndex, getBinaryData: true);
 
                         pwiz.CLI.data.CVParam param;
-                        if (oSpectrum.scanList.scans.Count > 0)
+                        if (spectrum.scanList.scans.Count > 0)
                         {
-                            if (clsProteoWizardDataParser.TryGetCVParam(oSpectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_scan_start_time, out param))
+                            if (clsProteoWizardDataParser.TryGetCVParam(spectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_scan_start_time, out param))
                             {
                                 var scanNum = spectrumIndex + 1;
                                 var startTimeMinutes = param.timeInSeconds() / 60.0;
@@ -190,14 +190,14 @@ namespace MSFileInfoScanner
                         }
 
                         // Use the following to determine info on this spectrum
-                        if (clsProteoWizardDataParser.TryGetCVParam(oSpectrum.cvParams, pwiz.CLI.cv.CVID.MS_ms_level, out param))
+                        if (clsProteoWizardDataParser.TryGetCVParam(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_ms_level, out param))
                         {
                             int.TryParse(param.value, out _);
                         }
 
                         // Use the following to get the MZs and Intensities
-                        var mzList = oSpectrum.getMZArray();
-                        oSpectrum.getIntensityArray();
+                        var mzList = spectrum.getMZArray();
+                        spectrum.getIntensityArray();
 
                         if (mzList.data.Count > 0)
                         {
@@ -233,10 +233,10 @@ namespace MSFileInfoScanner
                                 startTime = DateTime.Now;
                                 for (var j = 1; j <= LOOP_ITERATIONS; j++)
                                 {
-                                    var oMzArray = mzList.data;
-                                    for (var index = 0; index <= oMzArray.Count - 1; index++)
+                                    var mzArray = mzList.data;
+                                    for (var index = 0; index <= mzArray.Count - 1; index++)
                                     {
-                                        tic2 += oMzArray[index];
+                                        tic2 += mzArray[index];
                                     }
                                 }
                                 endTime = DateTime.Now;
@@ -270,26 +270,26 @@ namespace MSFileInfoScanner
 
                     do
                     {
-                        var oTimeIntensityPairList = new TimeIntensityPairList();
+                        var timeIntensityPairList = new TimeIntensityPairList();
 
                         // Note that even for a small .Wiff file (1.5 MB), obtaining the Chromatogram list will take some time (20 to 60 seconds)
                         // The chromatogram at index 0 should be the TIC
                         // The chromatogram at index >=1 will be each SRM
 
-                        var oChromatogram = pWiz2.run.chromatogramList.chromatogram(chromatogramIndex, getBinaryData: true);
+                        var chromatogram = pWiz2.run.chromatogramList.chromatogram(chromatogramIndex, getBinaryData: true);
 
                         // Determine the chromatogram type
 
-                        if (clsProteoWizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out var param))
+                        if (clsProteoWizardDataParser.TryGetCVParam(chromatogram.cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out var param))
                         {
                             // Obtain the data
-                            oChromatogram.getTimeIntensityPairs(ref oTimeIntensityPairList);
+                            chromatogram.getTimeIntensityPairs(ref timeIntensityPairList);
                         }
 
-                        if (clsProteoWizardDataParser.TryGetCVParam(oChromatogram.cvParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out param))
+                        if (clsProteoWizardDataParser.TryGetCVParam(chromatogram.cvParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out param))
                         {
                             // Obtain the SRM scan
-                            oChromatogram.getTimeIntensityPairs(ref oTimeIntensityPairList);
+                            chromatogram.getTimeIntensityPairs(ref timeIntensityPairList);
                         }
 
                         chromatogramIndex += 1;

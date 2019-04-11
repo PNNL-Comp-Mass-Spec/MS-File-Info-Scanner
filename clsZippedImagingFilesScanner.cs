@@ -39,11 +39,11 @@ namespace MSFileInfoScanner
                     "apexAcquisition.method",
                     "submethods.xml"};
 
-                var oZipFile = new Ionic.Zip.ZipFile(zipFile.FullName);
+                var zipFileReader = new Ionic.Zip.ZipFile(zipFile.FullName);
 
                 foreach (var fileNameToFind in fileNamesToFind)
                 {
-                    using (var zipEntry = oZipFile.GetEnumerator())
+                    using (var zipEntry = zipFileReader.GetEnumerator())
                     {
 
                         while (zipEntry.MoveNext())
