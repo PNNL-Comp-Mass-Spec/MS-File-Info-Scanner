@@ -576,6 +576,8 @@ namespace MSFileInfoScanner
                     outputDirectory = new DirectoryInfo(".");
                 }
 
+                OnDebugEvent("Output directory path: " + outputDirectory.FullName);
+
                 UpdatePlotWithPython();
 
                 if (mPlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
