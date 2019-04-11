@@ -81,7 +81,7 @@ def read_file(fpath):
 
         return data, plotLabels, columnOptions
 
-def set_title_and_labels(ax, plt, baseFontSize, title, xDataMax, xAxisLabel, yAxisLabel, yAxisFormatString, r_label, l_label):
+def set_title_and_labels(ax, plt, baseFontSize, title, xDataMin, xDataMax, xAxisLabel, yAxisLabel, yAxisFormatString, r_label, l_label):
 
     MAX_TITLE_LENGTH = 68
     
@@ -137,8 +137,13 @@ def set_title_and_labels(ax, plt, baseFontSize, title, xDataMax, xAxisLabel, yAx
     plt.ylim(ymin = ymin, ymax = ymax)    
     
     # Set the X axis maximum to the max X value (in other words, we don't want any padding)
-    plt.xlim(xmax = xDataMax)
-
+    # However, if there is only one X data point, do add some padding
+    if xDataMin == xDataMax:
+        plt.xlim(xmin = xDataMax - 1)
+        plt.xlim(xmax = xDataMax + 1)
+    else:
+        plt.xlim(xmax = xDataMax)
+    
     plt.xlabel(xAxisLabel, fontsize=baseFontSize)
     plt.ylabel(yAxisLabel, fontsize=baseFontSize)
 
@@ -147,8 +152,10 @@ def set_title_and_labels(ax, plt, baseFontSize, title, xDataMax, xAxisLabel, yAx
     ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(yAxisFormatString))
     ax.yaxis.set_minor_locator(mtick.AutoMinorLocator())
     
-    # Optionally define the distance between tick labels
-    # ax.xaxis.set_major_locator(mtick.MultipleLocator(5000))
+    # If the x axis range is 5 or less, assure that the minimum distance between major tick marks is at least 1
+    if xDataMax - xDataMin <= 5:
+        ax.xaxis.set_major_locator(mtick.MultipleLocator(1))
+    
     ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda x, p: format(int(x), ',')))
     ax.xaxis.set_minor_locator(mtick.AutoMinorLocator())
 
@@ -164,7 +171,11 @@ def plot_lc_intensity(outputFilePath, columnNames, lc_scan_num, intensities, tit
     
     baseFontSize = 12
     
-    ax.plot(lc_scan_num, intensities, linewidth=0.5, color='black')
+    if len(intensities) == 1:
+        print ('Single point plot')
+        ax.plot(lc_scan_num, intensities, linewidth=0.5, markersize=4, marker='o', color='darkblue')
+    else:
+        ax.plot(lc_scan_num, intensities, linewidth=0.5, color='black')
 
     # X axis is typically scan number
     xAxisLabel = columnNames[0]
@@ -172,7 +183,7 @@ def plot_lc_intensity(outputFilePath, columnNames, lc_scan_num, intensities, tit
     # Y axis is intensity
     yAxisLabel = columnNames[1]
 
-    set_title_and_labels(ax, plt, baseFontSize, title, np.max(lc_scan_num), xAxisLabel, yAxisLabel, '%.2e', r_label, '')
+    set_title_and_labels(ax, plt, baseFontSize, title, np.min(lc_scan_num), np.max(lc_scan_num), xAxisLabel, yAxisLabel, '%.2e', r_label, '')
     plt.tight_layout()
 
     plt.savefig(outputFilePath)
@@ -300,7 +311,7 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
     # Y axis is typically m/z, but could be monoisotopic mass
     yAxisLabel = columnNames[1]
     
-    set_title_and_labels(ax, plt, baseFontSize, title, np.max(xData), xAxisLabel, yAxisLabel, '%.0f', r_label, l_label)
+    set_title_and_labels(ax, plt, baseFontSize, title, np.min(xData), np.max(xData), xAxisLabel, yAxisLabel, '%.0f', r_label, l_label)
    
     if chargeData:
         plt.tight_layout(rect=(0,0,0.96,1))
