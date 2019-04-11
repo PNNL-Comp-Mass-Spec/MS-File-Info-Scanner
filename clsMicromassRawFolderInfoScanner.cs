@@ -18,7 +18,7 @@ namespace MSFileInfoScanner
 
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
-            // The dataset name is simply the folder name without .Raw
+            // The dataset name is simply the directory name without .Raw
             try
             {
                 return Path.GetFileNameWithoutExtension(dataFilePath);
@@ -69,7 +69,7 @@ namespace MSFileInfoScanner
                 datasetFileInfo.DatasetName = GetDatasetNameViaPath(datasetDirectory.Name);
                 datasetFileInfo.FileExtension = datasetDirectory.Extension;
 
-                // Sum up the sizes of all of the files in this folder
+                // Sum up the sizes of all of the files in this directory
                 datasetFileInfo.FileSizeBytes = 0;
                 var fileCount = 0;
                 foreach (var item in datasetDirectory.GetFiles())

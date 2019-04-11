@@ -97,7 +97,7 @@ namespace MSFileInfoScanner
 
         public const string DEFAULT_ACQUISITION_TIME_FILENAME_TXT = "DatasetTimeFile.txt";
 
-        public const string DEFAULT_FOLDER_INTEGRITY_INFO_FILENAME_TXT = "FolderIntegrityInfo.txt";
+        public const string DEFAULT_DIRECTORY_INTEGRITY_INFO_FILENAME_TXT = "DirectoryIntegrityInfo.txt";
 
         public const string DEFAULT_FILE_INTEGRITY_DETAILS_FILENAME_TXT = "FileIntegrityDetails.txt";
 
@@ -152,7 +152,7 @@ namespace MSFileInfoScanner
 
         private StreamWriter mLogFile;
 
-        // This variable is updated in ProcessMSFileOrFolder
+        // This variable is updated in ProcessMSFileOrDirectory
         private string mOutputDirectoryPath;
 
         // If blank, mOutputDirectoryPath will be used; if mOutputDirectoryPath is also blank, the log is created in the same directory as the executing assembly
@@ -182,7 +182,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// When true, checks the integrity of every file in every folder processed
+        /// When true, checks the integrity of every file in every directory processed
         /// </summary>
         public override bool CheckFileIntegrity
         {
@@ -204,8 +204,8 @@ namespace MSFileInfoScanner
             {
                 case eDataFileTypeConstants.MSFileInfo:
                     return mMSFileInfoDataCache.AcquisitionTimeFilePath;
-                case eDataFileTypeConstants.FolderIntegrityInfo:
-                    return mMSFileInfoDataCache.FolderIntegrityInfoFilePath;
+                case eDataFileTypeConstants.DirectoryIntegrityInfo:
+                    return mMSFileInfoDataCache.DirectoryIntegrityInfoFilePath;
                 case eDataFileTypeConstants.FileIntegrityDetails:
                     return mFileIntegrityDetailsFilePath;
                 case eDataFileTypeConstants.FileIntegrityErrors:
@@ -222,8 +222,8 @@ namespace MSFileInfoScanner
                 case eDataFileTypeConstants.MSFileInfo:
                     mMSFileInfoDataCache.AcquisitionTimeFilePath = filePath;
                     break;
-                case eDataFileTypeConstants.FolderIntegrityInfo:
-                    mMSFileInfoDataCache.FolderIntegrityInfoFilePath = filePath;
+                case eDataFileTypeConstants.DirectoryIntegrityInfo:
+                    mMSFileInfoDataCache.DirectoryIntegrityInfoFilePath = filePath;
                     break;
                 case eDataFileTypeConstants.FileIntegrityDetails:
                     mFileIntegrityDetailsFilePath = filePath;
@@ -246,8 +246,8 @@ namespace MSFileInfoScanner
             {
                 case eDataFileTypeConstants.MSFileInfo:
                     return DEFAULT_ACQUISITION_TIME_FILENAME_TXT;
-                case eDataFileTypeConstants.FolderIntegrityInfo:
-                    return DEFAULT_FOLDER_INTEGRITY_INFO_FILENAME_TXT;
+                case eDataFileTypeConstants.DirectoryIntegrityInfo:
+                    return DEFAULT_DIRECTORY_INTEGRITY_INFO_FILENAME_TXT;
                 case eDataFileTypeConstants.FileIntegrityDetails:
                     return DEFAULT_FILE_INTEGRITY_DETAILS_FILENAME_TXT;
                 case eDataFileTypeConstants.FileIntegrityErrors:
@@ -484,24 +484,24 @@ namespace MSFileInfoScanner
                     return;
                 }
 
-                var checkFolder = true;
+                var checkDirectory = true;
                 if (UseCacheFiles && !forceRecheck)
                 {
-                    if (mMSFileInfoDataCache.CachedFolderIntegrityInfoContainsDirectory(datasetDirectory.FullName, out directoryID, out var dataRow))
+                    if (mMSFileInfoDataCache.CachedDirectoryIntegrityInfoContainsDirectory(datasetDirectory.FullName, out directoryID, out var dataRow))
                     {
                         var cachedFileCount = (int)dataRow[clsMSFileInfoDataCache.COL_NAME_FILE_COUNT];
                         var cachedCountFailIntegrity = (int)dataRow[clsMSFileInfoDataCache.COL_NAME_COUNT_FAIL_INTEGRITY];
 
                         if (cachedFileCount == fileCount && cachedCountFailIntegrity == 0)
                         {
-                            // Folder contains the same number of files as last time, and no files failed the integrity check last time
-                            // Do not recheck the folder
-                            checkFolder = false;
+                            // Directory contains the same number of files as last time, and no files failed the integrity check last time
+                            // Do not recheck the directory
+                            checkDirectory = false;
                         }
                     }
                 }
 
-                if (!checkFolder)
+                if (!checkDirectory)
                 {
                     return;
                 }
@@ -510,7 +510,7 @@ namespace MSFileInfoScanner
 
                 if (UseCacheFiles)
                 {
-                    if (!mMSFileInfoDataCache.UpdateCachedFolderIntegrityInfo(udtDirectoryStats, out directoryID))
+                    if (!mMSFileInfoDataCache.UpdateCachedDirectoryIntegrityInfo(udtDirectoryStats, out directoryID))
                     {
                         directoryID = -1;
                     }
@@ -540,19 +540,19 @@ namespace MSFileInfoScanner
 
             try
             {
-                var appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+                var appDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
 
                 if (string.IsNullOrWhiteSpace(appName))
-                    return appDataFolder;
+                    return appDataDirectory;
 
-                var appFolder = new DirectoryInfo(Path.Combine(appDataFolder, appName));
+                var appDirectory = new DirectoryInfo(Path.Combine(appDataDirectory, appName));
 
-                if (!appFolder.Exists)
+                if (!appDirectory.Exists)
                 {
-                    appFolder.Create();
+                    appDirectory.Create();
                 }
 
-                return appFolder.FullName;
+                return appDirectory.FullName;
 
             }
             catch (Exception ex)
@@ -632,8 +632,8 @@ namespace MSFileInfoScanner
                     return string.Empty;
                 case eMSFileScannerErrorCodes.InvalidInputFilePath:
                     return "Invalid input file path";
-                case eMSFileScannerErrorCodes.InvalidOutputFolderPath:
-                    return "Invalid output folder path";
+                case eMSFileScannerErrorCodes.InvalidOutputDirectoryPath:
+                    return "Invalid output directory path";
                 case eMSFileScannerErrorCodes.ParameterFileNotFound:
                     return "Parameter file not found";
                 case eMSFileScannerErrorCodes.FilePathError:
@@ -690,30 +690,30 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool GetFileOrFolderInfo(string fileOrFolderPath, out bool isFolder, out FileSystemInfo fileOrFolderInfo)
+        private bool GetFileOrDirectoryInfo(string fileOrDirectoryPath, out bool isDirectory, out FileSystemInfo fileOrDirectoryInfo)
         {
 
-            isFolder = false;
+            isDirectory = false;
 
-            // See if fileOrFolderPath points to a valid file
-            var datasetFile = new FileInfo(fileOrFolderPath);
+            // See if fileOrDirectoryPath points to a valid file
+            var datasetFile = new FileInfo(fileOrDirectoryPath);
 
             if (datasetFile.Exists)
             {
-                fileOrFolderInfo = datasetFile;
+                fileOrDirectoryInfo = datasetFile;
                 return true;
             }
 
-            // See if fileOrFolderPath points to a folder
-            var datasetDirectory = new DirectoryInfo(fileOrFolderPath);
+            // See if fileOrDirectoryPath points to a directory
+            var datasetDirectory = new DirectoryInfo(fileOrDirectoryPath);
             if (datasetDirectory.Exists)
             {
-                fileOrFolderInfo = datasetDirectory;
-                isFolder = true;
+                fileOrDirectoryInfo = datasetDirectory;
+                isDirectory = true;
                 return true;
             }
 
-            fileOrFolderInfo = new FileInfo(fileOrFolderPath);
+            fileOrDirectoryInfo = new FileInfo(fileOrDirectoryPath);
             return false;
         }
 
@@ -739,7 +739,7 @@ namespace MSFileInfoScanner
 
         private void LogMessage(string message, eMessageTypeConstants eMessageType = eMessageTypeConstants.Normal)
         {
-            // Note that ProcessMSFileOrFolder() will update mOutputDirectoryPath, which is used here if mLogDirectoryPath is blank
+            // Note that ProcessMSFileOrDirectory() will update mOutputDirectoryPath, which is used here if mLogDirectoryPath is blank
 
             if (mLogFile == null && LogMessagesToFile)
             {
@@ -759,7 +759,7 @@ namespace MSFileInfoScanner
 
                         if (mLogDirectoryPath.Length == 0)
                         {
-                            // Log folder is undefined; use mOutputDirectoryPath if it is defined
+                            // Log directory is undefined; use mOutputDirectoryPath if it is defined
                             if (!string.IsNullOrEmpty(mOutputDirectoryPath))
                             {
                                 mLogDirectoryPath = string.Copy(mOutputDirectoryPath);
@@ -768,7 +768,7 @@ namespace MSFileInfoScanner
 
                         if (mLogDirectoryPath.Length > 0)
                         {
-                            // Create the log folder if it doesn't exist
+                            // Create the log directory if it doesn't exist
                             if (!Directory.Exists(mLogDirectoryPath))
                             {
                                 Directory.CreateDirectory(mLogDirectoryPath);
@@ -1256,7 +1256,7 @@ namespace MSFileInfoScanner
             return success;
         }
 
-        private bool ProcessMSDataset(string inputFileOrFolderPath, iMSFileInfoProcessor scanner, string datasetName, string outputFolderPath)
+        private bool ProcessMSDataset(string inputFileOrDirectoryPath, iMSFileInfoProcessor scanner, string datasetName, string outputDirectoryPath)
         {
 
             var datasetFileInfo = new clsDatasetFileInfo();
@@ -1320,7 +1320,7 @@ namespace MSFileInfoScanner
             {
 
                 // Process the data file
-                success = scanner.ProcessDataFile(inputFileOrFolderPath, datasetFileInfo);
+                success = scanner.ProcessDataFile(inputFileOrDirectoryPath, datasetFileInfo);
 
                 if (!success)
                 {
@@ -1355,7 +1355,7 @@ namespace MSFileInfoScanner
             if (success)
             {
 
-                success = scanner.CreateOutputFiles(inputFileOrFolderPath, outputFolderPath);
+                success = scanner.CreateOutputFiles(inputFileOrDirectoryPath, outputDirectoryPath);
                 if (!success)
                 {
                     SetErrorCode(eMSFileScannerErrorCodes.OutputFileWriteError);
@@ -1397,7 +1397,7 @@ namespace MSFileInfoScanner
 
                 if (datasetFileInfo.ScanCount == 0 && ErrorCode == eMSFileScannerErrorCodes.NoError)
                 {
-                    OnWarningEvent( "Dataset has no spectra: " + inputFileOrFolderPath);
+                    OnWarningEvent( "Dataset has no spectra: " + inputFileOrDirectoryPath);
                     SetErrorCode(eMSFileScannerErrorCodes.DatasetHasNoSpectra);
                 }
 
@@ -1441,8 +1441,8 @@ namespace MSFileInfoScanner
             out eMSFileProcessingStateConstants eMSFileProcessingState)
         {
 
-            // Note: inputFileOrFolderPath must be a known MS data file or MS data folder
-            // See function ProcessMSFilesAndRecurseFolders for more details
+            // Note: inputFileOrDirectoryPath must be a known MS data file or MS data directory
+            // See function ProcessMSFilesAndRecurseDirectories for more details
             // This function returns True if it processed a file (or the dataset was processed previously)
             // When SKIP_FILES_IN_ERROR = True, it also returns True if the file type was a known type but the processing failed
             // If the file type is unknown, or if an error occurs, it returns false
@@ -1495,11 +1495,11 @@ namespace MSFileInfoScanner
                         HandleException("Error parsing " + inputFileOrDirectoryPath, ex);
                     }
 
-                    // Determine whether inputFileOrDirectoryPath points to a file or a folder
+                    // Determine whether inputFileOrDirectoryPath points to a file or a directory
 
-                    if (!GetFileOrFolderInfo(inputFileOrDirectoryPath, out var isFolder, out var fileOrFolderInfo))
+                    if (!GetFileOrDirectoryInfo(inputFileOrDirectoryPath, out var isDirectory, out var fileOrDirectoryInfo))
                     {
-                        ReportError("File or directory not found: " + fileOrFolderInfo.FullName);
+                        ReportError("File or directory not found: " + fileOrDirectoryInfo.FullName);
 
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if (SKIP_FILES_IN_ERROR)
@@ -1517,11 +1517,11 @@ namespace MSFileInfoScanner
                     var knownMSDataType = false;
 
                     // Only continue if it's a known type
-                    if (isFolder)
+                    if (isDirectory)
                     {
-                        if (fileOrFolderInfo.Name == clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME)
+                        if (fileOrDirectoryInfo.Name == clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME)
                         {
-                            // Bruker 1 folder
+                            // Bruker 1 directory
                             mMSInfoScanner = new clsBrukerOneFolderInfoScanner();
                             knownMSDataType = true;
                         }
@@ -1535,7 +1535,7 @@ namespace MSFileInfoScanner
                             switch (Path.GetExtension(inputFileOrDirectoryPath).ToUpper())
                             {
                                 case clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION:
-                                    // Agilent .D folder or Bruker .D folder
+                                    // Agilent .D directory or Bruker .D directory
 
                                     if (Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 ||
                                         Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_SER_FILE_NAME).Length > 0 ||
@@ -1568,13 +1568,13 @@ namespace MSFileInfoScanner
                                     knownMSDataType = true;
                                     break;
                                 case clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION:
-                                    // Micromass .Raw folder
+                                    // Micromass .Raw directory
                                     mMSInfoScanner = new clsMicromassRawFolderInfoScanner();
                                     knownMSDataType = true;
                                     break;
                                 default:
-                                    // Unknown folder extension (or no extension)
-                                    // See if the folder contains one or more 0_R*.zip files
+                                    // Unknown directory extension (or no extension)
+                                    // See if the directory contains one or more 0_R*.zip files
                                     if (Directory.GetFiles(inputFileOrDirectoryPath, clsZippedImagingFilesScanner.ZIPPED_IMAGING_FILE_SEARCH_SPEC).Length > 0)
                                     {
                                         mMSInfoScanner = new clsZippedImagingFilesScanner();
@@ -1586,31 +1586,31 @@ namespace MSFileInfoScanner
                     }
                     else
                     {
-                        if (string.Equals(fileOrFolderInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
+                        if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
                         {
                             mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
                             knownMSDataType = true;
 
                         }
-                        else if (string.Equals(fileOrFolderInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
+                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
                         {
                             mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
                             knownMSDataType = true;
 
                         }
-                        else if (string.Equals(fileOrFolderInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
+                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
                         {
                             mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
                             knownMSDataType = true;
 
                         }
-                        else if (string.Equals(fileOrFolderInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
+                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
                         {
-                            // If the folder also contains file BRUKER_EXTENSION_BAF_FILE_NAME then this is a Bruker XMass folder
-                            var parentFolder = Path.GetDirectoryName(fileOrFolderInfo.FullName);
-                            if (!string.IsNullOrEmpty(parentFolder))
+                            // If the directory also contains file BRUKER_EXTENSION_BAF_FILE_NAME then this is a Bruker XMass directory
+                            var parentDirectory = Path.GetDirectoryName(fileOrDirectoryInfo.FullName);
+                            if (!string.IsNullOrEmpty(parentDirectory))
                             {
-                                var pathCheck = Path.Combine(parentFolder, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME);
+                                var pathCheck = Path.Combine(parentDirectory, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME);
                                 if (File.Exists(pathCheck))
                                 {
                                     mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
@@ -1622,7 +1622,7 @@ namespace MSFileInfoScanner
                         if (!knownMSDataType)
                         {
                             // Examine the extension on inputFileOrDirectoryPath
-                            switch (fileOrFolderInfo.Extension.ToUpper())
+                            switch (fileOrDirectoryInfo.Extension.ToUpper())
                             {
                                 case clsFinniganRawFileInfoScanner.THERMO_RAW_FILE_EXTENSION:
                                     // Thermo .raw file
@@ -1657,7 +1657,7 @@ namespace MSFileInfoScanner
 
                                 case clsDeconToolsIsosInfoScanner.DECONTOOLS_CSV_FILE_EXTENSION:
 
-                                    if (fileOrFolderInfo.FullName.EndsWith(clsDeconToolsIsosInfoScanner.DECONTOOLS_ISOS_FILE_SUFFIX, StringComparison.InvariantCultureIgnoreCase))
+                                    if (fileOrDirectoryInfo.FullName.EndsWith(clsDeconToolsIsosInfoScanner.DECONTOOLS_ISOS_FILE_SUFFIX, StringComparison.InvariantCultureIgnoreCase))
                                     {
                                         mMSInfoScanner = new clsDeconToolsIsosInfoScanner();
                                         knownMSDataType = true;
@@ -1665,14 +1665,14 @@ namespace MSFileInfoScanner
                                     break;
 
                                 default:
-                                    // Unknown file extension; check for a zipped folder
-                                    if (clsBrukerOneFolderInfoScanner.IsZippedSFolder(fileOrFolderInfo.Name))
+                                    // Unknown file extension; check for a zipped directory
+                                    if (clsBrukerOneFolderInfoScanner.IsZippedSFolder(fileOrDirectoryInfo.Name))
                                     {
                                         // Bruker s001.zip file
                                         mMSInfoScanner = new clsBrukerOneFolderInfoScanner();
                                         knownMSDataType = true;
                                     }
-                                    else if (clsZippedImagingFilesScanner.IsZippedImagingFile(fileOrFolderInfo.Name))
+                                    else if (clsZippedImagingFilesScanner.IsZippedImagingFile(fileOrDirectoryInfo.Name))
                                     {
                                         mMSInfoScanner = new clsZippedImagingFilesScanner();
                                         knownMSDataType = true;
@@ -1693,7 +1693,7 @@ namespace MSFileInfoScanner
                     // Attach the events
                     RegisterEvents(mMSInfoScanner);
 
-                    var datasetName = mMSInfoScanner.GetDatasetNameViaPath(fileOrFolderInfo.FullName);
+                    var datasetName = mMSInfoScanner.GetDatasetNameViaPath(fileOrDirectoryInfo.FullName);
 
                     if (UseCacheFiles && !ReprocessExistingFiles)
                     {
@@ -1761,7 +1761,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Calls ProcessMSFileOrFolder for all files in inputFileOrDirectoryPath and below having a known extension
+        /// Calls ProcessMSFileOrDirectory for all files in inputFileOrDirectoryPath and below having a known extension
         /// </summary>
         /// <param name="inputFileOrDirectoryPath">Path to the input file or directory; can contain a wildcard (* or ?)</param>
         /// <param name="outputDirectoryPath">Directory to write any results files to</param>
@@ -1787,7 +1787,7 @@ namespace MSFileInfoScanner
                 if (inputFileOrDirectoryPath != null &&
                     (inputFileOrDirectoryPath.IndexOf('*') >= 0 || inputFileOrDirectoryPath.IndexOf('?') >= 0))
                 {
-                    // Obtain a list of the matching files and folders
+                    // Obtain a list of the matching files and directories
 
                     // Copy the path into cleanPath and replace any * or ? characters with _
                     var cleanPath = inputFileOrDirectoryPath.Replace("*", "_").Replace("?", "_");
@@ -1940,33 +1940,33 @@ namespace MSFileInfoScanner
 
 
         /// <summary>
-        /// Main processing function, with input file / folder path, plus output folder path
+        /// Main processing function, with input file / directory path, plus output directory path
         /// </summary>
         /// <param name="inputFileOrFolderPath"></param>
-        /// <param name="outputFolderPath"></param>
+        /// <param name="outputDirectoryPath"></param>
         /// <returns>True if success, False if an error</returns>
         [Obsolete("Use ProcessMSFileOrDirectory")]
-        public override bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputFolderPath)
+        public override bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputDirectoryPath)
         {
-            return ProcessMSFileOrDirectory(inputFileOrFolderPath, outputFolderPath);
+            return ProcessMSFileOrDirectory(inputFileOrFolderPath, outputDirectoryPath);
         }
 
         /// <summary>
         /// Main processing function with input / output paths, error code reset flag, and processing state
         /// </summary>
         /// <param name="inputFileOrFolderPath"></param>
-        /// <param name="outputFolderPath"></param>
+        /// <param name="outputDirectoryPath"></param>
         /// <param name="resetErrorCode"></param>
         /// <param name="eMSFileProcessingState"></param>
         /// <returns>True if success, False if an error</returns>
         [Obsolete("Use ProcessMSFileOrDirectory")]
         public override bool ProcessMSFileOrFolder(
             string inputFileOrFolderPath,
-            string outputFolderPath,
+            string outputDirectoryPath,
             bool resetErrorCode,
             out eMSFileProcessingStateConstants eMSFileProcessingState)
         {
-            return ProcessMSFileOrDirectory(inputFileOrFolderPath, outputFolderPath, resetErrorCode, out eMSFileProcessingState);
+            return ProcessMSFileOrDirectory(inputFileOrFolderPath, outputDirectoryPath, resetErrorCode, out eMSFileProcessingState);
         }
 
         /// <summary>
@@ -2088,37 +2088,37 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Calls ProcessMSFileOrFolder for all files in inputFileOrFolderPath and below having a known extension
+        /// Calls ProcessMSFileOrDirectory for all files in inputFileOrFolderPath and below having a known extension
         /// </summary>
         /// <param name="inputFileOrFolderPath">Path to the input file or directory; can contain a wildcard (* or ?)</param>
-        /// <param name="outputFolderPath">Folder to write any results files to</param>
+        /// <param name="outputDirectoryPath">Folder to write any results files to</param>
         /// <param name="resetErrorCode"></param>
         /// <returns>True if success, False if an error</returns>
         [Obsolete("Use ProcessMSFileOrDirectoryWildcard")]
-        public override bool ProcessMSFileOrFolderWildcard(string inputFileOrFolderPath, string outputFolderPath, bool resetErrorCode)
+        public override bool ProcessMSFileOrFolderWildcard(string inputFileOrFolderPath, string outputDirectoryPath, bool resetErrorCode)
         {
-            return ProcessMSFileOrDirectoryWildcard(inputFileOrFolderPath, outputFolderPath, resetErrorCode);
+            return ProcessMSFileOrDirectoryWildcard(inputFileOrFolderPath, outputDirectoryPath, resetErrorCode);
         }
 
         /// <summary>
-        /// Calls ProcessMSFileOrFolder for all files in inputFilePathOrFolder and below having a known extension
+        /// Calls ProcessMSFileOrDirectory for all files in inputFilePathOrFolder and below having a known extension
         ///  Known extensions are:
         ///   .Raw for Finnigan files
         ///   .Wiff for Agilent TOF files and for Q-Star files
-        ///   .Baf for Bruker XMASS folders (contains file analysis.baf, and hopefully files scan.xml and Log.txt)
-        /// For each folder that does not have any files matching a known extension, will then look for special folder names:
+        ///   .Baf for Bruker XMASS directories (contains file analysis.baf, and hopefully files scan.xml and Log.txt)
+        /// For each directory that does not have any files matching a known extension, will then look for special directory names:
         ///   Folders matching *.Raw for Micromass data
         ///   Folders matching *.D for Agilent Ion Trap data
-        ///   A folder named 1 for Bruker FTICR-MS data
+        ///   A directory named 1 for Bruker FTICR-MS data
         /// </summary>
         /// <param name="inputFilePathOrFolder">Path to the input file or directory; can contain a wildcard (* or ?)</param>
-        /// <param name="outputFolderPath">Folder to write any results files to</param>
-        /// <param name="recurseFoldersMaxLevels">Maximum folder depth to process; Set to 0 to process all folders</param>
+        /// <param name="outputDirectoryPath">Folder to write any results files to</param>
+        /// <param name="recurseFoldersMaxLevels">Maximum directory depth to process; Set to 0 to process all directories</param>
         /// <returns>True if success, False if an error</returns>
         [Obsolete("Use ProcessMSFilesAndRecurseDirectories")]
-        public override bool ProcessMSFilesAndRecurseFolders(string inputFilePathOrFolder, string outputFolderPath, int recurseFoldersMaxLevels)
+        public override bool ProcessMSFilesAndRecurseFolders(string inputFilePathOrFolder, string outputDirectoryPath, int recurseFoldersMaxLevels)
         {
-            return ProcessMSFilesAndRecurseDirectories(inputFilePathOrFolder, outputFolderPath, recurseFoldersMaxLevels);
+            return ProcessMSFilesAndRecurseDirectories(inputFilePathOrFolder, outputDirectoryPath, recurseFoldersMaxLevels);
         }
 
         private bool RecurseDirectoriesWork(
@@ -2138,7 +2138,7 @@ namespace MSFileInfoScanner
             DirectoryInfo inputDirectory = null;
 
             List<string> fileExtensionsToParse;
-            List<string> folderExtensionsToParse;
+            List<string> directoryExtensionsToParse;
             bool processAllFileExtensions;
 
             bool success;
@@ -2158,7 +2158,7 @@ namespace MSFileInfoScanner
                 }
                 catch (Exception ex)
                 {
-                    // Input folder path error
+                    // Input directory path error
                     HandleException("Error populating DirectoryInfo inputDirectory for " + inputDirectoryPath, ex);
                     if (!ex.Message.Contains("no longer available"))
                     {
@@ -2183,13 +2183,13 @@ namespace MSFileInfoScanner
 
             try
             {
-                // Construct and validate the list of file and folder extensions to parse
+                // Construct and validate the list of file and directory extensions to parse
                 fileExtensionsToParse = GetKnownFileExtensionsList();
-                folderExtensionsToParse = GetKnownDirectoryExtensionsList();
+                directoryExtensionsToParse = GetKnownDirectoryExtensionsList();
 
                 // Validate the extensions, including assuring that they are all capital letters
                 processAllFileExtensions = ValidateExtensions(fileExtensionsToParse);
-                ValidateExtensions(folderExtensionsToParse);
+                ValidateExtensions(directoryExtensionsToParse);
             }
             catch (Exception ex)
             {
@@ -2201,7 +2201,7 @@ namespace MSFileInfoScanner
             {
                 Console.WriteLine("Examining " + inputDirectoryPath);
 
-                // Process any matching files in this folder
+                // Process any matching files in this directory
                 success = true;
                 var processedZippedSFolder = false;
 
@@ -2229,7 +2229,7 @@ namespace MSFileInfoScanner
                                     processedFileList.Add(fileItem.FullName);
                                 }
 
-                                // Successfully processed a folder; exit the for loop
+                                // Successfully processed a directory; exit the for loop
                                 break;
                             }
 
@@ -2334,7 +2334,7 @@ namespace MSFileInfoScanner
                     {
                         try
                         {
-                            // Check whether the folder name is BRUKER_ONE_FOLDER = "1"
+                            // Check whether the directory name is BRUKER_ONE_FOLDER = "1"
                             if (subdirectory.Name == clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME)
                             {
                                 success = ProcessMSFileOrDirectory(subdirectory.FullName, outputDirectoryPath, true, out eMSFileProcessingState);
@@ -2352,11 +2352,11 @@ namespace MSFileInfoScanner
                             }
                             else
                             {
-                                // See if the subdirectory has an extension matching folderExtensionsToParse()
-                                // If it does, process it using ProcessMSFileOrFolder and do not recurse into it
-                                foreach (var folderExtension in folderExtensionsToParse)
+                                // See if the subdirectory has an extension matching directoryExtensionsToParse()
+                                // If it does, process it using ProcessMSFileOrDirectory and do not recurse into it
+                                foreach (var directoryExtension in directoryExtensionsToParse)
                                 {
-                                    if (subdirectory.Extension.ToUpper() != folderExtension)
+                                    if (subdirectory.Extension.ToUpper() != directoryExtension)
                                     {
                                         continue;
                                     }
@@ -2374,7 +2374,7 @@ namespace MSFileInfoScanner
                                     subdirectoriesProcessed += 1;
                                     subdirectoryNamesProcessed.Add(subdirectory.Name);
 
-                                    // Successfully processed a folder; exit the for loop
+                                    // Successfully processed a directory; exit the for loop
                                     break;
                                 }
 
@@ -2386,7 +2386,7 @@ namespace MSFileInfoScanner
                         }
                         catch (Exception ex)
                         {
-                            // Error parsing folder
+                            // Error parsing directory
                             HandleException("Error in RecurseDirectoriesWork at For Each subdirectory(A) in " + inputDirectoryPath, ex);
                             if (!ex.Message.Contains("no longer available"))
                             {
@@ -2417,7 +2417,7 @@ namespace MSFileInfoScanner
                 if (maxLevelsToRecurse <= 0 || recursionLevel <= maxLevelsToRecurse)
                 {
                     // Call this function for each of the subdirectories of inputDirectory
-                    // However, do not step into folders listed in subdirectoryNamesProcessed
+                    // However, do not step into directories listed in subdirectoryNamesProcessed
 
                     foreach (var subdirectory in inputDirectory.GetDirectories())
                     {
@@ -2702,7 +2702,7 @@ namespace MSFileInfoScanner
 
                 if (!datasetFile.Exists)
                 {
-                    // Make sure the folder exists
+                    // Make sure the directory exists
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     if (datasetFile.Directory != null && !datasetFile.Directory.Exists)
                     {
@@ -2759,7 +2759,7 @@ namespace MSFileInfoScanner
 
         private void WriteFileIntegrityDetails(
             TextWriter writer,
-            int folderID,
+            int directoryID,
             IEnumerable<clsFileIntegrityChecker.udtFileStatsType> udtFileStats)
         {
 
@@ -2770,7 +2770,7 @@ namespace MSFileInfoScanner
             {
                 // Note: HH:mm:ss corresponds to time in 24 hour format
                 writer.WriteLine(
-                    folderID.ToString() + '\t' +
+                    directoryID.ToString() + '\t' +
                     item.FileName + '\t' +
                     item.SizeBytes + '\t' +
                     item.ModificationDate.ToString("yyyy-MM-dd HH:mm:ss") + '\t' +

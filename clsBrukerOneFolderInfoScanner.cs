@@ -189,10 +189,10 @@ namespace MSFileInfoScanner
         /// Updates datasetFileInfo.FileSizeBytes with this info, while also updating datasetFileInfo.ScanCount with the total number of files found
         /// Also computes the SHA-1 hash of each file
         /// </summary>
-        /// <param name="zippedSFilesFolderInfo"></param>
+        /// <param name="zippedSFilesDirectoryInfo"></param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success and also if no matching Zip files were found; returns False if error</returns>
-        private bool ParseBrukerZippedSFolders(DirectoryInfo zippedSFilesFolderInfo, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseBrukerZippedSFolders(DirectoryInfo zippedSFilesDirectoryInfo, clsDatasetFileInfo datasetFileInfo)
         {
 
             bool success;
@@ -202,7 +202,7 @@ namespace MSFileInfoScanner
 
             try
             {
-                foreach (var zippedSFile in zippedSFilesFolderInfo.GetFiles("s*.zip"))
+                foreach (var zippedSFile in zippedSFilesDirectoryInfo.GetFiles("s*.zip"))
                 {
                     // Get the info on each zip file
 
@@ -238,15 +238,15 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ParseICRDirectory(DirectoryInfo icrDirectoryInfo, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseICRDirectory(DirectoryInfo icrDirectory, clsDatasetFileInfo datasetFileInfo)
         {
-            // Look for and open the .Pek file in icrDirectoryInfo
+            // Look for and open the .Pek file in icrDirectory
             // Count the number of PEK_FILE_FILENAME_LINE lines
 
             var fileListCount = 0;
             var success = false;
 
-            foreach (var pekFile in icrDirectoryInfo.GetFiles("*.pek"))
+            foreach (var pekFile in icrDirectory.GetFiles("*.pek"))
             {
                 try
                 {
@@ -376,18 +376,18 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// // Process a Bruker 1 folder or Bruker s001.zip file, specified by dataFilePath
+        /// // Process a Bruker 1 directory or Bruker s001.zip file, specified by dataFilePath
         /// </summary>
-        /// <param name="dataFilePath">Bruker 1 folder path or Bruker s001.zip file</param>
+        /// <param name="dataFilePath">Bruker 1 directory path or Bruker s001.zip file</param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
-        /// <remarks>If a Bruker 1 folder, it must contain file acqu and typically contains file LOCK</remarks>
+        /// <remarks>If a Bruker 1 directory, it must contain file acqu and typically contains file LOCK</remarks>
         public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
 
             ResetResults();
 
-            DirectoryInfo zippedSFilesFolderInfo = null;
+            DirectoryInfo zippedSFilesDirectoryInfo = null;
 
             var scanCountSaved = 0;
             var ticModificationDate = DateTime.MinValue;
@@ -397,7 +397,7 @@ namespace MSFileInfoScanner
 
             try
             {
-                // Determine whether dataFilePath points to a file or a folder
+                // Determine whether dataFilePath points to a file or a directory
                 // See if dataFilePath points to a valid file
                 var brukerDatasetFile = new FileInfo(dataFilePath);
 
@@ -406,8 +406,8 @@ namespace MSFileInfoScanner
                     // Parsing a zipped S folder
                     parsingBrukerOneFolder = false;
 
-                    // The dataset name is equivalent to the name of the folder containing dataFilePath
-                    zippedSFilesFolderInfo = brukerDatasetFile.Directory;
+                    // The dataset name is equivalent to the name of the directory containing dataFilePath
+                    zippedSFilesDirectoryInfo = brukerDatasetFile.Directory;
                     success = true;
 
                     // Cannot determine accurate acquisition start or end times
@@ -435,14 +435,14 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    // Assuming it's a "1" folder
+                    // Assuming it's a "1" directory
                     parsingBrukerOneFolder = true;
 
-                    zippedSFilesFolderInfo = new DirectoryInfo(dataFilePath);
-                    if (zippedSFilesFolderInfo.Exists)
+                    zippedSFilesDirectoryInfo = new DirectoryInfo(dataFilePath);
+                    if (zippedSFilesDirectoryInfo.Exists)
                     {
-                        // Determine the dataset name by looking up the name of the parent folder of dataFilePath
-                        zippedSFilesFolderInfo = zippedSFilesFolderInfo.Parent;
+                        // Determine the dataset name by looking up the name of the parent directory of dataFilePath
+                        zippedSFilesDirectoryInfo = zippedSFilesDirectoryInfo.Parent;
                         success = true;
                     }
                     else
@@ -474,20 +474,20 @@ namespace MSFileInfoScanner
                     // Look for a fid or ser file
                     if (!instrumentFileAdded)
                     {
-                        AddLargestInstrumentFile(zippedSFilesFolderInfo);
+                        AddLargestInstrumentFile(zippedSFilesDirectoryInfo);
                     }
                 }
 
-                if (success && zippedSFilesFolderInfo != null)
+                if (success && zippedSFilesDirectoryInfo != null)
                 {
-                    datasetFileInfo.FileSystemCreationTime = zippedSFilesFolderInfo.CreationTime;
-                    datasetFileInfo.FileSystemModificationTime = zippedSFilesFolderInfo.LastWriteTime;
+                    datasetFileInfo.FileSystemCreationTime = zippedSFilesDirectoryInfo.CreationTime;
+                    datasetFileInfo.FileSystemModificationTime = zippedSFilesDirectoryInfo.LastWriteTime;
 
                     // The acquisition times will get updated below to more accurate values
                     datasetFileInfo.AcqTimeStart = datasetFileInfo.FileSystemModificationTime;
                     datasetFileInfo.AcqTimeEnd = datasetFileInfo.FileSystemModificationTime;
 
-                    datasetFileInfo.DatasetName = zippedSFilesFolderInfo.Name;
+                    datasetFileInfo.DatasetName = zippedSFilesDirectoryInfo.Name;
                     datasetFileInfo.FileExtension = string.Empty;
                     datasetFileInfo.FileSizeBytes = 0;
                     datasetFileInfo.ScanCount = 0;
@@ -519,10 +519,10 @@ namespace MSFileInfoScanner
 
             if (success)
             {
-                // Look for the zipped S folders in zippedSFilesFolderInfo
+                // Look for the zipped S folders in zippedSFilesDirectoryInfo
                 try
                 {
-                    success = ParseBrukerZippedSFolders(zippedSFilesFolderInfo, datasetFileInfo);
+                    success = ParseBrukerZippedSFolders(zippedSFilesDirectoryInfo, datasetFileInfo);
                     scanCountSaved = datasetFileInfo.ScanCount;
                 }
                 catch (Exception)
@@ -534,18 +534,18 @@ namespace MSFileInfoScanner
                 {
                     success = false;
 
-                    if (zippedSFilesFolderInfo != null)
+                    if (zippedSFilesDirectoryInfo != null)
                     {
-                        // Look for the TIC* folder to obtain the scan count from a .Tic file
+                        // Look for the TIC* directory to obtain the scan count from a .Tic file
                         // If the Scan Count in the TIC is larger than the scan count from ParseBrukerZippedSFolders,
                         //  then we'll use that instead
-                        foreach (var subFolder in zippedSFilesFolderInfo.GetDirectories("TIC*"))
+                        foreach (var subDirectory in zippedSFilesDirectoryInfo.GetDirectories("TIC*"))
                         {
-                            success = ParseTICDirectory(subFolder, datasetFileInfo, out ticModificationDate);
+                            success = ParseTICDirectory(subDirectory, datasetFileInfo, out ticModificationDate);
 
                             if (success)
                             {
-                                // Successfully parsed a TIC folder; do not parse any others
+                                // Successfully parsed a TIC directory; do not parse any others
                                 break;
                             }
                         }
@@ -553,8 +553,8 @@ namespace MSFileInfoScanner
 
                     if (!success)
                     {
-                        // TIC directory not found; see if a .TIC file is present in zippedSFilesFolderInfo
-                        success = ParseTICDirectory(zippedSFilesFolderInfo, datasetFileInfo, out ticModificationDate);
+                        // TIC directory not found; see if a .TIC file is present in zippedSFilesDirectoryInfo
+                        success = ParseTICDirectory(zippedSFilesDirectoryInfo, datasetFileInfo, out ticModificationDate);
                     }
 
                     if (success && !parsingBrukerOneFolder && ticModificationDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
@@ -567,17 +567,17 @@ namespace MSFileInfoScanner
                         }
                     }
 
-                    if (!success && zippedSFilesFolderInfo != null)
+                    if (!success && zippedSFilesDirectoryInfo != null)
                     {
-                        // .Tic file not found in zippedSFilesFolderInfo
-                        // Look for an ICR* folder to obtain the scan count from a .Pek file
-                        foreach (var subFolder in zippedSFilesFolderInfo.GetDirectories("ICR*"))
+                        // .Tic file not found in zippedSFilesDirectoryInfo
+                        // Look for an ICR* directory to obtain the scan count from a .Pek file
+                        foreach (var subDirectory in zippedSFilesDirectoryInfo.GetDirectories("ICR*"))
                         {
-                            success = ParseICRDirectory(subFolder, datasetFileInfo);
+                            success = ParseICRDirectory(subDirectory, datasetFileInfo);
 
                             if (success)
                             {
-                                // Successfully parsed an ICR folder; do not parse any others
+                                // Successfully parsed an ICR directory; do not parse any others
                                 break;
                             }
                         }
@@ -599,7 +599,7 @@ namespace MSFileInfoScanner
                 }
                 catch (Exception)
                 {
-                    // Error parsing the TIC* or ICR* folders; do not abort
+                    // Error parsing the TIC* or ICR* directories; do not abort
                 }
 
                 // Validate datasetFileInfo.AcqTimeStart vs. datasetFileInfo.AcqTimeEnd

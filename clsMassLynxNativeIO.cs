@@ -426,13 +426,13 @@ namespace MSFileInfoScanner
                     message = "";
                     break;
                 case eErrorCodeConstants.InvalidDataFolderPath:
-                    message = "Invalid data folder path";
+                    message = "Invalid data directory path";
                     break;
                 case eErrorCodeConstants.DataFolderHeaderReadError:
-                    message = "The data folder header read error";
+                    message = "The data directory header read error";
                     break;
                 case eErrorCodeConstants.DataFolderReadError:
-                    message = "Data folder read error";
+                    message = "Data directory read error";
                     break;
                 default:
                     message = "Unknown error";
@@ -452,7 +452,7 @@ namespace MSFileInfoScanner
             out int versionMajor,
             out int versionMinor)
         {
-            // Returns information on the given MassLynx data file (actually a folder)
+            // Returns information on the given MassLynx data file (actually a directory)
             // Returns True if success, false if failure
 
             bool success;
@@ -492,7 +492,7 @@ namespace MSFileInfoScanner
 
         public bool GetFileInfo(string massLynxDataDirectoryPath, out udtMSHeaderInfoType udtHeaderInfo)
         {
-            // Returns information on the given MassLynx data file (actually a folder)
+            // Returns information on the given MassLynx data file (actually a directory)
             // Returns True if success, false if failure
 
             bool success;
@@ -831,9 +831,9 @@ namespace MSFileInfoScanner
 
         public bool IsMassLynxData(string massLynxDataDirectoryPath)
         {
-            // massLynxDataDirectoryPath should contain the path to a folder that ends in the text .RAW
+            // massLynxDataDirectoryPath should contain the path to a directory that ends in the text .RAW
             // If massLynxDataDirectoryPath contains the path to a file, then the ValidateDataFolder function
-            //  will strip off the filename and only examine the folder
+            //  will strip off the filename and only examine the directory
 
             return ValidateDataFolder(massLynxDataDirectoryPath);
 
@@ -850,7 +850,7 @@ namespace MSFileInfoScanner
         {
 
             // Verifies that massLynxDataDirectoryPath exists
-            // Loads the header information for the given MassLynx folder path
+            // Loads the header information for the given MassLynx directory path
             // Returns True if success, false if failure
 
             var success = false;

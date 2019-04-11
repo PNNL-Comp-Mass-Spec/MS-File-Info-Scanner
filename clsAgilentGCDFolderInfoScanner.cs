@@ -51,7 +51,7 @@ namespace MSFileInfoScanner
 
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
-            // The dataset name is simply the folder name without .D
+            // The dataset name is simply the directory name without .D
             try
             {
                 return Path.GetFileNameWithoutExtension(dataFilePath);
@@ -386,7 +386,7 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    // Compute the hash of the largest file in the .D folder
+                    // Compute the hash of the largest file in the .D directory
                     AddLargestInstrumentFile(agilentDFolder);
                 }
 
@@ -418,6 +418,7 @@ namespace MSFileInfoScanner
                     if (methodFile.Exists)
                     {
 
+                        // ReSharper disable once CommentTypo
                         // Update the AcqTimes only if the LastWriteTime of the acqmeth.txt or GC.ini file is within the next 60 minutes of .AcqTimeEnd
                         if (!success || methodFile.LastWriteTime.Subtract(datasetFileInfo.AcqTimeEnd).TotalMinutes < 60)
                         {
@@ -429,7 +430,7 @@ namespace MSFileInfoScanner
                         if (datasetFileInfo.FileSizeBytes == 0)
                         {
                             // File size was not determined from the MS file
-                            // Instead, sum up the sizes of all of the files in this folder
+                            // Instead, sum up the sizes of all of the files in this directory
                             foreach (var item in agilentDFolder.GetFiles())
                             {
                                 datasetFileInfo.FileSizeBytes += item.Length;
@@ -478,7 +479,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Exception parsing GC .D folder: " + ex.Message, ex);
+                OnErrorEvent("Exception parsing GC .D directory: " + ex.Message, ex);
                 success = false;
             }
 

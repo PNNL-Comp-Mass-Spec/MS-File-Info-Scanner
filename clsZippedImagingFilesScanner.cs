@@ -116,7 +116,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private DirectoryInfo GetDatasetFolder(string dataFilePath)
+        private DirectoryInfo GetDatasetDirectory(string dataFilePath)
         {
 
             // First see if dataFilePath points to a valid file
@@ -124,11 +124,11 @@ namespace MSFileInfoScanner
 
             if (datasetFile.Exists)
             {
-                // User specified a file; assume the parent folder of this file is the dataset folder
+                // User specified a file; assume the parent directory of this file is the dataset directory
                 return datasetFile.Directory;
             }
 
-            // Assume this is the path to the dataset folder
+            // Assume this is the path to the dataset directory
             return new DirectoryInfo(dataFilePath);
         }
 
@@ -139,8 +139,8 @@ namespace MSFileInfoScanner
             try
             {
                 // The dataset name for a dataset with zipped imaging files is the name of the parent directory
-                // However, dataFilePath could be a file or a folder path, so use GetDatasetFolder to get the dataset folder
-                var datasetDirectory = GetDatasetFolder(dataFilePath);
+                // However, dataFilePath could be a file or a directory path, so use GetDatasetDirectory to get the dataset directory
+                var datasetDirectory = GetDatasetDirectory(dataFilePath);
                 datasetName = datasetDirectory.Name;
 
                 if (datasetName.ToLower().EndsWith(".d"))
@@ -192,18 +192,18 @@ namespace MSFileInfoScanner
 
             try
             {
-                // Determine whether dataFilePath points to a file or a folder
+                // Determine whether dataFilePath points to a file or a directory
 
-                var datasetDirectory = GetDatasetFolder(dataFilePath);
+                var datasetDirectory = GetDatasetDirectory(dataFilePath);
 
-                // Validate that we have selected a valid folder
+                // Validate that we have selected a valid directory
                 if (!datasetDirectory.Exists)
                 {
-                    OnErrorEvent("File/folder not found: " + dataFilePath);
+                    OnErrorEvent("File/directory not found: " + dataFilePath);
                     return false;
                 }
 
-                // In case we cannot find any .Zip files, update the .AcqTime values to the folder creation date
+                // In case we cannot find any .Zip files, update the .AcqTime values to the directory creation date
                 datasetFileInfo.AcqTimeStart = datasetDirectory.CreationTime;
                 datasetFileInfo.AcqTimeEnd = datasetDirectory.CreationTime;
 

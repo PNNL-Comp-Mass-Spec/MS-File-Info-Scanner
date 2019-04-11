@@ -362,7 +362,7 @@ namespace MSFileInfoScanner
 
                             if (!string.Equals(dataFilePathLocal, dataFilePath, StringComparison.InvariantCultureIgnoreCase))
                             {
-                                OnDebugEvent("Copying file " + Path.GetFileName(dataFilePath) + " to the working folder");
+                                OnDebugEvent("Copying file " + Path.GetFileName(dataFilePath) + " to the working directory");
                                 File.Copy(dataFilePath, dataFilePathLocal, true);
 
                                 dataFilePath = string.Copy(dataFilePathLocal);

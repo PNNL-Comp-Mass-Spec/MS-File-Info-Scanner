@@ -21,7 +21,7 @@ namespace MSFileInfoScanner
         public const string COL_NAME_INFO_LAST_MODIFIED = "InfoLastModified";
 
         public const string COL_NAME_FILE_MODIFICATION_DATE = "FileModificationDate";
-        private const string FOLDER_INTEGRITY_INFO_DATA_TABLE = "FolderIntegrityInfoTable";
+        private const string DIRECTORY_INTEGRITY_INFO_DATA_TABLE = "DirectoryIntegrityInfoTable";
         public const string COL_NAME_FOLDER_ID = "FolderID";
         public const string COL_NAME_FOLDER_PATH = "FolderPath";
         public const string COL_NAME_FILE_COUNT = "FileCount";
@@ -45,10 +45,10 @@ namespace MSFileInfoScanner
             FileModificationDate = 8
         }
 
-        public enum eFolderIntegrityInfoFileColumns
+        public enum eDirectoryIntegrityInfoFileColumns
         {
-            FolderID = 0,
-            FolderPath = 1,
+            DirectoryID = 0,
+            DirectoryPath = 1,
             FileCount = 2,
             FileCountFailedIntegrity = 3,
             InfoLastModified = 4
@@ -76,18 +76,18 @@ namespace MSFileInfoScanner
         #region "Classwide Variables"
         private string mAcquisitionTimeFilePath;
 
-        private string mFolderIntegrityInfoFilePath;
+        private string mDirectoryIntegrityInfoFilePath;
         private int mCachedResultsAutoSaveIntervalMinutes;
         private DateTime mCachedMSInfoResultsLastSaveTime;
 
-        private DateTime mCachedFolderIntegrityInfoLastSaveTime;
+        private DateTime mCachedDirectoryIntegrityInfoLastSaveTime;
         private DataSet mMSFileInfoDataset;
 
         private eCachedResultsStateConstants mMSFileInfoCachedResultsState;
-        private DataSet mFolderIntegrityInfoDataset;
-        private eCachedResultsStateConstants mFolderIntegrityInfoResultsState;
+        private DataSet mDirectoryIntegrityInfoDataset;
+        private eCachedResultsStateConstants mDirectoryIntegrityInfoResultsState;
 
-        private int mMaximumFolderIntegrityInfoFolderID;
+        private int mMaximumDirectoryIntegrityInfoDirectoryID;
 
         #endregion
 
@@ -99,10 +99,10 @@ namespace MSFileInfoScanner
             set => mAcquisitionTimeFilePath = value;
         }
 
-        public string FolderIntegrityInfoFilePath
+        public string DirectoryIntegrityInfoFilePath
         {
-            get => mFolderIntegrityInfoFilePath;
-            set => mFolderIntegrityInfoFilePath = value;
+            get => mDirectoryIntegrityInfoFilePath;
+            set => mDirectoryIntegrityInfoFilePath = value;
         }
 
         #endregion
@@ -132,12 +132,12 @@ namespace MSFileInfoScanner
                     }
                 }
 
-                if (mFolderIntegrityInfoResultsState == eCachedResultsStateConstants.Modified)
+                if (mDirectoryIntegrityInfoResultsState == eCachedResultsStateConstants.Modified)
                 {
-                    if (DateTime.UtcNow.Subtract(mCachedFolderIntegrityInfoLastSaveTime).TotalMinutes >= mCachedResultsAutoSaveIntervalMinutes)
+                    if (DateTime.UtcNow.Subtract(mCachedDirectoryIntegrityInfoLastSaveTime).TotalMinutes >= mCachedResultsAutoSaveIntervalMinutes)
                     {
                         // Auto save the cached results
-                        SaveCachedFolderIntegrityInfoResults(false);
+                        SaveCachedDirectoryIntegrityInfoResults(false);
                     }
                 }
             }
@@ -154,17 +154,17 @@ namespace MSFileInfoScanner
             return DatasetTableContainsPrimaryKeyValue(mMSFileInfoDataset, MS_FILE_INFO_DATA_TABLE, datasetName, out rowMatch);
         }
 
-        public bool CachedFolderIntegrityInfoContainsDirectory(string folderPath, out int folderID)
+        public bool CachedDirectoryIntegrityInfoContainsDirectory(string directoryPath, out int directoryID)
         {
-            return CachedFolderIntegrityInfoContainsDirectory(folderPath, out folderID, out _);
+            return CachedDirectoryIntegrityInfoContainsDirectory(directoryPath, out directoryID, out _);
         }
 
-        public bool CachedFolderIntegrityInfoContainsDirectory(
+        public bool CachedDirectoryIntegrityInfoContainsDirectory(
             string directoryPath,
             out int directoryID,
             out DataRow rowMatch)
         {
-            if (DatasetTableContainsPrimaryKeyValue(mFolderIntegrityInfoDataset, FOLDER_INTEGRITY_INFO_DATA_TABLE, directoryPath, out rowMatch))
+            if (DatasetTableContainsPrimaryKeyValue(mDirectoryIntegrityInfoDataset, DIRECTORY_INTEGRITY_INFO_DATA_TABLE, directoryPath, out rowMatch))
             {
                 directoryID = Convert.ToInt32(rowMatch[COL_NAME_FOLDER_ID]);
                 return true;
@@ -181,11 +181,11 @@ namespace MSFileInfoScanner
             mMSFileInfoCachedResultsState = eCachedResultsStateConstants.NotInitialized;
         }
 
-        private void ClearCachedFolderIntegrityInfoResults()
+        private void ClearCachedDirectoryIntegrityInfoResults()
         {
-            mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATA_TABLE].Clear();
-            mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized;
-            mMaximumFolderIntegrityInfoFolderID = 0;
+            mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].Clear();
+            mDirectoryIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized;
+            mMaximumDirectoryIntegrityInfoDirectoryID = 0;
         }
 
         public string ConstructHeaderLine(iMSFileInfoScanner.eDataFileTypeConstants eDataFileType)
@@ -196,8 +196,8 @@ namespace MSFileInfoScanner
                     // Note: The order of the output should match eMSFileInfoResultsFileColumns
 
                     return COL_NAME_DATASET_ID + '\t' + COL_NAME_DATASET_NAME + '\t' + COL_NAME_FILE_EXTENSION + '\t' + COL_NAME_ACQ_TIME_START + '\t' + COL_NAME_ACQ_TIME_END + '\t' + COL_NAME_SCAN_COUNT + '\t' + COL_NAME_FILE_SIZE_BYTES + '\t' + COL_NAME_INFO_LAST_MODIFIED + '\t' + COL_NAME_FILE_MODIFICATION_DATE;
-                case iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo:
-                    // Note: The order of the output should match eFolderIntegrityInfoFileColumns
+                case iMSFileInfoScanner.eDataFileTypeConstants.DirectoryIntegrityInfo:
+                    // Note: The order of the output should match eDirectoryIntegrityInfoFileColumns
 
                     return COL_NAME_FOLDER_ID + '\t' + COL_NAME_FOLDER_PATH + '\t' + COL_NAME_FILE_COUNT + '\t' + COL_NAME_COUNT_FAIL_INTEGRITY + '\t' + COL_NAME_INFO_LAST_MODIFIED;
                 case iMSFileInfoScanner.eDataFileTypeConstants.FileIntegrityDetails:
@@ -254,9 +254,9 @@ namespace MSFileInfoScanner
         {
             mCachedResultsAutoSaveIntervalMinutes = 5;
             mCachedMSInfoResultsLastSaveTime = DateTime.UtcNow;
-            mCachedFolderIntegrityInfoLastSaveTime = DateTime.UtcNow;
+            mCachedDirectoryIntegrityInfoLastSaveTime = DateTime.UtcNow;
 
-            mFolderIntegrityInfoFilePath = Path.Combine(clsMSFileInfoScanner.GetAppDirectoryPath(), clsMSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo));
+            mDirectoryIntegrityInfoFilePath = Path.Combine(clsMSFileInfoScanner.GetAppDirectoryPath(), clsMSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.DirectoryIntegrityInfo));
 
             mAcquisitionTimeFilePath = Path.Combine(clsMSFileInfoScanner.GetAppDirectoryPath(), clsMSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo));
             clsMSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo);
@@ -299,31 +299,31 @@ namespace MSFileInfoScanner
             msFileInfo.PrimaryKey = MSInfoPrimaryKeyColumn;
 
             // Make the Folder Integrity Info DataTable
-            var folderIntegrityInfo = new DataTable(FOLDER_INTEGRITY_INFO_DATA_TABLE);
+            var directoryIntegrityInfo = new DataTable(DIRECTORY_INTEGRITY_INFO_DATA_TABLE);
 
             // Add the columns to the DataTable
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(folderIntegrityInfo, COL_NAME_FOLDER_ID);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnStringToTable(folderIntegrityInfo, COL_NAME_FOLDER_PATH);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(folderIntegrityInfo, COL_NAME_FILE_COUNT);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(folderIntegrityInfo, COL_NAME_COUNT_FAIL_INTEGRITY);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnDateToTable(folderIntegrityInfo, COL_NAME_INFO_LAST_MODIFIED, defaultDate);
+            PRISM.DatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(directoryIntegrityInfo, COL_NAME_FOLDER_ID);
+            PRISM.DatabaseUtils.DataTableUtils.AppendColumnStringToTable(directoryIntegrityInfo, COL_NAME_FOLDER_PATH);
+            PRISM.DatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(directoryIntegrityInfo, COL_NAME_FILE_COUNT);
+            PRISM.DatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(directoryIntegrityInfo, COL_NAME_COUNT_FAIL_INTEGRITY);
+            PRISM.DatabaseUtils.DataTableUtils.AppendColumnDateToTable(directoryIntegrityInfo, COL_NAME_INFO_LAST_MODIFIED, defaultDate);
 
             // Use the directory path as the primary key
             var FolderInfoPrimaryKeyColumn = new[] {
-                folderIntegrityInfo.Columns[COL_NAME_FOLDER_PATH]
+                directoryIntegrityInfo.Columns[COL_NAME_FOLDER_PATH]
             };
-            folderIntegrityInfo.PrimaryKey = FolderInfoPrimaryKeyColumn;
+            directoryIntegrityInfo.PrimaryKey = FolderInfoPrimaryKeyColumn;
 
             // Instantiate the datasets
             mMSFileInfoDataset = new DataSet("MSFileInfoDataset");
-            mFolderIntegrityInfoDataset = new DataSet("FolderIntegrityInfoDataset");
+            mDirectoryIntegrityInfoDataset = new DataSet("DirectoryIntegrityInfoDataset");
 
             // Add the new DataTable to each DataSet
             mMSFileInfoDataset.Tables.Add(msFileInfo);
-            mFolderIntegrityInfoDataset.Tables.Add(folderIntegrityInfo);
+            mDirectoryIntegrityInfoDataset.Tables.Add(directoryIntegrityInfo);
 
             mMSFileInfoCachedResultsState = eCachedResultsStateConstants.NotInitialized;
-            mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized;
+            mDirectoryIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized;
         }
 
         public void LoadCachedResults(bool forceLoad)
@@ -331,27 +331,25 @@ namespace MSFileInfoScanner
             if (forceLoad || mMSFileInfoCachedResultsState == eCachedResultsStateConstants.NotInitialized)
             {
                 LoadCachedMSFileInfoResults();
-                LoadCachedFolderIntegrityInfoResults();
+                LoadCachedDirectoryIntegrityInfoResults();
             }
         }
 
-        private void LoadCachedFolderIntegrityInfoResults()
+        private void LoadCachedDirectoryIntegrityInfoResults()
         {
-            var udtFolderStats = default(clsFileIntegrityChecker.udtFolderStatsType);
-
             var sepChars = new[] { '\t' };
 
             // Clear the Folder Integrity Info Table
-            ClearCachedFolderIntegrityInfoResults();
+            ClearCachedDirectoryIntegrityInfoResults();
 
-            clsMSFileInfoScanner.ValidateDataFilePath(ref mFolderIntegrityInfoFilePath, iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo);
+            clsMSFileInfoScanner.ValidateDataFilePath(ref mDirectoryIntegrityInfoFilePath, iMSFileInfoScanner.eDataFileTypeConstants.DirectoryIntegrityInfo);
 
-            OnDebugEvent("Loading cached folder integrity info from: " + Path.GetFileName(mFolderIntegrityInfoFilePath));
+            OnDebugEvent("Loading cached directory integrity info from: " + Path.GetFileName(mDirectoryIntegrityInfoFilePath));
 
-            if (File.Exists(mFolderIntegrityInfoFilePath))
+            if (File.Exists(mDirectoryIntegrityInfoFilePath))
             {
-                // Read the entries from mFolderIntegrityInfoFilePath, populating mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATA_TABLE)
-                using (var reader = new StreamReader(mFolderIntegrityInfoFilePath))
+                // Read the entries from mDirectoryIntegrityInfoFilePath, populating mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE)
+                using (var reader = new StreamReader(mDirectoryIntegrityInfoFilePath))
                 {
                     while (!reader.EndOfStream)
                     {
@@ -365,28 +363,31 @@ namespace MSFileInfoScanner
                         if (splitLine.Length < 5)
                             continue;
 
-                        var folderPath = splitLine[(int)eFolderIntegrityInfoFileColumns.FolderPath];
+                        var directoryPath = splitLine[(int)eDirectoryIntegrityInfoFileColumns.DirectoryPath];
 
-                        if (!IsNumber(splitLine[(int)eFolderIntegrityInfoFileColumns.FolderID]))
+                        if (!IsNumber(splitLine[(int)eDirectoryIntegrityInfoFileColumns.DirectoryID]))
                             continue;
 
-                        if (CachedFolderIntegrityInfoContainsDirectory(folderPath, out var folderID))
+                        if (CachedDirectoryIntegrityInfoContainsDirectory(directoryPath, out var directoryID))
                             continue;
 
                         try
                         {
-                            var newRow = mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATA_TABLE].NewRow();
+                            var newRow = mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].NewRow();
 
-                            folderID = Convert.ToInt32(splitLine[(int)eFolderIntegrityInfoFileColumns.FolderID]);
-                            udtFolderStats.FolderPath = folderPath;
-                            udtFolderStats.FileCount = Convert.ToInt32(splitLine[(int)eFolderIntegrityInfoFileColumns.FileCount]);
-                            udtFolderStats.FileCountFailIntegrity =
-                                Convert.ToInt32(splitLine[(int)eFolderIntegrityInfoFileColumns.FileCountFailedIntegrity]);
+                            directoryID = Convert.ToInt32(splitLine[(int)eDirectoryIntegrityInfoFileColumns.DirectoryID]);
 
-                            var infoLastModified = ParseDate(splitLine[(int)eFolderIntegrityInfoFileColumns.InfoLastModified]);
+                            var directoryStats = new clsFileIntegrityChecker.udtDirectoryStatsType
+                            {
+                                DirectoryPath = directoryPath,
+                                FileCount = Convert.ToInt32(splitLine[(int)eDirectoryIntegrityInfoFileColumns.FileCount]),
+                                FileCountFailIntegrity = Convert.ToInt32(splitLine[(int)eDirectoryIntegrityInfoFileColumns.FileCountFailedIntegrity])
+                            };
 
-                            PopulateFolderIntegrityInfoDataRow(folderID, udtFolderStats, newRow, infoLastModified);
-                            mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATA_TABLE].Rows.Add(newRow);
+                            var infoLastModified = ParseDate(splitLine[(int)eDirectoryIntegrityInfoFileColumns.InfoLastModified]);
+
+                            PopulateDirectoryIntegrityInfoDataRow(directoryID, directoryStats, newRow, infoLastModified);
+                            mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].Rows.Add(newRow);
 
                         }
                         catch (Exception)
@@ -398,7 +399,7 @@ namespace MSFileInfoScanner
 
             }
 
-            mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
+            mDirectoryIntegrityInfoResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
 
         }
 
@@ -511,29 +512,29 @@ namespace MSFileInfoScanner
             //[COL_NAME_QUALITY_SCORE] = datasetFileInfo.OverallQualityScore
         }
 
-        private void PopulateFolderIntegrityInfoDataRow(
-            int folderID,
-            clsFileIntegrityChecker.udtFolderStatsType directoryStats,
+        private void PopulateDirectoryIntegrityInfoDataRow(
+            int directoryID,
+            clsFileIntegrityChecker.udtDirectoryStatsType directoryStats,
             DataRow currentRow)
         {
-            PopulateFolderIntegrityInfoDataRow(folderID, directoryStats, currentRow, DateTime.Now);
+            PopulateDirectoryIntegrityInfoDataRow(directoryID, directoryStats, currentRow, DateTime.Now);
         }
 
-        private void PopulateFolderIntegrityInfoDataRow(
-            int folderID,
-            clsFileIntegrityChecker.udtFolderStatsType directoryStats,
+        private void PopulateDirectoryIntegrityInfoDataRow(
+            int directoryID,
+            clsFileIntegrityChecker.udtDirectoryStatsType directoryStats,
             DataRow currentRow,
             DateTime infoLastModified)
         {
-            currentRow[COL_NAME_FOLDER_ID] = folderID;
-            currentRow[COL_NAME_FOLDER_PATH] = directoryStats.FolderPath;
+            currentRow[COL_NAME_FOLDER_ID] = directoryID;
+            currentRow[COL_NAME_FOLDER_PATH] = directoryStats.DirectoryPath;
             currentRow[COL_NAME_FILE_COUNT] = directoryStats.FileCount;
             currentRow[COL_NAME_COUNT_FAIL_INTEGRITY] = directoryStats.FileCountFailIntegrity;
             currentRow[COL_NAME_INFO_LAST_MODIFIED] = AssureMinimumDate(infoLastModified, DateTime.MinValue);
 
-            if (folderID > mMaximumFolderIntegrityInfoFolderID)
+            if (directoryID > mMaximumDirectoryIntegrityInfoDirectoryID)
             {
-                mMaximumFolderIntegrityInfoFolderID = folderID;
+                mMaximumDirectoryIntegrityInfoDirectoryID = directoryID;
             }
         }
 
@@ -550,50 +551,50 @@ namespace MSFileInfoScanner
         public bool SaveCachedResults(bool clearCachedData)
         {
             var success1 = SaveCachedMSInfoResults(clearCachedData);
-            var success2 = SaveCachedFolderIntegrityInfoResults(clearCachedData);
+            var success2 = SaveCachedDirectoryIntegrityInfoResults(clearCachedData);
 
             return success1 && success2;
 
         }
 
-        public bool SaveCachedFolderIntegrityInfoResults(bool clearCachedData)
+        public bool SaveCachedDirectoryIntegrityInfoResults(bool clearCachedData)
         {
             bool success;
 
-            if (mFolderIntegrityInfoDataset == null ||
-                mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATA_TABLE].Rows.Count <= 0 ||
-                mFolderIntegrityInfoResultsState != eCachedResultsStateConstants.Modified)
+            if (mDirectoryIntegrityInfoDataset == null ||
+                mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].Rows.Count <= 0 ||
+                mDirectoryIntegrityInfoResultsState != eCachedResultsStateConstants.Modified)
             {
                 return false;
             }
 
-            OnDebugEvent("Saving cached folder integrity info to: " + Path.GetFileName(mFolderIntegrityInfoFilePath));
+            OnDebugEvent("Saving cached directory integrity info to: " + Path.GetFileName(mDirectoryIntegrityInfoFilePath));
 
             try
             {
-                // Write all of mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATA_TABLE) to the results file
-                using (var writer = new StreamWriter(new FileStream(mFolderIntegrityInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                // Write all of mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE) to the results file
+                using (var writer = new StreamWriter(new FileStream(mDirectoryIntegrityInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
 
-                    writer.WriteLine(ConstructHeaderLine(iMSFileInfoScanner.eDataFileTypeConstants.FolderIntegrityInfo));
+                    writer.WriteLine(ConstructHeaderLine(iMSFileInfoScanner.eDataFileTypeConstants.DirectoryIntegrityInfo));
 
-                    foreach (DataRow currentRow in mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATA_TABLE].Rows)
+                    foreach (DataRow currentRow in mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].Rows)
                     {
-                        WriteFolderIntegrityInfoDataLine(writer, currentRow);
+                        WriteDirectoryIntegrityInfoDataLine(writer, currentRow);
                     }
 
                 }
 
-                mCachedFolderIntegrityInfoLastSaveTime = DateTime.UtcNow;
+                mCachedDirectoryIntegrityInfoLastSaveTime = DateTime.UtcNow;
 
                 if (clearCachedData)
                 {
                     // Clear the data table
-                    ClearCachedFolderIntegrityInfoResults();
+                    ClearCachedDirectoryIntegrityInfoResults();
                 }
                 else
                 {
-                    mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
+                    mDirectoryIntegrityInfoResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
                 }
 
                 success = true;
@@ -601,7 +602,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error in SaveCachedFolderIntegrityInfoResults", ex);
+                OnErrorEvent("Error in SaveCachedDirectoryIntegrityInfoResults", ex);
                 success = false;
             }
 
@@ -704,32 +705,32 @@ namespace MSFileInfoScanner
 
         }
 
-        public bool UpdateCachedFolderIntegrityInfo(
-            clsFileIntegrityChecker.udtFolderStatsType directoryStats,
-            out int folderID)
+        public bool UpdateCachedDirectoryIntegrityInfo(
+            clsFileIntegrityChecker.udtDirectoryStatsType directoryStats,
+            out int directoryID)
         {
-            // Update the entry for this dataset in mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATA_TABLE)
+            // Update the entry for this dataset in mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE)
 
             bool success;
 
-            folderID = -1;
+            directoryID = -1;
 
             try
             {
-                if (mFolderIntegrityInfoResultsState == eCachedResultsStateConstants.NotInitialized)
+                if (mDirectoryIntegrityInfoResultsState == eCachedResultsStateConstants.NotInitialized)
                 {
                     // Coding error; this shouldn't be the case
-                    OnErrorEvent("mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized in UpdateCachedFolderIntegrityInfo; unable to continue");
+                    OnErrorEvent("mDirectoryIntegrityInfoResultsState = eCachedResultsStateConstants.NotInitialized in UpdateCachedDirectoryIntegrityInfo; unable to continue");
                     return false;
                 }
 
                 // Examine the data in memory and add or update the data for dataset
-                if (CachedFolderIntegrityInfoContainsDirectory(directoryStats.FolderPath, out folderID, out var currentRow))
+                if (CachedDirectoryIntegrityInfoContainsDirectory(directoryStats.DirectoryPath, out directoryID, out var currentRow))
                 {
                     // Item already present; update it
                     try
                     {
-                        PopulateFolderIntegrityInfoDataRow(folderID, directoryStats, currentRow);
+                        PopulateDirectoryIntegrityInfoDataRow(directoryID, directoryStats, currentRow);
                     }
                     catch (Exception)
                     {
@@ -741,20 +742,20 @@ namespace MSFileInfoScanner
                     // Item not present; add it
 
                     // Auto-assign the next available FolderID value
-                    folderID = mMaximumFolderIntegrityInfoFolderID + 1;
+                    directoryID = mMaximumDirectoryIntegrityInfoDirectoryID + 1;
 
-                    currentRow = mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATA_TABLE].NewRow();
-                    PopulateFolderIntegrityInfoDataRow(folderID, directoryStats, currentRow);
-                    mFolderIntegrityInfoDataset.Tables[FOLDER_INTEGRITY_INFO_DATA_TABLE].Rows.Add(currentRow);
+                    currentRow = mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].NewRow();
+                    PopulateDirectoryIntegrityInfoDataRow(directoryID, directoryStats, currentRow);
+                    mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].Rows.Add(currentRow);
                 }
 
-                mFolderIntegrityInfoResultsState = eCachedResultsStateConstants.Modified;
+                mDirectoryIntegrityInfoResultsState = eCachedResultsStateConstants.Modified;
 
                 success = true;
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error in UpdateCachedFolderIntegrityInfo", ex);
+                OnErrorEvent("Error in UpdateCachedDirectoryIntegrityInfo", ex);
                 success = false;
             }
 
@@ -778,7 +779,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private void WriteFolderIntegrityInfoDataLine(TextWriter writer, DataRow currentRow)
+        private void WriteDirectoryIntegrityInfoDataLine(TextWriter writer, DataRow currentRow)
         {
             writer.WriteLine(
                 currentRow[COL_NAME_FOLDER_ID].ToString() + '\t' +

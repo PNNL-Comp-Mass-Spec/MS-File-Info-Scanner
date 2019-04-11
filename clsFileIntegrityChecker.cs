@@ -5,7 +5,7 @@ using System.Threading;
 using System.Xml;
 using PRISM;
 
-// This class will check the integrity of files in a given folder
+// This class will check the integrity of files in a given directory
 //
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started May 16, 2008
@@ -43,9 +43,9 @@ namespace MSFileInfoScanner
 
         #region "Structures"
 
-        public struct udtFolderStatsType
+        public struct udtDirectoryStatsType
         {
-            public string FolderPath;
+            public string DirectoryPath;
             public int FileCount;
             public int FileCountFailIntegrity;
         }
@@ -59,7 +59,7 @@ namespace MSFileInfoScanner
 
             public string FileHash;
 
-            public void Initialize()
+            public void Clear()
             {
                 FileName = string.Empty;
                 SizeBytes = 0;
@@ -1348,13 +1348,13 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Validates the given XML file; tries to determine the expected element names based on the file name and its parent folder
+        /// Validates the given XML file; tries to determine the expected element names based on the file name and its parent directory
         /// </summary>
         /// <param name="filePath">File Path</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         private bool CheckXMLFile(string filePath)
         {
-            // Examine the parent folder name to determine the type of XML file filePath most likely is
+            // Examine the parent directory name to determine the type of XML file filePath most likely is
 
             bool xmlIsValid;
 
@@ -1374,7 +1374,7 @@ namespace MSFileInfoScanner
             {
                 case "SIC":
                 case "DLS":
-                    // MASIC or DeconTools folder
+                    // MASIC or DeconTools directory
                     if (FileIsXMLSettingsFile(file.FullName))
                     {
                         xmlIsValid = CheckXMLFileWork(filePath, 5, new List<string>
@@ -1403,7 +1403,7 @@ namespace MSFileInfoScanner
                     break;
 
                 case "SEQ":
-                    // Sequest folder
+                    // Sequest directory
                     if (fileName.Equals("FinniganDefSettings.xml", StringComparison.OrdinalIgnoreCase) || FileIsXMLSettingsFile(file.FullName))
                     {
                         xmlIsValid = CheckXMLFileWork(filePath, 5, new List<string>
@@ -1424,7 +1424,7 @@ namespace MSFileInfoScanner
                     break;
 
                 case "XTM":
-                    // XTandem folder
+                    // XTandem directory
                     switch (fileName.ToLower())
                     {
                         case "default_input.xml":
@@ -1676,7 +1676,7 @@ namespace MSFileInfoScanner
         /// <remarks>Note that udtFileStats will never be shrunk in size; only increased as needed</remarks>
         public bool CheckIntegrityOfFilesInDirectory(
             string directoryPath,
-            out udtFolderStatsType udtDirectoryStats,
+            out udtDirectoryStatsType udtDirectoryStats,
             out List<udtFileStatsType> udtFileStats,
             List<string> filesToIgnore)
         {
@@ -1684,7 +1684,7 @@ namespace MSFileInfoScanner
 
             var useIgnoreList = false;
 
-            udtDirectoryStats = new udtFolderStatsType();
+            udtDirectoryStats = new udtDirectoryStatsType();
             udtFileStats = new List<udtFileStatsType>();
 
             try
@@ -1795,7 +1795,7 @@ namespace MSFileInfoScanner
                             }
                         }
 
-                        var udtNewFile = new udtFileStatsType
+                        var udtNewFile = new udtFileStatsType()
                         {
                             FileName = dataFile.FullName,
                             ModificationDate = dataFile.LastWriteTime,
@@ -1839,12 +1839,12 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Checks the integrity of each file in the given folder (provided the extension is recognized)
-        /// Will populate udtFolderStats with stats on the files in this folder
+        /// Checks the integrity of each file in the given directory (provided the extension is recognized)
+        /// Will populate udtFolderStats with stats on the files in this directory
         /// Will populate udtFileDetails with the name of each file parsed, plus details on the files
         /// </summary>
         /// <param name="directoryPath">Folder to examine</param>
-        /// <param name="udtFolderStats">Stats on the folder, including number of files and number of files that failed the integrity check</param>
+        /// <param name="udtFolderStats">Stats on the directory, including number of files and number of files that failed the integrity check</param>
         /// <param name="udtFileStats">Details on each file checked; use udtFolderStatsType.FileCount to determine the number of entries in udtFileStats </param>
         /// <param name="filesToIgnore">List of files to skip; can be file names or full file paths</param>
         /// <returns>Returns True if all files pass the integrity checks; otherwise, returns False</returns>
@@ -1852,7 +1852,7 @@ namespace MSFileInfoScanner
         [Obsolete("Use CheckIntegrityOfFilesInDirectory")]
         public bool CheckIntegrityOfFilesInFolder(
             string directoryPath,
-            out udtFolderStatsType udtFolderStats,
+            out udtDirectoryStatsType udtFolderStats,
             out List<udtFileStatsType> udtFileStats,
             List<string> filesToIgnore)
         {
@@ -2117,11 +2117,11 @@ namespace MSFileInfoScanner
 
         }
 
-        public static udtFolderStatsType GetNewFolderStats(string directoryPath)
+        public static udtDirectoryStatsType GetNewFolderStats(string directoryPath)
         {
-            var udtFolderStats = new udtFolderStatsType
+            var udtFolderStats = new udtDirectoryStatsType
             {
-                FolderPath = directoryPath,
+                DirectoryPath = directoryPath,
                 FileCount = 0,
                 FileCountFailIntegrity = 0
             };

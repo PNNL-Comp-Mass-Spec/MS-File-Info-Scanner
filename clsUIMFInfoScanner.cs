@@ -313,7 +313,7 @@ namespace MSFileInfoScanner
                     }
 
                     // Read the frame StartTime
-                    // This will be zero in older .UIMF files, or in files converted from Agilent .D folders
+                    // This will be zero in older .UIMF files, or in files converted from Agilent .D directories
                     // In newer files, it is the number of minutes since 12:00 am
                     frameStartTimeCurrent = frameParams.GetValueDouble(FrameParamKeyType.StartTimeMinutes);
                     if (masterFrameNumIndex == 0 || frameStartTimeInitial < -0.9)

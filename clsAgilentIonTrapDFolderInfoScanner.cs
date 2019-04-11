@@ -46,7 +46,7 @@ namespace MSFileInfoScanner
 
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
-            // The dataset name is simply the folder name without .D
+            // The dataset name is simply the directory name without .D
             try
             {
                 return Path.GetFileNameWithoutExtension(dataFilePath);
@@ -203,7 +203,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Process the data file
         /// </summary>
-        /// <param name="dataFilePath">Dataset folder ptah</param>
+        /// <param name="dataFilePath">Dataset directory ptah</param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
@@ -257,7 +257,7 @@ namespace MSFileInfoScanner
                         datasetFileInfo.AcqTimeEnd = runLog.LastWriteTime;
                         success = true;
 
-                        // Sum up the sizes of all of the files in this folder
+                        // Sum up the sizes of all of the files in this directory
                         datasetFileInfo.FileSizeBytes = 0;
                         foreach (var datasetFile in datasetDirectory.GetFiles())
                         {

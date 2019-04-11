@@ -63,7 +63,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Find the best candidate folder with Python 3.x
+        /// Find the best candidate directory with Python 3.x
         /// </summary>
         /// <returns>True if Python could be found, otherwise false</returns>
         protected static bool FindPython()
@@ -73,9 +73,9 @@ namespace MSFileInfoScanner
 
             var pathsToCheck = PythonPathsToCheck();
 
-            foreach (var folderPath in pathsToCheck)
+            foreach (var directoryPath in pathsToCheck)
             {
-                var exePath = FindPythonExe(folderPath);
+                var exePath = FindPythonExe(directoryPath);
                 if (string.IsNullOrWhiteSpace(exePath))
                     continue;
 
@@ -88,12 +88,12 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Find the best candidate folder with Python 3.x
+        /// Find the best candidate directory with Python 3.x
         /// </summary>
         /// <returns>Path to the python executable, otherwise an empty string</returns>
-        private static string FindPythonExe(string folderPath)
+        private static string FindPythonExe(string directoryPath)
         {
-            var directory = new DirectoryInfo(folderPath);
+            var directory = new DirectoryInfo(directoryPath);
             if (!directory.Exists)
                 return string.Empty;
 

@@ -31,7 +31,7 @@ namespace MSFileInfoScanner
 
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
-            // The dataset name is simply the folder name without .D
+            // The dataset name is simply the directory name without .D
             try
             {
                 return Path.GetFileNameWithoutExtension(dataFilePath);
@@ -226,32 +226,32 @@ namespace MSFileInfoScanner
 
             try
             {
-                var rootFolder = new DirectoryInfo(dataFilePath);
-                var acqDataFolder = new DirectoryInfo(Path.Combine(rootFolder.FullName, AGILENT_ACQDATA_FOLDER_NAME));
+                var rootDirectory = new DirectoryInfo(dataFilePath);
+                var acqDataDirectory = new DirectoryInfo(Path.Combine(rootDirectory.FullName, AGILENT_ACQDATA_FOLDER_NAME));
 
-                datasetFileInfo.FileSystemCreationTime = acqDataFolder.CreationTime;
-                datasetFileInfo.FileSystemModificationTime = acqDataFolder.LastWriteTime;
+                datasetFileInfo.FileSystemCreationTime = acqDataDirectory.CreationTime;
+                datasetFileInfo.FileSystemModificationTime = acqDataDirectory.LastWriteTime;
 
                 // The acquisition times will get updated below to more accurate values
                 datasetFileInfo.AcqTimeStart = datasetFileInfo.FileSystemModificationTime;
                 datasetFileInfo.AcqTimeEnd = datasetFileInfo.FileSystemModificationTime;
 
-                datasetFileInfo.DatasetName = GetDatasetNameViaPath(rootFolder.Name);
-                datasetFileInfo.FileExtension = rootFolder.Extension;
+                datasetFileInfo.DatasetName = GetDatasetNameViaPath(rootDirectory.Name);
+                datasetFileInfo.FileExtension = rootDirectory.Extension;
                 datasetFileInfo.FileSizeBytes = 0;
                 datasetFileInfo.ScanCount = 0;
 
-                if (acqDataFolder.Exists)
+                if (acqDataDirectory.Exists)
                 {
-                    // Sum up the sizes of all of the files in the AcqData folder
-                    foreach (var file in acqDataFolder.GetFiles("*", SearchOption.AllDirectories))
+                    // Sum up the sizes of all of the files in the AcqData directory
+                    foreach (var file in acqDataDirectory.GetFiles("*", SearchOption.AllDirectories))
                     {
                         datasetFileInfo.FileSizeBytes += file.Length;
                     }
 
                     // Look for the MSScan.bin file
                     // Use its modification time to get an initial estimate for the acquisition end time
-                    var msScanFile = new FileInfo(Path.Combine(acqDataFolder.FullName, AGILENT_MS_SCAN_FILE));
+                    var msScanFile = new FileInfo(Path.Combine(acqDataDirectory.FullName, AGILENT_MS_SCAN_FILE));
 
                     bool primaryFileAdded;
 
@@ -269,16 +269,16 @@ namespace MSFileInfoScanner
                     {
                         // Read the file info from the file system
                         // Several of these stats will be further updated later
-                        UpdateDatasetFileStats(acqDataFolder, datasetFileInfo.DatasetID);
+                        UpdateDatasetFileStats(acqDataDirectory, datasetFileInfo.DatasetID);
                         primaryFileAdded = false;
                     }
 
                     var additionalFilesToHash = new List<FileInfo>
                     {
-                        new FileInfo(Path.Combine(acqDataFolder.FullName, AGILENT_MS_PEAK_FILE)),
-                        new FileInfo(Path.Combine(acqDataFolder.FullName, AGILENT_MS_PEAK_PERIODIC_ACTUALS_FILE)),
-                        new FileInfo(Path.Combine(acqDataFolder.FullName, AGILENT_MS_PROFILE_FILE)),
-                        new FileInfo(Path.Combine(acqDataFolder.FullName, AGILENT_XML_CONTENTS_FILE))
+                        new FileInfo(Path.Combine(acqDataDirectory.FullName, AGILENT_MS_PEAK_FILE)),
+                        new FileInfo(Path.Combine(acqDataDirectory.FullName, AGILENT_MS_PEAK_PERIODIC_ACTUALS_FILE)),
+                        new FileInfo(Path.Combine(acqDataDirectory.FullName, AGILENT_MS_PROFILE_FILE)),
+                        new FileInfo(Path.Combine(acqDataDirectory.FullName, AGILENT_XML_CONTENTS_FILE))
                     };
 
                     foreach (var addnlFile in additionalFilesToHash)
@@ -300,8 +300,8 @@ namespace MSFileInfoScanner
 
                     if (!primaryFileAdded)
                     {
-                        // Add largest file in the AcqData folder
-                        AddLargestInstrumentFile(acqDataFolder);
+                        // Add largest file in the AcqData directory
+                        AddLargestInstrumentFile(acqDataDirectory);
                     }
 
                     success = true;
@@ -309,13 +309,13 @@ namespace MSFileInfoScanner
 
                 if (success)
                 {
-                    // The AcqData folder exists
+                    // The AcqData directory exists
 
                     // Parse the Contents.xml file to determine the acquisition start time
-                    var acqStartTimeDetermined = ProcessContentsXMLFile(acqDataFolder.FullName, datasetFileInfo);
+                    var acqStartTimeDetermined = ProcessContentsXMLFile(acqDataDirectory.FullName, datasetFileInfo);
 
                     // Parse the MSTS.xml file to determine the acquisition length and number of scans
-                    var validMSTS = ProcessTimeSegmentFile(acqDataFolder.FullName, datasetFileInfo, out var acquisitionLengthMinutes);
+                    var validMSTS = ProcessTimeSegmentFile(acqDataDirectory.FullName, datasetFileInfo, out var acquisitionLengthMinutes);
 
                     if (!acqStartTimeDetermined && validMSTS)
                     {
@@ -331,7 +331,7 @@ namespace MSFileInfoScanner
                     //	        <AcqMode>TargetedMS2</AcqMode>
 
                     // Read the raw data to create the TIC and BPI
-                    ReadBinaryData(rootFolder.FullName, datasetFileInfo);
+                    ReadBinaryData(rootDirectory.FullName, datasetFileInfo);
 
                 }
 
@@ -349,7 +349,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Exception parsing Agilent TOF .D folder: " + ex.Message, ex);
+                OnErrorEvent("Exception parsing Agilent TOF .D directory: " + ex.Message, ex);
                 success = false;
             }
 
@@ -364,7 +364,7 @@ namespace MSFileInfoScanner
 
             try
             {
-                // Open the data folder using the ProteoWizardWrapper
+                // Open the data directory using the ProteoWizardWrapper
 
                 var pWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(dataDirectoryPath);
 
@@ -422,7 +422,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Exception reading the Binary Data in the Agilent TOF .D folder using ProteoWizard: " + ex.Message, ex);
+                OnErrorEvent("Exception reading the Binary Data in the Agilent TOF .D directory using ProteoWizard: " + ex.Message, ex);
             }
 
         }

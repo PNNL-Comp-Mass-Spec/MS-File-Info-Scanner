@@ -17,7 +17,11 @@ namespace MSFileInfoScannerInterfaces
         {
             NoError = 0,
             InvalidInputFilePath = 1,
+            InvalidOutputDirectoryPath = 2,
+
+            [Obsolete("Use InvalidOutputDirectoryPath")]
             InvalidOutputFolderPath = 2,
+
             ParameterFileNotFound = 3,
             FilePathError = 4,
 
@@ -55,7 +59,11 @@ namespace MSFileInfoScannerInterfaces
         public enum eDataFileTypeConstants
         {
             MSFileInfo = 0,
+            DirectoryIntegrityInfo = 1,
+
+            [Obsolete("Use DirectoryIntegrityInfo")]
             FolderIntegrityInfo = 1,
+
             FileIntegrityDetails = 2,
             FileIntegrityErrors = 3
         }
@@ -212,10 +220,10 @@ namespace MSFileInfoScannerInterfaces
         public virtual bool UpdateDatasetStatsTextFile { get; set; }
 
         /// <summary>
-        /// If True, saves/loads data from/to the cache files (DatasetTimeFile.txt and FolderIntegrityInfo.txt)
+        /// If True, saves/loads data from/to the cache files (DatasetTimeFile.txt and DirectoryIntegrityInfo.txt)
         /// If you simply want to create TIC and BPI files, and/or the _DatasetInfo.xml file for a single dataset, set this to False
         /// </summary>
-        /// <remarks>If this is false, data is not loaded/saved from/to the DatasetTimeFile.txt or the FolderIntegrityInfo.txt file</remarks>
+        /// <remarks>If this is false, data is not loaded/saved from/to the DatasetTimeFile.txt or the DirectoryIntegrityInfo.txt file</remarks>
         public virtual bool UseCacheFiles { get; set; }
 
         public virtual bool ZipFileCheckAllData { get; set; }
@@ -298,10 +306,10 @@ namespace MSFileInfoScannerInterfaces
         /// Main processing function, with input file / directory path, plus output directory path
         /// </summary>
         /// <param name="inputFileOrFolderPath"></param>
-        /// <param name="outputFolderPath"></param>
+        /// <param name="outputDirectoryPath"></param>
         /// <returns>True if success, False if an error</returns>
         [Obsolete("Use ProcessMSFileOrDirectory")]
-        public abstract bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputFolderPath);
+        public abstract bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputDirectoryPath);
 
         /// <summary>
         /// Main processing function with input / output paths, error code reset flag, and processing state
@@ -318,12 +326,12 @@ namespace MSFileInfoScannerInterfaces
         /// Main processing function with input / output paths, error code reset flag, and processing state
         /// </summary>
         /// <param name="inputFileOrFolderPath"></param>
-        /// <param name="outputFolderPath"></param>
+        /// <param name="outputDirectoryPath"></param>
         /// <param name="resetErrorCode"></param>
         /// <param name="eMSFileProcessingState"></param>
         /// <returns>True if success, False if an error</returns>
         [Obsolete("Use ProcessMSFileOrDirectory")]
-        public abstract bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputFolderPath, bool resetErrorCode,
+        public abstract bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputDirectoryPath, bool resetErrorCode,
                                                    out eMSFileProcessingStateConstants eMSFileProcessingState);
 
         /// <summary>
@@ -339,11 +347,11 @@ namespace MSFileInfoScannerInterfaces
         /// Calls ProcessMSFileOrFolder for all files in inputFileOrFolderPath and below having a known extension
         /// </summary>
         /// <param name="inputFileOrFolderPath">Path to the input file or folder; can contain a wildcard (* or ?)</param>
-        /// <param name="outputFolderPath">Folder to write any results files to</param>
+        /// <param name="outputDirectoryPath">Folder to write any results files to</param>
         /// <param name="resetErrorCode"></param>
         /// <returns>True if success, False if an error</returns>
         [Obsolete("Use ProcessMSFileOrDirectory")]
-        public abstract bool ProcessMSFileOrFolderWildcard(string inputFileOrFolderPath, string outputFolderPath, bool resetErrorCode);
+        public abstract bool ProcessMSFileOrFolderWildcard(string inputFileOrFolderPath, string outputDirectoryPath, bool resetErrorCode);
 
         /// <summary>
         /// Calls ProcessMSFileOrDirectory for all files in inputFilePathOrDirectory and below having a known extension
@@ -358,11 +366,11 @@ namespace MSFileInfoScannerInterfaces
         /// Calls ProcessMSFileOrFolder for all files in inputFilePathOrFolder and below having a known extension
         /// </summary>
         /// <param name="inputFilePathOrFolder">Path to the input file or folder; can contain a wildcard (* or ?)</param>
-        /// <param name="outputFolderPath">Folder to write any results files to</param>
+        /// <param name="outputDirectoryPath">Folder to write any results files to</param>
         /// <param name="recurseFoldersMaxLevels">Maximum folder depth to process; Set to 0 to process all folders</param>
         /// <returns>True if success, False if an error</returns>
         [Obsolete("Use ProcessMSFilesAndRecurseDirectories")]
-        public abstract bool ProcessMSFilesAndRecurseFolders(string inputFilePathOrFolder, string outputFolderPath, int recurseFoldersMaxLevels);
+        public abstract bool ProcessMSFilesAndRecurseFolders(string inputFilePathOrFolder, string outputDirectoryPath, int recurseFoldersMaxLevels);
 
         public abstract bool SaveCachedResults();
 

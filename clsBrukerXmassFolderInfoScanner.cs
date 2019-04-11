@@ -99,9 +99,9 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Looks for a .m folder then looks for apexAcquisition.method or submethods.xml in that folder
+        /// Looks for a .m directory then looks for apexAcquisition.method or submethods.xml in that directory
         /// Uses the file modification time as the run start time
-        /// Also looks for the .hdx file in the dataset folder and examine its modification time
+        /// Also looks for the .hdx file in the dataset directory and examine its modification time
         /// </summary>
         /// <param name="datasetDirectory"></param>
         /// <param name="datasetFileInfo"></param>
@@ -114,7 +114,7 @@ namespace MSFileInfoScanner
 
             try
             {
-                // Look for the method folder (folder name should end in .m)
+                // Look for the method directory (directory name should end in .m)
                 var subDirectories = datasetDirectory.GetDirectories("*.m").ToList();
 
                 if (subDirectories.Count == 0)
@@ -126,7 +126,7 @@ namespace MSFileInfoScanner
 
                 if (subDirectories.Count > 0)
                 {
-                    // Look for the apexAcquisition.method in each matching subfolder
+                    // Look for the apexAcquisition.method in each matching subdirectory
                     // We have historically used that file's modification time as the acquisition start time for the dataset
                     // However, we've found that on the 12T a series of datasets will all use the same method file and thus the modification time is not necessarily appropriate
 
@@ -180,7 +180,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error finding XMass method folder: " + ex.Message, ex);
+                OnErrorEvent("Error finding XMass method directory: " + ex.Message, ex);
             }
 
         }
@@ -207,7 +207,7 @@ namespace MSFileInfoScanner
                 return acquisitionMethodFiles.First();
             }
 
-            OnErrorEvent("Multiple 'apexAcquisition.method' files were found in the .D folder; not sure which to use");
+            OnErrorEvent("Multiple 'apexAcquisition.method' files were found in the .D directory; not sure which to use");
             return null;
 
         }
@@ -228,8 +228,8 @@ namespace MSFileInfoScanner
             }
 
             // Often the Bruker file structures contain multiple Acqus files. I will select
-            // the one that is in the same folder as the 'ser' file and if that isn't present,
-            // the same folder as the 'fid' file. Otherwise, throw errors
+            // the one that is in the same directory as the 'ser' file and if that isn't present,
+            // the same directory as the 'fid' file. Otherwise, throw errors
 
             foreach (var acquFile in acqusFiles)
             {
@@ -239,7 +239,7 @@ namespace MSFileInfoScanner
                 }
             }
 
-            OnErrorEvent("Multiple 'acqus' files were found in the .D folder; not sure which one to use");
+            OnErrorEvent("Multiple 'acqus' files were found in the .D directory; not sure which one to use");
             return null;
 
         }
@@ -827,7 +827,7 @@ namespace MSFileInfoScanner
 
             if (datasetFile.Exists)
             {
-                // User specified a file; assume the parent folder of this file is the dataset folder
+                // User specified a file; assume the parent directory of this file is the dataset directory
                 return datasetFile.Directory;
             }
 
@@ -841,8 +841,8 @@ namespace MSFileInfoScanner
 
             try
             {
-                // The dataset name for a Bruker Xmass folder is the name of the parent directory
-                // However, dataFilePath could be a file or a folder path, so use GetDatasetFolder to get the dataset folder
+                // The dataset name for a Bruker Xmass directory is the name of the parent directory
+                // However, dataFilePath could be a file or a directory path, so use GetDatasetFolder to get the dataset directory
                 var datasetDirectory = GetDatasetFolder(dataFilePath);
                 datasetName = datasetDirectory.Name;
 
@@ -862,9 +862,9 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Process a Bruker Xmass folder, specified by dataFilePath
+        /// Process a Bruker Xmass directory, specified by dataFilePath
         /// </summary>
-        /// <param name="dataFilePath">Either the dataset folder containing the XMass files, or any of the XMass files in the dataset folder</param>
+        /// <param name="dataFilePath">Either the dataset directory containing the XMass files, or any of the XMass files in the dataset directory</param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
         /// <remarks></remarks>
@@ -874,18 +874,18 @@ namespace MSFileInfoScanner
 
             try
             {
-                // Determine whether dataFilePath points to a file or a folder
+                // Determine whether dataFilePath points to a file or a directory
 
                 var datasetDirectory = GetDatasetFolder(dataFilePath);
 
-                // Validate that we have selected a valid folder
+                // Validate that we have selected a valid directory
                 if (!datasetDirectory.Exists)
                 {
-                    OnErrorEvent("File/folder not found: " + dataFilePath);
+                    OnErrorEvent("File/directory not found: " + dataFilePath);
                     return false;
                 }
 
-                // In case we cannot find a .BAF file, update the .AcqTime values to the folder creation date
+                // In case we cannot find a .BAF file, update the .AcqTime values to the directory creation date
                 // We have to assign a date, so we'll assign the date for the BAF file
                 datasetFileInfo.AcqTimeStart = datasetDirectory.CreationTime;
                 datasetFileInfo.AcqTimeEnd = datasetDirectory.CreationTime;
@@ -977,7 +977,7 @@ namespace MSFileInfoScanner
                 datasetFileInfo.FileExtension = string.Empty;
                 datasetFileInfo.FileSizeBytes = primaryInstrumentFile.Length;
 
-                // Find the apexAcquisition.method or submethods.xml file in the XMASS_Method.m subfolder to determine .AcqTimeStart
+                // Find the apexAcquisition.method or submethods.xml file in the XMASS_Method.m subdirectory to determine .AcqTimeStart
                 // This function updates datasetFileInfo.AcqTimeEnd and datasetFileInfo.AcqTimeStart to have the same time
                 DetermineAcqStartTime(datasetDirectory, datasetFileInfo);
 
@@ -1166,7 +1166,6 @@ namespace MSFileInfoScanner
                     try
                     {
                         serReader.GetMassSpectrum(scanNumber, out mzList, out intensityList);
-
                     }
                     catch (Exception ex)
                     {
