@@ -412,7 +412,7 @@ namespace MSFileInfoScanner
                 if (pWiz.SpectrumCount > 0)
                 {
                     // Process the spectral data
-                    pWizParser.StoreMSSpectraInfo(datasetFileInfo, ticStored, ref runtimeMinutes);
+                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }
 

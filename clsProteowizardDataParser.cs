@@ -393,7 +393,7 @@ namespace MSFileInfoScanner
             Store2DPlotData(dct2DDataScanTimes, dct2DDataParent, dct2DDataProduct);
         }
 
-        public void StoreMSSpectraInfo(clsDatasetFileInfo datasetFileInfo, bool ticStored, ref double runtimeMinutes)
+        public bool StoreMSSpectraInfo(bool ticStored, ref double runtimeMinutes)
         {
             try
             {
