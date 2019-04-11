@@ -393,8 +393,30 @@ namespace MSFileInfoScanner
             Store2DPlotData(dct2DDataScanTimes, dct2DDataParent, dct2DDataProduct);
         }
 
+        /// <summary>
+        /// Read the spectra from the data file
+        /// </summary>
+        /// <param name="ticStored"></param>
+        /// <param name="runtimeMinutes"></param>
+        /// <returns>True if at least 50% of the spectra were successfully read</returns>
         public bool StoreMSSpectraInfo(bool ticStored, ref double runtimeMinutes)
         {
+            return StoreMSSpectraInfo(ticStored, ref runtimeMinutes, out _, out _);
+        }
+
+        /// <summary>
+        /// Read the spectra from the data file
+        /// </summary>
+        /// <param name="ticStored"></param>
+        /// <param name="runtimeMinutes"></param>
+        /// <param name="scanCountSuccess"></param>
+        /// <param name="scanCountError"></param>
+        /// <returns>True if at least 50% of the spectra were successfully read</returns>
+        public bool StoreMSSpectraInfo(bool ticStored, ref double runtimeMinutes, out int scanCountSuccess, out int scanCountError)
+        {
+            scanCountSuccess = 0;
+            scanCountError = 0;
+
             try
             {
                 double tic = 0;
@@ -535,10 +557,12 @@ namespace MSFileInfoScanner
                             mDatasetStatsSummarizer.ClassifySpectrum(msDataSpectrum.Mzs, msLevels[scanIndex], "Scan " + scanStatsEntry.ScanNumber);
                         }
 
+                        scanCountSuccess += 1;
                     }
                     catch (Exception ex)
                     {
                         OnErrorEvent("Error loading header info for scan " + scanIndex + 1 + ": " + ex.Message);
+                        scanCountError += 1;
                     }
 
                     if (DateTime.UtcNow.Subtract(lastProgressTime).TotalSeconds > 60)
@@ -549,10 +573,17 @@ namespace MSFileInfoScanner
 
                 }
 
+                var scanCountTotal = scanCountSuccess + scanCountError;
+                if (scanCountTotal == 0)
+                    return false;
+
+                // Return True if at least 50% of the spectra were successfully read
+                return scanCountSuccess >= scanCountTotal / 2.0;
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error obtaining scan times and MSLevels using GetScanTimesAndMsLevels: " + ex.Message, ex);
+                return false;
             }
 
         }
