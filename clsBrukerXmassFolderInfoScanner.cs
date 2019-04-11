@@ -366,8 +366,6 @@ namespace MSFileInfoScanner
         private bool ParseBAFFile(FileInfo bafFileInfo, clsDatasetFileInfo datasetFileInfo)
         {
 
-            bool success;
-
             // Override dataFilePath here, if needed
             var manualOverride = false;
 
@@ -425,7 +423,7 @@ namespace MSFileInfoScanner
 
                 // Instantiate the ProteoWizard Data Parser class
                 var pWizParser = new clsProteoWizardDataParser(pWiz, mDatasetStatsSummarizer, mTICAndBPIPlot, mLCMS2DPlot,
-                                                            mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus)
+                                                               mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus)
                 {
                     HighResMS1 = true,
                     HighResMS2 = true
@@ -460,15 +458,13 @@ namespace MSFileInfoScanner
                 pWiz.Dispose();
                 ProgRunner.GarbageCollectNow();
 
-                success = true;
+                return true;
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error using ProteoWizard reader: " + ex.Message, ex);
-                success = false;
+                return false;
             }
-
-            return success;
 
         }
 
