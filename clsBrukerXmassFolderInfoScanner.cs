@@ -363,7 +363,14 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ParseBAFFile(FileInfo bafFileInfo, clsDatasetFileInfo datasetFileInfo)
+        /// <summary>
+        /// Read data from the analysis.baf file using ProteoWizard
+        /// </summary>
+        /// <param name="bafFileInfo"></param>
+        /// <param name="datasetFileInfo"></param>
+        /// <param name="bafFileChecked">Output: true if the file exists and we tried to open it (will still be true if the file is corrupt)</param>
+        /// <returns>True if success, false if an error</returns>
+        private bool ParseBAFFile(FileInfo bafFileInfo, clsDatasetFileInfo datasetFileInfo, out bool bafFileChecked)
         {
 
             // Override dataFilePath here, if needed
@@ -378,6 +385,7 @@ namespace MSFileInfoScanner
             }
 
             mLCMS2DPlot.Options.UseObservedMinScan = false;
+            bafFileChecked = bafFileInfo.Exists;
 
             try
             {
@@ -392,11 +400,18 @@ namespace MSFileInfoScanner
                         return false;
                     }
 
-                    OnWarningEvent("Ser file not found; trying ProteoWizard anyway");
+                    OnWarningEvent("ser file not found; trying ProteoWizard anyway");
                 }
 
                 // Open the analysis.baf (or extension.baf) file using the ProteoWizardWrapper
                 OnDebugEvent("Determining acquisition info using ProteoWizard");
+
+                // ReSharper disable CommentTypo
+
+                // This call will create a SQLite file in the .D directory and will display this status message:
+                // [INFO ] bdal.io.baf2sql: Generating new SQLite cache in analysis directory: C:\CTM_WorkDir\DatasetName.d\analysis.sqlite
+
+                // ReSharper restore CommentTypo
 
                 var pWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(bafFileInfo.FullName);
 
@@ -462,9 +477,15 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                // Note that this exception is thrown for a corrupt .D directory (perhaps a corrupt analysis.baf file):
-                // Error using ProteoWizard reader: unknown compressor id: 6bb2e64a-27a0-4575-a66a-4e312c8b9ad7
                 OnErrorEvent("Error using ProteoWizard reader: " + ex.Message, ex);
+
+                // Note that the following exception is thrown for a corrupt .D directory
+                // Error using ProteoWizard reader: unknown compressor id: 6bb2e64a-27a0-4575-a66a-4e312c8b9ad7
+                if (ex.Message.IndexOf("6bb2e64a-27a0-4575-a66a-4e312c8b9ad7", StringComparison.OrdinalIgnoreCase) > 0)
+                {
+                    OnWarningEvent("Most likely a corrupt analysis.baf file");
+                }
+
                 return false;
             }
 
@@ -1004,13 +1025,13 @@ namespace MSFileInfoScanner
                     // If the scans.xml file contains runtime entries (e.g. <minutes>100.0456</minutes>) then .AcqTimeEnd is updated using .AcqTimeStart + RunTimeMinutes
                     success = ParseScanXMLFile(datasetDirectory, datasetFileInfo, out var scanElutionTimeMap, out var duplicateScanCount);
 
-                    var bafFileParsed = false;
+                    var bafFileChecked = false;
 
                     if (!success)
                     {
                         // Use ProteoWizard to extract the scan counts and acquisition time information
                         // If mSaveLCMS2DPlots = True, this method will also read the m/z and intensity values from each scan so that we can make 2D plots
-                        bafFileParsed = ParseBAFFile(primaryInstrumentFile, datasetFileInfo);
+                        ParseBAFFile(primaryInstrumentFile, datasetFileInfo, out bafFileChecked);
                     }
 
                     if (datasetFileInfo.ScanCount == 0 ||
@@ -1021,10 +1042,10 @@ namespace MSFileInfoScanner
 
                         var serOrFidParsed = ParseSerOrFidFile(primaryInstrumentFile.Directory, scanElutionTimeMap, datasetFileInfo, duplicateScanCount);
 
-                        if (!serOrFidParsed && !bafFileParsed)
+                        if (!serOrFidParsed && !bafFileChecked)
                         {
                             // Look for an analysis.baf file
-                            bafFileParsed = ParseBAFFile(primaryInstrumentFile, datasetFileInfo);
+                            ParseBAFFile(primaryInstrumentFile, datasetFileInfo, out _);
                         }
 
                     }
