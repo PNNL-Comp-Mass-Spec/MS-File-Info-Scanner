@@ -462,6 +462,8 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
+                // Note that this exception is thrown for a corrupt .D directory (perhaps a corrupt analysis.baf file):
+                // Error using ProteoWizard reader: unknown compressor id: 6bb2e64a-27a0-4575-a66a-4e312c8b9ad7
                 OnErrorEvent("Error using ProteoWizard reader: " + ex.Message, ex);
                 return false;
             }
