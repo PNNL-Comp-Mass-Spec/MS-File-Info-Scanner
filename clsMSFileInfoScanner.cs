@@ -557,10 +557,9 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                ConsoleMsgUtils.ShowError("Error in GetAppDataDirectoryPath: " + ex.Message);
+                ConsoleMsgUtils.ShowError("Error in GetAppDataDirectoryPath", ex);
                 return Path.GetTempPath();
             }
-
 
         }
 

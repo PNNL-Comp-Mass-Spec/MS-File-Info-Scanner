@@ -315,6 +315,5 @@ namespace MSFileInfoScannerUnitTests
             ConsoleMsgUtils.ShowError(message, ex);
         }
 
-
     }
 }

@@ -730,7 +730,7 @@ namespace MSFileInfoScanner
 
         private static void MSFileScanner_ErrorEvent(string message, Exception ex)
         {
-            ConsoleMsgUtils.ShowError(message, ex, false);
+            ConsoleMsgUtils.ShowErrorCustom(message, ex, false);
         }
 
         private static void MSFileScanner_MessageEvent(string message)
