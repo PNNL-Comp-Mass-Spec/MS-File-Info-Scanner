@@ -450,7 +450,7 @@ namespace MSFileInfoScanner
                         success = false;
                     }
 
-                    var filesToFind = new List<string> {"fid", "ser"};
+                    var filesToFind = new List<string> { "fid", "ser" };
                     var instrumentFileAdded = false;
 
                     foreach (var fileToFind in filesToFind)

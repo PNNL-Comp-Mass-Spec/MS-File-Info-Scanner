@@ -114,7 +114,7 @@ namespace MSFileInfoScanner
             DatasetName = string.Empty;
             FileExtension = string.Empty;
             AcqTimeStart = DateTime.MinValue;
-            AcqTimeEnd  = DateTime.MinValue;
+            AcqTimeEnd = DateTime.MinValue;
             ScanCount = 0;
             FileSizeBytes = 0;
             InstrumentFiles.Clear();

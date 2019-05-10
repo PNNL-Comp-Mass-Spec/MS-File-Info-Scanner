@@ -1396,7 +1396,7 @@ namespace MSFileInfoScanner
 
                 if (datasetFileInfo.ScanCount == 0 && ErrorCode == eMSFileScannerErrorCodes.NoError)
                 {
-                    OnWarningEvent( "Dataset has no spectra: " + inputFileOrDirectoryPath);
+                    OnWarningEvent("Dataset has no spectra: " + inputFileOrDirectoryPath);
                     SetErrorCode(eMSFileScannerErrorCodes.DatasetHasNoSpectra);
                 }
 

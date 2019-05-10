@@ -401,7 +401,7 @@ namespace MSFileInfoScanner
                 fileIsValid = CheckTextFileWork(filePath, 1, 0, "Datafile", false);
 
             }
-            else if (fileName.Equals( "XTandem_Processing_Log.txt", StringComparison.OrdinalIgnoreCase))
+            else if (fileName.Equals("XTandem_Processing_Log.txt", StringComparison.OrdinalIgnoreCase))
             {
                 // Example contents:
                 //  2008-05-16 10:48:19	X! Tandem starting

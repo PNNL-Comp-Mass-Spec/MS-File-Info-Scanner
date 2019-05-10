@@ -22,7 +22,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "April 30, 2019";
+        public const string PROGRAM_DATE = "May 9, 2019";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
@@ -261,7 +261,8 @@ namespace MSFileInfoScanner
                     }
 
                     System.Threading.Thread.Sleep(1500);
-                } else if (scanner.ErrorCode == iMSFileInfoScanner.eMSFileScannerErrorCodes.MS2MzMinValidationWarning)
+                }
+                else if (scanner.ErrorCode == iMSFileInfoScanner.eMSFileScannerErrorCodes.MS2MzMinValidationWarning)
                 {
                     ConsoleMsgUtils.ShowWarning("MS2MzMin validation warning: " + scanner.MS2MzMinValidationMessage);
                 }
@@ -430,7 +431,8 @@ namespace MSFileInfoScanner
                     if (value.StartsWith("itraq", StringComparison.OrdinalIgnoreCase))
                     {
                         mMS2MzMin = clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ;
-                    } else if (value.StartsWith("tmt", StringComparison.OrdinalIgnoreCase))
+                    }
+                    else if (value.StartsWith("tmt", StringComparison.OrdinalIgnoreCase))
                     {
                         mMS2MzMin = clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT;
                     }
