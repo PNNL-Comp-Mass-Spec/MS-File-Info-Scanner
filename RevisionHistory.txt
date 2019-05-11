@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 1.5.7027; May 10, 2019
+	- Add a generic file info scanner
+		- Used to obtain basic metadata for Shimadzu QGD files
+
 Version 1.5.7027; March 29, 2019
 	- Check for duplicate scan numbers in Bruker scan.xml files
 
