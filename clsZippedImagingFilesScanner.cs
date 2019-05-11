@@ -229,7 +229,6 @@ namespace MSFileInfoScanner
                     mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
                     mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
 
-                    mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetFileInfo.DatasetID;
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = datasetDirectory.Name;
                     mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = firstImagingFile.Extension;
                     mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = 0;
@@ -268,13 +267,8 @@ namespace MSFileInfoScanner
                         datasetFileInfo.AcqTimeEnd = firstImagingFile.LastWriteTime;
                     }
 
-                    // Copy over the updated file time info and scan info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
-                    mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
-                    mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
-                    mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
-                    mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
-                    mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
-                    mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
+                    // Copy over the updated file time info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
+                    UpdateDatasetStatsSummarizerUsingDatasetFileInfo(datasetFileInfo, false);
 
                     success = true;
                 }

@@ -1068,10 +1068,14 @@ namespace MSFileInfoScanner
 
         }
 
-        protected void UpdateDatasetStatsSummarizerUsingDatasetFileInfo(clsDatasetFileInfo datasetFileInfo)
+        protected void UpdateDatasetStatsSummarizerUsingDatasetFileInfo(clsDatasetFileInfo datasetFileInfo, bool copyFileSystemTimes = true)
         {
-            mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
-            mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
+            if (copyFileSystemTimes)
+            {
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
+            }
+
             mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetFileInfo.DatasetID;
             mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
             mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
@@ -1079,6 +1083,7 @@ namespace MSFileInfoScanner
             mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
             mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
             mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
+
         }
 
         /// <summary>
