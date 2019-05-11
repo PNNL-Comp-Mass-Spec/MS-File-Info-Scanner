@@ -130,6 +130,11 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
+        /// When true, do not include the Scan Type table in the QC Plot HTML file
+        /// </summary>
+        protected bool HideEmptyHtmlSections { get; set; }
+
+        /// <summary>
         /// LC/MS 2D plot options
         /// </summary>
         public override clsLCMSDataPlotterOptions LCMS2DPlotOptions
@@ -487,6 +492,8 @@ namespace MSFileInfoScanner
             MS2MzMinValidationMessage = string.Empty;
 
             ErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError;
+
+            HideEmptyHtmlSections = false;
         }
 
         protected void InitializeTICAndBPI()
@@ -815,13 +822,24 @@ namespace MSFileInfoScanner
                     }
 
                     writer.WriteLine("    <tr>");
-                    writer.WriteLine("      <td valign=\"middle\">TIC</td>");
-                    writer.WriteLine("      <td>" + GenerateQCFigureHTML(mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC), 250) + "</td>");
-                    writer.WriteLine("      <td valign=\"middle\">");
 
-                    GenerateQCScanTypeSummaryHTML(writer, summaryStats, "        ");
+                    if (HideEmptyHtmlSections && summaryStats.ScanTypeStats.Count == 0)
+                    {
+                        writer.WriteLine("      <td>&nbsp;</td><td style='width: 200px'>&nbsp;</td><td style='width: 200px'>&nbsp;</td>");
+                    }
+                    else
+                    {
+                        var qcFigureHTML = GenerateQCFigureHTML(mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC), 250);
 
-                    writer.WriteLine("      </td>");
+                        writer.WriteLine("      <td valign=\"middle\">TIC</td>");
+                        writer.WriteLine("      <td>" + qcFigureHTML + "</td>");
+                        writer.WriteLine("      <td valign=\"middle\">");
+
+                        GenerateQCScanTypeSummaryHTML(writer, summaryStats, "        ");
+
+                        writer.WriteLine("      </td>");
+                    }
+
                     writer.WriteLine("    </tr>");
 
                     writer.WriteLine("    <tr>");
@@ -950,6 +968,7 @@ namespace MSFileInfoScanner
         protected void ShowInstrumentFiles()
         {
             if (mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles.Count <= 0) return;
+
             var fileInfo = new StringBuilder();
 
             if (mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles.Count == 1)
@@ -1047,6 +1066,19 @@ namespace MSFileInfoScanner
 
             return true;
 
+        }
+
+        protected void UpdateDatasetStatsSummarizerUsingDatasetFileInfo(clsDatasetFileInfo datasetFileInfo)
+        {
+            mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetFileInfo.FileSystemCreationTime;
+            mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetFileInfo.FileSystemModificationTime;
+            mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetFileInfo.DatasetID;
+            mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
+            mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
+            mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
+            mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
+            mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
+            mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
         }
 
         /// <summary>
