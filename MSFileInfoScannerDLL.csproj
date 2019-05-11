@@ -117,6 +117,7 @@
     <Compile Include="clsTICandBPIPlotter.cs" />
     <Compile Include="clsUIMFInfoScanner.cs" />
     <Compile Include="clsZippedImagingFilesScanner.cs" />
+    <Compile Include="GenericFileInfoScanner.cs" />
     <Compile Include="MSFileInfoProcessorInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

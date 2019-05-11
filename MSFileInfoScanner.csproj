@@ -122,6 +122,7 @@
     <Compile Include="clsPythonPlotContainer3D.cs" />
     <Compile Include="clsPythonPlotContainer.cs" />
     <Compile Include="clsPythonPlotContainer2D.cs" />
+    <Compile Include="GenericFileInfoScanner.cs" />
     <Compile Include="modMain.cs" />
     <Compile Include="clsPlotContainer.cs" />
     <Compile Include="clsProteowizardDataParser.cs" />

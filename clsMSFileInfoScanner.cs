@@ -1396,8 +1396,15 @@ namespace MSFileInfoScanner
 
                 if (datasetFileInfo.ScanCount == 0 && ErrorCode == eMSFileScannerErrorCodes.NoError)
                 {
-                    OnWarningEvent("Dataset has no spectra: " + inputFileOrDirectoryPath);
-                    SetErrorCode(eMSFileScannerErrorCodes.DatasetHasNoSpectra);
+                    if (scanner is GenericFileInfoScanner)
+                    {
+                        OnWarningEvent("Spectra data and acquisition details were not loaded since the file was processed with the generic scanner: " + inputFileOrDirectoryPath);
+                    }
+                    else
+                    {
+                        OnWarningEvent("Dataset has no spectra: " + inputFileOrDirectoryPath);
+                        SetErrorCode(eMSFileScannerErrorCodes.DatasetHasNoSpectra);
+                    }
                 }
 
             }
@@ -1603,7 +1610,15 @@ namespace MSFileInfoScanner
                             knownMSDataType = true;
 
                         }
-                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
+                        else if (string.Equals(fileOrDirectoryInfo.Extension, ".qgd", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Shimadzu GC file
+                            // Use the generic scanner to read the file size, modification date, and compute the SHA-1 hash
+                            mMSInfoScanner = new GenericFileInfoScanner();
+                            knownMSDataType = true;
+
+                        }
+                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
                             // If the directory also contains file BRUKER_EXTENSION_BAF_FILE_NAME then this is a Bruker XMass directory
                             var parentDirectory = Path.GetDirectoryName(fileOrDirectoryInfo.FullName);
