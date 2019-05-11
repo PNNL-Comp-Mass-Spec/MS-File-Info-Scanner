@@ -1592,19 +1592,19 @@ namespace MSFileInfoScanner
                     }
                     else
                     {
-                        if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
+                        if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
                             mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
                             knownMSDataType = true;
 
                         }
-                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
+                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
                             mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
                             knownMSDataType = true;
 
                         }
-                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME, StringComparison.CurrentCultureIgnoreCase))
+                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
                             mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
                             knownMSDataType = true;

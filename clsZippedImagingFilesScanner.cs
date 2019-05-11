@@ -64,7 +64,7 @@ namespace MSFileInfoScanner
                                 continue;
                             }
 
-                            if (!string.Equals(nameParts[nameParts.Length - 1], fileNameToFind, StringComparison.CurrentCultureIgnoreCase))
+                            if (!string.Equals(nameParts[nameParts.Length - 1], fileNameToFind, StringComparison.OrdinalIgnoreCase))
                                 continue;
 
                             if (zipEntry.Current.LastModified < datasetFileInfo.AcqTimeStart)

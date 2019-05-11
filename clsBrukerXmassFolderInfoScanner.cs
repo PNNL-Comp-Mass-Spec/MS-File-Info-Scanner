@@ -496,7 +496,7 @@ namespace MSFileInfoScanner
 
             try
             {
-                var metadataNameToID = new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
+                var metadataNameToID = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
                 var scanData = new Dictionary<string, udtMCFScanInfoType>();
 
                 if (mSaveTICAndBPI)
