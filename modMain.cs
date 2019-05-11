@@ -5,20 +5,19 @@ using System.Linq;
 using MSFileInfoScannerInterfaces;
 using PRISM;
 
-// -------------------------------------------------------------------------------
-// This program scans a series of MS data files (or data directories) and extracts the acquisition start and end times,
-// number of spectra, and the total size of the Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
-//
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-// Program started in 2005
-// Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
-//
-// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
-// Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
-// -------------------------------------------------------------------------------
-
 namespace MSFileInfoScanner
 {
+    /// -------------------------------------------------------------------------------
+    /// This program scans a series of MS data files (or data directories) and extracts the acquisition start and end times,
+    /// number of spectra, and the total size of the Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
+    ///
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+    /// Program started in 2005
+    /// Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
+    ///
+    /// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
+    /// Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
+    /// -------------------------------------------------------------------------------
     static class modMain
     {
 
