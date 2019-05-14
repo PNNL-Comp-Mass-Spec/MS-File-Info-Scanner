@@ -1498,7 +1498,7 @@ namespace MSFileInfoScanner
                     }
                     catch (Exception ex)
                     {
-                        HandleException("Error parsing " + inputFileOrDirectoryPath, ex);
+                        HandleException("Error extracting the name from " + inputFileOrDirectoryPath, ex);
                     }
 
                     // Determine whether inputFileOrDirectoryPath points to a file or a directory
@@ -1573,11 +1573,13 @@ namespace MSFileInfoScanner
 
                                     knownMSDataType = true;
                                     break;
+
                                 case clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION:
                                     // Micromass .Raw directory
                                     mMSInfoScanner = new clsMicromassRawFolderInfoScanner();
                                     knownMSDataType = true;
                                     break;
+
                                 default:
                                     // Unknown directory extension (or no extension)
                                     // See if the directory contains one or more 0_R*.zip files
