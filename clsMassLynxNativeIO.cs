@@ -722,21 +722,21 @@ namespace MSFileInfoScanner
         /// Retrieves information on the given MassLynx data file (actually a directory)
         /// </summary>
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
-        /// <param name="udtHeaderInfo">Output: file info</param>
+        /// <param name="headerInfo">Output: file info</param>
         /// <returns> True if success, false if failure</returns>
-        public bool GetFileInfo(string massLynxDataDirectoryPath, out udtMSHeaderInfoType udtHeaderInfo)
+        public bool GetFileInfo(string massLynxDataDirectoryPath, out udtMSHeaderInfoType headerInfo)
         {
 
             bool success;
 
-            udtHeaderInfo = new udtMSHeaderInfoType();
+            headerInfo = new udtMSHeaderInfoType();
 
             try
             {
                 success = ValidateDataFolder(massLynxDataDirectoryPath);
                 if (success)
                 {
-                    udtHeaderInfo = mMSData.HeaderInfo;
+                    headerInfo = mMSData.HeaderInfo;
                 }
             }
             catch (Exception ex)
@@ -872,13 +872,13 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
         /// <param name="functionNumber">Function number</param>
-        /// <param name="udtFunctionInfo">Output: function info</param>
+        /// <param name="functionInfo">Output: function info</param>
         /// <returns>True if success, false if failure</returns>
-        public bool GetFunctionInfo(string massLynxDataDirectoryPath, int functionNumber, out udtMSFunctionInfoType udtFunctionInfo)
+        public bool GetFunctionInfo(string massLynxDataDirectoryPath, int functionNumber, out udtMSFunctionInfoType functionInfo)
         {
             bool success;
 
-            udtFunctionInfo = new udtMSFunctionInfoType();
+            functionInfo = new udtMSFunctionInfoType();
 
             try
             {
@@ -887,7 +887,7 @@ namespace MSFileInfoScanner
                 {
                     if (functionNumber >= 1 && functionNumber <= mMSData.FunctionCount)
                     {
-                        udtFunctionInfo = mMSData.FunctionInfo[functionNumber];
+                        functionInfo = mMSData.FunctionInfo[functionNumber];
                     }
                     else
                     {
@@ -1034,7 +1034,7 @@ namespace MSFileInfoScanner
             // Note that ScanType = 0 means MS-only scan (survey scan)
             // ScanType > 0 means ms/ms scan
 
-            var udtScanStatsSingleScan = default(udtScanStatsType);
+            var scanStatsSingleScan = default(udtScanStatsType);
 
             scanType = 0;
             basePeakMZ = 0;
@@ -1058,39 +1058,39 @@ namespace MSFileInfoScanner
                 return false;
             }
 
-            LoadMSScanHeader(ref udtScanStatsSingleScan, mMSData, functionNumber, scanNumber);
+            LoadMSScanHeader(ref scanStatsSingleScan, mMSData, functionNumber, scanNumber);
 
             scanType = mMSData.FunctionInfo[functionNumber].FunctionType;
-            basePeakMZ = udtScanStatsSingleScan.BPIMass;
-            parentIonMZ = udtScanStatsSingleScan.SetMass;
-            retentionTime = udtScanStatsSingleScan.RetentionTime;
-            basePeakIntensity = udtScanStatsSingleScan.BPI;
-            totalIonCurrent = udtScanStatsSingleScan.TIC;
-            calibrated = udtScanStatsSingleScan.Calibrated;
-            continuum = udtScanStatsSingleScan.Continuum;
-            overload = udtScanStatsSingleScan.Overload;
-            massStart = udtScanStatsSingleScan.MassStart;
-            massEnd = udtScanStatsSingleScan.MassEnd;
+            basePeakMZ = scanStatsSingleScan.BPIMass;
+            parentIonMZ = scanStatsSingleScan.SetMass;
+            retentionTime = scanStatsSingleScan.RetentionTime;
+            basePeakIntensity = scanStatsSingleScan.BPI;
+            totalIonCurrent = scanStatsSingleScan.TIC;
+            calibrated = scanStatsSingleScan.Calibrated;
+            continuum = scanStatsSingleScan.Continuum;
+            overload = scanStatsSingleScan.Overload;
+            massStart = scanStatsSingleScan.MassStart;
+            massEnd = scanStatsSingleScan.MassEnd;
             return true;
         }
 
-        private void InitializeFunctionInfo(ref udtMSFunctionInfoType udtMSFunctionInfo, int functionNumber)
+        private void InitializeFunctionInfo(ref udtMSFunctionInfoType msFunctionInfo, int functionNumber)
         {
-            udtMSFunctionInfo.FunctionNumber = functionNumber;
-            udtMSFunctionInfo.ProcessNumber = 0;
+            msFunctionInfo.FunctionNumber = functionNumber;
+            msFunctionInfo.ProcessNumber = 0;
 
-            udtMSFunctionInfo.CalibrationCoefficientCount = 0;
-            udtMSFunctionInfo.CalibrationCoefficients = new double[7];
+            msFunctionInfo.CalibrationCoefficientCount = 0;
+            msFunctionInfo.CalibrationCoefficients = new double[7];
 
-            udtMSFunctionInfo.CalTypeID = 0;
-            udtMSFunctionInfo.CalStDev = 0;
+            msFunctionInfo.CalTypeID = 0;
+            msFunctionInfo.CalStDev = 0;
         }
 
-        private void InitializeNativeFunctionInfo(ref udtRawFunctionDescriptorRecordType udtNativeFunctionInfo)
+        private void InitializeNativeFunctionInfo(ref udtRawFunctionDescriptorRecordType nativeFunctionInfo)
         {
-            udtNativeFunctionInfo.SegmentScanTimes = new int[32];
-            udtNativeFunctionInfo.SegmentStartMasses = new int[32];
-            udtNativeFunctionInfo.SegmentEndMasses = new int[32];
+            nativeFunctionInfo.SegmentScanTimes = new int[32];
+            nativeFunctionInfo.SegmentStartMasses = new int[32];
+            nativeFunctionInfo.SegmentEndMasses = new int[32];
 
         }
 
@@ -1154,10 +1154,10 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Verifies that massLynxDataDirectoryPath exists, then loads the header information
         /// </summary>
-        /// <param name="udtThisMSData">Info on the dataset directory; the calling method must initialize it</param>
+        /// <param name="thisMSData">Info on the dataset directory; the calling method must initialize it</param>
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
         /// <returns>True if success, false if failure</returns>
-        private bool LoadMSFileHeader(ref udtMSDataType udtThisMSData, string massLynxDataDirectoryPath)
+        private bool LoadMSFileHeader(ref udtMSDataType thisMSData, string massLynxDataDirectoryPath)
         {
             var success = false;
 
@@ -1167,15 +1167,15 @@ namespace MSFileInfoScanner
                 if (Directory.Exists(massLynxDataDirectoryPath))
                 {
                     // Read the header information from the current file
-                    success = NativeIOReadHeader(massLynxDataDirectoryPath, out udtThisMSData.HeaderInfo);
+                    success = NativeIOReadHeader(massLynxDataDirectoryPath, out thisMSData.HeaderInfo);
 
-                    udtThisMSData.FunctionCount = 0;
+                    thisMSData.FunctionCount = 0;
                     return true;
                 }
                 else
                 {
                     SetErrorCode(eErrorCodeConstants.InvalidDataFolderPath);
-                    udtThisMSData.FunctionCount = 0;
+                    thisMSData.FunctionCount = 0;
                     return false;
                 }
 
@@ -1188,7 +1188,7 @@ namespace MSFileInfoScanner
                 {
                     // Assume invalid data file
                     SetErrorCode(eErrorCodeConstants.DataFolderReadError);
-                    udtThisMSData.FunctionCount = 0;
+                    thisMSData.FunctionCount = 0;
                 }
             }
 
@@ -1198,12 +1198,12 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Determines the number of functions in the given data file
         /// </summary>
-        /// <param name="udtThisMSData"></param>
+        /// <param name="thisMSData"></param>
         /// <param name="massLynxDataDirectoryPath"></param>
         /// <returns>The function count, or 0 on failure</returns>
-        private int LoadMSFunctionInfo(ref udtMSDataType udtThisMSData, string massLynxDataDirectoryPath)
+        private int LoadMSFunctionInfo(ref udtMSDataType thisMSData, string massLynxDataDirectoryPath)
         {
-            var udtScanIndexRecord = default(udtScanIndexRecordType);
+            var scanIndexRecord = default(udtScanIndexRecordType);
 
             var fileValidated = false;
 
@@ -1229,31 +1229,31 @@ namespace MSFileInfoScanner
                     cleanMassLynxDataFolderPath = string.Copy(massLynxDataDirectoryPath);
                 }
 
-                if (LoadMSFileHeader(ref udtThisMSData, cleanMassLynxDataFolderPath))
+                if (LoadMSFileHeader(ref thisMSData, cleanMassLynxDataFolderPath))
                 {
-                    udtThisMSData.UserSuppliedDataDirPath = massLynxDataDirectoryPath;
-                    udtThisMSData.CurrentDataDirPath = cleanMassLynxDataFolderPath;
+                    thisMSData.UserSuppliedDataDirPath = massLynxDataDirectoryPath;
+                    thisMSData.CurrentDataDirPath = cleanMassLynxDataFolderPath;
 
                     // Use sFuncInfo to read the header information from the current file
-                    udtThisMSData.FunctionCount = NativeIOGetFunctionCount(ref cleanMassLynxDataFolderPath);
+                    thisMSData.FunctionCount = NativeIOGetFunctionCount(ref cleanMassLynxDataFolderPath);
 
-                    if (udtThisMSData.FunctionCount > 0)
+                    if (thisMSData.FunctionCount > 0)
                     {
                         fileValidated = true;
-                        udtThisMSData.FunctionInfo = new udtMSFunctionInfoType[udtThisMSData.FunctionCount + 1];
+                        thisMSData.FunctionInfo = new udtMSFunctionInfoType[thisMSData.FunctionCount + 1];
 
                         // Note that the function array is 1-based
-                        for (var functionNumber = 1; functionNumber <= udtThisMSData.FunctionCount; functionNumber++)
+                        for (var functionNumber = 1; functionNumber <= thisMSData.FunctionCount; functionNumber++)
                         {
-                            InitializeFunctionInfo(ref udtThisMSData.FunctionInfo[functionNumber], functionNumber);
+                            InitializeFunctionInfo(ref thisMSData.FunctionInfo[functionNumber], functionNumber);
 
-                            if (NativeIOGetFunctionInfo(cleanMassLynxDataFolderPath, ref udtThisMSData.FunctionInfo[functionNumber]))
+                            if (NativeIOGetFunctionInfo(cleanMassLynxDataFolderPath, ref thisMSData.FunctionInfo[functionNumber]))
                             {
                                 float startMass;
                                 float endMass;
-                                if (udtThisMSData.FunctionInfo[functionNumber].ScanCount > 0)
+                                if (thisMSData.FunctionInfo[functionNumber].ScanCount > 0)
                                 {
-                                    NativeIOGetScanInfo(cleanMassLynxDataFolderPath, udtThisMSData.FunctionInfo[functionNumber], 1, ref udtScanIndexRecord);
+                                    NativeIOGetScanInfo(cleanMassLynxDataFolderPath, thisMSData.FunctionInfo[functionNumber], 1, ref scanIndexRecord);
 
                                     // ToDo: Get the Start and End mass for the given scan
                                     startMass = 0;
@@ -1261,23 +1261,23 @@ namespace MSFileInfoScanner
 
                                     // Since the first scan may not have the full mass range, we'll also check a scan
                                     // in the middle of the file as a random comparison
-                                    if (udtThisMSData.FunctionInfo[functionNumber].ScanCount >= 3)
+                                    if (thisMSData.FunctionInfo[functionNumber].ScanCount >= 3)
                                     {
-                                        //Call sScanStats.GetScanStats(cleanMassLynxDataFolderPath, functionNumber, .ProcessNumber, CLng(.ScanCount / 3))
-                                        //If sScanStats.LoMass < startMass Then startMass = scanStats.LoMass
-                                        //If sScanStats.HiMass > endMass Then endMass = scanStats.HiMass
+                                        // Call sScanStats.GetScanStats(cleanMassLynxDataFolderPath, functionNumber, .ProcessNumber, CLng(.ScanCount / 3))
+                                        // If sScanStats.LoMass < startMass Then startMass = scanStats.LoMass
+                                        // If sScanStats.HiMass > endMass Then endMass = scanStats.HiMass
                                     }
 
-                                    if (udtThisMSData.FunctionInfo[functionNumber].ScanCount >= 2)
+                                    if (thisMSData.FunctionInfo[functionNumber].ScanCount >= 2)
                                     {
-                                        //Call sScanStats.GetScanStats(cleanMassLynxDataFolderPath, functionNumber, .ProcessNumber, CLng(.ScanCount / 2))
-                                        //If sScanStats.LoMass < startMass Then startMass = scanStats.LoMass
-                                        //If sScanStats.HiMass > endMass Then endMass = scanStats.HiMass
+                                        // Call sScanStats.GetScanStats(cleanMassLynxDataFolderPath, functionNumber, .ProcessNumber, CLng(.ScanCount / 2))
+                                        // If sScanStats.LoMass < startMass Then startMass = scanStats.LoMass
+                                        // If sScanStats.HiMass > endMass Then endMass = scanStats.HiMass
                                     }
 
-                                    //Call sScanStats.GetScanStats(cleanMassLynxDataFolderPath, functionNumber, .ProcessNumber, .ScanCount)
-                                    //If sScanStats.LoMass < startMass Then startMass = scanStats.LoMass
-                                    //If sScanStats.HiMass > endMass Then endMass = scanStats.HiMass
+                                    // Call sScanStats.GetScanStats(cleanMassLynxDataFolderPath, functionNumber, .ProcessNumber, .ScanCount)
+                                    // If sScanStats.LoMass < startMass Then startMass = scanStats.LoMass
+                                    // If sScanStats.HiMass > endMass Then endMass = scanStats.HiMass
                                 }
                                 else
                                 {
@@ -1285,31 +1285,31 @@ namespace MSFileInfoScanner
                                     endMass = 0;
                                 }
 
-                                udtThisMSData.FunctionInfo[functionNumber].StartMass = startMass;
-                                udtThisMSData.FunctionInfo[functionNumber].EndMass = endMass;
+                                thisMSData.FunctionInfo[functionNumber].StartMass = startMass;
+                                thisMSData.FunctionInfo[functionNumber].EndMass = endMass;
                             }
                             else
                             {
-                                udtThisMSData.FunctionInfo[functionNumber].ScanCount = 0;
+                                thisMSData.FunctionInfo[functionNumber].ScanCount = 0;
                             }
                         }
                     }
                     else
                     {
-                        udtThisMSData.FunctionCount = 0;
+                        thisMSData.FunctionCount = 0;
                     }
 
-                    if (udtThisMSData.FunctionCount > 0)
+                    if (thisMSData.FunctionCount > 0)
                     {
-                        NativeIOReadCalInfoFromHeader(ref udtThisMSData);
+                        NativeIOReadCalInfoFromHeader(ref thisMSData);
                     }
                 }
                 else
                 {
-                    udtThisMSData.FunctionCount = 0;
+                    thisMSData.FunctionCount = 0;
                 }
 
-                return udtThisMSData.FunctionCount;
+                return thisMSData.FunctionCount;
 
             }
             catch (Exception ex)
@@ -1320,20 +1320,20 @@ namespace MSFileInfoScanner
                 {
                     // Assume invalid data file
                     SetErrorCode(eErrorCodeConstants.DataFolderReadError);
-                    udtThisMSData.FunctionCount = 0;
+                    thisMSData.FunctionCount = 0;
                 }
 
-                return udtThisMSData.FunctionCount;
+                return thisMSData.FunctionCount;
             }
 
         }
 
         /// <summary>
         /// Loads information on the given scan for the given function
-        /// Updates udtScanStatsSingleScan.PeakCount with the number of peaks in the scan; 0 if an error
+        /// Updates scanStatsSingleScan.PeakCount with the number of peaks in the scan; 0 if an error
         /// </summary>
-        /// <param name="udtScanStatsSingleScan"></param>
-        /// <param name="udtThisMSData"></param>
+        /// <param name="scanStatsSingleScan"></param>
+        /// <param name="thisMSData"></param>
         /// <param name="functionNumber"></param>
         /// <param name="scanNumber"></param>
         /// <remarks>
@@ -1341,47 +1341,47 @@ namespace MSFileInfoScanner
         /// Since this function uses mMSData.FunctionInfo, one must call NativeIOGetFunctionInfo
         /// to populate .FunctionInfo before calling this function
         /// </remarks>
-        private void LoadMSScanHeader(ref udtScanStatsType udtScanStatsSingleScan, udtMSDataType udtThisMSData, int functionNumber, int scanNumber)
+        private void LoadMSScanHeader(ref udtScanStatsType scanStatsSingleScan, udtMSDataType thisMSData, int functionNumber, int scanNumber)
         {
-            var udtScanIndexRecord = default(udtScanIndexRecordType);
+            var scanIndexRecord = default(udtScanIndexRecordType);
 
             try
             {
 
-                udtScanStatsSingleScan.PeakCount = 0;
+                scanStatsSingleScan.PeakCount = 0;
 
-                udtScanStatsSingleScan.Calibrated = false;
-                udtScanStatsSingleScan.Continuum = false;
-                udtScanStatsSingleScan.Overload = false;
+                scanStatsSingleScan.Calibrated = false;
+                scanStatsSingleScan.Continuum = false;
+                scanStatsSingleScan.Overload = false;
 
-                udtScanStatsSingleScan.MassStart = 0;
-                udtScanStatsSingleScan.MassEnd = 0;
-                udtScanStatsSingleScan.SetMass = 0;
+                scanStatsSingleScan.MassStart = 0;
+                scanStatsSingleScan.MassEnd = 0;
+                scanStatsSingleScan.SetMass = 0;
 
-                udtScanStatsSingleScan.BPI = 0;
-                udtScanStatsSingleScan.BPIMass = 0;
-                udtScanStatsSingleScan.TIC = 0;
+                scanStatsSingleScan.BPI = 0;
+                scanStatsSingleScan.BPIMass = 0;
+                scanStatsSingleScan.TIC = 0;
 
-                udtScanStatsSingleScan.PeakCount = 0;
-                udtScanStatsSingleScan.RetentionTime = 0;
+                scanStatsSingleScan.PeakCount = 0;
+                scanStatsSingleScan.RetentionTime = 0;
 
-                if (NativeIOGetScanInfo(udtThisMSData.CurrentDataDirPath, udtThisMSData.FunctionInfo[functionNumber], scanNumber, ref udtScanIndexRecord))
+                if (NativeIOGetScanInfo(thisMSData.CurrentDataDirPath, thisMSData.FunctionInfo[functionNumber], scanNumber, ref scanIndexRecord))
                 {
-                    udtScanStatsSingleScan.Calibrated = udtScanIndexRecord.ScanContainsCalibratedMasses;
-                    udtScanStatsSingleScan.Continuum = udtScanIndexRecord.ContinuumDataOverride;
-                    udtScanStatsSingleScan.Overload = udtScanIndexRecord.ScanOverload;
+                    scanStatsSingleScan.Calibrated = scanIndexRecord.ScanContainsCalibratedMasses;
+                    scanStatsSingleScan.Continuum = scanIndexRecord.ContinuumDataOverride;
+                    scanStatsSingleScan.Overload = scanIndexRecord.ScanOverload;
 
-                    udtScanStatsSingleScan.MassStart = udtScanIndexRecord.LoMass;
-                    udtScanStatsSingleScan.MassEnd = udtScanIndexRecord.HiMass;
+                    scanStatsSingleScan.MassStart = scanIndexRecord.LoMass;
+                    scanStatsSingleScan.MassEnd = scanIndexRecord.HiMass;
 
-                    udtScanStatsSingleScan.BPI = udtScanIndexRecord.BasePeakIntensity;
-                    udtScanStatsSingleScan.BPIMass = udtScanIndexRecord.BasePeakMass;
-                    udtScanStatsSingleScan.TIC = udtScanIndexRecord.TicValue;
+                    scanStatsSingleScan.BPI = scanIndexRecord.BasePeakIntensity;
+                    scanStatsSingleScan.BPIMass = scanIndexRecord.BasePeakMass;
+                    scanStatsSingleScan.TIC = scanIndexRecord.TicValue;
 
-                    udtScanStatsSingleScan.PeakCount = udtScanIndexRecord.NumSpectralPeaks;
-                    udtScanStatsSingleScan.RetentionTime = udtScanIndexRecord.ScanTime;
+                    scanStatsSingleScan.PeakCount = scanIndexRecord.NumSpectralPeaks;
+                    scanStatsSingleScan.RetentionTime = scanIndexRecord.ScanTime;
 
-                    udtScanStatsSingleScan.SetMass = udtScanIndexRecord.SetMass;
+                    scanStatsSingleScan.SetMass = scanIndexRecord.SetMass;
 
                 }
             }
@@ -1416,7 +1416,7 @@ namespace MSFileInfoScanner
                 mMSData.UserSuppliedDataDirPath = string.Empty;
             }
 
-            if (mMSData.FunctionCount == 0 || mMSData.UserSuppliedDataDirPath.ToLower() != massLynxDataDirectoryPath.ToLower())
+            if (mMSData.FunctionCount == 0 || !string.Equals(mMSData.UserSuppliedDataDirPath, massLynxDataDirectoryPath, StringComparison.OrdinalIgnoreCase))
             {
                 var numFunctions = LoadMSFunctionInfo(ref mMSData, massLynxDataDirectoryPath);
                 if (numFunctions > 0)
@@ -1454,12 +1454,15 @@ namespace MSFileInfoScanner
             return true;
         }
 
+        /// <summary>
+        /// Create a mask
+        /// </summary>
+        /// <param name="startBit"></param>
+        /// <param name="endBit"></param>
+        /// <returns></returns>
+        /// <remarks>Returns a long value to allow for unsigned Int32 masks</remarks>
         private long CreateMask(byte startBit, byte endBit)
         {
-            // Note: The mask needs to be long data type to allow for unsigned Int32 masks
-            // This is because the Int32 data type has a maximum value of 2^32 / 2 - 1 while
-            //  unsigned Int32 can be up to 2^32-1
-
             long thisMask;
 
             if (startBit == 0)
@@ -1516,7 +1519,6 @@ namespace MSFileInfoScanner
             maskBPStandardDataMass = (int)CreateMask(0, 23);
 
             maskBPUncalibratedDataChannelNumber = (int)CreateMask(0, 27);
-
         }
 
         private int CIntSafe(string valueText)
@@ -1579,12 +1581,12 @@ namespace MSFileInfoScanner
         /// Retrieve the function info
         /// </summary>
         /// <param name="dataDirPath"></param>
-        /// <param name="udtMSFunctionInfo"></param>
+        /// <param name="msFunctionInfo"></param>
         /// <returns>True if success, False if failure</returns>
-        private bool NativeIOGetFunctionInfo(string dataDirPath, ref udtMSFunctionInfoType udtMSFunctionInfo)
+        private bool NativeIOGetFunctionInfo(string dataDirPath, ref udtMSFunctionInfoType msFunctionInfo)
         {
-            var udtNativeFunctionInfo = new udtRawFunctionDescriptorRecordType();
-            InitializeNativeFunctionInfo(ref udtNativeFunctionInfo);
+            var nativeFunctionInfo = new udtRawFunctionDescriptorRecordType();
+            InitializeNativeFunctionInfo(ref nativeFunctionInfo);
 
             try
             {
@@ -1603,7 +1605,7 @@ namespace MSFileInfoScanner
                 {
                     functionCount = (int)(functionsFile.Length / NATIVE_FUNCTION_INFO_SIZE_BYTES);
 
-                    if (udtMSFunctionInfo.FunctionNumber < 1 || udtMSFunctionInfo.FunctionNumber > functionCount)
+                    if (msFunctionInfo.FunctionNumber < 1 || msFunctionInfo.FunctionNumber > functionCount)
                     {
                         return false;
                     }
@@ -1612,47 +1614,47 @@ namespace MSFileInfoScanner
                     // The first byte is 1, and that is where Function 1 can be found
                     // Function 2 can be found NATIVE_FUNCTION_INFO_SIZE_BYTES+1 bytes into the file
 
-                    reader.BaseStream.Seek((udtMSFunctionInfo.FunctionNumber - 1) * NATIVE_FUNCTION_INFO_SIZE_BYTES,
+                    reader.BaseStream.Seek((msFunctionInfo.FunctionNumber - 1) * NATIVE_FUNCTION_INFO_SIZE_BYTES,
                                              SeekOrigin.Begin);
 
-                    udtNativeFunctionInfo.PackedFunctionInfo = reader.ReadInt16();
-                    udtNativeFunctionInfo.CycleTime = reader.ReadSingle();
-                    udtNativeFunctionInfo.InterScanDelay = reader.ReadSingle();
-                    udtNativeFunctionInfo.StartRT = reader.ReadSingle();
-                    udtNativeFunctionInfo.EndRT = reader.ReadSingle();
-                    udtNativeFunctionInfo.ScanCount = reader.ReadInt32();
+                    nativeFunctionInfo.PackedFunctionInfo = reader.ReadInt16();
+                    nativeFunctionInfo.CycleTime = reader.ReadSingle();
+                    nativeFunctionInfo.InterScanDelay = reader.ReadSingle();
+                    nativeFunctionInfo.StartRT = reader.ReadSingle();
+                    nativeFunctionInfo.EndRT = reader.ReadSingle();
+                    nativeFunctionInfo.ScanCount = reader.ReadInt32();
 
                     // Packed MS/MS Info:
                     //   bits 0-7: collision energy
                     //   bits 8-15: segment/channel count
-                    udtNativeFunctionInfo.PackedMSMSInfo = reader.ReadInt16();
+                    nativeFunctionInfo.PackedMSMSInfo = reader.ReadInt16();
 
                     // The following are more MS/MS parameters
-                    udtNativeFunctionInfo.FunctionSetMass = reader.ReadSingle();
-                    udtNativeFunctionInfo.InterSegmentChannelTime = reader.ReadSingle();
+                    nativeFunctionInfo.FunctionSetMass = reader.ReadSingle();
+                    nativeFunctionInfo.InterSegmentChannelTime = reader.ReadSingle();
 
                     // Up to 32 segment scans can be conducted for a MS/MS run
                     // The following three arrays store the segment times, start, and end masses
                     for (var index = 0; index <= 31; index++)
                     {
-                        udtNativeFunctionInfo.SegmentScanTimes[index] = reader.ReadInt32();
+                        nativeFunctionInfo.SegmentScanTimes[index] = reader.ReadInt32();
                     }
                     for (var index = 0; index <= 31; index++)
                     {
-                        udtNativeFunctionInfo.SegmentStartMasses[index] = reader.ReadInt32();
+                        nativeFunctionInfo.SegmentStartMasses[index] = reader.ReadInt32();
                     }
                     for (var index = 0; index <= 31; index++)
                     {
-                        udtNativeFunctionInfo.SegmentEndMasses[index] = reader.ReadInt32();
+                        nativeFunctionInfo.SegmentEndMasses[index] = reader.ReadInt32();
                     }
 
                 } // end using
 
                 var success = true;
 
-                if (udtNativeFunctionInfo.PackedFunctionInfo == 0 &&
-                    Math.Abs(udtNativeFunctionInfo.CycleTime) < float.Epsilon &&
-                    Math.Abs(udtNativeFunctionInfo.InterScanDelay) < float.Epsilon)
+                if (nativeFunctionInfo.PackedFunctionInfo == 0 &&
+                    Math.Abs(nativeFunctionInfo.CycleTime) < float.Epsilon &&
+                    Math.Abs(nativeFunctionInfo.InterScanDelay) < float.Epsilon)
                 {
                     // Empty function record; see if file even exists
                     if (File.Exists(Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(functionCount + 1) + ".dat")))
@@ -1664,94 +1666,94 @@ namespace MSFileInfoScanner
 
                 if (success)
                 {
-                    // Copy data from udtNativeFunctionInfo to udtFunctionInfo
-                    udtMSFunctionInfo.FunctionTypeID = (short)(udtNativeFunctionInfo.PackedFunctionInfo & maskFunctionType);
+                    // Copy data from nativeFunctionInfo to udtFunctionInfo
+                    msFunctionInfo.FunctionTypeID = (short)(nativeFunctionInfo.PackedFunctionInfo & maskFunctionType);
 
                     // 0=MS, 1=SIR, 2=DLY, 3=CAT, 4=OFF, 5=PAR, 6=DAU, 7=NL, 8=NG,
                     // 9=MRM, 10=Q1F, 11=MS2, 12=DAD, 13=TOF, 14=PSD
                     // 16=QTOF MS/MS, 17=MTOF, 18=LCT/QTOF Normal
-                    udtMSFunctionInfo.FunctionType = 0;
-                    switch (udtMSFunctionInfo.FunctionTypeID)
+                    msFunctionInfo.FunctionType = 0;
+                    switch (msFunctionInfo.FunctionTypeID)
                     {
                         case 0:
-                            udtMSFunctionInfo.FunctionTypeText = "MS";
+                            msFunctionInfo.FunctionTypeText = "MS";
                             break;
                         case 1:
-                            udtMSFunctionInfo.FunctionTypeText = "SIR";
+                            msFunctionInfo.FunctionTypeText = "SIR";
                             break;
                         case 2:
-                            udtMSFunctionInfo.FunctionTypeText = "DLY";
+                            msFunctionInfo.FunctionTypeText = "DLY";
                             break;
                         case 3:
-                            udtMSFunctionInfo.FunctionTypeText = "CAT";
+                            msFunctionInfo.FunctionTypeText = "CAT";
                             break;
                         case 4:
-                            udtMSFunctionInfo.FunctionTypeText = "OFF";
+                            msFunctionInfo.FunctionTypeText = "OFF";
                             break;
                         case 5:
-                            udtMSFunctionInfo.FunctionTypeText = "PAR";
+                            msFunctionInfo.FunctionTypeText = "PAR";
                             break;
                         case 6:
-                            udtMSFunctionInfo.FunctionTypeText = "DAU";
-                            udtMSFunctionInfo.FunctionType = 1;
+                            msFunctionInfo.FunctionTypeText = "DAU";
+                            msFunctionInfo.FunctionType = 1;
                             break;
                         case 7:
-                            udtMSFunctionInfo.FunctionTypeText = "NL";
+                            msFunctionInfo.FunctionTypeText = "NL";
                             break;
                         case 8:
-                            udtMSFunctionInfo.FunctionTypeText = "NG";
+                            msFunctionInfo.FunctionTypeText = "NG";
                             break;
                         case 9:
-                            udtMSFunctionInfo.FunctionTypeText = "MRM";
+                            msFunctionInfo.FunctionTypeText = "MRM";
                             break;
                         case 10:
-                            udtMSFunctionInfo.FunctionTypeText = "Q1F";
+                            msFunctionInfo.FunctionTypeText = "Q1F";
                             break;
                         case 11:
-                            udtMSFunctionInfo.FunctionTypeText = "MS2";
-                            udtMSFunctionInfo.FunctionType = 1;
+                            msFunctionInfo.FunctionTypeText = "MS2";
+                            msFunctionInfo.FunctionType = 1;
                             break;
                         case 12:
-                            udtMSFunctionInfo.FunctionTypeText = "DAD";
+                            msFunctionInfo.FunctionTypeText = "DAD";
                             break;
                         case 13:
-                            udtMSFunctionInfo.FunctionTypeText = "TOF";
+                            msFunctionInfo.FunctionTypeText = "TOF";
                             break;
                         case 14:
-                            udtMSFunctionInfo.FunctionTypeText = "PSD";
+                            msFunctionInfo.FunctionTypeText = "PSD";
                             break;
                         case 16:
-                            udtMSFunctionInfo.FunctionTypeText = "TOF MS/MS";
-                            udtMSFunctionInfo.FunctionType = 1;
+                            msFunctionInfo.FunctionTypeText = "TOF MS/MS";
+                            msFunctionInfo.FunctionType = 1;
                             break;
                         case 17:
-                            udtMSFunctionInfo.FunctionTypeText = "TOF MS";
+                            msFunctionInfo.FunctionTypeText = "TOF MS";
                             break;
                         case 18:
-                            udtMSFunctionInfo.FunctionTypeText = "TOF MS";
+                            msFunctionInfo.FunctionTypeText = "TOF MS";
                             break;
                         default:
-                            udtMSFunctionInfo.FunctionTypeText = "MS Unknown";
+                            msFunctionInfo.FunctionTypeText = "MS Unknown";
                             break;
                     }
 
-                    udtMSFunctionInfo.IonMode = (short)((short)(udtNativeFunctionInfo.PackedFunctionInfo & maskIonMode) / 32f);     // 32 = 2^5
-                    udtMSFunctionInfo.AcquisitionDataType = (short)((short)(udtNativeFunctionInfo.PackedFunctionInfo & maskAcquisitionDataType) / 1024f);    // 1024 = 2^10
+                    msFunctionInfo.IonMode = (short)((short)(nativeFunctionInfo.PackedFunctionInfo & maskIonMode) / 32f);     // 32 = 2^5
+                    msFunctionInfo.AcquisitionDataType = (short)((short)(nativeFunctionInfo.PackedFunctionInfo & maskAcquisitionDataType) / 1024f);    // 1024 = 2^10
 
-                    udtMSFunctionInfo.CycleTime = udtNativeFunctionInfo.CycleTime;
-                    udtMSFunctionInfo.InterScanDelay = udtNativeFunctionInfo.InterScanDelay;
-                    udtMSFunctionInfo.StartRT = udtNativeFunctionInfo.StartRT;
-                    udtMSFunctionInfo.EndRT = udtNativeFunctionInfo.EndRT;
+                    msFunctionInfo.CycleTime = nativeFunctionInfo.CycleTime;
+                    msFunctionInfo.InterScanDelay = nativeFunctionInfo.InterScanDelay;
+                    msFunctionInfo.StartRT = nativeFunctionInfo.StartRT;
+                    msFunctionInfo.EndRT = nativeFunctionInfo.EndRT;
 
-                    udtMSFunctionInfo.MsMsCollisionEnergy = (short)(udtNativeFunctionInfo.PackedMSMSInfo & maskCollisionEnergy);
-                    udtMSFunctionInfo.MSMSSegmentOrChannelCount = (short)(NumberConversion.Int32ToUnsigned(udtNativeFunctionInfo.PackedMSMSInfo) / 256f);      // 256 = 2^8
+                    msFunctionInfo.MsMsCollisionEnergy = (short)(nativeFunctionInfo.PackedMSMSInfo & maskCollisionEnergy);
+                    msFunctionInfo.MSMSSegmentOrChannelCount = (short)(NumberConversion.Int32ToUnsigned(nativeFunctionInfo.PackedMSMSInfo) / 256f);      // 256 = 2^8
 
-                    udtMSFunctionInfo.FunctionSetMass = udtNativeFunctionInfo.FunctionSetMass;
-                    udtMSFunctionInfo.InterSegmentChannelTime = udtNativeFunctionInfo.InterSegmentChannelTime;
+                    msFunctionInfo.FunctionSetMass = nativeFunctionInfo.FunctionSetMass;
+                    msFunctionInfo.InterSegmentChannelTime = nativeFunctionInfo.InterSegmentChannelTime;
 
-                    // Since udtNativeFunctionInfo.ScanCount is always 0, we need to use NativeIOGetScanCount instead
-                    var scanCount = NativeIOGetScanCount(dataDirPath, ref udtMSFunctionInfo);
-                    if (udtMSFunctionInfo.ScanCount != scanCount)
+                    // Since nativeFunctionInfo.ScanCount is always 0, we need to use NativeIOGetScanCount instead
+                    var scanCount = NativeIOGetScanCount(dataDirPath, ref msFunctionInfo);
+                    if (msFunctionInfo.ScanCount != scanCount)
                     {
                         // This is unexpected
                         Debug.WriteLine("Scan count values do not agree in NativeIOGetFunctionInfo");
@@ -1771,21 +1773,21 @@ namespace MSFileInfoScanner
 
         /// <summary>
         /// Returns the number of scans in the given function
-        /// Also updates udtMSFunctionInfo.ScanCount
+        /// Also updates msFunctionInfo.ScanCount
         /// </summary>
         /// <param name="dataDirPath"></param>
-        /// <param name="udtMSFunctionInfo"></param>
+        /// <param name="msFunctionInfo"></param>
         /// <returns>Number of scans, or 0 if an error</returns>
         /// <remarks>
-        /// udtMSFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
+        /// msFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
         /// </remarks>
-        private int NativeIOGetScanCount(string dataDirPath, ref udtMSFunctionInfoType udtMSFunctionInfo)
+        private int NativeIOGetScanCount(string dataDirPath, ref udtMSFunctionInfoType msFunctionInfo)
         {
 
             try
             {
 
-                var indexFilePath = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(udtMSFunctionInfo.FunctionNumber) + ".idx");
+                var indexFilePath = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(msFunctionInfo.FunctionNumber) + ".idx");
                 var indexFile = new FileInfo(indexFilePath);
 
                 var numberOfScansInFunction = 0;
@@ -1796,7 +1798,7 @@ namespace MSFileInfoScanner
                     //  by the size of each udtRawScanIndexRecordType
 
                     numberOfScansInFunction = (int)(indexFile.Length / RAW_SCAN_INDEX_RECORD_SIZE);
-                    udtMSFunctionInfo.ScanCount = numberOfScansInFunction;
+                    msFunctionInfo.ScanCount = numberOfScansInFunction;
                 }
 
                 return numberOfScansInFunction;
@@ -1813,38 +1815,38 @@ namespace MSFileInfoScanner
         /// Retrieves information on the given scan for the given function
         /// </summary>
         /// <param name="dataDirPath"></param>
-        /// <param name="udtMSFunctionInfo"></param>
+        /// <param name="msFunctionInfo"></param>
         /// <param name="scanNumber"></param>
-        /// <param name="udtScanIndexRecord"></param>
+        /// <param name="scanIndexRecord"></param>
         /// <param name="scanOffsetAndPeakCountOnly"></param>
         /// <returns>True if success, False if failure</returns>
         /// <remarks>
-        /// udtMSFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
+        /// msFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
         /// </remarks>
         private bool NativeIOGetScanInfo(
             string dataDirPath,
-            udtMSFunctionInfoType udtMSFunctionInfo,
+            udtMSFunctionInfoType msFunctionInfo,
             int scanNumber,
-            ref udtScanIndexRecordType udtScanIndexRecord,
+            ref udtScanIndexRecordType scanIndexRecord,
             bool scanOffsetAndPeakCountOnly = false)
         {
 
             // This udt is used for most files
-            var udtNativeScanIndexRecord = default(udtRawScanIndexRecordType);
+            var nativeScanIndexRecord = default(udtRawScanIndexRecordType);
 
-            // This udt is used for files with udtMSFunctionInfo.AcquisitionDataType = 0
+            // This udt is used for files with msFunctionInfo.AcquisitionDataType = 0
             // The difference is that udtRawScanIndexRecordType ends in an Integer then a Long
             //  while this udt ends in a Long, then an Integer
-            // When this udt is used, its values are copied to udtNativeScanIndexRecord directly after reading
-            var udtNativeScanIndexRecordCompressedScan = default(udtRawScanIndexRecordCompressedScanType);
+            // When this udt is used, its values are copied to nativeScanIndexRecord directly after reading
+            var nativeScanIndexRecordCompressedScan = default(udtRawScanIndexRecordCompressedScanType);
 
             var success = false;
 
             try
             {
 
-                var indexFilePath = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(udtMSFunctionInfo.FunctionNumber) + ".idx");
-                // indexFilePath  = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(ref udtMSFunctionInfo.FunctionNumber) + ".sts");
+                var indexFilePath = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(msFunctionInfo.FunctionNumber) + ".idx");
+                // indexFilePath  = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(ref msFunctionInfo.FunctionNumber) + ".sts");
 
                 var indexFile = new FileInfo(indexFilePath);
 
@@ -1872,38 +1874,38 @@ namespace MSFileInfoScanner
                         // Jump to the appropriate file offset based on scanNumber
                         reader.BaseStream.Seek((scanNumber - 1) * RAW_SCAN_INDEX_RECORD_SIZE, SeekOrigin.Begin);
 
-                        if (udtMSFunctionInfo.AcquisitionDataType == 0)
+                        if (msFunctionInfo.AcquisitionDataType == 0)
                         {
                             // File saved with Acquisition Data Type 0
 
-                            udtNativeScanIndexRecordCompressedScan.StartScanOffset = reader.ReadInt32();
-                            udtNativeScanIndexRecordCompressedScan.PackedScanInfo = reader.ReadInt32();
-                            udtNativeScanIndexRecordCompressedScan.TicValue = reader.ReadSingle();
-                            udtNativeScanIndexRecordCompressedScan.ScanTime = reader.ReadSingle();
-                            udtNativeScanIndexRecordCompressedScan.PackedBasePeakInfo = reader.ReadInt32();
-                            udtNativeScanIndexRecordCompressedScan.Spare = reader.ReadInt16();
+                            nativeScanIndexRecordCompressedScan.StartScanOffset = reader.ReadInt32();
+                            nativeScanIndexRecordCompressedScan.PackedScanInfo = reader.ReadInt32();
+                            nativeScanIndexRecordCompressedScan.TicValue = reader.ReadSingle();
+                            nativeScanIndexRecordCompressedScan.ScanTime = reader.ReadSingle();
+                            nativeScanIndexRecordCompressedScan.PackedBasePeakInfo = reader.ReadInt32();
+                            nativeScanIndexRecordCompressedScan.Spare = reader.ReadInt16();
 
-                            // Copy from udtNativeScanIndexRecordCompressedScan to udtNativeScanIndexRecord
-                            udtNativeScanIndexRecord.StartScanOffset = udtNativeScanIndexRecordCompressedScan.StartScanOffset;
-                            udtNativeScanIndexRecord.PackedScanInfo = udtNativeScanIndexRecordCompressedScan.PackedScanInfo;
+                            // Copy from nativeScanIndexRecordCompressedScan to nativeScanIndexRecord
+                            nativeScanIndexRecord.StartScanOffset = nativeScanIndexRecordCompressedScan.StartScanOffset;
+                            nativeScanIndexRecord.PackedScanInfo = nativeScanIndexRecordCompressedScan.PackedScanInfo;
 
-                            udtNativeScanIndexRecord.TicValue = udtNativeScanIndexRecordCompressedScan.TicValue;
-                            udtNativeScanIndexRecord.ScanTime = udtNativeScanIndexRecordCompressedScan.ScanTime;
+                            nativeScanIndexRecord.TicValue = nativeScanIndexRecordCompressedScan.TicValue;
+                            nativeScanIndexRecord.ScanTime = nativeScanIndexRecordCompressedScan.ScanTime;
 
                             // Unused
-                            udtNativeScanIndexRecord.PackedBasePeakIntensity = 0;
+                            nativeScanIndexRecord.PackedBasePeakIntensity = 0;
 
-                            udtNativeScanIndexRecord.PackedBasePeakInfo = udtNativeScanIndexRecordCompressedScan.PackedBasePeakInfo;
+                            nativeScanIndexRecord.PackedBasePeakInfo = nativeScanIndexRecordCompressedScan.PackedBasePeakInfo;
                         }
                         else
                         {
                             // File saved with Acquisition Data Type other than 0
-                            udtNativeScanIndexRecord.StartScanOffset = reader.ReadInt32();
-                            udtNativeScanIndexRecord.PackedScanInfo = reader.ReadInt32();
-                            udtNativeScanIndexRecord.TicValue = reader.ReadSingle();
-                            udtNativeScanIndexRecord.ScanTime = reader.ReadSingle();
-                            udtNativeScanIndexRecord.PackedBasePeakIntensity = reader.ReadInt16();
-                            udtNativeScanIndexRecord.PackedBasePeakInfo = reader.ReadInt32();
+                            nativeScanIndexRecord.StartScanOffset = reader.ReadInt32();
+                            nativeScanIndexRecord.PackedScanInfo = reader.ReadInt32();
+                            nativeScanIndexRecord.TicValue = reader.ReadSingle();
+                            nativeScanIndexRecord.ScanTime = reader.ReadSingle();
+                            nativeScanIndexRecord.PackedBasePeakIntensity = reader.ReadInt16();
+                            nativeScanIndexRecord.PackedBasePeakInfo = reader.ReadInt32();
                         }
 
                         success = true;
@@ -1912,39 +1914,39 @@ namespace MSFileInfoScanner
 
                 if (success)
                 {
-                    udtScanIndexRecord.StartScanOffset = udtNativeScanIndexRecord.StartScanOffset;
+                    scanIndexRecord.StartScanOffset = nativeScanIndexRecord.StartScanOffset;
 
-                    udtScanIndexRecord.NumSpectralPeaks = udtNativeScanIndexRecord.PackedScanInfo & maskSpectralPeak;
+                    scanIndexRecord.NumSpectralPeaks = nativeScanIndexRecord.PackedScanInfo & maskSpectralPeak;
 
                     if (!scanOffsetAndPeakCountOnly)
                     {
                         // 4194304 = 2^22
-                        udtScanIndexRecord.SegmentNumber = (short)((short)(udtNativeScanIndexRecord.PackedScanInfo & maskSegment) / 4194304);
+                        scanIndexRecord.SegmentNumber = (short)((short)(nativeScanIndexRecord.PackedScanInfo & maskSegment) / 4194304);
 
-                        udtScanIndexRecord.UseFollowingContinuum = NumberConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskUseFollowingContinuum);
-                        udtScanIndexRecord.ContinuumDataOverride = NumberConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskContinuumDataOverride);
-                        udtScanIndexRecord.ScanContainsMolecularMasses = NumberConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskScanContainsMolecularMasses);
-                        udtScanIndexRecord.ScanContainsCalibratedMasses = NumberConversion.ValueToBool(udtNativeScanIndexRecord.PackedScanInfo & maskScanContainsCalibratedMasses);
-                        if (udtNativeScanIndexRecord.PackedScanInfo != Math.Abs(udtNativeScanIndexRecord.PackedScanInfo))
+                        scanIndexRecord.UseFollowingContinuum = NumberConversion.ValueToBool(nativeScanIndexRecord.PackedScanInfo & maskUseFollowingContinuum);
+                        scanIndexRecord.ContinuumDataOverride = NumberConversion.ValueToBool(nativeScanIndexRecord.PackedScanInfo & maskContinuumDataOverride);
+                        scanIndexRecord.ScanContainsMolecularMasses = NumberConversion.ValueToBool(nativeScanIndexRecord.PackedScanInfo & maskScanContainsMolecularMasses);
+                        scanIndexRecord.ScanContainsCalibratedMasses = NumberConversion.ValueToBool(nativeScanIndexRecord.PackedScanInfo & maskScanContainsCalibratedMasses);
+                        if (nativeScanIndexRecord.PackedScanInfo != Math.Abs(nativeScanIndexRecord.PackedScanInfo))
                         {
-                            udtScanIndexRecord.ScanOverload = true;
+                            scanIndexRecord.ScanOverload = true;
                         }
 
-                        udtScanIndexRecord.TicValue = udtNativeScanIndexRecord.TicValue;
-                        udtScanIndexRecord.ScanTime = udtNativeScanIndexRecord.ScanTime;
+                        scanIndexRecord.TicValue = nativeScanIndexRecord.TicValue;
+                        scanIndexRecord.ScanTime = nativeScanIndexRecord.ScanTime;
 
-                        udtScanIndexRecord.BasePeakIntensity = (int)UnpackIntensity(udtNativeScanIndexRecord.PackedBasePeakIntensity, udtNativeScanIndexRecord.PackedBasePeakInfo, udtMSFunctionInfo.AcquisitionDataType);
+                        scanIndexRecord.BasePeakIntensity = (int)UnpackIntensity(nativeScanIndexRecord.PackedBasePeakIntensity, nativeScanIndexRecord.PackedBasePeakInfo, msFunctionInfo.AcquisitionDataType);
 
-                        udtScanIndexRecord.BasePeakMass = (float)UnpackMass(udtNativeScanIndexRecord.PackedBasePeakInfo, udtMSFunctionInfo.AcquisitionDataType, true);
+                        scanIndexRecord.BasePeakMass = (float)UnpackMass(nativeScanIndexRecord.PackedBasePeakInfo, msFunctionInfo.AcquisitionDataType, true);
 
                         // ToDo: May need to calibrate the base peak mass
-                        // udtScanIndexRecord.BasePeakMass = udtScanIndexRecord.BasePeakMass;
+                        // scanIndexRecord.BasePeakMass = scanIndexRecord.BasePeakMass;
 
-                        udtScanIndexRecord.LoMass = 0;
+                        scanIndexRecord.LoMass = 0;
 
                         // ToDo: Figure out if this can be read from the FunctionIndex file
-                        udtScanIndexRecord.HiMass = 0;
-                        udtScanIndexRecord.SetMass = 0;
+                        scanIndexRecord.HiMass = 0;
+                        scanIndexRecord.SetMass = 0;
                         // This will get populated below
                     }
 
@@ -2001,10 +2003,10 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Looks for the "$$ Cal Function" lines in the _HEADER.TXT file
         /// </summary>
-        /// <param name="udtThisMSData"></param>
+        /// <param name="thisMSData"></param>
         /// <returns>True if successful, False if not</returns>
         /// <remarks>Should only be called by LoadMSFunctionInfo and only after the functions have been determined</remarks>
-        private bool NativeIOReadCalInfoFromHeader(ref udtMSDataType udtThisMSData)
+        private bool NativeIOReadCalInfoFromHeader(ref udtMSDataType thisMSData)
         {
             const string CAL_FUNCTION_NAME = "CAL FUNCTION";
             const string CAL_STDDEV_FUNCTION_NAME = "CAL STDDEV FUNCTION";
@@ -2012,7 +2014,7 @@ namespace MSFileInfoScanner
             try
             {
 
-                var headerFilePath = Path.Combine(udtThisMSData.CurrentDataDirPath, "_HEADER.TXT");
+                var headerFilePath = Path.Combine(thisMSData.CurrentDataDirPath, "_HEADER.TXT");
                 var headerFile = new FileInfo(headerFilePath);
 
                 if (!headerFile.Exists)
@@ -2044,14 +2046,14 @@ namespace MSFileInfoScanner
                         {
                             // Calibration equation for one of the functions
                             functionNumber = CIntSafe(dataLine.Substring(CAL_FUNCTION_NAME.Length, colonIndex - CAL_FUNCTION_NAME.Length));
-                            if (functionNumber >= 1 && functionNumber <= udtThisMSData.FunctionCount)
+                            if (functionNumber >= 1 && functionNumber <= thisMSData.FunctionCount)
                             {
 
                                 NativeIOParseCalibrationCoefficients(
                                     keyValue,
-                                    out udtThisMSData.FunctionInfo[functionNumber].CalibrationCoefficientCount,
-                                    udtThisMSData.FunctionInfo[functionNumber].CalibrationCoefficients,
-                                    out udtThisMSData.FunctionInfo[functionNumber].CalTypeID);
+                                    out thisMSData.FunctionInfo[functionNumber].CalibrationCoefficientCount,
+                                    thisMSData.FunctionInfo[functionNumber].CalibrationCoefficients,
+                                    out thisMSData.FunctionInfo[functionNumber].CalTypeID);
 
                             }
                             else
@@ -2063,11 +2065,11 @@ namespace MSFileInfoScanner
                         else if (dataLine.ToUpper().StartsWith(CAL_STDDEV_FUNCTION_NAME))
                         {
                             functionNumber = CIntSafe(dataLine.Substring(CAL_STDDEV_FUNCTION_NAME.Length, colonIndex - CAL_STDDEV_FUNCTION_NAME.Length));
-                            if (functionNumber >= 1 && functionNumber <= udtThisMSData.FunctionCount)
+                            if (functionNumber >= 1 && functionNumber <= thisMSData.FunctionCount)
                             {
                                 if (double.TryParse(keyValue, out var calStdDev))
                                 {
-                                    udtThisMSData.FunctionInfo[functionNumber].CalStDev = calStdDev;
+                                    thisMSData.FunctionInfo[functionNumber].CalStDev = calStdDev;
                                 }
                             }
                         }
