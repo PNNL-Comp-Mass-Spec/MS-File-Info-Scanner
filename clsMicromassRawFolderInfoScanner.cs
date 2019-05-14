@@ -7,6 +7,9 @@ using System.IO;
 
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// Class for reading data from Waters mass spectrometers (previously Micromass)
+    /// </summary>
     public class clsMicromassRawFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
 

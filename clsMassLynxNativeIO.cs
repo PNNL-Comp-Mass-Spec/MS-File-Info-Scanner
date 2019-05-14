@@ -2,9 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+// ReSharper disable BuiltInTypeReferenceStyle
 
 namespace MSFileInfoScanner
 {
+
+    /// This class can read data from MassLynx data files using native disk access,
+    ///  obviating the need to have MassLynx installed
+    ///
+    /// Note that native file IO is significantly slower than utilizing the
+    ///  MassLynx API access functions (see clsMassLynxReader3 and clsMassLynxReader4)
+    ///
+    /// Written by Matthew Monroe for PNNL in Jan 2004
+    /// Portions of this code were written at UNC in 2001
+    ///
+    /// VB6 version Last modified January 22, 2004
+    /// Updated to VB.NET September 17, 2005, though did not upgrade the extended function info functions or data point reading options
+    /// Updated to C# in May 2016
     internal class clsMassLynxNativeIO
     {
 
@@ -16,18 +30,6 @@ namespace MSFileInfoScanner
         {
             CreateNativeDataMasks();
         }
-
-        // This class can read data from MassLynx data files using native disk access,
-        //  obviating the need to have MassLynx installed
-        // Note that native file IO is significantly slower than utilizing the
-        //  MassLynx API access functions (see clsMassLynxReader3 and clsMassLynxReader4)
-        //
-        // Written by Matthew Monroe for PNNL in Jan 2004
-        // Portions of this code were written at UNC in 2001
-        //
-        // VB6 version Last modified January 22, 2004
-        // Updated to VB.NET September 17, 2005, though did not upgrade the extended function info functions or data point reading options
-        // Updated to C# in May 2016
 
         //-------------------------------
         //-- Start Native IO Headers
@@ -228,7 +230,9 @@ namespace MSFileInfoScanner
             public short Spare;
         }
 
-        // The udtRawScanIndexRecordType data read from the file is stored in this structure
+        /// <summary>
+        /// The udtRawScanIndexRecordType data read from the file is stored in this structure
+        /// </summary>
         private struct udtScanIndexRecordType
         {
             // offset (in bytes) from start of file where scan begins
@@ -291,46 +295,171 @@ namespace MSFileInfoScanner
             DataFolderReadError = 3
         }
 
+        /// <summary>
+        /// MS file header info
+        /// </summary>
         public struct udtMSHeaderInfoType
         {
+            /// <summary>
+            /// Acquisition date
+            /// </summary>
             public string AcquDate;
+
+            /// <summary>
+            /// Acquisition name
+            /// </summary>
             public string AcquName;
+
+            /// <summary>
+            /// Acquisition time
+            /// </summary>
             public string AcquTime;
+
+            /// <summary>
+            /// Job code
+            /// </summary>
             public string JobCode;
+
+            /// <summary>
+            /// Task code
+            /// </summary>
             public string TaskCode;
+
+            /// <summary>
+            /// Username
+            /// </summary>
             public string UserName;
+
+            /// <summary>
+            /// Instrument name
+            /// </summary>
             public string Instrument;
+
+            /// <summary>
+            /// Instrument type
+            /// </summary>
             public string InstrumentType;
+
+            /// <summary>
+            /// Conditions
+            /// </summary>
             public string Conditions;
+
+            /// <summary>
+            /// Lab name
+            /// </summary>
             public string LabName;
+
+            /// <summary>
+            /// Sample description
+            /// </summary>
             public string SampleDesc;
+
+            /// <summary>
+            /// Solvent delay
+            /// </summary>
             public float SolventDelay;
+
+            /// <summary>
+            /// Submitter
+            /// </summary>
             public string Submitter;
+
+            /// <summary>
+            /// Sample ID
+            /// </summary>
             public string SampleID;
+
+            /// <summary>
+            /// Bottle number
+            /// </summary>
             public string BottleNumber;
+
+            /// <summary>
+            /// Plate description
+            /// </summary>
             public string PlateDesc;
+
+            /// <summary>
+            /// Mux stream
+            /// </summary>
             public int MuxStream;
+
+            /// <summary>
+            /// Major version
+            /// </summary>
             public int VersionMajor;
+
+            /// <summary>
+            /// Minor version
+            /// </summary>
             public int VersionMinor;
+
+            /// <summary>
+            /// Static MS1 calibration coefficient count
+            /// </summary>
             public short CalMS1StaticCoefficientCount;
+
+            /// <summary>
+            /// Static MS1 calibration coefficients
+            /// </summary>
             public double[] CalMS1StaticCoefficients;
 
-            // 0 = normal, 1 = Root mass
+            /// <summary>
+            /// Static MS1 calibration type
+            /// </summary>
+            /// <remarks>
+            /// 0 = normal, 1 = Root mass
+            /// </remarks>
             public short CalMS1StaticTypeID;
+
+            /// <summary>
+            /// Static MS2 calibration coefficient count
+            /// </summary>
             public short CalMS2StaticCoefficientCount;
+
+            /// <summary>
+            /// Static MS2 calibration coefficients
+            /// </summary>
             public double[] CalMS2StaticCoefficients;
 
             // 0 = normal, 1 = Root mass
             public short CalMS2StaticTypeID;
         }
 
+        /// <summary>
+        /// Scan stats
+        /// </summary>
         private struct udtScanStatsType
         {
+            /// <summary>
+            /// Number of peaks in this scan
+            /// </summary>
             public int PeakCount;
+
+            /// <summary>
+            /// True if calibrated
+            /// </summary>
             public bool Calibrated;
+
+            /// <summary>
+            /// True if continuum (aka profile)
+            /// </summary>
             public bool Continuum;
+
+            /// <summary>
+            /// True if overload
+            /// </summary>
             public bool Overload;
+
+            /// <summary>
+            /// Starting mass (m/z)
+            /// </summary>
             public float MassStart;
+
+            /// <summary>
+            /// Ending mass (m/z)
+            /// </summary>
             public float MassEnd;
 
             // MS/MS Parent Ion Mass
@@ -339,64 +468,154 @@ namespace MSFileInfoScanner
             // Base peak intensity
             public float BPI;
 
-            // Base peak mass
+            /// <summary>
+            /// Base peak mass
+            /// </summary>
             public float BPIMass;
+
+            /// <summary>
+            /// Total ion chromatogram (total intensity)
+            /// </summary>
             public float TIC;
+
+            /// <summary>
+            /// Elution time (retention time)
+            /// </summary>
             public float RetentionTime;
         }
 
         public struct udtMSFunctionInfoType
         {
-            // The function number that this data corresponds to
+            /// <summary>
+            /// The function number that this data corresponds to
+            /// </summary>
             public int FunctionNumber;
+
+            /// <summary>
+            /// Process number
+            /// </summary>
             public short ProcessNumber;
+
+            /// <summary>
+            /// Starting elution time
+            /// </summary>
             public float StartRT;
+
+            /// <summary>
+            /// Ending elution time
+            /// </summary>
             public float EndRT;
 
-            // 0=MS, 1=SIR, 2=DLY, 3=CAT, 4=OFF, 5=PAR, 6=DAU, 7=NL, 8=NG,
-            // 9=MRM, 10=Q1F, 11=MS2, 12=DAD, 13=TOF, 14=PSD
-            // 16=QTOF MS/MS, 17=MTOF, 18=LCT/QTOF Normal
-            // 0 for MS-only; 1 for MS/MS
+            /// <summary>
+            /// Function TypeID (mass spec method type)
+            /// </summary>
+            /// <remarks>
+            /// 0=MS, 1=SIR, 2=DLY, 3=CAT, 4=OFF, 5=PAR, 6=DAU, 7=NL, 8=NG,
+            /// 9=MRM, 10=Q1F, 11=MS2, 12=DAD, 13=TOF, 14=PSD
+            /// 16=QTOF MS/MS, 17=MTOF, 18=LCT/QTOF Normal
+            /// </remarks>
             public short FunctionTypeID;
 
+            /// <summary>
+            /// Function type (fragmentation type)
+            /// </summary>
+            /// <remarks>0 for MS-only; 1 for MS/MS</remarks>
             public short FunctionType;
+
+            /// <summary>
+            /// User-friendly version of FunctionTypeID
+            /// </summary>
             public string FunctionTypeText;
+
+            /// <summary>
+            /// Start mass (minimum mass)
+            /// </summary>
             public float StartMass;
+
+            /// <summary>
+            /// End mass (maximum mass)
+            /// </summary>
             public float EndMass;
+
+            /// <summary>
+            /// Scan count
+            /// </summary>
             public int ScanCount;
+
+            /// <summary>
+            /// Ion mode
+            /// </summary>
             public short IonMode;
 
-            // 0=Compressed scan, 1=Standard Scan, 2=SIR or MRM Data, 3=Scanning Continuum,
+            /// <summary>
+            /// Acquisition type
+            /// </summary>
+            /// <remarks>
+            /// 0=Compressed scan, 1=Standard Scan, 2=SIR or MRM Data, 3=Scanning Continuum,
+            /// </remarks>
             public short AcquisitionDataType;
 
-            // 4=MCA Data, 5=MCA data with SD, 6=MCB data, 7=MCB data with SD
-            // 8=Molecular weight data, 9=High accuracy calibrated data
-            // 10=Single float precision (not used), 11=Enhanced uncalibrated data
-            // 12=Enhanced calibrated data
-            // in seconds
+            /// <summary>
+            /// Cycle time
+            /// </summary>
+            /// <remarks>
+            /// 4=MCA Data, 5=MCA data with SD, 6=MCB data, 7=MCB data with SD
+            /// 8=Molecular weight data, 9=High accuracy calibrated data
+            /// 10=Single float precision (not used), 11=Enhanced uncalibrated data
+            /// 12=Enhanced calibrated data
+            /// </remarks>
             public float CycleTime;
 
-            // in seconds
+            /// <summary>
+            /// Inter scan delay, in seconds
+            /// </summary>
             public float InterScanDelay;
 
-            // in eV
+            /// <summary>
+            /// MS/MS collision energy, in eV
+            /// </summary>
             public short MsMsCollisionEnergy;
+
+            /// <summary>
+            /// MS/MS segment or channel count
+            /// </summary>
             public short MSMSSegmentOrChannelCount;
+
+
+            /// <summary>
+            /// Function set mass (aka parent ion mass)
+            /// </summary>
             public float FunctionSetMass;
 
-            // in seconds
+            /// <summary>
+            /// Inter segment channel time, in seconds
+            /// </summary>
             public float InterSegmentChannelTime;
 
-            // Should be 0 or 6 or 7  (typically 6 coefficients)
+            /// <summary>
+            /// Calibration coefficient count (length of CalibrationCoefficients array)
+            /// </summary>
+            /// <remarks>
+            /// Should be 0 or 6 or 7  (typically 6 coefficients)
+            /// </remarks>
             public short CalibrationCoefficientCount;
 
-            // Calibration coefficients
+            /// <summary>
+            /// Calibration coefficients
+            /// </summary>
             public double[] CalibrationCoefficients;
 
-            // 0 = normal, 1 = Root mass
+            /// <summary>
+            /// Calibration type
+            /// </summary>
+            /// <remarks>
+            /// 0 = normal, 1 = Root mass
+            /// </remarks>
             public short CalTypeID;
 
-            // Calibration standard deviation
+            /// <summary>
+            /// Calibration standard deviation
+            /// </summary>
             public double CalStDev;
         }
 
@@ -442,6 +661,18 @@ namespace MSFileInfoScanner
             return message;
         }
 
+        /// <summary>
+        /// Retrieves information on the given MassLynx data file (actually a directory)
+        /// </summary>
+        /// <param name="massLynxDataDirectoryPath"></param>
+        /// <param name="acquDate"></param>
+        /// <param name="acquName"></param>
+        /// <param name="instrument"></param>
+        /// <param name="instrumentType"></param>
+        /// <param name="sampleDesc"></param>
+        /// <param name="versionMajor"></param>
+        /// <param name="versionMinor"></param>
+        /// <returns>True if success, false if failure</returns>
         public bool GetFileInfo(
             string massLynxDataDirectoryPath,
             out string acquDate,
@@ -452,9 +683,6 @@ namespace MSFileInfoScanner
             out int versionMajor,
             out int versionMinor)
         {
-            // Returns information on the given MassLynx data file (actually a directory)
-            // Returns True if success, false if failure
-
             bool success;
 
             acquDate = string.Empty;
@@ -490,10 +718,14 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Retrieves information on the given MassLynx data file (actually a directory)
+        /// </summary>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
+        /// <param name="udtHeaderInfo">Output: file info</param>
+        /// <returns> True if success, false if failure</returns>
         public bool GetFileInfo(string massLynxDataDirectoryPath, out udtMSHeaderInfoType udtHeaderInfo)
         {
-            // Returns information on the given MassLynx data file (actually a directory)
-            // Returns True if success, false if failure
 
             bool success;
 
@@ -517,6 +749,12 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Get acquisition type of the given function
+        /// </summary>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
+        /// <param name="functionNumber">Function number</param>
+        /// <returns></returns>
         public short GetFunctionAcquisitionDataType(string massLynxDataDirectoryPath, int functionNumber)
         {
             short acquisitionDataTypeID = -1;
@@ -540,6 +778,13 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Retrieves information on the given function
+        /// </summary>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
+        /// <param name="functionNumber">Function number</param>
+        /// <param name="functionType">Output: function type (numeric code)</param>
+        /// <returns></returns>
         public bool GetFunctionInfo(
             string massLynxDataDirectoryPath,
             int functionNumber,
@@ -553,6 +798,20 @@ namespace MSFileInfoScanner
                                    out _);
         }
 
+        /// <summary>
+        /// Retrieves information on the given function
+        /// </summary>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
+        /// <param name="functionNumber">Function number</param>
+        /// <param name="scanCount">Output: scan count</param>
+        /// <param name="startRT">Output: Start elution time</param>
+        /// <param name="endRT">Output: End elution time</param>
+        /// <param name="startMass">Output: Start mass</param>
+        /// <param name="endMass">Output: End mass</param>
+        /// <param name="functionType">Output: function type (numeric code)</param>
+        /// <param name="functionTypeText">Output: function type (text)</param>
+        /// <param name="functionSetMass">Output: function set mass</param>
+        /// <returns>True if success, false if failure</returns>
         public bool GetFunctionInfo(
             string massLynxDataDirectoryPath,
             int functionNumber,
@@ -565,9 +824,6 @@ namespace MSFileInfoScanner
             out string functionTypeText,
             out double functionSetMass)
         {
-            // Returns information on the given function
-            // Returns True if success, false if failure
-
             bool success;
 
             scanCount = 0;
@@ -611,11 +867,15 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Retrieves information on the given function
+        /// </summary>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
+        /// <param name="functionNumber">Function number</param>
+        /// <param name="udtFunctionInfo">Output: function info</param>
+        /// <returns>True if success, false if failure</returns>
         public bool GetFunctionInfo(string massLynxDataDirectoryPath, int functionNumber, out udtMSFunctionInfoType udtFunctionInfo)
         {
-            // Returns information on the given function
-            // Returns True if success, false if failure
-
             bool success;
 
             udtFunctionInfo = new udtMSFunctionInfoType();
@@ -645,11 +905,13 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Retrieves the number of functions in the data file
+        /// </summary>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
+        /// <returns>Function count, or 0 if an error</returns>
         public int GetFunctionCount(string massLynxDataDirectoryPath)
         {
-            // Function returns the number of functions in the datafile
-            // Returns 0 if an error
-
             var functionCount = 0;
 
             try
@@ -668,11 +930,14 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Retrieve the number of scans for the given function
+        /// </summary>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
+        /// <param name="functionNumber"></param>
+        /// <returns>Number of scans, or 0 if an error</returns>
         public int GetNumScans(string massLynxDataDirectoryPath, int functionNumber = 1)
         {
-            // Function returns the number of scans for the given function
-            // Returns 0 if an error
-
             var scanCount = 0;
 
             try
@@ -697,6 +962,19 @@ namespace MSFileInfoScanner
             return scanCount;
         }
 
+        /// <summary>
+        /// Retrieves scan information
+        /// </summary>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
+        /// <param name="functionNumber"></param>
+        /// <param name="scanNumber"></param>
+        /// <param name="scanType">Output: 0 means MS-only scan (survey scan), 1 or greater means MS/MS scan</param>
+        /// <param name="basePeakMZ"></param>
+        /// <param name="parentIonMZ"></param>
+        /// <param name="retentionTime"></param>
+        /// <param name="basePeakIntensity"></param>
+        /// <param name="totalIonCurrent"></param>
+        /// <returns>True if no error, False if an error</returns>
         public bool GetScanInfo(
             string massLynxDataDirectoryPath,
             int functionNumber,
@@ -708,18 +986,30 @@ namespace MSFileInfoScanner
             out float basePeakIntensity,
             out float totalIonCurrent)
         {
-            // Returns scan information in the ByRef variables
-            // Function returns True if no error, False if an error
-            //
-            // Note that ScanType = 0 means MS-only scan (survey scan)
-            // ScanType > 0 means ms/ms scan
-
             return GetScanInfoEx(massLynxDataDirectoryPath, functionNumber, scanNumber,
                                  out scanType, out basePeakMZ, out parentIonMZ, out retentionTime,
                                  out basePeakIntensity, out totalIonCurrent, out _,
                                  out _, out _, out _, out _);
         }
 
+        /// <summary>
+        /// Retrieves scan information
+        /// </summary>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
+        /// <param name="functionNumber"></param>
+        /// <param name="scanNumber"></param>
+        /// <param name="scanType">Output: 0 means MS-only scan (survey scan), 1 or greater means MS/MS scan</param>
+        /// <param name="basePeakMZ"></param>
+        /// <param name="parentIonMZ"></param>
+        /// <param name="retentionTime"></param>
+        /// <param name="basePeakIntensity"></param>
+        /// <param name="totalIonCurrent"></param>
+        /// <param name="calibrated"></param>
+        /// <param name="continuum"></param>
+        /// <param name="overload"></param>
+        /// <param name="massStart"></param>
+        /// <param name="massEnd"></param>
+        /// <returns></returns>
         public bool GetScanInfoEx(
             string massLynxDataDirectoryPath,
             int functionNumber,
@@ -804,6 +1094,12 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Return true if the function has MS/MS data
+        /// </summary>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
+        /// <param name="functionNumber"></param>
+        /// <returns></returns>
         public bool IsFunctionMsMs(string massLynxDataDirectoryPath, int functionNumber)
         {
 
@@ -815,6 +1111,13 @@ namespace MSFileInfoScanner
             return false;
         }
 
+        /// <summary>
+        /// Return true if the spectrum has continuum (profile) data
+        /// </summary>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
+        /// <param name="functionNumber"></param>
+        /// <param name="scanNumber"></param>
+        /// <returns></returns>
         public bool IsSpectrumContinuumData(string massLynxDataDirectoryPath, int functionNumber, int scanNumber = 1)
         {
 
@@ -829,30 +1132,33 @@ namespace MSFileInfoScanner
             return false;
         }
 
+        /// <summary>
+        /// Return true if the directory is a validate Waters / Micromass / MassLynx data directory
+        /// </summary>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path; alternatively, the path to a file in the .raw directory</param>
+        /// <returns></returns>
         public bool IsMassLynxData(string massLynxDataDirectoryPath)
         {
-            // massLynxDataDirectoryPath should contain the path to a directory that ends in the text .RAW
-            // If massLynxDataDirectoryPath contains the path to a file, then the ValidateDataFolder function
-            //  will strip off the filename and only examine the directory
-
             return ValidateDataFolder(massLynxDataDirectoryPath);
-
         }
 
+        /// <summary>
+        /// Included for compatibility with MassLynxReader3 and MassLynxReader4
+        /// </summary>
+        /// <returns>Always returns True since this class doesn't require MassLynx</returns>
         public bool IsMassLynxInstalled()
         {
-            // This function is included for compatibility with MassLynxReader3 and MassLynxReader4
-            // It always returns True since this class doesn't require MassLynx
             return true;
         }
 
+        /// <summary>
+        /// Verifies that massLynxDataDirectoryPath exists, then loads the header information
+        /// </summary>
+        /// <param name="udtThisMSData">Info on the dataset directory; the calling method must initialize it</param>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
+        /// <returns>True if success, false if failure</returns>
         private bool LoadMSFileHeader(ref udtMSDataType udtThisMSData, string massLynxDataDirectoryPath)
         {
-
-            // Verifies that massLynxDataDirectoryPath exists
-            // Loads the header information for the given MassLynx directory path
-            // Returns True if success, false if failure
-
             var success = false;
 
             try
@@ -864,11 +1170,13 @@ namespace MSFileInfoScanner
                     success = NativeIOReadHeader(massLynxDataDirectoryPath, out udtThisMSData.HeaderInfo);
 
                     udtThisMSData.FunctionCount = 0;
+                    return true;
                 }
                 else
                 {
                     SetErrorCode(eErrorCodeConstants.InvalidDataFolderPath);
                     udtThisMSData.FunctionCount = 0;
+                    return false;
                 }
 
             }
@@ -887,12 +1195,14 @@ namespace MSFileInfoScanner
             return success;
         }
 
+        /// <summary>
+        /// Determines the number of functions in the given data file
+        /// </summary>
+        /// <param name="udtThisMSData"></param>
+        /// <param name="massLynxDataDirectoryPath"></param>
+        /// <returns>The function count, or 0 on failure</returns>
         private int LoadMSFunctionInfo(ref udtMSDataType udtThisMSData, string massLynxDataDirectoryPath)
         {
-
-            // Determines the number of functions in the given data file
-            // Returns the function count, or 0 on failure
-
             var udtScanIndexRecord = default(udtScanIndexRecordType);
 
             var fileValidated = false;
@@ -1018,15 +1328,21 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Loads information on the given scan for the given function
+        /// Updates udtScanStatsSingleScan.PeakCount with the number of peaks in the scan; 0 if an error
+        /// </summary>
+        /// <param name="udtScanStatsSingleScan"></param>
+        /// <param name="udtThisMSData"></param>
+        /// <param name="functionNumber"></param>
+        /// <param name="scanNumber"></param>
+        /// <remarks>
+        /// The calling function must validate that functionNumber is valid
+        /// Since this function uses mMSData.FunctionInfo, one must call NativeIOGetFunctionInfo
+        /// to populate .FunctionInfo before calling this function
+        /// </remarks>
         private void LoadMSScanHeader(ref udtScanStatsType udtScanStatsSingleScan, udtMSDataType udtThisMSData, int functionNumber, int scanNumber)
         {
-            // Loads information on the given scan for the given function
-            // Returns the number of peaks in the scan; returns 0 if an error
-            //
-            // Note that the calling function must validate that functionNumber is valid
-            // Since this function uses mMSData.FunctionInfo, one must call NativeIOGetFunctionInfo
-            //  to populate .FunctionInfo before calling this function
-
             var udtScanIndexRecord = default(udtScanIndexRecordType);
 
             try
@@ -1123,10 +1439,6 @@ namespace MSFileInfoScanner
 
         }
 
-        //---------------------------------------------------------
-        // The following functions are used for Native file IO
-        //---------------------------------------------------------
-
         private bool ConstructValidDataFilePath(string desiredDataFilePath, out string dataFilePath)
         {
 
@@ -1145,7 +1457,7 @@ namespace MSFileInfoScanner
         private long CreateMask(byte startBit, byte endBit)
         {
             // Note: The mask needs to be long data type to allow for unsigned Int32 masks
-            // This is because the VB Int32 data type has a maximum value of 2^32 / 2 - 1 while
+            // This is because the Int32 data type has a maximum value of 2^32 / 2 - 1 while
             //  unsigned Int32 can be up to 2^32-1
 
             long thisMask;
@@ -1230,9 +1542,14 @@ namespace MSFileInfoScanner
             return functionNumber.ToString().PadLeft(3, '0');
         }
 
+        /// <summary>
+        /// Retrieves the number of functions
+        /// </summary>
+        /// <param name="dataDirPath"></param>
+        /// <returns>The number of functions, 0 if an error</returns>
         private int NativeIOGetFunctionCount(ref string dataDirPath)
         {
-            // Returns the number of functions, 0 if an error
+
             var functionCount = 0;
 
             try
@@ -1258,10 +1575,14 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Retrieve the function info
+        /// </summary>
+        /// <param name="dataDirPath"></param>
+        /// <param name="udtMSFunctionInfo"></param>
+        /// <returns>True if success, False if failure</returns>
         private bool NativeIOGetFunctionInfo(string dataDirPath, ref udtMSFunctionInfoType udtMSFunctionInfo)
         {
-            // Returns True if success, False if failure
-
             var udtNativeFunctionInfo = new udtRawFunctionDescriptorRecordType();
             InitializeNativeFunctionInfo(ref udtNativeFunctionInfo);
 
@@ -1448,13 +1769,18 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Returns the number of scans in the given function
+        /// Also updates udtMSFunctionInfo.ScanCount
+        /// </summary>
+        /// <param name="dataDirPath"></param>
+        /// <param name="udtMSFunctionInfo"></param>
+        /// <returns>Number of scans, or 0 if an error</returns>
+        /// <remarks>
+        /// udtMSFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
+        /// </remarks>
         private int NativeIOGetScanCount(string dataDirPath, ref udtMSFunctionInfoType udtMSFunctionInfo)
         {
-            // Returns the number of scans for the given function
-            // Also updates udtMSFunctionInfo.ScanCount
-            // Returns 0 if an error
-            //
-            // Note that udtMSFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
 
             try
             {
@@ -1471,7 +1797,6 @@ namespace MSFileInfoScanner
 
                     numberOfScansInFunction = (int)(indexFile.Length / RAW_SCAN_INDEX_RECORD_SIZE);
                     udtMSFunctionInfo.ScanCount = numberOfScansInFunction;
-
                 }
 
                 return numberOfScansInFunction;
@@ -1484,6 +1809,18 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Retrieves information on the given scan for the given function
+        /// </summary>
+        /// <param name="dataDirPath"></param>
+        /// <param name="udtMSFunctionInfo"></param>
+        /// <param name="scanNumber"></param>
+        /// <param name="udtScanIndexRecord"></param>
+        /// <param name="scanOffsetAndPeakCountOnly"></param>
+        /// <returns>True if success, False if failure</returns>
+        /// <remarks>
+        /// udtMSFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
+        /// </remarks>
         private bool NativeIOGetScanInfo(
             string dataDirPath,
             udtMSFunctionInfoType udtMSFunctionInfo,
@@ -1491,11 +1828,6 @@ namespace MSFileInfoScanner
             ref udtScanIndexRecordType udtScanIndexRecord,
             bool scanOffsetAndPeakCountOnly = false)
         {
-
-            // Returns information on the given scan for the given function
-            // Returns True if success, False if failure
-            //
-            // Note that udtMSFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
 
             // This udt is used for most files
             var udtNativeScanIndexRecord = default(udtRawScanIndexRecordType);
@@ -1666,14 +1998,14 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Looks for the "$$ Cal Function" lines in the _HEADER.TXT file
+        /// </summary>
+        /// <param name="udtThisMSData"></param>
+        /// <returns>True if successful, False if not</returns>
+        /// <remarks>Should only be called by LoadMSFunctionInfo and only after the functions have been determined</remarks>
         private bool NativeIOReadCalInfoFromHeader(ref udtMSDataType udtThisMSData)
         {
-
-            // Looks for the "$$ Cal Function" lines in the _HEADER.TXT file
-            // Returns True if successful, False if not
-            //
-            // This function should only be called by LoadMSFunctionInfo and only after the functions have been determined
-
             const string CAL_FUNCTION_NAME = "CAL FUNCTION";
             const string CAL_STDDEV_FUNCTION_NAME = "CAL STDDEV FUNCTION";
 
@@ -1752,30 +2084,33 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Populates the header info by reading _HEADER.TXT
+        /// </summary>
+        /// <param name="dataDirPath"></param>
+        /// <param name="headerInfo"></param>
+        /// <returns>True if successful, False if not</returns>
         private bool NativeIOReadHeader(string dataDirPath, out udtMSHeaderInfoType headerInfo)
         {
 
-            // Duplicates job of DMRawReadHeader to avoid need for calling Dll
-            // Returns True if successful, False if not
-
             headerInfo = new udtMSHeaderInfoType
             {
-                AcquDate = "",
-                AcquName = "",
-                AcquTime = "",
-                JobCode = "",
-                TaskCode = "",
-                UserName = "",
-                Instrument = "",
-                InstrumentType = "",
-                Conditions = "",
-                LabName = "",
-                SampleDesc = "",
+                AcquDate = string.Empty,
+                AcquName = string.Empty,
+                AcquTime = string.Empty,
+                JobCode = string.Empty,
+                TaskCode = string.Empty,
+                UserName = string.Empty,
+                Instrument = string.Empty,
+                InstrumentType = string.Empty,
+                Conditions = string.Empty,
+                LabName = string.Empty,
+                SampleDesc = string.Empty,
                 SolventDelay = 0,
-                Submitter = "",
-                SampleID = "",
-                BottleNumber = "",
-                PlateDesc = "",
+                Submitter = string.Empty,
+                SampleID = string.Empty,
+                BottleNumber = string.Empty,
+                PlateDesc = string.Empty,
                 MuxStream = 0,
                 VersionMajor = 0,
                 VersionMinor = 0,
@@ -1932,6 +2267,13 @@ namespace MSFileInfoScanner
             return unpackedValue;
         }
 
+        /// <summary>
+        /// Extracts packed intensity data
+        /// </summary>
+        /// <param name="PackedBasePeakIntensity"></param>
+        /// <param name="PackedBasePeakInfo"></param>
+        /// <param name="acquisitionDataType"></param>
+        /// <returns></returns>
         private float UnpackIntensity(short PackedBasePeakIntensity, int PackedBasePeakInfo, short acquisitionDataType)
         {
             // See note for Acquisition Data Types 9 to 12 below
@@ -1947,15 +2289,16 @@ namespace MSFileInfoScanner
                     //  (9=High accuracy calibrated data, 11=Enhanced uncalibrated data, and 12=Enhanced calibrated data)
                     // Note: Only use this function to unpack intensities for data in the .IDX file, not for data in the .DAT file
                     //       See the NativeIOGetSpectrum function for the method of unpacking intensities in .DAT files
-
                     unpackedIntensity = (float)(PackedBasePeakIntensity * Math.Pow(4, PackedBasePeakInfo & maskBPIntensityScale));
+                    //Debug.Assert unpackedIntensity = PackedBasePeakIntensity * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 3)
                     break;
-                //Debug.Assert unpackedIntensity = PackedBasePeakIntensity * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 3)
+
                 case 0:
                     // Compressed data
                     unpackedIntensity = (float)((short)(PackedBasePeakInfo & maskBPCompressedDataIntensity) / 8f * Math.Pow(4, PackedBasePeakInfo & maskBPCompressedDataIntensityScale));
+                    //Debug.Assert unpackedIntensity = ExtractFromBitsInt32(PackedBasePeakInfo, 3, 10) * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 2)
                     break;
-                //Debug.Assert unpackedIntensity = ExtractFromBitsInt32(PackedBasePeakInfo, 3, 10) * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 2)
+
                 case 1:
                 case 2:
                 case 3:
@@ -1965,12 +2308,14 @@ namespace MSFileInfoScanner
                 case 7:
                     // Standard data and Uncalibrated data
                     unpackedIntensity = (float)((short)(PackedBasePeakIntensity & maskBPStandardDataIntensity) / 8f * Math.Pow(4, PackedBasePeakIntensity & maskBPStandardDataIntensityScale));
+                    //Debug.Assert unpackedIntensity = ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 3, 15) * 4 ^ ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 0, 2)
                     break;
-                //Debug.Assert unpackedIntensity = ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 3, 15) * 4 ^ ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 0, 2)
+
                 case 8:
-                    //  High intensity calibrated data
+                    // High intensity calibrated data
                     unpackedIntensity = (float)(PackedBasePeakIntensity * Math.Pow(4, PackedBasePeakInfo & maskBPIntensityScale));
                     break;
+
                 default:
                     unpackedIntensity = 0;
                     break;
@@ -1979,6 +2324,13 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Extracts packed mass data
+        /// </summary>
+        /// <param name="PackedBasePeakInfo"></param>
+        /// <param name="acquisitionDataType"></param>
+        /// <param name="processingFunctionIndexFile"></param>
+        /// <returns></returns>
         private double UnpackMass(int PackedBasePeakInfo, short acquisitionDataType, bool processingFunctionIndexFile)
         {
             // See note for Acquisition Data Types 9 to 12 below
@@ -1999,12 +2351,10 @@ namespace MSFileInfoScanner
                     //  then right shifting 9 bits by dividing by 2^9
                     // It would be more straightforward to use PackedBasePeakInfo And CreateMask(9, 31) but VB won't let us
                     //  And a Currency value with a Long; this gives an OverFlow error
-                    var MassMantissa = (int)(NumberConversion.Int32ToUnsigned(PackedBasePeakInfo) / 512f);
-                    // 512 = 2^9
+                    var MassMantissa = (int)(NumberConversion.Int32ToUnsigned(PackedBasePeakInfo) / 512f);      // 512 = 2^9
 
                     // Compute the MassExponent value by multiplying the Packed value by the appropriate BitMask, then right shifting 4 bits by dividing by 2^4
-                    var MassExponent = (short)(PackedBasePeakInfo & maskBPMassExponent) / 16f;
-                    // 16 = 2^4
+                    var MassExponent = (short)(PackedBasePeakInfo & maskBPMassExponent) / 16f;                  // 16 = 2^4
 
                     if (processingFunctionIndexFile)
                     {
@@ -2023,9 +2373,9 @@ namespace MSFileInfoScanner
                     }
 
                     // Note that we divide by 2^23 to convert the mass mantissa to fractional form
-                    unpackedMass = MassMantissa / 8388608f * Math.Pow(2, MassExponent);
-                    // 8388608 = 2^23
+                    unpackedMass = MassMantissa / 8388608f * Math.Pow(2, MassExponent);      // 8388608 = 2^23
                     break;
+
                 case 0:
                     // Compressed data
                     // Compute the MassMantissa value by converting the Packed value to an Unsigned Int32 (and storing in a long),
@@ -2034,13 +2384,15 @@ namespace MSFileInfoScanner
                     //  And a Currency value with a Long; this gives an OverFlow error
                     // We must divide the MassMantissa by 128 to get the mass
                     unpackedMass = (int)(NumberConversion.Int32ToUnsigned(PackedBasePeakInfo) / 2048f) / 128f;      // 2048 = 2^11
+                    // Debug.Assert(unpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 11, 31) / 128f);
                     break;
-                // Debug.Assert(unpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 11, 31) / 128f);
+
                 case 1:
                     // Standard data
                     // We must divide the MassMantissa by 1024 to get the mass
                     unpackedMass = (short)(PackedBasePeakInfo & maskBPStandardDataMass) / 1024f;
                     break;
+
                 case 2:
                 case 3:
                 case 4:
@@ -2051,14 +2403,16 @@ namespace MSFileInfoScanner
                     // This type of data doesn't have a base peak mass
                     unpackedMass = 0;
                     break;
+
                 case 8:
                     // High intensity calibrated data
                     // Compute the MassMantissa value by converting the Packed value to an Unsigned Int32 (and storing in a long),
                     //  then right shifting 4 bits by dividing by 2^4
                     // We must divide the MassMantissa by 128 to get the mass
                     unpackedMass = (int)(NumberConversion.Int32ToUnsigned(PackedBasePeakInfo) / 16f) / 128f;        // 16 = 2^4
+                    //Debug.Assert(unpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 4, 31) / 128f);
                     break;
-                //Debug.Assert(unpackedMass == ExtractFromBitsInt32(PackedBasePeakInfo, 4, 31) / 128f);
+
                 default:
                     unpackedMass = 0;
                     break;
