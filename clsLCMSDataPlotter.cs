@@ -255,7 +255,7 @@ namespace MSFileInfoScanner
             }
             else
             {
-                ionList = new List<udtMSIonType>(ionCount - 1);
+                ionList = new List<udtMSIonType>(ionCount);
 
                 for (var index = 0; index <= ionCount - 1; index++)
                 {
