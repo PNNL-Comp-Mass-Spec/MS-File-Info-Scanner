@@ -20,23 +20,13 @@ namespace MSFileInfoScanner
         private readonly bool mSaveTICAndBPI;
 
         private readonly bool mCheckCentroidingStatus;
-        private bool mHighResMS1;
 
         private readonly Regex mGetQ1MZ;
         private readonly Regex mGetQ3MZ;
 
-        private bool mHighResMS2;
-        public bool HighResMS1
-        {
-            get => mHighResMS1;
-            set => mHighResMS1 = value;
-        }
+        public bool HighResMS1 { get; set; }
 
-        public bool HighResMS2
-        {
-            get => mHighResMS2;
-            set => mHighResMS2 = value;
-        }
+        public bool HighResMS2 { get; set; }
 
         /// <summary>
         /// Constructor
@@ -345,7 +335,7 @@ namespace MSFileInfoScanner
 
                     var cvParams = mPWiz.GetChromatogramCVParams(chromatogramIndex);
 
-                    if (TryGetCVParam(cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out var _))
+                    if (TryGetCVParam(cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out _))
                     {
                         // This chromatogram is the TIC
 
@@ -455,7 +445,7 @@ namespace MSFileInfoScanner
 
                         if (msLevels[scanIndex] > 1)
                         {
-                            if (mHighResMS2)
+                            if (HighResMS2)
                             {
                                 scanStatsEntry.ScanTypeName = "HMSn";
                             }
@@ -466,7 +456,7 @@ namespace MSFileInfoScanner
                         }
                         else
                         {
-                            if (mHighResMS1)
+                            if (HighResMS1)
                             {
                                 scanStatsEntry.ScanTypeName = "HMS";
                             }
