@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -990,10 +991,18 @@ namespace MSFileInfoScanner
             return UpdateDatasetFileStats(instrumentFile, datasetID, out _);
         }
 
+        /// <summary>
+        /// Store the creation time and last write time of the instrument file in mDatasetStatsSummarizer.DatasetFileInfo
+        /// Initialize the Acquisition start/end times using to the last write time
+        /// </summary>
+        /// <param name="instrumentFile"></param>
+        /// <param name="datasetID"></param>
+        /// <param name="fileAdded"></param>
+        /// <returns></returns>
         protected bool UpdateDatasetFileStats(FileInfo instrumentFile, int datasetID, out bool fileAdded)
         {
-
             fileAdded = false;
+
             try
             {
                 if (!instrumentFile.Exists)
@@ -1032,31 +1041,59 @@ namespace MSFileInfoScanner
 
         }
 
-        protected bool UpdateDatasetFileStats(DirectoryInfo outputDirectory, int datasetID)
+        protected bool UpdateDatasetFileStats(DirectoryInfo datasetDirectory, FileInfo primaryDataFile, int datasetID)
         {
+            var primaryDataFiles = new List<FileInfo>();
+            if (primaryDataFile != null)
+            {
+                primaryDataFiles.Add(primaryDataFile);
+            }
 
+            return UpdateDatasetFileStats(datasetDirectory, primaryDataFiles, datasetID);
+        }
+
+        protected bool UpdateDatasetFileStats(DirectoryInfo datasetDirectory, List<FileInfo> primaryDataFiles, int datasetID)
+        {
             try
             {
-                if (!outputDirectory.Exists)
+                if (!datasetDirectory.Exists)
                     return false;
 
                 // Record the file size and Dataset ID
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = outputDirectory.CreationTime;
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = outputDirectory.LastWriteTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetDirectory.CreationTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetDirectory.LastWriteTime;
 
                 mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
                 mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
 
                 mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetID;
-                mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = Path.GetFileNameWithoutExtension(outputDirectory.Name);
-                mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = outputDirectory.Extension;
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = Path.GetFileNameWithoutExtension(datasetDirectory.Name);
+                mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = datasetDirectory.Extension;
 
-                foreach (var outputFile in outputDirectory.GetFiles("*", SearchOption.AllDirectories))
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = 0;
+                foreach (var outputFile in datasetDirectory.GetFiles("*", SearchOption.AllDirectories))
                 {
                     mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes += outputFile.Length;
                 }
 
                 mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
+
+                for (var i = 0; i < primaryDataFiles.Count; i++)
+                {
+                    var dataFile = primaryDataFiles[i];
+                    if (!dataFile.Exists)
+                        continue;
+
+                    if (mDisableInstrumentHash || i > 0)
+                    {
+                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(dataFile);
+                    }
+                    else
+                    {
+                        // Compute the SHA-1 hash for the first file
+                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(dataFile);
+                    }
+                }
 
             }
             catch (Exception)

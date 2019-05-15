@@ -269,7 +269,7 @@ namespace MSFileInfoScanner
                     {
                         // Read the file info from the file system
                         // Several of these stats will be further updated later
-                        UpdateDatasetFileStats(acqDataDirectory, datasetFileInfo.DatasetID);
+                        UpdateDatasetFileStats(acqDataDirectory, msScanFile, datasetFileInfo.DatasetID);
                         primaryFileAdded = false;
                     }
 
