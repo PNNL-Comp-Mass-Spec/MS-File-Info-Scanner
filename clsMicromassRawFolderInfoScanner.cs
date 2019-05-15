@@ -73,11 +73,33 @@ namespace MSFileInfoScanner
                 datasetFileInfo.DatasetName = GetDatasetNameViaPath(datasetDirectory.Name);
                 datasetFileInfo.FileExtension = datasetDirectory.Extension;
 
+                datasetFileInfo.ScanCount = 0;
 
+                mDatasetStatsSummarizer.ClearCachedData();
+                mLCMS2DPlot.Options.UseObservedMinScan = false;
 
                 ProcessRawDirectory(datasetDirectory, datasetFileInfo, out var primaryDataFiles);
 
+                // Read the file info from the file system
+                // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
+                // This will also add the primary data files to mDatasetStatsSummarizer.DatasetFileInfo
+                // The SHA-1 has of the first file in primaryDataFiles will also be computed
+                UpdateDatasetFileStats(datasetDirectory, primaryDataFiles, datasetFileInfo.DatasetID);
 
+                // Copy over the updated file time info and scan info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
+                UpdateDatasetStatsSummarizerUsingDatasetFileInfo(datasetFileInfo);
+
+                PostProcessTasks();
+
+                return true;
+
+            }
+            catch (Exception)
+            {
+                PostProcessTasks();
+                return false;
+            }
+        }
 
         private void ProcessRawDirectory(DirectoryInfo datasetDirectory, clsDatasetFileInfo datasetFileInfo, out List<FileInfo> primaryDataFiles)
         {
