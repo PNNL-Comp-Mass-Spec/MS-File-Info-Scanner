@@ -1076,8 +1076,17 @@ namespace MSFileInfoScanner
                     return false;
 
                 // Record the file size and Dataset ID
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetDirectory.CreationTime;
-                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetDirectory.LastWriteTime;
+
+                if (primaryDataFiles.Count > 0 && primaryDataFiles[0].Exists)
+                {
+                    mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = primaryDataFiles[0].CreationTime;
+                    mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = primaryDataFiles[0].LastWriteTime;
+                }
+                else
+                {
+                    mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = datasetDirectory.CreationTime;
+                    mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = datasetDirectory.LastWriteTime;
+                }
 
                 mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
                 mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
@@ -1111,13 +1120,12 @@ namespace MSFileInfoScanner
                     }
                 }
 
+                return true;
             }
             catch (Exception)
             {
                 return false;
             }
-
-            return true;
 
         }
 
