@@ -555,7 +555,7 @@ namespace MSFileInfoScanner
                         scanCountError += 1;
                     }
 
-                    if (DateTime.UtcNow.Subtract(lastProgressTime).TotalSeconds > 60)
+                    if (DateTime.UtcNow.Subtract(lastProgressTime).TotalSeconds > 15)
                     {
                         OnDebugEvent(" ... " + ((scanIndex + 1) / (double)scanTimes.Length * 100).ToString("0.0") + "% complete");
                         lastProgressTime = DateTime.UtcNow;
