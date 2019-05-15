@@ -186,8 +186,6 @@ namespace MSFileInfoScanner
         public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
         {
 
-            bool success;
-
             ResetResults();
 
             try
@@ -215,72 +213,69 @@ namespace MSFileInfoScanner
                 {
                     // 0_R*.zip files not found
                     OnErrorEvent(ZIPPED_IMAGING_FILE_SEARCH_SPEC + "files not found in " + datasetDirectory.FullName);
-                    success = false;
+                    return false;
 
                 }
-                else
+
+                var firstImagingFile = zipFiles.First();
+
+                // Initialize the .DatasetFileInfo
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = firstImagingFile.CreationTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = firstImagingFile.LastWriteTime;
+
+                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
+                mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
+
+                mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = datasetDirectory.Name;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = firstImagingFile.Extension;
+                mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = 0;
+                mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
+
+                // Update the dataset name and file extension
+                datasetFileInfo.DatasetName = GetDatasetNameViaPath(datasetDirectory.FullName);
+                datasetFileInfo.FileExtension = string.Empty;
+
+                datasetFileInfo.AcqTimeEnd = DateTime.MinValue;
+                datasetFileInfo.AcqTimeStart = DateTime.MaxValue;
+                datasetFileInfo.ScanCount = 0;
+
+                // Process each zip file
+
+                foreach (var zipFile in zipFiles)
                 {
-                    var firstImagingFile = zipFiles.First();
+                    // Examine all of the apexAcquisition.method files in this zip file
+                    DetermineAcqStartEndTime(zipFile, datasetFileInfo);
 
-                    // Initialize the .DatasetFileInfo
-                    mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = firstImagingFile.CreationTime;
-                    mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = firstImagingFile.LastWriteTime;
-
-                    mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
-                    mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime;
-
-                    mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = datasetDirectory.Name;
-                    mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = firstImagingFile.Extension;
-                    mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = 0;
-                    mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
-
-                    // Update the dataset name and file extension
-                    datasetFileInfo.DatasetName = GetDatasetNameViaPath(datasetDirectory.FullName);
-                    datasetFileInfo.FileExtension = string.Empty;
-
-                    datasetFileInfo.AcqTimeEnd = DateTime.MinValue;
-                    datasetFileInfo.AcqTimeStart = DateTime.MaxValue;
-                    datasetFileInfo.ScanCount = 0;
-
-                    // Process each zip file
-
-                    foreach (var zipFile in zipFiles)
+                    if (mDisableInstrumentHash)
                     {
-                        // Examine all of the apexAcquisition.method files in this zip file
-                        DetermineAcqStartEndTime(zipFile, datasetFileInfo);
-
-                        if (mDisableInstrumentHash)
-                        {
-                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(zipFile);
-                        }
-                        else
-                        {
-                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(zipFile);
-                        }
+                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(zipFile);
                     }
-
-                    if (datasetFileInfo.AcqTimeEnd == DateTime.MinValue || datasetFileInfo.AcqTimeStart == DateTime.MaxValue)
+                    else
                     {
-                        // Did not find any apexAcquisition.method files or submethods.xml files
-                        // Use the file modification date of the first zip file
-                        datasetFileInfo.AcqTimeStart = firstImagingFile.LastWriteTime;
-                        datasetFileInfo.AcqTimeEnd = firstImagingFile.LastWriteTime;
+                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(zipFile);
                     }
-
-                    // Copy over the updated file time info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
-                    UpdateDatasetStatsSummarizerUsingDatasetFileInfo(datasetFileInfo, false);
-
-                    success = true;
                 }
+
+                if (datasetFileInfo.AcqTimeEnd == DateTime.MinValue || datasetFileInfo.AcqTimeStart == DateTime.MaxValue)
+                {
+                    // Did not find any apexAcquisition.method files or submethods.xml files
+                    // Use the file modification date of the first zip file
+                    datasetFileInfo.AcqTimeStart = firstImagingFile.LastWriteTime;
+                    datasetFileInfo.AcqTimeEnd = firstImagingFile.LastWriteTime;
+                }
+
+                // Copy over the updated file time info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
+                UpdateDatasetStatsSummarizerUsingDatasetFileInfo(datasetFileInfo, false);
+
+                PostProcessTasks();
+
+                return true;
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Exception processing Zipped Imaging Files: " + ex.Message);
-                success = false;
+                return false;
             }
-
-            PostProcessTasks();
-            return success;
 
         }
 

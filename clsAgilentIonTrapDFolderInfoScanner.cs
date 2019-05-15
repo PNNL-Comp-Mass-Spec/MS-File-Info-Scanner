@@ -290,6 +290,8 @@ namespace MSFileInfoScanner
                 // Copy over the updated file time info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
                 UpdateDatasetStatsSummarizerUsingDatasetFileInfo(datasetFileInfo);
 
+                PostProcessTasks();
+
             }
             catch (Exception)
             {
