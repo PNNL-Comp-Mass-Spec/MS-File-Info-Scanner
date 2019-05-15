@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using MSFileInfoScanner.MassLynxData;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2005
@@ -140,61 +141,72 @@ namespace MSFileInfoScanner
 
             var nativeFileIO = new clsMassLynxNativeIO();
 
-            if (nativeFileIO.GetFileInfo(datasetDirectory.FullName, out var udtHeaderInfo))
+            if (nativeFileIO.GetFileInfo(datasetDirectory.FullName, out var headerInfo))
             {
-                var newStartDate = DateTime.Parse(udtHeaderInfo.AcquDate + " " + udtHeaderInfo.AcquTime);
+                ReadMassLynxAcquisitionInfo(datasetDirectory, datasetFileInfo, nativeFileIO, headerInfo);
 
-                var functionCount = nativeFileIO.GetFunctionCount(datasetDirectory.FullName);
+        }
 
-                if (functionCount > 0)
+        /// <summary>
+        /// Reads the acquisition date and time from the .raw directory
+        /// Also determines the total number of scans
+        /// </summary>
+        /// <param name="datasetDirectory"></param>
+        /// <param name="datasetFileInfo"></param>
+        /// <param name="nativeFileIO"></param>
+        /// <param name="headerInfo"></param>
+        private void ReadMassLynxAcquisitionInfo(
+            FileSystemInfo datasetDirectory,
+            clsDatasetFileInfo datasetFileInfo,
+            clsMassLynxNativeIO nativeFileIO,
+            MSHeaderInfo headerInfo)
+        {
+
+            var newStartDate = DateTime.Parse(headerInfo.AcquDate + " " + headerInfo.AcquTime);
+
+            var functionCount = nativeFileIO.GetFunctionCount(datasetDirectory.FullName);
+
+            if (functionCount > 0)
+            {
+                // Sum up the scan count of all of the functions
+                // Additionally, find the largest EndRT value in all of the functions
+                float endRT = 0;
+                for (var functionNumber = 1; functionNumber <= functionCount; functionNumber++)
                 {
-                    // Sum up the scan count of all of the functions
-                    // Additionally, find the largest EndRT value in all of the functions
-                    float endRT = 0;
-                    for (var functionNumber = 1; functionNumber <= functionCount; functionNumber++)
+                    if (nativeFileIO.GetFunctionInfo(datasetDirectory.FullName, 1, out MassLynxData.MSFunctionInfo functionInfo))
                     {
-                        if (nativeFileIO.GetFunctionInfo(datasetDirectory.FullName, 1, out MassLynxData.MSFunctionInfo functionInfo))
+                        datasetFileInfo.ScanCount += functionInfo.ScanCount;
+                        if (functionInfo.EndRT > endRT)
                         {
-                            datasetFileInfo.ScanCount += functionInfo.ScanCount;
-                            if (functionInfo.EndRT > endRT)
-                            {
-                                endRT = functionInfo.EndRT;
-                            }
+                            endRT = functionInfo.EndRT;
                         }
                     }
+                }
 
-                    if (newStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                if (newStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                {
+                    datasetFileInfo.AcqTimeStart = newStartDate;
+
+                    if (endRT > 0)
                     {
-                        datasetFileInfo.AcqTimeStart = newStartDate;
-
-                        if (endRT > 0)
-                        {
-                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.Add(MinutesToTimeSpan(endRT));
-                        }
-                        else
-                        {
-                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
-                        }
+                        datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.Add(MinutesToTimeSpan(endRT));
                     }
                     else
                     {
-                        // Keep .AcqTimeEnd as the file modification date
-                        // Set .AcqTimeStart based on .AcqEndTime
-                        if (endRT > 0)
-                        {
-                            datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.Subtract(MinutesToTimeSpan(endRT));
-                        }
-                        else
-                        {
-                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
-                        }
+                        datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
                     }
                 }
                 else
                 {
-                    if (newStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                    // Keep .AcqTimeEnd as the file modification date
+                    // Set .AcqTimeStart based on .AcqEndTime
+                    if (endRT > 0)
                     {
-                        datasetFileInfo.AcqTimeStart = newStartDate;
+                        datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.Subtract(MinutesToTimeSpan(endRT));
+                    }
+                    else
+                    {
+                        datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
                     }
                 }
 
@@ -203,7 +215,12 @@ namespace MSFileInfoScanner
             {
                 // Error getting the header info using clsMassLynxNativeIO
                 // Continue anyway since we've populated some of the values
+                if (newStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                {
+                    datasetFileInfo.AcqTimeStart = newStartDate;
+                }
             }
         }
+
     }
 }
