@@ -998,7 +998,7 @@ namespace MSFileInfoScanner
         /// <param name="instrumentFile"></param>
         /// <param name="datasetID"></param>
         /// <param name="fileAdded"></param>
-        /// <returns></returns>
+        /// <returns>True if success, false if an error</returns>
         protected bool UpdateDatasetFileStats(FileInfo instrumentFile, int datasetID, out bool fileAdded)
         {
             fileAdded = false;
@@ -1041,6 +1041,14 @@ namespace MSFileInfoScanner
 
         }
 
+        /// <summary>
+        /// Store the creation time and last write time of the first primary data file (or of the dataset directory) in mDatasetStatsSummarizer.DatasetFileInfo
+        /// Initialize the Acquisition start/end times using to the last write time
+        /// </summary>
+        /// <param name="datasetDirectory">Dataset directory</param>
+        /// <param name="primaryDataFile">Primary data file (not required to exist on disk)</param>
+        /// <param name="datasetID">Dataset ID</param>
+        /// <returns>True if success, false if an error</returns>
         protected bool UpdateDatasetFileStats(DirectoryInfo datasetDirectory, FileInfo primaryDataFile, int datasetID)
         {
             var primaryDataFiles = new List<FileInfo>();
@@ -1052,6 +1060,14 @@ namespace MSFileInfoScanner
             return UpdateDatasetFileStats(datasetDirectory, primaryDataFiles, datasetID);
         }
 
+        /// <summary>
+        /// Store the creation time and last write time of the first primary data file (or of the dataset directory) in mDatasetStatsSummarizer.DatasetFileInfo
+        /// Initialize the Acquisition start/end times using to the last write time
+        /// </summary>
+        /// <param name="datasetDirectory">Dataset directory</param>
+        /// <param name="primaryDataFiles">Primary data files (not required to exist on disk)</param>
+        /// <param name="datasetID">Dataset ID</param>
+        /// <returns>True if success, false if an error</returns>
         protected bool UpdateDatasetFileStats(DirectoryInfo datasetDirectory, List<FileInfo> primaryDataFiles, int datasetID)
         {
             try
