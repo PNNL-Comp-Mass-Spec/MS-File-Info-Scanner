@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -72,116 +73,115 @@ namespace MSFileInfoScanner
                 datasetFileInfo.DatasetName = GetDatasetNameViaPath(datasetDirectory.Name);
                 datasetFileInfo.FileExtension = datasetDirectory.Extension;
 
-                // Sum up the sizes of all of the files in this directory
-                datasetFileInfo.FileSizeBytes = 0;
-                var fileCount = 0;
-                foreach (var item in datasetDirectory.GetFiles())
+
+
+                ProcessRawDirectory(datasetDirectory, datasetFileInfo, out var primaryDataFiles);
+
+
+
+        private void ProcessRawDirectory(DirectoryInfo datasetDirectory, clsDatasetFileInfo datasetFileInfo, out List<FileInfo> primaryDataFiles)
+        {
+
+            primaryDataFiles = new List<FileInfo>();
+
+            // Sum up the sizes of all of the files in this directory
+            datasetFileInfo.FileSizeBytes = 0;
+
+            var fileCount = 0;
+            foreach (var item in datasetDirectory.GetFiles())
+            {
+                datasetFileInfo.FileSizeBytes += item.Length;
+
+                if (fileCount == 0)
                 {
-                    datasetFileInfo.FileSizeBytes += item.Length;
-
-                    if (fileCount == 0)
-                    {
-                        // Assign the first file's modification time to .AcqTimeStart and .AcqTimeEnd
-                        // Necessary in case _header.txt is missing
-                        datasetFileInfo.AcqTimeStart = item.LastWriteTime;
-                        datasetFileInfo.AcqTimeEnd = item.LastWriteTime;
-                    }
-
-                    if (item.Name.ToLower() == "_header.txt")
-                    {
-                        // Assign the file's modification time to .AcqTimeStart and .AcqTimeEnd
-                        // These will get updated below to more precise values
-                        datasetFileInfo.AcqTimeStart = item.LastWriteTime;
-                        datasetFileInfo.AcqTimeEnd = item.LastWriteTime;
-                    }
-
-                    if (item.Extension.ToLower().Equals(".dat"))
-                    {
-                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(item);
-                    }
-
-                    fileCount += 1;
+                    // Assign the first file's modification time to .AcqTimeStart and .AcqTimeEnd
+                    // Necessary in case _header.txt is missing
+                    datasetFileInfo.AcqTimeStart = item.LastWriteTime;
+                    datasetFileInfo.AcqTimeEnd = item.LastWriteTime;
                 }
 
-                datasetFileInfo.ScanCount = 0;
-
-                var nativeFileIO = new clsMassLynxNativeIO();
-
-                if (nativeFileIO.GetFileInfo(datasetDirectory.FullName, out var udtHeaderInfo))
+                if (item.Name.ToLower() == "_header.txt")
                 {
-                    var newStartDate = DateTime.Parse(udtHeaderInfo.AcquDate + " " + udtHeaderInfo.AcquTime);
+                    // Assign the file's modification time to .AcqTimeStart and .AcqTimeEnd
+                    // These will get updated below to more precise values
+                    datasetFileInfo.AcqTimeStart = item.LastWriteTime;
+                    datasetFileInfo.AcqTimeEnd = item.LastWriteTime;
+                }
 
-                    var functionCount = nativeFileIO.GetFunctionCount(datasetDirectory.FullName);
+                if (item.Extension.ToLower().Equals(".dat"))
+                {
+                    primaryDataFiles.Add(item);
+                }
 
-                    if (functionCount > 0)
+                fileCount += 1;
+            }
+
+            var nativeFileIO = new clsMassLynxNativeIO();
+
+            if (nativeFileIO.GetFileInfo(datasetDirectory.FullName, out var udtHeaderInfo))
+            {
+                var newStartDate = DateTime.Parse(udtHeaderInfo.AcquDate + " " + udtHeaderInfo.AcquTime);
+
+                var functionCount = nativeFileIO.GetFunctionCount(datasetDirectory.FullName);
+
+                if (functionCount > 0)
+                {
+                    // Sum up the scan count of all of the functions
+                    // Additionally, find the largest EndRT value in all of the functions
+                    float endRT = 0;
+                    for (var functionNumber = 1; functionNumber <= functionCount; functionNumber++)
                     {
-                        // Sum up the scan count of all of the functions
-                        // Additionally, find the largest EndRT value in all of the functions
-                        float endRT = 0;
-                        for (var functionNumber = 1; functionNumber <= functionCount; functionNumber++)
+                        if (nativeFileIO.GetFunctionInfo(datasetDirectory.FullName, 1, out MassLynxData.MSFunctionInfo functionInfo))
                         {
-                            if (nativeFileIO.GetFunctionInfo(datasetDirectory.FullName, 1, out MassLynxData.MSFunctionInfo functionInfo))
+                            datasetFileInfo.ScanCount += functionInfo.ScanCount;
+                            if (functionInfo.EndRT > endRT)
                             {
-                                datasetFileInfo.ScanCount += functionInfo.ScanCount;
-                                if (functionInfo.EndRT > endRT)
-                                {
-                                    endRT = functionInfo.EndRT;
-                                }
+                                endRT = functionInfo.EndRT;
                             }
                         }
+                    }
 
-                        if (newStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                    if (newStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                    {
+                        datasetFileInfo.AcqTimeStart = newStartDate;
+
+                        if (endRT > 0)
                         {
-                            datasetFileInfo.AcqTimeStart = newStartDate;
-
-                            if (endRT > 0)
-                            {
-                                datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.Add(MinutesToTimeSpan(endRT));
-                            }
-                            else
-                            {
-                                datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
-                            }
+                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.Add(MinutesToTimeSpan(endRT));
                         }
                         else
                         {
-                            // Keep .AcqTimeEnd as the file modification date
-                            // Set .AcqTimeStart based on .AcqEndTime
-                            if (endRT > 0)
-                            {
-                                datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.Subtract(MinutesToTimeSpan(endRT));
-                            }
-                            else
-                            {
-                                datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
-                            }
+                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
                         }
                     }
                     else
                     {
-                        if (newStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                        // Keep .AcqTimeEnd as the file modification date
+                        // Set .AcqTimeStart based on .AcqEndTime
+                        if (endRT > 0)
                         {
-                            datasetFileInfo.AcqTimeStart = newStartDate;
+                            datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.Subtract(MinutesToTimeSpan(endRT));
+                        }
+                        else
+                        {
+                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
                         }
                     }
-
                 }
                 else
                 {
-                    // Error getting the header info using clsMassLynxNativeIO
-                    // Continue anyway since we've populated some of the values
+                    if (newStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
+                    {
+                        datasetFileInfo.AcqTimeStart = newStartDate;
+                    }
                 }
 
-                PostProcessTasks();
-                return true;
-
             }
-            catch (Exception)
+            else
             {
-                PostProcessTasks();
-                return false;
+                // Error getting the header info using clsMassLynxNativeIO
+                // Continue anyway since we've populated some of the values
             }
         }
-
     }
 }
