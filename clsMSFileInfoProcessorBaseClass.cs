@@ -1067,6 +1067,14 @@ namespace MSFileInfoScanner
             OnDebugEvent(fileInfo.ToString());
         }
 
+        /// <summary>
+        /// Store the creation time and last write time of the instrument file in mDatasetStatsSummarizer.DatasetFileInfo
+        /// Initialize the Acquisition start/end times using to the last write time
+        /// Computes the SHA-1 hash of the instrument file
+        /// </summary>
+        /// <param name="instrumentFile"></param>
+        /// <param name="datasetID"></param>
+        /// <returns>True if success, false if an error</returns>
         protected bool UpdateDatasetFileStats(FileInfo instrumentFile, int datasetID)
         {
             return UpdateDatasetFileStats(instrumentFile, datasetID, out _);
@@ -1075,6 +1083,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Store the creation time and last write time of the instrument file in mDatasetStatsSummarizer.DatasetFileInfo
         /// Initialize the Acquisition start/end times using to the last write time
+        /// Computes the SHA-1 hash of the instrument file
         /// </summary>
         /// <param name="instrumentFile"></param>
         /// <param name="datasetID"></param>
@@ -1089,7 +1098,6 @@ namespace MSFileInfoScanner
                 if (!instrumentFile.Exists)
                     return false;
 
-                // Record the file size and Dataset ID
                 mDatasetStatsSummarizer.DatasetFileInfo.FileSystemCreationTime = instrumentFile.CreationTime;
                 mDatasetStatsSummarizer.DatasetFileInfo.FileSystemModificationTime = instrumentFile.LastWriteTime;
 
@@ -1125,6 +1133,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Store the creation time and last write time of the first primary data file (or of the dataset directory) in mDatasetStatsSummarizer.DatasetFileInfo
         /// Initialize the Acquisition start/end times using to the last write time
+        /// Computes the SHA-1 hash of the primary data file
         /// </summary>
         /// <param name="datasetDirectory">Dataset directory</param>
         /// <param name="primaryDataFile">Primary data file (not required to exist on disk)</param>
@@ -1144,6 +1153,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Store the creation time and last write time of the first primary data file (or of the dataset directory) in mDatasetStatsSummarizer.DatasetFileInfo
         /// Initialize the Acquisition start/end times using to the last write time
+        /// Computes the SHA-1 hash of the first primary data file
         /// </summary>
         /// <param name="datasetDirectory">Dataset directory</param>
         /// <param name="primaryDataFiles">Primary data files (not required to exist on disk)</param>
@@ -1155,8 +1165,6 @@ namespace MSFileInfoScanner
             {
                 if (!datasetDirectory.Exists)
                     return false;
-
-                // Record the file size and Dataset ID
 
                 if (primaryDataFiles.Count > 0 && primaryDataFiles[0].Exists)
                 {

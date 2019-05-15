@@ -83,7 +83,7 @@ namespace MSFileInfoScanner
                 // Read the file info from the file system
                 // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
                 // This will also add the primary data files to mDatasetStatsSummarizer.DatasetFileInfo
-                // The SHA-1 has of the first file in primaryDataFiles will also be computed
+                // The SHA-1 hash of the first file in primaryDataFiles will also be computed
                 UpdateDatasetFileStats(datasetDirectory, primaryDataFiles, datasetFileInfo.DatasetID);
 
                 // Copy over the updated file time info and scan info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
