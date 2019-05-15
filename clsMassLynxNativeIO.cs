@@ -709,7 +709,7 @@ namespace MSFileInfoScanner
                         float endMass;
                         if (thisMSData.FunctionInfo[functionNumber].ScanCount > 0)
                         {
-                            NativeIOGetScanInfo(cleanMassLynxDataFolderPath, thisMSData.FunctionInfo[functionNumber], 1,  out _);
+                            NativeIOGetScanInfo(cleanMassLynxDataFolderPath, thisMSData.FunctionInfo[functionNumber], 1, out _);
 
                             // ToDo: Get the Start and End mass for the given scan
                             startMass = 0;
@@ -1434,8 +1434,8 @@ namespace MSFileInfoScanner
                                     thisMSData.FunctionInfo[functionNumber].CalibrationCoefficients,
                                     out var calibrationTypeID);
 
-                                    thisMSData.FunctionInfo[functionNumber].CalibrationCoefficientCount = calibrationCoefficientCount;
-                                    thisMSData.FunctionInfo[functionNumber].CalTypeID = calibrationTypeID;
+                                thisMSData.FunctionInfo[functionNumber].CalibrationCoefficientCount = calibrationCoefficientCount;
+                                thisMSData.FunctionInfo[functionNumber].CalTypeID = calibrationTypeID;
 
                             }
                             else

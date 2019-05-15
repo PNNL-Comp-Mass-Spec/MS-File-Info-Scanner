@@ -149,7 +149,7 @@ namespace MSFileInfoScannerUnitTests
 
             classifier.CheckSpectrum(lstMZs, 2, false);
 
-            Assert.AreEqual(1,classifier.CentroidedMSnSpectra, "Centroided spectrum was classified as profile mode");
+            Assert.AreEqual(1, classifier.CentroidedMSnSpectra, "Centroided spectrum was classified as profile mode");
         }
 
         [Test]
