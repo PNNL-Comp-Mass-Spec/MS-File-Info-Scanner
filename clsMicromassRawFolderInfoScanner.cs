@@ -120,12 +120,12 @@ namespace MSFileInfoScanner
                         float endRT = 0;
                         for (var functionNumber = 1; functionNumber <= functionCount; functionNumber++)
                         {
-                            if (nativeFileIO.GetFunctionInfo(datasetDirectory.FullName, 1, out clsMassLynxNativeIO.udtMSFunctionInfoType udtFunctionInfo))
+                            if (nativeFileIO.GetFunctionInfo(datasetDirectory.FullName, 1, out MassLynxData.MSFunctionInfo functionInfo))
                             {
-                                datasetFileInfo.ScanCount += udtFunctionInfo.ScanCount;
-                                if (udtFunctionInfo.EndRT > endRT)
+                                datasetFileInfo.ScanCount += functionInfo.ScanCount;
+                                if (functionInfo.EndRT > endRT)
                                 {
-                                    endRT = udtFunctionInfo.EndRT;
+                                    endRT = functionInfo.EndRT;
                                 }
                             }
                         }

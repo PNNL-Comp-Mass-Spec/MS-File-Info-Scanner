@@ -123,6 +123,16 @@
     <Compile Include="clsPythonPlotContainer.cs" />
     <Compile Include="clsPythonPlotContainer2D.cs" />
     <Compile Include="GenericFileInfoScanner.cs" />
+    <Compile Include="MassLynxData\MSData.cs" />
+    <Compile Include="MassLynxData\MSFunctionInfo.cs" />
+    <Compile Include="MassLynxData\MSHeaderInfo.cs" />
+    <Compile Include="MassLynxData\NumberConversion.cs" />
+    <Compile Include="MassLynxData\RawDataUtils.cs" />
+    <Compile Include="MassLynxData\RawFunctionDescriptorRecord.cs" />
+    <Compile Include="MassLynxData\RawScanIndexRecordCompressedScan.cs" />
+    <Compile Include="MassLynxData\RawScanIndexRecord.cs" />
+    <Compile Include="MassLynxData\ScanIndexRecord.cs" />
+    <Compile Include="MassLynxData\MassLynxScanStats.cs" />
     <Compile Include="modMain.cs" />
     <Compile Include="clsPlotContainer.cs" />
     <Compile Include="clsProteowizardDataParser.cs" />
@@ -150,6 +160,7 @@
       <Version>3.6.7</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>if exist "$(TargetDir)pwiz_bindings_cli.dll" del "$(TargetDir)pwiz_bindings_cli.dll"
