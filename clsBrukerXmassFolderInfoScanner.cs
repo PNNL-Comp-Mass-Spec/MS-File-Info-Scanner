@@ -12,7 +12,6 @@ using PRISM;
 
 namespace MSFileInfoScanner
 {
-    [CLSCompliant(false)]
     public class clsBrukerXmassFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
 

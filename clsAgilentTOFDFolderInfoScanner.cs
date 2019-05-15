@@ -8,7 +8,6 @@ using PRISM;
 
 namespace MSFileInfoScanner
 {
-    [CLSCompliant(false)]
     // ReSharper disable once IdentifierTypo
     public class clsAgilentTOFDFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
