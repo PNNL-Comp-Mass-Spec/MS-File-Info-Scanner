@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using MSFileInfoScannerInterfaces;
+using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2007
@@ -949,6 +950,86 @@ namespace MSFileInfoScanner
             }
 
             return (int)Math.Round(value / 1000.0 / 1000, 0) + "M";
+        }
+
+        protected void LoadScanDataWithProteoWizard(
+            FileSystemInfo datasetFileOrDirectory,
+            clsDatasetFileInfo datasetFileInfo,
+            bool highResMS1 = true,
+            bool highResMS2 = true)
+        {
+            try
+            {
+                // Open the instrument data using the ProteoWizardWrapper
+
+                var pWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(datasetFileOrDirectory.FullName);
+
+                try
+                {
+                    var runStartTime = Convert.ToDateTime(pWiz.RunStartTime);
+
+                    // Update AcqTimeEnd if possible
+                    // Found out by trial and error that we need to use .ToUniversalTime() to adjust the time reported by ProteoWizard
+                    runStartTime = runStartTime.ToUniversalTime();
+                    if (runStartTime < datasetFileInfo.AcqTimeEnd)
+                    {
+                        if (datasetFileInfo.AcqTimeEnd.Subtract(runStartTime).TotalDays < 1)
+                        {
+                            if (datasetFileInfo.AcqTimeStart == DateTime.MinValue ||
+                                Math.Abs(datasetFileInfo.AcqTimeStart.Subtract(runStartTime).TotalSeconds) > 0)
+                            {
+                                datasetFileInfo.AcqTimeStart = runStartTime;
+                            }
+
+                        }
+                    }
+
+                }
+                catch (Exception)
+                {
+                    datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd;
+                }
+
+                // Instantiate the ProteoWizard Data Parser class
+                var pWizParser = new clsProteoWizardDataParser(pWiz, mDatasetStatsSummarizer, mTICAndBPIPlot,
+                                                               mLCMS2DPlot, mSaveLCMS2DPlots, mSaveTICAndBPI,
+                                                               mCheckCentroidingStatus)
+                {
+                    HighResMS1 = highResMS1,
+                    HighResMS2 = highResMS2
+                };
+
+                RegisterEvents(pWizParser);
+
+                var ticStored = false;
+                var srmDataCached = false;
+                double runtimeMinutes = 0;
+
+                // Note that SRM .Wiff files will only have chromatograms, and no spectra
+
+                if (pWiz.ChromatogramCount > 0)
+                {
+                    // Process the chromatograms
+                    pWizParser.StoreChromatogramInfo(datasetFileInfo, out ticStored, out srmDataCached, out runtimeMinutes);
+                    pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
+
+                }
+
+                if (pWiz.SpectrumCount > 0 && !srmDataCached)
+                {
+                    // Process the spectral data (though only if we did not process SRM data)
+                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes);
+                    pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
+                }
+
+                pWiz.Dispose();
+                ProgRunner.GarbageCollectNow();
+
+            }
+            catch (Exception ex)
+            {
+                OnErrorEvent("Error using ProteoWizard reader", ex);
+            }
         }
 
         protected void PostProcessTasks()
