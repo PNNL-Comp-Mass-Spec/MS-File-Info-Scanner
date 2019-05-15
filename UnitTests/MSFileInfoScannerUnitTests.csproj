@@ -33,6 +33,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ProteowizardWrapper">
+      <HintPath>..\Lib\ProteowizardWrapper.dll</HintPath>
+    </Reference>
+    <Reference Include="pwiz_bindings_cli">
+      <HintPath>..\Lib\pwiz_bindings_cli.dll</HintPath>
+    </Reference>
     <Reference Include="SpectraTypeClassifier, Version=2.0.6520.23941, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Lib\SpectraTypeClassifier.dll</HintPath>
@@ -42,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpectraTypeClassifierTests.cs" />
+    <Compile Include="ProteoWizardWrapperTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -54,7 +61,18 @@
       <Version>2.5.20</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MSFileInfoScanner.csproj">
+      <Project>{ed7fbc96-ff30-4e96-aad7-2f0d8d4f31e9}</Project>
+      <Name>MSFileInfoScanner</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if exist "$(TargetDir)pwiz_bindings_cli.dll" del "$(TargetDir)pwiz_bindings_cli.dll"
+if exist "$(TargetDir)SQLite.Interop.dll" (del "$(TargetDir)SQLite.Interop.dll")
+</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
