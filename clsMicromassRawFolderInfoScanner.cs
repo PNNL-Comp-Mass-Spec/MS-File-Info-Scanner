@@ -144,7 +144,14 @@ namespace MSFileInfoScanner
             if (nativeFileIO.GetFileInfo(datasetDirectory.FullName, out var headerInfo))
             {
                 ReadMassLynxAcquisitionInfo(datasetDirectory, datasetFileInfo, nativeFileIO, headerInfo);
+            }
+            else
+            {
+                // Error getting the header info using clsMassLynxNativeIO
+                // Continue anyway since we've populated some of the values
+            }
 
+            LoadScanDataWithProteoWizard(datasetDirectory, datasetFileInfo);
         }
 
         /// <summary>
@@ -209,12 +216,9 @@ namespace MSFileInfoScanner
                         datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
                     }
                 }
-
             }
             else
             {
-                // Error getting the header info using clsMassLynxNativeIO
-                // Continue anyway since we've populated some of the values
                 if (newStartDate >= MINIMUM_ACCEPTABLE_ACQ_START_TIME)
                 {
                     datasetFileInfo.AcqTimeStart = newStartDate;
