@@ -1278,7 +1278,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error updating the dataset stats text file: " + ex.Message, ex);
+                OnErrorEvent("Error updating the dataset stats text file", ex);
                 success = false;
             }
 
