@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using MSFileInfoScannerInterfaces;
 using PRISM;
@@ -952,6 +953,7 @@ namespace MSFileInfoScanner
             return (int)Math.Round(value / 1000.0 / 1000, 0) + "M";
         }
 
+        [HandleProcessCorruptedStateExceptions]
         protected void LoadScanDataWithProteoWizard(
             FileSystemInfo datasetFileOrDirectory,
             clsDatasetFileInfo datasetFileInfo,
@@ -1012,7 +1014,6 @@ namespace MSFileInfoScanner
                     // Process the chromatograms
                     pWizParser.StoreChromatogramInfo(datasetFileInfo, out ticStored, out srmDataCached, out runtimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
-
                 }
 
                 if (pWiz.SpectrumCount > 0 && !srmDataCached)
@@ -1025,6 +1026,13 @@ namespace MSFileInfoScanner
                 pWiz.Dispose();
                 ProgRunner.GarbageCollectNow();
 
+            }
+            catch (AccessViolationException)
+            {
+                // Attempted to read or write protected memory. This is often an indication that other memory is corrupt.
+                OnWarningEvent("Error reading instrument data with ProteoWizard: Attempted to read or write protected memory. " +
+                               "The instrument data file is likely corrupt.");
+                mDatasetStatsSummarizer.CreateEmptyScanStatsFiles = false;
             }
             catch (Exception ex)
             {
