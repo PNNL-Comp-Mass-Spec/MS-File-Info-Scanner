@@ -1315,32 +1315,32 @@ namespace MSFileInfoScanner
             var retryCount = 0;
             bool success;
 
-            do
+            while (true)
             {
 
                 // Process the data file
                 success = scanner.ProcessDataFile(inputFileOrDirectoryPath, datasetFileInfo);
 
-                if (!success)
+                if (success)
+                    break;
+
+                retryCount += 1;
+
+                if (retryCount >= MAX_FILE_READ_ACCESS_ATTEMPTS)
+                    break;
+
+                // Retry if the file modification or creation time is within FILE_MODIFICATION_WINDOW_MINUTES minutes of the current time
+
+                if (DateTime.Now.Subtract(datasetFileInfo.FileSystemCreationTime).TotalMinutes < FILE_MODIFICATION_WINDOW_MINUTES || DateTime.Now.Subtract(datasetFileInfo.FileSystemModificationTime).TotalMinutes < FILE_MODIFICATION_WINDOW_MINUTES)
                 {
-                    retryCount += 1;
-
-                    if (retryCount < MAX_FILE_READ_ACCESS_ATTEMPTS)
-                    {
-                        // Retry if the file modification or creation time is within FILE_MODIFICATION_WINDOW_MINUTES minutes of the current time
-
-                        if (DateTime.Now.Subtract(datasetFileInfo.FileSystemCreationTime).TotalMinutes < FILE_MODIFICATION_WINDOW_MINUTES || DateTime.Now.Subtract(datasetFileInfo.FileSystemModificationTime).TotalMinutes < FILE_MODIFICATION_WINDOW_MINUTES)
-                        {
-                            // Sleep for 10 seconds then try again
-                            SleepNow(10);
-                        }
-                        else
-                        {
-                            retryCount = MAX_FILE_READ_ACCESS_ATTEMPTS;
-                        }
-                    }
+                    // Sleep for 10 seconds then try again
+                    SleepNow(10);
                 }
-            } while (!success && retryCount < MAX_FILE_READ_ACCESS_ATTEMPTS);
+                else
+                {
+                    retryCount = MAX_FILE_READ_ACCESS_ATTEMPTS;
+                }
+            }
 
             if (!success && retryCount >= MAX_FILE_READ_ACCESS_ATTEMPTS)
             {
