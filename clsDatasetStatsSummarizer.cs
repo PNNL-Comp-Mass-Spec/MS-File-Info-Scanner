@@ -83,6 +83,12 @@ namespace MSFileInfoScanner
         #region "Properties"
 
         /// <summary>
+        /// When false, do not create the scan stats files if no data was loaded
+        /// Defaults to True
+        /// </summary>
+        public bool CreateEmptyScanStatsFiles { get; set; }
+
+        /// <summary>
         /// Dataset file info
         /// </summary>
         public clsDatasetFileInfo DatasetFileInfo { get; set; }
@@ -210,6 +216,9 @@ namespace MSFileInfoScanner
             mSpectraTypeClassifier.CheckSpectrum(ionCount, mzArray, msLevel, centroidingStatus, spectrumTitle);
         }
 
+        /// <summary>
+        /// Clear cached data
+        /// </summary>
         public void ClearCachedData()
         {
             mDatasetScanStats.Clear();
@@ -222,6 +231,7 @@ namespace MSFileInfoScanner
 
             mSpectraTypeClassifier.Reset();
 
+            CreateEmptyScanStatsFiles = true;
         }
 
         /// <summary>
@@ -786,6 +796,11 @@ namespace MSFileInfoScanner
                 {
                     ReportError("scanStats is Nothing; unable to continue in CreateScanStatsFile");
                     return false;
+                }
+
+                if (scanStats.Count == 0 && !CreateEmptyScanStatsFiles)
+                {
+                    return true;
                 }
 
                 ErrorMessage = "";
