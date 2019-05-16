@@ -375,7 +375,7 @@ namespace MSFileInfoScanner
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID;
                 }
 
-                success = mDatasetStatsSummarizer.CreateScanStatsFile(datasetName, scanStatsFilePath);
+                success = mDatasetStatsSummarizer.CreateScanStatsFile(scanStatsFilePath);
 
                 if (!success)
                 {

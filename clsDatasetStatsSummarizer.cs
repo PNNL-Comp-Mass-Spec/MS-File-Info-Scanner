@@ -110,7 +110,7 @@ namespace MSFileInfoScanner
         /// </summary>
         public clsDatasetStatsSummarizer()
         {
-            FileDate = "November 7, 2017";
+            FileDate = "May 16, 2019";
 
             ErrorMessage = string.Empty;
 
@@ -126,7 +126,6 @@ namespace MSFileInfoScanner
             SampleInfo = new udtSampleInfoType();
 
             ClearCachedData();
-
         }
 
         /// <summary>
@@ -488,7 +487,6 @@ namespace MSFileInfoScanner
         // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(List<clsScanStatsEntry> scanStats, clsDatasetFileInfo datasetFileInfo, udtSampleInfoType udtSampleInfo)
         {
-
             return CreateDatasetInfoXML(datasetFileInfo.DatasetName, scanStats, datasetFileInfo, udtSampleInfo);
         }
 
@@ -762,27 +760,23 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Creates a tab-delimited text file with details on each scan tracked by this class (stored in mDatasetScanStats)
         /// </summary>
-        /// <param name="datasetName">Dataset Name</param>
         /// <param name="scanStatsFilePath">File path to write the text file to</param>
         /// <returns>True if success; False if failure</returns>
         /// <remarks></remarks>
-        public bool CreateScanStatsFile(string datasetName, string scanStatsFilePath)
+        public bool CreateScanStatsFile(string scanStatsFilePath)
         {
-
-            return CreateScanStatsFile(datasetName, scanStatsFilePath, mDatasetScanStats, DatasetFileInfo);
+            return CreateScanStatsFile(scanStatsFilePath, mDatasetScanStats, DatasetFileInfo);
         }
 
         /// <summary>
         /// Creates a tab-delimited text file with details on each scan tracked by this class (stored in mDatasetScanStats)
         /// </summary>
-        /// <param name="datasetName">Dataset Name</param>
         /// <param name="scanStatsFilePath">File path to write the text file to</param>
         /// <param name="scanStats">Scan stats to parse</param>
         /// <param name="datasetFileInfo">Dataset Info</param>
         /// <returns>True if success; False if failure</returns>
         /// <remarks></remarks>
         public bool CreateScanStatsFile(
-            string datasetName,
             string scanStatsFilePath,
             List<clsScanStatsEntry> scanStats,
             clsDatasetFileInfo datasetFileInfo)
