@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 using PRISM;
 using pwiz.ProteowizardWrapper;
@@ -10,7 +11,7 @@ namespace MSFileInfoScanner
     public class clsProteoWizardDataParser : EventNotifier
     {
 
-        private readonly pwiz.ProteowizardWrapper.MSDataFileReader mPWiz;
+        private readonly MSDataFileReader mPWiz;
 
         private readonly clsDatasetStatsSummarizer mDatasetStatsSummarizer;
         private readonly clsTICandBPIPlotter mTICAndBPIPlot;
@@ -23,6 +24,8 @@ namespace MSFileInfoScanner
 
         private readonly Regex mGetQ1MZ;
         private readonly Regex mGetQ3MZ;
+
+        private bool mWarnedAccessViolationException;
 
         public bool HighResMS1 { get; set; }
 
@@ -39,7 +42,7 @@ namespace MSFileInfoScanner
         /// <param name="saveTICAndBPI"></param>
         /// <param name="checkCentroidingStatus"></param>
         public clsProteoWizardDataParser(
-            pwiz.ProteowizardWrapper.MSDataFileReader pWiz,
+            MSDataFileReader pWiz,
             clsDatasetStatsSummarizer datasetStatsSummarizer,
             clsTICandBPIPlotter ticAndBPIPlot,
             clsLCMSDataPlotter lcms2DPlot,
@@ -60,19 +63,17 @@ namespace MSFileInfoScanner
 
             mGetQ3MZ = new Regex("Q1=[0-9.]+ Q3=([0-9.]+)", RegexOptions.Compiled);
 
+            mWarnedAccessViolationException = false;
         }
 
         private bool ExtractQ1MZ(string chromatogramID, out double mz)
         {
             return ExtractQMZ(mGetQ1MZ, chromatogramID, out mz);
-
         }
 
         private bool ExtractQ3MZ(string chromatogramID, out double mz)
         {
-
             return ExtractQMZ(mGetQ3MZ, chromatogramID, out mz);
-
         }
 
         private bool ExtractQMZ(Regex reGetMZ, string chromatogramID, out double mz)
@@ -297,6 +298,7 @@ namespace MSFileInfoScanner
 
         }
 
+        [HandleProcessCorruptedStateExceptions]
         public void StoreChromatogramInfo(clsDatasetFileInfo datasetFileInfo, out bool ticStored, out bool srmDataCached, out double runtimeMinutes)
         {
             var ticScanTimes = new List<float>();
@@ -354,15 +356,27 @@ namespace MSFileInfoScanner
                     {
                         // This chromatogram is an SRM scan
 
-                        ProcessSRM(chromatogramID, scanTimes, intensities, ticScanTimes, ticScanNumbers, ref runtimeMinutes, dct2DDataParent, dct2DDataProduct, dct2DDataScanTimes);
+                        ProcessSRM(chromatogramID, scanTimes, intensities, ticScanTimes, ticScanNumbers, ref runtimeMinutes, dct2DDataParent,
+                                   dct2DDataProduct, dct2DDataScanTimes);
 
                         srmDataCached = true;
                     }
 
                 }
+                catch (AccessViolationException)
+                {
+                    // Attempted to read or write protected memory. This is often an indication that other memory is corrupt.
+                    if (!mWarnedAccessViolationException)
+                    {
+                        OnWarningEvent("Error loading chromatogram data with ProteoWizard: Attempted to read or write protected memory. " +
+                                       "The instrument data file is likely corrupt.");
+                        mWarnedAccessViolationException = true;
+                    }
+                    mDatasetStatsSummarizer.CreateEmptyScanStatsFiles = false;
+                }
                 catch (Exception ex)
                 {
-                    OnErrorEvent("Error processing chromatogram " + chromatogramIndex + ": " + ex.Message, ex);
+                    OnErrorEvent("Error processing chromatogram " + chromatogramIndex + " with ProteoWizard: " + ex.Message, ex);
                 }
 
             }
@@ -403,6 +417,7 @@ namespace MSFileInfoScanner
         /// <param name="scanCountSuccess"></param>
         /// <param name="scanCountError"></param>
         /// <returns>True if at least 50% of the spectra were successfully read</returns>
+        [HandleProcessCorruptedStateExceptions]
         public bool StoreMSSpectraInfo(bool ticStored, ref double runtimeMinutes, out int scanCountSuccess, out int scanCountError)
         {
             scanCountSuccess = 0;
@@ -566,9 +581,21 @@ namespace MSFileInfoScanner
                 // Return True if at least 50% of the spectra were successfully read
                 return scanCountSuccess >= scanCountTotal / 2.0;
             }
+            catch (AccessViolationException)
+            {
+                // Attempted to read or write protected memory. This is often an indication that other memory is corrupt.
+                if (!mWarnedAccessViolationException)
+                {
+                    OnWarningEvent("Error reading instrument data with ProteoWizard: Attempted to read or write protected memory. " +
+                                   "The instrument data file is likely corrupt.");
+                    mWarnedAccessViolationException = true;
+                }
+                mDatasetStatsSummarizer.CreateEmptyScanStatsFiles = false;
+                return false;
+            }
             catch (Exception ex)
             {
-                OnErrorEvent("Error obtaining scan times and MSLevels using GetScanTimesAndMsLevels: " + ex.Message, ex);
+                OnErrorEvent("Error reading instrument data with ProteoWizard: " + ex.Message, ex);
                 return false;
             }
 
