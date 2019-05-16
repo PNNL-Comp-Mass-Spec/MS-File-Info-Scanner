@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using pwiz.CLI.data;
 using PRISM;
+using pwiz.ProteowizardWrapper;
 
 namespace MSFileInfoScanner
 {
@@ -336,7 +336,7 @@ namespace MSFileInfoScanner
 
                     var cvParams = mPWiz.GetChromatogramCVParams(chromatogramIndex);
 
-                    if (TryGetCVParam(cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out _))
+                    if (MSDataFileReader.TryGetCVParam(cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out _))
                     {
                         // This chromatogram is the TIC
 
@@ -350,7 +350,7 @@ namespace MSFileInfoScanner
 
                     }
 
-                    if (TryGetCVParam(cvParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out _))
+                    if (MSDataFileReader.TryGetCVParam(cvParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out _))
                     {
                         // This chromatogram is an SRM scan
 
@@ -476,17 +476,17 @@ namespace MSFileInfoScanner
 
                         var spectrum = mPWiz.GetSpectrumObject(scanIndex);
 
-                        if (TryGetCVParamDouble(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out var tic))
+                        if (MSDataFileReader.TryGetCVParamDouble(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out var tic))
                         {
                             scanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(tic, 5);
                             computeTIC = false;
                         }
 
-                        if (TryGetCVParamDouble(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, out var bpi))
+                        if (MSDataFileReader.TryGetCVParamDouble(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, out var bpi))
                         {
                             scanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(bpi, 5);
 
-                            if (TryGetCVParamDouble(spectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, out var basePeakMzFromCvParams))
+                            if (MSDataFileReader.TryGetCVParamDouble(spectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, out var basePeakMzFromCvParams))
                             {
                                 scanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(basePeakMzFromCvParams, 5);
                                 computeBPI = false;
@@ -678,53 +678,6 @@ namespace MSFileInfoScanner
                 return chromatogramIdText;
 
             return chromatogramIdText.Substring(0, charIndex).TrimEnd();
-
-        }
-
-        public static bool TryGetCVParam(CVParamList cvParams, pwiz.CLI.cv.CVID cvidToFind, out CVParam paramMatch)
-        {
-            foreach (var param in cvParams)
-            {
-                if (param.cvid == cvidToFind)
-                {
-                    if (!param.empty())
-                    {
-                        paramMatch = param;
-                        return true;
-                    }
-                }
-            }
-            paramMatch = null;
-            return false;
-        }
-
-        public static bool TryGetCVParamDouble(CVParamList cvParams, pwiz.CLI.cv.CVID cvidToFind, out double value, double valueIfMissing = 0)
-        {
-            if (!TryGetCVParam(cvParams, cvidToFind, out var paramMatch))
-            {
-                value = valueIfMissing;
-                return false;
-            }
-
-            try
-            {
-                // Try to use implicit casting
-                value = paramMatch.value;
-                return true;
-            }
-            catch
-            {
-                // The value could not be converted implicitly; use an explicit conversion
-            }
-
-            if (double.TryParse(paramMatch.value.ToString(), out var parsedValue))
-            {
-                value = parsedValue;
-                return true;
-            }
-
-            value = valueIfMissing;
-            return false;
 
         }
 
