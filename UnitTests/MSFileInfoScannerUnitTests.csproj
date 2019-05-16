@@ -36,9 +36,6 @@
     <Reference Include="ProteowizardWrapper">
       <HintPath>..\Lib\ProteowizardWrapper.dll</HintPath>
     </Reference>
-    <Reference Include="pwiz_bindings_cli">
-      <HintPath>..\Lib\pwiz_bindings_cli.dll</HintPath>
-    </Reference>
     <Reference Include="SpectraTypeClassifier, Version=2.0.6520.23941, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Lib\SpectraTypeClassifier.dll</HintPath>
@@ -48,7 +45,6 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpectraTypeClassifierTests.cs" />
-    <Compile Include="ProteoWizardWrapperTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
