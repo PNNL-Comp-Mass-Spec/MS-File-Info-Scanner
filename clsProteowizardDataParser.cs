@@ -328,6 +328,7 @@ namespace MSFileInfoScanner
                     {
                         OnStatusEvent("Obtaining chromatograms (this could take as long as 60 seconds)");
                     }
+
                     mPWiz.GetChromatogram(chromatogramIndex, out var chromatogramID, out var scanTimes, out var intensities);
 
                     if (chromatogramID == null)
@@ -409,9 +410,6 @@ namespace MSFileInfoScanner
 
             try
             {
-                double tic = 0;
-                double bpi = 0;
-
                 OnStatusEvent("Obtaining scan times and MSLevels (this could take several minutes)");
 
                 mPWiz.GetScanTimesAndMsLevels(out var scanTimes, out var msLevels);
@@ -478,21 +476,19 @@ namespace MSFileInfoScanner
 
                         var spectrum = mPWiz.GetSpectrumObject(scanIndex);
 
-                        if (TryGetCVParam(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out var param))
+                        if (TryGetCVParamDouble(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out var tic))
                         {
-                            tic = param.value;
                             scanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(tic, 5);
                             computeTIC = false;
                         }
 
-                        if (TryGetCVParam(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, out param))
+                        if (TryGetCVParamDouble(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, out var bpi))
                         {
-                            bpi = param.value;
                             scanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(bpi, 5);
 
-                            if (TryGetCVParam(spectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, out param))
+                            if (TryGetCVParamDouble(spectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, out var basePeakMzFromCvParams))
                             {
-                                scanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(param.value, 5);
+                                scanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(basePeakMzFromCvParams, 5);
                                 computeBPI = false;
                             }
                         }
@@ -700,6 +696,36 @@ namespace MSFileInfoScanner
             }
             paramMatch = null;
             return false;
+        }
+
+        public static bool TryGetCVParamDouble(CVParamList cvParams, pwiz.CLI.cv.CVID cvidToFind, out double value, double valueIfMissing = 0)
+        {
+            if (!TryGetCVParam(cvParams, cvidToFind, out var paramMatch))
+            {
+                value = valueIfMissing;
+                return false;
+            }
+
+            try
+            {
+                // Try to use implicit casting
+                value = paramMatch.value;
+                return true;
+            }
+            catch
+            {
+                // The value could not be converted implicitly; use an explicit conversion
+            }
+
+            if (double.TryParse(paramMatch.value.ToString(), out var parsedValue))
+            {
+                value = parsedValue;
+                return true;
+            }
+
+            value = valueIfMissing;
+            return false;
+
         }
 
         private void UpdateDataRanges(
