@@ -110,7 +110,7 @@ namespace MSFileInfoScanner
         /// </summary>
         public clsDatasetStatsSummarizer()
         {
-            FileDate = "May 16, 2019";
+            FileDate = "May 27, 2019";
 
             ErrorMessage = string.Empty;
 
@@ -1079,14 +1079,63 @@ namespace MSFileInfoScanner
         /// <param name="errorOrWarningMsg"></param>
         /// <param name="maxPercentAllowedFailed"></param>
         /// <returns>True if valid data, false if at least 10% of the spectra has a minimum m/z higher than the threshold</returns>
+        /// <remarks>
+        /// If a dataset has a mix of MS2 and MS3 spectra, and if all of the MS3 spectra meet the minimum m/z requirement, a warning is not raised
+        /// Example dataset: UCLA_Dun_TMT_set2_03_QE_24May19_Rage_Rep-19-04-r01
+        /// </remarks>
         public bool ValidateMS2MzMin(float requiredMzMin, out string errorOrWarningMsg, int maxPercentAllowedFailed)
         {
+
+            // First examine MS2 spectra (or higher)
+            var validMS2 = ValidateMSnMzMin(
+                2,
+                requiredMzMin, maxPercentAllowedFailed,
+                out var scanCountWithDataMS2,
+                out var messageMS2);
+
+            if (scanCountWithDataMS2 > 0 && validMS2)
+            {
+                errorOrWarningMsg = messageMS2;
+                return true;
+            }
+
+            // MS2 spectra did not meet the requirements; check MS3 spectra
+            var validMS3 = ValidateMSnMzMin(
+                3,
+                requiredMzMin, maxPercentAllowedFailed,
+                out var scanCountWithDataMS3,
+                out var messageMS3);
+
+            if (scanCountWithDataMS3 > 0 && validMS3)
+            {
+                errorOrWarningMsg = messageMS3;
+                return true;
+            }
+
+            if (scanCountWithDataMS2 > 0 && scanCountWithDataMS3 == 0)
+                errorOrWarningMsg = messageMS2;
+            else if (scanCountWithDataMS2 == 0 && scanCountWithDataMS3 > 0)
+                errorOrWarningMsg = messageMS3;
+            else
+                errorOrWarningMsg = messageMS2 + "; " + messageMS3;
+
+            return false;
+        }
+
+        private bool ValidateMSnMzMin(
+            int msLevel,
+            float requiredMzMin,
+            int maxPercentAllowedFailed,
+            out int scanCountWithData,
+            out string errorOrWarningMsg)
+        {
+
+            scanCountWithData = 0;
             var scanCountInvalid = 0;
-            var scanCountWithData = 0;
 
             foreach (var scan in mDatasetScanStats)
             {
-                if (scan.ScanType < 2)
+                if (scan.ScanType != msLevel)
                     continue;
 
                 if (scan.IonCount == 0 && scan.IonCountRaw == 0)
@@ -1100,10 +1149,18 @@ namespace MSFileInfoScanner
 
             }
 
+            string spectraType;
+            if (msLevel == 2)
+                spectraType = "MS2";
+            else if (msLevel == 3)
+                spectraType = "MS3";
+            else
+                spectraType = "MSn";
+
             if (scanCountWithData == 0)
             {
-                // No data
-                errorOrWarningMsg = "None of the spectra has data; cannot validate";
+                // None of the MS2 spectra has data; cannot validate
+                errorOrWarningMsg = string.Format("None of the {0} spectra has data; cannot validate", spectraType);
                 return false;
             }
 
@@ -1118,15 +1175,15 @@ namespace MSFileInfoScanner
             var percentRounded = percentInvalid.ToString(percentInvalid < 10 ? "F1" : "F0");
 
             // Example messages:
-            // 3.8% of the scans have a minimum m/z value larger than 113.0 m/z (950 / 25,000)
-            // 100% of the scans have a minimum m/z value larger than 126.0 m/z (32,489 / 32,489)
+            // 3.8% of the MS2 spectra have a minimum m/z value larger than 113.0 m/z (950 / 25,000)
+            // 2.5% of the MS3 spectra have a minimum m/z value larger than 113.0 m/z (75 / 3,000)
+            // 100% of the MS2 spectra have a minimum m/z value larger than 126.0 m/z (32,489 / 32,489)
 
-            errorOrWarningMsg = string.Format("{0}% of the scans have a minimum m/z value larger than {1:F1} m/z ({2:N0} / {3:N0})",
-                                              percentRounded, requiredMzMin, scanCountInvalid, scanCountWithData);
+            errorOrWarningMsg = string.Format("{0}% of the {1} spectra have a minimum m/z value larger than {2:F1} m/z ({3:N0} / {4:N0})",
+                                              percentRounded, spectraType, requiredMzMin, scanCountInvalid, scanCountWithData);
 
             return percentInvalid < maxPercentAllowedFailed;
         }
-
     }
 
     public class clsScanStatsEntry
