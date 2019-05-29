@@ -156,7 +156,7 @@
       <Version>1.0.97</Version>
     </PackageReference>
     <PackageReference Include="UIMFLibrary">
-      <Version>3.6.7</Version>
+      <Version>3.6.9</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup />

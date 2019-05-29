@@ -165,8 +165,8 @@ namespace MSFileInfoScanner
             DataReader uimfReader,
             int frameStart,
             int frameEnd,
-            out Dictionary<int, double> dctTIC,
-            out Dictionary<int, double> dctBPI)
+            out SortedDictionary<int, double> dctTIC,
+            out SortedDictionary<int, double> dctBPI)
         {
             try
             {
@@ -182,8 +182,8 @@ namespace MSFileInfoScanner
             catch (Exception ex)
             {
                 OnErrorEvent("Error obtaining TIC and BPI for overall dataset: " + ex.Message);
-                dctTIC = new Dictionary<int, double>();
-                dctBPI = new Dictionary<int, double>();
+                dctTIC = new SortedDictionary<int, double>();
+                dctBPI = new SortedDictionary<int, double>();
             }
 
         }

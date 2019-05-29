@@ -21,7 +21,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "May 27, 2019";
+        public const string PROGRAM_DATE = "May 28, 2019";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
