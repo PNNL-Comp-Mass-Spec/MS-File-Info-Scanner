@@ -427,9 +427,9 @@ namespace MSFileInfoScanner
 
                             // Process all of the IMS scans in this Frame to compute a summed spectrum representative of the frame
 
-                            // In UIMF files from IMS04, if Frame_Parameters.Scans = 360 then Frame_Scans will have scans 0 through 359
-                            // In UIMF files from IMS08, prior to December 1, 2014, if Frame_Parameters.Scans = 374 then Frame_Scans will have scans 0 through 373
-                            // in UIMF files from IMS08, after December 1, 2014     if Frame_Parameters.Scans = 374 then Frame_Scans will have scans 1 through 374
+                            // In UIMF files from IMS04,                            if Frame_Parameters.Scans = 360, Frame_Scans will have scans 0 through 359
+                            // In UIMF files from IMS08, prior to December 1, 2014, if Frame_Parameters.Scans = 374, Frame_Scans will have scans 0 through 373
+                            // in UIMF files from IMS08, after December 1, 2014     if Frame_Parameters.Scans = 374, Frame_Scans will have scans 1 through 374
 
                             var ionCount = uimfReader.GetSpectrum(frameNumber, frameNumber, eFrameType, 0, frameParams.Scans, out mzList, out intensityList);
 

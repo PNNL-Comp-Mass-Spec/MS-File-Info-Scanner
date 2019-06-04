@@ -110,7 +110,7 @@ namespace MSFileInfoScanner
         /// </summary>
         public clsDatasetStatsSummarizer()
         {
-            FileDate = "May 27, 2019";
+            FileDate = "June 3, 2019";
 
             ErrorMessage = string.Empty;
 
@@ -1280,21 +1280,62 @@ namespace MSFileInfoScanner
         /// <remarks>1 for MS, 2 for MS2, 3 for MS3</remarks>
         public int ScanType;
 
-        // Example values: "FTMS + p NSI Full ms [400.00-2000.00]" or "ITMS + c ESI Full ms [300.00-2000.00]" or "ITMS + p ESI d Z ms [1108.00-1118.00]" or "ITMS + c ESI d Full ms2 342.90@cid35.00"
+        /// <summary>
+        /// Scan filter text
+        /// </summary>
+        /// <remarks>
+        /// Example values: "FTMS + p NSI Full ms [400.00-2000.00]" or "ITMS + c ESI Full ms [300.00-2000.00]" or "ITMS + p ESI d Z ms [1108.00-1118.00]" or "ITMS + c ESI d Full ms2 342.90@cid35.00"
+        /// </remarks>
         public string ScanFilterText;
 
-        // Example values: MS, HMS, Zoom, CID-MSn, or PQD-MSn
+        /// <summary>
+        /// Scan type name
+        /// </summary>
+        /// <remarks>
+        /// Example values: MS, HMS, Zoom, CID-MSn, or PQD-MSn
+        /// </remarks>
         public string ScanTypeName;
 
         // The following are strings to prevent the number formatting from changing
+
+        /// <summary>
+        /// Elution time, in minutes
+        /// </summary>
         public string ElutionTime;
+
+        /// <summary>
+        /// Drift time, in milliseconds
+        /// </summary>
+        public string DriftTimeMsec;
+
+        /// <summary>
+        /// Total ion intensity
+        /// </summary>
         public string TotalIonIntensity;
+
+        /// <summary>
+        /// Base peak ion intensity
+        /// </summary>
         public string BasePeakIntensity;
+
+        /// <summary>
+        /// Base peak m/z
+        /// </summary>
         public string BasePeakMZ;
 
+        /// <summary>
+        /// Signal to noise ratio (S/N)
+        /// </summary>
         public string BasePeakSignalToNoiseRatio;
+
+        /// <summary>
+        /// Ion count
+        /// </summary>
         public int IonCount;
 
+        /// <summary>
+        /// Ion count before centroiding
+        /// </summary>
         public int IonCountRaw;
 
         /// <summary>
@@ -1307,9 +1348,15 @@ namespace MSFileInfoScanner
         /// </summary>
         public double MzMax;
 
-        // Only used for Thermo data
+        /// <summary>
+        /// Extended scan info
+        /// </summary>
+        /// <remarks>Only used for Thermo data</remarks>
         public udtExtendedStatsInfoType ExtendedScanInfo;
 
+        /// <summary>
+        /// Clear all values
+        /// </summary>
         public void Clear()
         {
             ScanNumber = 0;
@@ -1319,6 +1366,7 @@ namespace MSFileInfoScanner
             ScanTypeName = string.Empty;
 
             ElutionTime = "0";
+            DriftTimeMsec = "0";
             TotalIonIntensity = "0";
             BasePeakIntensity = "0";
             BasePeakMZ = "0";
