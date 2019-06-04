@@ -66,8 +66,6 @@ namespace MSFileInfoScanner
 
         private readonly List<clsScanData> mScans;
 
-        private clsLCMSDataPlotterOptions mOptions;
-
         private readonly List<udtOutputFileInfoType> mRecentFiles;
 
         private int mSortingWarnCount;
@@ -80,11 +78,7 @@ namespace MSFileInfoScanner
 
         #region "Properties"
 
-        public clsLCMSDataPlotterOptions Options
-        {
-            get => mOptions;
-            set => mOptions = value;
-        }
+        public clsLCMSDataPlotterOptions Options { get; set; }
 
         public int ScanCountCached => mScans.Count;
 
@@ -104,7 +98,7 @@ namespace MSFileInfoScanner
         /// <param name="options"></param>
         public clsLCMSDataPlotter(clsLCMSDataPlotterOptions options)
         {
-            mOptions = options;
+            Options = options;
             mRecentFiles = new List<udtOutputFileInfoType>();
             mSortingWarnCount = 0;
             mSpectraFoundExceedingMaxIonCount = 0;
@@ -197,7 +191,7 @@ namespace MSFileInfoScanner
                 var ionCountNew = 0;
                 for (var index = 0; index <= ionCount - 1; index++)
                 {
-                    if (massIntensityPairs[1, index] > 0 && massIntensityPairs[1, index] >= mOptions.MinIntensity)
+                    if (massIntensityPairs[1, index] > 0 && massIntensityPairs[1, index] >= Options.MinIntensity)
                     {
                         ionsMZFiltered[ionCountNew] = massIntensityPairs[0, index];
 
@@ -326,7 +320,7 @@ namespace MSFileInfoScanner
                 var ionCountNew = 0;
                 for (var index = 0; index <= ionList.Count - 1; index++)
                 {
-                    if (ionList[index].Intensity > 0 && ionList[index].Intensity >= mOptions.MinIntensity)
+                    if (ionList[index].Intensity > 0 && ionList[index].Intensity >= Options.MinIntensity)
                     {
                         ionsMZFiltered[ionCountNew] = ionList[index].MZ;
 
@@ -364,7 +358,7 @@ namespace MSFileInfoScanner
             var centroidRequired = false;
             for (var index = 0; index <= ionCount - 2; index++)
             {
-                if (ionsMZFiltered[index + 1] - ionsMZFiltered[index] < mOptions.MZResolution)
+                if (ionsMZFiltered[index + 1] - ionsMZFiltered[index] < Options.MZResolution)
                 {
                     centroidRequired = true;
                     break;
@@ -374,7 +368,7 @@ namespace MSFileInfoScanner
             if (centroidRequired)
             {
                 // Consolidate any points closer than mOptions.MZResolution m/z units
-                CentroidMSData(mOptions.MZResolution, ref ionCount, ionsMZFiltered, ionsIntensityFiltered, chargeFiltered);
+                CentroidMSData(Options.MZResolution, ref ionCount, ionsMZFiltered, ionsIntensityFiltered, chargeFiltered);
             }
 
             // Instantiate a new ScanData var for this scan
@@ -402,7 +396,7 @@ namespace MSFileInfoScanner
             mScans.Add(scanData);
             mPointCountCached += scanData.IonCount;
 
-            if (mPointCountCached <= mOptions.MaxPointsToPlot * 5)
+            if (mPointCountCached <= Options.MaxPointsToPlot * 5)
                 return;
 
             // Too many data points are being tracked; trim out the low abundance ones
@@ -413,7 +407,7 @@ namespace MSFileInfoScanner
             if (mPointCountCached > mPointCountCachedAfterLastTrim * 1.1)
             {
                 // Step through the scans and reduce the number of points in memory
-                TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum);
+                TrimCachedData(Options.MaxPointsToPlot, Options.MinPointsPerSpectrum);
 
             }
         }
@@ -437,7 +431,7 @@ namespace MSFileInfoScanner
                 mScans.Add(scanData);
                 mPointCountCached += scanData.IonCount;
 
-                if (mPointCountCached > mOptions.MaxPointsToPlot * 5)
+                if (mPointCountCached > Options.MaxPointsToPlot * 5)
                 {
                     // Too many data points are being tracked; trim out the low abundance ones
 
@@ -447,7 +441,7 @@ namespace MSFileInfoScanner
                     if (mPointCountCached > mPointCountCachedAfterLastTrim * 1.1)
                     {
                         // Step through the scans and reduce the number of points in memory
-                        TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum);
+                        TrimCachedData(Options.MaxPointsToPlot, Options.MinPointsPerSpectrum);
 
                     }
                 }
@@ -476,7 +470,7 @@ namespace MSFileInfoScanner
                 ValidateMSLevel();
             }
 
-            if (mPointCountCached > mOptions.MaxPointsToPlot)
+            if (mPointCountCached > Options.MaxPointsToPlot)
             {
                 // Need to step through the scans and reduce the number of points in memory
 
@@ -484,7 +478,7 @@ namespace MSFileInfoScanner
                 //  more than mOptions.MaxPointsToPlot, depending on mOptions.MinPointsPerSpectrum
                 //  (see TrimCachedData for more details)
 
-                TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum);
+                TrimCachedData(Options.MaxPointsToPlot, Options.MinPointsPerSpectrum);
 
             }
 
@@ -1183,7 +1177,7 @@ namespace MSFileInfoScanner
             colorScaleMinIntensity = 0;
             colorScaleMaxIntensity = 0;
 
-            if (!skipTrimCachedData && mPointCountCached > mOptions.MaxPointsToPlot)
+            if (!skipTrimCachedData && mPointCountCached > Options.MaxPointsToPlot)
             {
                 // Need to step through the scans and reduce the number of points in memory
 
@@ -1191,7 +1185,7 @@ namespace MSFileInfoScanner
                 //  more than mOptions.MaxPointsToPlot, depending on mOptions.MinPointsPerSpectrum
                 //  (see TrimCachedData for more details)
 
-                TrimCachedData(mOptions.MaxPointsToPlot, mOptions.MinPointsPerSpectrum);
+                TrimCachedData(Options.MaxPointsToPlot, Options.MinPointsPerSpectrum);
             }
 
             // Populate points and scanTimePoints with the data
@@ -1203,12 +1197,12 @@ namespace MSFileInfoScanner
 
 
             var maxMonoMass = double.MaxValue;
-            if (mOptions.PlottingDeisotopedData)
+            if (Options.PlottingDeisotopedData)
             {
-                maxMonoMass = mOptions.MaxMonoMassForDeisotopedPlot;
+                maxMonoMass = Options.MaxMonoMassForDeisotopedPlot;
             }
 
-            if (mOptions.PlottingDeisotopedData)
+            if (Options.PlottingDeisotopedData)
             {
                 pointsByCharge = GetMonoMassSeriesByCharge(msLevelFilter, maxMonoMass, out minMZ, out maxMZ, out scanTimeMax, out minScan, out maxScan);
             }
@@ -1478,7 +1472,7 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         private clsPlotContainerBase InitializePlot(string plotTitle, int msLevelFilter, bool skipTrimCachedData)
         {
-            if (mOptions.PlotWithPython)
+            if (Options.PlotWithPython)
             {
                 return InitializePythonPlot(plotTitle, msLevelFilter, skipTrimCachedData);
             }
@@ -1512,7 +1506,7 @@ namespace MSFileInfoScanner
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (writeDebugData)
             {
-                debugWriter = new StreamWriter(new FileStream(plotTitle + " - LCMS Top " + IntToEngineeringNotation(mOptions.MaxPointsToPlot) + " points.txt", FileMode.Create, FileAccess.Write, FileShare.Read));
+                debugWriter = new StreamWriter(new FileStream(plotTitle + " - LCMS Top " + IntToEngineeringNotation(Options.MaxPointsToPlot) + " points.txt", FileMode.Create, FileAccess.Write, FileShare.Read));
                 debugWriter.WriteLine("scan" + '\t' + "m/z" + '\t' + "Intensity");
             }
 
@@ -1529,7 +1523,7 @@ namespace MSFileInfoScanner
             }
 
             string yAxisLabel;
-            if (mOptions.PlottingDeisotopedData)
+            if (Options.PlottingDeisotopedData)
             {
                 yAxisLabel = "Monoisotopic Mass";
             }
@@ -1540,7 +1534,7 @@ namespace MSFileInfoScanner
 
             var myPlot = clsOxyplotUtilities.GetBasicPlotModel(plotTitle, "LC Scan Number", yAxisLabel);
 
-            if (mOptions.PlottingDeisotopedData)
+            if (Options.PlottingDeisotopedData)
             {
                 AddOxyPlotSeriesMonoMassVsScan(pointsByCharge, myPlot);
                 myPlot.TitlePadding = 40;
@@ -1587,7 +1581,7 @@ namespace MSFileInfoScanner
             }
 
             // Override the auto-computed X axis range
-            if (mOptions.UseObservedMinScan)
+            if (Options.UseObservedMinScan)
             {
                 myPlot.Axes[0].Minimum = minScan;
             }
@@ -1623,15 +1617,15 @@ namespace MSFileInfoScanner
             double maxMzToUse;
 
             // Set the maximum value for the Y-axis
-            if (mOptions.PlottingDeisotopedData)
+            if (Options.PlottingDeisotopedData)
             {
-                if (maxMZ < mOptions.MaxMonoMassForDeisotopedPlot)
+                if (maxMZ < Options.MaxMonoMassForDeisotopedPlot)
                 {
                     maxMzToUse = maxMZ;
                 }
                 else
                 {
-                    maxMzToUse = mOptions.MaxMonoMassForDeisotopedPlot;
+                    maxMzToUse = Options.MaxMonoMassForDeisotopedPlot;
                 }
             }
             else
@@ -1675,7 +1669,7 @@ namespace MSFileInfoScanner
             }
 
             string yAxisLabel;
-            if (mOptions.PlottingDeisotopedData)
+            if (Options.PlottingDeisotopedData)
             {
                 yAxisLabel = "Monoisotopic Mass";
             }
@@ -1689,7 +1683,7 @@ namespace MSFileInfoScanner
                 DeleteTempFiles = Options.DeleteTempFiles
             };
 
-            if (mOptions.PlottingDeisotopedData)
+            if (Options.PlottingDeisotopedData)
             {
                 AddPythonPlotSeriesMonoMassVsScan(pointsByCharge, plotContainer);
             }
@@ -1744,7 +1738,7 @@ namespace MSFileInfoScanner
             }
 
             // Override the auto-computed X axis range
-            if (mOptions.UseObservedMinScan)
+            if (Options.UseObservedMinScan)
             {
                 plotContainer.XAxisInfo.Minimum = minScan;
             }
@@ -1777,15 +1771,15 @@ namespace MSFileInfoScanner
             double maxMzToUse;
 
             // Set the maximum value for the Y-axis
-            if (mOptions.PlottingDeisotopedData)
+            if (Options.PlottingDeisotopedData)
             {
-                if (maxMZ < mOptions.MaxMonoMassForDeisotopedPlot)
+                if (maxMZ < Options.MaxMonoMassForDeisotopedPlot)
                 {
                     maxMzToUse = maxMZ;
                 }
                 else
                 {
-                    maxMzToUse = mOptions.MaxMonoMassForDeisotopedPlot;
+                    maxMzToUse = Options.MaxMonoMassForDeisotopedPlot;
                 }
             }
             else
@@ -1844,12 +1838,12 @@ namespace MSFileInfoScanner
                 if (scanModeSuffixAddon == null)
                     scanModeSuffixAddon = string.Empty;
 
-                var ms1Plot = InitializePlot(datasetName + " - " + mOptions.MS1PlotTitle, 1, false);
+                var ms1Plot = InitializePlot(datasetName + " - " + Options.MS1PlotTitle, 1, false);
                 RegisterEvents(ms1Plot);
 
-                ms1Plot.PlottingDeisotopedData = mOptions.PlottingDeisotopedData;
+                ms1Plot.PlottingDeisotopedData = Options.PlottingDeisotopedData;
 
-                if (mOptions.TestGradientColorSchemes)
+                if (Options.TestGradientColorSchemes)
                 {
                     var colorGradients = new Dictionary<string, OxyPalette>
                     {
@@ -1879,7 +1873,7 @@ namespace MSFileInfoScanner
                     AddRecentFile(pngFile.FullName, eOutputFileTypes.LCMS);
                 }
 
-                var ms2Plot = InitializePlot(datasetName + " - " + mOptions.MS2PlotTitle, 2, true);
+                var ms2Plot = InitializePlot(datasetName + " - " + Options.MS2PlotTitle, 2, true);
                 RegisterEvents(ms2Plot);
 
                 if (ms2Plot.SeriesCount > 0)
