@@ -404,6 +404,14 @@ namespace MSFileInfoScanner
                     scanStatsEntry.IonCount = nonZeroPointsInFrame;
                     scanStatsEntry.IonCountRaw = nonZeroPointsInFrame;
 
+                    // For UIMF files, we only store one entry per frame
+                    // Use the median drift time as the representative drift time
+
+                    var medianScanNum = frameParams.Scans / 2;
+
+                    var driftTimeMsec = uimfReader.GetDriftTime(frameNumber, medianScanNum, true);
+                    scanStatsEntry.DriftTimeMsec = driftTimeMsec.ToString("0.0###");
+
                     mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
 
                     if (mSaveLCMS2DPlots || mCheckCentroidingStatus)
