@@ -480,8 +480,13 @@ namespace MSFileInfoScanner
 
                         }
 
+                        var driftTimeMsec = msDataSpectrum.DriftTimeMsec ?? 0;
+
                         scanStatsEntry.ScanFilterText = driftTimeMsec > 0 ? "IMS" : string.Empty;
                         scanStatsEntry.ExtendedScanInfo.ScanFilterText = scanStatsEntry.ScanFilterText;
+
+                        scanStatsEntry.DriftTimeMsec = driftTimeMsec.ToString("0.0###");
+
                         scanStatsEntry.ElutionTime = scanTimes[scanIndex].ToString("0.0###");
 
                         // Bump up runtimeMinutes if necessary
