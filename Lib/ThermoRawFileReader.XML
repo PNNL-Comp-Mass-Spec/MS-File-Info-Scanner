@@ -1320,18 +1320,25 @@
             </summary>
             <remarks></remarks>
         </member>
+        <member name="M:ThermoRawFileReader.XRawFileIO.#ctor(ThermoRawFileReader.ThermoReaderOptions)">
+            <summary>
+            Constructor with an options parameter
+            </summary>
+            <param name="options">Thermo reader options</param>
+            <remarks></remarks>
+        </member>
         <member name="M:ThermoRawFileReader.XRawFileIO.#ctor(System.String,System.Boolean)">
             <summary>
-            Constructor
+            Constructor with a file path parameter
             </summary>
-            <param name="rawFilePath">Optional .raw file to open</param>
+            <param name="rawFilePath">Thermo .raw file to open (empty string to not open a file)</param>
             <param name="traceMode">When true, additional messages are reported via Debug events</param>
         </member>
         <member name="M:ThermoRawFileReader.XRawFileIO.#ctor(System.String,ThermoRawFileReader.ThermoReaderOptions,System.Boolean)">
             <summary>
-            Constructor
+            Constructor with file path, options, and optionally a trace flag
             </summary>
-            <param name="rawFilePath">Optional .raw file to open</param>
+            <param name="rawFilePath">Thermo .raw file to open (empty string to not open a file)</param>
             <param name="options">Thermo reader options</param>
             <param name="traceMode">When true, additional messages are reported via Debug events</param>
         </member>
