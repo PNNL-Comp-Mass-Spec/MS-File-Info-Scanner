@@ -813,6 +813,14 @@ namespace MSFileInfoScanner
                 using (var scanStatsExWriter = new StreamWriter(new FileStream(scanStatsExFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
 
+                    var includeDriftTime = false;
+
+                    foreach (var scanStatsEntry in scanStats)
+                    {
+                        if (!double.TryParse(scanStatsEntry.DriftTimeMsec, out var driftTimeMsec) || driftTimeMsec < float.Epsilon) continue;
+                        includeDriftTime = true;
+                        break;
+                    }
 
 
                     // Write the headers
@@ -831,6 +839,10 @@ namespace MSFileInfoScanner
                         "ScanTypeName"
                     };
 
+                    if (includeDriftTime)
+                    {
+                        dataValues.Add("DriftTime");
+                    }
 
                     scanStatsWriter.WriteLine(string.Join("\t", dataValues));
 
@@ -885,6 +897,11 @@ namespace MSFileInfoScanner
                         // Scan type name
                         dataValues.Add(scanStatsEntry.ScanTypeName);
 
+                        // Drift time (optional)
+                        if (includeDriftTime)
+                        {
+                            dataValues.Add(scanStatsEntry.DriftTimeMsec);
+                        }
 
                         scanStatsWriter.WriteLine(string.Join("\t", dataValues));
 
