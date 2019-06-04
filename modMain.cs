@@ -21,7 +21,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "May 28, 2019";
+        public const string PROGRAM_DATE = "June 4, 2019";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
@@ -301,6 +301,7 @@ namespace MSFileInfoScanner
                 "QZ",
                 "NoTIC",
                 "LC",
+                "2D",
                 "LCDiv",
                 "LCGrad",
                 "CC",
@@ -391,18 +392,25 @@ namespace MSFileInfoScanner
                 if (parser.IsParameterPresent("NoTIC"))
                     mSaveTICAndBPIPlots = false;
 
-                if (parser.RetrieveValueForParameter("LC", out value))
+                var lcPlotsEnabled = parser.RetrieveValueForParameter("LC", out var maxValidPoints);
+
+                if (!lcPlotsEnabled)
+                {
+                    lcPlotsEnabled = parser.RetrieveValueForParameter("2D", out maxValidPoints);
+                }
+
+                if (lcPlotsEnabled)
                 {
                     mSaveLCMS2DPlots = true;
-                    if (!string.IsNullOrWhiteSpace(value))
+                    if (!string.IsNullOrWhiteSpace(maxValidPoints))
                     {
-                        if (int.TryParse(value, out var maxPoints))
+                        if (int.TryParse(maxValidPoints, out var maxPoints))
                         {
                             mLCMS2DMaxPointsToPlot = maxPoints;
                         }
                         else
                         {
-                            ConsoleMsgUtils.ShowWarning("Ignoring invalid max points value for /LC: " + value);
+                            ConsoleMsgUtils.ShowWarning("Ignoring invalid max points value for /LC: " + maxValidPoints);
                         }
                     }
                 }
@@ -617,7 +625,7 @@ namespace MSFileInfoScanner
                 Console.WriteLine();
 
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "Use /LC to create 2D LCMS plots (this process could take several minutes for each dataset). " +
+                                      "Use /LC or /2D to create 2D LCMS plots (this process could take several minutes for each dataset). " +
                                       "By default, plots the top " + clsLCMSDataPlotterOptions.DEFAULT_MAX_POINTS_TO_PLOT + " points." +
                                       "To plot the top 20000 points, use /LC:20000."));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
