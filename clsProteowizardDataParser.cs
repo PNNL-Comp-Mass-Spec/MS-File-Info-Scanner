@@ -101,7 +101,7 @@ namespace MSFileInfoScanner
             else
             {
                 // Find the nearest match
-                indexMatch = indexMatch ^ -1;
+                indexMatch ^= -1;
                 if (indexMatch == items.Count)
                 {
                     indexMatch -= 1;
