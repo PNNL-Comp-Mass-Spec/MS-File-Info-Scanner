@@ -373,9 +373,11 @@ namespace MSFileInfoScanner
                         scanStatsEntry.ScanTypeName = "HMSn";
                     }
 
-                    scanStatsEntry.ScanFilterText = "";
+                    scanStatsEntry.ScanFilterText = "IMS";
+                    scanStatsEntry.ExtendedScanInfo.ScanFilterText = scanStatsEntry.ScanFilterText;
 
                     scanStatsEntry.ElutionTime = elutionTime.ToString("0.0###");
+
                     if (tic > BAD_TIC_OR_BPI)
                     {
                         scanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(tic, 5);
