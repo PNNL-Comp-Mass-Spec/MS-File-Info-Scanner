@@ -1388,6 +1388,11 @@ namespace MSFileInfoScanner
             public double BPIMax;
             public double TICMedian;
             public double BPIMedian;
+
+            public override string ToString()
+            {
+                return "ScanCount: " + ScanCount;
+            }
         }
 
         public void Clear()
