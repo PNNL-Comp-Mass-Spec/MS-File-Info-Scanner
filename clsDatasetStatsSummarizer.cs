@@ -334,7 +334,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Creates an XML file summarizing the data stored in this class (in mDatasetScanStats, Me.DatasetFileInfo, and Me.SampleInfo)
+        /// Creates an XML file summarizing the data stored in this class (in mDatasetScanStats, this.DatasetFileInfo, and this.SampleInfo)
         /// </summary>
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="datasetInfoFilePath">File path to write the XML to</param>
@@ -396,7 +396,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Creates XML summarizing the data stored in this class (in mDatasetScanStats, Me.DatasetFileInfo, and Me.SampleInfo)
+        /// Creates XML summarizing the data stored in this class (in mDatasetScanStats, this.DatasetFileInfo, and this.SampleInfo)
         /// Auto-determines the dataset name using Me.DatasetFileInfo.DatasetName
         /// </summary>
         /// <returns>XML (as string)</returns>
@@ -407,7 +407,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Creates XML summarizing the data stored in this class (in mDatasetScanStats, Me.DatasetFileInfo, and Me.SampleInfo)
+        /// Creates XML summarizing the data stored in this class (in mDatasetScanStats, this.DatasetFileInfo, and this.SampleInfo)
         /// </summary>
         /// <param name="datasetName">Dataset Name</param>
         /// <returns>XML (as string)</returns>
@@ -822,7 +822,7 @@ namespace MSFileInfoScanner
 
                         dataValues.Clear();
 
-                        // Dataset number (aka Dataset ID)
+                        // Dataset ID
                         dataValues.Add(datasetID.ToString());
 
                         // Scan number
@@ -1234,6 +1234,9 @@ namespace MSFileInfoScanner
             }
         }
 
+        /// <summary>
+        /// Scan number
+        /// </summary>
         public int ScanNumber;
 
         /// <summary>
@@ -1246,7 +1249,11 @@ namespace MSFileInfoScanner
         /// Scan filter text
         /// </summary>
         /// <remarks>
-        /// Example values: "FTMS + p NSI Full ms [400.00-2000.00]" or "ITMS + c ESI Full ms [300.00-2000.00]" or "ITMS + p ESI d Z ms [1108.00-1118.00]" or "ITMS + c ESI d Full ms2 342.90@cid35.00"
+        /// Examples:
+        ///   FTMS + p NSI Full ms [400.00-2000.00]
+        ///   ITMS + c ESI Full ms [300.00-2000.00]
+        ///   ITMS + p ESI d Z ms [1108.00-1118.00]
+        ///   ITMS + c ESI d Full ms2 342.90@cid35.00
         /// </remarks>
         public string ScanFilterText;
 
@@ -1254,7 +1261,8 @@ namespace MSFileInfoScanner
         /// Scan type name
         /// </summary>
         /// <remarks>
-        /// Example values: MS, HMS, Zoom, CID-MSn, or PQD-MSn
+        /// Examples:
+        ///   MS, HMS, Zoom, CID-MSn, or PQD-MSn
         /// </remarks>
         public string ScanTypeName;
 
@@ -1356,12 +1364,21 @@ namespace MSFileInfoScanner
     {
 
         public double ElutionTimeMax;
+
         public udtSummaryStatDetailsType MSStats;
 
         public udtSummaryStatDetailsType MSnStats;
 
-        // The following collection keeps track of each ScanType in the dataset, along with the number of scans of this type
-        // Example scan types:  FTMS + p NSI Full ms" or "ITMS + c ESI Full ms" or "ITMS + p ESI d Z ms" or "ITMS + c ESI d Full ms2 @cid35.00"
+        /// <summary>
+        /// Keeps track of each ScanType in the dataset, along with the number of scans of this type
+        /// </summary>
+        /// <remarks>
+        /// Examples
+        ///   FTMS + p NSI Full ms
+        ///   ITMS + c ESI Full ms
+        ///   ITMS + p ESI d Z ms
+        ///   ITMS + c ESI d Full ms2 @cid35.00
+        /// </remarks>
         public readonly Dictionary<string, int> ScanTypeStats;
 
         public struct udtSummaryStatDetailsType
