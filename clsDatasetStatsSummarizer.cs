@@ -298,7 +298,7 @@ namespace MSFileInfoScanner
             ICollection<double> bpiList)
         {
 
-            if (!string.IsNullOrEmpty(scanStats.ElutionTime))
+            if (!string.IsNullOrWhiteSpace(scanStats.ElutionTime))
             {
                 if (double.TryParse(scanStats.ElutionTime, out var elutionTime))
                 {
