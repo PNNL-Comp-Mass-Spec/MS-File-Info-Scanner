@@ -110,6 +110,11 @@
     <Compile Include="clsPythonPlotContainer3D.cs" />
     <Compile Include="clsPythonPlotContainer.cs" />
     <Compile Include="clsPythonPlotContainer2D.cs" />
+    <Compile Include="DatasetStats\DatasetSummaryStats.cs" />
+    <Compile Include="DatasetStats\ExtendedStatsInfo.cs" />
+    <Compile Include="DatasetStats\InstrumentFileInfo.cs" />
+    <Compile Include="DatasetStats\ScanStatsEntry.cs" />
+    <Compile Include="DatasetStats\SummaryStatDetails.cs" />
     <Compile Include="GenericFileInfoScanner.cs" />
     <Compile Include="DatasetStats\clsDatasetFileInfo.cs" />
     <Compile Include="DatasetStats\clsDatasetStatsSummarizer.cs" />

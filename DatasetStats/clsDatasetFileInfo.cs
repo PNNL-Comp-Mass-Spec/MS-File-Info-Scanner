@@ -8,23 +8,6 @@ namespace MSFileInfoScanner.DatasetStats
 {
     public class clsDatasetFileInfo
     {
-        public struct InstrumentFileInfo
-        {
-            /// <summary>
-            /// File size, in bytes
-            /// </summary>
-            public long Length;
-
-            /// <summary>
-            /// File hash (empty string if undefined)
-            /// </summary>
-            public string Hash;
-
-            /// <summary>
-            /// File hash type
-            /// </summary>
-            public HashUtilities.HashTypeConstants HashType;
-        }
 
         /// <summary>
         /// File creation time (local time)
@@ -75,7 +58,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Tracks the file size and hash value for each primary instrument file
         /// </summary>
-        public Dictionary<string, InstrumentFileInfo> InstrumentFiles { get; } = new Dictionary<string, InstrumentFileInfo>();
+        public Dictionary<string, InstrumentFileInfo> InstrumentFiles { get; }
 
         /// <summary>
         /// Quality score
@@ -88,6 +71,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public clsDatasetFileInfo()
         {
+            InstrumentFiles = new Dictionary<string, InstrumentFileInfo>();
             Clear();
         }
 

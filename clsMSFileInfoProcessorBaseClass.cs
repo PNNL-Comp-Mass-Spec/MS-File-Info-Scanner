@@ -850,7 +850,7 @@ namespace MSFileInfoScanner
                     writer.WriteLine("      <td>&nbsp;</td>");
                     writer.WriteLine("      <td align=\"center\">DMS <a href=\"http://dms2.pnl.gov/dataset/show/" + datasetName + "\">Dataset Detail Report</a></td>");
 
-                    var datasetInfoFileName = datasetName + clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
+                    var datasetInfoFileName = datasetName + DatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
                     if (mCreateDatasetInfoFile || File.Exists(Path.Combine(outputDirectoryPath, datasetInfoFileName)))
                     {
                         writer.WriteLine("      <td align=\"center\"><a href=\"" + datasetInfoFileName + "\">Dataset Info XML file</a></td>");
@@ -892,7 +892,7 @@ namespace MSFileInfoScanner
             return string.Format("<a href=\"{0}\"><img src=\"{0}\" width=\"{1}\" border=\"0\"></a>", filename, widthPixels);
         }
 
-        private void GenerateQCScanTypeSummaryHTML(TextWriter writer, clsDatasetSummaryStats datasetSummaryStats, string indent)
+        private void GenerateQCScanTypeSummaryHTML(TextWriter writer, DatasetSummaryStats datasetSummaryStats, string indent)
         {
             if (indent == null)
                 indent = string.Empty;

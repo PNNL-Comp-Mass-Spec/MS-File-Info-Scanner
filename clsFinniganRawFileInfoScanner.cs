@@ -212,7 +212,7 @@ namespace MSFileInfoScanner
                         };
 
                         // Store the ScanEvent values in .ExtendedScanInfo
-                        StoreExtendedScanInfo(ref scanStatsEntry.ExtendedScanInfo, scanInfo.ScanEvents);
+                        StoreExtendedScanInfo(scanStatsEntry.ExtendedScanInfo, scanInfo.ScanEvents);
 
                         // Store the collision mode and the scan filter text
                         scanStatsEntry.ExtendedScanInfo.CollisionMode = scanInfo.CollisionMode;
@@ -529,9 +529,8 @@ namespace MSFileInfoScanner
             StoreExtendedScanInfo(ref udtExtendedScanInfo, scanEvents);
 
         }
-
         private void StoreExtendedScanInfo(
-            ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo,
+            ExtendedStatsInfo extendedScanInfo,
             IReadOnlyCollection<KeyValuePair<string, string>> scanEvents)
         {
             var cTrimChars = new[] {
@@ -560,49 +559,49 @@ namespace MSFileInfoScanner
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_ION_INJECTION_TIME,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.IonInjectionTime = scanEvent.Value;
+                        extendedScanInfo.IonInjectionTime = scanEvent.Value;
                         break;
                     }
 
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_SCAN_SEGMENT,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.ScanSegment = scanEvent.Value;
+                        extendedScanInfo.ScanSegment = scanEvent.Value;
                         break;
                     }
 
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_SCAN_EVENT,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.ScanEvent = scanEvent.Value;
+                        extendedScanInfo.ScanEvent = scanEvent.Value;
                         break;
                     }
 
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_CHARGE_STATE,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.ChargeState = scanEvent.Value;
+                        extendedScanInfo.ChargeState = scanEvent.Value;
                         break;
                     }
 
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_MONOISOTOPIC_MZ,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.MonoisotopicMZ = scanEvent.Value;
+                        extendedScanInfo.MonoisotopicMZ = scanEvent.Value;
                         break;
                     }
 
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_COLLISION_MODE,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.CollisionMode = scanEvent.Value;
+                        extendedScanInfo.CollisionMode = scanEvent.Value;
                         break;
                     }
 
                     if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_SCAN_FILTER_TEXT,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
-                        udtExtendedScanInfo.ScanFilterText = scanEvent.Value;
+                        extendedScanInfo.ScanFilterText = scanEvent.Value;
                         break;
                     }
                 }
