@@ -28,9 +28,10 @@ namespace MSFileInfoScanner
 
         private class clsLineMatchSearchInfo
         {
-            public readonly bool MatchLineStart;
+            public bool MatchLineStart { get; }
 
-            public bool Matched;
+            public bool Matched { get; set; }
+
             public clsLineMatchSearchInfo(bool bMatchLineStart)
             {
                 MatchLineStart = bMatchLineStart;
