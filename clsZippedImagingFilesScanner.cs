@@ -25,7 +25,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if at least one valid file is found; otherwise false</returns>
         /// <remarks></remarks>
-        private void DetermineAcqStartEndTime(FileInfo zipFile, clsDatasetFileInfo datasetFileInfo)
+        private void DetermineAcqStartEndTime(FileInfo zipFile, DatasetFileInfo datasetFileInfo)
         {
 
             var success = false;
@@ -82,7 +82,7 @@ namespace MSFileInfoScanner
                             datasetFileInfo.ScanCount += 1;
 
                             // Add a Scan Stats entry
-                            var scanStatsEntry = new clsScanStatsEntry
+                            var scanStatsEntry = new ScanStatsEntry
                             {
                                 ScanNumber = datasetFileInfo.ScanCount,
                                 ScanType = 1,
@@ -184,7 +184,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
         /// <remarks></remarks>
-        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
 
             ResetResults();

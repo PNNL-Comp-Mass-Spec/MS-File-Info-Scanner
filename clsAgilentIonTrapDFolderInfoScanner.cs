@@ -76,7 +76,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private void ParseRunLogFile(string directoryPath, clsDatasetFileInfo datasetFileInfo)
+        private void ParseRunLogFile(string directoryPath, DatasetFileInfo datasetFileInfo)
         {
             var mostRecentMethodLine = string.Empty;
 
@@ -157,7 +157,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private void ParseAnalysisCDFFile(string directoryPath, clsDatasetFileInfo datasetFileInfo)
+        private void ParseAnalysisCDFFile(string directoryPath, DatasetFileInfo datasetFileInfo)
         {
             NetCDFReader.clsMSNetCdf netCDFReader = null;
 
@@ -207,7 +207,7 @@ namespace MSFileInfoScanner
         /// <param name="dataFilePath">Dataset directory ptah</param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
-        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
             var success = false;
 

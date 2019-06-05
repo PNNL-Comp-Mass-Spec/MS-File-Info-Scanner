@@ -1681,7 +1681,7 @@ namespace MSFileInfoScanner
             out List<udtFileStatsType> udtFileStats,
             List<string> filesToIgnore)
         {
-            var datasetFileInfo = new clsDatasetFileInfo();
+            var datasetFileInfo = new DatasetFileInfo();
 
             var useIgnoreList = false;
 

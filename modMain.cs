@@ -22,7 +22,7 @@ namespace MSFileInfoScanner
     static class modMain
     {
 
-        public const string PROGRAM_DATE = "June 4, 2019";
+        public const string PROGRAM_DATE = "June 5, 2019";
 
         // This path can contain wildcard characters, e.g. C:\*.raw
         private static string mInputDataFilePath;
@@ -664,7 +664,7 @@ namespace MSFileInfoScanner
                                       "Use /DST to update (or create) a tab-delimited text file with overview stats for the dataset. " +
                                       "If /DI is used, will include detailed scan counts; otherwise, will just have the dataset name, " +
                                       "acquisition date, and (if available) sample name and comment. " +
-                                      "By default, the file is named " + clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME + "; " +
+                                      "By default, the file is named " + DatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME + "; " +
                                       "to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt"));
                 Console.WriteLine();
 

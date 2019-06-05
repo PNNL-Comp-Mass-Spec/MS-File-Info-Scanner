@@ -105,7 +105,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ParseBrukerAcquFile(string directoryPath, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseBrukerAcquFile(string directoryPath, DatasetFileInfo datasetFileInfo)
         {
             bool success;
 
@@ -148,7 +148,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ParseBrukerLockFile(string directoryPath, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseBrukerLockFile(string directoryPath, DatasetFileInfo datasetFileInfo)
         {
             bool success;
 
@@ -193,7 +193,7 @@ namespace MSFileInfoScanner
         /// <param name="zippedSFilesDirectoryInfo"></param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success and also if no matching Zip files were found; returns False if error</returns>
-        private bool ParseBrukerZippedSFolders(DirectoryInfo zippedSFilesDirectoryInfo, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseBrukerZippedSFolders(DirectoryInfo zippedSFilesDirectoryInfo, DatasetFileInfo datasetFileInfo)
         {
 
             bool success;
@@ -239,7 +239,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ParseICRDirectory(DirectoryInfo icrDirectory, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseICRDirectory(DirectoryInfo icrDirectory, DatasetFileInfo datasetFileInfo)
         {
             // Look for and open the .Pek file in icrDirectory
             // Count the number of PEK_FILE_FILENAME_LINE lines
@@ -290,7 +290,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ParseTICDirectory(DirectoryInfo ticDirectoryInfo, clsDatasetFileInfo datasetFileInfo, out DateTime ticModificationDate)
+        private bool ParseTICDirectory(DirectoryInfo ticDirectoryInfo, DatasetFileInfo datasetFileInfo, out DateTime ticModificationDate)
         {
             // Look for and open the .Tic file in ticDirectoryInfo and look for the line listing the number of files
             // As a second validation, count the number of lines between TIC_FILE_TIC_FILE_LIST_START and TIC_FILE_TIC_FILE_LIST_END
@@ -383,7 +383,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
         /// <remarks>If a Bruker 1 directory, it must contain file acqu and typically contains file LOCK</remarks>
-        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
 
             ResetResults();

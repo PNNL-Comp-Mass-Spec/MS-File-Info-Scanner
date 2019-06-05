@@ -451,7 +451,7 @@ namespace MSFileInfoScanner
                             var newRow = mMSFileInfoDataset.Tables[MS_FILE_INFO_DATA_TABLE].NewRow();
 
                             var datasetId = Convert.ToInt32(splitLine[(int)eMSFileInfoResultsFileColumns.DatasetID]);
-                            var datasetFileInfo = new clsDatasetFileInfo(datasetId, datasetName)
+                            var datasetFileInfo = new DatasetFileInfo(datasetId, datasetName)
                             {
                                 FileExtension = string.Copy(splitLine[(int)eMSFileInfoResultsFileColumns.FileExtension]),
                                 AcqTimeStart = ParseDate(splitLine[(int)eMSFileInfoResultsFileColumns.AcqTimeStart]),
@@ -492,12 +492,12 @@ namespace MSFileInfoScanner
             return DateTime.MinValue;
         }
 
-        private void PopulateMSInfoDataRow(clsDatasetFileInfo datasetFileInfo, DataRow currentRow)
+        private void PopulateMSInfoDataRow(DatasetFileInfo datasetFileInfo, DataRow currentRow)
         {
             PopulateMSInfoDataRow(datasetFileInfo, currentRow, DateTime.Now);
         }
 
-        private void PopulateMSInfoDataRow(clsDatasetFileInfo datasetFileInfo, DataRow currentRow, DateTime infoLastModified)
+        private void PopulateMSInfoDataRow(DatasetFileInfo datasetFileInfo, DataRow currentRow, DateTime infoLastModified)
         {
             // ToDo: Update datasetFileInfo to include some overall quality scores
 
@@ -663,7 +663,7 @@ namespace MSFileInfoScanner
 
         }
 
-        public bool UpdateCachedMSFileInfo(clsDatasetFileInfo datasetFileInfo)
+        public bool UpdateCachedMSFileInfo(DatasetFileInfo datasetFileInfo)
         {
             // Update the entry for this dataset in mMSFileInfoDataset.Tables(MS_FILE_INFO_DATA_TABLE)
 

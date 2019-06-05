@@ -6,7 +6,7 @@ using PRISM;
 
 namespace MSFileInfoScanner.DatasetStats
 {
-    public class clsDatasetFileInfo
+    public class DatasetFileInfo
     {
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsDatasetFileInfo()
+        public DatasetFileInfo()
         {
             InstrumentFiles = new Dictionary<string, InstrumentFileInfo>();
             Clear();
@@ -80,7 +80,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         /// <param name="datasetId"></param>
         /// <param name="datasetName"></param>
-        public clsDatasetFileInfo(int datasetId, string datasetName)
+        public DatasetFileInfo(int datasetId, string datasetName)
         {
             Clear();
             DatasetID = datasetId;

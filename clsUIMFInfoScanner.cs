@@ -26,7 +26,7 @@ namespace MSFileInfoScanner
         /// <param name="masterFrameNumList"></param>
         private void ComputeQualityScores(
             DataReader uimfReader,
-            clsDatasetFileInfo datasetFileInfo,
+            DatasetFileInfo datasetFileInfo,
             IReadOnlyDictionary<int, UIMFData.FrameType> dctMasterFrameList,
             IReadOnlyList<int> masterFrameNumList)
         {
@@ -359,7 +359,7 @@ namespace MSFileInfoScanner
                         mInstrumentSpecificPlots.AddDataTICOnly(frameNumber, msLevel, (float)elutionTime, pressure);
                     }
 
-                    var scanStatsEntry = new clsScanStatsEntry
+                    var scanStatsEntry = new ScanStatsEntry
                     {
                         ScanNumber = frameNumber,
                         ScanType = msLevel
@@ -520,7 +520,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
         /// <remarks></remarks>
-        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
 
             ResetResults();

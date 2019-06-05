@@ -40,7 +40,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error or if the file has no scans</returns>
         /// <remarks></remarks>
-        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
             ResetResults();
 

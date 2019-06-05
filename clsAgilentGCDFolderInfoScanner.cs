@@ -81,7 +81,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ParseAcqMethodFile(string directoryPath, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseAcqMethodFile(string directoryPath, DatasetFileInfo datasetFileInfo)
         {
             double totalRuntime = 0;
 
@@ -173,7 +173,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ParseGCIniFile(string directoryPath, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseGCIniFile(string directoryPath, DatasetFileInfo datasetFileInfo)
         {
             double totalRuntime = 0;
 
@@ -233,7 +233,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ProcessChemstationMSDataFile(string datafilePath, clsDatasetFileInfo datasetFileInfo)
+        private bool ProcessChemstationMSDataFile(string datafilePath, DatasetFileInfo datasetFileInfo)
         {
             bool success;
             var currentIndex = 0;
@@ -273,7 +273,7 @@ namespace MSFileInfoScanner
 
                         if (validSpectrum)
                         {
-                            var scanStatsEntry = new clsScanStatsEntry
+                            var scanStatsEntry = new ScanStatsEntry
                             {
                                 ScanNumber = spectrumIndex + 1,
                                 ScanType = msLevel,
@@ -345,7 +345,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
         /// <remarks></remarks>
-        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
 
             var success = false;

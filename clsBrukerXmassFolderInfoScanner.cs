@@ -74,7 +74,7 @@ namespace MSFileInfoScanner
                 mTICAndBPIPlot.AddData(scanNumber, msLevel, elutionTime, bpi, tic);
             }
 
-            var scanStatsEntry = new clsScanStatsEntry
+            var scanStatsEntry = new ScanStatsEntry
             {
                 ScanNumber = scanNumber,
                 ScanType = msLevel,
@@ -107,7 +107,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if a valid file is found; otherwise false</returns>
         /// <remarks></remarks>
-        private void DetermineAcqStartTime(DirectoryInfo datasetDirectory, clsDatasetFileInfo datasetFileInfo)
+        private void DetermineAcqStartTime(DirectoryInfo datasetDirectory, DatasetFileInfo datasetFileInfo)
         {
 
             var success = false;
@@ -370,7 +370,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <param name="bafFileChecked">Output: true if the file exists and we tried to open it (will still be true if the file is corrupt)</param>
         /// <returns>True if success, false if an error</returns>
-        private bool ParseBAFFile(FileInfo bafFileInfo, clsDatasetFileInfo datasetFileInfo, out bool bafFileChecked)
+        private bool ParseBAFFile(FileInfo bafFileInfo, DatasetFileInfo datasetFileInfo, out bool bafFileChecked)
         {
 
             // Override dataFilePath here, if needed
@@ -491,7 +491,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private bool ParseMcfIndexFiles(DirectoryInfo datasetDirectory, clsDatasetFileInfo datasetFileInfo)
+        private bool ParseMcfIndexFiles(DirectoryInfo datasetDirectory, DatasetFileInfo datasetFileInfo)
         {
 
             try
@@ -673,7 +673,7 @@ namespace MSFileInfoScanner
 
         private bool ParseScanXMLFile(
             FileSystemInfo datasetDirectory,
-            clsDatasetFileInfo datasetFileInfo,
+            DatasetFileInfo datasetFileInfo,
             out Dictionary<int, float> scanElutionTimeMap,
             out int duplicateScanCount)
         {
@@ -887,7 +887,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
         /// <remarks></remarks>
-        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
             ResetResults();
 
@@ -1102,7 +1102,7 @@ namespace MSFileInfoScanner
         private bool ParseSerOrFidFile(
             DirectoryInfo dotDFolder,
             IReadOnlyDictionary<int, float> scanElutionTimeMap,
-            clsDatasetFileInfo datasetFileInfo,
+            DatasetFileInfo datasetFileInfo,
             int duplicateScanCount)
         {
 

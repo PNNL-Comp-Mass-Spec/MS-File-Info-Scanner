@@ -24,7 +24,7 @@ namespace MSFileInfoScanner
             DisableInstrumentHash = 9
         }
 
-        public abstract bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo);
+        public abstract bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo);
         public abstract bool CreateOutputFiles(string inputFileName, string outputDirectoryPath);
         public abstract string GetDatasetInfoXML();
         public abstract string GetDatasetNameViaPath(string dataFilePath);

@@ -103,7 +103,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private void LoadData(FileInfo isosFile, clsDatasetFileInfo datasetFileInfo)
+        private void LoadData(FileInfo isosFile, DatasetFileInfo datasetFileInfo)
         {
             // Cache the data in the _isos.csv and _scans.csv files
 
@@ -432,7 +432,7 @@ namespace MSFileInfoScanner
                             scanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(udtScanData.FilterText);
                         }
 
-                        var scanStatsEntry = new clsScanStatsEntry
+                        var scanStatsEntry = new ScanStatsEntry
                         {
                             ScanNumber = udtScanData.Scan,
                             ScanType = udtScanData.MSLevel,
@@ -471,10 +471,10 @@ namespace MSFileInfoScanner
         {
             foreach (var columnName in dctColumnInfo.Keys.ToList())
             {
-                var intcolIndex = dataColumns.IndexOf(columnName);
-                if (intcolIndex >= 0)
+                var colIndex = dataColumns.IndexOf(columnName);
+                if (colIndex >= 0)
                 {
-                    dctColumnInfo[columnName] = intcolIndex;
+                    dctColumnInfo[columnName] = colIndex;
                 }
                 else
                 {
@@ -490,7 +490,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
         /// <remarks>Will also read the _scans.csv file if present (to determine ElutionTime and MSLevel</remarks>
-        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
 
             ResetResults();

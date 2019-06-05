@@ -58,7 +58,7 @@ namespace MSFileInfoScanner
             CreateDatasetInfoFile = false;
 
             UpdateDatasetStatsTextFile = false;
-            mDatasetStatsTextFileName = clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME;
+            mDatasetStatsTextFileName = DatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME;
 
             SaveTICAndBPIPlots = false;
             SaveLCMS2DPlots = false;
@@ -1259,7 +1259,7 @@ namespace MSFileInfoScanner
         private bool ProcessMSDataset(string inputFileOrDirectoryPath, iMSFileInfoProcessor scanner, string datasetName, string outputDirectoryPath)
         {
 
-            var datasetFileInfo = new clsDatasetFileInfo();
+            var datasetFileInfo = new DatasetFileInfo();
             if (!string.IsNullOrWhiteSpace(datasetName))
                 datasetFileInfo.DatasetName = datasetName;
 

@@ -58,7 +58,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
         /// <remarks></remarks>
-        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
             ResetResults();
 
@@ -103,7 +103,7 @@ namespace MSFileInfoScanner
             }
         }
 
-        private void ProcessRawDirectory(DirectoryInfo datasetDirectory, clsDatasetFileInfo datasetFileInfo, out List<FileInfo> primaryDataFiles)
+        private void ProcessRawDirectory(DirectoryInfo datasetDirectory, DatasetFileInfo datasetFileInfo, out List<FileInfo> primaryDataFiles)
         {
 
             primaryDataFiles = new List<FileInfo>();
@@ -165,7 +165,7 @@ namespace MSFileInfoScanner
         /// <param name="headerInfo"></param>
         private void ReadMassLynxAcquisitionInfo(
             FileSystemInfo datasetDirectory,
-            clsDatasetFileInfo datasetFileInfo,
+            DatasetFileInfo datasetFileInfo,
             clsMassLynxNativeIO nativeFileIO,
             MSHeaderInfo headerInfo)
         {

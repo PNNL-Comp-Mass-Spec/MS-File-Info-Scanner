@@ -1,7 +1,7 @@
 ﻿
 namespace MSFileInfoScanner.DatasetStats
 {
-    public class clsSampleInfo
+    public class SampleInfo
     {
         public string SampleName { get; set; }
 
@@ -12,7 +12,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsSampleInfo()
+        public SampleInfo()
         {
             Clear();
         }

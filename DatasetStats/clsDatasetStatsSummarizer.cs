@@ -25,7 +25,7 @@ using SpectraTypeClassifier;
 namespace MSFileInfoScanner.DatasetStats
 {
 
-    public class clsDatasetStatsSummarizer : EventNotifier
+    public class DatasetStatsSummarizer : EventNotifier
     {
 
         #region "Constants and Enums"
@@ -63,7 +63,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Dataset file info
         /// </summary>
-        public clsDatasetFileInfo DatasetFileInfo { get; }
+        public DatasetFileInfo DatasetFileInfo { get; }
 
         /// <summary>
         /// Error message
@@ -78,14 +78,14 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Sample info
         /// </summary>
-        public clsSampleInfo SampleInfo { get; }
+        public SampleInfo SampleInfo { get; }
 
         #endregion
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsDatasetStatsSummarizer()
+        public DatasetStatsSummarizer()
         {
             FileDate = "June 4, 2019";
 
@@ -101,8 +101,8 @@ namespace MSFileInfoScanner.DatasetStats
 
             mDatasetSummaryStatsUpToDate = false;
 
-            DatasetFileInfo = new clsDatasetFileInfo();
-            SampleInfo = new clsSampleInfo();
+            DatasetFileInfo = new DatasetFileInfo();
+            SampleInfo = new SampleInfo();
 
             ClearCachedData();
         }
@@ -361,9 +361,9 @@ namespace MSFileInfoScanner.DatasetStats
         public bool CreateDatasetInfoFile(
             string datasetName,
             string datasetInfoFilePath,
-            clsDatasetFileInfo datasetInfo,
-            clsSampleInfo sampleInfo)
             List<ScanStatsEntry> scanStats,
+            DatasetFileInfo datasetInfo,
+            SampleInfo sampleInfo)
         {
 
             bool success;
@@ -432,7 +432,7 @@ namespace MSFileInfoScanner.DatasetStats
         // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(List<ScanStatsEntry> scanStats, DatasetFileInfo datasetInfo)
         {
-            return CreateDatasetInfoXML(datasetInfo.DatasetName, scanStats, datasetInfo, new clsSampleInfo());
+            return CreateDatasetInfoXML(datasetInfo.DatasetName, scanStats, datasetInfo, new SampleInfo());
         }
 
         /// <summary>
@@ -462,7 +462,7 @@ namespace MSFileInfoScanner.DatasetStats
         public string CreateDatasetInfoXML(string datasetName, ref List<ScanStatsEntry> scanStats, DatasetFileInfo datasetInfo)
         {
 
-            return CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, new clsSampleInfo());
+            return CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, new SampleInfo());
         }
 
         /// <summary>
@@ -735,8 +735,8 @@ namespace MSFileInfoScanner.DatasetStats
         /// <remarks></remarks>
         public bool CreateScanStatsFile(
             string scanStatsFilePath,
-            clsDatasetFileInfo datasetInfo)
             List<ScanStatsEntry> scanStats,
+            DatasetFileInfo datasetInfo)
         {
             var datasetID = datasetInfo.DatasetID;
 
@@ -988,9 +988,9 @@ namespace MSFileInfoScanner.DatasetStats
         public bool UpdateDatasetStatsTextFile(
             string datasetName,
             string datasetStatsFilePath,
-            clsDatasetFileInfo datasetInfo,
-            clsSampleInfo sampleInfo)
             List<ScanStatsEntry> scanStats,
+            DatasetFileInfo datasetInfo,
+            SampleInfo sampleInfo)
         {
 
             var writeHeaders = false;

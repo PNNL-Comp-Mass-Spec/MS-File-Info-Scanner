@@ -28,7 +28,7 @@ namespace MSFileInfoScanner
             mInstrumentSpecificPlots = new clsTICandBPIPlotter("InstrumentSpecificPlots", true);
             RegisterEvents(mInstrumentSpecificPlots);
 
-            mDatasetStatsSummarizer = new clsDatasetStatsSummarizer();
+            mDatasetStatsSummarizer = new DatasetStatsSummarizer();
             RegisterEvents(mDatasetStatsSummarizer);
 
             mLCMS2DPlot = new clsLCMSDataPlotter();
@@ -99,7 +99,7 @@ namespace MSFileInfoScanner
 
         private readonly clsLCMSDataPlotter mLCMS2DPlotOverview;
 
-        protected readonly clsDatasetStatsSummarizer mDatasetStatsSummarizer;
+        protected readonly DatasetStatsSummarizer mDatasetStatsSummarizer;
 
         #endregion
 
@@ -330,7 +330,7 @@ namespace MSFileInfoScanner
             {
                 var datasetName = GetDatasetNameViaPath(inputFileName);
                 var datasetInfoFilePath = Path.Combine(outputDirectoryPath, datasetName);
-                datasetInfoFilePath += clsDatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
+                datasetInfoFilePath += DatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
 
                 if (mDatasetStatsSummarizer.DatasetFileInfo.DatasetID == 0 && mDatasetID > 0)
                 {
@@ -478,7 +478,7 @@ namespace MSFileInfoScanner
             mCreateScanStatsFile = false;
 
             mUpdateDatasetStatsTextFile = false;
-            mDatasetStatsTextFileName = clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME;
+            mDatasetStatsTextFileName = DatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME;
 
             mScanStart = 0;
             mScanEnd = 0;
@@ -903,12 +903,12 @@ namespace MSFileInfoScanner
             foreach (var scanTypeEntry in datasetSummaryStats.ScanTypeStats)
             {
                 var scanType = scanTypeEntry.Key;
-                var indexMatch = scanType.IndexOf(clsDatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR, StringComparison.Ordinal);
+                var indexMatch = scanType.IndexOf(DatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR, StringComparison.Ordinal);
 
                 string scanFilterText;
                 if (indexMatch >= 0)
                 {
-                    scanFilterText = scanType.Substring(indexMatch + clsDatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR.Length);
+                    scanFilterText = scanType.Substring(indexMatch + DatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR.Length);
                     if (indexMatch > 0)
                     {
                         scanType = scanType.Substring(0, indexMatch);
@@ -957,7 +957,7 @@ namespace MSFileInfoScanner
         [HandleProcessCorruptedStateExceptions]
         protected void LoadScanDataWithProteoWizard(
             FileSystemInfo datasetFileOrDirectory,
-            clsDatasetFileInfo datasetFileInfo,
+            DatasetFileInfo datasetFileInfo,
             bool highResMS1 = true,
             bool highResMS2 = true)
         {
@@ -1227,7 +1227,7 @@ namespace MSFileInfoScanner
 
         }
 
-        protected void UpdateDatasetStatsSummarizerUsingDatasetFileInfo(clsDatasetFileInfo datasetFileInfo, bool copyFileSystemTimes = true)
+        protected void UpdateDatasetStatsSummarizerUsingDatasetFileInfo(DatasetFileInfo datasetFileInfo, bool copyFileSystemTimes = true)
         {
             if (copyFileSystemTimes)
             {
@@ -1255,7 +1255,7 @@ namespace MSFileInfoScanner
         // ReSharper disable once UnusedMember.Global
         public bool UpdateDatasetStatsTextFile(string inputFileName, string outputDirectoryPath)
         {
-            return UpdateDatasetStatsTextFile(inputFileName, outputDirectoryPath, clsDatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME);
+            return UpdateDatasetStatsTextFile(inputFileName, outputDirectoryPath, DatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME);
         }
 
         /// <summary>

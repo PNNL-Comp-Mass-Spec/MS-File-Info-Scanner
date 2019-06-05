@@ -14,7 +14,7 @@ namespace MSFileInfoScanner
 
         private readonly MSDataFileReader mPWiz;
 
-        private readonly clsDatasetStatsSummarizer mDatasetStatsSummarizer;
+        private readonly DatasetStatsSummarizer mDatasetStatsSummarizer;
         private readonly clsTICandBPIPlotter mTICAndBPIPlot;
 
         private readonly clsLCMSDataPlotter mLCMS2DPlot;
@@ -44,7 +44,7 @@ namespace MSFileInfoScanner
         /// <param name="checkCentroidingStatus"></param>
         public clsProteoWizardDataParser(
             MSDataFileReader pWiz,
-            clsDatasetStatsSummarizer datasetStatsSummarizer,
+            DatasetStatsSummarizer datasetStatsSummarizer,
             clsTICandBPIPlotter ticAndBPIPlot,
             clsLCMSDataPlotter lcms2DPlot,
             bool saveLCMS2DPlots,
@@ -140,7 +140,7 @@ namespace MSFileInfoScanner
             return indexMatch;
         }
 
-        public void PossiblyUpdateAcqTimeStart(clsDatasetFileInfo datasetFileInfo, double runtimeMinutes)
+        public void PossiblyUpdateAcqTimeStart(DatasetFileInfo datasetFileInfo, double runtimeMinutes)
         {
             if (runtimeMinutes > 0)
             {
@@ -181,7 +181,7 @@ namespace MSFileInfoScanner
                     runtimeMinutes = scanTimes[index];
                 }
 
-                var scanStatsEntry = new clsScanStatsEntry
+                var scanStatsEntry = new ScanStatsEntry
                 {
                     ScanNumber = scanNumber,
                     ScanType = 1,
@@ -300,7 +300,7 @@ namespace MSFileInfoScanner
         }
 
         [HandleProcessCorruptedStateExceptions]
-        public void StoreChromatogramInfo(clsDatasetFileInfo datasetFileInfo, out bool ticStored, out bool srmDataCached, out double runtimeMinutes)
+        public void StoreChromatogramInfo(DatasetFileInfo datasetFileInfo, out bool ticStored, out bool srmDataCached, out double runtimeMinutes)
         {
             var ticScanTimes = new List<float>();
             var ticScanNumbers = new List<int>();
@@ -451,7 +451,7 @@ namespace MSFileInfoScanner
                         // Obtain the raw mass spectrum
                         var msDataSpectrum = mPWiz.GetSpectrum(scanIndex);
 
-                        var scanStatsEntry = new clsScanStatsEntry
+                        var scanStatsEntry = new ScanStatsEntry
                         {
                             ScanNumber = scanIndex + 1,
                             ScanType = msDataSpectrum.Level

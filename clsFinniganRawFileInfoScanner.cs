@@ -39,7 +39,7 @@ namespace MSFileInfoScanner
         /// <param name="xcaliburAccessor"></param>
         /// <param name="datasetFileInfo"></param>
         /// <remarks></remarks>
-        private void ComputeQualityScores(XRawFileIO xcaliburAccessor, clsDatasetFileInfo datasetFileInfo)
+        private void ComputeQualityScores(XRawFileIO xcaliburAccessor, DatasetFileInfo datasetFileInfo)
         {
             float overallScore;
 
@@ -194,7 +194,7 @@ namespace MSFileInfoScanner
                                 scanInfo.TotalIonCurrent);
                         }
 
-                        var scanStatsEntry = new clsScanStatsEntry
+                        var scanStatsEntry = new ScanStatsEntry
                         {
                             ScanNumber = scanNumber,
                             ScanType = scanInfo.MSLevel,
@@ -294,7 +294,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error or if the file has no scans</returns>
         /// <remarks></remarks>
-        public override bool ProcessDataFile(string dataFilePath, clsDatasetFileInfo datasetFileInfo)
+        public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
             ResetResults();
 
@@ -556,49 +556,49 @@ namespace MSFileInfoScanner
                     // We're only storing certain scan events
                     var entryNameLCase = scanEvent.Key.ToLower().TrimEnd(cTrimChars);
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_ION_INJECTION_TIME,
+                    if (string.Equals(entryNameLCase, ScanStatsEntry.SCAN_STATS_COL_ION_INJECTION_TIME,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         extendedScanInfo.IonInjectionTime = scanEvent.Value;
                         break;
                     }
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_SCAN_SEGMENT,
+                    if (string.Equals(entryNameLCase, ScanStatsEntry.SCAN_STATS_COL_SCAN_SEGMENT,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         extendedScanInfo.ScanSegment = scanEvent.Value;
                         break;
                     }
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_SCAN_EVENT,
+                    if (string.Equals(entryNameLCase, ScanStatsEntry.SCAN_STATS_COL_SCAN_EVENT,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         extendedScanInfo.ScanEvent = scanEvent.Value;
                         break;
                     }
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_CHARGE_STATE,
+                    if (string.Equals(entryNameLCase, ScanStatsEntry.SCAN_STATS_COL_CHARGE_STATE,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         extendedScanInfo.ChargeState = scanEvent.Value;
                         break;
                     }
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_MONOISOTOPIC_MZ,
+                    if (string.Equals(entryNameLCase, ScanStatsEntry.SCAN_STATS_COL_MONOISOTOPIC_MZ,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         extendedScanInfo.MonoisotopicMZ = scanEvent.Value;
                         break;
                     }
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_COLLISION_MODE,
+                    if (string.Equals(entryNameLCase, ScanStatsEntry.SCAN_STATS_COL_COLLISION_MODE,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         extendedScanInfo.CollisionMode = scanEvent.Value;
                         break;
                     }
 
-                    if (string.Equals(entryNameLCase, clsScanStatsEntry.SCAN_STATS_COL_SCAN_FILTER_TEXT,
+                    if (string.Equals(entryNameLCase, ScanStatsEntry.SCAN_STATS_COL_SCAN_FILTER_TEXT,
                                       StringComparison.InvariantCultureIgnoreCase))
                     {
                         extendedScanInfo.ScanFilterText = scanEvent.Value;
