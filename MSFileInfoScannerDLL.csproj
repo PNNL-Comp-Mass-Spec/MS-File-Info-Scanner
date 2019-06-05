@@ -94,9 +94,7 @@
     <Compile Include="clsAxisInfo.cs" />
     <Compile Include="clsBrukerOneFolderInfoScanner.cs" />
     <Compile Include="clsBrukerXmassFolderInfoScanner.cs" />
-    <Compile Include="clsDatasetStatsSummarizer.cs" />
     <Compile Include="clsDeconToolsIsosInfoScanner.cs" />
-    <Compile Include="clsDatasetFileInfo.cs" />
     <Compile Include="clsFileIntegrityChecker.cs" />
     <Compile Include="clsFilterDataArrayMaxCount.cs" />
     <Compile Include="clsFinniganRawFileInfoScanner.cs" />
@@ -112,8 +110,10 @@
     <Compile Include="clsPythonPlotContainer3D.cs" />
     <Compile Include="clsPythonPlotContainer.cs" />
     <Compile Include="clsPythonPlotContainer2D.cs" />
-    <Compile Include="clsSampleInfo.cs" />
     <Compile Include="GenericFileInfoScanner.cs" />
+    <Compile Include="DatasetStats\clsDatasetFileInfo.cs" />
+    <Compile Include="DatasetStats\clsDatasetStatsSummarizer.cs" />
+    <Compile Include="DatasetStats\clsSampleInfo.cs" />
     <Compile Include="MassLynxData\MSData.cs" />
     <Compile Include="MassLynxData\MSFunctionInfo.cs" />
     <Compile Include="MassLynxData\MSHeaderInfo.cs" />
