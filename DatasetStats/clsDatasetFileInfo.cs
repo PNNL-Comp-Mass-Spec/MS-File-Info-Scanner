@@ -4,7 +4,7 @@ using System.Data;
 using System.IO;
 using PRISM;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.DatasetStats
 {
     public class clsDatasetFileInfo
     {

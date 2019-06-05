@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using MSFileInfoScanner.DatasetStats;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Started in 2005

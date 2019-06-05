@@ -1,5 +1,5 @@
 ﻿
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.DatasetStats
 {
     public class clsSampleInfo
     {

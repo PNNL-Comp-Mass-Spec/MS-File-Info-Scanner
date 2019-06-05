@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
+using MSFileInfoScanner.DatasetStats;
 using PRISM;
 using pwiz.ProteowizardWrapper;
 

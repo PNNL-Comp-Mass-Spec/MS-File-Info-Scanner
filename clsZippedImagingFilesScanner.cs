@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using MSFileInfoScanner.DatasetStats;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 //

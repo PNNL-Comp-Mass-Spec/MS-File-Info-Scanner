@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Data.SQLite;
 using System.Xml;
+using MSFileInfoScanner.DatasetStats;
 using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)

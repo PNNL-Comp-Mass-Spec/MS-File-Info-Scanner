@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using MSFileInfoScanner.DatasetStats;
 
 namespace MSFileInfoScanner
 {

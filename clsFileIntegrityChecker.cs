@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Xml;
+using MSFileInfoScanner.DatasetStats;
 using PRISM;
 
 // This class will check the integrity of files in a given directory

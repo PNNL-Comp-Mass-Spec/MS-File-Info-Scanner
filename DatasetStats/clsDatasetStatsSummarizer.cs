@@ -22,7 +22,7 @@ using SpectraTypeClassifier;
 // https://opensource.org/licenses/BSD-2-Clause
 //
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.DatasetStats
 {
 
     public class clsDatasetStatsSummarizer : EventNotifier
