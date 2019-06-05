@@ -29,10 +29,12 @@ namespace MSFileInfoScanner
     {
 
         #region "Constants and Enums"
+
         public const string SCAN_TYPE_STATS_SEP_CHAR = "::###::";
         public const string DATASET_INFO_FILE_SUFFIX = "_DatasetInfo.xml";
         public const string DEFAULT_DATASET_STATS_FILENAME = "MSFileInfo_DatasetStats.txt";
 
+        public const string DATE_TIME_FORMAT_STRING = "yyyy-MM-dd hh:mm:ss tt";
 
         #endregion
 
