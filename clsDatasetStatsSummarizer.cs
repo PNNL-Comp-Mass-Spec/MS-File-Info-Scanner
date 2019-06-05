@@ -87,7 +87,7 @@ namespace MSFileInfoScanner
         /// </summary>
         public clsDatasetStatsSummarizer()
         {
-            FileDate = "June 3, 2019";
+            FileDate = "June 4, 2019";
 
             ErrorMessage = string.Empty;
 
@@ -99,6 +99,7 @@ namespace MSFileInfoScanner
             mDatasetScanStats = new List<clsScanStatsEntry>();
             mDatasetSummaryStats = new clsDatasetSummaryStats();
 
+            mDatasetSummaryStatsUpToDate = false;
 
             DatasetFileInfo = new clsDatasetFileInfo();
             SampleInfo = new clsSampleInfo();
