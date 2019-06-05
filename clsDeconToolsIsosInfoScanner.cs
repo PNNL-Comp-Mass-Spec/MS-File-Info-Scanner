@@ -19,7 +19,7 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public clsDeconToolsIsosInfoScanner()
         {
-            MaxFit = DEFAUT_MAX_FIT;
+            MaxFit = DEFAULT_MAX_FIT;
         }
 
         // Note: The extension must be in all caps
@@ -28,7 +28,7 @@ namespace MSFileInfoScanner
 
         public const string DECONTOOLS_SCANS_FILE_SUFFIX = "_SCANS.CSV";
 
-        public const float DEFAUT_MAX_FIT = 0.15f;
+        public const float DEFAULT_MAX_FIT = 0.15f;
 
         private struct udtIsosDataType
         {
@@ -381,7 +381,7 @@ namespace MSFileInfoScanner
 
                         // The info column will have data of the form "FTMS + p NSI Full ms [400.00-2000.00]" for Thermo datasets
                         // For .mzXML files, this fill will simply have an integer (and thus isn't useful)
-                        // It may not be present in older _scancs.csv files and is thus optional
+                        // It may not be present in older _scans.csv files and is thus optional
                         colIndexScanInfo = dataColumns.IndexOf("info");
 
                         continue;
