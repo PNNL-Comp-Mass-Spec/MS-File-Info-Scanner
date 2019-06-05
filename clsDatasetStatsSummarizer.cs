@@ -218,12 +218,7 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public bool ComputeScanStatsSummary(List<clsScanStatsEntry> scanStats, out clsDatasetSummaryStats summaryStats)
         {
-            var ticListMSCount = 0;
-            var ticListMSnCount = 0;
-            var bpiListMSCount = 0;
-            var bpiListMSnCount = 0;
 
-            // Initialize summaryStats
             summaryStats = new clsDatasetSummaryStats();
 
             try
@@ -238,12 +233,12 @@ namespace MSFileInfoScanner
 
                 var scanStatsCount = scanStats.Count;
 
-                // Initialize the TIC and BPI List arrays
-                var ticListMS = new double[scanStatsCount];
-                var bpiListMS = new double[scanStatsCount];
+                // Initialize the TIC and BPI Lists
+                var ticListMS = new List<double>(scanStatsCount);
+                var bpiListMS = new List<double>(scanStatsCount);
 
-                var ticListMSn = new double[scanStatsCount];
-                var bpiListMSn = new double[scanStatsCount];
+                var ticListMSn = new List<double>(scanStatsCount);
+                var bpiListMSn = new List<double>(scanStatsCount);
 
                 foreach (var statEntry in scanStats)
                 {
@@ -251,12 +246,20 @@ namespace MSFileInfoScanner
                     if (statEntry.ScanType > 1)
                     {
                         // MSn spectrum
-                        ComputeScanStatsUpdateDetails(statEntry, ref summaryStats.ElutionTimeMax, ref summaryStats.MSnStats, ticListMSn, ref ticListMSnCount, bpiListMSn, ref bpiListMSnCount);
+                        ComputeScanStatsUpdateDetails(statEntry,
+                                                      ref summaryStats.ElutionTimeMax,
+                                                      ref summaryStats.MSnStats,
+                                                      ticListMSn,
+                                                      bpiListMSn);
                     }
                     else
                     {
                         // MS spectrum
-                        ComputeScanStatsUpdateDetails(statEntry, ref summaryStats.ElutionTimeMax, ref summaryStats.MSStats, ticListMS, ref ticListMSCount, bpiListMS, ref bpiListMSCount);
+                        ComputeScanStatsUpdateDetails(statEntry,
+                                                      ref summaryStats.ElutionTimeMax,
+                                                      ref summaryStats.MSStats,
+                                                      ticListMS,
+                                                      bpiListMS);
                     }
 
                     var scanTypeKey = statEntry.ScanTypeName + SCAN_TYPE_STATS_SEP_CHAR + statEntry.ScanFilterText;
@@ -270,11 +273,11 @@ namespace MSFileInfoScanner
                     }
                 }
 
-                summaryStats.MSStats.TICMedian = ComputeMedian(ticListMS, ticListMSCount);
-                summaryStats.MSStats.BPIMedian = ComputeMedian(bpiListMS, bpiListMSCount);
+                summaryStats.MSStats.TICMedian = mMedianUtils.Median(ticListMS);
+                summaryStats.MSStats.BPIMedian = mMedianUtils.Median(bpiListMS);
 
-                summaryStats.MSnStats.TICMedian = ComputeMedian(ticListMSn, ticListMSnCount);
-                summaryStats.MSnStats.BPIMedian = ComputeMedian(bpiListMSn, bpiListMSnCount);
+                summaryStats.MSnStats.TICMedian = mMedianUtils.Median(ticListMSn);
+                summaryStats.MSnStats.BPIMedian = mMedianUtils.Median(bpiListMSn);
 
                 return true;
 
@@ -291,10 +294,8 @@ namespace MSFileInfoScanner
             clsScanStatsEntry scanStats,
             ref double elutionTimeMax,
             ref clsDatasetSummaryStats.udtSummaryStatDetailsType udtSummaryStatDetails,
-            IList<double> ticList,
-            ref int ticListCount,
-            IList<double> bpiList,
-            ref int bpiListCount)
+            ICollection<double> ticList,
+            ICollection<double> bpiList)
         {
 
             if (!string.IsNullOrEmpty(scanStats.ElutionTime))
@@ -315,8 +316,7 @@ namespace MSFileInfoScanner
                     udtSummaryStatDetails.TICMax = tic;
                 }
 
-                ticList[ticListCount] = tic;
-                ticListCount += 1;
+                ticList.Add(tic);
             }
 
             if (double.TryParse(scanStats.BasePeakIntensity, out var bpi))
@@ -326,26 +326,10 @@ namespace MSFileInfoScanner
                     udtSummaryStatDetails.BPIMax = bpi;
                 }
 
-                bpiList[bpiListCount] = bpi;
-                bpiListCount += 1;
+                bpiList.Add(bpi);
             }
 
             udtSummaryStatDetails.ScanCount += 1;
-
-        }
-
-        private double ComputeMedian(IReadOnlyList<double> values, int itemCount)
-        {
-
-            var lstData = new List<double>(itemCount);
-            for (var i = 0; i < itemCount; i++)
-            {
-                lstData.Add(values[i]);
-            }
-
-            var medianValue = mMedianUtils.Median(lstData);
-
-            return medianValue;
 
         }
 
