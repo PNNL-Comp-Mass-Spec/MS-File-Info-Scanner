@@ -794,7 +794,7 @@ namespace MSFileInfoScanner
 
 
                     // Write the headers
-                    var dataValues = new List<string>
+                    var headerNames = new List<string>
                     {
                         "Dataset",
                         "ScanNumber",
@@ -811,23 +811,27 @@ namespace MSFileInfoScanner
 
                     if (includeDriftTime)
                     {
-                        dataValues.Add("DriftTime");
+                        headerNames.Add("DriftTime");
                     }
 
-                    scanStatsWriter.WriteLine(string.Join("\t", dataValues));
+                    scanStatsWriter.WriteLine(string.Join("\t", headerNames));
 
-                    dataValues.Clear();
-                    dataValues.Add("Dataset");
-                    dataValues.Add("ScanNumber");
-                    dataValues.Add(clsScanStatsEntry.SCAN_STATS_COL_ION_INJECTION_TIME);
-                    dataValues.Add(clsScanStatsEntry.SCAN_STATS_COL_SCAN_SEGMENT);
-                    dataValues.Add(clsScanStatsEntry.SCAN_STATS_COL_SCAN_EVENT);
-                    dataValues.Add(clsScanStatsEntry.SCAN_STATS_COL_CHARGE_STATE);
-                    dataValues.Add(clsScanStatsEntry.SCAN_STATS_COL_MONOISOTOPIC_MZ);
-                    dataValues.Add(clsScanStatsEntry.SCAN_STATS_COL_COLLISION_MODE);
-                    dataValues.Add(clsScanStatsEntry.SCAN_STATS_COL_SCAN_FILTER_TEXT);
+                    var headerNamesEx = new List<string>
+                    {
+                        "Dataset",
+                        "ScanNumber",
+                        clsScanStatsEntry.SCAN_STATS_COL_ION_INJECTION_TIME,
+                        clsScanStatsEntry.SCAN_STATS_COL_SCAN_SEGMENT,
+                        clsScanStatsEntry.SCAN_STATS_COL_SCAN_EVENT,
+                        clsScanStatsEntry.SCAN_STATS_COL_CHARGE_STATE,
+                        clsScanStatsEntry.SCAN_STATS_COL_MONOISOTOPIC_MZ,
+                        clsScanStatsEntry.SCAN_STATS_COL_COLLISION_MODE,
+                        clsScanStatsEntry.SCAN_STATS_COL_SCAN_FILTER_TEXT
+                    };
 
-                    scanStatsExWriter.WriteLine(string.Join("\t", dataValues));
+                    scanStatsExWriter.WriteLine(string.Join("\t", headerNamesEx));
+
+                    var dataValues = new List<string>();
 
                     foreach (var scanStatsEntry in scanStats)
                     {
@@ -1040,40 +1044,44 @@ namespace MSFileInfoScanner
                 // Create or open the output file
                 using (var writer = new StreamWriter(new FileStream(datasetStatsFilePath, FileMode.Append, FileAccess.Write, FileShare.Read)))
                 {
-                    var dataValues = new List<string>();
 
                     if (writeHeaders)
                     {
                         // Write the header line
-                        dataValues.Add("Dataset");
-                        dataValues.Add("ScanCount");
-                        dataValues.Add("ScanCountMS");
-                        dataValues.Add("ScanCountMSn");
-                        dataValues.Add("Elution_Time_Max");
-                        dataValues.Add("AcqTimeMinutes");
-                        dataValues.Add("StartTime");
-                        dataValues.Add("EndTime");
-                        dataValues.Add("FileSizeBytes");
-                        dataValues.Add("SampleName");
-                        dataValues.Add("Comment1");
-                        dataValues.Add("Comment2");
+                        var headerNames = new List<string>
+                        {
+                            "Dataset",
+                            "ScanCount",
+                            "ScanCountMS",
+                            "ScanCountMSn",
+                            "Elution_Time_Max",
+                            "AcqTimeMinutes",
+                            "StartTime",
+                            "EndTime",
+                            "FileSizeBytes",
+                            "SampleName",
+                            "Comment1",
+                            "Comment2"
+                        };
 
-                        writer.WriteLine(string.Join("\t", dataValues));
+                        writer.WriteLine(string.Join("\t", headerNames));
                     }
 
-                    dataValues.Clear();
-                    dataValues.Add(datasetName);
-                    dataValues.Add((summaryStats.MSStats.ScanCount + summaryStats.MSnStats.ScanCount).ToString());
-                    dataValues.Add(summaryStats.MSStats.ScanCount.ToString());
-                    dataValues.Add(summaryStats.MSnStats.ScanCount.ToString());
-                    dataValues.Add(summaryStats.ElutionTimeMax.ToString("0.00"));
-                    dataValues.Add(datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00"));
-                    dataValues.Add(datasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt"));
-                    dataValues.Add(datasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt"));
-                    dataValues.Add(datasetFileInfo.FileSizeBytes.ToString());
-                    dataValues.Add(FixNull(udtSampleInfo.SampleName));
-                    dataValues.Add(FixNull(udtSampleInfo.Comment1));
-                    dataValues.Add(FixNull(udtSampleInfo.Comment2));
+                    var dataValues = new List<string>
+                    {
+                        datasetName,
+                        (summaryStats.MSStats.ScanCount + summaryStats.MSnStats.ScanCount).ToString(),
+                        summaryStats.MSStats.ScanCount.ToString(),
+                        summaryStats.MSnStats.ScanCount.ToString(),
+                        summaryStats.ElutionTimeMax.ToString("0.00"),
+                        datasetInfo.AcqTimeEnd.Subtract(datasetInfo.AcqTimeStart).TotalMinutes.ToString("0.00"),
+                        datasetInfo.AcqTimeStart.ToString(DATE_TIME_FORMAT_STRING),
+                        datasetInfo.AcqTimeEnd.ToString(DATE_TIME_FORMAT_STRING),
+                        datasetInfo.FileSizeBytes.ToString(),
+                        FixNull(sampleInfo.SampleName),
+                        FixNull(sampleInfo.Comment1),
+                        FixNull(sampleInfo.Comment2)
+                    };
 
                     writer.WriteLine(string.Join("\t", dataValues));
 
