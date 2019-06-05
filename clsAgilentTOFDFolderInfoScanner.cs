@@ -5,7 +5,6 @@ using MSFileInfoScanner.DatasetStats;
 using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
-//
 
 namespace MSFileInfoScanner
 {
@@ -14,7 +13,6 @@ namespace MSFileInfoScanner
     {
 
         // Note: The extension must be in all caps
-
         public const string AGILENT_DATA_FOLDER_D_EXTENSION = ".D";
 
         // ReSharper disable once IdentifierTypo

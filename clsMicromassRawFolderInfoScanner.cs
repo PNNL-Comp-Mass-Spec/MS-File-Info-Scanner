@@ -4,9 +4,7 @@ using System.IO;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScanner.MassLynxData;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-// Started in 2005
-//
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
 
 namespace MSFileInfoScanner
 {
@@ -17,7 +15,6 @@ namespace MSFileInfoScanner
     {
 
         // Note: The extension must be in all caps
-
         public const string MICROMASS_RAW_FOLDER_EXTENSION = ".RAW";
 
         private readonly DateTime MINIMUM_ACCEPTABLE_ACQ_START_TIME = new DateTime(1975, 1, 1);

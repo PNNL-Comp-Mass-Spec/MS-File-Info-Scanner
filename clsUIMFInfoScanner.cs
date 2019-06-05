@@ -6,7 +6,6 @@ using PRISM;
 using UIMFLibrary;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-//
 
 namespace MSFileInfoScanner
 {
@@ -14,7 +13,6 @@ namespace MSFileInfoScanner
     {
 
         // Note: The extension must be in all caps
-
         public const string UIMF_FILE_EXTENSION = ".UIMF";
 
         /// <summary>

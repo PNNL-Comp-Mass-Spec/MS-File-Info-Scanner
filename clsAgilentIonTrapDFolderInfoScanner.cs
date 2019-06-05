@@ -2,9 +2,7 @@ using System;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-// Started in 2005
-//
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
 
 namespace MSFileInfoScanner
 {
@@ -12,7 +10,6 @@ namespace MSFileInfoScanner
     {
 
         // Note: The extension must be in all caps
-
         public const string AGILENT_ION_TRAP_D_EXTENSION = ".D";
         private const string AGILENT_YEP_FILE = "Analysis.yep";
         private const string AGILENT_RUN_LOG_FILE = "RUN.LOG";

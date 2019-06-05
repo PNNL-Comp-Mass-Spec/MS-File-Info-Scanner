@@ -5,9 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-// Started in 2005
-//
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
 
 namespace MSFileInfoScanner
 {

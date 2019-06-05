@@ -2,8 +2,7 @@ using System;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-// Started in 2005
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
 //
 // Updated in March 2012 to use ProteoWizard to read data from QTrap .Wiff files
 // (cannot read MS data or TIC values from Agilent .Wiff files)

@@ -6,13 +6,13 @@ using System.Xml;
 using MSFileInfoScanner.DatasetStats;
 using PRISM;
 
-// This class will check the integrity of files in a given directory
-//
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-// Started May 16, 2008
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2008
 
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// Check the integrity of files in a given directory
+    /// </summary>
     public class clsFileIntegrityChecker : EventNotifier
     {
 

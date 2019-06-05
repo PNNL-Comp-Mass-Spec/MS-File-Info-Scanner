@@ -8,9 +8,7 @@ using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScannerInterfaces;
 using PRISM;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-// Started in 2007
-//
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2007
 
 namespace MSFileInfoScanner
 {

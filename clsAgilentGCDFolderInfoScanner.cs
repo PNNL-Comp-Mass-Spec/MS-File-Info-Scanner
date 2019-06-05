@@ -7,7 +7,6 @@ using MSFileInfoScanner.DatasetStats;
 using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
-//
 
 namespace MSFileInfoScanner
 {
@@ -15,7 +14,6 @@ namespace MSFileInfoScanner
     {
 
         // Note: The extension must be in all caps
-
         public const string AGILENT_DATA_FOLDER_D_EXTENSION = ".D";
         public const string AGILENT_MS_DATA_FILE = "DATA.MS";
         public const string AGILENT_ACQ_METHOD_FILE = "acqmeth.txt";

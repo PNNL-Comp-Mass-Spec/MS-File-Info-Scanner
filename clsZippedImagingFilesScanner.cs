@@ -5,7 +5,6 @@ using System.Linq;
 using MSFileInfoScanner.DatasetStats;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-//
 
 namespace MSFileInfoScanner
 {

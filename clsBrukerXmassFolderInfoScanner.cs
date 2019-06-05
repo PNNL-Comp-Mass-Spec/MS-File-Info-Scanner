@@ -9,7 +9,6 @@ using MSFileInfoScanner.DatasetStats;
 using PRISM;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-//
 
 namespace MSFileInfoScanner
 {
