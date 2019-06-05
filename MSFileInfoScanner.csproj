@@ -121,6 +121,7 @@
     <Compile Include="clsPythonPlotContainer3D.cs" />
     <Compile Include="clsPythonPlotContainer.cs" />
     <Compile Include="clsPythonPlotContainer2D.cs" />
+    <Compile Include="clsSampleInfo.cs" />
     <Compile Include="GenericFileInfoScanner.cs" />
     <Compile Include="MassLynxData\MSData.cs" />
     <Compile Include="MassLynxData\MSFunctionInfo.cs" />

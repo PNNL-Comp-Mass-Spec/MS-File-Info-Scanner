@@ -32,36 +32,7 @@ namespace MSFileInfoScanner
         public const string SCAN_TYPE_STATS_SEP_CHAR = "::###::";
         public const string DATASET_INFO_FILE_SUFFIX = "_DatasetInfo.xml";
         public const string DEFAULT_DATASET_STATS_FILENAME = "MSFileInfo_DatasetStats.txt";
-        #endregion
 
-        #region "Structures"
-
-        /// <summary>
-        /// Sample info
-        /// </summary>
-        public struct udtSampleInfoType
-        {
-            public string SampleName;
-            public string Comment1;
-
-            public string Comment2;
-            public void Clear()
-            {
-                SampleName = string.Empty;
-                Comment1 = string.Empty;
-                Comment2 = string.Empty;
-            }
-
-            public bool HasData()
-            {
-                if (!string.IsNullOrEmpty(SampleName) || !string.IsNullOrEmpty(Comment1) || !string.IsNullOrEmpty(Comment2))
-                {
-                    return true;
-                }
-
-                return false;
-            }
-        }
 
         #endregion
 
@@ -69,7 +40,6 @@ namespace MSFileInfoScanner
 
         private readonly List<clsScanStatsEntry> mDatasetScanStats;
 
-        public udtSampleInfoType SampleInfo;
         private readonly clsSpectrumTypeClassifier mSpectraTypeClassifier;
 
         private bool mDatasetSummaryStatsUpToDate;
@@ -103,6 +73,11 @@ namespace MSFileInfoScanner
         /// </summary>
         public string FileDate { get; }
 
+        /// <summary>
+        /// Sample info
+        /// </summary>
+        public clsSampleInfo SampleInfo { get; }
+
         #endregion
 
         /// <summary>
@@ -122,8 +97,9 @@ namespace MSFileInfoScanner
             mDatasetScanStats = new List<clsScanStatsEntry>();
             mDatasetSummaryStats = new clsDatasetSummaryStats();
 
+
             DatasetFileInfo = new clsDatasetFileInfo();
-            SampleInfo = new udtSampleInfoType();
+            SampleInfo = new clsSampleInfo();
 
             ClearCachedData();
         }
@@ -392,7 +368,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetInfoFilePath">File path to write the XML to</param>
         /// <param name="scanStats">Scan stats to parse</param>
         /// <param name="datasetFileInfo">Dataset Info</param>
-        /// <param name="udtSampleInfo">Sample Info</param>
+        /// <param name="sampleInfo">Sample Info</param>
         /// <returns>True if success; False if failure</returns>
         /// <remarks></remarks>
         public bool CreateDatasetInfoFile(
@@ -400,7 +376,7 @@ namespace MSFileInfoScanner
             string datasetInfoFilePath,
             List<clsScanStatsEntry> scanStats,
             clsDatasetFileInfo datasetFileInfo,
-            udtSampleInfoType udtSampleInfo)
+            clsSampleInfo sampleInfo)
         {
 
             bool success;
@@ -419,7 +395,7 @@ namespace MSFileInfoScanner
                 // However, CreateDatasetInfoXML() now uses a MemoryStream, so we're able to use UTF8
                 using (var writer = new StreamWriter(new FileStream(datasetInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read), Encoding.UTF8))
                 {
-                    writer.WriteLine(CreateDatasetInfoXML(datasetName, scanStats, datasetFileInfo, udtSampleInfo));
+                    writer.WriteLine(CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, sampleInfo));
                 }
 
                 success = true;
@@ -469,25 +445,22 @@ namespace MSFileInfoScanner
         // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(List<clsScanStatsEntry> scanStats, clsDatasetFileInfo datasetFileInfo)
         {
-            var udtSampleInfo = new udtSampleInfoType();
-            udtSampleInfo.Clear();
-
-            return CreateDatasetInfoXML(datasetFileInfo.DatasetName, scanStats, datasetFileInfo, udtSampleInfo);
+            return CreateDatasetInfoXML(datasetInfo.DatasetName, scanStats, datasetInfo, new clsSampleInfo());
         }
 
         /// <summary>
-        /// Creates XML summarizing the data in scanStats, datasetFileInfo, and udtSampleInfo
         /// Auto-determines the dataset name using datasetFileInfo.DatasetName
+        /// Creates XML summarizing the data in scanStats, datasetInfo, and sampleInfo
         /// </summary>
         /// <param name="scanStats">Scan stats to parse</param>
         /// <param name="datasetFileInfo">Dataset Info</param>
-        /// <param name="udtSampleInfo">Sample Info</param>
+        /// <param name="sampleInfo">Sample Info</param>
         /// <returns>XML (as string)</returns>
         /// <remarks></remarks>
         // ReSharper disable once UnusedMember.Global
-        public string CreateDatasetInfoXML(List<clsScanStatsEntry> scanStats, clsDatasetFileInfo datasetFileInfo, udtSampleInfoType udtSampleInfo)
+        public string CreateDatasetInfoXML(List<clsScanStatsEntry> scanStats, clsDatasetFileInfo datasetInfo, clsSampleInfo sampleInfo)
         {
-            return CreateDatasetInfoXML(datasetFileInfo.DatasetName, scanStats, datasetFileInfo, udtSampleInfo);
+            return CreateDatasetInfoXML(datasetInfo.DatasetName, scanStats, datasetInfo, sampleInfo);
         }
 
         /// <summary>
@@ -502,10 +475,7 @@ namespace MSFileInfoScanner
         public string CreateDatasetInfoXML(string datasetName, ref List<clsScanStatsEntry> scanStats, clsDatasetFileInfo datasetFileInfo)
         {
 
-            var udtSampleInfo = new udtSampleInfoType();
-            udtSampleInfo.Clear();
-
-            return CreateDatasetInfoXML(datasetName, scanStats, datasetFileInfo, udtSampleInfo);
+            return CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, new clsSampleInfo());
         }
 
         /// <summary>
@@ -514,14 +484,14 @@ namespace MSFileInfoScanner
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="scanStats">Scan stats to parse</param>
         /// <param name="datasetFileInfo">Dataset Info</param>
-        /// <param name="udtSampleInfo"></param>
+        /// <param name="sampleInfo"></param>
         /// <returns>XML (as string)</returns>
         /// <remarks></remarks>
         public string CreateDatasetInfoXML(
             string datasetName,
             List<clsScanStatsEntry> scanStats,
             clsDatasetFileInfo datasetFileInfo,
-            udtSampleInfoType udtSampleInfo)
+            clsSampleInfo sampleInfo)
         {
 
             var includeCentroidStats = false;
@@ -721,13 +691,13 @@ namespace MSFileInfoScanner
                 writer.WriteEndElement();
                 // TICInfo EndElement
 
-                // Only write the SampleInfo block if udtSampleInfo contains entries
-                if (udtSampleInfo.HasData())
+                // Only write the SampleInfo block if sampleInfo contains entries
+                if (sampleInfo.HasData())
                 {
                     writer.WriteStartElement("SampleInfo");
-                    writer.WriteElementString("SampleName", FixNull(udtSampleInfo.SampleName));
-                    writer.WriteElementString("Comment1", FixNull(udtSampleInfo.Comment1));
-                    writer.WriteElementString("Comment2", FixNull(udtSampleInfo.Comment2));
+                    writer.WriteElementString("SampleName", FixNull(sampleInfo.SampleName));
+                    writer.WriteElementString("Comment1", FixNull(sampleInfo.Comment1));
+                    writer.WriteElementString("Comment2", FixNull(sampleInfo.Comment2));
                     writer.WriteEndElement();
                     // SampleInfo EndElement
                 }
@@ -1021,7 +991,7 @@ namespace MSFileInfoScanner
         /// <param name="datasetStatsFilePath">Tab-delimited file to create/update</param>
         /// <param name="scanStats">Scan stats to parse</param>
         /// <param name="datasetFileInfo">Dataset Info</param>
-        /// <param name="udtSampleInfo">Sample Info</param>
+        /// <param name="sampleInfo">Sample Info</param>
         /// <returns>True if success; False if failure</returns>
         /// <remarks></remarks>
         public bool UpdateDatasetStatsTextFile(
@@ -1029,7 +999,7 @@ namespace MSFileInfoScanner
             string datasetStatsFilePath,
             List<clsScanStatsEntry> scanStats,
             clsDatasetFileInfo datasetFileInfo,
-            udtSampleInfoType udtSampleInfo)
+            clsSampleInfo sampleInfo)
         {
 
             var writeHeaders = false;
