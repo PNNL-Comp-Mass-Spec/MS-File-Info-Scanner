@@ -61,7 +61,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Dataset file info
         /// </summary>
-        public clsDatasetFileInfo DatasetFileInfo { get; set; }
+        public clsDatasetFileInfo DatasetFileInfo { get; }
 
         /// <summary>
         /// Error message
