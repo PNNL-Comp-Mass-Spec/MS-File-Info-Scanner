@@ -362,12 +362,12 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Creates an XML file summarizing the data in scanStats and datasetFileInfo
+        /// Creates an XML file summarizing the data in scanStats and datasetInfo
         /// </summary>
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="datasetInfoFilePath">File path to write the XML to</param>
         /// <param name="scanStats">Scan stats to parse</param>
-        /// <param name="datasetFileInfo">Dataset Info</param>
+        /// <param name="datasetInfo">Dataset Info</param>
         /// <param name="sampleInfo">Sample Info</param>
         /// <returns>True if success; False if failure</returns>
         /// <remarks></remarks>
@@ -375,7 +375,7 @@ namespace MSFileInfoScanner
             string datasetName,
             string datasetInfoFilePath,
             List<clsScanStatsEntry> scanStats,
-            clsDatasetFileInfo datasetFileInfo,
+            clsDatasetFileInfo datasetInfo,
             clsSampleInfo sampleInfo)
         {
 
@@ -435,25 +435,25 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Creates XML summarizing the data in scanStats and datasetFileInfo
-        /// Auto-determines the dataset name using datasetFileInfo.DatasetName
+        /// Creates XML summarizing the data in scanStats and datasetInfo
+        /// Auto-determines the dataset name using datasetInfo.DatasetName
         /// </summary>
         /// <param name="scanStats">Scan stats to parse</param>
-        /// <param name="datasetFileInfo">Dataset Info</param>
+        /// <param name="datasetInfo">Dataset Info</param>
         /// <returns>XML (as string)</returns>
         /// <remarks></remarks>
         // ReSharper disable once UnusedMember.Global
-        public string CreateDatasetInfoXML(List<clsScanStatsEntry> scanStats, clsDatasetFileInfo datasetFileInfo)
+        public string CreateDatasetInfoXML(List<clsScanStatsEntry> scanStats, clsDatasetFileInfo datasetInfo)
         {
             return CreateDatasetInfoXML(datasetInfo.DatasetName, scanStats, datasetInfo, new clsSampleInfo());
         }
 
         /// <summary>
-        /// Auto-determines the dataset name using datasetFileInfo.DatasetName
         /// Creates XML summarizing the data in scanStats, datasetInfo, and sampleInfo
+        /// Auto-determines the dataset name using datasetInfo.DatasetName
         /// </summary>
         /// <param name="scanStats">Scan stats to parse</param>
-        /// <param name="datasetFileInfo">Dataset Info</param>
+        /// <param name="datasetInfo">Dataset Info</param>
         /// <param name="sampleInfo">Sample Info</param>
         /// <returns>XML (as string)</returns>
         /// <remarks></remarks>
@@ -464,33 +464,33 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Creates XML summarizing the data in scanStats and datasetFileInfo
+        /// Creates XML summarizing the data in scanStats and datasetInfo
         /// </summary>
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="scanStats">Scan stats to parse</param>
-        /// <param name="datasetFileInfo">Dataset Info</param>
+        /// <param name="datasetInfo">Dataset Info</param>
         /// <returns>XML (as string)</returns>
         /// <remarks></remarks>
         // ReSharper disable once UnusedMember.Global
-        public string CreateDatasetInfoXML(string datasetName, ref List<clsScanStatsEntry> scanStats, clsDatasetFileInfo datasetFileInfo)
+        public string CreateDatasetInfoXML(string datasetName, ref List<clsScanStatsEntry> scanStats, clsDatasetFileInfo datasetInfo)
         {
 
             return CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, new clsSampleInfo());
         }
 
         /// <summary>
-        /// Creates XML summarizing the data in scanStats and datasetFileInfo
+        /// Creates XML summarizing the data in scanStats and datasetInfo
         /// </summary>
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="scanStats">Scan stats to parse</param>
-        /// <param name="datasetFileInfo">Dataset Info</param>
+        /// <param name="datasetInfo">Dataset Info</param>
         /// <param name="sampleInfo"></param>
         /// <returns>XML (as string)</returns>
         /// <remarks></remarks>
         public string CreateDatasetInfoXML(
             string datasetName,
             List<clsScanStatsEntry> scanStats,
-            clsDatasetFileInfo datasetFileInfo,
+            clsDatasetFileInfo datasetInfo,
             clsSampleInfo sampleInfo)
         {
 
@@ -605,9 +605,9 @@ namespace MSFileInfoScanner
                 writer.WriteStartElement("AcquisitionInfo");
 
                 var scanCountTotal = summaryStats.MSStats.ScanCount + summaryStats.MSnStats.ScanCount;
-                if (scanCountTotal == 0 && datasetFileInfo.ScanCount > 0)
+                if (scanCountTotal == 0 && datasetInfo.ScanCount > 0)
                 {
-                    scanCountTotal = datasetFileInfo.ScanCount;
+                    scanCountTotal = datasetInfo.ScanCount;
                 }
 
                 writer.WriteElementString("ScanCount", scanCountTotal.ToString());
@@ -616,20 +616,20 @@ namespace MSFileInfoScanner
                 writer.WriteElementString("ScanCountMSn", summaryStats.MSnStats.ScanCount.ToString());
                 writer.WriteElementString("Elution_Time_Max", summaryStats.ElutionTimeMax.ToString("0.00"));
 
-                writer.WriteElementString("AcqTimeMinutes", datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes.ToString("0.00"));
-                writer.WriteElementString("StartTime", datasetFileInfo.AcqTimeStart.ToString("yyyy-MM-dd hh:mm:ss tt"));
-                writer.WriteElementString("EndTime", datasetFileInfo.AcqTimeEnd.ToString("yyyy-MM-dd hh:mm:ss tt"));
+                writer.WriteElementString("AcqTimeMinutes", datasetInfo.AcqTimeEnd.Subtract(datasetInfo.AcqTimeStart).TotalMinutes.ToString("0.00"));
+                writer.WriteElementString("StartTime", datasetInfo.AcqTimeStart.ToString(DATE_TIME_FORMAT_STRING));
+                writer.WriteElementString("EndTime", datasetInfo.AcqTimeEnd.ToString(DATE_TIME_FORMAT_STRING));
 
                 // For datasets based on a single file, this is the file's size
                 // For datasets stored in a directory, this is the total size of the primary instrument files
-                writer.WriteElementString("FileSizeBytes", datasetFileInfo.FileSizeBytes.ToString());
+                writer.WriteElementString("FileSizeBytes", datasetInfo.FileSizeBytes.ToString());
 
-                if (datasetFileInfo.InstrumentFiles.Count > 0)
+                if (datasetInfo.InstrumentFiles.Count > 0)
                 {
 
                     writer.WriteStartElement("InstrumentFiles");
 
-                    foreach (var instrumentFile in datasetFileInfo.InstrumentFiles)
+                    foreach (var instrumentFile in datasetInfo.InstrumentFiles)
                     {
                         writer.WriteStartElement("InstrumentFile");
                         writer.WriteAttributeString("Hash", FixNull(instrumentFile.Value.Hash));
@@ -743,15 +743,15 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="scanStatsFilePath">File path to write the text file to</param>
         /// <param name="scanStats">Scan stats to parse</param>
-        /// <param name="datasetFileInfo">Dataset Info</param>
+        /// <param name="datasetInfo">Dataset Info</param>
         /// <returns>True if success; False if failure</returns>
         /// <remarks></remarks>
         public bool CreateScanStatsFile(
             string scanStatsFilePath,
             List<clsScanStatsEntry> scanStats,
-            clsDatasetFileInfo datasetFileInfo)
+            clsDatasetFileInfo datasetInfo)
         {
-            var datasetID = datasetFileInfo.DatasetID;
+            var datasetID = datasetInfo.DatasetID;
 
             try
             {
@@ -989,12 +989,12 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Updates a tab-delimited text file, adding a new line summarizing the data in scanStats and datasetFileInfo
+        /// Updates a tab-delimited text file, adding a new line summarizing the data in scanStats and datasetInfo
         /// </summary>
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="datasetStatsFilePath">Tab-delimited file to create/update</param>
         /// <param name="scanStats">Scan stats to parse</param>
-        /// <param name="datasetFileInfo">Dataset Info</param>
+        /// <param name="datasetInfo">Dataset Info</param>
         /// <param name="sampleInfo">Sample Info</param>
         /// <returns>True if success; False if failure</returns>
         /// <remarks></remarks>
@@ -1002,7 +1002,7 @@ namespace MSFileInfoScanner
             string datasetName,
             string datasetStatsFilePath,
             List<clsScanStatsEntry> scanStats,
-            clsDatasetFileInfo datasetFileInfo,
+            clsDatasetFileInfo datasetInfo,
             clsSampleInfo sampleInfo)
         {
 
