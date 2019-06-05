@@ -514,21 +514,6 @@ namespace MSFileInfoScanner
 
         }
 
-        private void StoreExtendedScanInfo(ref clsScanStatsEntry.udtExtendedStatsInfoType udtExtendedScanInfo, string entryName, string entryValue)
-        {
-            if (entryValue == null)
-            {
-                entryValue = string.Empty;
-            }
-
-            var scanEvents = new List<KeyValuePair<string, string>>
-            {
-                new KeyValuePair<string, string>(entryName, entryValue)
-            };
-
-            StoreExtendedScanInfo(ref udtExtendedScanInfo, scanEvents);
-
-        }
         private void StoreExtendedScanInfo(
             ExtendedStatsInfo extendedScanInfo,
             IReadOnlyCollection<KeyValuePair<string, string>> scanEvents)
