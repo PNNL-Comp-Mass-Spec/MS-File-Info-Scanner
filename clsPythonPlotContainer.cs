@@ -71,6 +71,13 @@ namespace MSFileInfoScanner
             if (!string.IsNullOrWhiteSpace(PythonPath))
                 return true;
 
+            if (PRISM.SystemInfo.IsLinux)
+            {
+                ConsoleMsgUtils.ShowDebug("Assuming python 3 is in the path and is named 'python3'");
+                PythonPath = "python3";
+                return true;
+            }
+
             var pathsToCheck = PythonPathsToCheck();
 
             foreach (var directoryPath in pathsToCheck)
