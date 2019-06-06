@@ -20,8 +20,8 @@ from pprint import pprint
 # -------------------------------------------------------------------------------
 
 # Update the default font
-plt.rcParams["font.family"] = "arial"
-
+plt.rcParams['font.family'] = ['Arial', 'FreeSans', 'DejaVu Sans']
+                               
 def process_file(dataFilePath):
     dataFile = Path(dataFilePath)
     if not dataFile.is_file():
