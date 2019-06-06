@@ -336,8 +336,14 @@ namespace MSFileInfoScanner
 
             // Use XRaw to read the .Raw file
             // If reading from a SAMBA-mounted network share, and if the current user has
-            //  Read privileges but not Read&Execute privileges, then we will need to copy the file locally
-            var xcaliburAccessor = new XRawFileIO();
+            //  Read privileges but not Read&Execute privileges, we will need to copy the file locally
+
+            var readerOptions = new ThermoReaderOptions {
+                LoadMSMethodInfo = true,
+                LoadMSTuneInfo = true
+            };
+
+            var xcaliburAccessor = new XRawFileIO(readerOptions);
 
             RegisterEvents(xcaliburAccessor);
 
