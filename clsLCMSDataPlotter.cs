@@ -541,7 +541,7 @@ namespace MSFileInfoScanner
                 // Now process the data from the highest intensity to the lowest intensity
                 // As each data point is processed, we will either:
                 //  a) set its intensity to the negative of the actual intensity to mark it as being processed
-                //  b) set its intensity to Single.MinValue (-3.40282347E+38) if the point is to be removed
+                //  b) set its intensity to float.MinValue (-3.40282347E+38) if the point is to be removed
                 //     because it is within mzResolution m/z units of a point with a higher intensity
 
                 var pointerIndex = ionCount - 1;
