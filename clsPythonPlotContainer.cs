@@ -73,8 +73,8 @@ namespace MSFileInfoScanner
 
             if (PRISM.SystemInfo.IsLinux)
             {
-                ConsoleMsgUtils.ShowDebug("Assuming python 3 is in the path and is named 'python3'");
-                PythonPath = "python3";
+                PythonPath = "/usr/bin/python3";
+                ConsoleMsgUtils.ShowDebug("Assuming Python 3 is at {0}", PythonPath);
                 return true;
             }
 
