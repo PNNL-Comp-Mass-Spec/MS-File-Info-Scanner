@@ -1,6 +1,15 @@
 MS File Info Scanner Change Log
 
-Version 1.5.7027; May 10, 2019
+Version 1.5.7096; June 6, 2019
+	- Add support for Linux, including creating plots with Python 3.x
+
+Version 1.5.7086; May 27, 2019
+	- Check MS2 and MS3 spectra separately when verifying that the majority of spectra have data below a minimum m/z threshold
+
+Version 1.5.7074; May 15, 2019
+	- Load data from MassLynx .raw directories using ProteoWizard
+
+Version 1.5.7069; May 10, 2019
 	- Add a generic file info scanner
 		- Used to obtain basic metadata for Shimadzu QGD files
 
