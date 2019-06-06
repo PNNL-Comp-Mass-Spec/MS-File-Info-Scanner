@@ -30,18 +30,18 @@ def process_file(dataFilePath):
 
     print('Input: ', dataFile)
     data, plotLabels, columnOptions = read_file(dataFile)
-    
+
     outputFilePath = str(dataFile.with_suffix('.png'))
-    
+
     if len(data.columns) == 2:
         print('Output:', outputFilePath)
         print()
-        print('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '"')            
+        print('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '"')
         print("  {:,}".format(len(data.index)) + ' data points')
         print()
         plot_lc_intensity(outputFilePath, data.columns, data[data.columns[0]], data[data.columns[1]], plotLabels['Title'], plotLabels['BottomRight'])
         return
-    
+
     if len(data.columns) == 3:
         print('Output:', outputFilePath)
         print()
@@ -50,7 +50,7 @@ def process_file(dataFilePath):
         print()
         plot_lc_mz(outputFilePath, data.columns, data[data.columns[0]], data[data.columns[1]], data[data.columns[2]], plotLabels['Title'], plotLabels['BottomRight'], plotLabels['BottomLeft'])
         return
-    
+
     if len(data.columns) == 4:
         print('Output:', outputFilePath)
         print()
@@ -59,10 +59,10 @@ def process_file(dataFilePath):
         print()
         plot_lc_mz_by_charge(outputFilePath, data.columns, data[data.columns[0]], data[data.columns[1]], data[data.columns[2]], data[data.columns[3]], plotLabels['Title'], plotLabels['BottomRight'], plotLabels['BottomLeft'])
         return
-        
+
     print('Unsupported number of columns: ' + str(len(data.columns)))
     print(data.columns)
-    
+
 def parse_metadata(plotOption):
     return {m.split('=')[0]:m.split('=')[1] for m in plotOption.split(';')}
 
@@ -84,7 +84,7 @@ def read_file(fpath):
 def set_title_and_labels(ax, plt, baseFontSize, title, xDataMin, xDataMax, xAxisLabel, yAxisLabel, yAxisFormatString, r_label, l_label):
 
     MAX_TITLE_LENGTH = 68
-    
+
     if len(title) > MAX_TITLE_LENGTH:
         # Trim out the middle portion of the title
         # Find the first space
@@ -101,19 +101,19 @@ def set_title_and_labels(ax, plt, baseFontSize, title, xDataMin, xDataMax, xAxis
             titleToUse = title[-MAX_TITLE_LENGTH:]
     else:
         titleToUse = title
-        
+
     plt.title(titleToUse, fontsize=baseFontSize+1)
-    
+
     # Assure that the X axis minimimum is not negative
     xmin, xmax = plt.xlim()
-    
+
     if xmin < 0:
         plt.xlim(xmin = 0)
 
     # When plotting BPI or TIC, fix the Y axis minimum at 0 and add 5% padding above the Y axis maximum
     # Otherwise, assure that the Y range isn't too small
-    ymin, ymax = plt.ylim()   
-    
+    ymin, ymax = plt.ylim()
+
     if "- TIC -" in title or "- BPI -" in title:
         ymin = 0
         ymax += ymax * 0.05
@@ -133,9 +133,9 @@ def set_title_and_labels(ax, plt, baseFontSize, title, xDataMin, xDataMax, xAxis
 
         if ymin < 0:
             ymin = 0
-            
-    plt.ylim(ymin = ymin, ymax = ymax)    
-    
+
+    plt.ylim(ymin = ymin, ymax = ymax)
+
     # Set the X axis maximum to the max X value (in other words, we don't want any padding)
     # However, if there is only one X data point, do add some padding
     if xDataMin == xDataMax:
@@ -143,7 +143,7 @@ def set_title_and_labels(ax, plt, baseFontSize, title, xDataMin, xDataMax, xAxis
         plt.xlim(xmax = xDataMax + 1)
     else:
         plt.xlim(xmax = xDataMax)
-    
+
     plt.xlabel(xAxisLabel, fontsize=baseFontSize)
     plt.ylabel(yAxisLabel, fontsize=baseFontSize)
 
@@ -151,16 +151,16 @@ def set_title_and_labels(ax, plt, baseFontSize, title, xDataMin, xDataMax, xAxis
     plt.yticks(fontsize=baseFontSize-2)
     ax.yaxis.set_major_formatter(mtick.FormatStrFormatter(yAxisFormatString))
     ax.yaxis.set_minor_locator(mtick.AutoMinorLocator())
-    
+
     # If the x axis range is 5 or less, assure that the minimum distance between major tick marks is at least 1
     if xDataMax - xDataMin <= 5:
         ax.xaxis.set_major_locator(mtick.MultipleLocator(1))
-    
+
     ax.xaxis.set_major_formatter(mtick.FuncFormatter(lambda x, p: format(int(x), ',')))
     ax.xaxis.set_minor_locator(mtick.AutoMinorLocator())
 
     plt.gcf().text(0.88, 0.02, r_label, fontsize=baseFontSize-1)
-    
+
     if len(l_label) > 0:
         plt.gcf().text(0.01, 0.02, l_label, fontsize=baseFontSize-1)
 
@@ -168,9 +168,9 @@ def plot_lc_intensity(outputFilePath, columnNames, lc_scan_num, intensities, tit
 
     fig = plt.figure(figsize=(8.5333,5), dpi=120)
     ax = fig.add_subplot(111, facecolor='whitesmoke')
-    
+
     baseFontSize = 12
-    
+
     if len(intensities) == 1:
         print ('Single point plot')
         ax.plot(lc_scan_num, intensities, linewidth=0.5, markersize=4, marker='o', color='darkblue')
@@ -179,7 +179,7 @@ def plot_lc_intensity(outputFilePath, columnNames, lc_scan_num, intensities, tit
 
     # X axis is typically scan number
     xAxisLabel = columnNames[0]
-    
+
     # Y axis is intensity
     yAxisLabel = columnNames[1]
 
@@ -187,23 +187,23 @@ def plot_lc_intensity(outputFilePath, columnNames, lc_scan_num, intensities, tit
     plt.tight_layout()
 
     plt.savefig(outputFilePath)
-    
+
     print('XY plot created')
-    
+
     # Uncomment to view the plot with an interactive GUI
     #plt.show()
 
 def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label, chargeData):
     fig = plt.figure(figsize=(8.5333,5.8333), dpi=120)
     ax = fig.add_subplot(111, facecolor='whitesmoke')
-    
+
     baseFontSize = 12
-    
+
     dataMin=np.min(zData)
     dataMedian=np.median(zData)
     dataMax=np.max(zData)
     dataRange = dataMax - dataMin
-    
+
     if chargeData:
         cm = plt.cm.get_cmap('Set1')
         normMin=dataMin
@@ -223,30 +223,30 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
     # print('Range:   ' + "{:10.2f}".format(dataRange))
     # print('NormMin: ' + "{:10.2f}".format(normMin))
     # print('NormMax: ' + "{:10.2f}".format(normMax))
-    
+
     if chargeData:
         # matplotlib color chart: https://stackoverflow.com/a/37232760
 
         colors = ['blue','red','green','hotpink','peru','darkviolet']
-        
+
         maxChargeWithData = 1
-        
+
         for chargeIndex in range(6):
             charge = chargeIndex + 1
-            
+
             indicesToUse = (zData == charge)
             seriesName = "Charge " + str(charge)
 
             # Change the alpha value based on the number of points to point
             pointsToPlot = len(xData[indicesToUse])
-            
+
             # print ('Charge {0} has {1} points'.format(charge, pointsToPlot))
-            
+
             if pointsToPlot < 1:
                 continue
 
             maxChargeWithData = charge
-            
+
             if pointsToPlot < 10:
                 alpha = 1
             else:
@@ -258,13 +258,13 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
                     alpha = 1
 
             # print("{:10,d}".format(pointsToPlot) + " points, alpha " + format(alpha, ".2f"))
-            
+
             sc = ax.scatter(xData[indicesToUse], yData[indicesToUse], s=1, color=colors[chargeIndex], alpha=alpha, label=seriesName)
 
         # Option 1: Create a legend using the actual symbols and sizes used by the data points
         #           This doesn't work with the small data point sizes that we're using
         # ax.legend()
-        
+
         # Option 2: Add custom colored text using plt.figtext
 
         legendStartX = 0.943
@@ -273,51 +273,51 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
 
         legendItems = []
         colorRow = 0
-        
+
         for plotColor in colors:
             colorRow += 1
 
             if colorRow > maxChargeWithData:
                 # print ("Legend will not include charge " + str(colorRow) + "+ or higher")
                 break
-                
+
             legendLabel = str(colorRow) + "+"
             legendPatch = mpatches.Patch(color=plotColor, label=legendLabel)
             legendItems.append(legendPatch)
 
             # Option 2
             plt.figtext(legendStartX + 0.016, legendStartY - colorRow/20.0, legendLabel, color=plotColor, fontsize=baseFontSize+2)
-          
+
         # Option 3: Create a legend with custom patches
         # plt.legend(handles=legendItems, shadow = True, bbox_to_anchor=[0.99, 0.85], loc='center right', facecolor='white')
 
         # Uncomment to inspect the contents of variables
         # pprint(vars(fig))
-        
+
         # for textItem in fig.texts:
         #    pprint(vars(textItem))
-                  
-    else:        
+
+    else:
         sc = ax.scatter(xData, yData, c=zData, vmin=normMin, vmax=normMax, s=1, cmap=cm, alpha=1)
 
     if not chargeData:
         # Optionally show a color scale an intensity legend
         # plt.colorbar(sc)
         pass
-             
+
     # X axis is typically scan number
     xAxisLabel = columnNames[0]
-    
+
     # Y axis is typically m/z, but could be monoisotopic mass
     yAxisLabel = columnNames[1]
-    
+
     set_title_and_labels(ax, plt, baseFontSize, title, np.min(xData), np.max(xData), xAxisLabel, yAxisLabel, '%.0f', r_label, l_label)
-   
+
     if chargeData:
         plt.tight_layout(rect=(0,0,0.96,1))
     else:
         plt.tight_layout()
-        
+
     return plt
 
 def plot_lc_mz(outputFilePath, columnNames, lc_scan_num, mz, intensities, title, r_label, l_label):
@@ -327,24 +327,24 @@ def plot_lc_mz(outputFilePath, columnNames, lc_scan_num, mz, intensities, title,
 
 def plot_lc_mz_by_charge(outputFilePath, columnNames, lc_scan_num, mz, intensities, charge, title, r_label, l_label):
     plt = generate_heat_map(columnNames, lc_scan_num, mz, charge, title, r_label, l_label, True)
-    
+
     plt.savefig(outputFilePath)
     print('2D plot created')
-    
+
 import sys
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print('\nError: please enter the file name to process (wildcards are supported)')
         exit()
-    
+
     fileNameMatchSpec = sys.argv[1]
 
     filesProcessed = 0
     for dataFile in glob.glob(fileNameMatchSpec):
         process_file(dataFile)
         filesProcessed += 1
-        
+
     if filesProcessed == 0:
         print('\nError: no files match:\n' + fileNameMatchSpec)
 
