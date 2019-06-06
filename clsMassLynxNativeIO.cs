@@ -689,7 +689,7 @@ namespace MSFileInfoScanner
                 thisMSData.CurrentDataDirPath = cleanMassLynxDataFolderPath;
 
                 // Use sFuncInfo to read the header information from the current file
-                var functionCount = NativeIOGetFunctionCount(ref cleanMassLynxDataFolderPath);
+                var functionCount = NativeIOGetFunctionCount(cleanMassLynxDataFolderPath);
                 thisMSData.InitializeFunctionInfo(functionCount);
 
                 if (thisMSData.FunctionCount <= 0)
@@ -926,7 +926,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="dataDirPath"></param>
         /// <returns>The number of functions, 0 if an error</returns>
-        private int NativeIOGetFunctionCount(ref string dataDirPath)
+        private int NativeIOGetFunctionCount(string dataDirPath)
         {
 
             var functionCount = 0;
@@ -1223,7 +1223,7 @@ namespace MSFileInfoScanner
             {
 
                 var indexFilePath = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(msFunctionInfo.FunctionNumber) + ".idx");
-                // indexFilePath  = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(ref msFunctionInfo.FunctionNumber) + ".sts");
+                // indexFilePath  = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(msFunctionInfo.FunctionNumber) + ".sts");
 
                 var indexFile = new FileInfo(indexFilePath);
 

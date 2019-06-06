@@ -459,7 +459,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <returns>XML (as string)</returns>
         /// <remarks></remarks>
         // ReSharper disable once UnusedMember.Global
-        public string CreateDatasetInfoXML(string datasetName, ref List<ScanStatsEntry> scanStats, DatasetFileInfo datasetInfo)
+        public string CreateDatasetInfoXML(string datasetName, List<ScanStatsEntry> scanStats, DatasetFileInfo datasetInfo)
         {
 
             return CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, new SampleInfo());
