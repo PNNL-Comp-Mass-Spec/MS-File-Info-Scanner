@@ -674,7 +674,8 @@ namespace MSFileInfoScanner
                                     "For example, to start processing at scan 10, use /ScanStart:10"));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /Debug to display debug information at the console, " +
-                                      "including showing the scan number prior to reading each scan's data"));
+                                      "including showing the scan number prior to reading each scan's data. " +
+                                      "Also, when /Debug is enabled, temporary files for creating plots with Python will not be deleted."));
                 Console.WriteLine();
 
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
