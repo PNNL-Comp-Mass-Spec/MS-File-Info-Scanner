@@ -1,3 +1,5 @@
+== Windows ==
+
 Install Python 3.6.2 or newer from https://www.python.org/downloads/
 
 From an admin level command prompt:
@@ -5,3 +7,18 @@ python-3.6.2.exe /passive InstallAllUsers=1 DefaultAllUsersTargetDir=C:\Python36
 
 After that finishes:
 C:\Python36\Scripts\pip install numpy matplotlib pandas
+
+
+== Linux (CentOS) ==
+
+sudo su -
+
+yum install python36
+yum install python36-pip
+/usr/bin/pip3 --version
+
+/usr/bin/pip3 install -U matplotlib
+/usr/bin/pip3 install -U pandas
+
+chmod -R a+rx /usr/local/lib64/python3.6
+chmod -R a+rx /usr/local/lib/python3.6/
