@@ -246,21 +246,23 @@ namespace MSFileInfoScanner
             ref double runtimeMinutes,
             bool storeInTICAndBPIPlot)
         {
-            for (var index = 0; index <= scanTimes.Count - 1; index++)
+            for (var scanIndex = 0; scanIndex <= scanTimes.Count - 1; scanIndex++)
             {
-                ticScanTimes.Add(scanTimes[index]);
-                ticScanNumbers.Add(index + 1);
+                ticScanTimes.Add(scanTimes[scanIndex]);
+
+                var scanNumber = scanIndex + 1;
+                ticScanNumbers.Add(scanNumber);
 
                 // Bump up runtimeMinutes if necessary
-                if (scanTimes[index] > runtimeMinutes)
+                if (scanTimes[scanIndex] > runtimeMinutes)
                 {
-                    runtimeMinutes = scanTimes[index];
+                    runtimeMinutes = scanTimes[scanIndex];
                 }
 
                 if (storeInTICAndBPIPlot)
                 {
                     // Use this TIC chromatogram for this dataset since there are no normal Mass Spectra
-                    mTICAndBPIPlot.AddDataTICOnly(index + 1, 1, scanTimes[index], intensities[index]);
+                    mTICAndBPIPlot.AddDataTICOnly(scanNumber, 1, scanTimes[scanIndex], intensities[scanIndex]);
                 }
 
             }
