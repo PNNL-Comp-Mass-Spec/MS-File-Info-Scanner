@@ -1910,14 +1910,15 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public class clsScanData
         {
-            private int mMSLevel;
 
-            public int IonCount;
+            public int IonCount { get; set; }
+
             public double[] IonsMZ;
             public float[] IonsIntensity;
 
             public byte[] Charge;
-            public int MSLevel => mMSLevel;
+
+            public int MSLevel { get; private set; }
 
             public int ScanNumber { get; }
 
@@ -1926,7 +1927,7 @@ namespace MSFileInfoScanner
             public clsScanData(int scanNumber, int msLevel, float scanTimeMinutes, int dataCount, double[] ionsMZ, float[] ionsIntensity, byte[] charge)
             {
                 ScanNumber = scanNumber;
-                mMSLevel = msLevel;
+                MSLevel = msLevel;
                 ScanTimeMinutes = scanTimeMinutes;
 
                 IonCount = dataCount;
@@ -1950,9 +1951,9 @@ namespace MSFileInfoScanner
                 }
             }
 
-            public void UpdateMSLevel(int NewMSLevel)
+            public void UpdateMSLevel(int newMSLevel)
             {
-                mMSLevel = NewMSLevel;
+                MSLevel = newMSLevel;
             }
 
             /// <summary>
