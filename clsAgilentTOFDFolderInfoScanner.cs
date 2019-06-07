@@ -329,7 +329,7 @@ namespace MSFileInfoScanner
                     //	        <AcqMode>TargetedMS2</AcqMode>
 
                     // Read the raw data to create the TIC and BPI
-                    ReadBinaryData(rootDirectory.FullName, datasetFileInfo);
+                    ReadBinaryData(rootDirectory.FullName, datasetFileInfo, acquisitionLengthMinutes);
 
                 }
 
@@ -357,7 +357,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private void ReadBinaryData(string dataDirectoryPath, DatasetFileInfo datasetFileInfo)
+        private void ReadBinaryData(string dataDirectoryPath, DatasetFileInfo datasetFileInfo, double acquisitionLengthMinutes)
         {
 
             try
@@ -376,6 +376,10 @@ namespace MSFileInfoScanner
                         if (datasetFileInfo.AcqTimeEnd.Subtract(runStartTime).TotalDays < 1)
                         {
                             datasetFileInfo.AcqTimeStart = runStartTime;
+                            if (acquisitionLengthMinutes > 0)
+                            {
+                                datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(acquisitionLengthMinutes);
+                            }
                         }
                     }
 
@@ -410,7 +414,8 @@ namespace MSFileInfoScanner
                 if (pWiz.SpectrumCount > 0)
                 {
                     // Process the spectral data
-                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes);
+                    var skipExistingScans = (pWiz.ChromatogramCount > 0);
+                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans: skipExistingScans);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }
 
