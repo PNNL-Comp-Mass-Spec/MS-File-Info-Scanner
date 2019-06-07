@@ -138,6 +138,14 @@ namespace MSFileInfoScanner.DatasetStats
             ExtendedScanInfo.Clear();
         }
 
+        /// <summary>
+        /// Display the scan number and scan filter for this scan
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return string.Format("Scan {0}: {1}", ScanNumber, ScanFilterText);
+        }
     }
 
 }

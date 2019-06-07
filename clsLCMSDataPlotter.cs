@@ -44,6 +44,11 @@ namespace MSFileInfoScanner
             public double Intensity;
 
             public byte Charge;
+
+            /// <summary>
+            /// Display the m/z, intensity, and charge
+            /// </summary>
+            /// <returns></returns>
             public override string ToString()
             {
                 if (Charge > 0)
@@ -1950,6 +1955,17 @@ namespace MSFileInfoScanner
                 mMSLevel = NewMSLevel;
             }
 
+            /// <summary>
+            /// Display the scan number and MSLevel
+            /// </summary>
+            /// <returns></returns>
+            public override string ToString()
+            {
+                if (MSLevel > 0)
+                    return string.Format("Scan {0}, MS{1}", ScanNumber, MSLevel);
+
+                return string.Format("Scan {0}", ScanNumber);
+            }
         }
 
         public class udtMSIonTypeComparer : IComparer<udtMSIonType>

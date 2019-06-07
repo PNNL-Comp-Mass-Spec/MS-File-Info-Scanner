@@ -45,6 +45,10 @@ namespace MSFileInfoScanner.DatasetStats
             BPIMedian = 0;
         }
 
+        /// <summary>
+        /// Display the scan count
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return "ScanCount: " + ScanCount;
