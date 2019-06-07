@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<DatasetInfo>
+  <Dataset>20190204QCShew_Intact_100ng_1</Dataset>
+  <ScanTypes>
+    <ScanType ScanCount="586" ScanFilterText="">HMS</ScanType>
+  </ScanTypes>
+  <AcquisitionInfo>
+    <ScanCount>586</ScanCount>
+    <ScanCountMS>586</ScanCountMS>
+    <ScanCountMSn>0</ScanCountMSn>
+    <Elution_Time_Max>99.84</Elution_Time_Max>
+    <AcqTimeMinutes>100.00</AcqTimeMinutes>
+    <StartTime>2019-02-04 09:50:44 PM</StartTime>
+    <EndTime>2019-02-04 11:30:44 PM</EndTime>
+    <FileSizeBytes>786569825</FileSizeBytes>
+    <InstrumentFiles>
+      <InstrumentFile Hash="e072da55a9f2220c8c25de38e649a8e3b01d767c" HashType="SHA1" Size="786448136">_FUNC001.DAT</InstrumentFile>
+    </InstrumentFiles>
+    <ProfileScanCountMS1>586</ProfileScanCountMS1>
+    <ProfileScanCountMS2>0</ProfileScanCountMS2>
+    <CentroidScanCountMS1>0</CentroidScanCountMS1>
+    <CentroidScanCountMS2>0</CentroidScanCountMS2>
+  </AcquisitionInfo>
+  <TICInfo>
+    <TIC_Max_MS>1.0167E+10</TIC_Max_MS>
+    <TIC_Max_MSn>0</TIC_Max_MSn>
+    <BPI_Max_MS>3.4292E+07</BPI_Max_MS>
+    <BPI_Max_MSn>0</BPI_Max_MSn>
+    <TIC_Median_MS>1.1117E+08</TIC_Median_MS>
+    <TIC_Median_MSn>0</TIC_Median_MSn>
+    <BPI_Median_MS>74730</BPI_Median_MS>
+    <BPI_Median_MSn>0</BPI_Median_MSn>
+  </TICInfo>
+</DatasetInfo>

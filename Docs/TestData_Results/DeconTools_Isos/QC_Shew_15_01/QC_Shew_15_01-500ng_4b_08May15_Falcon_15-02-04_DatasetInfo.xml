@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<DatasetInfo>
+  <Dataset>QC_Shew_15_01-500ng_4b_08May15_Falcon_15-02-04</Dataset>
+  <ScanTypes>
+    <ScanType ScanCount="1673" ScanFilterText="FTMS + p NSI Full ms">HMS</ScanType>
+  </ScanTypes>
+  <AcquisitionInfo>
+    <ScanCount>1673</ScanCount>
+    <ScanCountMS>1673</ScanCountMS>
+    <ScanCountMSn>0</ScanCountMSn>
+    <Elution_Time_Max>98.95</Elution_Time_Max>
+    <AcqTimeMinutes>98.95</AcqTimeMinutes>
+    <StartTime>2015-05-09 01:42:00 PM</StartTime>
+    <EndTime>2015-05-09 03:20:57 PM</EndTime>
+    <FileSizeBytes>27361046</FileSizeBytes>
+    <InstrumentFiles>
+      <InstrumentFile Hash="c91ff90152bcc71a70a5d241c941f689596ec418" HashType="SHA1" Size="27361046">QC_Shew_15_01-500ng_4b_08May15_Falcon_15-02-04_isos.csv</InstrumentFile>
+    </InstrumentFiles>
+  </AcquisitionInfo>
+  <TICInfo>
+    <TIC_Max_MS>1.3289E+10</TIC_Max_MS>
+    <TIC_Max_MSn>0</TIC_Max_MSn>
+    <BPI_Max_MS>4.7183E+08</BPI_Max_MS>
+    <BPI_Max_MSn>0</BPI_Max_MSn>
+    <TIC_Median_MS>7.3297E+08</TIC_Median_MS>
+    <TIC_Median_MSn>0</TIC_Median_MSn>
+    <BPI_Median_MS>5.1869E+06</BPI_Median_MS>
+    <BPI_Median_MSn>0</BPI_Median_MSn>
+  </TICInfo>
+</DatasetInfo>

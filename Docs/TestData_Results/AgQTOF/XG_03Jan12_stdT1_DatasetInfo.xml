@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<DatasetInfo>
+  <Dataset>XG_03Jan12_stdT1</Dataset>
+  <ScanTypes>
+    <ScanType ScanCount="7" ScanFilterText="">HMS</ScanType>
+    <ScanType ScanCount="221" ScanFilterText="">HMSn</ScanType>
+  </ScanTypes>
+  <AcquisitionInfo>
+    <ScanCount>228</ScanCount>
+    <ScanCountMS>7</ScanCountMS>
+    <ScanCountMSn>221</ScanCountMSn>
+    <Elution_Time_Max>1.01</Elution_Time_Max>
+    <AcqTimeMinutes>90.00</AcqTimeMinutes>
+    <StartTime>2012-01-04 08:14:07 AM</StartTime>
+    <EndTime>2012-01-04 09:44:07 AM</EndTime>
+    <FileSizeBytes>353764173</FileSizeBytes>
+  </AcquisitionInfo>
+  <TICInfo>
+    <TIC_Max_MS>1.0632E+06</TIC_Max_MS>
+    <TIC_Max_MSn>8566</TIC_Max_MSn>
+    <BPI_Max_MS>24122</BPI_Max_MS>
+    <BPI_Max_MSn>314</BPI_Max_MSn>
+    <TIC_Median_MS>318205</TIC_Median_MS>
+    <TIC_Median_MSn>2778</TIC_Median_MSn>
+    <BPI_Median_MS>5263</BPI_Median_MS>
+    <BPI_Median_MSn>104</BPI_Median_MSn>
+  </TICInfo>
+</DatasetInfo>

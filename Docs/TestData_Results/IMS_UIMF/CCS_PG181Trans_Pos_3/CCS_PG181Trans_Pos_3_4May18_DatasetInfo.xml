@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<DatasetInfo>
+  <Dataset>CCS_PG181Trans_Pos_3_4May18</Dataset>
+  <ScanTypes>
+    <ScanType ScanCount="207" ScanFilterText="IMS">HMS</ScanType>
+  </ScanTypes>
+  <AcquisitionInfo>
+    <ScanCount>207</ScanCount>
+    <ScanCountMS>207</ScanCountMS>
+    <ScanCountMSn>0</ScanCountMSn>
+    <Elution_Time_Max>3.45</Elution_Time_Max>
+    <AcqTimeMinutes>3.45</AcqTimeMinutes>
+    <StartTime>2018-05-04 11:57:41 AM</StartTime>
+    <EndTime>2018-05-04 12:01:08 PM</EndTime>
+    <FileSizeBytes>621670400</FileSizeBytes>
+    <InstrumentFiles>
+      <InstrumentFile Hash="68c51515fa4a77ab077b5a2ea35cacd118dcbbdb" HashType="SHA1" Size="621670400">CCS_PG181Trans_Pos_3_4May18.uimf</InstrumentFile>
+    </InstrumentFiles>
+    <ProfileScanCountMS1>207</ProfileScanCountMS1>
+    <ProfileScanCountMS2>0</ProfileScanCountMS2>
+    <CentroidScanCountMS1>0</CentroidScanCountMS1>
+    <CentroidScanCountMS2>0</CentroidScanCountMS2>
+  </AcquisitionInfo>
+  <TICInfo>
+    <TIC_Max_MS>6.2519E+07</TIC_Max_MS>
+    <TIC_Max_MSn>0</TIC_Max_MSn>
+    <BPI_Max_MS>1.7497E+06</BPI_Max_MS>
+    <BPI_Max_MSn>0</BPI_Max_MSn>
+    <TIC_Median_MS>4.9212E+07</TIC_Median_MS>
+    <TIC_Median_MSn>0</TIC_Median_MSn>
+    <BPI_Median_MS>1.299E+06</BPI_Median_MS>
+    <BPI_Median_MSn>0</BPI_Median_MSn>
+  </TICInfo>
+</DatasetInfo>

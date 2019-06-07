@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<DatasetInfo>
+  <Dataset>Sdata_Exp5NQ_PRISM_F21_03Apr17_Smeagol</Dataset>
+  <ScanTypes>
+    <ScanType ScanCount="8378" ScanFilterText="+ c NSI SRM ms2">CID-SRM</ScanType>
+  </ScanTypes>
+  <AcquisitionInfo>
+    <ScanCount>8378</ScanCount>
+    <ScanCountMS>0</ScanCountMS>
+    <ScanCountMSn>8378</ScanCountMSn>
+    <Elution_Time_Max>27.09</Elution_Time_Max>
+    <AcqTimeMinutes>27.09</AcqTimeMinutes>
+    <StartTime>2017-04-04 01:14:52 PM</StartTime>
+    <EndTime>2017-04-04 01:41:58 PM</EndTime>
+    <FileSizeBytes>4453272</FileSizeBytes>
+    <InstrumentFiles>
+      <InstrumentFile Hash="c43d2fdcc6b21fb7eb83c047c39afff974c9e919" HashType="SHA1" Size="4453272">Sdata_Exp5NQ_PRISM_F21_03Apr17_Smeagol.raw</InstrumentFile>
+    </InstrumentFiles>
+    <ProfileScanCountMS1>0</ProfileScanCountMS1>
+    <ProfileScanCountMS2>0</ProfileScanCountMS2>
+    <CentroidScanCountMS1>0</CentroidScanCountMS1>
+    <CentroidScanCountMS2>8378</CentroidScanCountMS2>
+  </AcquisitionInfo>
+  <TICInfo>
+    <TIC_Max_MS>0</TIC_Max_MS>
+    <TIC_Max_MSn>2.2831E+06</TIC_Max_MSn>
+    <BPI_Max_MS>0</BPI_Max_MS>
+    <BPI_Max_MSn>1.215E+06</BPI_Max_MSn>
+    <TIC_Median_MS>0</TIC_Median_MS>
+    <TIC_Median_MSn>3.4591</TIC_Median_MSn>
+    <BPI_Median_MS>0</BPI_Median_MS>
+    <BPI_Median_MSn>1.2071</BPI_Median_MSn>
+  </TICInfo>
+</DatasetInfo>

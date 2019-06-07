@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<DatasetInfo>
+  <Dataset>2015_08_16_MeOH_Blank_1_01_3924</Dataset>
+  <ScanTypes>
+    <ScanType ScanCount="217" ScanFilterText="">HMS</ScanType>
+  </ScanTypes>
+  <AcquisitionInfo>
+    <ScanCount>217</ScanCount>
+    <ScanCountMS>217</ScanCountMS>
+    <ScanCountMSn>0</ScanCountMSn>
+    <Elution_Time_Max>3.05</Elution_Time_Max>
+    <AcqTimeMinutes>3.05</AcqTimeMinutes>
+    <StartTime>2015-08-16 05:53:51 PM</StartTime>
+    <EndTime>2015-08-16 05:56:54 PM</EndTime>
+    <FileSizeBytes>1480512484</FileSizeBytes>
+    <InstrumentFiles>
+      <InstrumentFile Hash="daa468d3062ce895935a5b966120f3e67b4f5531" HashType="SHA1" Size="1480512484">analysis.baf</InstrumentFile>
+      <InstrumentFile Hash="eba3c75d6b4788a3e23d2243f68f19c0b3dbedee" HashType="SHA1" Size="910163968">ser</InstrumentFile>
+    </InstrumentFiles>
+  </AcquisitionInfo>
+  <TICInfo>
+    <TIC_Max_MS>8.397E+06</TIC_Max_MS>
+    <TIC_Max_MSn>0</TIC_Max_MSn>
+    <BPI_Max_MS>1.251E+06</BPI_Max_MS>
+    <BPI_Max_MSn>0</BPI_Max_MSn>
+    <TIC_Median_MS>2.17E+06</TIC_Median_MS>
+    <TIC_Median_MSn>0</TIC_Median_MSn>
+    <BPI_Median_MS>842600</BPI_Median_MS>
+    <BPI_Median_MSn>0</BPI_Median_MSn>
+  </TICInfo>
+</DatasetInfo>

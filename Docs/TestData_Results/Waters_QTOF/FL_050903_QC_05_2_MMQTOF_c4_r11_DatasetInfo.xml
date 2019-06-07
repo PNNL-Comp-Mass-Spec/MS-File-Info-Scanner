@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<DatasetInfo>
+  <Dataset>FL_050903_QC_05_2_MMQTOF_c4_r11</Dataset>
+  <ScanTypes>
+    <ScanType ScanCount="1590" ScanFilterText="">HMS</ScanType>
+  </ScanTypes>
+  <AcquisitionInfo>
+    <ScanCount>1590</ScanCount>
+    <ScanCountMS>1590</ScanCountMS>
+    <ScanCountMSn>0</ScanCountMSn>
+    <Elution_Time_Max>30.00</Elution_Time_Max>
+    <AcqTimeMinutes>30.00</AcqTimeMinutes>
+    <StartTime>2005-09-05 10:51:32 AM</StartTime>
+    <EndTime>2005-09-05 11:21:33 AM</EndTime>
+    <FileSizeBytes>49536574</FileSizeBytes>
+    <InstrumentFiles>
+      <InstrumentFile Hash="288322a67715fecf7c02f37a31973c6e894d49dc" HashType="SHA1" Size="49396650">_FUNC001.DAT</InstrumentFile>
+    </InstrumentFiles>
+    <ProfileScanCountMS1>1577</ProfileScanCountMS1>
+    <ProfileScanCountMS2>0</ProfileScanCountMS2>
+    <CentroidScanCountMS1>13</CentroidScanCountMS1>
+    <CentroidScanCountMS2>0</CentroidScanCountMS2>
+  </AcquisitionInfo>
+  <TICInfo>
+    <TIC_Max_MS>38499</TIC_Max_MS>
+    <TIC_Max_MSn>0</TIC_Max_MSn>
+    <BPI_Max_MS>2556</BPI_Max_MS>
+    <BPI_Max_MSn>0</BPI_Max_MSn>
+    <TIC_Median_MS>4216.5</TIC_Median_MS>
+    <TIC_Median_MSn>0</TIC_Median_MSn>
+    <BPI_Median_MS>104</BPI_Median_MS>
+    <BPI_Median_MSn>0</BPI_Median_MSn>
+  </TICInfo>
+</DatasetInfo>

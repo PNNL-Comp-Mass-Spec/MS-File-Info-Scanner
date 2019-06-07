@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<DatasetInfo>
+  <Dataset>15CPTAC_UCEC_P_PNNL_20180503_B4S3_f11_REP-17-12-06</Dataset>
+  <ScanTypes>
+    <ScanType ScanCount="7488" ScanFilterText="FTMS + p NSI Full ms">HMS</ScanType>
+    <ScanType ScanCount="43120" ScanFilterText="FTMS + c NSI d Full ms2 0@hcd30.00">HCD-HMSn</ScanType>
+  </ScanTypes>
+  <AcquisitionInfo>
+    <ScanCount>50608</ScanCount>
+    <ScanCountMS>7488</ScanCountMS>
+    <ScanCountMSn>43120</ScanCountMSn>
+    <Elution_Time_Max>110.00</Elution_Time_Max>
+    <AcqTimeMinutes>110.00</AcqTimeMinutes>
+    <StartTime>2018-06-09 03:31:55 AM</StartTime>
+    <EndTime>2018-06-09 05:21:54 AM</EndTime>
+    <FileSizeBytes>861751054</FileSizeBytes>
+    <InstrumentFiles>
+      <InstrumentFile Hash="115025528bafaa355681472a3ea0cd3209ed4082" HashType="SHA1" Size="861751054">15CPTAC_UCEC_P_PNNL_20180503_B4S3_f11_REP-17-12-06.raw</InstrumentFile>
+    </InstrumentFiles>
+    <ProfileScanCountMS1>7488</ProfileScanCountMS1>
+    <ProfileScanCountMS2>0</ProfileScanCountMS2>
+    <CentroidScanCountMS1>0</CentroidScanCountMS1>
+    <CentroidScanCountMS2>43120</CentroidScanCountMS2>
+    <CentroidMS1ScansClassifiedAsProfile>0</CentroidMS1ScansClassifiedAsProfile>
+    <CentroidMS2ScansClassifiedAsProfile>2</CentroidMS2ScansClassifiedAsProfile>
+  </AcquisitionInfo>
+  <TICInfo>
+    <TIC_Max_MS>4.3005E+10</TIC_Max_MS>
+    <TIC_Max_MSn>2.6013E+09</TIC_Max_MSn>
+    <BPI_Max_MS>1.301E+10</BPI_Max_MS>
+    <BPI_Max_MSn>5.4906E+08</BPI_Max_MSn>
+    <TIC_Median_MS>1.9599E+09</TIC_Median_MS>
+    <TIC_Median_MSn>2.2482E+06</TIC_Median_MSn>
+    <BPI_Median_MS>1.0095E+08</BPI_Median_MS>
+    <BPI_Median_MSn>178587</BPI_Median_MSn>
+  </TICInfo>
+</DatasetInfo>

@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<DatasetInfo>
+  <Dataset>EXP-Solv_DBM_100pM_pos_2Dec14_Columbia_DI</Dataset>
+  <ScanTypes>
+    <ScanType ScanCount="161" ScanFilterText="IMS">HMS</ScanType>
+  </ScanTypes>
+  <AcquisitionInfo>
+    <ScanCount>161</ScanCount>
+    <ScanCountMS>161</ScanCountMS>
+    <ScanCountMSn>0</ScanCountMSn>
+    <Elution_Time_Max>0.00</Elution_Time_Max>
+    <AcqTimeMinutes>0.00</AcqTimeMinutes>
+    <StartTime>2014-12-02 05:05:12 PM</StartTime>
+    <EndTime>2014-12-02 05:05:12 PM</EndTime>
+    <FileSizeBytes>225117184</FileSizeBytes>
+    <InstrumentFiles>
+      <InstrumentFile Hash="e86a687a3e07712c78ab6391f4bcee7ee2cd7ba6" HashType="SHA1" Size="225117184">EXP-Solv_DBM_100pM_pos_2Dec14_Columbia_DI.uimf</InstrumentFile>
+    </InstrumentFiles>
+    <ProfileScanCountMS1>161</ProfileScanCountMS1>
+    <ProfileScanCountMS2>0</ProfileScanCountMS2>
+    <CentroidScanCountMS1>0</CentroidScanCountMS1>
+    <CentroidScanCountMS2>0</CentroidScanCountMS2>
+  </AcquisitionInfo>
+  <TICInfo>
+    <TIC_Max_MS>2.9499E+07</TIC_Max_MS>
+    <TIC_Max_MSn>0</TIC_Max_MSn>
+    <BPI_Max_MS>176189</BPI_Max_MS>
+    <BPI_Max_MSn>0</BPI_Max_MSn>
+    <TIC_Median_MS>2.3572E+07</TIC_Median_MS>
+    <TIC_Median_MSn>0</TIC_Median_MSn>
+    <BPI_Median_MS>146757</BPI_Median_MS>
+    <BPI_Median_MSn>0</BPI_Median_MSn>
+  </TICInfo>
+</DatasetInfo>

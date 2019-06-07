@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<DatasetInfo>
+  <Dataset>Froze_Core_2015_S2_10_20_24_Metab</Dataset>
+  <ScanTypes>
+    <ScanType ScanCount="5020" ScanFilterText="">GC-MS</ScanType>
+  </ScanTypes>
+  <AcquisitionInfo>
+    <ScanCount>5020</ScanCount>
+    <ScanCountMS>5020</ScanCountMS>
+    <ScanCountMSn>0</ScanCountMSn>
+    <Elution_Time_Max>37.49</Elution_Time_Max>
+    <AcqTimeMinutes>37.49</AcqTimeMinutes>
+    <StartTime>2016-05-24 09:51:00 PM</StartTime>
+    <EndTime>2016-05-24 10:28:29 PM</EndTime>
+    <FileSizeBytes>6256128</FileSizeBytes>
+    <InstrumentFiles>
+      <InstrumentFile Hash="b88bf620b322cb11e997d23536b94de0e497d381" HashType="SHA1" Size="6256128">DATA.MS</InstrumentFile>
+    </InstrumentFiles>
+    <ProfileScanCountMS1>0</ProfileScanCountMS1>
+    <ProfileScanCountMS2>0</ProfileScanCountMS2>
+    <CentroidScanCountMS1>5020</CentroidScanCountMS1>
+    <CentroidScanCountMS2>0</CentroidScanCountMS2>
+  </AcquisitionInfo>
+  <TICInfo>
+    <TIC_Max_MS>6.4E+07</TIC_Max_MS>
+    <TIC_Max_MSn>0</TIC_Max_MSn>
+    <BPI_Max_MS>7.7E+06</BPI_Max_MS>
+    <BPI_Max_MSn>0</BPI_Max_MSn>
+    <TIC_Median_MS>567667</TIC_Median_MS>
+    <TIC_Median_MSn>0</TIC_Median_MSn>
+    <BPI_Median_MS>83820</BPI_Median_MS>
+    <BPI_Median_MSn>0</BPI_Median_MSn>
+  </TICInfo>
+</DatasetInfo>
