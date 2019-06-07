@@ -402,24 +402,26 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Read the spectra from the data file
         /// </summary>
-        /// <param name="ticStored"></param>
-        /// <param name="runtimeMinutes"></param>
+        /// <param name="ticStored">The calling method should set this to true if the TIC was already stored</param>
+        /// <param name="runtimeMinutes">Maximum acquisition time (updated by this method)</param>
+        /// <param name="skipExistingScans">When true, skip scans already defined in mDatasetStatsSummarizer</param>
         /// <returns>True if at least 50% of the spectra were successfully read</returns>
-        public bool StoreMSSpectraInfo(bool ticStored, ref double runtimeMinutes)
+        public bool StoreMSSpectraInfo(bool ticStored, ref double runtimeMinutes, bool skipExistingScans)
         {
-            return StoreMSSpectraInfo(ticStored, ref runtimeMinutes, out _, out _);
+            return StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans, out _, out _);
         }
 
         /// <summary>
         /// Read the spectra from the data file
         /// </summary>
-        /// <param name="ticStored"></param>
-        /// <param name="runtimeMinutes"></param>
-        /// <param name="scanCountSuccess"></param>
-        /// <param name="scanCountError"></param>
+        /// <param name="ticStored">The calling method should set this to true if the TIC was already stored</param>
+        /// <param name="runtimeMinutes">Maximum acquisition time (updated by this method)</param>
+        /// <param name="skipExistingScans">When true, skip scans already defined in mDatasetStatsSummarizer</param>
+        /// <param name="scanCountSuccess">Output: number of scans successfully read</param>
+        /// <param name="scanCountError">Output: number of scans that could not be read</param>
         /// <returns>True if at least 50% of the spectra were successfully read</returns>
         [HandleProcessCorruptedStateExceptions]
-        public bool StoreMSSpectraInfo(bool ticStored, ref double runtimeMinutes, out int scanCountSuccess, out int scanCountError)
+        public bool StoreMSSpectraInfo(bool ticStored, ref double runtimeMinutes, bool skipExistingScans, out int scanCountSuccess, out int scanCountError)
         {
             scanCountSuccess = 0;
             scanCountError = 0;
@@ -440,6 +442,7 @@ namespace MSFileInfoScanner
                 OnStatusEvent("Reading spectra");
                 var lastProgressTime = DateTime.UtcNow;
 
+                var scanNumber = 0;
                 for (var scanIndex = 0; scanIndex <= scanTimes.Length - 1; scanIndex++)
                 {
 
@@ -451,9 +454,11 @@ namespace MSFileInfoScanner
                         // Obtain the raw mass spectrum
                         var msDataSpectrum = mPWiz.GetSpectrum(scanIndex);
 
+                        scanNumber = scanIndex + 1;
+
                         var scanStatsEntry = new ScanStatsEntry
                         {
-                            ScanNumber = scanIndex + 1,
+                            ScanNumber = scanNumber,
                             ScanType = msDataSpectrum.Level
                         };
 
@@ -548,14 +553,19 @@ namespace MSFileInfoScanner
 
                         }
 
-                        mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
+                        var addScan = !skipExistingScans || skipExistingScans && !mDatasetStatsSummarizer.TryGetScan(scanNumber, out _);
+
+                        if (addScan)
+                        {
+                            mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
+                        }
 
                         if (mSaveTICAndBPI && !ticStored)
                         {
                             mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimes[scanIndex], bpi, tic);
                         }
 
-                        if (mSaveLCMS2DPlots)
+                        if (mSaveLCMS2DPlots && addScan)
                         {
                             mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimes[scanIndex], msDataSpectrum.Mzs.Length, msDataSpectrum.Mzs, msDataSpectrum.Intensities);
                         }
@@ -569,13 +579,13 @@ namespace MSFileInfoScanner
                     }
                     catch (Exception ex)
                     {
-                        OnErrorEvent("Error loading header info for scan " + scanIndex + 1 + ": " + ex.Message);
+                        OnErrorEvent("Error loading header info for scan " + scanNumber, ex);
                         scanCountError += 1;
                     }
 
                     if (DateTime.UtcNow.Subtract(lastProgressTime).TotalSeconds > 15)
                     {
-                        OnDebugEvent(" ... " + ((scanIndex + 1) / (double)scanTimes.Length * 100).ToString("0.0") + "% complete");
+                        OnDebugEvent(string.Format(" ... {0:F1}% complete", scanNumber / (double)scanTimes.Length * 100));
                         lastProgressTime = DateTime.UtcNow;
                     }
 

@@ -463,7 +463,8 @@ namespace MSFileInfoScanner
                 if (pWiz.SpectrumCount > 0 && !srmDataCached)
                 {
                     // Process the spectral data (though only if we did not process SRM data)
-                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes);
+                    var skipExistingScans = (pWiz.ChromatogramCount > 0);
+                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
 
                     datasetFileInfo.ScanCount = pWiz.SpectrumCount;

@@ -1005,7 +1005,6 @@ namespace MSFileInfoScanner
                 var ticStored = false;
                 var srmDataCached = false;
                 double runtimeMinutes = 0;
-
                 // Note that SRM .Wiff files will only have chromatograms, and no spectra
 
                 if (pWiz.ChromatogramCount > 0)
@@ -1018,7 +1017,8 @@ namespace MSFileInfoScanner
                 if (pWiz.SpectrumCount > 0 && !srmDataCached)
                 {
                     // Process the spectral data (though only if we did not process SRM data)
-                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes);
+                    var skipExistingScans = (pWiz.ChromatogramCount > 0);
+                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }
 

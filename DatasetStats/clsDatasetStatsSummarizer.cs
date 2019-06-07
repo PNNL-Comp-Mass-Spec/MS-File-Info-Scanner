@@ -933,6 +933,25 @@ namespace MSFileInfoScanner.DatasetStats
         }
 
         /// <summary>
+        /// Retrieve the scan entry of the given scan number
+        /// </summary>
+        /// <param name="scanNumber"></param>
+        /// <param name="scanEntry"></param>
+        /// <returns>True if the scan is found, otherwise false</returns>
+        public bool TryGetScan(int scanNumber, out ScanStatsEntry scanEntry)
+        {
+            var query = (from item in mDatasetScanStats where item.ScanNumber == scanNumber select item).ToList();
+            if (query.Any())
+            {
+                scanEntry = query.First();
+                return true;
+            }
+
+            scanEntry = null;
+            return false;
+        }
+
+        /// <summary>
         /// Updates the scan type information for the specified scan number
         /// </summary>
         /// <param name="scanNumber"></param>
