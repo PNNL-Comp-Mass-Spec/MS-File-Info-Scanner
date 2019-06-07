@@ -286,7 +286,7 @@ namespace MSFileInfoScanner
                             }
                             else
                             {
-                                dataCountImplicitlyIncluded = dataCountImplicitlyIncluded + 1;
+                                dataCountImplicitlyIncluded += 1;
                             }
 
                             if (index % 10000 == 0)
