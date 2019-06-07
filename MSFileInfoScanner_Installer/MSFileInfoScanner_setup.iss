@@ -12,32 +12,46 @@ WelcomeLabel2=This will install [name/ver] on your computer.
 ; WelcomeLabel2=Welcome message%n%nAdditional sentence
 
 [Files]
-Source: ..\bin\MSFileInfoScanner.exe                 ; DestDir: {app}
-Source: ..\bin\MSFileInfoScanner.pdb                 ; DestDir: {app}
-Source: ..\bin\BrukerDataReader.dll                  ; DestDir: {app}
-Source: ..\bin\ChemstationMSFileReader.dll           ; DestDir: {app}
-Source: ..\bin\Ionic.Zip.dll                         ; DestDir: {app}
-Source: ..\bin\MathNet.Numerics.dll                  ; DestDir: {app}
-Source: ..\bin\MSFileInfoScannerInterfaces.dll       ; DestDir: {app}
-Source: ..\bin\netcdf.dll                            ; DestDir: {app}
-Source: ..\bin\NetCDFReader.dll                      ; DestDir: {app}
-Source: ..\bin\OxyPlot.dll                           ; DestDir: {app}
-Source: ..\bin\OxyPlot.Wpf.dll                       ; DestDir: {app}
-Source: ..\bin\PRISM.dll                             ; DestDir: {app}
-Source: ..\bin\ProteowizardWrapper.dll               ; DestDir: {app}
-Source: ..\bin\SpectraTypeClassifier.dll             ; DestDir: {app}
-Source: ..\bin\System.Data.SQLite.dll                ; DestDir: {app}
-Source: ..\lib\RawFileReaderLicense.doc              ; DestDir: {app}
-Source: ..\bin\ThermoFisher.CommonCore.BackgroundSubtraction.dll    ; DestDir: {app}
-Source: ..\bin\ThermoFisher.CommonCore.Data.dll                     ; DestDir: {app}
-Source: ..\bin\ThermoFisher.CommonCore.MassPrecisionEstimator.dll   ; DestDir: {app}
-Source: ..\bin\ThermoFisher.CommonCore.RawFileReader.dll            ; DestDir: {app}
-Source: ..\bin\ThermoRawFileReader.dll                              ; DestDir: {app}
-Source: ..\bin\UIMFLibrary.dll                                      ; DestDir: {app}
+Source: ..\bin\MSFileInfoScanner.exe             ; DestDir: {app}
+Source: ..\bin\MSFileInfoScanner.pdb             ; DestDir: {app}
+Source: ..\bin\agtsampleinforw.dll               ; DestDir: {app}
+Source: ..\bin\BaseCommon.dll                    ; DestDir: {app}
+Source: ..\bin\BaseDataAccess.dll                ; DestDir: {app}
+Source: ..\bin\BaseError.dll                     ; DestDir: {app}
+Source: ..\bin\BaseTof.dll                       ; DestDir: {app}
+Source: ..\bin\BDal.CXt.Lc.dll                   ; DestDir: {app}
+Source: ..\bin\BDal.CXt.Lc.Factory.dll           ; DestDir: {app}
+Source: ..\bin\BDal.CXt.Lc.Interfaces.dll        ; DestDir: {app}
+Source: ..\bin\BDal.CXt.Lc.UntU2.dll             ; DestDir: {app}
+Source: ..\bin\BrukerDataReader.dll              ; DestDir: {app}
+Source: ..\bin\ChemstationMSFileReader.dll       ; DestDir: {app}
+Source: ..\bin\DataReader.dll                    ; DestDir: {app}
+Source: ..\bin\Interop.EDAL.dll                  ; DestDir: {app}
+Source: ..\bin\Interop.HSREADWRITELib.dll        ; DestDir: {app}
+Source: ..\bin\Ionic.Zip.dll                     ; DestDir: {app}
+Source: ..\bin\MassSpecDataReader.dll            ; DestDir: {app}
+Source: ..\bin\MathNet.Numerics.dll              ; DestDir: {app}
+Source: ..\bin\MIDAC.dll                         ; DestDir: {app}
+Source: ..\bin\MSFileInfoScannerInterfaces.dll   ; DestDir: {app}
+Source: ..\bin\netcdf.dll                        ; DestDir: {app}
+Source: ..\bin\NetCDFReader.dll                  ; DestDir: {app}
+Source: ..\bin\OxyPlot.dll                       ; DestDir: {app}
+Source: ..\bin\OxyPlot.Wpf.dll                   ; DestDir: {app}
+Source: ..\bin\PRISM.dll                         ; DestDir: {app}
+Source: ..\bin\ProteowizardWrapper.dll           ; DestDir: {app}
+Source: ..\bin\SpectraTypeClassifier.dll         ; DestDir: {app}
+Source: ..\bin\System.Data.SQLite.dll            ; DestDir: {app}
+Source: ..\lib\RawFileReaderLicense.doc                              ; DestDir: {app}
+Source: ..\bin\ThermoFisher.CommonCore.BackgroundSubtraction.dll     ; DestDir: {app}
+Source: ..\bin\ThermoFisher.CommonCore.Data.dll                      ; DestDir: {app}
+Source: ..\bin\ThermoFisher.CommonCore.MassPrecisionEstimator.dll    ; DestDir: {app}
+Source: ..\bin\ThermoFisher.CommonCore.RawFileReader.dll             ; DestDir: {app}
+Source: ..\bin\ThermoRawFileReader.dll                               ; DestDir: {app}
+Source: ..\bin\UIMFLibrary.dll                                       ; DestDir: {app}
 
-Source: ..\Readme.md                                  ; DestDir: {app}
-Source: ..\RevisionHistory.txt                        ; DestDir: {app}
-Source: Images\delete_16x.ico                         ; DestDir: {app}
+Source: ..\Readme.md                                                 ; DestDir: {app}
+Source: ..\RevisionHistory.txt                                       ; DestDir: {app}
+Source: Images\delete_16x.ico                                        ; DestDir: {app}
 
 [Dirs]
 Name: {commonappdata}\MSFileInfoScanner; Flags: uninsalwaysuninstall
