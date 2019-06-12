@@ -15,7 +15,7 @@ namespace SpectraTypeClassifier
         #region "Constants and Enums"
 
         /// <summary>
-        /// Defeault spacing between adjacent data points for deciding that data is thresholded (default is 50 ppm)
+        /// Default spacing between adjacent data points for deciding that data is thresholded (default is 50 ppm)
         /// </summary>
         public const int DEFAULT_PPM_DIFF_THRESHOLD = 50;
 
@@ -272,8 +272,8 @@ namespace SpectraTypeClassifier
 
                         if (previousMz > 0 && mz > previousMz)
                         {
-                            var delMPPM = 1000000.0 * (mz - previousMz) / mz;
-                            lstPpmDiffs.Add(delMPPM);
+                            var delMassPPM = 1000000.0 * (mz - previousMz) / mz;
+                            lstPpmDiffs.Add(delMassPPM);
                         }
                         previousMz = mz;
                     }
@@ -445,8 +445,8 @@ namespace SpectraTypeClassifier
 
                 if (previousMz > 0 && mz > previousMz)
                 {
-                    var delMppm = 1000000.0 * (mz - previousMz) / mz;
-                    lstPpmDiffs.Add(delMppm);
+                    var delMassPPM = 1000000.0 * (mz - previousMz) / mz;
+                    lstPpmDiffs.Add(delMassPPM);
                 }
             }
 
@@ -505,8 +505,8 @@ namespace SpectraTypeClassifier
 
                 if (previousMz > 0 && mz > previousMz)
                 {
-                    var delMppm = 1000000.0 * (mz - previousMz) / mz;
-                    lstPpmDiffs.Add(delMppm);
+                    var delMassPPM = 1000000.0 * (mz - previousMz) / mz;
+                    lstPpmDiffs.Add(delMassPPM);
                 }
             }
 
@@ -530,7 +530,7 @@ namespace SpectraTypeClassifier
             string spectrumDescription;
             string comparison;
 
-            if (medianDelMppm < PpmDiffThreshold)
+            if (medianDelMassPPM < PpmDiffThreshold)
             {
                 // Profile mode data
                 centroided = false;
@@ -549,7 +549,7 @@ namespace SpectraTypeClassifier
             // Example messages:
             //  Profile mode spectrum, since 23.3 is less than 50 ppm
             //  Centroided spectrum, since 78.6 is greater than 50 ppm
-            var msg = string.Format("  {0} spectrum, since {1:F1} is {2} {3} ppm", spectrumDescription, medianDelMppm, comparison, PpmDiffThreshold);
+            var msg = string.Format("  {0} spectrum, since {1:F1} is {2} {3} ppm", spectrumDescription, medianDelMassPPM, comparison, PpmDiffThreshold);
 
             NotifyDebug(spectrumTitle, msg);
 
@@ -620,8 +620,8 @@ namespace SpectraTypeClassifier
 
                 if (previousMz > 0 && mz > previousMz)
                 {
-                    var delMPPM = 1000000.0 * (mz - previousMz) / mz;
-                    lstPpmDiffs.Add(delMPPM);
+                    var delMassPPM = 1000000.0 * (mz - previousMz) / mz;
+                    lstPpmDiffs.Add(delMassPPM);
                 }
                 previousMz = mz;
             }
@@ -664,7 +664,7 @@ namespace SpectraTypeClassifier
         }
 
         /// <summary>
-        /// Send a message via a debug event, optionally prepending with a title
+        /// Send a message via a debug event, optionally prefixing with a title
         /// </summary>
         /// <param name="spectrumTitle"></param>
         /// <param name="msg"></param>
