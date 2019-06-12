@@ -14,6 +14,9 @@ namespace MSFileInfoScanner
 {
     public abstract class clsMSFileInfoProcessorBaseClass : iMSFileInfoProcessor
     {
+        public const int PROGRESS_SPECTRA_LOADED = 90;
+        public const int PROGRESS_SAVED_TIC_AND_BPI_PLOT = 92;
+        public const int PROGRESS_SAVED_2D_PLOTS = 99;
 
         /// <summary>
         /// Constructor
@@ -319,6 +322,29 @@ namespace MSFileInfoScanner
             }
         }
 
+        /// <summary>
+        /// Computes the incremental progress that has been made beyond currentTaskProgressAtStart, based on the subtask progress and the next overall progress level
+        /// </summary>
+        /// <param name="currentTaskProgressAtStart">Progress at the start of the current subtask (value between 0 and 100)</param>
+        /// <param name="currentTaskProgressAtEnd">Progress at the start of the current subtask (value between 0 and 100)</param>
+        /// <param name="subTaskProgress">Progress of the current subtask (value between 0 and 100)</param>
+        /// <returns>Overall progress (value between 0 and 100)</returns>
+        /// <remarks></remarks>
+        public static float ComputeIncrementalProgress(float currentTaskProgressAtStart, float currentTaskProgressAtEnd, float subTaskProgress)
+        {
+            if (subTaskProgress < 0)
+            {
+                return currentTaskProgressAtStart;
+            }
+
+            if (subTaskProgress >= 100)
+            {
+                return currentTaskProgressAtEnd;
+            }
+
+            return (float)(currentTaskProgressAtStart + (subTaskProgress / 100.0) * (currentTaskProgressAtEnd - currentTaskProgressAtStart));
+        }
+
         private bool CreateDatasetInfoFile(string inputFileName, string outputDirectoryPath)
         {
 
@@ -547,7 +573,6 @@ namespace MSFileInfoScanner
             var success = mLCMS2DPlotOverview.Save2DPlots(datasetName, outputDirectoryPath, "HighAbu_", scanModeSuffixAddon);
 
             return success;
-
         }
 
         /// <summary>
@@ -601,6 +626,11 @@ namespace MSFileInfoScanner
                     mLCMS2DPlot.Options.DeleteTempFiles = false;
                 }
 
+                if (mSaveTICAndBPI || mSaveLCMS2DPlots)
+                {
+                    OnProgressUpdate("Saving plots", PROGRESS_SPECTRA_LOADED);
+                }
+
                 bool success;
                 if (mSaveTICAndBPI)
                 {
@@ -619,13 +649,35 @@ namespace MSFileInfoScanner
                     }
 
                     createQCPlotHtmlFile = true;
+
+                    OnProgressUpdate("TIC and BPI plots saved", PROGRESS_SAVED_TIC_AND_BPI_PLOT);
                 }
 
                 if (mSaveLCMS2DPlots)
                 {
+                    // Determine the number of times we'll be calling Save2DPlots or CreateOverview2DPlots
+                    var lcMSPlotStepsTotal = 1;
+
+                    if (mLCMS2DOverviewPlotDivisor > 0)
+                    {
+                        lcMSPlotStepsTotal++;
+                    }
+
+                    if (mLCMS2DPlot.Options.PlottingDeisotopedData)
+                    {
+                        lcMSPlotStepsTotal++;
+                        if (mLCMS2DOverviewPlotDivisor > 0)
+                        {
+                            lcMSPlotStepsTotal++;
+                        }
+                    }
+
                     // Write out the 2D plot of m/z vs. intensity
                     // Plots will be named Dataset_LCMS.png and Dataset_LCMSn.png
                     success = mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName);
+                    var lcMSPlotStepsComplete = 1;
+                    ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
+
                     if (!success)
                     {
                         successOverall = false;
@@ -637,6 +689,9 @@ namespace MSFileInfoScanner
                             // Also save the Overview 2D Plots
                             // Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
                             success = CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DOverviewPlotDivisor);
+                            lcMSPlotStepsComplete++;
+                            ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
+
                             if (!success)
                             {
                                 successOverall = false;
@@ -654,13 +709,20 @@ namespace MSFileInfoScanner
                             mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
 
                             mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName, "", "_zoom");
+                            lcMSPlotStepsComplete++;
+                            ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
+
                             if (mLCMS2DOverviewPlotDivisor > 0)
                             {
                                 CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DOverviewPlotDivisor, "_zoom");
+                                lcMSPlotStepsComplete++;
+                                ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
                             }
                         }
                     }
                     createQCPlotHtmlFile = true;
+
+                    OnProgressUpdate("2D plots saved", PROGRESS_SAVED_2D_PLOTS);
                 }
 
                 if (mCreateDatasetInfoFile)
@@ -1042,6 +1104,14 @@ namespace MSFileInfoScanner
         protected void PostProcessTasks()
         {
             ShowInstrumentFiles();
+        }
+
+        private void ReportProgressSaving2DPlots(int lcMSPlotStepsComplete, int lcMSPlotStepsTotal)
+        {
+            OnProgressUpdate("Saving 2D plots ", ComputeIncrementalProgress(
+                                 PROGRESS_SAVED_TIC_AND_BPI_PLOT,
+                                 PROGRESS_SAVED_2D_PLOTS,
+                                 lcMSPlotStepsComplete / (float)lcMSPlotStepsTotal * 100));
         }
 
         protected void ResetResults()

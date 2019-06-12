@@ -11,6 +11,8 @@ namespace MSFileInfoScanner
     [CLSCompliant(false)]
     public class clsProteoWizardDataParser : EventNotifier
     {
+        private const int PROGRESS_START = 0;
+        private const int PROGRESS_SCAN_TIMES_LOADED = 10;
 
         private readonly MSDataFileReader mPWiz;
 
@@ -25,6 +27,10 @@ namespace MSFileInfoScanner
 
         private readonly Regex mGetQ1MZ;
         private readonly Regex mGetQ3MZ;
+
+        private DateTime mLastScanLoadingDebugProgressTime;
+        private DateTime mLastScanLoadingStatusProgressTime;
+        private bool mReportedTotalSpectraToExamine;
 
         private bool mWarnedAccessViolationException;
 
@@ -140,6 +146,40 @@ namespace MSFileInfoScanner
             return indexMatch;
         }
 
+        private void MonitorScanTimeLoadingProgress(int scansLoaded, int totalScans)
+        {
+
+            if (DateTime.UtcNow.Subtract(mLastScanLoadingDebugProgressTime).TotalSeconds < 30)
+                return;
+
+            mLastScanLoadingDebugProgressTime = DateTime.UtcNow;
+
+            if (totalScans == 0)
+                return;
+
+            if (!mReportedTotalSpectraToExamine)
+            {
+                OnStatusEvent(string.Format(" ... {0:N0} total spectra to examine", totalScans));
+                mReportedTotalSpectraToExamine = true;
+            }
+
+            var percentComplete = scansLoaded / (float)totalScans * 100;
+
+            if (DateTime.UtcNow.Subtract(mLastScanLoadingStatusProgressTime).TotalMinutes > 5)
+            {
+                OnStatusEvent(string.Format("Obtaining scan times and MSLevels, examined {0:N0} / {1:N0} spectra", scansLoaded, totalScans));
+                mLastScanLoadingStatusProgressTime = DateTime.UtcNow;
+                return;
+            }
+
+            var percentCompleteOverall = clsMSFileInfoProcessorBaseClass.ComputeIncrementalProgress(
+                PROGRESS_START,
+                PROGRESS_SCAN_TIMES_LOADED,
+                percentComplete);
+
+            OnProgressUpdate(string.Format("Spectra examined: {0:N0}", scansLoaded), percentCompleteOverall);
+        }
+
         public void PossiblyUpdateAcqTimeStart(DatasetFileInfo datasetFileInfo, double runtimeMinutes)
         {
             if (runtimeMinutes > 0)
@@ -168,8 +208,9 @@ namespace MSFileInfoScanner
             // Attempt to parse out the product m/z
             var parentMZFound = ExtractQ1MZ(chromatogramID, out var parentMZ);
             var productMZFound = ExtractQ3MZ(chromatogramID, out var productMZ);
+            var spectrumCount = scanTimes.Length;
 
-            for (var index = 0; index <= scanTimes.Length - 1; index++)
+            for (var index = 0; index <= spectrumCount - 1; index++)
             {
                 // Find the ScanNumber in the TIC nearest to scanTimes[index]
                 var indexMatch = FindNearestInList(ticScanTimes, scanTimes[index]);
@@ -352,7 +393,6 @@ namespace MSFileInfoScanner
                         ticStored = storeInTICAndBPIPlot;
 
                         datasetFileInfo.ScanCount = scanTimes.Length;
-
                     }
 
                     if (MSDataFileReader.TryGetCVParam(cvParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out _))
@@ -430,22 +470,30 @@ namespace MSFileInfoScanner
 
             try
             {
+                Console.WriteLine();
                 OnStatusEvent("Obtaining scan times and MSLevels (this could take several minutes)");
+                mLastScanLoadingDebugProgressTime = DateTime.UtcNow;
+                mLastScanLoadingStatusProgressTime = DateTime.UtcNow;
+                mReportedTotalSpectraToExamine = false;
 
-                mPWiz.GetScanTimesAndMsLevels(out var scanTimes, out var msLevels);
+                mPWiz.GetScanTimesAndMsLevels(out var scanTimes, out var msLevels, MonitorScanTimeLoadingProgress);
+
+                var spectrumCount = scanTimes.Length;
 
                 // The scan times returned by .GetScanTimesAndMsLevels() are the acquisition time in seconds from the start of the analysis
                 // Convert these to minutes
-                for (var scanIndex = 0; scanIndex <= scanTimes.Length - 1; scanIndex++)
+                for (var scanIndex = 0; scanIndex <= spectrumCount - 1; scanIndex++)
                 {
                     scanTimes[scanIndex] /= 60.0;
                 }
 
+                Console.WriteLine();
                 OnStatusEvent("Reading spectra");
-                var lastProgressTime = DateTime.UtcNow;
+                var lastDebugProgressTime = DateTime.UtcNow;
+                var lastStatusProgressTime = DateTime.UtcNow;
 
                 var scanNumber = 0;
-                for (var scanIndex = 0; scanIndex <= scanTimes.Length - 1; scanIndex++)
+                for (var scanIndex = 0; scanIndex <= spectrumCount - 1; scanIndex++)
                 {
 
                     try
@@ -585,11 +633,26 @@ namespace MSFileInfoScanner
                         scanCountError += 1;
                     }
 
-                    if (DateTime.UtcNow.Subtract(lastProgressTime).TotalSeconds > 15)
+                    if (DateTime.UtcNow.Subtract(lastStatusProgressTime).TotalMinutes > 5)
                     {
-                        OnDebugEvent(string.Format(" ... {0:F1}% complete", scanNumber / (double)scanTimes.Length * 100));
-                        lastProgressTime = DateTime.UtcNow;
+                        OnStatusEvent(string.Format("Reading spectra, loaded {0:N0} / {1:N0} spectra",  scanNumber, spectrumCount));
+                        lastStatusProgressTime = DateTime.UtcNow;
+                        lastDebugProgressTime = DateTime.UtcNow;
+                        continue;
                     }
+
+                    if (!(DateTime.UtcNow.Subtract(lastDebugProgressTime).TotalSeconds > 15))
+                        continue;
+
+                    lastDebugProgressTime = DateTime.UtcNow;
+                    var percentComplete = scanNumber / (float)spectrumCount * 100;
+
+                    var percentCompleteOverall = clsMSFileInfoProcessorBaseClass.ComputeIncrementalProgress(
+                        PROGRESS_SCAN_TIMES_LOADED,
+                        clsMSFileInfoProcessorBaseClass.PROGRESS_SPECTRA_LOADED,
+                        percentComplete);
+
+                    OnProgressUpdate(string.Format("Spectra processed: {0:N0}", scanNumber), percentCompleteOverall);
 
                 }
 
