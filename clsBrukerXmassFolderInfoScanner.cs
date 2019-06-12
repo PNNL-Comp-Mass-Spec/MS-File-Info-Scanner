@@ -1259,7 +1259,7 @@ namespace MSFileInfoScanner
                         progressThresholdSeconds += 2;
 
                     var percentComplete = scansProcessed / (float)scanCount * 100;
-                    OnProgressUpdate(string.Format("Scans processed: {0:N0}", scansProcessed), percentComplete);
+                    OnProgressUpdate(string.Format("Spectra processed: {0:N0}", scansProcessed), percentComplete);
 
                 }
 

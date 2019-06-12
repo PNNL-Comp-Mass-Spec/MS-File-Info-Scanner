@@ -50,7 +50,6 @@ namespace MSFileInfoScanner
                 // This avoids having to reload all of the data using xcaliburAccessor
                 const int msLevelFilter = 1;
                 overallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(msLevelFilter);
-
             }
             else
             {
@@ -277,7 +276,7 @@ namespace MSFileInfoScanner
                     progressThresholdSeconds += 2;
 
                 var percentComplete = scansProcessed / (float)totalScansToProcess * 100;
-                OnProgressUpdate(string.Format("Scans processed: {0:N0}", scansProcessed), percentComplete);
+                OnProgressUpdate(string.Format("Spectra processed: {0:N0}", scansProcessed), percentComplete);
 
             }
 
@@ -446,7 +445,6 @@ namespace MSFileInfoScanner
                         // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
                         LoadScanDetails(xcaliburAccessor);
                     }
-
 
                     if (mComputeOverallQualityScores)
                     {

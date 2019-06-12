@@ -503,7 +503,7 @@ namespace MSFileInfoScanner
                     progressThresholdSeconds += 2;
 
                 var percentComplete = masterFrameNumIndex / (float)masterFrameNumList.Count * 100;
-                OnProgressUpdate("Frames processed: " + masterFrameNumIndex, percentComplete);
+                OnProgressUpdate(string.Format("Frames processed: {0:N0}", masterFrameNumIndex), percentComplete);
 
             }
 

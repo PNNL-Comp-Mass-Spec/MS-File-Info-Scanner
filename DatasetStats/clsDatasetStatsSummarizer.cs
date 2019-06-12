@@ -7,8 +7,6 @@ using System.Xml;
 using PRISM;
 using SpectraTypeClassifier;
 
-// This class computes aggregate stats for a dataset
-//
 // -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Program started May 7, 2009
@@ -25,7 +23,9 @@ using SpectraTypeClassifier;
 
 namespace MSFileInfoScanner.DatasetStats
 {
-
+    /// <summary>
+    /// This class computes aggregate stats for a dataset
+    /// </summary>
     public class DatasetStatsSummarizer : EventNotifier
     {
 
