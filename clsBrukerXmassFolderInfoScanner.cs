@@ -17,6 +17,7 @@ namespace MSFileInfoScanner
 
         public const string BRUKER_BAF_FILE_NAME = "analysis.baf";
         public const string BRUKER_TDF_FILE_NAME = "analysis.tdf";
+        public const string BRUKER_TDF_BIN_FILE_NAME = "analysis.tdf_bin";
         public const string BRUKER_SER_FILE_NAME = "ser";
         public const string BRUKER_FID_FILE_NAME = "fid";
         public const string BRUKER_EXTENSION_BAF_FILE_NAME = "extension.baf";
@@ -921,6 +922,7 @@ namespace MSFileInfoScanner
                 var instrumentDataFiles = new List<string> {
                     BRUKER_BAF_FILE_NAME,
                     BRUKER_TDF_FILE_NAME,
+                    BRUKER_TDF_BIN_FILE_NAME,
                     BRUKER_SER_FILE_NAME,
                     BRUKER_FID_FILE_NAME,
                     BRUKER_EXTENSION_BAF_FILE_NAME
