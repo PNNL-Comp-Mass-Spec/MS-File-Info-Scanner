@@ -101,12 +101,18 @@ namespace MSFileInfoScannerUnitTests
         [Test]
         public void TestMedian()
         {
+#pragma warning disable 618
             var medianUtilities = new clsMedianUtilities();
 
             var testValues = new List<double> { 5, 9, 20, 6, 8, 9.2, 9.5, 12, 15, 18, 20, 15 };
 
+            var median = MathNet.Numerics.Statistics.Statistics.Median(testValues);
+
             medianUtilities.EvenNumberedListCountBehavior = clsMedianUtilities.eEventListCountBehaviorType.ReportMidpointAverage;
-            var medianMidpointAverage = medianUtilities.Median(testValues);
+            var medianMidpointAverage = medianUtilities.Median_Old(testValues);
+
+            medianUtilities.EvenNumberedListCountBehavior = clsMedianUtilities.eEventListCountBehaviorType.ReportNearest;
+            var medianReportNearest = medianUtilities.Median_Old(testValues);
 
             testValues.Sort();
 
@@ -116,14 +122,15 @@ namespace MSFileInfoScannerUnitTests
                 Console.WriteLine(value);
             }
 
+            Console.WriteLine("Median using MathNet.Numerics:                              {0}", median);
+            Assert.AreEqual(10.75, median, 0.0001, "Median mode:  MathNet.Numerics");
+
             Console.WriteLine("Median using the average of the values around the midpoint: {0}", medianMidpointAverage);
             Assert.AreEqual(10.75, medianMidpointAverage, 0.0001, "Median mode: midpoint average");
 
-            medianUtilities.EvenNumberedListCountBehavior = clsMedianUtilities.eEventListCountBehaviorType.ReportNearest;
-            var medianReportNearest = medianUtilities.Median(testValues);
-
             Console.WriteLine("Median using the value nearest the midpoint:                {0}", medianReportNearest);
             Assert.AreEqual(9.5, medianReportNearest, 0.0001, "Median mode: report nearest");
+#pragma warning restore 618
         }
 
         [Test]
