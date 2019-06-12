@@ -16,6 +16,7 @@ namespace MSFileInfoScanner
     {
 
         public const string BRUKER_BAF_FILE_NAME = "analysis.baf";
+        public const string BRUKER_TDF_FILE_NAME = "analysis.tdf";
         public const string BRUKER_SER_FILE_NAME = "ser";
         public const string BRUKER_FID_FILE_NAME = "fid";
         public const string BRUKER_EXTENSION_BAF_FILE_NAME = "extension.baf";
@@ -363,7 +364,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Read data from the analysis.baf file using ProteoWizard
+        /// Read data from the analysis.baf or analysis.tdf file using ProteoWizard
         /// </summary>
         /// <param name="bafFileInfo"></param>
         /// <param name="datasetFileInfo"></param>
@@ -390,7 +391,7 @@ namespace MSFileInfoScanner
             {
                 if (bafFileInfo.Length > 1024 * 1024 * 1024)
                 {
-                    OnWarningEvent("analysis.baf file is over 1 GB; ProteoWizard typically cannot handle .baf files this large");
+                    OnWarningEvent(string.Format("{0} file is over 1 GB; ProteoWizard typically cannot handle .baf files this large", bafFileInfo.Name));
 
                     // Look for a ser file
                     if (bafFileInfo.Directory != null && File.Exists(Path.Combine(bafFileInfo.Directory.FullName, "ser")))
@@ -402,7 +403,7 @@ namespace MSFileInfoScanner
                     OnWarningEvent("ser file not found; trying ProteoWizard anyway");
                 }
 
-                // Open the analysis.baf (or extension.baf) file using the ProteoWizardWrapper
+                // Open the analysis.baf (or analysis.tdf or extension.baf) file using the ProteoWizardWrapper
                 OnDebugEvent("Determining acquisition info using ProteoWizard");
 
                 // ReSharper disable CommentTypo
@@ -483,7 +484,9 @@ namespace MSFileInfoScanner
                 // Error using ProteoWizard reader: unknown compressor id: 6bb2e64a-27a0-4575-a66a-4e312c8b9ad7
                 if (ex.Message.IndexOf("6bb2e64a-27a0-4575-a66a-4e312c8b9ad7", StringComparison.OrdinalIgnoreCase) > 0)
                 {
-                    OnWarningEvent("Most likely a corrupt analysis.baf file");
+                    // Most likely a corrupt analysis.baf file
+                    // Most likely a corrupt analysis.tdf file
+                    OnWarningEvent(string.Format("Most likely a corrupt {0} file", bafFileInfo.Name));
                 }
 
                 return false;
@@ -911,12 +914,13 @@ namespace MSFileInfoScanner
 
                 mDatasetStatsSummarizer.ClearCachedData();
 
-                // Look for the analysis.baf file in datasetDirectory
+                // Look for the analysis.baf or analysis.tdf file in datasetDirectory
                 // Use its modification time as the AcqTime start and End values
-                // If we cannot find the analysis.baf file, then look for a ser file or a fid file
+                // If we cannot find the analysis.baf or analysis.tdf file, look for a ser file or a fid file
 
                 var instrumentDataFiles = new List<string> {
                     BRUKER_BAF_FILE_NAME,
+                    BRUKER_TDF_FILE_NAME,
                     BRUKER_SER_FILE_NAME,
                     BRUKER_FID_FILE_NAME,
                     BRUKER_EXTENSION_BAF_FILE_NAME
@@ -1044,7 +1048,7 @@ namespace MSFileInfoScanner
 
                         if (!serOrFidParsed && !bafFileChecked)
                         {
-                            // Look for an analysis.baf file
+                            // Look for an analysis.baf or analysis.tdf file
                             ParseBAFFile(primaryInstrumentFile, datasetFileInfo, out _);
                         }
 

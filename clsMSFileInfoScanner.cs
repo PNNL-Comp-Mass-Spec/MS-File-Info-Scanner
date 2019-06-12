@@ -1545,6 +1545,7 @@ namespace MSFileInfoScanner
                                     // Agilent .D directory or Bruker .D directory
 
                                     if (Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 ||
+                                        Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_TDF_FILE_NAME).Length > 0 ||
                                         Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_SER_FILE_NAME).Length > 0 ||
                                         Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_FID_FILE_NAME).Length > 0 ||
                                         Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_idx").Length > 0 ||
@@ -1596,6 +1597,12 @@ namespace MSFileInfoScanner
                     else
                     {
                         if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+                        {
+                            mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
+                            knownMSDataType = true;
+
+                        }
+                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_TDF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
                             mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
                             knownMSDataType = true;
