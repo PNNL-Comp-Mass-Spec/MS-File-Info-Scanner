@@ -49,8 +49,6 @@ namespace MSFileInfoScanner.DatasetStats
 
         private DatasetSummaryStats mDatasetSummaryStats;
 
-        private readonly clsMedianUtilities mMedianUtils;
-
         #endregion
 
         #region "Properties"
@@ -88,11 +86,9 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public DatasetStatsSummarizer()
         {
-            FileDate = "June 6, 2019";
+            FileDate = "June 12, 2019";
 
             ErrorMessage = string.Empty;
-
-            mMedianUtils = new clsMedianUtilities();
 
             mSpectraTypeClassifier = new clsSpectrumTypeClassifier();
             RegisterEvents(mSpectraTypeClassifier);
@@ -277,11 +273,11 @@ namespace MSFileInfoScanner.DatasetStats
                     }
                 }
 
-                summaryStats.MSStats.TICMedian = mMedianUtils.Median(ticListMS);
-                summaryStats.MSStats.BPIMedian = mMedianUtils.Median(bpiListMS);
+                summaryStats.MSStats.TICMedian = MathNet.Numerics.Statistics.Statistics.Median(ticListMS);
+                summaryStats.MSStats.BPIMedian = MathNet.Numerics.Statistics.Statistics.Median(bpiListMS);
 
-                summaryStats.MSnStats.TICMedian = mMedianUtils.Median(ticListMSn);
-                summaryStats.MSnStats.BPIMedian = mMedianUtils.Median(bpiListMSn);
+                summaryStats.MSnStats.TICMedian = MathNet.Numerics.Statistics.Statistics.Median(ticListMSn);
+                summaryStats.MSnStats.BPIMedian = MathNet.Numerics.Statistics.Statistics.Median(bpiListMSn);
 
                 return true;
 

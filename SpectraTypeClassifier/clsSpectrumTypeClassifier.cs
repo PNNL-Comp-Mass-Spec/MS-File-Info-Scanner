@@ -62,8 +62,6 @@ namespace SpectraTypeClassifier
 
         #endregion
 
-        private readonly clsMedianUtilities mMedianUtils;
-
         #region "Events"
 
         public event ReadingSpectraEventHandler ReadingSpectra;
@@ -197,8 +195,6 @@ namespace SpectraTypeClassifier
         /// </summary>
         public clsSpectrumTypeClassifier()
         {
-            mMedianUtils = new clsMedianUtilities();
-
             mCentroidedSpectra = new Dictionary<int, int>();
             mCentroidedSpectraClassifiedAsProfile = new Dictionary<int, int>();
             mTotalSpectra = new Dictionary<int, int>();
@@ -529,7 +525,7 @@ namespace SpectraTypeClassifier
             if (lstPpmDiffs.Count < 4)
                 return true;
 
-            var medianDelMppm = mMedianUtils.Median(lstPpmDiffs);
+            var medianDelMassPPM = MathNet.Numerics.Statistics.Statistics.Median(lstPpmDiffs);
             bool centroided;
             string spectrumDescription;
             string comparison;

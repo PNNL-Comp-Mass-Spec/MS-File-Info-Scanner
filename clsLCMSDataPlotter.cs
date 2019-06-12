@@ -484,31 +484,23 @@ namespace MSFileInfoScanner
                 //  (see TrimCachedData for more details)
 
                 TrimCachedData(Options.MaxPointsToPlot, Options.MinPointsPerSpectrum);
-
             }
 
-            var dataCount = 0;
-            double intensitySum = 0;
+            var dataToAverage = new List<double>();
 
             for (var scanIndex = 0; scanIndex <= mScans.Count - 1; scanIndex++)
             {
+                if (msLevelFilter != 0 && mScans[scanIndex].MSLevel != msLevelFilter)
+                    continue;
 
-                if (msLevelFilter == 0 || mScans[scanIndex].MSLevel == msLevelFilter)
+                for (var ionIndex = 0; ionIndex <= mScans[scanIndex].IonCount - 1; ionIndex++)
                 {
-                    for (var ionIndex = 0; ionIndex <= mScans[scanIndex].IonCount - 1; ionIndex++)
-                    {
-                        intensitySum += mScans[scanIndex].IonsIntensity[ionIndex];
-                        dataCount += 1;
-                    }
+                    dataToAverage.Add(mScans[scanIndex].IonsIntensity[ionIndex]);
                 }
             }
 
-            if (dataCount > 0)
-            {
-                return (float)intensitySum / dataCount;
-            }
-
-            return 0;
+            var average = MathNet.Numerics.Statistics.Statistics.Mean(dataToAverage);
+            return (float)average;
         }
 
         private void CentroidMSData(
@@ -1123,6 +1115,7 @@ namespace MSFileInfoScanner
             plotContainer.AddData(points, 0);
         }
 
+        [Obsolete("Use MathNet.Numerics.Statistics.Statistics.Median")]
         private float ComputeMedian(float[] values, int itemCount)
         {
             var average = false;
@@ -1195,11 +1188,9 @@ namespace MSFileInfoScanner
 
             // Populate points and scanTimePoints with the data
             // At the same time, determine the range of m/z and intensity values
-            // Lastly, compute the median and average intensity values
 
             // Instantiate the list to track the data points
             var pointsByCharge = new List<List<ScatterPoint>>();
-
 
             var maxMonoMass = double.MaxValue;
             if (Options.PlottingDeisotopedData)
@@ -1386,8 +1377,7 @@ namespace MSFileInfoScanner
 
             var points = new List<ScatterPoint>();
 
-            var sortedIntensityListCount = 0;
-            var sortedIntensityList = new float[mPointCountCached + 1];
+            var intensityList = new List<float>();
 
             colorScaleMinIntensity = float.MaxValue;
             colorScaleMaxIntensity = 0;
@@ -1410,18 +1400,14 @@ namespace MSFileInfoScanner
 
                 for (var ionIndex = 0; ionIndex <= mScans[scanIndex].IonCount - 1; ionIndex++)
                 {
-                    if (sortedIntensityListCount >= sortedIntensityList.Length)
-                    {
-                        // Need to reserve more room (this is unexpected)
-                        Array.Resize(ref sortedIntensityList, sortedIntensityList.Length * 2);
-                    }
+                    var currentValue = mScans[scanIndex].IonsIntensity[ionIndex];
 
-                    sortedIntensityList[sortedIntensityListCount] = mScans[scanIndex].IonsIntensity[ionIndex];
+                    intensityList.Add(currentValue);
 
                     var dataPoint = new ScatterPoint(mScans[scanIndex].ScanNumber,
                                                      mScans[scanIndex].IonsMZ[ionIndex])
                     {
-                        Value = mScans[scanIndex].IonsIntensity[ionIndex]
+                        Value = currentValue
                     };
 
                     points.Add(dataPoint);
@@ -1431,13 +1417,11 @@ namespace MSFileInfoScanner
                         debugWriter?.WriteLine(
                             mScans[scanIndex].ScanNumber + '\t' +
                             mScans[scanIndex].IonsMZ[ionIndex] + '\t' +
-                            mScans[scanIndex].IonsIntensity[ionIndex]);
+                            currentValue);
                     }
 
-                    UpdateMinMax(sortedIntensityList[sortedIntensityListCount], ref colorScaleMinIntensity, ref colorScaleMaxIntensity);
+                    UpdateMinMax(currentValue, ref colorScaleMinIntensity, ref colorScaleMaxIntensity);
                     UpdateMinMax(mScans[scanIndex].IonsMZ[ionIndex], ref minMZ, ref maxMZ);
-
-                    sortedIntensityListCount += 1;
                 }
 
                 UpdateMinMax(mScans[scanIndex].ScanTimeMinutes, ref scanTimeMin, ref scanTimeMax);
@@ -1453,12 +1437,11 @@ namespace MSFileInfoScanner
                 }
             }
 
-            if (points.Count <= 0 || sortedIntensityListCount <= 0)
+            if (points.Count == 0 || intensityList.Count == 0)
                 return points;
 
-            // Compute median and average intensity values
-            Array.Sort(sortedIntensityList, 0, sortedIntensityListCount);
-            var medianIntensity = ComputeMedian(sortedIntensityList, sortedIntensityListCount);
+            // Compute median intensity value
+            var medianIntensity = MathNet.Numerics.Statistics.Statistics.Median(intensityList);
 
             // Set the minimum color intensity to the median
             colorScaleMinIntensity = medianIntensity;

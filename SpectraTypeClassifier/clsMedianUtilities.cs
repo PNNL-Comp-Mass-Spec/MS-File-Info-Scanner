@@ -11,6 +11,7 @@ namespace SpectraTypeClassifier
     /// </summary>
     /// <remarks>From http://stackoverflow.com/questions/4140719/i-need-c-sharp-function-that-will-calculate-median </remarks>
     [CLSCompliant(true)]
+    [Obsolete("Use MathNet.Numerics.Statistics.Statistics.Median()")]
     public class clsMedianUtilities
     {
 
@@ -36,7 +37,7 @@ namespace SpectraTypeClassifier
         /// Partitions the given list around a pivot element such that all elements on left of pivot are less than or equal to pivot
         /// and the ones at thr right are greater than pivot. This method can be used for sorting, N-order statistics such as
         /// as median finding algorithms.
-        /// Pivot is selected ranodmly if random number generator is supplied else its selected as last element in the list.
+        /// Pivot is selected randomly if random number generator is supplied else its selected as last element in the list.
         /// Reference: Introduction to Algorithms 3rd Edition, Corman et al, pp 171
         /// </summary>
         private int Partition(IList<double> lstData, int startIndex, int endIndex, Random oRandom)
@@ -130,6 +131,16 @@ namespace SpectraTypeClassifier
         /// </summary>
         /// <remarks>lstData will be mutated (changed) when determining the median</remarks>
         public double Median(IList<double> lstData)
+        {
+            var median = MathNet.Numerics.Statistics.Statistics.Median(lstData);
+            return median;
+        }
+
+        /// <summary>
+        /// Compute the median of the values in lstData
+        /// </summary>
+        /// <remarks>lstData will be mutated (changed) when determining the median</remarks>
+        public double Median_Old(IList<double> lstData)
         {
 
             if (lstData == null || lstData.Count < 1)
