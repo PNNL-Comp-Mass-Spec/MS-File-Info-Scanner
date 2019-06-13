@@ -284,7 +284,7 @@ namespace MSFileInfoScanner.DatasetStats
             }
             catch (Exception ex)
             {
-                ReportError("Error in ComputeScanStatsSummary: " + ex.Message);
+                ReportError("Error in ComputeScanStatsSummary", ex);
                 return false;
             }
 
@@ -363,8 +363,6 @@ namespace MSFileInfoScanner.DatasetStats
             SampleInfo sampleInfo)
         {
 
-            bool success;
-
             try
             {
                 if (scanStats == null)
@@ -382,16 +380,14 @@ namespace MSFileInfoScanner.DatasetStats
                     writer.WriteLine(CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, sampleInfo));
                 }
 
-                success = true;
+                return true;
 
             }
             catch (Exception ex)
             {
-                ReportError("Error in CreateDatasetInfoFile: " + ex.Message);
-                success = false;
+                ReportError("Error in CreateDatasetInfoFile", ex);
+                return false;
             }
-
-            return success;
 
         }
 
@@ -704,7 +700,7 @@ namespace MSFileInfoScanner.DatasetStats
             }
             catch (Exception ex)
             {
-                ReportError("Error in CreateDatasetInfoXML: " + ex.Message);
+                ReportError("Error in CreateDatasetInfoXML", ex);
             }
 
             // This code will only be reached if an exception occurs
@@ -895,7 +891,7 @@ namespace MSFileInfoScanner.DatasetStats
             }
             catch (Exception ex)
             {
-                ReportError("Error in CreateScanStatsFile: " + ex.Message);
+                ReportError("Error in CreateScanStatsFile", ex);
                 return false;
             }
 
@@ -924,10 +920,18 @@ namespace MSFileInfoScanner.DatasetStats
 
         }
 
-        private void ReportError(string message)
+        private void ReportError(string message, Exception ex = null)
         {
-            ErrorMessage = string.Copy(message);
-            OnErrorEvent(message);
+            if (ex is null)
+            {
+                ErrorMessage = message;
+            }
+            else
+            {
+                ErrorMessage = message + ": " + ex.Message;
+            }
+
+            OnErrorEvent(message, ex);
         }
 
         /// <summary>
@@ -1012,8 +1016,6 @@ namespace MSFileInfoScanner.DatasetStats
 
             var writeHeaders = false;
 
-            bool success;
-
             try
             {
                 if (scanStats == null)
@@ -1091,16 +1093,14 @@ namespace MSFileInfoScanner.DatasetStats
 
                 }
 
-                success = true;
+                return true;
 
             }
             catch (Exception ex)
             {
-                ReportError("Error in UpdateDatasetStatsTextFile: " + ex.Message);
-                success = false;
+                ReportError("Error in UpdateDatasetStatsTextFile", ex);
+                return false;
             }
-
-            return success;
 
         }
 
