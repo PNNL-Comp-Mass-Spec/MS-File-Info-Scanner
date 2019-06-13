@@ -86,7 +86,7 @@ namespace MSFileInfoScanner
                                 ScanNumber = datasetFileInfo.ScanCount,
                                 ScanType = 1,
                                 ScanTypeName = "MALDI-HMS",
-                                ScanFilterText = "",
+                                ScanFilterText = string.Empty,
                                 ElutionTime = "0",
                                 TotalIonIntensity = "0",
                                 BasePeakIntensity = "0",

@@ -229,7 +229,7 @@ namespace MSFileInfoScanner.DatasetStats
                     return false;
                 }
 
-                ErrorMessage = "";
+                ErrorMessage = string.Empty;
 
                 var scanStatsCount = scanStats.Count;
 
@@ -371,7 +371,7 @@ namespace MSFileInfoScanner.DatasetStats
                     return false;
                 }
 
-                ErrorMessage = "";
+                ErrorMessage = string.Empty;
 
                 // If CreateDatasetInfoXML() used a StringBuilder to cache the XML data, then we would have to use Encoding.Unicode
                 // However, CreateDatasetInfoXML() now uses a MemoryStream, so we're able to use UTF8
@@ -484,7 +484,7 @@ namespace MSFileInfoScanner.DatasetStats
                     return string.Empty;
                 }
 
-                ErrorMessage = "";
+                ErrorMessage = string.Empty;
 
                 DatasetSummaryStats summaryStats;
                 if (scanStats == mDatasetScanStats)
@@ -747,7 +747,7 @@ namespace MSFileInfoScanner.DatasetStats
                     return true;
                 }
 
-                ErrorMessage = "";
+                ErrorMessage = string.Empty;
 
                 // Define the path to the extended scan stats file
                 var scanStatsFile = new FileInfo(scanStatsFilePath);
@@ -1024,7 +1024,7 @@ namespace MSFileInfoScanner.DatasetStats
                     return false;
                 }
 
-                ErrorMessage = "";
+                ErrorMessage = string.Empty;
 
                 DatasetSummaryStats summaryStats;
                 if (scanStats == mDatasetScanStats)

@@ -155,14 +155,14 @@ namespace MSFileInfoScanner.DatasetStats
 
         public void AddInstrumentFileNoHash(FileInfo instrumentFile)
         {
-            var sha1Hash = "";
+            var sha1Hash = string.Empty;
             AddInstrumentFile(instrumentFile.Name, instrumentFile.Length, sha1Hash, HashUtilities.HashTypeConstants.Undefined);
         }
-		
-		public override string ToString()
-		{
+
+        public override string ToString()
+        {
             return string.Format("Dataset {0}, ScanCount={1}", DatasetName, ScanCount);
         }
-		
+
     }
 }

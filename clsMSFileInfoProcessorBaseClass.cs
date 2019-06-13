@@ -708,7 +708,7 @@ namespace MSFileInfoScanner
                             mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
                             mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
 
-                            mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName, "", "_zoom");
+                            mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName, string.Empty, "_zoom");
                             lcMSPlotStepsComplete++;
                             ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
 
@@ -794,10 +794,10 @@ namespace MSFileInfoScanner
                     writer.WriteLine("<head>");
                     writer.WriteLine("  <title>" + datasetName + "</title>");
                     writer.WriteLine("</head>");
-                    writer.WriteLine("");
+                    writer.WriteLine();
                     writer.WriteLine("<body>");
                     writer.WriteLine("  <h2>" + datasetName + "</h2>");
-                    writer.WriteLine("");
+                    writer.WriteLine();
                     writer.WriteLine("  <table>");
 
                     // First the plots with the top 50,000 points
@@ -822,7 +822,7 @@ namespace MSFileInfoScanner
                         writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
                         writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
                         writer.WriteLine("    </tr>");
-                        writer.WriteLine("");
+                        writer.WriteLine();
                     }
 
                     // Now the plots with the top 500,000 points
@@ -846,7 +846,7 @@ namespace MSFileInfoScanner
                         writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
                         writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
                         writer.WriteLine("    </tr>");
-                        writer.WriteLine("");
+                        writer.WriteLine();
                     }
 
                     file1 = mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS);
@@ -858,7 +858,7 @@ namespace MSFileInfoScanner
                         writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
                         writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
                         writer.WriteLine("    </tr>");
-                        writer.WriteLine("");
+                        writer.WriteLine();
                     }
 
                     file1 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC);
@@ -882,7 +882,7 @@ namespace MSFileInfoScanner
                         else
                             writer.WriteLine("      <td></td>");
                         writer.WriteLine("    </tr>");
-                        writer.WriteLine("");
+                        writer.WriteLine();
                     }
 
                     writer.WriteLine("    <tr>");
@@ -922,12 +922,12 @@ namespace MSFileInfoScanner
 
                     writer.WriteLine("    </tr>");
 
-                    writer.WriteLine("");
+                    writer.WriteLine();
                     writer.WriteLine("  </table>");
-                    writer.WriteLine("");
+                    writer.WriteLine();
                     writer.WriteLine("</body>");
                     writer.WriteLine("</html>");
-                    writer.WriteLine("");
+                    writer.WriteLine();
 
                 }
 

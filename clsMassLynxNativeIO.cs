@@ -101,7 +101,7 @@ namespace MSFileInfoScanner
             switch (mErrorCode)
             {
                 case eErrorCodeConstants.NoError:
-                    message = "";
+                    message = string.Empty;
                     break;
                 case eErrorCodeConstants.InvalidDataFolderPath:
                     message = "Invalid data directory path";
@@ -292,7 +292,7 @@ namespace MSFileInfoScanner
             endMass = 0;
             functionType = 0;
             functionSetMass = 0;
-            functionTypeText = "";
+            functionTypeText = string.Empty;
 
             try
             {

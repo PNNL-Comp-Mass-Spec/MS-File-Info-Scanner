@@ -277,7 +277,7 @@ namespace MSFileInfoScanner
                                 ScanNumber = spectrumIndex + 1,
                                 ScanType = msLevel,
                                 ScanTypeName = "GC-MS",
-                                ScanFilterText = "",
+                                ScanFilterText = string.Empty,
                                 ElutionTime = spectrum.RetentionTimeMinutes.ToString("0.0###"),
                                 TotalIonIntensity = StringUtilities.ValueToString(spectrum.TIC, 1),
                                 BasePeakIntensity = StringUtilities.ValueToString(spectrum.BasePeakAbundance, 1),
