@@ -518,7 +518,8 @@ namespace MSFileInfoScanner
                 // Convert these to minutes
                 for (var scanIndex = 0; scanIndex <= spectrumCount - 1; scanIndex++)
                 {
-                    scanTimes[scanIndex] /= 60.0;
+                    var scanTimeMinutes = scanTimes[scanIndex] / 60.0;
+                    scanTimes[scanIndex] = scanTimeMinutes;
                 }
 
                 Console.WriteLine();
