@@ -114,6 +114,20 @@ namespace MSFileInfoScanner.DatasetStats
             mDatasetSummaryStatsUpToDate = false;
         }
 
+        private double AssureNumeric(double value)
+        {
+            if (double.IsNaN(value))
+                return 0;
+
+            if (double.IsPositiveInfinity(value))
+                return double.MaxValue;
+
+            if (double.IsNegativeInfinity(value))
+                return double.MinValue;
+
+            return value;
+        }
+
         /// <summary>
         /// Examine the m/z values in the spectrum to determine if the data is centroided
         /// </summary>
@@ -273,11 +287,11 @@ namespace MSFileInfoScanner.DatasetStats
                     }
                 }
 
-                summaryStats.MSStats.TICMedian = MathNet.Numerics.Statistics.Statistics.Median(ticListMS);
-                summaryStats.MSStats.BPIMedian = MathNet.Numerics.Statistics.Statistics.Median(bpiListMS);
+                summaryStats.MSStats.TICMedian = AssureNumeric(MathNet.Numerics.Statistics.Statistics.Median(ticListMS));
+                summaryStats.MSStats.BPIMedian = AssureNumeric(MathNet.Numerics.Statistics.Statistics.Median(bpiListMS));
 
-                summaryStats.MSnStats.TICMedian = MathNet.Numerics.Statistics.Statistics.Median(ticListMSn);
-                summaryStats.MSnStats.BPIMedian = MathNet.Numerics.Statistics.Statistics.Median(bpiListMSn);
+                summaryStats.MSnStats.TICMedian = AssureNumeric(MathNet.Numerics.Statistics.Statistics.Median(ticListMSn));
+                summaryStats.MSnStats.BPIMedian = AssureNumeric(MathNet.Numerics.Statistics.Statistics.Median(bpiListMSn));
 
                 return true;
 
