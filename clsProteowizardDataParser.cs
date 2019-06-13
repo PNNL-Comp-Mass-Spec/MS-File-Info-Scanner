@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using MSFileInfoScanner.DatasetStats;
 using PRISM;
 using pwiz.ProteowizardWrapper;
@@ -27,6 +28,8 @@ namespace MSFileInfoScanner
 
         private readonly Regex mGetQ1MZ;
         private readonly Regex mGetQ3MZ;
+
+        private CancellationTokenSource mCancellationToken;
 
         private DateTime mLastScanLoadingDebugProgressTime;
         private DateTime mLastScanLoadingStatusProgressTime;
@@ -151,6 +154,15 @@ namespace MSFileInfoScanner
 
             if (DateTime.UtcNow.Subtract(mLastScanLoadingDebugProgressTime).TotalSeconds < 30)
                 return;
+
+            // Set this to true if you want to abort loading data early while debugging
+            var abortNow = false;
+
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (abortNow)
+            {
+                mCancellationToken.Cancel();
+            }
 
             mLastScanLoadingDebugProgressTime = DateTime.UtcNow;
 
@@ -476,7 +488,29 @@ namespace MSFileInfoScanner
                 mLastScanLoadingStatusProgressTime = DateTime.UtcNow;
                 mReportedTotalSpectraToExamine = false;
 
-                mPWiz.GetScanTimesAndMsLevels(out var scanTimes, out var msLevels, MonitorScanTimeLoadingProgress);
+                mCancellationToken = new CancellationTokenSource();
+
+                var scanTimes = new double[0];
+                var msLevels = new byte[0];
+
+                try
+                {
+                    mPWiz.GetScanTimesAndMsLevels(mCancellationToken.Token, out scanTimes, out msLevels, MonitorScanTimeLoadingProgress);
+                }
+                catch (OperationCanceledException)
+                {
+                    // abortNow was set to true in MonitorScanTimeLoadingProgress
+                    // Shrink the arrays to reflect the amount of data that was actually loaded
+
+                    for (var scanIndex = 0; scanIndex <= scanTimes.Length - 1; scanIndex++)
+                    {
+                        if (msLevels[scanIndex] > 0) continue;
+
+                        Array.Resize(ref scanTimes, scanIndex);
+                        Array.Resize(ref msLevels, scanIndex);
+                        break;
+                    }
+                }
 
                 var spectrumCount = scanTimes.Length;
 
