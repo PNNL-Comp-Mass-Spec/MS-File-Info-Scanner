@@ -605,10 +605,20 @@ namespace MSFileInfoScanner
                             }
                         }
 
-                        if (string.IsNullOrEmpty(scanStatsEntry.ScanFilterText) &&
-                            MSDataFileReader.TryGetCVParam(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_inverse_reduced_ion_mobility, out _))
+                        if (string.IsNullOrEmpty(scanStatsEntry.ScanFilterText))
                         {
-                            scanStatsEntry.ScanFilterText = "IMS";
+                            if (spectrum?.scanList?.scans.Count > 0)
+                            {
+                                // Bruker timsTOF datasets will have CVParam "inverse reduced ion mobility" for IMS spectra; check for this
+                                foreach (var scanItem in spectrum.scanList.scans)
+                                {
+                                    if (MSDataFileReader.TryGetCVParam(scanItem.cvParams, pwiz.CLI.cv.CVID.MS_inverse_reduced_ion_mobility, out _))
+                                    {
+                                        scanStatsEntry.ScanFilterText = "IMS";
+                                        break;
+                                    }
+                                }
+                            }
                         }
 
                         // Base peak signal to noise ratio
