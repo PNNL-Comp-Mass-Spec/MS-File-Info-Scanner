@@ -604,6 +604,12 @@ namespace MSFileInfoScanner
                             }
                         }
 
+                        if (string.IsNullOrEmpty(scanStatsEntry.ScanFilterText) &&
+                            MSDataFileReader.TryGetCVParam(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_inverse_reduced_ion_mobility, out _))
+                        {
+                            scanStatsEntry.ScanFilterText = "IMS";
+                        }
+
                         // Base peak signal to noise ratio
                         scanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
