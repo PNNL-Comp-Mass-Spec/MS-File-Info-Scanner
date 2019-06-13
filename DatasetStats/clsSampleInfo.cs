@@ -35,5 +35,10 @@ namespace MSFileInfoScanner.DatasetStats
 
             return false;
         }
+
+        public override string ToString()
+		{
+            return SampleName;
+        }
     }
 }

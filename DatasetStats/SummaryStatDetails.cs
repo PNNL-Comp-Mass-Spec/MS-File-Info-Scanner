@@ -51,7 +51,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <returns></returns>
         public override string ToString()
         {
-            return "ScanCount: " + ScanCount;
+            return string.Format("ScanCount: {0}", ScanCount);
         }
     }
 }
