@@ -30,6 +30,9 @@ namespace MSFileInfoScanner
         private readonly Regex mGetQ3MZ;
 
         private CancellationTokenSource mCancellationToken;
+        private DateTime mGetScanTimesStartTime;
+        private int mGetScanTimesMaxWaitTimeSeconds;
+        private bool mGetScanTimesAutoAborted;
 
         private DateTime mLastScanLoadingDebugProgressTime;
         private DateTime mLastScanLoadingStatusProgressTime;
@@ -155,12 +158,12 @@ namespace MSFileInfoScanner
             if (DateTime.UtcNow.Subtract(mLastScanLoadingDebugProgressTime).TotalSeconds < 30)
                 return;
 
-            // Set this to true if you want to abort loading data early while debugging
-            var abortNow = false;
-
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (abortNow)
+            // If the call to mPWiz.GetScanTimesAndMsLevels() takes too long,
+            // abort the process and instead get the ScanTimes and MSLevels via mPWiz.GetSpectrum()
+            if (mGetScanTimesMaxWaitTimeSeconds > 0 &&
+                DateTime.UtcNow.Subtract(mGetScanTimesStartTime).TotalSeconds >= mGetScanTimesMaxWaitTimeSeconds)
             {
+                mGetScanTimesAutoAborted = true;
                 mCancellationToken.Cancel();
             }
 
@@ -404,6 +407,7 @@ namespace MSFileInfoScanner
 
                         ticStored = storeInTICAndBPIPlot;
 
+                        // This is FrameCount for Bruker timsTOF datasets
                         datasetFileInfo.ScanCount = scanTimes.Length;
                     }
 
@@ -501,22 +505,34 @@ namespace MSFileInfoScanner
                 var scanTimes = new double[0];
                 var msLevels = new byte[0];
 
+                mGetScanTimesStartTime = DateTime.UtcNow;
+                mGetScanTimesMaxWaitTimeSeconds = 90;
+                mGetScanTimesAutoAborted = false;
+
+                var minScanIndexWithoutScanTimes = int.MaxValue;
+
                 try
                 {
                     mPWiz.GetScanTimesAndMsLevels(mCancellationToken.Token, out scanTimes, out msLevels, MonitorScanTimeLoadingProgress);
                 }
                 catch (OperationCanceledException)
                 {
-                    // abortNow was set to true in MonitorScanTimeLoadingProgress
-                    // Shrink the arrays to reflect the amount of data that was actually loaded
+                    // mCancellationToken.Cancel was called in MonitorScanTimeLoadingProgress
 
+                    // Determine the scan index where GetScanTimesAndMsLevels exited the for loop
                     for (var scanIndex = 0; scanIndex <= scanTimes.Length - 1; scanIndex++)
                     {
                         if (msLevels[scanIndex] > 0) continue;
 
-                        Array.Resize(ref scanTimes, scanIndex);
-                        Array.Resize(ref msLevels, scanIndex);
+                        minScanIndexWithoutScanTimes = scanIndex;
                         break;
+                    }
+
+                    if (!mGetScanTimesAutoAborted && minScanIndexWithoutScanTimes < int.MaxValue)
+                    {
+                        // Manually aborted; shrink the arrays to reflect the amount of data that was actually loaded
+                        Array.Resize(ref scanTimes, minScanIndexWithoutScanTimes);
+                        Array.Resize(ref msLevels, minScanIndexWithoutScanTimes);
                     }
                 }
 
@@ -526,6 +542,9 @@ namespace MSFileInfoScanner
                 // Convert these to minutes
                 for (var scanIndex = 0; scanIndex <= spectrumCount - 1; scanIndex++)
                 {
+                    if (scanIndex >= minScanIndexWithoutScanTimes)
+                        break;
+
                     var scanTimeMinutes = scanTimes[scanIndex] / 60.0;
                     scanTimes[scanIndex] = scanTimeMinutes;
                 }
@@ -534,6 +553,7 @@ namespace MSFileInfoScanner
                 OnStatusEvent("Reading spectra");
                 var lastDebugProgressTime = DateTime.UtcNow;
                 var lastStatusProgressTime = DateTime.UtcNow;
+                var skippedEmptyScans = 0;
 
                 var scanNumber = 0;
                 for (var scanIndex = 0; scanIndex <= spectrumCount - 1; scanIndex++)
@@ -548,6 +568,17 @@ namespace MSFileInfoScanner
                         var msDataSpectrum = mPWiz.GetSpectrum(scanIndex);
 
                         scanNumber = scanIndex + 1;
+
+                        if (scanIndex >= minScanIndexWithoutScanTimes)
+                        {
+                            // msDataSpectrum.RetentionTime is already in minutes
+                            scanTimes[scanIndex] = msDataSpectrum.RetentionTime ?? 0;
+
+                            if (msDataSpectrum.Level >= byte.MinValue && msDataSpectrum.Level <= byte.MaxValue)
+                            {
+                                msLevels[scanIndex] = (byte)msDataSpectrum.Level;
+                            }
+                        }
 
                         var scanStatsEntry = new ScanStatsEntry
                         {
