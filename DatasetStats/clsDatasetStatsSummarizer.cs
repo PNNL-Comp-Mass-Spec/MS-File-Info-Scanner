@@ -986,15 +986,14 @@ namespace MSFileInfoScanner.DatasetStats
             // Look for scan scanNumber in mDatasetScanStats
             for (var index = 0; index <= mDatasetScanStats.Count - 1; index++)
             {
-                if (mDatasetScanStats[index].ScanNumber == scanNumber)
-                {
-                    mDatasetScanStats[index].ScanType = scanType;
-                    mDatasetScanStats[index].ScanTypeName = scanTypeName;
-                    mDatasetSummaryStatsUpToDate = false;
+                if (mDatasetScanStats[index].ScanNumber != scanNumber) continue;
 
-                    matchFound = true;
-                    break;
-                }
+                mDatasetScanStats[index].ScanType = scanType;
+                mDatasetScanStats[index].ScanTypeName = scanTypeName;
+                mDatasetSummaryStatsUpToDate = false;
+
+                matchFound = true;
+                break;
             }
 
             return matchFound;
