@@ -635,7 +635,7 @@ namespace MSFileInfoScanner
                         scanStatsEntry.IonCount = msDataSpectrum.Mzs.Length;
                         scanStatsEntry.IonCountRaw = scanStatsEntry.IonCount;
 
-                        if (computeBPI || computeTIC)
+                        if ((computeBPI || computeTIC) && scanStatsEntry.IonCount > 0)
                         {
                             // Step through the raw data to compute the BPI and TIC
 
@@ -659,7 +659,6 @@ namespace MSFileInfoScanner
                             scanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(tic, 5);
                             scanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(bpi, 5);
                             scanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(basePeakMZ, 5);
-
                         }
 
                         var addScan = !skipExistingScans || skipExistingScans && !mDatasetStatsSummarizer.HasScanNumber(scanNumber);
