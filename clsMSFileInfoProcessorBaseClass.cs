@@ -1018,6 +1018,7 @@ namespace MSFileInfoScanner
         protected void LoadScanDataWithProteoWizard(
             FileSystemInfo datasetFileOrDirectory,
             DatasetFileInfo datasetFileInfo,
+            bool skipScansWithNoIons,
             bool highResMS1 = true,
             bool highResMS2 = true)
         {
@@ -1080,7 +1081,7 @@ namespace MSFileInfoScanner
                 {
                     // Process the spectral data (though only if we did not process SRM data)
                     var skipExistingScans = (pWiz.ChromatogramCount > 0);
-                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans);
+                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans, skipScansWithNoIons);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }
 

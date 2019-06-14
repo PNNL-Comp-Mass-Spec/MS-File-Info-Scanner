@@ -415,7 +415,7 @@ namespace MSFileInfoScanner
                 {
                     // Process the spectral data
                     var skipExistingScans = (pWiz.ChromatogramCount > 0);
-                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans: skipExistingScans);
+                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans: skipExistingScans, skipScansWithNoIons: true);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }
 

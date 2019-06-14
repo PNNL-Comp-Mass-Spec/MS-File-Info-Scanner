@@ -149,7 +149,7 @@ namespace MSFileInfoScanner
                 // Continue anyway since we've populated some of the values
             }
 
-            LoadScanDataWithProteoWizard(datasetDirectory, datasetFileInfo);
+            LoadScanDataWithProteoWizard(datasetDirectory, datasetFileInfo, true);
         }
 
         /// <summary>

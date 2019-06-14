@@ -459,10 +459,11 @@ namespace MSFileInfoScanner
         /// <param name="ticStored">The calling method should set this to true if the TIC was already stored</param>
         /// <param name="runtimeMinutes">Maximum acquisition time (updated by this method)</param>
         /// <param name="skipExistingScans">When true, skip scans already defined in mDatasetStatsSummarizer</param>
+        /// <param name="skipScansWithNoIons">When true, skip scans that have no ions</param>
         /// <returns>True if at least 50% of the spectra were successfully read</returns>
-        public bool StoreMSSpectraInfo(bool ticStored, ref double runtimeMinutes, bool skipExistingScans)
+        public bool StoreMSSpectraInfo(bool ticStored, ref double runtimeMinutes, bool skipExistingScans, bool skipScansWithNoIons)
         {
-            return StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans, out _, out _);
+            return StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans, skipScansWithNoIons, out _, out _);
         }
 
         /// <summary>
@@ -471,11 +472,18 @@ namespace MSFileInfoScanner
         /// <param name="ticStored">The calling method should set this to true if the TIC was already stored</param>
         /// <param name="runtimeMinutes">Maximum acquisition time (updated by this method)</param>
         /// <param name="skipExistingScans">When true, skip scans already defined in mDatasetStatsSummarizer</param>
+        /// <param name="skipScansWithNoIons">When true, skip scans that have no ions</param>
         /// <param name="scanCountSuccess">Output: number of scans successfully read</param>
         /// <param name="scanCountError">Output: number of scans that could not be read</param>
         /// <returns>True if at least 50% of the spectra were successfully read</returns>
         [HandleProcessCorruptedStateExceptions]
-        public bool StoreMSSpectraInfo(bool ticStored, ref double runtimeMinutes, bool skipExistingScans, out int scanCountSuccess, out int scanCountError)
+        public bool StoreMSSpectraInfo(
+            bool ticStored,
+            ref double runtimeMinutes,
+            bool skipExistingScans,
+            bool skipScansWithNoIons,
+            out int scanCountSuccess,
+            out int scanCountError)
         {
             scanCountSuccess = 0;
             scanCountError = 0;
@@ -658,7 +666,25 @@ namespace MSFileInfoScanner
 
                         if (addScan)
                         {
-                            mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
+                            if (skipScansWithNoIons && scanStatsEntry.IonCount == 0)
+                            {
+                                skippedEmptyScans++;
+
+                                if (skippedEmptyScans < 25 ||
+                                    skippedEmptyScans < 100 && skippedEmptyScans % 10 == 0 ||
+                                    skippedEmptyScans < 1000 && skippedEmptyScans % 100 == 0 ||
+                                    skippedEmptyScans < 10000 && skippedEmptyScans % 1000 == 0 ||
+                                    skippedEmptyScans < 100000 && skippedEmptyScans % 10000 == 0 ||
+                                    skippedEmptyScans % 100000 == 0)
+                                {
+                                    ConsoleMsgUtils.ShowDebug("Skipping scan {0:N0} since no ions; {1:N0} total skipped scans", scanNumber, skippedEmptyScans);
+                                }
+                            }
+                            else
+                            {
+                                mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
+                            }
+
                         }
 
                         if (mSaveTICAndBPI && !ticStored)
