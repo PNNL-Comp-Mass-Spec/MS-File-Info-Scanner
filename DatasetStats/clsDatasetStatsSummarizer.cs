@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml;
 using PRISM;
@@ -40,6 +39,8 @@ namespace MSFileInfoScanner.DatasetStats
         #endregion
 
         #region "Classwide Variables"
+
+        private readonly SortedSet<int> mDatasetScanNumbers;
 
         private readonly List<ScanStatsEntry> mDatasetScanStats;
 
@@ -93,6 +94,7 @@ namespace MSFileInfoScanner.DatasetStats
             mSpectraTypeClassifier = new clsSpectrumTypeClassifier();
             RegisterEvents(mSpectraTypeClassifier);
 
+            mDatasetScanNumbers = new SortedSet<int>();
             mDatasetScanStats = new List<ScanStatsEntry>();
             mDatasetSummaryStats = new DatasetSummaryStats();
 
@@ -110,6 +112,11 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="scanStats"></param>
         public void AddDatasetScan(ScanStatsEntry scanStats)
         {
+            if (!mDatasetScanNumbers.Contains(scanStats.ScanNumber))
+            {
+                mDatasetScanNumbers.Add(scanStats.ScanNumber);
+            }
+
             mDatasetScanStats.Add(scanStats);
             mDatasetSummaryStatsUpToDate = false;
         }
@@ -210,6 +217,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public void ClearCachedData()
         {
+            mDatasetScanNumbers.Clear();
             mDatasetScanStats.Clear();
             mDatasetSummaryStats.Clear();
 
@@ -934,6 +942,16 @@ namespace MSFileInfoScanner.DatasetStats
 
         }
 
+        /// <summary>
+        /// Return true if the given scan number has been stored using AddDatasetScan
+        /// </summary>
+        /// <param name="scanNumber"></param>
+        /// <returns></returns>
+        public bool HasScanNumber(int scanNumber)
+        {
+            return mDatasetScanNumbers.Contains(scanNumber);
+        }
+
         private void ReportError(string message, Exception ex = null)
         {
             if (ex is null)
@@ -946,25 +964,6 @@ namespace MSFileInfoScanner.DatasetStats
             }
 
             OnErrorEvent(message, ex);
-        }
-
-        /// <summary>
-        /// Retrieve the scan entry of the given scan number
-        /// </summary>
-        /// <param name="scanNumber"></param>
-        /// <param name="scanEntry"></param>
-        /// <returns>True if the scan is found, otherwise false</returns>
-        public bool TryGetScan(int scanNumber, out ScanStatsEntry scanEntry)
-        {
-            var query = (from item in mDatasetScanStats where item.ScanNumber == scanNumber select item).ToList();
-            if (query.Any())
-            {
-                scanEntry = query.First();
-                return true;
-            }
-
-            scanEntry = null;
-            return false;
         }
 
         /// <summary>

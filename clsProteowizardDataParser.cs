@@ -662,7 +662,7 @@ namespace MSFileInfoScanner
 
                         }
 
-                        var addScan = !skipExistingScans || skipExistingScans && !mDatasetStatsSummarizer.TryGetScan(scanNumber, out _);
+                        var addScan = !skipExistingScans || skipExistingScans && !mDatasetStatsSummarizer.HasScanNumber(scanNumber);
 
                         if (addScan)
                         {
