@@ -598,12 +598,15 @@ namespace MSFileInfoScanner
 
                         if (MSDataFileReader.TryGetCVParamDouble(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out var tic))
                         {
+                            // For timsTOF data, this is the TIC of the entire frame
                             scanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(tic, 5);
                             computeTIC = false;
                         }
 
                         if (MSDataFileReader.TryGetCVParamDouble(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, out var bpi))
                         {
+                            // For timsTOF data, this is the BPI of the entire frame
+                            // Additionally, for timsTOF data, MS_base_peak_m_z is not defined
                             scanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(bpi, 5);
 
                             if (MSDataFileReader.TryGetCVParamDouble(spectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, out var basePeakMzFromCvParams))
@@ -711,7 +714,7 @@ namespace MSFileInfoScanner
 
                     if (DateTime.UtcNow.Subtract(lastStatusProgressTime).TotalMinutes > 5)
                     {
-                        OnStatusEvent(string.Format("Reading spectra, loaded {0:N0} / {1:N0} spectra",  scanNumber, spectrumCount));
+                        OnStatusEvent(string.Format("Reading spectra, loaded {0:N0} / {1:N0} spectra", scanNumber, spectrumCount));
                         lastStatusProgressTime = DateTime.UtcNow;
                         lastDebugProgressTime = DateTime.UtcNow;
                         continue;

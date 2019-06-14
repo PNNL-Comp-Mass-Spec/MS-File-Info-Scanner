@@ -87,7 +87,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public DatasetStatsSummarizer()
         {
-            FileDate = "June 12, 2019";
+            FileDate = "June 13, 2019";
 
             ErrorMessage = string.Empty;
 
@@ -929,6 +929,10 @@ namespace MSFileInfoScanner.DatasetStats
             return text;
         }
 
+        /// <summary>
+        /// Get the DatasetSummaryStats object
+        /// </summary>
+        /// <returns></returns>
         public DatasetSummaryStats GetDatasetSummaryStats()
         {
 
@@ -1134,7 +1138,7 @@ namespace MSFileInfoScanner.DatasetStats
         public bool ValidateMS2MzMin(float requiredMzMin, out string errorOrWarningMsg, int maxPercentAllowedFailed)
         {
 
-            // First examine MS2 spectra (or higher)
+            // First examine MS2 spectra
             var validMS2 = ValidateMSnMzMin(
                 2,
                 requiredMzMin, maxPercentAllowedFailed,
@@ -1170,6 +1174,15 @@ namespace MSFileInfoScanner.DatasetStats
             return false;
         }
 
+        /// <summary>
+        /// Determine the percentage of scans with the given msLevel that have a minimum m/z value greater than requiredMzMin
+        /// </summary>
+        /// <param name="msLevel"></param>
+        /// <param name="requiredMzMin"></param>
+        /// <param name="maxPercentAllowedFailed"></param>
+        /// <param name="scanCountWithData"></param>
+        /// <param name="errorOrWarningMsg"></param>
+        /// <returns></returns>
         private bool ValidateMSnMzMin(
             int msLevel,
             float requiredMzMin,
