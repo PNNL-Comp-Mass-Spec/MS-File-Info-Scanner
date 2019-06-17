@@ -1231,7 +1231,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Store the creation time and last write time of the first primary data file (or of the dataset directory) in mDatasetStatsSummarizer.DatasetFileInfo
         /// Initialize the Acquisition start/end times using to the last write time
-        /// Computes the SHA-1 hash of the first primary data file
+        /// Computes the SHA-1 hash of the files in primaryDataFiles
         /// </summary>
         /// <param name="datasetDirectory">Dataset directory</param>
         /// <param name="primaryDataFiles">Primary data files (not required to exist on disk)</param>
@@ -1270,13 +1270,12 @@ namespace MSFileInfoScanner
 
                 mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
 
-                for (var i = 0; i < primaryDataFiles.Count; i++)
+                foreach (var dataFile in primaryDataFiles)
                 {
-                    var dataFile = primaryDataFiles[i];
                     if (!dataFile.Exists)
                         continue;
 
-                    if (mDisableInstrumentHash || i > 0)
+                    if (mDisableInstrumentHash)
                     {
                         mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(dataFile);
                     }
