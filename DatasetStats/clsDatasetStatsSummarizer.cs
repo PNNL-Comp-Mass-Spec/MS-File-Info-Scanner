@@ -572,29 +572,10 @@ namespace MSFileInfoScanner.DatasetStats
 
                 foreach (var scanTypeEntry in summaryStats.ScanTypeStats)
                 {
-                    var scanType = scanTypeEntry.Key;
-                    var indexMatch = scanType.IndexOf(SCAN_TYPE_STATS_SEP_CHAR, StringComparison.Ordinal);
-
-                    string scanFilterText;
-                    if (indexMatch >= 0)
-                    {
-                        scanFilterText = scanType.Substring(indexMatch + SCAN_TYPE_STATS_SEP_CHAR.Length);
-                        if (indexMatch > 0)
-                        {
-                            scanType = scanType.Substring(0, indexMatch);
-                        }
-                        else
-                        {
-                            scanType = string.Empty;
-                        }
-                    }
-                    else
-                    {
-                        scanFilterText = string.Empty;
-                    }
+                    var scanCountForType = GetScanTypeAndFilter(scanTypeEntry, out var scanType, out _, out var scanFilterText);
 
                     writer.WriteStartElement("ScanType");
-                    writer.WriteAttributeString("ScanCount", scanTypeEntry.Value.ToString());
+                    writer.WriteAttributeString("ScanCount", scanCountForType.ToString());
                     writer.WriteAttributeString("ScanFilterText", FixNull(scanFilterText));
                     writer.WriteString(scanType);
                     writer.WriteEndElement();
@@ -936,14 +917,53 @@ namespace MSFileInfoScanner.DatasetStats
         public DatasetSummaryStats GetDatasetSummaryStats()
         {
 
-            if (!mDatasetSummaryStatsUpToDate)
+        /// <summary>
+        /// Extract out the scan type and filter text from the key in scanTypeEntry
+        /// </summary>
+        /// <param name="scanTypeEntry"></param>
+        /// <param name="scanType">Scan Type, e.g. HMS or HCD-HMSn</param>
+        /// <param name="basicScanType">Simplified scan type, e.g. HMS or HMSn</param>
+        /// <param name="scanFilterText">Scan filter text, e.g. "FTMS + p NSI Full ms" or "FTMS + p NSI d Full ms2 0@hcd25.00" or "IMS"</param>
+        /// <returns>Scan count for this scan type and filter string</returns>
+        private int GetScanTypeAndFilter(
+            KeyValuePair<string, int> scanTypeEntry,
+            out string scanType,
+            out string basicScanType,
+            out string scanFilterText)
+        {
+            var scanTypeKey = scanTypeEntry.Key;
+            var indexMatch = scanTypeKey.IndexOf(SCAN_TYPE_STATS_SEP_CHAR, StringComparison.Ordinal);
+
+            if (indexMatch >= 0)
             {
-                ComputeScanStatsSummary(mDatasetScanStats, out mDatasetSummaryStats);
-                mDatasetSummaryStatsUpToDate = true;
+                scanFilterText = scanTypeKey.Substring(indexMatch + SCAN_TYPE_STATS_SEP_CHAR.Length);
+                if (indexMatch > 0)
+                {
+                    scanType = scanTypeKey.Substring(0, indexMatch);
+                }
+                else
+                {
+                    scanType = string.Empty;
+                }
+            }
+            else
+            {
+                scanType = scanTypeKey;
+                scanFilterText = string.Empty;
             }
 
-            return mDatasetSummaryStats;
+            var dashIndex = scanType.IndexOf('-');
 
+            if (dashIndex > 0 && dashIndex < scanType.Length - 1)
+            {
+                basicScanType = scanType.Substring(dashIndex + 1);
+            }
+            else
+            {
+                basicScanType = scanType;
+            }
+
+            return scanTypeEntry.Value;
         }
 
         /// <summary>
