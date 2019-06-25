@@ -792,7 +792,7 @@ namespace MSFileInfoScanner
                         continue;
                     }
 
-                    if (!(DateTime.UtcNow.Subtract(lastDebugProgressTime).TotalSeconds > 15))
+                    if (DateTime.UtcNow.Subtract(lastDebugProgressTime).TotalSeconds < 15)
                         continue;
 
                     lastDebugProgressTime = DateTime.UtcNow;
