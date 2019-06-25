@@ -50,6 +50,12 @@ namespace MSFileInfoScanner.DatasetStats
 
         private DatasetSummaryStats mDatasetSummaryStats;
 
+        private int ScanCountHMS;
+        private int ScanCountHMSn;
+        private int ScanCountMS;
+        private int ScanCountMSn;
+        private double ElutionTimeMax;
+
         #endregion
 
         #region "Properties"
@@ -119,6 +125,131 @@ namespace MSFileInfoScanner.DatasetStats
 
             mDatasetScanStats.Add(scanStats);
             mDatasetSummaryStatsUpToDate = false;
+        }
+
+        private void AdjustSummaryStats(DatasetSummaryStats summaryStats)
+        {
+            // Keys in this dictionary are keys in summaryStats.ScanTypeStats
+            // Values are basic (simplified) scan types
+            var basicScanTypeByScanTypeKey = new Dictionary<string, string>();
+
+            // Keys in this dictionary are keys in summaryStats.ScanTypeStats
+            // Values are scan counts
+            var scanCountsByScanTypeKey = new Dictionary<string, int>();
+
+            var totalScansInSummaryStats = 0;
+
+            // Determine the basic (simplified) scan type for each entry in summaryStats
+            // Also cache the scan counts
+            foreach (var scanTypeEntry in summaryStats.ScanTypeStats)
+            {
+                var scanCountForType = GetScanTypeAndFilter(scanTypeEntry, out _, out var basicScanType, out _);
+
+                basicScanTypeByScanTypeKey.Add(scanTypeEntry.Key, basicScanType);
+                scanCountsByScanTypeKey.Add(scanTypeEntry.Key, scanCountForType);
+                totalScansInSummaryStats += scanCountForType;
+            }
+
+            // Only adjust the scan stats if the total number of stored scans is less than 98% of the sum of the ScanCount member variables
+            if (totalScansInSummaryStats >= (ScanCountMS + ScanCountHMS + ScanCountMSn + ScanCountHMSn) * 0.98)
+                return;
+
+            // The dataset summary stats object does not contain data for all of the scans
+
+            // Adjust the scan counts in summaryStats.ScanTypeStats using the counts in
+            // ScanCountMS, ScanCountHMS, ScanCountMSn, and ScanCountHMSn
+
+            OnWarningEvent(string.Format(
+                               "This dataset has a large number of spectra; detailed scan info was stored for {0:N0} of the {1:N0} total spectra. " +
+                               "Will now extrapolate the scan counts based on the stored data.",
+                               totalScansInSummaryStats, ScanCountMS + ScanCountHMS + ScanCountMSn + ScanCountHMSn));
+
+            // Determine the total scans for each basic scan type
+            var scanCountsByBasicScanType = new Dictionary<string, int>();
+
+            foreach (var scanTypeEntry in basicScanTypeByScanTypeKey)
+            {
+                var basicScanType = scanTypeEntry.Value;
+                if (!(basicScanType.Equals("HMS", StringComparison.OrdinalIgnoreCase) ||
+                      basicScanType.Equals("HMSn", StringComparison.OrdinalIgnoreCase) ||
+                      basicScanType.Equals("MS", StringComparison.OrdinalIgnoreCase) ||
+                      basicScanType.Equals("MSn", StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+
+                var scanCountToAdd = scanCountsByScanTypeKey[scanTypeEntry.Key];
+
+                if (scanCountsByBasicScanType.TryGetValue(basicScanType, out var scanCountForBasicScanType))
+                {
+                    scanCountsByBasicScanType[basicScanType] = scanCountForBasicScanType + scanCountToAdd;
+                }
+                else
+                {
+                    scanCountsByBasicScanType.Add(basicScanType, scanCountToAdd);
+                }
+            }
+
+            // Adjust the scan counts in summaryStats.ScanTypeStats
+            foreach (var scanTypeEntry in basicScanTypeByScanTypeKey)
+            {
+                GetScanTypeAndFilter(scanTypeEntry.Key, out var scanType, out _, out var scanTypeFilter);
+
+                var basicScanType = scanTypeEntry.Value;
+                if (!scanCountsByBasicScanType.TryGetValue(basicScanType, out var totalStoredScanCount))
+                {
+                    continue;
+                }
+
+                var storedScanCount = scanCountsByScanTypeKey[scanTypeEntry.Key];
+                var percentOfTotal = storedScanCount / (double)totalStoredScanCount;
+
+                double updatedScanCount;
+
+                switch (basicScanType)
+                {
+                    case "HMS":
+                        updatedScanCount = ScanCountHMS * percentOfTotal;
+                        break;
+                    case "HMSn":
+                        updatedScanCount = ScanCountHMSn * percentOfTotal;
+                        break;
+                    case "MS":
+                        updatedScanCount = ScanCountMS * percentOfTotal;
+                        break;
+                    case "MSn":
+                        updatedScanCount = ScanCountMSn * percentOfTotal;
+                        break;
+                    default:
+                        updatedScanCount = -1;
+                        break;
+                }
+
+                if (updatedScanCount < 0)
+                    continue;
+
+                var updatedScanCountInt = (int)updatedScanCount;
+
+                summaryStats.ScanTypeStats[scanTypeEntry.Key] = updatedScanCountInt;
+
+                if (string.IsNullOrWhiteSpace(scanTypeFilter))
+                {
+                    OnStatusEvent(string.Format(
+                                      "Adjusted the scan count for {0} from {1:N0} to {2:N0}",
+                                      scanType, storedScanCount, updatedScanCountInt));
+                }
+                else
+                {
+                    OnStatusEvent(string.Format(
+                                      "Adjusted the scan count for {0} ({1}) from {2:N0} to {3:N0}",
+                                      scanType, scanTypeFilter, storedScanCount, updatedScanCountInt));
+                }
+            }
+
+            // Assure that the MS and MSn scan counts are also correct
+            summaryStats.MSStats.ScanCount = Math.Max(summaryStats.MSStats.ScanCount, ScanCountHMS + ScanCountMS);
+            summaryStats.MSnStats.ScanCount = Math.Max(summaryStats.MSnStats.ScanCount, ScanCountHMSn + ScanCountMSn);
+            summaryStats.ElutionTimeMax = Math.Max(summaryStats.ElutionTimeMax, ElutionTimeMax);
         }
 
         private double AssureNumeric(double value)
@@ -229,6 +360,12 @@ namespace MSFileInfoScanner.DatasetStats
             mSpectraTypeClassifier.Reset();
 
             CreateEmptyScanStatsFiles = true;
+
+            ScanCountHMS = 0;
+            ScanCountHMSn = 0;
+            ScanCountMS = 0;
+            ScanCountMSn = 0;
+            ElutionTimeMax = 0;
         }
 
         /// <summary>
@@ -509,6 +646,7 @@ namespace MSFileInfoScanner.DatasetStats
                 ErrorMessage = string.Empty;
 
                 DatasetSummaryStats summaryStats;
+
                 if (scanStats == mDatasetScanStats)
                 {
                     summaryStats = GetDatasetSummaryStats();
@@ -517,11 +655,9 @@ namespace MSFileInfoScanner.DatasetStats
                     {
                         includeCentroidStats = true;
                     }
-
                 }
                 else
                 {
-
                     // Parse the data in scanStats to compute the bulk values
                     var success = ComputeScanStatsSummary(scanStats, out summaryStats);
                     if (!success)
@@ -589,6 +725,10 @@ namespace MSFileInfoScanner.DatasetStats
 
                 var scanCountTotal = summaryStats.MSStats.ScanCount + summaryStats.MSnStats.ScanCount;
                 if (scanCountTotal == 0 && datasetInfo.ScanCount > 0)
+                {
+                    scanCountTotal = datasetInfo.ScanCount;
+                }
+                else if (datasetInfo.ScanCount > scanCountTotal)
                 {
                     scanCountTotal = datasetInfo.ScanCount;
                 }
@@ -916,6 +1056,34 @@ namespace MSFileInfoScanner.DatasetStats
         /// <returns></returns>
         public DatasetSummaryStats GetDatasetSummaryStats()
         {
+            if (mDatasetSummaryStatsUpToDate)
+                return mDatasetSummaryStats;
+
+            ComputeScanStatsSummary(mDatasetScanStats, out mDatasetSummaryStats);
+
+            AdjustSummaryStats(mDatasetSummaryStats);
+
+            mDatasetSummaryStatsUpToDate = true;
+
+            return mDatasetSummaryStats;
+        }
+
+        /// <summary>
+        /// Extract out the scan type and filter text from scanTypeKey
+        /// </summary>
+        /// <param name="scanTypeKey"></param>
+        /// <param name="scanType">Scan Type, e.g. HMS or HCD-HMSn</param>
+        /// <param name="basicScanType">Simplified scan type, e.g. HMS or HMSn</param>
+        /// <param name="scanFilterText">Scan filter text, e.g. "FTMS + p NSI Full ms" or "FTMS + p NSI d Full ms2 0@hcd25.00" or "IMS"</param>
+        private void GetScanTypeAndFilter(
+            string scanTypeKey,
+            out string scanType,
+            out string basicScanType,
+            out string scanFilterText)
+        {
+            var placeholderEntry = new KeyValuePair<string, int>(scanTypeKey, 0);
+            GetScanTypeAndFilter(placeholderEntry, out scanType, out basicScanType, out scanFilterText);
+        }
 
         /// <summary>
         /// Extract out the scan type and filter text from the key in scanTypeEntry
@@ -988,6 +1156,27 @@ namespace MSFileInfoScanner.DatasetStats
             }
 
             OnErrorEvent(message, ex);
+        }
+
+        /// <summary>
+        /// Store scan counts, by scan type
+        /// </summary>
+        /// <param name="scanCountHMS"></param>
+        /// <param name="scanCountHMSn"></param>
+        /// <param name="scanCountMS"></param>
+        /// <param name="scanCountMSn"></param>
+        /// <param name="elutionTimeMax"></param>
+        /// <remarks>
+        /// Counts passed to this method are relevant when reading datasets with millions of spectra
+        /// and we limited the amount of detailed scan info stored in mDatasetScanStats
+        /// </remarks>
+        public void StoreScanTypeTotals(int scanCountHMS, int scanCountHMSn, int scanCountMS, int scanCountMSn, double elutionTimeMax)
+        {
+            ScanCountHMS = scanCountHMS;
+            ScanCountHMSn = scanCountHMSn;
+            ScanCountMS = scanCountMS;
+            ScanCountMSn = scanCountMSn;
+            ElutionTimeMax = elutionTimeMax;
         }
 
         /// <summary>
@@ -1264,6 +1453,7 @@ namespace MSFileInfoScanner.DatasetStats
 
             return percentInvalid < maxPercentAllowedFailed;
         }
+
     }
 
 }

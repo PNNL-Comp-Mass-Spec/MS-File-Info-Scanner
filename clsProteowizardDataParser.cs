@@ -804,8 +804,11 @@ namespace MSFileInfoScanner
                         percentComplete);
 
                     OnProgressUpdate(string.Format("Spectra processed: {0:N0}", scanNumber), percentCompleteOverall);
-
                 }
+
+                mDatasetStatsSummarizer.StoreScanTypeTotals(scanCountHMS, scanCountHMSn,
+                                                            scanCountMS, scanCountMSn,
+                                                            runtimeMinutes);
 
                 var scanCountTotal = scanCountSuccess + scanCountError;
                 if (scanCountTotal == 0)
