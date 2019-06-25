@@ -582,6 +582,14 @@ namespace MSFileInfoScanner
                 var skippedEmptyScans = 0;
 
                 var scanNumber = 0;
+                var scansStored  = 0;
+                var ticAndBpiScansStored = 0;
+
+                var scanCountHMS = 0;
+                var scanCountHMSn = 0;
+                var scanCountMS = 0;
+                var scanCountMSn = 0;
+
                 for (var scanIndex = 0; scanIndex <= spectrumCount - 1; scanIndex++)
                 {
 
@@ -617,10 +625,12 @@ namespace MSFileInfoScanner
                             if (HighResMS2)
                             {
                                 scanStatsEntry.ScanTypeName = "HMSn";
+                                scanCountHMSn++;
                             }
                             else
                             {
                                 scanStatsEntry.ScanTypeName = "MSn";
+                                scanCountMSn++;
                             }
                         }
                         else
@@ -628,12 +638,13 @@ namespace MSFileInfoScanner
                             if (HighResMS1)
                             {
                                 scanStatsEntry.ScanTypeName = "HMS";
+                                scanCountHMS++;
                             }
                             else
                             {
                                 scanStatsEntry.ScanTypeName = "MS";
+                                scanCountMS++;
                             }
-
                         }
 
                         var driftTimeMsec = msDataSpectrum.DriftTimeMsec ?? 0;
