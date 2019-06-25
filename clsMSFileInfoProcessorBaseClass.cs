@@ -18,6 +18,9 @@ namespace MSFileInfoScanner
         public const int PROGRESS_SAVED_TIC_AND_BPI_PLOT = 92;
         public const int PROGRESS_SAVED_2D_PLOTS = 99;
 
+        protected const int MAX_SCANS_TO_TRACK_IN_DETAIL = 750000;
+        protected const int MAX_SCANS_FOR_TIC_AND_BPI = 1000000;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -376,7 +379,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         /// <summary>
@@ -1022,6 +1024,7 @@ namespace MSFileInfoScanner
             bool highResMS1 = true,
             bool highResMS2 = true)
         {
+
             try
             {
                 // Open the instrument data using the ProteoWizardWrapper
@@ -1081,7 +1084,11 @@ namespace MSFileInfoScanner
                 {
                     // Process the spectral data (though only if we did not process SRM data)
                     var skipExistingScans = (pWiz.ChromatogramCount > 0);
-                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans, skipScansWithNoIons);
+                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes,
+                                                  skipExistingScans, skipScansWithNoIons,
+                                                  maxScansToTrackInDetail: MAX_SCANS_TO_TRACK_IN_DETAIL,
+                                                  maxScansForTicAndBpi: MAX_SCANS_FOR_TIC_AND_BPI);
+
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }
 

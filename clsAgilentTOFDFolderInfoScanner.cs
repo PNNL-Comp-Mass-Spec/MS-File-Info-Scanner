@@ -415,7 +415,13 @@ namespace MSFileInfoScanner
                 {
                     // Process the spectral data
                     var skipExistingScans = (pWiz.ChromatogramCount > 0);
-                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans: skipExistingScans, skipScansWithNoIons: true);
+
+                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes,
+                                                  skipExistingScans,
+                                                  skipScansWithNoIons: true,
+                                                  maxScansToTrackInDetail: MAX_SCANS_TO_TRACK_IN_DETAIL,
+                                                  maxScansForTicAndBpi: MAX_SCANS_FOR_TIC_AND_BPI);
+
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }
 

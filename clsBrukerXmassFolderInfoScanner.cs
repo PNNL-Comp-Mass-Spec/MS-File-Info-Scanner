@@ -373,7 +373,6 @@ namespace MSFileInfoScanner
         /// <returns>True if success, false if an error</returns>
         private bool ParseBAFFile(FileInfo bafFileInfo, DatasetFileInfo datasetFileInfo, out bool bafFileChecked)
         {
-
             // Override dataFilePath here, if needed
             var manualOverride = false;
 
@@ -466,7 +465,12 @@ namespace MSFileInfoScanner
                 {
                     // Process the spectral data (though only if we did not process SRM data)
                     var skipExistingScans = (pWiz.ChromatogramCount > 0);
-                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans, skipScansWithNoIons: true);
+                    pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes,
+                                                  skipExistingScans,
+                                                  skipScansWithNoIons: true,
+                                                  maxScansToTrackInDetail: MAX_SCANS_TO_TRACK_IN_DETAIL,
+                                                  maxScansForTicAndBpi: MAX_SCANS_FOR_TIC_AND_BPI);
+
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
 
                     datasetFileInfo.ScanCount = pWiz.SpectrumCount;

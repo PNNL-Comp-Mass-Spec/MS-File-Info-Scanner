@@ -464,10 +464,26 @@ namespace MSFileInfoScanner
         /// <param name="runtimeMinutes">Maximum acquisition time (updated by this method)</param>
         /// <param name="skipExistingScans">When true, skip scans already defined in mDatasetStatsSummarizer</param>
         /// <param name="skipScansWithNoIons">When true, skip scans that have no ions</param>
+        /// <param name="maxScansToTrackInDetail">
+        /// Maximum number of scans to store in mDatasetStatsSummarizer; limit to 1 million to reduce memory usage.
+        /// If less than zero, store all scans
+        /// </param>
+        /// <param name="maxScansForTicAndBpi">
+        /// Maximum number of scans to store in mTICAndBPIPlot; limit to 2 million to reduce memory usage.
+        /// If less than zero, store all scans
+        /// </param>
         /// <returns>True if at least 50% of the spectra were successfully read</returns>
-        public bool StoreMSSpectraInfo(bool ticStored, ref double runtimeMinutes, bool skipExistingScans, bool skipScansWithNoIons)
+        public bool StoreMSSpectraInfo(
+            bool ticStored,
+            ref double runtimeMinutes,
+            bool skipExistingScans,
+            bool skipScansWithNoIons,
+            int maxScansToTrackInDetail,
+            int maxScansForTicAndBpi)
         {
-            return StoreMSSpectraInfo(ticStored, ref runtimeMinutes, skipExistingScans, skipScansWithNoIons, out _, out _);
+            return StoreMSSpectraInfo(ticStored, ref runtimeMinutes,
+                                      skipExistingScans, skipScansWithNoIons,
+                                      maxScansToTrackInDetail, maxScansForTicAndBpi, out _, out _);
         }
 
         /// <summary>
@@ -477,6 +493,14 @@ namespace MSFileInfoScanner
         /// <param name="runtimeMinutes">Maximum acquisition time (updated by this method)</param>
         /// <param name="skipExistingScans">When true, skip scans already defined in mDatasetStatsSummarizer</param>
         /// <param name="skipScansWithNoIons">When true, skip scans that have no ions</param>
+        /// <param name="maxScansToTrackInDetail">
+        /// Maximum number of scans to store in mDatasetStatsSummarizer; limit to 1 million to reduce memory usage.
+        /// If less than zero, store all scans
+        /// </param>
+        /// <param name="maxScansForTicAndBpi">
+        /// Maximum number of scans to store in mTICAndBPIPlot; limit to 2 million to reduce memory usage.
+        /// If less than zero, store all scans
+        /// </param>
         /// <param name="scanCountSuccess">Output: number of scans successfully read</param>
         /// <param name="scanCountError">Output: number of scans that could not be read</param>
         /// <returns>True if at least 50% of the spectra were successfully read</returns>
@@ -486,6 +510,8 @@ namespace MSFileInfoScanner
             ref double runtimeMinutes,
             bool skipExistingScans,
             bool skipScansWithNoIons,
+            int maxScansToTrackInDetail,
+            int maxScansForTicAndBpi,
             out int scanCountSuccess,
             out int scanCountError)
         {
@@ -715,14 +741,18 @@ namespace MSFileInfoScanner
                             }
                             else
                             {
-                                mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
+                                if (maxScansToTrackInDetail < 0 || scansStored < maxScansToTrackInDetail) {
+                                    mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
+                                    scansStored += 1;
+                                }
                             }
 
                         }
 
-                        if (mSaveTICAndBPI && !ticStored)
+                        if (mSaveTICAndBPI && !ticStored && (maxScansForTicAndBpi < 0 || ticAndBpiScansStored < maxScansForTicAndBpi))
                         {
                             mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimes[scanIndex], bpi, tic);
+                            ticAndBpiScansStored += 1;
                         }
 
                         if (mSaveLCMS2DPlots && addScan)
