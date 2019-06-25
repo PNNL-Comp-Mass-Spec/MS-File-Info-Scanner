@@ -93,7 +93,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public DatasetStatsSummarizer()
         {
-            FileDate = "June 13, 2019";
+            FileDate = "June 24, 2019";
 
             ErrorMessage = string.Empty;
 
@@ -714,12 +714,10 @@ namespace MSFileInfoScanner.DatasetStats
                     writer.WriteAttributeString("ScanCount", scanCountForType.ToString());
                     writer.WriteAttributeString("ScanFilterText", FixNull(scanFilterText));
                     writer.WriteString(scanType);
-                    writer.WriteEndElement();
-                    // ScanType EndElement
+                    writer.WriteEndElement();       // ScanType EndElement
                 }
 
-                writer.WriteEndElement();
-                // ScanTypes
+                writer.WriteEndElement();           // ScanTypes
 
                 writer.WriteStartElement("AcquisitionInfo");
 
@@ -763,8 +761,7 @@ namespace MSFileInfoScanner.DatasetStats
                         writer.WriteEndElement();
                     }
 
-                    writer.WriteEndElement();
-                    // InstrumentFiles
+                    writer.WriteEndElement();       // InstrumentFiles
                 }
 
                 if (includeCentroidStats)
@@ -800,8 +797,7 @@ namespace MSFileInfoScanner.DatasetStats
 
                 }
 
-                writer.WriteEndElement();
-                // AcquisitionInfo EndElement
+                writer.WriteEndElement();   // AcquisitionInfo EndElement
 
                 writer.WriteStartElement("TICInfo");
                 writer.WriteElementString("TIC_Max_MS", StringUtilities.ValueToString(summaryStats.MSStats.TICMax, 5));
@@ -812,8 +808,7 @@ namespace MSFileInfoScanner.DatasetStats
                 writer.WriteElementString("TIC_Median_MSn", StringUtilities.ValueToString(summaryStats.MSnStats.TICMedian, 5));
                 writer.WriteElementString("BPI_Median_MS", StringUtilities.ValueToString(summaryStats.MSStats.BPIMedian, 5));
                 writer.WriteElementString("BPI_Median_MSn", StringUtilities.ValueToString(summaryStats.MSnStats.BPIMedian, 5));
-                writer.WriteEndElement();
-                // TICInfo EndElement
+                writer.WriteEndElement();       // TICInfo EndElement
 
                 // Only write the SampleInfo block if sampleInfo contains entries
                 if (sampleInfo.HasData())
@@ -822,14 +817,12 @@ namespace MSFileInfoScanner.DatasetStats
                     writer.WriteElementString("SampleName", FixNull(sampleInfo.SampleName));
                     writer.WriteElementString("Comment1", FixNull(sampleInfo.Comment1));
                     writer.WriteElementString("Comment2", FixNull(sampleInfo.Comment2));
-                    writer.WriteEndElement();
-                    // SampleInfo EndElement
+                    writer.WriteEndElement();       // SampleInfo EndElement
                 }
 
-                writer.WriteEndElement();
-                //End the "Root" element (DatasetInfo)
-                writer.WriteEndDocument();
-                //End the document
+                writer.WriteEndElement();           // End the "Root" element (DatasetInfo)
+
+                writer.WriteEndDocument();          // End the document
 
                 writer.Close();
 
@@ -915,7 +908,6 @@ namespace MSFileInfoScanner.DatasetStats
                         includeDriftTime = true;
                         break;
                     }
-
 
                     // Write the headers
                     var headerNames = new List<string>
@@ -1030,7 +1022,6 @@ namespace MSFileInfoScanner.DatasetStats
                 }
 
                 return true;
-
             }
             catch (Exception ex)
             {
