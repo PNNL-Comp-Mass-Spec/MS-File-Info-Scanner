@@ -786,7 +786,15 @@ namespace MSFileInfoScanner
 
                     if (DateTime.UtcNow.Subtract(lastStatusProgressTime).TotalMinutes > 5)
                     {
-                        OnStatusEvent(string.Format("Reading spectra, loaded {0:N0} / {1:N0} spectra", scanNumber, spectrumCount));
+                        OnStatusEvent(string.Format("Reading spectra, loaded {0:N0} / {1:N0} spectra; " +
+                                                    "{2:N0} HMS spectra; {3:N0} HMSn spectra; " +
+                                                    "{4:N0} MS spectra; {5:N0} MSn spectra; " +
+                                                    "max elution time is {6:F2} minutes",
+                                                    scanNumber, spectrumCount,
+                                                    scanCountHMS, scanCountHMSn,
+                                                    scanCountMS, scanCountMSn,
+                                                    runtimeMinutes));
+
                         lastStatusProgressTime = DateTime.UtcNow;
                         lastDebugProgressTime = DateTime.UtcNow;
                         continue;
