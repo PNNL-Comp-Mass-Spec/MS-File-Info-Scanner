@@ -93,7 +93,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public DatasetStatsSummarizer()
         {
-            FileDate = "June 25, 2019";
+            FileDate = "September 9, 2019";
 
             ErrorMessage = string.Empty;
 
@@ -1341,6 +1341,7 @@ namespace MSFileInfoScanner.DatasetStats
             var validMS2 = ValidateMSnMzMin(
                 2,
                 requiredMzMin, maxPercentAllowedFailed,
+                out var scanCountMS2,
                 out var scanCountWithDataMS2,
                 out var messageMS2);
 
@@ -1354,12 +1355,21 @@ namespace MSFileInfoScanner.DatasetStats
             var validMS3 = ValidateMSnMzMin(
                 3,
                 requiredMzMin, maxPercentAllowedFailed,
+                out var scanCountMS3,
                 out var scanCountWithDataMS3,
                 out var messageMS3);
 
             if (scanCountWithDataMS3 > 0 && validMS3)
             {
                 errorOrWarningMsg = messageMS3;
+                return true;
+            }
+
+            if (scanCountMS2 == 0 && scanCountMS3 == 0)
+            {
+                // No MS2 or MS3 spectra
+                // Treat this as "valid data"
+                errorOrWarningMsg = "No MS2 or MS3 spectra";
                 return true;
             }
 
@@ -1379,6 +1389,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="msLevel"></param>
         /// <param name="requiredMzMin"></param>
         /// <param name="maxPercentAllowedFailed"></param>
+        /// <param name="scanCountForMSLevel"></param>
         /// <param name="scanCountWithData"></param>
         /// <param name="errorOrWarningMsg"></param>
         /// <returns></returns>
@@ -1386,11 +1397,14 @@ namespace MSFileInfoScanner.DatasetStats
             int msLevel,
             float requiredMzMin,
             int maxPercentAllowedFailed,
+            out int scanCountForMSLevel,
             out int scanCountWithData,
             out string errorOrWarningMsg)
         {
 
             scanCountWithData = 0;
+            scanCountForMSLevel = 0;
+
             var scanCountInvalid = 0;
 
             foreach (var scan in mDatasetScanStats)
@@ -1398,6 +1412,7 @@ namespace MSFileInfoScanner.DatasetStats
                 if (scan.ScanType != msLevel)
                     continue;
 
+                scanCountForMSLevel++;
                 if (scan.IonCount == 0 && scan.IonCountRaw == 0)
                     continue;
 
@@ -1417,10 +1432,17 @@ namespace MSFileInfoScanner.DatasetStats
             else
                 spectraType = "MSn";
 
+            if (scanCountForMSLevel == 0)
+            {
+                // There are no MS2 (or MS3) spectra
+                errorOrWarningMsg = string.Format("Dataset has no {0} spectra; cannot validate minimum m/z", spectraType);
+                return false;
+            }
+
             if (scanCountWithData == 0)
             {
-                // None of the MS2 spectra has data; cannot validate
-                errorOrWarningMsg = string.Format("None of the {0} spectra has data; cannot validate", spectraType);
+                // None of the MS2 (or MS3) spectra has data; cannot validate
+                errorOrWarningMsg = string.Format("None of the {0} spectra has data; cannot validate minimum m/z", spectraType);
                 return false;
             }
 
