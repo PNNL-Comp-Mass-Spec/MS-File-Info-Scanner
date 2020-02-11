@@ -1134,7 +1134,8 @@ namespace MSFileInfoScanner
         /// </summary>
         protected void ShowInstrumentFiles()
         {
-            if (mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles.Count <= 0) return;
+            if (mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles.Count <= 0) 
+                return;
 
             var fileInfo = new StringBuilder();
 
