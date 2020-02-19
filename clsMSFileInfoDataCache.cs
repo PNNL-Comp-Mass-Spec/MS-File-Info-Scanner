@@ -285,15 +285,15 @@ namespace MSFileInfoScanner
             var msFileInfo = new DataTable(MS_FILE_INFO_DATA_TABLE);
 
             // Add the columns to the DataTable
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(msFileInfo, COL_NAME_DATASET_ID);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnStringToTable(msFileInfo, COL_NAME_DATASET_NAME);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnStringToTable(msFileInfo, COL_NAME_FILE_EXTENSION);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnDateToTable(msFileInfo, COL_NAME_ACQ_TIME_START, defaultDate);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnDateToTable(msFileInfo, COL_NAME_ACQ_TIME_END, defaultDate);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(msFileInfo, COL_NAME_SCAN_COUNT);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnLongToTable(msFileInfo, COL_NAME_FILE_SIZE_BYTES);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnDateToTable(msFileInfo, COL_NAME_INFO_LAST_MODIFIED, defaultDate);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnDateToTable(msFileInfo, COL_NAME_FILE_MODIFICATION_DATE, defaultDate);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(msFileInfo, COL_NAME_DATASET_ID);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnStringToTable(msFileInfo, COL_NAME_DATASET_NAME);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnStringToTable(msFileInfo, COL_NAME_FILE_EXTENSION);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnDateToTable(msFileInfo, COL_NAME_ACQ_TIME_START, defaultDate);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnDateToTable(msFileInfo, COL_NAME_ACQ_TIME_END, defaultDate);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(msFileInfo, COL_NAME_SCAN_COUNT);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnLongToTable(msFileInfo, COL_NAME_FILE_SIZE_BYTES);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnDateToTable(msFileInfo, COL_NAME_INFO_LAST_MODIFIED, defaultDate);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnDateToTable(msFileInfo, COL_NAME_FILE_MODIFICATION_DATE, defaultDate);
 
             // Use the dataset name as the primary key since we won't always know Dataset_ID
             var MSInfoPrimaryKeyColumn = new[] { msFileInfo.Columns[COL_NAME_DATASET_NAME] };
@@ -303,11 +303,11 @@ namespace MSFileInfoScanner
             var directoryIntegrityInfo = new DataTable(DIRECTORY_INTEGRITY_INFO_DATA_TABLE);
 
             // Add the columns to the DataTable
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(directoryIntegrityInfo, COL_NAME_FOLDER_ID);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnStringToTable(directoryIntegrityInfo, COL_NAME_FOLDER_PATH);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(directoryIntegrityInfo, COL_NAME_FILE_COUNT);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(directoryIntegrityInfo, COL_NAME_COUNT_FAIL_INTEGRITY);
-            PRISM.DatabaseUtils.DataTableUtils.AppendColumnDateToTable(directoryIntegrityInfo, COL_NAME_INFO_LAST_MODIFIED, defaultDate);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(directoryIntegrityInfo, COL_NAME_FOLDER_ID);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnStringToTable(directoryIntegrityInfo, COL_NAME_FOLDER_PATH);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(directoryIntegrityInfo, COL_NAME_FILE_COUNT);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnIntegerToTable(directoryIntegrityInfo, COL_NAME_COUNT_FAIL_INTEGRITY);
+            PRISMDatabaseUtils.DataTableUtils.AppendColumnDateToTable(directoryIntegrityInfo, COL_NAME_INFO_LAST_MODIFIED, defaultDate);
 
             // Use the directory path as the primary key
             var FolderInfoPrimaryKeyColumn = new[] {

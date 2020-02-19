@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScannerInterfaces;
 using PRISM;
+using PRISMDatabaseUtils;
 
 namespace MSFileInfoScanner
 {
@@ -117,12 +117,14 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <remarks>All MS/MS spectra should have a scan range that starts below this value</remarks>
         public const int MINIMUM_MZ_THRESHOLD_ITRAQ = 113;
+        public const string MINIMUM_MZ_THRESHOLD_ITRAQ_STRING = "113";
 
         /// <summary>
         /// Default m/z threshold for TMT labeled samples
         /// </summary>
         /// <remarks>All MS/MS spectra should have a scan range that starts below this value</remarks>
         public const int MINIMUM_MZ_THRESHOLD_TMT = 126;
+        public const string MINIMUM_MZ_THRESHOLD_TMT_STRING = "126";
 
         private const bool SKIP_FILES_IN_ERROR = true;
 
@@ -1097,33 +1099,25 @@ namespace MSFileInfoScanner
                     storedProcedureName = "UpdateDatasetFileInfoXML";
                 }
 
-                var command = new SqlCommand
-                {
-                    CommandType = CommandType.StoredProcedure,
-                    CommandText = storedProcedureName
-                };
+                var dbTools = DbToolsFactory.GetDBTools(connectionString);
+                dbTools.ErrorEvent += ExecuteSP_DBErrorEvent;
 
-                command.Parameters.Add(new SqlParameter("@Return", SqlDbType.Int));
-                command.Parameters["@Return"].Direction = ParameterDirection.ReturnValue;
+                var cmd = dbTools.CreateCommand(storedProcedureName, CommandType.StoredProcedure);
 
-                command.Parameters.Add(new SqlParameter("@DatasetInfoXML", SqlDbType.Xml));
-                command.Parameters["@DatasetInfoXML"].Direction = ParameterDirection.Input;
-                command.Parameters["@DatasetInfoXML"].Value = dsInfoXMLClean;
+                var returnParam = dbTools.AddParameter(cmd, "@Return", SqlType.Int, ParameterDirection.ReturnValue);
 
-                var executeSP = new ExecuteDatabaseSP(connectionString);
+                dbTools.AddParameter(cmd, "@DatasetInfoXML", SqlType.Xml).Value = dsInfoXMLClean;
 
-                executeSP.ErrorEvent += ExecuteSP_DBErrorEvent;
+                var result = dbTools.ExecuteSP(cmd, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES);
 
-                var result = executeSP.ExecuteSP(command, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES);
-
-                if (result == ExecuteDatabaseSP.RET_VAL_OK)
+                if (result == DbUtilsConstants.RET_VAL_OK)
                 {
                     // No errors
                     success = true;
                 }
                 else
                 {
-                    ReportError("Error calling stored procedure, return code = " + result);
+                    ReportError("Error calling stored procedure, return code = " + returnParam.Value.CastDBVal<string>());
                     SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
                     success = false;
                 }
@@ -1212,35 +1206,24 @@ namespace MSFileInfoScanner
                     storedProcedureName = "CacheDatasetInfoXML";
                 }
 
-                var command = new SqlCommand
-                {
-                    CommandType = CommandType.StoredProcedure,
-                    CommandText = storedProcedureName
-                };
+                var dbTools = DbToolsFactory.GetDBTools(connectionString);
+                dbTools.ErrorEvent += ExecuteSP_DBErrorEvent;
+                var cmd = dbTools.CreateCommand(storedProcedureName, CommandType.StoredProcedure);
 
-                command.Parameters.Add(new SqlParameter("@Return", SqlDbType.Int));
-                command.Parameters["@Return"].Direction = ParameterDirection.ReturnValue;
+                var returnParam = dbTools.AddParameter(cmd, "@Return", SqlType.Int, ParameterDirection.ReturnValue);
+                dbTools.AddParameter(cmd, "@DatasetID", SqlType.Int).Value = datasetID;
+                dbTools.AddParameter(cmd, "@DatasetInfoXML", SqlType.Xml).Value = dsInfoXMLClean;
 
-                command.Parameters.Add(new SqlParameter("@DatasetID", SqlDbType.Int));
-                command.Parameters["@DatasetID"].Direction = ParameterDirection.Input;
-                command.Parameters["@DatasetID"].Value = datasetID;
+                var result = dbTools.ExecuteSP(cmd, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES);
 
-                command.Parameters.Add(new SqlParameter("@DatasetInfoXML", SqlDbType.Xml));
-                command.Parameters["@DatasetInfoXML"].Direction = ParameterDirection.Input;
-                command.Parameters["@DatasetInfoXML"].Value = dsInfoXMLClean;
-
-                var executeSP = new ExecuteDatabaseSP(connectionString);
-
-                var result = executeSP.ExecuteSP(command, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES);
-
-                if (result == ExecuteDatabaseSP.RET_VAL_OK)
+                if (result == DbUtilsConstants.RET_VAL_OK)
                 {
                     // No errors
                     success = true;
                 }
                 else
                 {
-                    ReportError("Error calling stored procedure, return code = " + result);
+                    ReportError("Error calling stored procedure, return code = " + returnParam.Value.CastDBVal<string>());
                     SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
                     success = false;
                 }
