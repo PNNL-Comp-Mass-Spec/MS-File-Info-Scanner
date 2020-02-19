@@ -112,6 +112,7 @@
     <Compile Include="clsPythonPlotContainer3D.cs" />
     <Compile Include="clsPythonPlotContainer.cs" />
     <Compile Include="clsPythonPlotContainer2D.cs" />
+    <Compile Include="CommandLineOptions.cs" />
     <Compile Include="DatasetStats\DatasetSummaryStats.cs" />
     <Compile Include="DatasetStats\ExtendedStatsInfo.cs" />
     <Compile Include="DatasetStats\InstrumentFileInfo.cs" />
