@@ -5,7 +5,9 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using OxyPlot;
-using OxyPlot.Axes;
+using OxyPlot.Wpf;
+using LinearColorAxis = OxyPlot.Axes.LinearColorAxis;
+
 // ReSharper disable RedundantNameQualifier
 
 namespace MSFileInfoScanner
@@ -53,8 +55,9 @@ namespace MSFileInfoScanner
         /// <param name="dataSource"></param>
         /// <remarks></remarks>
         public clsPlotContainer(
-            OxyPlot.PlotModel thePlot,
-            bool writeDebug = false, string dataSource = "") : base(writeDebug, dataSource)
+            PlotModel thePlot,
+            bool writeDebug = false,
+            string dataSource = "") : base(writeDebug, dataSource)
         {
             Plot = thePlot;
             FontSizeBase = DEFAULT_BASE_FONT_SIZE;
@@ -190,12 +193,12 @@ namespace MSFileInfoScanner
 
                 if (!string.IsNullOrWhiteSpace(AnnotationBottomLeft))
                 {
-                    AddText(AnnotationBottomLeft, drawContext, width, height, OxyPlot.HorizontalAlignment.Left, OxyPlot.VerticalAlignment.Bottom, 5);
+                    AddText(AnnotationBottomLeft, drawContext, width, height, HorizontalAlignment.Left, VerticalAlignment.Bottom, 5);
                 }
 
                 if (!string.IsNullOrWhiteSpace(AnnotationBottomRight))
                 {
-                    AddText(AnnotationBottomRight, drawContext, width, height, OxyPlot.HorizontalAlignment.Right, OxyPlot.VerticalAlignment.Bottom, 5);
+                    AddText(AnnotationBottomRight, drawContext, width, height, HorizontalAlignment.Right, VerticalAlignment.Bottom, 5);
                 }
 
                 if (PlottingDeisotopedData)
@@ -284,7 +287,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, OxyPlot.HorizontalAlignment hAlign, OxyPlot.VerticalAlignment vAlign, int padding)
+        private void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, HorizontalAlignment hAlign, VerticalAlignment vAlign, int padding)
         {
             var usCulture = CultureInfo.GetCultureInfo("en-us");
             // var fontTypeface = new Typeface(new FontFamily("Arial"), FontStyles.Normal, System.Windows.FontWeights.Normal, FontStretches.Normal);
@@ -299,26 +302,26 @@ namespace MSFileInfoScanner
 
             switch (hAlign)
             {
-                case OxyPlot.HorizontalAlignment.Left:
+                case HorizontalAlignment.Left:
                     position.X += padding;
                     break;
-                case OxyPlot.HorizontalAlignment.Center:
+                case HorizontalAlignment.Center:
                     position.X += (textRect.Width - newText.Width) / 2;
                     break;
-                case OxyPlot.HorizontalAlignment.Right:
+                case HorizontalAlignment.Right:
                     position.X += textRect.Width - newText.Width - padding;
                     break;
             }
 
             switch (vAlign)
             {
-                case OxyPlot.VerticalAlignment.Top:
+                case VerticalAlignment.Top:
                     position.Y += padding;
                     break;
-                case OxyPlot.VerticalAlignment.Middle:
+                case VerticalAlignment.Middle:
                     position.Y += (textRect.Height - newText.Height) / 2;
                     break;
-                case OxyPlot.VerticalAlignment.Bottom:
+                case VerticalAlignment.Bottom:
                     position.Y += textRect.Height - newText.Height - padding;
                     break;
             }

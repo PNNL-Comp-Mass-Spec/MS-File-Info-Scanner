@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScannerInterfaces;
 using PRISM;
 
@@ -152,7 +150,7 @@ namespace MSFileInfoScanner
             return PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppVersion(PROGRAM_DATE);
         }
 
-        private static string CollapseList(List<string> itemList)
+        private static string CollapseList(IEnumerable<string> itemList)
         {
             return string.Join(", ", itemList);
         }
