@@ -29,7 +29,11 @@ namespace MSFileInfoScanner
             JPG
         }
 
-        public OxyPlot.PlotModel Plot { get; }
+        /// <summary>
+        /// The OxyPlot plot model
+        /// </summary>
+        /// <remarks>Type OxyPlot.PlotModel</remarks>
+        public PlotModel Plot { get; }
 
         public int FontSizeBase { get; set; }
 
@@ -50,7 +54,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="thePlot"></param>
+        /// <param name="thePlot">The plot (type OxyPlot.PlotModel)</param>
         /// <param name="writeDebug"></param>
         /// <param name="dataSource"></param>
         /// <remarks></remarks>

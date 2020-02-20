@@ -19,7 +19,7 @@ namespace MSFileInfoScanner
     /// -------------------------------------------------------------------------------
     static class modMain
     {
-        public const string PROGRAM_DATE = "February 18, 2020";
+        public const string PROGRAM_DATE = "February 19, 2020";
 
         private static DateTime mLastProgressTime;
 
