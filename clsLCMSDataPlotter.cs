@@ -1520,7 +1520,7 @@ namespace MSFileInfoScanner
                 yAxisLabel = "m/z";
             }
 
-            var myPlot = clsOxyplotUtilities.GetBasicPlotModel(plotTitle, "LC Scan Number", yAxisLabel);
+            var myPlot = clsOxyPlotUtilities.GetBasicPlotModel(plotTitle, "LC Scan Number", yAxisLabel);
 
             if (Options.PlottingDeisotopedData)
             {
@@ -1534,10 +1534,10 @@ namespace MSFileInfoScanner
 
             // Update the axis format codes if the data values are small or the range of data is small
             var xVals = (from item in pointsByCharge.First() select item.X).ToList();
-            clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[0], xVals, true);
+            clsOxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[0], xVals, true);
 
             var yVals = (from item in pointsByCharge.First() select item.Y).ToList();
-            clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
+            clsOxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
 
             var plotContainer = new clsPlotContainer(myPlot)
             {
@@ -1600,7 +1600,7 @@ namespace MSFileInfoScanner
             }
 
             // Assure that we don't see ticks between scan numbers
-            clsOxyplotUtilities.ValidateMajorStep(myPlot.Axes[0]);
+            clsOxyPlotUtilities.ValidateMajorStep(myPlot.Axes[0]);
 
             double maxMzToUse;
 

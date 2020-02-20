@@ -6,7 +6,7 @@ using OxyPlot.Axes;
 
 namespace MSFileInfoScanner
 {
-    public class clsOxyplotUtilities
+    public class clsOxyPlotUtilities
     {
 
         public static PlotModel GetBasicPlotModel(string title, string xAxisLabel, string yAxisLabel)

@@ -299,7 +299,7 @@ namespace MSFileInfoScanner
             // Multiple maxIntensity by 2% and then round up to the nearest integer
             maxIntensity = Math.Ceiling(maxIntensity * 1.02);
 
-            var myPlot = clsOxyplotUtilities.GetBasicPlotModel(plotTitle, xAxisLabel, yAxisLabel);
+            var myPlot = clsOxyPlotUtilities.GetBasicPlotModel(plotTitle, xAxisLabel, yAxisLabel);
 
             if (yAxisExponentialNotation)
             {
@@ -310,10 +310,10 @@ namespace MSFileInfoScanner
 
             // Update the axis format codes if the data values are small or the range of data is small
             var xVals = (from item in points select item.X).ToList();
-            clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[0], xVals, true);
+            clsOxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[0], xVals, true);
 
             var yVals = (from item in points select item.Y).ToList();
-            clsOxyplotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
+            clsOxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
 
             var plotContainer = new clsPlotContainer(myPlot, mWriteDebug, mDataSource)
             {
@@ -379,7 +379,7 @@ namespace MSFileInfoScanner
             }
 
             // Assure that we don't see ticks between scan numbers
-            clsOxyplotUtilities.ValidateMajorStep(myPlot.Axes[0]);
+            clsOxyPlotUtilities.ValidateMajorStep(myPlot.Axes[0]);
 
             // Override the auto-computed Y axis range
             if (autoMinMaxY)
