@@ -9,7 +9,9 @@ namespace MSFileInfoScanner
     public class clsOxyPlotUtilities
     {
 
+#pragma warning disable CS3002 // Return type is not CLS-compliant
         public static PlotModel GetBasicPlotModel(string title, string xAxisLabel, string yAxisLabel)
+#pragma warning restore CS3002 // Argument type is not CLS-compliant
         {
 
             var myPlot = new PlotModel
@@ -38,7 +40,11 @@ namespace MSFileInfoScanner
 
         }
 
+#pragma warning disable CS3001 // Argument type is not CLS-compliant
+#pragma warning disable CS3002 // Return type is not CLS-compliant
         public static LinearAxis MakeLinearAxis(AxisPosition position, string axisTitle, int baseFontSize)
+#pragma warning restore CS3002 // Return type is not CLS-compliant
+#pragma warning restore CS3001 // Argument type is not CLS-compliant
         {
             var axis = new LinearAxis
             {
@@ -70,7 +76,9 @@ namespace MSFileInfoScanner
         /// <param name="dataPoints"></param>
         /// <param name="integerData"></param>
         /// <remarks></remarks>
+#pragma warning disable CS3001 // Argument type is not CLS-compliant
         public static void UpdateAxisFormatCodeIfSmallValues(Axis currentAxis, List<double> dataPoints, bool integerData)
+#pragma warning restore CS3001
         {
             if (!dataPoints.Any())
                 return;
@@ -83,7 +91,9 @@ namespace MSFileInfoScanner
             currentAxis.MinorGridlineThickness = axisInfo.MinorGridlineThickness;
         }
 
+#pragma warning disable CS3001 // Argument type is not CLS-compliant
         public static void ValidateMajorStep(Axis currentAxis)
+#pragma warning restore CS3001
         {
             if (Math.Abs(currentAxis.ActualMajorStep) > float.Epsilon && currentAxis.ActualMajorStep < 1)
             {
