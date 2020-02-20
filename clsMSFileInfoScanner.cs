@@ -1100,7 +1100,7 @@ namespace MSFileInfoScanner
                 }
 
                 var dbTools = DbToolsFactory.GetDBTools(connectionString);
-                dbTools.ErrorEvent += ExecuteSP_DBErrorEvent;
+                RegisterEvents(dbTools);
 
                 var cmd = dbTools.CreateCommand(storedProcedureName, CommandType.StoredProcedure);
 
@@ -1207,7 +1207,8 @@ namespace MSFileInfoScanner
                 }
 
                 var dbTools = DbToolsFactory.GetDBTools(connectionString);
-                dbTools.ErrorEvent += ExecuteSP_DBErrorEvent;
+                RegisterEvents(dbTools);
+
                 var cmd = dbTools.CreateCommand(storedProcedureName, CommandType.StoredProcedure);
 
                 var returnParam = dbTools.AddParameter(cmd, "@Return", SqlType.Int, ParameterDirection.ReturnValue);
@@ -2818,11 +2819,6 @@ namespace MSFileInfoScanner
             }
 
             WriteFileIntegrityFailure(mFileIntegrityErrorsWriter, filePath, message);
-        }
-
-        private void ExecuteSP_DBErrorEvent(string message, Exception ex)
-        {
-            ReportError(message);
         }
 
     }
