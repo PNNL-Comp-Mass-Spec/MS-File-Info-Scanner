@@ -99,7 +99,7 @@
     <Compile Include="clsDeconToolsIsosInfoScanner.cs" />
     <Compile Include="clsFileIntegrityChecker.cs" />
     <Compile Include="clsFilterDataArrayMaxCount.cs" />
-    <Compile Include="clsFinniganRawFileInfoScanner.cs" />
+    <Compile Include="clsThermoRawFileInfoScanner.cs" />
     <Compile Include="clsLCMSDataPlotter.cs" />
     <Compile Include="clsMassLynxNativeIO.cs" />
     <Compile Include="clsMicromassRawFolderInfoScanner.cs" />
