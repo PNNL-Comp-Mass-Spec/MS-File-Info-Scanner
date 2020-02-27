@@ -158,7 +158,7 @@ namespace MSFileInfoScanner
                             mSortingWarnCount += 1;
                             if (mSortingWarnCount <= 10)
                             {
-                                Console.WriteLine("  Sorting m/z data (this typically shouldn't be required for Finnigan data, though can occur for high res orbitrap data)");
+                                Console.WriteLine("  Sorting m/z data (this typically shouldn't be required for Thermo data, though can occur for high res orbitrap data)");
                             }
                             else if (mSortingWarnCount % 100 == 0)
                             {
@@ -305,7 +305,7 @@ namespace MSFileInfoScanner
                         mSortingWarnCount += 1;
                         if (mSortingWarnCount <= 10)
                         {
-                            Console.WriteLine("  Sorting m/z data (this typically shouldn't be required for Finnigan data, though can occur for high res orbitrap data)");
+                            Console.WriteLine("  Sorting m/z data (this typically shouldn't be required for Thermo data, though can occur for high res orbitrap data)");
                         }
                         else if (mSortingWarnCount % 100 == 0)
                         {

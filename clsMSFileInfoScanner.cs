@@ -14,7 +14,7 @@ namespace MSFileInfoScanner
     /// This program scans a series of MS data files (or data directories) and extracts the acquisition start and end times,
     /// number of spectra, and the total size of the Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
     ///
-    /// Supported file types are Finnigan .RAW files, Agilent Ion Trap (.D directories), Agilent or QStar/QTrap .WIFF files,
+    /// Supported file types are Thermo .RAW files, Agilent Ion Trap (.D directories), Agilent or QStar/QTrap .WIFF files,
     /// MassLynx .Raw directories, Bruker 1 directories, Bruker XMass analysis.baf files, and .UIMF files (IMS)
     ///
     /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -597,7 +597,7 @@ namespace MSFileInfoScanner
         {
             var extensionsToParse = new List<string>
             {
-                clsFinniganRawFileInfoScanner.THERMO_RAW_FILE_EXTENSION.ToUpper(),
+                clsThermoRawFileInfoScanner.THERMO_RAW_FILE_EXTENSION.ToUpper(),
                 clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION.ToUpper(),
                 clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION.ToUpper(),
                 clsBrukerXmassFolderInfoScanner.BRUKER_MCF_FILE_EXTENSION.ToUpper(),
@@ -1632,9 +1632,9 @@ namespace MSFileInfoScanner
                             // Examine the extension on inputFileOrDirectoryPath
                             switch (fileOrDirectoryInfo.Extension.ToUpper())
                             {
-                                case clsFinniganRawFileInfoScanner.THERMO_RAW_FILE_EXTENSION:
+                                case clsThermoRawFileInfoScanner.THERMO_RAW_FILE_EXTENSION:
                                     // Thermo .raw file
-                                    mMSInfoScanner = new clsFinniganRawFileInfoScanner();
+                                    mMSInfoScanner = new clsThermoRawFileInfoScanner();
                                     knownMSDataType = true;
                                     break;
 
@@ -1980,7 +1980,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Calls ProcessMSFileOrDirectory for all files in inputFilePathOrDirectory and below having a known extension
         ///  Known extensions are:
-        ///   .Raw for Finnigan files
+        ///   .Raw for Thermo files
         ///   .Wiff for Agilent TOF files and for Q-Star files
         ///   .Baf for Bruker XMASS directories (contains file analysis.baf, and hopefully files scan.xml and Log.txt)
         /// For each directory that does not have any files matching a known extension, will then look for special directory names:
@@ -2111,7 +2111,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Calls ProcessMSFileOrDirectory for all files in inputFilePathOrFolder and below having a known extension
         ///  Known extensions are:
-        ///   .Raw for Finnigan files
+        ///   .Raw for Thermo files
         ///   .Wiff for Agilent TOF files and for Q-Star files
         ///   .Baf for Bruker XMASS directories (contains file analysis.baf, and hopefully files scan.xml and Log.txt)
         /// For each directory that does not have any files matching a known extension, will then look for special directory names:

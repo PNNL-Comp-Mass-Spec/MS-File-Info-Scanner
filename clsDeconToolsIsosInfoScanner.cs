@@ -427,7 +427,7 @@ namespace MSFileInfoScanner
                         }
                         else
                         {
-                            scanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(udtScanData.FilterText);
+                            scanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(udtScanData.FilterText);
                         }
 
                         var scanStatsEntry = new ScanStatsEntry
@@ -435,7 +435,7 @@ namespace MSFileInfoScanner
                             ScanNumber = udtScanData.Scan,
                             ScanType = udtScanData.MSLevel,
                             ScanTypeName = scanTypeName,
-                            ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(udtScanData.FilterText),
+                            ScanFilterText = XRawFileIO.MakeGenericThermoScanFilter(udtScanData.FilterText),
                             ElutionTime = udtScanData.ElutionTime.ToString("0.0###"),
                             TotalIonIntensity = StringUtilities.ValueToString(udtScanData.TotalIonCurrent, 5),
                             BasePeakIntensity = StringUtilities.ValueToString(udtScanData.BasePeakIntensity, 5),

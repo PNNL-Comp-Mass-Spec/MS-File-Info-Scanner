@@ -1762,9 +1762,9 @@ namespace MSFileInfoScanner
 
                                 case THERMO_RAW_FILE_EXTENSION:
                                     // File was not in fileIgnoreList
-                                    // Re-check using clsFinniganRawFileInfoScanner
+                                    // Re-check using clsThermoRawFileInfoScanner
 
-                                    msInfoScanner = new clsFinniganRawFileInfoScanner();
+                                    msInfoScanner = new clsThermoRawFileInfoScanner();
                                     msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, false);
                                     msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, false);
                                     msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, false);

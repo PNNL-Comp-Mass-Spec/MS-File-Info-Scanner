@@ -161,7 +161,7 @@ namespace MSFileInfoScanner
             try
             {
                 // Note: as of May 2016 this only works if you compile as x86 or if you enable "Prefer 32-bit" when compiling as AnyCPU
-                // In contrast, XRawFileIO in clsFinniganRawFileInfoScanner requires that "Prefer 32-bit" be disabled
+                // In contrast, XRawFileIO in clsThermoRawFileInfoScanner requires that "Prefer 32-bit" be disabled
 
                 netCDFReader = new NetCDFReader.clsMSNetCdf();
                 var success = netCDFReader.OpenMSCdfFile(Path.Combine(directoryPath, AGILENT_ANALYSIS_CDF_FILE));

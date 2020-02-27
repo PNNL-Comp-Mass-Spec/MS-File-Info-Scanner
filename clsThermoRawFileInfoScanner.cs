@@ -12,7 +12,7 @@ using ThermoRawFileReader;
 
 namespace MSFileInfoScanner
 {
-    public class clsFinniganRawFileInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class clsThermoRawFileInfoScanner : clsMSFileInfoProcessorBaseClass
     {
 
         // Note: The extension must be in all caps
@@ -24,7 +24,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsFinniganRawFileInfoScanner()
+        public clsThermoRawFileInfoScanner()
         {
             mIsCentroid = new Regex("([FI]TMS [+-] c .+)|([FI]TMS {[^ ]+} +[+-] c .+)|(^ *[+-] c .+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -195,8 +195,8 @@ namespace MSFileInfoScanner
                         {
                             ScanNumber = scanNumber,
                             ScanType = scanInfo.MSLevel,
-                            ScanTypeName = XRawFileIO.GetScanTypeNameFromFinniganScanFilterText(scanInfo.FilterText),
-                            ScanFilterText = XRawFileIO.MakeGenericFinniganScanFilter(scanInfo.FilterText),
+                            ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText),
+                            ScanFilterText = XRawFileIO.MakeGenericThermoScanFilter(scanInfo.FilterText),
                             ElutionTime = scanInfo.RetentionTime.ToString("0.0###"),
                             TotalIonIntensity = StringUtilities.ValueToString(scanInfo.TotalIonCurrent, 5),
                             BasePeakIntensity = StringUtilities.ValueToString(scanInfo.BasePeakIntensity, 5),
