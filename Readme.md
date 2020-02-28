@@ -36,27 +36,36 @@ MSFileInfoScanner.exe
 Use `/I` to specify the name of a file or directory to scan
 * The path can contain the wildcard character *
 
-The output directory name is optional.  If omitted, the output files will be
-created in the program directory.
+The output directory name is optional
+* If omitted, the output files will be created in the program directory
 
-The parameter file switch `/P` is optional. If supplied, it should point to a valid XML
-parameter file. If omitted, defaults are used.
+The parameter file switch `/P` is optional
+* If provided, it should point to a valid XML parameter file. If omitted, defaults are used
 
-Use `/S` to process all valid files in the input directory and subdirectories.
-* Include a number after /S (like `/S:2`) to limit the level of subdirectories to examine. 
-* Use `/IE` to ignore errors when recursing.
+Use `/S` to process all valid files in the input directory and subdirectories
+* Include a number after /S (like `/S:2`) to limit the level of subdirectories to examine
+* Use `/IE` to ignore errors when recursing
 
-Use `/L` to specify the file path for logging messages.
+Use `/L` to specify the file path for logging messages
 
-Use `/LC` to create 2D LCMS plots (this process could take several minutes for each dataset). 
-* By default, plots the top 200000 points. 
+Use `/LC` to create 2D LCMS plots (this process could take several minutes for each dataset)
+* By default, plots the top 200000 points
 * To plot the top 20000 points, use `/LC:20000`
 
-Use `/LCDiv` to specify the divisor to use when creating the overview 2D LCMS plots. 
+Use `/LCDiv` to specify the divisor to use when creating the overview 2D LCMS plots
 * By default, uses `/LCDiv:10`
-* Use `/LCDiv:0` to disable creation of the overview plots.
+* Use `/LCDiv:0` to disable creation of the overview plots
 
-Use `/NoTIC` to not save TIC and BPI plots.
+By default, the MS File Info Scanner creates TIC and BPI plots, showing intensity vs. time
+* Use `/NoTIC` to disable creating TIC and BPI plots
+* Plots created:
+  * Separate BPI plots for MS and MS2 spectra
+  * Single TIC plot for all spectra
+* For Thermo .raw files where the acquisition software also controlled an LC system, 
+  if the .raw file has pressure data (or similar) stored in it, this program will also create plots of pressure vs. time
+  * These are labeled "Addnl Plots" in the index.html file
+* For .UIMF files, if the file includes pressure information, a pressure vs. time plot will be created
+* The software also creates an html file named `index.html` that shows an overview of each plot, plus a table with scan stats 
 
 Use `/LCGrad` to save a series of 2D LC plots, each using a different color scheme
 * The default color scheme is OxyPalettes.Jet
@@ -65,39 +74,39 @@ Use `/DatasetID:#` to define the dataset's DatasetID value (where # is an intege
 * Only appropriate if processing a single dataset
 * If defined, the DatasetID is included in the dataset info XML file
 
-Use `/DI` to create a dataset info XML file for each dataset.
+Use `/DI` to create a dataset info XML file for each dataset
 
-Use `/SS` to create a _ScanStats.txt  file for each dataset.
+Use `/SS` to create a _ScanStats.txt  file for each dataset
 
-Use `/QS` to compute an overall quality score for the data in each datasets.
+Use `/QS` to compute an overall quality score for the data in each datasets
 
 Use `/CC` to check spectral data for whether it is centroided or profile
 
-Use `/MS2MzMin` to specify a minimum m/z value that all MS/MS spectra should have.
-* Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold. 
+Use `/MS2MzMin` to specify a minimum m/z value that all MS/MS spectra should have
+* Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold
 * Useful for validating instrument files where the sample is iTRAQ or TMT labeled and it is important to detect the reporter ions in the MS/MS spectra
 * Select the default minimum m/z for iTRAQ (113) using `/MS2MzMin:iTRAQ`
 * Select the default mnimum m/z for TMT (126) using `/MS2MzMin:TMT`
 * Specify a custom minimum m/z value using `/MS2MzMin:110`
 
-A SHA-1 hash is computed for the primary instrument data file(s). 
+A SHA-1 hash is computed for the primary instrument data file(s)
 * Use `/NoHash` to disable this
 
-Use `/DST` to update (or create) a tab-delimited text file with overview stats for the dataset. 
+Use `/DST` to update (or create) a tab-delimited text file with overview stats for the dataset
 * If `/DI` is specified, the file will include detailed scan counts
-  * Otherwise, it will just have the dataset name, acquisition date, and (if available) sample name and comment. 
+  * Otherwise, it will just have the dataset name, acquisition date, and (if available) sample name and comment
 * By default, the file is named MSFileInfo_DatasetStats.txt
   * To override, add the file name after the `/DST` switch, for example `/DST:DatasetStatsFileName.txt`
 
-Use `/ScanStart` and `/ScanEnd` to limit the scan range to process; useful for files
-where the first few scans are corrupt. 
+Use `/ScanStart` and `/ScanEnd` to limit the scan range to process
+* Useful for files where the first few scans are corrupt
 * For example, to start processing at scan 10, use `/ScanStart:10`
 
 Use `/Debug` to display debug information at the console, including showing the
 scan number prior to reading each scan's data
 
 Use `/C` to perform an integrity check on all known file types
-* This process will open known file types and verify that they contain the expected data. 
+* This process will open known file types and verify that they contain the expected data
 * This option is only used if you specify an Input Directory and use a wildcard
   * You will typically also want to use `/S` when using `/C`
 
