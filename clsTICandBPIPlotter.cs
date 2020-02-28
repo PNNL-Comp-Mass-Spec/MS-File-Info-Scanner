@@ -5,6 +5,7 @@ using System.Linq;
 using OxyPlot;
 using OxyPlot.Series;
 using PRISM;
+using ThermoFisher.CommonCore.Data.Business;
 
 namespace MSFileInfoScanner
 {
@@ -31,11 +32,14 @@ namespace MSFileInfoScanner
 
         #region "Member variables"
 
-        // Data stored in mTIC will get plotted for all scans, both MS and MS/MS
-
+        /// <summary>
+        /// Data stored in mTIC will get plotted for all scans, both MS and MS/MS
+        /// </summary>
         private clsChromatogramInfo mTIC;
-        // Data stored in mBPI will be plotted separately for MS and MS/MS spectra
 
+        /// <summary>
+        /// Data stored in mBPI will be plotted separately for MS and MS/MS spectra
+        /// </summary>
         private clsChromatogramInfo mBPI;
 
         private readonly List<udtOutputFileInfoType> mRecentFiles;
@@ -67,12 +71,20 @@ namespace MSFileInfoScanner
 
         public bool DeleteTempFiles { get; set; }
 
+        /// <summary>
+        /// Device type of the data in mTIC or mBPI
+        /// </summary>
+        public Device DeviceType { get; set; }
+
         public bool PlotWithPython { get; set; }
 
         public bool RemoveZeroesFromEnds { get; set; }
 
         public bool TICAutoMinMaxY { get; set; }
 
+        /// <summary>
+        /// Plot title abbreviation
+        /// </summary>
         public string TICPlotAbbrev { get; set; } = "TIC";
 
         // ReSharper disable IdentifierTypo
@@ -99,6 +111,8 @@ namespace MSFileInfoScanner
 
             mDataSource = dataSource;
             mWriteDebug = writeDebug;
+
+            DeviceType = Device.None;
 
             Reset();
         }

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using MSFileInfoScanner.DatasetStats;
 using PRISM;
+using ThermoFisher.CommonCore.Data.Business;
 using UIMFLibrary;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -210,6 +212,8 @@ namespace MSFileInfoScanner
             // The StartTime value for each frame is the number of minutes since 12:00 am
             // If acquiring data from 11:59 pm through 12:00 am, the StartTime will reset to zero
 
+            clsTICandBPIPlotter pressurePlot;
+
             if (mSaveTICAndBPI)
             {
                 // Initialize the TIC and BPI arrays
@@ -217,15 +221,28 @@ namespace MSFileInfoScanner
                 mTICAndBPIPlot.BPIXAxisLabel = "Frame number";
                 mTICAndBPIPlot.TICXAxisLabel = "Frame number";
 
-                mInstrumentSpecificPlots.BPIXAxisLabel = "Frame number";
-                mInstrumentSpecificPlots.TICXAxisLabel = "Frame number";
+                if (mInstrumentSpecificPlots.Count == 0)
+                {
+                    AddInstrumentSpecificPlot("Drift tube Pressure");
+                }
 
-                mInstrumentSpecificPlots.TICYAxisLabel = "Pressure";
-                mInstrumentSpecificPlots.TICYAxisExponentialNotation = false;
+                // Track drift tube pressures using mTIC in pressurePlot
+                pressurePlot = mInstrumentSpecificPlots.First();
+                pressurePlot.DeviceType = Device.Analog;
 
-                mInstrumentSpecificPlots.TICPlotAbbrev = "Pressure";
-                mInstrumentSpecificPlots.TICAutoMinMaxY = true;
-                mInstrumentSpecificPlots.RemoveZeroesFromEnds = true;
+                pressurePlot.BPIXAxisLabel = "Frame number";
+                pressurePlot.TICXAxisLabel = "Frame number";
+
+                pressurePlot.TICYAxisLabel = "Pressure";
+                pressurePlot.TICYAxisExponentialNotation = false;
+
+                pressurePlot.TICPlotAbbrev = "Pressure";
+                pressurePlot.TICAutoMinMaxY = true;
+                pressurePlot.RemoveZeroesFromEnds = true;
+            }
+            else
+            {
+                pressurePlot = new clsTICandBPIPlotter();
             }
 
             if (mSaveLCMS2DPlots)

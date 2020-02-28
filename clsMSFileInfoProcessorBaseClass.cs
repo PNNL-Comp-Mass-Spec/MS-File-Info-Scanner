@@ -7,6 +7,8 @@ using System.Text;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScannerInterfaces;
 using PRISM;
+using ThermoFisher.CommonCore.Data.Business;
+using ThermoRawFileReader;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2007
 

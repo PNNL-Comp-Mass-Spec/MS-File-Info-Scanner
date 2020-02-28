@@ -6,6 +6,7 @@ using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScannerInterfaces;
 using PRISM;
 using SpectraTypeClassifier;
+using ThermoFisher.CommonCore.Data.Business;
 using ThermoRawFileReader;
 
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
@@ -29,6 +30,31 @@ namespace MSFileInfoScanner
             mIsCentroid = new Regex("([FI]TMS [+-] c .+)|([FI]TMS {[^ ]+} +[+-] c .+)|(^ *[+-] c .+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             mIsProfileM = new Regex("([FI]TMS [+-] p .+)|([FI]TMS {[^ ]+} +[+-] p .+)|(^ *[+-] p .+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        }
+
+        private void AddThermoDevices(
+            XRawFileIO xcaliburAccessor,
+            DatasetFileInfo datasetFileInfo,
+            ICollection<Device> deviceMatchList,
+            ICollection<Device> deviceSkipList)
+        {
+
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+            foreach (var device in xcaliburAccessor.FileInfo.Devices)
+            {
+                if (deviceMatchList.Count > 0 && !deviceMatchList.Contains(device.Key))
+                    continue;
+
+                if (deviceSkipList.Count > 0 && deviceSkipList.Contains(device.Key))
+                    continue;
+
+                for (var deviceNumber = 1; deviceNumber <= device.Value; deviceNumber++)
+                {
+                    var deviceInfo = xcaliburAccessor.GetDeviceInfo(device.Key, deviceNumber);
+                    datasetFileInfo.DeviceList.Add(deviceInfo);
+                }
+            }
+
         }
 
         /// <summary>
@@ -337,7 +363,8 @@ namespace MSFileInfoScanner
             // If reading from a SAMBA-mounted network share, and if the current user has
             //  Read privileges but not Read&Execute privileges, we will need to copy the file locally
 
-            var readerOptions = new ThermoReaderOptions {
+            var readerOptions = new ThermoReaderOptions
+            {
                 LoadMSMethodInfo = true,
                 LoadMSTuneInfo = true
             };
@@ -464,6 +491,66 @@ namespace MSFileInfoScanner
             mDatasetStatsSummarizer.SampleInfo.SampleName = xcaliburAccessor.FileInfo.SampleName;
             mDatasetStatsSummarizer.SampleInfo.Comment1 = xcaliburAccessor.FileInfo.Comment1;
             mDatasetStatsSummarizer.SampleInfo.Comment2 = xcaliburAccessor.FileInfo.Comment2;
+
+            // Add the devices
+            var deviceFilterList = new SortedSet<Device> {
+                Device.MS,
+                Device.MSAnalog
+            };
+
+            // First add the MS devices
+            AddThermoDevices(xcaliburAccessor, datasetFileInfo, deviceFilterList, new SortedSet<Device>());
+
+            // Now add any non-mass spec devices
+            AddThermoDevices(xcaliburAccessor, datasetFileInfo, new SortedSet<Device>(), deviceFilterList);
+
+            if (mSaveTICAndBPI && datasetFileInfo.DeviceList.Count > 0)
+            {
+                mInstrumentSpecificPlots.Clear();
+
+                foreach (var device in datasetFileInfo.DeviceList)
+                {
+                    if (device.DeviceType == Device.MS || device.DeviceType == Device.MSAnalog)
+                        continue;
+
+                    var chromatogramData = xcaliburAccessor.GetChromatogramData(device.DeviceType, device.DeviceNumber);
+                    if (chromatogramData.Count == 0)
+                        continue;
+
+                    var devicePlot = AddInstrumentSpecificPlot(device.DeviceDescription);
+
+                    devicePlot.TICXAxisLabel = string.IsNullOrWhiteSpace(device.AxisLabelX) ? "Scan number" : device.AxisLabelX;
+                    devicePlot.TICYAxisLabel = device.YAxisLabelWithUnits;
+
+                    devicePlot.TICYAxisExponentialNotation = false;
+
+                    devicePlot.DeviceType = device.DeviceType;
+                    devicePlot.TICPlotAbbrev = string.Format("{0}{1}", device.DeviceType.ToString(), device.DeviceNumber);
+                    devicePlot.TICAutoMinMaxY = true;
+                    devicePlot.RemoveZeroesFromEnds = false;
+
+                    float acqLengthMinutes;
+                    if (datasetFileInfo.AcqTimeEnd > datasetFileInfo.AcqTimeStart)
+                        acqLengthMinutes = (float)datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes;
+                    else
+                        acqLengthMinutes = chromatogramData.Count;
+
+                    var dataCount = chromatogramData.Count;
+
+                    foreach (var dataPoint in chromatogramData)
+                    {
+                        var scanNumber = dataPoint.Key;
+                        float scanTimeMinutes;
+                        if (acqLengthMinutes > 0)
+                            scanTimeMinutes = scanNumber / (float)dataCount * acqLengthMinutes;
+                        else
+                            scanTimeMinutes = scanNumber;
+
+                        devicePlot.AddDataTICOnly(scanNumber, 1, scanTimeMinutes, dataPoint.Value);
+                    }
+
+                }
+            }
 
             if (!string.IsNullOrEmpty(xcaliburAccessor.FileInfo.SampleComment))
             {

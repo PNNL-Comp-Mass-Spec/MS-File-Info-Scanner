@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using PRISM;
+using ThermoRawFileReader;
 
 namespace MSFileInfoScanner.DatasetStats
 {
@@ -56,6 +57,11 @@ namespace MSFileInfoScanner.DatasetStats
         public long FileSizeBytes { get; set; }
 
         /// <summary>
+        /// Information on the devices with data stored in this dataset
+        /// </summary>
+        public List<DeviceInfo> DeviceList { get; }
+
+        /// <summary>
         /// Tracks the file size and hash value for each primary instrument file
         /// </summary>
         public Dictionary<string, InstrumentFileInfo> InstrumentFiles { get; }
@@ -72,6 +78,7 @@ namespace MSFileInfoScanner.DatasetStats
         public DatasetFileInfo()
         {
             InstrumentFiles = new Dictionary<string, InstrumentFileInfo>();
+            DeviceList = new List<DeviceInfo>();
             Clear();
         }
 
@@ -101,6 +108,7 @@ namespace MSFileInfoScanner.DatasetStats
             AcqTimeEnd = DateTime.MinValue;
             ScanCount = 0;
             FileSizeBytes = 0;
+            DeviceList.Clear();
             InstrumentFiles.Clear();
             OverallQualityScore = 0;
         }
