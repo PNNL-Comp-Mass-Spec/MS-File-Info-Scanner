@@ -659,21 +659,23 @@ namespace MSFileInfoScanner
                     OnProgressUpdate("Saving plots", PROGRESS_SPECTRA_LOADED);
                 }
 
-                bool success;
                 if (mSaveTICAndBPI)
                 {
                     // Write out the TIC and BPI plots
-                    success = mTICAndBPIPlot.SaveTICAndBPIPlotFiles(datasetName, outputDirectory.FullName);
+                    var success = mTICAndBPIPlot.SaveTICAndBPIPlotFiles(datasetName, outputDirectory.FullName);
                     if (!success)
                     {
                         successOverall = false;
                     }
 
-                    // Write out any instrument-specific plots
-                    success = mInstrumentSpecificPlots.SaveTICAndBPIPlotFiles(datasetName, outputDirectory.FullName);
-                    if (!success)
+                    foreach (var plotContainer in mInstrumentSpecificPlots)
                     {
-                        successOverall = false;
+                        // Write out any instrument-specific plots
+                        var success2 = plotContainer.SaveTICAndBPIPlotFiles(datasetName, outputDirectory.FullName);
+                        if (!success2)
+                        {
+                            successOverall = false;
+                        }
                     }
 
                     createQCPlotHtmlFile = true;
@@ -702,11 +704,11 @@ namespace MSFileInfoScanner
 
                     // Write out the 2D plot of m/z vs. intensity
                     // Plots will be named Dataset_LCMS.png and Dataset_LCMSn.png
-                    success = mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName);
+                    var success3 = mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName);
                     var lcMSPlotStepsComplete = 1;
                     ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
 
-                    if (!success)
+                    if (!success3)
                     {
                         successOverall = false;
                     }
@@ -716,11 +718,11 @@ namespace MSFileInfoScanner
                         {
                             // Also save the Overview 2D Plots
                             // Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-                            success = CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DOverviewPlotDivisor);
+                            var success4 = CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DOverviewPlotDivisor);
                             lcMSPlotStepsComplete++;
                             ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
 
-                            if (!success)
+                            if (!success4)
                             {
                                 successOverall = false;
                             }
@@ -756,7 +758,7 @@ namespace MSFileInfoScanner
                 if (mCreateDatasetInfoFile)
                 {
                     // Create the _DatasetInfo.xml file
-                    success = CreateDatasetInfoFile(inputFileName, outputDirectory.FullName);
+                    var success = CreateDatasetInfoFile(inputFileName, outputDirectory.FullName);
                     if (!success)
                     {
                         successOverall = false;
@@ -767,7 +769,7 @@ namespace MSFileInfoScanner
                 if (mCreateScanStatsFile)
                 {
                     // Create the _ScanStats.txt file
-                    success = CreateDatasetScanStatsFile(inputFileName, outputDirectory.FullName);
+                    var success = CreateDatasetScanStatsFile(inputFileName, outputDirectory.FullName);
                     if (!success)
                     {
                         successOverall = false;
@@ -777,7 +779,7 @@ namespace MSFileInfoScanner
                 if (mUpdateDatasetStatsTextFile)
                 {
                     // Add a new row to the MSFileInfo_DatasetStats.txt file
-                    success = UpdateDatasetStatsTextFile(inputFileName, outputDirectory.FullName, mDatasetStatsTextFileName);
+                    var success = UpdateDatasetStatsTextFile(inputFileName, outputDirectory.FullName, mDatasetStatsTextFileName);
                     if (!success)
                     {
                         successOverall = false;
@@ -786,7 +788,7 @@ namespace MSFileInfoScanner
 
                 if (createQCPlotHtmlFile)
                 {
-                    success = CreateQCPlotHTMLFile(datasetName, outputDirectory.FullName);
+                    var success = CreateQCPlotHTMLFile(datasetName, outputDirectory.FullName);
                     if (!success)
                     {
                         successOverall = false;
