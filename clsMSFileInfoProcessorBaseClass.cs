@@ -1053,38 +1053,18 @@ namespace MSFileInfoScanner
             if (deviceList.Count == 0)
                 return;
 
+            var tableHtml = GetDeviceTableHTML(deviceList);
+
             writer.WriteLine("    <tr>");
             writer.WriteLine("      <td>&nbsp;</td>");
-            writer.WriteLine("      <td align=\"left\">" + GetDeviceTableHtml(deviceList.First()) + "</td>");
+            writer.WriteLine("      <td align=\"center\" colspan=2>");
 
-            // Display additional devices, if defined
-
-            if (deviceList.Count > 1)
+            foreach (var item in tableHtml)
             {
-                // In Thermo files, the same device might be listed more than once in deviceList, e.g. if an LC is tracking pressure from two different locations in the pump
-                // This SortedSet is used to avoid displaying the same device twice
-                var devicesDisplayed = new SortedSet<string>();
-
-                writer.WriteLine("      <td align=\"left\">");
-
-                foreach (var device in deviceList.Skip(1))
-                {
-                    var deviceKey = string.Format("{0}_{1}_{2}", device.InstrumentName, device.Model, device.SerialNumber);
-
-                    if (devicesDisplayed.Contains(deviceKey))
-                        continue;
-
-                    devicesDisplayed.Add(deviceKey);
-                    writer.WriteLine(GetDeviceTableHtml(device));
-                }
-
-                writer.WriteLine("</td>");
-            }
-            else
-            {
-                writer.WriteLine("      <td>&nbsp;</td>");
+                writer.WriteLine("        " + item);
             }
 
+            writer.WriteLine("      </td>");
             writer.WriteLine("    </tr>");
         }
 
@@ -1152,22 +1132,54 @@ namespace MSFileInfoScanner
 
         }
 
-        private string GetDeviceTableHtml(DeviceInfo device)
+        private List<string> GetDeviceTableHTML(IEnumerable<DeviceInfo> deviceList)
         {
+            var deviceTypeRow = new StringBuilder();
+            var deviceNameRow = new StringBuilder();
+            var deviceModelRow = new StringBuilder();
+            var deviceSerialRow = new StringBuilder();
+            var deviceSwVersionRow = new StringBuilder();
 
-            var html = string.Format(
-                "<table border=0>" +
-                " <tr><td>Device Type:</td><td>{0}</td></tr>" +
-                " <tr><td>Name:</td><td>{1}</td></tr>" +
-                " <tr><td>Model:</td><td>{2}</td></tr>" +
-                " <tr><td>Serial:</td><td>{3}</td></tr>" +
-                " <tr><td>Software Version:</td><td>{4}</td></tr>" +
-                "</table>",
-                device.DeviceDescription,
-                device.InstrumentName,
-                device.Model,
-                device.SerialNumber,
-                device.SoftwareVersion);
+            deviceTypeRow.Append(@"<th class=""DataHead"">Device Type:</th>");
+            deviceNameRow.Append(@"<th class=""DataHead"">Name:</th>");
+            deviceModelRow.Append(@"<th class=""DataHead"">Model:</th>");
+            deviceSerialRow.Append(@"<th class=""DataHead"">Serial:</th>");
+            deviceSwVersionRow.Append(@"<th class=""DataHead"">Software Version:</th>");
+
+            // In Thermo files, the same device might be listed more than once in deviceList, e.g. if an LC is tracking pressure from two different locations in the pump
+            // This SortedSet is used to avoid displaying the same device twice
+            var devicesDisplayed = new SortedSet<string>();
+
+            var tdFormatter = @"<td class=""DataCell"">{0}</td>";
+
+            foreach (var device in deviceList)
+            {
+                var deviceKey = string.Format("{0}_{1}_{2}", device.InstrumentName, device.Model, device.SerialNumber);
+
+                if (devicesDisplayed.Contains(deviceKey))
+                    continue;
+
+                devicesDisplayed.Add(deviceKey);
+
+                deviceTypeRow.Append(string.Format(tdFormatter, device.DeviceDescription));
+                deviceNameRow.Append(string.Format(tdFormatter, device.InstrumentName));
+                deviceModelRow.Append(string.Format(tdFormatter, device.Model));
+                deviceSerialRow.Append(string.Format(tdFormatter, device.SerialNumber));
+                deviceSwVersionRow.Append(string.Format(tdFormatter, device.SoftwareVersion));
+            }
+
+            // Padding is: top right bottom left
+
+            var html = new List<string>
+            {
+                @"<table class=""DataTable"">",
+                string.Format("  <tr>{0}</tr>", deviceTypeRow),
+                string.Format("  <tr>{0}</tr>", deviceNameRow),
+                string.Format("  <tr>{0}</tr>", deviceModelRow),
+                string.Format("  <tr>{0}</tr>", deviceSerialRow),
+                string.Format("  <tr>{0}</tr>", deviceSwVersionRow),
+                "</table>"
+            };
 
             return html;
         }
