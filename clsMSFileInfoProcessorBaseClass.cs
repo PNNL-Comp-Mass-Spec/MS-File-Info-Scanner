@@ -31,8 +31,7 @@ namespace MSFileInfoScanner
             mTICAndBPIPlot = new clsTICandBPIPlotter("TICAndBPIPlot", true);
             RegisterEvents(mTICAndBPIPlot);
 
-            mInstrumentSpecificPlots = new clsTICandBPIPlotter("InstrumentSpecificPlots", true);
-            RegisterEvents(mInstrumentSpecificPlots);
+            mInstrumentSpecificPlots = new List<clsTICandBPIPlotter>();
 
             mDatasetStatsSummarizer = new DatasetStatsSummarizer();
             RegisterEvents(mDatasetStatsSummarizer);
@@ -97,9 +96,16 @@ namespace MSFileInfoScanner
 
         private bool mPlotWithPython;
 
+        /// <summary>
+        /// This variable tracks TIC and BPI data (vs. scan)
+        /// </summary>
         protected readonly clsTICandBPIPlotter mTICAndBPIPlot;
 
-        protected readonly clsTICandBPIPlotter mInstrumentSpecificPlots;
+        /// <summary>
+        /// This variable tracks UIMF pressure vs. frame (using mTIC)
+        /// It also tracks data associated with other devices tracked by .raw files (e.g. LC pressure vs. scan)
+        /// </summary>
+        protected readonly List<clsTICandBPIPlotter> mInstrumentSpecificPlots;
 
         protected readonly clsLCMSDataPlotter mLCMS2DPlot;
 
@@ -303,6 +309,19 @@ namespace MSFileInfoScanner
                     throw new Exception("Unrecognized option, " + eOption);
             }
 
+        }
+
+        /// <summary>
+        /// Add a new clsTICAndBPIPlotter instance to mInstrumentSpecificPlots
+        /// </summary>
+        /// <param name="dataSource"></param>
+        protected clsTICandBPIPlotter AddInstrumentSpecificPlot(string dataSource)
+        {
+            var plotContainer = new clsTICandBPIPlotter(dataSource, true);
+            RegisterEvents(plotContainer);
+            mInstrumentSpecificPlots.Add(plotContainer);
+
+            return plotContainer;
         }
 
         /// <summary>
@@ -532,7 +551,12 @@ namespace MSFileInfoScanner
         {
             // Initialize TIC, BPI, and m/z vs. time arrays
             mTICAndBPIPlot.Reset();
-            mInstrumentSpecificPlots.Reset();
+            mTICAndBPIPlot.DeviceType = Device.MS;
+
+            foreach (var plotContainer in mInstrumentSpecificPlots)
+            {
+                plotContainer.Reset();
+            }
         }
 
         protected void InitializeLCMS2DPlot()
@@ -1376,7 +1400,11 @@ namespace MSFileInfoScanner
         private void UpdatePlotWithPython()
         {
             mTICAndBPIPlot.PlotWithPython = mPlotWithPython;
-            mInstrumentSpecificPlots.PlotWithPython = mPlotWithPython;
+
+            foreach (var plotContainer in mInstrumentSpecificPlots)
+            {
+                plotContainer.PlotWithPython = mPlotWithPython;
+            }
 
             if (mPlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
             {
@@ -1386,7 +1414,11 @@ namespace MSFileInfoScanner
             }
 
             mTICAndBPIPlot.DeleteTempFiles = !ShowDebugInfo;
-            mInstrumentSpecificPlots.DeleteTempFiles = !ShowDebugInfo;
+
+            foreach (var plotContainer in mInstrumentSpecificPlots)
+            {
+                plotContainer.DeleteTempFiles = !ShowDebugInfo;
+            }
 
             if (mPlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
             {

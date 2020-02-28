@@ -371,7 +371,7 @@ namespace MSFileInfoScanner
                         if (Math.Abs(pressure) < float.Epsilon)
                             pressure = frameParams.GetValueDouble(FrameParamKeyType.PressureFront);
 
-                        mInstrumentSpecificPlots.AddDataTICOnly(frameNumber, msLevel, (float)elutionTime, pressure);
+                        pressurePlot.AddDataTICOnly(frameNumber, msLevel, (float)elutionTime, pressure);
                     }
 
                     var scanStatsEntry = new ScanStatsEntry
