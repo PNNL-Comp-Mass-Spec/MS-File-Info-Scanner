@@ -703,7 +703,13 @@ namespace MSFileInfoScanner.DatasetStats
                 //Write the beginning of the "Root" element.
                 writer.WriteStartElement("DatasetInfo");
 
-                writer.WriteElementString("Dataset", datasetName);
+                writer.WriteStartElement("Dataset");
+                if (datasetInfo.DatasetID > 0)
+                {
+                    writer.WriteAttributeString("DatasetID", datasetInfo.DatasetID.ToString());
+                }
+                writer.WriteString(datasetName);
+                writer.WriteEndElement();       // Dataset EndElement
 
                 writer.WriteStartElement("ScanTypes");
 
