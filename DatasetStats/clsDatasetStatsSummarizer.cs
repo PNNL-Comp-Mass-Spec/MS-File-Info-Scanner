@@ -721,10 +721,10 @@ namespace MSFileInfoScanner.DatasetStats
                     writer.WriteAttributeString("ScanCount", scanCountForType.ToString());
                     writer.WriteAttributeString("ScanFilterText", FixNull(scanFilterText));
                     writer.WriteString(scanType);
-                    writer.WriteEndElement();       // ScanType EndElement
+                    writer.WriteEndElement();
                 }
 
-                writer.WriteEndElement();           // ScanTypes
+                writer.WriteEndElement();           // ScanTypes EndElement
 
                 writer.WriteStartElement("AcquisitionInfo");
 
@@ -768,7 +768,7 @@ namespace MSFileInfoScanner.DatasetStats
                         writer.WriteEndElement();
                     }
 
-                    writer.WriteEndElement();       // InstrumentFiles
+                    writer.WriteEndElement();       // InstrumentFiles EndElement
                 }
 
                 if (datasetInfo.DeviceList.Count > 0)
@@ -855,10 +855,10 @@ namespace MSFileInfoScanner.DatasetStats
                     writer.WriteElementString("SampleName", FixNull(sampleInfo.SampleName));
                     writer.WriteElementString("Comment1", FixNull(sampleInfo.Comment1));
                     writer.WriteElementString("Comment2", FixNull(sampleInfo.Comment2));
-                    writer.WriteEndElement();       // SampleInfo EndElement
+                    writer.WriteEndElement();
                 }
 
-                writer.WriteEndElement();           // End the "Root" element (DatasetInfo)
+                writer.WriteEndElement();           // DatasetInfo EndElement (note that DatasetInfo is the "root" element)
 
                 writer.WriteEndDocument();          // End the document
 

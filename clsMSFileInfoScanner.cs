@@ -1147,7 +1147,6 @@ namespace MSFileInfoScanner
         /// <returns>True if success; false if failure</returns>
         public override bool PostDatasetInfoUseDatasetID(int datasetID, string connectionString, string storedProcedureName)
         {
-
             return PostDatasetInfoUseDatasetID(datasetID, DatasetInfoXML, connectionString, storedProcedureName);
         }
 
