@@ -817,148 +817,30 @@ namespace MSFileInfoScanner
 
                 using (var writer = new StreamWriter(new FileStream(htmlFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
+                    // Add HTML headers and <table>
+                    AppendHtmlHeader(writer, datasetName);
 
-                    // ReSharper disable once StringLiteralTypo
-                    writer.WriteLine("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 3.2//EN\">");
-                    writer.WriteLine("<html>");
-                    writer.WriteLine("<head>");
-                    writer.WriteLine("  <title>" + datasetName + "</title>");
-                    writer.WriteLine("</head>");
-                    writer.WriteLine();
-                    writer.WriteLine("<body>");
-                    writer.WriteLine("  <h2>" + datasetName + "</h2>");
-                    writer.WriteLine();
-                    writer.WriteLine("  <table>");
+                    // First add the plots with the top 50,000 points
+                    AppendLCMS2DPlots(writer, mLCMS2DPlotOverview);
 
-                    // First the plots with the top 50,000 points
-                    var file1 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS);
+                    // Now add the plots with the top 500,000 points
+                    AppendLCMS2DPlots(writer, mLCMS2DPlot);
 
-                    string file2;
-                    if (mLCMS2DPlotOverview.Options.PlottingDeisotopedData)
-                    {
-                        file2 = file1.Replace("_zoom.png", ".png");
-                    }
-                    else
-                    {
-                        file2 = mLCMS2DPlotOverview.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn);
-                    }
+                    // Add the BPI plots
+                    AppendBPIPlots(writer);
 
-                    var top = IntToEngineeringNotation(mLCMS2DPlotOverview.Options.MaxPointsToPlot);
+                    // Add instrument-specific plots, if defined
+                    AppendAdditionalPlots(writer);
 
-                    if (file1.Length > 0 || file2.Length > 0)
-                    {
-                        writer.WriteLine("    <tr>");
-                        writer.WriteLine("      <td valign=\"middle\">LCMS<br>(Top " + top + ")</td>");
-                        writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
-                        writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
-                        writer.WriteLine("    </tr>");
-                        writer.WriteLine();
-                    }
+                    // Add the TIC
+                    AppendTICAndSummaryStats(writer, summaryStats);
 
-                    // Now the plots with the top 500,000 points
-                    file1 = mLCMS2DPlot.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS);
+                    // Append dataset info
+                    AppendDatasetInfo(writer, datasetName, outputDirectoryPath);
 
-                    if (mLCMS2DPlotOverview.Options.PlottingDeisotopedData)
-                    {
-                        file2 = file1.Replace("_zoom.png", ".png");
-                    }
-                    else
-                    {
-                        file2 = mLCMS2DPlot.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn);
-                    }
 
-                    top = IntToEngineeringNotation(mLCMS2DPlot.Options.MaxPointsToPlot);
-
-                    if (file1.Length > 0 || file2.Length > 0)
-                    {
-                        writer.WriteLine("    <tr>");
-                        writer.WriteLine("      <td valign=\"middle\">LCMS<br>(Top " + top + ")</td>");
-                        writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
-                        writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
-                        writer.WriteLine("    </tr>");
-                        writer.WriteLine();
-                    }
-
-                    file1 = mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS);
-                    file2 = mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn);
-                    if (file1.Length > 0 || file2.Length > 0)
-                    {
-                        writer.WriteLine("    <tr>");
-                        writer.WriteLine("      <td valign=\"middle\">BPI</td>");
-                        writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
-                        writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
-                        writer.WriteLine("    </tr>");
-                        writer.WriteLine();
-                    }
-
-                    file1 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC);
-                    file2 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS);
-                    var file3 = mInstrumentSpecificPlots.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn);
-
-                    if (file1.Length > 0 || file2.Length > 0 || file3.Length > 0)
-                    {
-                        writer.WriteLine("    <tr>");
-                        writer.WriteLine("      <td valign=\"middle\">Addnl Plots</td>");
-                        if (file1.Length > 0)
-                            writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
-                        else
-                            writer.WriteLine("      <td></td>");
-                        if (file2.Length > 0)
-                            writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
-                        else
-                            writer.WriteLine("      <td></td>");
-                        if (file3.Length > 0)
-                            writer.WriteLine("      <td>" + GenerateQCFigureHTML(file3, 250) + "</td>");
-                        else
-                            writer.WriteLine("      <td></td>");
-                        writer.WriteLine("    </tr>");
-                        writer.WriteLine();
-                    }
-
-                    writer.WriteLine("    <tr>");
-
-                    if (HideEmptyHtmlSections && summaryStats.ScanTypeStats.Count == 0)
-                    {
-                        writer.WriteLine("      <td>&nbsp;</td><td style='width: 200px'>&nbsp;</td><td style='width: 200px'>&nbsp;</td>");
-                    }
-                    else
-                    {
-                        var qcFigureHTML = GenerateQCFigureHTML(mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC), 250);
-
-                        writer.WriteLine("      <td valign=\"middle\">TIC</td>");
-                        writer.WriteLine("      <td>" + qcFigureHTML + "</td>");
-                        writer.WriteLine("      <td valign=\"middle\">");
-
-                        GenerateQCScanTypeSummaryHTML(writer, summaryStats, "        ");
-
-                        writer.WriteLine("      </td>");
-                    }
-
-                    writer.WriteLine("    </tr>");
-
-                    writer.WriteLine("    <tr>");
-                    writer.WriteLine("      <td>&nbsp;</td>");
-                    writer.WriteLine("      <td align=\"center\">DMS <a href=\"http://dms2.pnl.gov/dataset/show/" + datasetName + "\">Dataset Detail Report</a></td>");
-
-                    var datasetInfoFileName = datasetName + DatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
-                    if (mCreateDatasetInfoFile || File.Exists(Path.Combine(outputDirectoryPath, datasetInfoFileName)))
-                    {
-                        writer.WriteLine("      <td align=\"center\"><a href=\"" + datasetInfoFileName + "\">Dataset Info XML file</a></td>");
-                    }
-                    else
-                    {
-                        writer.WriteLine("      <td>&nbsp;</td>");
-                    }
-
-                    writer.WriteLine("    </tr>");
-
-                    writer.WriteLine();
-                    writer.WriteLine("  </table>");
-                    writer.WriteLine();
-                    writer.WriteLine("</body>");
-                    writer.WriteLine("</html>");
-                    writer.WriteLine();
-
+                    // Add </table> and HTML footers
+                    AppendHtmlFooter(writer);
                 }
 
                 return true;
@@ -970,6 +852,174 @@ namespace MSFileInfoScanner
                 return false;
             }
 
+        }
+
+        private void AppendHtmlHeader(TextWriter writer, string datasetName)
+        {
+            // ReSharper disable once StringLiteralTypo
+            writer.WriteLine("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 3.2//EN\">");
+            writer.WriteLine("<html>");
+            writer.WriteLine("<head>");
+            writer.WriteLine("  <title>" + datasetName + "</title>");
+            writer.WriteLine("</head>");
+            writer.WriteLine();
+            writer.WriteLine("<body>");
+            writer.WriteLine("  <h2>" + datasetName + "</h2>");
+            writer.WriteLine();
+            writer.WriteLine("  <table>");
+        }
+
+        private void AppendLCMS2DPlots(TextWriter writer, clsLCMSDataPlotter lcmsPlotter)
+        {
+            var file1 = lcmsPlotter.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS);
+
+            string file2;
+            if (lcmsPlotter.Options.PlottingDeisotopedData)
+            {
+                file2 = file1.Replace("_zoom.png", ".png");
+            }
+            else
+            {
+                file2 = lcmsPlotter.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn);
+            }
+
+            var top = IntToEngineeringNotation(lcmsPlotter.Options.MaxPointsToPlot);
+
+            if (file1.Length > 0 || file2.Length > 0)
+            {
+                writer.WriteLine("    <tr>");
+                writer.WriteLine("      <td valign=\"middle\">LCMS<br>(Top " + top + ")</td>");
+                writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
+                writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
+                writer.WriteLine("    </tr>");
+                writer.WriteLine();
+            }
+
+        }
+
+        private void AppendBPIPlots(TextWriter writer)
+        {
+
+            var file1 = mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS);
+            var file2 = mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn);
+            if (file1.Length > 0 || file2.Length > 0)
+            {
+                writer.WriteLine("    <tr>");
+                writer.WriteLine("      <td valign=\"middle\">BPI</td>");
+                writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
+                writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
+                writer.WriteLine("    </tr>");
+                writer.WriteLine();
+            }
+
+        }
+
+        private void AppendAdditionalPlots(TextWriter writer)
+        {
+            // This dictionary tracks the QC plots, by device type
+            var plotsByDeviceType = new Dictionary<Device, List<string>>();
+
+            // Generate the HTML to display the plots and store in plotsByDeviceType
+            foreach (var plotContainer in mInstrumentSpecificPlots)
+            {
+                var deviceType = plotContainer.DeviceType;
+
+                var file1 = plotContainer.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC);
+                var file2 = plotContainer.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS);
+                var file3 = plotContainer.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn);
+
+                if (file1.Length == 0 && file2.Length == 0 && file3.Length == 0)
+                {
+                    continue;
+                }
+
+                if (!plotsByDeviceType.TryGetValue(deviceType, out var plotsForDevice))
+                {
+                    plotsForDevice = new List<string>();
+                    plotsByDeviceType.Add(deviceType, plotsForDevice);
+                }
+
+                if (file1.Length > 0)
+                {
+                    plotsForDevice.Add(GenerateQCFigureHTML(file1, 250));
+                }
+
+                if (file2.Length > 0)
+                {
+                    plotsForDevice.Add(GenerateQCFigureHTML(file2, 250));
+                }
+
+                if (file3.Length > 0)
+                {
+                    plotsForDevice.Add(GenerateQCFigureHTML(file3, 250));
+                }
+
+            }
+
+            // Append rows and columns to the table for HTML in plotsByDeviceType
+            foreach (var plotsForDevice in plotsByDeviceType.Values)
+            {
+                writer.WriteLine("    <tr>");
+                writer.WriteLine("      <td valign=\"middle\">Addnl Plots</td>");
+
+                var columnsToAdd = Math.Max(3, plotsForDevice.Count);
+
+                for (var i = 0; i < columnsToAdd; i++)
+                {
+                    if (i < plotsForDevice.Count)
+                        writer.WriteLine("      <td>" + plotsForDevice[i] + "</td>");
+                    else
+                        writer.WriteLine("      <td></td>");
+                }
+
+                writer.WriteLine("    </tr>");
+                writer.WriteLine();
+            }
+        }
+
+        private void AppendTICAndSummaryStats(TextWriter writer, DatasetSummaryStats summaryStats)
+        {
+
+            writer.WriteLine("    <tr>");
+
+            if (HideEmptyHtmlSections && summaryStats.ScanTypeStats.Count == 0)
+            {
+                writer.WriteLine("      <td>&nbsp;</td><td style='width: 200px'>&nbsp;</td><td style='width: 200px'>&nbsp;</td>");
+            }
+            else
+            {
+                var qcFigureHTML = GenerateQCFigureHTML(mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC), 250);
+
+                writer.WriteLine("      <td valign=\"middle\">TIC</td>");
+                writer.WriteLine("      <td>" + qcFigureHTML + "</td>");
+                writer.WriteLine("      <td valign=\"middle\">");
+
+                GenerateQCScanTypeSummaryHTML(writer, summaryStats, "        ");
+
+                writer.WriteLine("      </td>");
+            }
+
+            writer.WriteLine("    </tr>");
+        }
+
+        private void AppendDatasetInfo(TextWriter writer, string datasetName, string outputDirectoryPath)
+        {
+            writer.WriteLine("    <tr>");
+            writer.WriteLine("      <td>&nbsp;</td>");
+            writer.WriteLine("      <td align=\"center\">DMS <a href=\"http://dms2.pnl.gov/dataset/show/" + datasetName + "\">Dataset Detail Report</a></td>");
+
+            var datasetInfoFileName = datasetName + DatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
+            if (mCreateDatasetInfoFile || File.Exists(Path.Combine(outputDirectoryPath, datasetInfoFileName)))
+            {
+                writer.WriteLine("      <td align=\"center\"><a href=\"" + datasetInfoFileName + "\">Dataset Info XML file</a></td>");
+            }
+            else
+            {
+                writer.WriteLine("      <td>&nbsp;</td>");
+            }
+
+            writer.WriteLine("    </tr>");
+        }
         }
 
         private string GenerateQCFigureHTML(string filename, int widthPixels)
@@ -1162,7 +1212,7 @@ namespace MSFileInfoScanner
         /// </summary>
         protected void ShowInstrumentFiles()
         {
-            if (mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles.Count <= 0) 
+            if (mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles.Count <= 0)
                 return;
 
             var fileInfo = new StringBuilder();
