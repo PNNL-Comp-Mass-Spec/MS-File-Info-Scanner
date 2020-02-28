@@ -838,6 +838,8 @@ namespace MSFileInfoScanner
                     // Append dataset info
                     AppendDatasetInfo(writer, datasetName, outputDirectoryPath);
 
+                    // Append device info
+                    AppendDeviceInfo(writer);
 
                     // Add </table> and HTML footers
                     AppendHtmlFooter(writer);
@@ -1020,6 +1022,58 @@ namespace MSFileInfoScanner
 
             writer.WriteLine("    </tr>");
         }
+
+        private void AppendDeviceInfo(TextWriter writer)
+        {
+            var deviceList = mDatasetStatsSummarizer.DatasetFileInfo.DeviceList;
+
+            if (deviceList.Count == 0)
+                return;
+
+            writer.WriteLine("    <tr>");
+            writer.WriteLine("      <td>&nbsp;</td>");
+            writer.WriteLine("      <td align=\"left\">" + GetDeviceTableHtml(deviceList.First()) + "</td>");
+
+            // Display additional devices, if defined
+
+            if (deviceList.Count > 1)
+            {
+                // In Thermo files, the same device might be listed more than once in deviceList, e.g. if an LC is tracking pressure from two different locations in the pump
+                // This SortedSet is used to avoid displaying the same device twice
+                var devicesDisplayed = new SortedSet<string>();
+
+                writer.WriteLine("      <td align=\"left\">");
+
+                foreach (var device in deviceList.Skip(1))
+                {
+                    var deviceKey = string.Format("{0}_{1}_{2}", device.InstrumentName, device.Model, device.SerialNumber);
+
+                    if (devicesDisplayed.Contains(deviceKey))
+                        continue;
+
+                    devicesDisplayed.Add(deviceKey);
+                    writer.WriteLine(GetDeviceTableHtml(device));
+                }
+
+                writer.WriteLine("</td>");
+            }
+            else
+            {
+                writer.WriteLine("      <td>&nbsp;</td>");
+            }
+
+            writer.WriteLine("    </tr>");
+        }
+
+        private void AppendHtmlFooter(TextWriter writer)
+        {
+            writer.WriteLine();
+            writer.WriteLine("  </table>");
+            writer.WriteLine();
+            writer.WriteLine("</body>");
+            writer.WriteLine("</html>");
+            writer.WriteLine();
+
         }
 
         private string GenerateQCFigureHTML(string filename, int widthPixels)
@@ -1070,6 +1124,26 @@ namespace MSFileInfoScanner
 
             writer.WriteLine(indent + "</table>");
 
+        }
+
+        private string GetDeviceTableHtml(DeviceInfo device)
+        {
+
+            var html = string.Format(
+                "<table border=0>" +
+                " <tr><td>Device Type:</td><td>{0}</td></tr>" +
+                " <tr><td>Name:</td><td>{1}</td></tr>" +
+                " <tr><td>Model:</td><td>{2}</td></tr>" +
+                " <tr><td>Serial:</td><td>{3}</td></tr>" +
+                " <tr><td>Software Version:</td><td>{4}</td></tr>" +
+                "</table>",
+                device.DeviceDescription,
+                device.InstrumentName,
+                device.Model,
+                device.SerialNumber,
+                device.SoftwareVersion);
+
+            return html;
         }
 
         /// <summary>
