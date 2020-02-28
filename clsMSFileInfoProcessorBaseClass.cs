@@ -862,6 +862,30 @@ namespace MSFileInfoScanner
             writer.WriteLine("<html>");
             writer.WriteLine("<head>");
             writer.WriteLine("  <title>" + datasetName + "</title>");
+            writer.WriteLine("  <style>");
+            writer.WriteLine("    table.DataTable {");
+            writer.WriteLine("      margin: 10px 5px 5px 5px;");
+            writer.WriteLine("      border: 1px solid black;");
+            writer.WriteLine("      border-collapse: collapse;");
+            writer.WriteLine("    }");
+            writer.WriteLine("    ");
+            writer.WriteLine("    th.DataHead {");
+            writer.WriteLine("      border: 1px solid black;");
+            writer.WriteLine("      padding: 2px 4px 2px 2px; ");
+            writer.WriteLine("      text-align: left;");
+            writer.WriteLine("    }");
+            writer.WriteLine("    ");
+            writer.WriteLine("    td.DataCell {");
+            writer.WriteLine("      border: 1px solid black;");
+            writer.WriteLine("      padding: 2px 4px 2px 4px;");
+            writer.WriteLine("    }");
+            writer.WriteLine("        ");
+            writer.WriteLine("    td.DataCentered {");
+            writer.WriteLine("      border: 1px solid black;");
+            writer.WriteLine("      padding: 2px 4px 2px 4px;");
+            writer.WriteLine("      text-align: center;");
+            writer.WriteLine("    }");
+            writer.WriteLine("   </style>");
             writer.WriteLine("</head>");
             writer.WriteLine();
             writer.WriteLine("<body>");
@@ -1090,8 +1114,8 @@ namespace MSFileInfoScanner
             if (indent == null)
                 indent = string.Empty;
 
-            writer.WriteLine(indent + @"<table border=""1"">");
-            writer.WriteLine(indent + "  <tr><th>Scan Type</th><th>Scan Count</th><th>Scan Filter Text</th></tr>");
+            writer.WriteLine(indent + @"<table class=""DataTable"">");
+            writer.WriteLine(indent + @"  <tr><th class=""DataHead"">Scan Type</th><th class=""DataHead"">Scan Count</th><th class=""DataHead"">Scan Filter Text</th></tr>");
 
             foreach (var scanTypeEntry in datasetSummaryStats.ScanTypeStats)
             {
@@ -1117,7 +1141,10 @@ namespace MSFileInfoScanner
                 }
                 var scanCount = scanTypeEntry.Value;
 
-                writer.WriteLine(indent + "  <tr><td>" + scanType + "</td>" + "<td align=\"center\">" + scanCount + "</td>" + "<td>" + scanFilterText + "</td></tr>");
+                writer.WriteLine(indent + "  " +
+                                 @"<tr><td class=""DataCell"">" + scanType + "</td>" +
+                                 @"<td class=""DataCentered"">" + scanCount + "</td>" +
+                                 @"<td class=""DataCell"">" + scanFilterText + "</td></tr>");
 
             }
 
