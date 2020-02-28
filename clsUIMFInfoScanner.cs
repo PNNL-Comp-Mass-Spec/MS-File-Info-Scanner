@@ -358,7 +358,7 @@ namespace MSFileInfoScanner
 
                     if (mSaveTICAndBPI)
                     {
-                        if (tic > BAD_TIC_OR_BPI && tic > BAD_TIC_OR_BPI)
+                        if (bpi > BAD_TIC_OR_BPI && tic > BAD_TIC_OR_BPI)
                         {
                             mTICAndBPIPlot.AddData(frameNumber, msLevel, (float)elutionTime, bpi, tic);
                         }
