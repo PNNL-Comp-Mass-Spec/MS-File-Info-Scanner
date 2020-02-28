@@ -148,7 +148,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// When true, do not include the Scan Type table in the QC Plot HTML file
         /// </summary>
-        protected bool HideEmptyHtmlSections { get; set; }
+        protected bool HideEmptyHTMLSections { get; set; }
 
         /// <summary>
         /// LC/MS 2D plot options
@@ -544,7 +544,7 @@ namespace MSFileInfoScanner
 
             ErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError;
 
-            HideEmptyHtmlSections = false;
+            HideEmptyHTMLSections = false;
         }
 
         protected void InitializeTICAndBPI()
@@ -617,7 +617,7 @@ namespace MSFileInfoScanner
             {
                 var datasetName = GetDatasetNameViaPath(inputFileName);
                 successOverall = true;
-                var createQCPlotHtmlFile = false;
+                var createQCPlotHTMLFile = false;
 
                 if (outputDirectoryPath == null)
                     outputDirectoryPath = string.Empty;
@@ -678,7 +678,7 @@ namespace MSFileInfoScanner
                         }
                     }
 
-                    createQCPlotHtmlFile = true;
+                    createQCPlotHTMLFile = true;
 
                     OnProgressUpdate("TIC and BPI plots saved", PROGRESS_SAVED_TIC_AND_BPI_PLOT);
                 }
@@ -750,7 +750,7 @@ namespace MSFileInfoScanner
                             }
                         }
                     }
-                    createQCPlotHtmlFile = true;
+                    createQCPlotHTMLFile = true;
 
                     OnProgressUpdate("2D plots saved", PROGRESS_SAVED_2D_PLOTS);
                 }
@@ -763,7 +763,7 @@ namespace MSFileInfoScanner
                     {
                         successOverall = false;
                     }
-                    createQCPlotHtmlFile = true;
+                    createQCPlotHTMLFile = true;
                 }
 
                 if (mCreateScanStatsFile)
@@ -786,7 +786,7 @@ namespace MSFileInfoScanner
                     }
                 }
 
-                if (createQCPlotHtmlFile)
+                if (createQCPlotHTMLFile)
                 {
                     var success = CreateQCPlotHTMLFile(datasetName, outputDirectory.FullName);
                     if (!success)
@@ -803,7 +803,6 @@ namespace MSFileInfoScanner
             }
 
             return successOverall;
-
         }
 
         private bool CreateQCPlotHTMLFile(string datasetName, string outputDirectoryPath)
@@ -818,7 +817,7 @@ namespace MSFileInfoScanner
                 using (var writer = new StreamWriter(new FileStream(htmlFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
                     // Add HTML headers and <table>
-                    AppendHtmlHeader(writer, datasetName);
+                    AppendHTMLHeader(writer, datasetName);
 
                     // First add the plots with the top 50,000 points
                     AppendLCMS2DPlots(writer, mLCMS2DPlotOverview);
@@ -842,7 +841,7 @@ namespace MSFileInfoScanner
                     AppendDeviceInfo(writer);
 
                     // Add </table> and HTML footers
-                    AppendHtmlFooter(writer);
+                    AppendHTMLFooter(writer);
                 }
 
                 return true;
@@ -856,7 +855,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private void AppendHtmlHeader(TextWriter writer, string datasetName)
+        private void AppendHTMLHeader(TextWriter writer, string datasetName)
         {
             // ReSharper disable once StringLiteralTypo
             writer.WriteLine("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 3.2//EN\">");
@@ -984,7 +983,7 @@ namespace MSFileInfoScanner
 
             writer.WriteLine("    <tr>");
 
-            if (HideEmptyHtmlSections && summaryStats.ScanTypeStats.Count == 0)
+            if (HideEmptyHTMLSections && summaryStats.ScanTypeStats.Count == 0)
             {
                 writer.WriteLine("      <td>&nbsp;</td><td style='width: 200px'>&nbsp;</td><td style='width: 200px'>&nbsp;</td>");
             }
@@ -1065,7 +1064,7 @@ namespace MSFileInfoScanner
             writer.WriteLine("    </tr>");
         }
 
-        private void AppendHtmlFooter(TextWriter writer)
+        private void AppendHTMLFooter(TextWriter writer)
         {
             writer.WriteLine();
             writer.WriteLine("  </table>");

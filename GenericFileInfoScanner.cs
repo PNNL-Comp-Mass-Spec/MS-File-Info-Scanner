@@ -11,7 +11,7 @@ namespace MSFileInfoScanner
         /// </summary>
         public GenericFileInfoScanner()
         {
-            HideEmptyHtmlSections = true;
+            HideEmptyHTMLSections = true;
         }
 
         /// <summary>
