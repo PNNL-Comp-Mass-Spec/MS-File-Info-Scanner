@@ -1345,6 +1345,8 @@ namespace MSFileInfoScanner
             mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
             mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
 
+            mDatasetStatsSummarizer.DatasetFileInfo.DeviceList.AddRange(datasetFileInfo.DeviceList);
+
         }
 
         /// <summary>
