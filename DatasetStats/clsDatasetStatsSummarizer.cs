@@ -690,6 +690,7 @@ namespace MSFileInfoScanner.DatasetStats
                 // However, when you send the output to a StringBuilder it is always encoded as Unicode (UTF-16)
                 //  since this is the only character encoding used in the .NET Framework for String values,
                 //  and thus you'll see the attribute encoding="utf-16" in the opening XML declaration
+
                 // The alternative is to use a MemoryStream.  Here, the stream encoding is set by the XmlWriter
                 //  and so you see the attribute encoding="utf-8" in the opening XML declaration encoding
                 //  (since we used xmlSettings.Encoding = Encoding.UTF8)
@@ -762,6 +763,37 @@ namespace MSFileInfoScanner.DatasetStats
                     }
 
                     writer.WriteEndElement();       // InstrumentFiles
+                }
+
+                if (datasetInfo.DeviceList.Count > 0)
+                {
+                    writer.WriteStartElement("DeviceList");
+
+                    // In Thermo files, the same device might be listed more than once in deviceList, e.g. if an LC is tracking pressure from two different locations in the pump
+                    // This SortedSet is used to avoid displaying the same device twice
+                    var devicesDisplayed = new SortedSet<string>();
+
+                    foreach (var device in datasetInfo.DeviceList)
+                    {
+                        var deviceKey = string.Format("{0}_{1}_{2}", device.InstrumentName, device.Model, device.SerialNumber);
+
+                        if (devicesDisplayed.Contains(deviceKey))
+                            continue;
+
+                        devicesDisplayed.Add(deviceKey);
+
+                        writer.WriteStartElement("Device");
+                        writer.WriteAttributeString("Type", device.DeviceType.ToString());
+                        writer.WriteAttributeString("Number", device.DeviceNumber.ToString());
+                        writer.WriteAttributeString("Name", device.InstrumentName);
+                        writer.WriteAttributeString("Model", device.Model);
+                        writer.WriteAttributeString("SerialNumber", device.SerialNumber);
+                        writer.WriteAttributeString("SoftwareVersion", device.SoftwareVersion);
+                        writer.WriteString(device.DeviceDescription);
+                        writer.WriteEndElement();
+                    }
+
+                    writer.WriteEndElement();       // DeviceList
                 }
 
                 if (includeCentroidStats)
