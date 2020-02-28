@@ -8,131 +8,165 @@ namespace MSFileInfoScanner
     internal class CommandLineOptions
     {
         // This path can contain wildcard characters, e.g. C:\*.raw
-        [Option("I", ArgPosition = 1, Required = true, HelpShowsDefault = false, HelpText = "The name of a file or directory to scan; the path can contain the wildcard character *")]
+        [Option("I", ArgPosition = 1, Required = true, HelpShowsDefault = false,
+            HelpText = "The name of a file or directory to scan; the path can contain the wildcard character *")]
         public string InputDataFilePath { get; set; }
 
-        [Option("O", HelpShowsDefault = false, HelpText = "Output directory name.  If omitted, the output files will be created in the program directory.")]
+        [Option("O", HelpShowsDefault = false,
+            HelpText = "Output directory name.  If omitted, the output files will be created in the program directory.")]
         public string OutputDirectoryName { get; set; }
 
-        [Option("P", HelpShowsDefault = false, HelpText = "Param file path. If supplied, it should point to a valid XML parameter file. If omitted, defaults are used.")]
+        [Option("P", HelpShowsDefault = false,
+            HelpText = "Param file path. If supplied, it should point to a valid XML parameter file. If omitted, defaults are used.")]
         public string ParameterFilePath { get; set; }
 
         public bool RecurseDirectories { get; set; }
 
-        [Option("S", ArgExistsProperty = nameof(RecurseDirectories), HelpShowsDefault = false, HelpText = "If supplied, process all valid files in the input directory and subdirectories. " +
-                                                                                                          "Include a number after /S (like /S:2) to limit the level of subdirectories to examine.")]
+        [Option("S", ArgExistsProperty = nameof(RecurseDirectories), HelpShowsDefault = false,
+            HelpText = "If supplied, process all valid files in the input directory and subdirectories. " +
+                       "Include a number after /S (like /S:2) to limit the level of subdirectories to examine.")]
         public int MaxLevelsToRecurse { get; set; }
 
-        [Option("IE", HelpShowsDefault = false, HelpText = "Ignore errors when recursing.")]
+        [Option("IE", HelpShowsDefault = false,
+            HelpText = "Ignore errors when recursing.")]
         public bool IgnoreErrorsWhenRecursing { get; set; }
 
-        [Option("L", HelpShowsDefault = false, HelpText = "File path for logging messages.")]
+        [Option("L", HelpShowsDefault = false,
+            HelpText = "File path for logging messages.")]
         public string LogFilePath { get; set; }
 
-        [Option("LC", "2D", ArgExistsProperty = nameof(SaveLCMS2DPlots), HelpText = "Create 2D LCMS plots (this process could take several minutes for each dataset), using the top N points." +
-                                                                                    "To plot the top 20000 points, use /LC:20000.")]
+        [Option("LC", "2D", ArgExistsProperty = nameof(SaveLCMS2DPlots),
+            HelpText = "Create 2D LCMS plots (this process could take several minutes for each dataset), using the top N points." +
+                       "To plot the top 20000 points, use /LC:20000.")]
         public int LCMS2DMaxPointsToPlot { get; set; }
 
-        [Option("LCDiv", HelpText = "The divisor to use when creating the overview 2D LCMS plots. Use /LCDiv:0 to disable creation of the overview plots.")]
+        [Option("LCDiv",
+            HelpText = "The divisor to use when creating the overview 2D LCMS plots. " +
+                       "Use /LCDiv:0 to disable creation of the overview plots.")]
         public int LCMS2DOverviewPlotDivisor { get; set; }
 
-        [Option("NoTIC", HelpShowsDefault = false, HelpText = "Disable saving TIC and BPI plots")]
+        [Option("NoTIC", HelpShowsDefault = false,
+            HelpText = "Disable saving TIC and BPI plots.  Also disables any device specific plots")]
         public bool SaveTICAndBPIPlots { get; set; }
 
-        [Option("LCGrad", HelpShowsDefault = false, HelpText = "Save a series of 2D LC plots, each using a different color scheme. " +
-                                                                      "The default color scheme is OxyPalettes.Jet")]
+        [Option("LCGrad", HelpShowsDefault = false,
+            HelpText = "Save a series of 2D LC plots, each using a different color scheme. " +
+                       "The default color scheme is OxyPalettes.Jet")]
         public bool TestLCMSGradientColorSchemes { get; set; }
 
-        [Option("DatasetID", HelpShowsDefault = false, HelpText = "Define the dataset's DatasetID value (where # is an integer); " +
-                                                                         "only appropriate if processing a single dataset", Min = 1)]
+        [Option("DatasetID", HelpShowsDefault = false,
+            HelpText = "Define the dataset's DatasetID value (where # is an integer); " +
+                       "only appropriate if processing a single dataset",
+            Min = 1)]
         public int DatasetID { get; set; }
 
-        [Option("DI", HelpShowsDefault = false, HelpText = "If supplied, create a dataset info XML file for each dataset.")]
+        [Option("DI", HelpShowsDefault = false,
+            HelpText = "If supplied, create a dataset info XML file for each dataset.")]
         public bool CreateDatasetInfoFile { get; set; }
 
-        [Option("SS", HelpShowsDefault = false, HelpText = "If supplied, create a _ScanStats.txt  file for each dataset.")]
+        [Option("SS", HelpShowsDefault = false,
+            HelpText = "If supplied, create a _ScanStats.txt  file for each dataset.")]
         public bool CreateScanStatsFile { get; set; }
 
-        [Option("QS", HelpShowsDefault = false, HelpText = "If supplied, compute an overall quality score for the data in each datasets.")]
+        [Option("QS", HelpShowsDefault = false,
+            HelpText = "If supplied, compute an overall quality score for the data in each datasets.")]
         public bool ComputeOverallQualityScores { get; set; }
 
-        [Option("CC", HelpShowsDefault = false, HelpText = "If supplied, check spectral data for whether it is centroided or profile")]
+        [Option("CC", HelpShowsDefault = false,
+            HelpText = "If supplied, check spectral data for whether it is centroided or profile")]
         public bool CheckCentroidingStatus { get; set; }
 
         public bool SaveLCMS2DPlots { get; set; }
 
-        [Option("MS2MzMin", HelpShowsDefault = false, HelpText = "If supplied, specifies a minimum m/z value that all MS/MS spectra should have. " +
-                                                                 "Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold. " +
-                                                                 "Useful for validating instrument files where the sample is iTRAQ or TMT labeled " +
-                                                                 "and it is important to detect the reporter ions in the MS/MS spectra. " +
-                                                                 "\n  - select the default iTRAQ m/z (" + clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ_STRING + ") using /MS2MzMin:iTRAQ" +
-                                                                 "\n  - select the default TMT m/z (" + clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT_STRING + ") using /MS2MzMin:TMT" +
-                                                                 "\n  - specify a m/z value using /MS2MzMin:110")]
+        [Option("MS2MzMin", HelpShowsDefault = false,
+            HelpText = "If supplied, specifies a minimum m/z value that all MS/MS spectra should have. " +
+                       "Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold. " +
+                       "Useful for validating instrument files where the sample is iTRAQ or TMT labeled " +
+                       "and it is important to detect the reporter ions in the MS/MS spectra. " +
+                       "\n  - select the default iTRAQ m/z (" + clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ_STRING + ") using /MS2MzMin:iTRAQ" +
+                       "\n  - select the default TMT m/z (" + clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT_STRING + ") using /MS2MzMin:TMT" +
+                       "\n  - specify a m/z value using /MS2MzMin:110")]
         public string MS2MzMinString { get; set; }
 
         public float MS2MzMin { get; set; }
 
-        [Option("NoHash", HelpShowsDefault = false, HelpText = "If supplied, disables creating a SHA-1 hash for the primary instrument data file(s).")]
+        [Option("NoHash", HelpShowsDefault = false,
+            HelpText = "If supplied, disables creating a SHA-1 hash for the primary instrument data file(s).")]
         public bool DisableInstrumentHash { get; set; }
 
         public bool UpdateDatasetStatsTextFile { get; set; }
 
-        [Option("DST", ArgExistsProperty = nameof(UpdateDatasetStatsTextFile), HelpShowsDefault = false, HelpText = "If supplied, update (or create) a tab-delimited text file with overview stats for the dataset. " +
-                                                                                                                    "If /DI is used, will include detailed scan counts; otherwise, will just have the dataset name, " +
-                                                                                                                    "acquisition date, and (if available) sample name and comment. " +
-                                                                                                                    "By default, the file is named " + DatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME + "; " +
-                                                                                                                    "to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt")]
+        [Option("DST", ArgExistsProperty = nameof(UpdateDatasetStatsTextFile), HelpShowsDefault = false,
+            HelpText = "If supplied, update (or create) a tab-delimited text file with overview stats for the dataset. " +
+                       "If /DI is used, will include detailed scan counts; otherwise, will just have the dataset name, " +
+                       "acquisition date, and (if available) sample name and comment. " +
+                       "By default, the file is named " + DatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME + "; " +
+                       "to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt")]
         public string DatasetStatsTextFileName { get; set; }
 
-        [Option("ScanStart", "Start", HelpShowsDefault = false, HelpText = "Use to limit the scan range to process; " +
-                                                                           "useful for files where the first few scans are corrupt. " +
-                                                                           "For example, to start processing at scan 10, use /ScanStart:10", Min = 0)]
+        [Option("ScanStart", "Start", HelpShowsDefault = false,
+            HelpText = "Use to limit the scan range to process; " +
+                       "useful for files where the first few scans are corrupt. " +
+                       "For example, to start processing at scan 10, use /ScanStart:10",
+            Min = 0)]
         public int ScanStart { get; set; }
 
-        [Option("ScanEnd", "End", HelpShowsDefault = false, HelpText = "Use to limit the scan range to process; " +
-                                                                       "useful for files where the first few scans are corrupt. " +
-                                                                       "For example, to start processing at scan 10, use /ScanStart:10", Min = 0)]
+        [Option("ScanEnd", "End", HelpShowsDefault = false,
+            HelpText = "Use to limit the scan range to process; " +
+                       "useful for files where the first few scans are corrupt. " +
+                       "For example, to start processing at scan 10, use /ScanStart:10",
+            Min = 0)]
         public int ScanEnd { get; set; }
 
-        [Option("Debug", HelpShowsDefault = false, HelpText = "If supplied, display debug information at the console, " +
-                                                              "including showing the scan number prior to reading each scan's data. " +
-                                                              "Also, when /Debug is enabled, temporary files for creating plots with Python will not be deleted.")]
+        [Option("Debug", HelpShowsDefault = false,
+            HelpText = "If supplied, display debug information at the console, " +
+                       "including showing the scan number prior to reading each scan's data. " +
+                       "Also, when /Debug is enabled, temporary files for creating plots with Python will not be deleted.")]
         public bool ShowDebugInfo { get; set; }
 
-        [Option("C", "CheckIntegrity", HelpShowsDefault = false, HelpText = "Use to perform an integrity check on all known file types; " +
-                                                                            "this process will open known file types and verify that they contain the expected data. " +
-                                                                            "This option is only used if you specify an Input Directory and use a wildcard; " +
-                                                                            "you will typically also want to use /S when using /C.")]
+        [Option("C", "CheckIntegrity", HelpShowsDefault = false,
+            HelpText = "Use to perform an integrity check on all known file types; " +
+                       "this process will open known file types and verify that they contain the expected data. " +
+                       "This option is only used if you specify an Input Directory and use a wildcard; " +
+                       "you will typically also want to use /S when using /C.")]
         public bool CheckFileIntegrity { get; set; }
 
-        [Option("M", HelpText = "Use to define the maximum number of lines to process when checking text or csv files.", Min = 1)]
+        [Option("M",
+            HelpText = "Use to define the maximum number of lines to process when checking text or csv files.", Min = 1)]
         public int MaximumTextFileLinesToCheck { get; set; }
 
-        [Option("H", HelpShowsDefault = false, HelpText = "If supplied, compute SHA-1 file hashes when verifying file integrity.")]
+        [Option("H", HelpShowsDefault = false,
+            HelpText = "If supplied, compute SHA-1 file hashes when verifying file integrity.")]
         public bool ComputeFileHashes { get; set; }
 
-        [Option("QZ", HelpShowsDefault = false, HelpText = "If supplied, run a quick zip-file validation test when verifying file integrity " +
-                                                           "(the test does not check all data in the .Zip file).")]
+        [Option("QZ", HelpShowsDefault = false,
+            HelpText = "If supplied, run a quick zip-file validation test when verifying file integrity " +
+                       "(the test does not check all data in the .Zip file).")]
         public bool ZipFileCheckAllData { get; set; }
 
-        [Option("CF", HelpShowsDefault = false, HelpText = "If supplied, save/load information from the acquisition time file (cache file). " +
-                                                           "This option is auto-enabled if you use /C.")]
+        [Option("CF", HelpShowsDefault = false,
+            HelpText = "If supplied, save/load information from the acquisition time file (cache file). " +
+                       "This option is auto-enabled if you use /C.")]
         public bool UseCacheFiles { get; set; }
 
-        [Option("R", HelpShowsDefault = false, HelpText = "If supplied, reprocess files that are already defined in the acquisition time file.")]
+        [Option("R", HelpShowsDefault = false,
+            HelpText = "If supplied, reprocess files that are already defined in the acquisition time file.")]
         public bool ReprocessingExistingFiles { get; set; }
 
-        [Option("Z", HelpShowsDefault = false, HelpText = "If supplied, reprocess files that are already defined in the acquisition time file " +
-                                                          "only if their cached size is 0 bytes.")]
+        [Option("Z", HelpShowsDefault = false,
+            HelpText = "If supplied, reprocess files that are already defined in the acquisition time file " +
+                        "only if their cached size is 0 bytes.")]
         public bool ReprocessIfCachedSizeIsZero { get; set; }
 
-        [Option("PostToDMS", HelpShowsDefault = false, HelpText = "If supplied, store the dataset info in the DMS database. " +
-                                                                  "To customize the server name and/or stored procedure to use for posting, " +
-                                                                  "use an XML parameter file with settings DSInfoConnectionString, " +
-                                                                  "DSInfoDBPostingEnabled, and DSInfoStoredProcedure")]
+        [Option("PostToDMS", HelpShowsDefault = false,
+            HelpText = "If supplied, store the dataset info in the DMS database. " +
+                       "To customize the server name and/or stored procedure to use for posting, " +
+                       "use an XML parameter file with settings DSInfoConnectionString, " +
+                       "DSInfoDBPostingEnabled, and DSInfoStoredProcedure")]
         public bool PostResultsToDMS { get; set; }
 
-        [Option("PythonPlot", "Python", HelpShowsDefault = false, HelpText = "If supplied, create plots with Python instead of OxyPlot")]
+        [Option("PythonPlot", "Python", HelpShowsDefault = false,
+            HelpText = "If supplied, create plots with Python instead of OxyPlot")]
         public bool PlotWithPython { get; set; }
 
         public CommandLineOptions()
