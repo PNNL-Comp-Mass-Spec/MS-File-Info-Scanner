@@ -17,7 +17,7 @@ Supported file types are:
 
 ## Example QC Graphics
 
-Links to example QC graphic output files can be found on the documentation page at
+Links to example QC graphic output files can be found on the documentation page at\
 [https://pnnl-comp-mass-spec.github.io/MS-File-Info-Scanner](https://pnnl-comp-mass-spec.github.io/MS-File-Info-Scanner/index.html#results)
 
 ## Console Switches
