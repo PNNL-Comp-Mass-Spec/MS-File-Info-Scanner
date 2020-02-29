@@ -25,6 +25,7 @@ rem clsDeconToolsIsosInfoScanner.cs
 rem clsFinniganRawFileInfoScanner.cs
 ..\bin\MSFileInfoScanner.exe TestData\Thermo\LCA_FS_PE_pool_13_Orbi_21Nov13_Tiger_13-07-36.raw             /python /SS /DI /2D /CC /O:TestData_Results\Thermo\ThermoLCA
 ..\bin\MSFileInfoScanner.exe TestData\Thermo\Mini_proteome_CytochromeC02-LCQ-1_22Oct04_Earth_0904-7.RAW    /python /SS /DI /2D /CC /O:TestData_Results\Thermo\ThermoLCQ
+..\bin\MSFileInfoScanner.exe \\proto-3\QEHFX02\2020_1\QC_Mam_19_01_rep04_21Feb20_Remus_WBEH-20-02-05\QC_Mam_19_01_rep04_21Feb20_Remus_WBEH-20-02-05.raw     /python /SS /DI /2D /CC /O:TestData_Results\Thermo\ThermoQEHFX
 ..\bin\MSFileInfoScanner.exe TestData\Thermo\QC_04_1_04Nov04_Pegasus_0804-4_LT-only.RAW                    /python /SS /DI /2D /CC /O:TestData_Results\Thermo\ThermoLTQFT_LTOnly
 ..\bin\MSFileInfoScanner.exe TestData\Thermo\Sdata_Exp5NQ_PRISM_F21_03Apr17_Smeagol.raw                    /python /SS /DI /2D /CC /O:TestData_Results\Thermo\ThermoMRM
 ..\bin\MSFileInfoScanner.exe TestData\Thermo\Angiotensin_AllScans.raw                                      /python /ss /di /2D /CC /o:TestData_Results\Thermo\Angiotensin_AllScans
