@@ -15,6 +15,11 @@ Supported file types are:
 * .UIMF files (IMS or SLIM)
 * DeconTools _isos.csv files (uses the _scans.csv file for elution time info)
 
+## Example QC Graphics
+
+Links to example QC graphic output files can be found on the documentation page at
+[https://pnnl-comp-mass-spec.github.io/MS-File-Info-Scanner](https://pnnl-comp-mass-spec.github.io/MS-File-Info-Scanner/index.html#results)
+
 ## Console Switches
 
 MSFileInfoScanner is a command line application.\
