@@ -1,5 +1,14 @@
 MS File Info Scanner Change Log
 
+Version 1.6.7363; February 28, 2020
+	- Add support for Bruker analysis.tdf files
+	- Report progress while reading data with ProteoWizard and while saving plots
+	- Compute the SHA-1 hash of all of the primary data files (not just the first one)
+	- Create plots of device data stored in Thermo .raw files (e.g. LC pressure vs. time)
+      - Include device info in the index.html file that shows QC plots
+	- Switch to using PRISMDatabaseUtils.dll to contact either a SQL server or a PostgreSQL database
+	- Update to OxyPlot 2.0 and .NET 4.7.2
+
 Version 1.5.7096; June 6, 2019
 	- Add support for Linux, including creating plots with Python 3.x
 
