@@ -47,7 +47,7 @@ namespace MSFileInfoScanner
                                         "DeconTools _isos.csv files" + Environment.NewLine + Environment.NewLine +
                                         "Known file extensions: " + CollapseList(scannerInfo.GetKnownFileExtensionsList()) + Environment.NewLine +
                                         "Known directory extensions: " + CollapseList(scannerInfo.GetKnownDirectoryExtensionsList());
-            cmdLineParser.ContactInfo = "Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005" + Environment.NewLine +
+            cmdLineParser.ContactInfo = "Program written by Matthew Monroe for PNNL (Richland, WA) in 2005" + Environment.NewLine +
                                         "E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov" + Environment.NewLine + "Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/";
 
             cmdLineParser.UsageExamples.Add("Program syntax:" + Environment.NewLine + Path.GetFileName(exePath) +
