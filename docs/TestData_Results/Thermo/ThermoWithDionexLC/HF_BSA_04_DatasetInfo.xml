@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<DatasetInfo>
+  <Dataset>HF_BSA_04</Dataset>
+  <ScanTypes>
+    <ScanType ScanCount="8240" ScanFilterText="FTMS + p NSI Full ms">HMS</ScanType>
+    <ScanType ScanCount="863" ScanFilterText="FTMS + c NSI d Full ms2 0@hcd27.00">HCD-HMSn</ScanType>
+    <ScanType ScanCount="670" ScanFilterText="FTMS - p NSI Full ms2 0@hcd35.00">HCD-HMSn</ScanType>
+  </ScanTypes>
+  <AcquisitionInfo>
+    <ScanCount>9773</ScanCount>
+    <ScanCountMS>8240</ScanCountMS>
+    <ScanCountMSn>1533</ScanCountMSn>
+    <Elution_Time_Max>30.01</Elution_Time_Max>
+    <AcqTimeMinutes>30.01</AcqTimeMinutes>
+    <StartTime>2020-02-11 08:13:04 AM</StartTime>
+    <EndTime>2020-02-11 08:43:05 AM</EndTime>
+    <FileSizeBytes>503363955</FileSizeBytes>
+    <InstrumentFiles>
+      <InstrumentFile Hash="25944ffe01a27652ced05fe768678fd27426ad35" HashType="SHA1" Size="503363955">HF_BSA_04.raw</InstrumentFile>
+    </InstrumentFiles>
+    <DeviceList>
+      <Device Type="MS" Number="1" Name="Q Exactive HF Orbitrap" Model="Q Exactive HF Orbitrap" SerialNumber="Exactive Series slot #2000" SoftwareVersion="2.9-290033/2.9.0.2926">Mass Spectrometer</Device>
+      <Device Type="Analog" Number="1" Name="Dionex.PumpNCS3500RS" Model="NCS-3500RS" SerialNumber="8119000" SoftwareVersion="">Analog device #1</Device>
+    </DeviceList>
+    <ProfileScanCountMS1>8240</ProfileScanCountMS1>
+    <ProfileScanCountMS2>670</ProfileScanCountMS2>
+    <CentroidScanCountMS1>0</CentroidScanCountMS1>
+    <CentroidScanCountMS2>863</CentroidScanCountMS2>
+  </AcquisitionInfo>
+  <TICInfo>
+    <TIC_Max_MS>7.3844E+08</TIC_Max_MS>
+    <TIC_Max_MSn>1.4303E+08</TIC_Max_MSn>
+    <BPI_Max_MS>1.9576E+08</BPI_Max_MS>
+    <BPI_Max_MSn>1.3016E+07</BPI_Max_MSn>
+    <TIC_Median_MS>4.9818E+07</TIC_Median_MS>
+    <TIC_Median_MSn>2.4385E+06</TIC_Median_MSn>
+    <BPI_Median_MS>3.979E+06</BPI_Median_MS>
+    <BPI_Median_MSn>365529</BPI_Median_MSn>
+  </TICInfo>
+</DatasetInfo>

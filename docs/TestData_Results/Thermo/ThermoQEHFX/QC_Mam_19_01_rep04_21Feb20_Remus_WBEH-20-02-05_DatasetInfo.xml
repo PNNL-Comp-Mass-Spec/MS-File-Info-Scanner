@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<DatasetInfo>
+  <Dataset>QC_Mam_19_01_rep04_21Feb20_Remus_WBEH-20-02-05</Dataset>
+  <ScanTypes>
+    <ScanType ScanCount="5914" ScanFilterText="FTMS + p NSI Full ms">HMS</ScanType>
+    <ScanType ScanCount="56191" ScanFilterText="FTMS + p NSI d Full ms2 0@hcd30.00">HCD-HMSn</ScanType>
+  </ScanTypes>
+  <AcquisitionInfo>
+    <ScanCount>62105</ScanCount>
+    <ScanCountMS>5914</ScanCountMS>
+    <ScanCountMSn>56191</ScanCountMSn>
+    <Elution_Time_Max>120.00</Elution_Time_Max>
+    <AcqTimeMinutes>120.00</AcqTimeMinutes>
+    <StartTime>2020-02-25 10:04:38 AM</StartTime>
+    <EndTime>2020-02-25 12:04:38 PM</EndTime>
+    <FileSizeBytes>1855400827</FileSizeBytes>
+    <InstrumentFiles>
+      <InstrumentFile Hash="65b82d8d5da369ca62e50a8f9bf332bc6ad8911e" HashType="SHA1" Size="1855400827">QC_Mam_19_01_rep04_21Feb20_Remus_WBEH-20-02-05.raw</InstrumentFile>
+    </InstrumentFiles>
+    <DeviceList>
+      <Device Type="MS" Number="1" Name="Q Exactive HF-X Orbitrap" Model="Q Exactive HF-X Orbitrap" SerialNumber="Exactive Series #6334" SoftwareVersion="2.9-290204/2.9.3.2948">Mass Spectrometer</Device>
+    </DeviceList>
+    <ProfileScanCountMS1>5914</ProfileScanCountMS1>
+    <ProfileScanCountMS2>56190</ProfileScanCountMS2>
+    <CentroidScanCountMS1>0</CentroidScanCountMS1>
+    <CentroidScanCountMS2>1</CentroidScanCountMS2>
+  </AcquisitionInfo>
+  <TICInfo>
+    <TIC_Max_MS>1.6069E+10</TIC_Max_MS>
+    <TIC_Max_MSn>2.7894E+09</TIC_Max_MSn>
+    <BPI_Max_MS>4.3616E+09</BPI_Max_MS>
+    <BPI_Max_MSn>7.4481E+08</BPI_Max_MSn>
+    <TIC_Median_MS>2.6678E+09</TIC_Median_MS>
+    <TIC_Median_MSn>9.6855E+06</TIC_Median_MSn>
+    <BPI_Median_MS>1.2858E+08</BPI_Median_MS>
+    <BPI_Median_MSn>745141</BPI_Median_MSn>
+  </TICInfo>
+</DatasetInfo>
