@@ -17,6 +17,9 @@
     <InstrumentFiles>
       <InstrumentFile Hash="115025528bafaa355681472a3ea0cd3209ed4082" HashType="SHA1" Size="861751054">15CPTAC_UCEC_P_PNNL_20180503_B4S3_f11_REP-17-12-06.raw</InstrumentFile>
     </InstrumentFiles>
+    <DeviceList>
+      <Device Type="MS" Number="1" Name="Orbitrap Fusion Lumos" Model="Orbitrap Fusion Lumos" SerialNumber="FSN20330" SoftwareVersion="2.1.1565.23">Mass Spectrometer</Device>
+    </DeviceList>
     <ProfileScanCountMS1>7488</ProfileScanCountMS1>
     <ProfileScanCountMS2>0</ProfileScanCountMS2>
     <CentroidScanCountMS1>0</CentroidScanCountMS1>

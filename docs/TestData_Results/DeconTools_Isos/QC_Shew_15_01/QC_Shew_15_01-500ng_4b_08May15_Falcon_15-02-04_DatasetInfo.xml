@@ -5,7 +5,7 @@
     <ScanType ScanCount="1673" ScanFilterText="FTMS + p NSI Full ms">HMS</ScanType>
   </ScanTypes>
   <AcquisitionInfo>
-    <ScanCount>1673</ScanCount>
+    <ScanCount>18366</ScanCount>
     <ScanCountMS>1673</ScanCountMS>
     <ScanCountMSn>0</ScanCountMSn>
     <Elution_Time_Max>98.95</Elution_Time_Max>

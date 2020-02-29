@@ -2,8 +2,8 @@
 <DatasetInfo>
   <Dataset>PPS20190130IN2-2A</Dataset>
   <ScanTypes>
-    <ScanType ScanCount="58" ScanFilterText="">HMS</ScanType>
-    <ScanType ScanCount="11542" ScanFilterText="IMS">HMS</ScanType>
+    <ScanType ScanCount="11574" ScanFilterText="IMS">HMS</ScanType>
+    <ScanType ScanCount="25" ScanFilterText="">HMS</ScanType>
   </ScanTypes>
   <AcquisitionInfo>
     <ScanCount>11600</ScanCount>
@@ -27,9 +27,9 @@
     <TIC_Max_MSn>0</TIC_Max_MSn>
     <BPI_Max_MS>7346</BPI_Max_MS>
     <BPI_Max_MSn>0</BPI_Max_MSn>
-    <TIC_Median_MS>495.5</TIC_Median_MS>
+    <TIC_Median_MS>2029.5</TIC_Median_MS>
     <TIC_Median_MSn>0</TIC_Median_MSn>
-    <BPI_Median_MS>29</BPI_Median_MS>
+    <BPI_Median_MS>41</BPI_Median_MS>
     <BPI_Median_MSn>0</BPI_Median_MSn>
   </TICInfo>
 </DatasetInfo>

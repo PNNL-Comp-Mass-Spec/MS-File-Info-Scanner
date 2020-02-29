@@ -2,6 +2,30 @@
 <html>
 <head>
   <title>Angiotensin_AllScans</title>
+  <style>
+    table.DataTable {
+      margin: 10px 5px 5px 5px;
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    
+    th.DataHead {
+      border: 1px solid black;
+      padding: 2px 4px 2px 2px; 
+      text-align: left;
+    }
+    
+    td.DataCell {
+      border: 1px solid black;
+      padding: 2px 4px 2px 4px;
+    }
+        
+    td.DataCentered {
+      border: 1px solid black;
+      padding: 2px 4px 2px 4px;
+      text-align: center;
+    }
+   </style>
 </head>
 
 <body>
@@ -30,16 +54,16 @@
       <td valign="middle">TIC</td>
       <td><a href="Angiotensin_AllScans_TIC.png"><img src="Angiotensin_AllScans_TIC.png" width="250" border="0"></a></td>
       <td valign="middle">
-        <table border="1">
-          <tr><th>Scan Type</th><th>Scan Count</th><th>Scan Filter Text</th></tr>
-          <tr><td>HMS</td><td align="center">87</td><td>FTMS + p ESI Full ms</td></tr>
-          <tr><td>HCD-HMSn</td><td align="center">422</td><td>FTMS + c ESI d Full ms2 0@hcd30.00</td></tr>
-          <tr><td>ETD-HMSn</td><td align="center">170</td><td>FTMS + c ESI d Full ms2 0@etd53.99</td></tr>
-          <tr><td>SA_HCD-HMSn</td><td align="center">170</td><td>FTMS + c ESI d sa Full ms2 0@etd53.99 0@hcd30.00</td></tr>
-          <tr><td>SA_CID-HMSn</td><td align="center">170</td><td>FTMS + c ESI d sa Full ms2 0@etd53.99 0@cid30.00</td></tr>
-          <tr><td>ETD-HMSn</td><td align="center">252</td><td>FTMS + c ESI d Full ms2 0@etd121.47</td></tr>
-          <tr><td>SA_HCD-HMSn</td><td align="center">252</td><td>FTMS + c ESI d sa Full ms2 0@etd121.47 0@hcd30.00</td></tr>
-          <tr><td>SA_CID-HMSn</td><td align="center">252</td><td>FTMS + c ESI d sa Full ms2 0@etd121.47 0@cid30.00</td></tr>
+        <table class="DataTable">
+          <tr><th class="DataHead">Scan Type</th><th class="DataHead">Scan Count</th><th class="DataHead">Scan Filter Text</th></tr>
+          <tr><td class="DataCell">HMS</td><td class="DataCentered">87</td><td class="DataCell">FTMS + p ESI Full ms</td></tr>
+          <tr><td class="DataCell">HCD-HMSn</td><td class="DataCentered">422</td><td class="DataCell">FTMS + c ESI d Full ms2 0@hcd30.00</td></tr>
+          <tr><td class="DataCell">ETD-HMSn</td><td class="DataCentered">170</td><td class="DataCell">FTMS + c ESI d Full ms2 0@etd53.99</td></tr>
+          <tr><td class="DataCell">SA_HCD-HMSn</td><td class="DataCentered">170</td><td class="DataCell">FTMS + c ESI d sa Full ms2 0@etd53.99 0@hcd30.00</td></tr>
+          <tr><td class="DataCell">SA_CID-HMSn</td><td class="DataCentered">170</td><td class="DataCell">FTMS + c ESI d sa Full ms2 0@etd53.99 0@cid30.00</td></tr>
+          <tr><td class="DataCell">ETD-HMSn</td><td class="DataCentered">252</td><td class="DataCell">FTMS + c ESI d Full ms2 0@etd121.47</td></tr>
+          <tr><td class="DataCell">SA_HCD-HMSn</td><td class="DataCentered">252</td><td class="DataCell">FTMS + c ESI d sa Full ms2 0@etd121.47 0@hcd30.00</td></tr>
+          <tr><td class="DataCell">SA_CID-HMSn</td><td class="DataCentered">252</td><td class="DataCell">FTMS + c ESI d sa Full ms2 0@etd121.47 0@cid30.00</td></tr>
         </table>
       </td>
     </tr>
@@ -47,6 +71,18 @@
       <td>&nbsp;</td>
       <td align="center">DMS <a href="http://dms2.pnl.gov/dataset/show/Angiotensin_AllScans">Dataset Detail Report</a></td>
       <td align="center"><a href="Angiotensin_AllScans_DatasetInfo.xml">Dataset Info XML file</a></td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td align="center" colspan=2>
+        <table class="DataTable">
+          <tr><th class="DataHead">Device Type:</th><td class="DataCell">Mass Spectrometer</td></tr>
+          <tr><th class="DataHead">Name:</th><td class="DataCell">Orbitrap Fusion Lumos</td></tr>
+          <tr><th class="DataHead">Model:</th><td class="DataCell">Orbitrap Fusion Lumos</td></tr>
+          <tr><th class="DataHead">Serial:</th><td class="DataCell">FSN20129</td></tr>
+          <tr><th class="DataHead">Software Version:</th><td class="DataCell">3.0.2041</td></tr>
+        </table>
+      </td>
     </tr>
 
   </table>
