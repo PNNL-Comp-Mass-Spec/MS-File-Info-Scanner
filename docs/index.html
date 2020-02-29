@@ -46,13 +46,26 @@
     </div>
     
     <div id="documentation">
-      <h3>Command line switches</h3>
+      <h3>Command Line Arguments</h3>
       
-      <p>MSFileInfoScanner is a command line application. See the
+      <p>MSFileInfoScanner is a console application. See the
         <a href="https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/Readme.md">Readme on GitHub</a> for details.
       </p>
-    </div>
+      
+      <p>Example command line usage:<br>
+         &nbsp;&nbsp;<code>MSFileInfoScanner.exe QC_Mam_19_01.raw /python /DI /2D /CC /O:QC_Results</code></p>
 
+      <ul>
+        <li>Process QC_Mam_19_01.raw</li>
+        <li>Create plots with Python and MSFileInfoScanner_Plotter.py</li>
+        <li>Create a dataset info XML file (named QC_Mam_19_01_DatasetInfo.xml)</li>
+        <li>Create 2D LC-MS plots (in addition to the standard BPI and TIC plots)</li>
+        <li>Check whether spectra are centroided or profile</li>      
+        <li>Create the output files in a subdirectory named QC_Results</li>      
+      </ul>
+      
+    </div>
+    
     <div id="results">
       <h3>Example Results</h3>
       
