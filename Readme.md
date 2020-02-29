@@ -17,7 +17,8 @@ Supported file types are:
 
 ## Console Switches
 
-MSFileInfoScanner is a command line application.  Syntax:
+MSFileInfoScanner is a command line application.\
+Syntax:
 
 ```
 MSFileInfoScanner.exe

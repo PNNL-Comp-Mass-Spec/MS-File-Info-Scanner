@@ -48,7 +48,6 @@ namespace MSFileInfoScanner
             string plotTitle = "Undefined", string xAxisTitle = "X", string yAxisTitle = "Y",
             bool writeDebug = false, string dataSource = "") : base(writeDebug, dataSource)
         {
-
             mSeriesCount = 0;
 
             DeleteTempFiles = true;
@@ -59,7 +58,6 @@ namespace MSFileInfoScanner
 
             XAxisInfo = new clsAxisInfo(xAxisTitle);
             YAxisInfo = new clsAxisInfo(yAxisTitle);
-
         }
 
         /// <summary>
@@ -91,7 +89,6 @@ namespace MSFileInfoScanner
             }
 
             return !string.IsNullOrWhiteSpace(PythonPath);
-
         }
 
         /// <summary>
@@ -126,7 +123,6 @@ namespace MSFileInfoScanner
             var query = (from item in candidates orderby item.LastWriteTime select item.FullName);
 
             return query.First();
-
         }
 
         protected bool GeneratePlotsWithPython(FileInfo exportFile, DirectoryInfo workDir)
@@ -216,7 +212,6 @@ namespace MSFileInfoScanner
 
             OnErrorEvent("Python ExitCode = " + progRunner.ExitCode);
             return false;
-
         }
 
         protected void NotifyPythonNotFound(string currentTask)
@@ -230,7 +225,6 @@ namespace MSFileInfoScanner
             }
 
             OnDebugEvent(debugMsg);
-
         }
 
         public static IEnumerable<string> PythonPathsToCheck()
