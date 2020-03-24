@@ -950,11 +950,6 @@
             Maximum size of the scan info cache
             </summary>
         </member>
-        <member name="F:ThermoRawFileReader.XRawFileIO.mCachedFilePath">
-            <summary>
-            The the full path to the currently loaded .raw file
-            </summary>
-        </member>
         <member name="F:ThermoRawFileReader.XRawFileIO.mCachedScanInfo">
             <summary>
             The scan info cache
@@ -991,6 +986,12 @@
             <summary>
             Thermo reader options
             </summary>
+        </member>
+        <member name="P:ThermoRawFileReader.XRawFileIO.RawFilePath">
+            <summary>
+            The full path to the currently loaded .raw file
+            </summary>
+            <remarks>This is changed to an empty string once the file is closed</remarks>
         </member>
         <member name="P:ThermoRawFileReader.XRawFileIO.ScanInfoCacheMaxSize">
             <summary>
@@ -1375,7 +1376,7 @@
             <param name="maxNumberOfPeaks"></param>
             <param name="centroidData"></param>
             <returns>The number of data points</returns>
-            <remarks></remarks>
+            <remarks>Uses the scan filter of the first scan to assure that we're only averaging similar scans</remarks>
         </member>
         <member name="M:ThermoRawFileReader.XRawFileIO.OpenRawFile(System.String)">
             <summary>
@@ -1703,6 +1704,11 @@
             <value></value>
             <returns></returns>
             <remarks></remarks>
+        </member>
+        <member name="F:ThermoRawFileReader.clsScanInfo.IonInjectionTime">
+            <summary>
+            Ion Injection Time (in milliseconds)
+            </summary>
         </member>
         <member name="P:ThermoRawFileReader.clsScanInfo.IsCentroided">
             <summary>
