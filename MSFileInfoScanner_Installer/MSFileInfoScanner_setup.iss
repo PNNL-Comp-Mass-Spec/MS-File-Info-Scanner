@@ -1,5 +1,5 @@
-; This is an Inno Setup configuration file
-; http://www.jrsoftware.org/isinfo.php
+﻿; This is an Inno Setup configuration file
+; https://jrsoftware.org/isinfo.php
 
 #define ApplicationVersion GetFileVersion('..\bin\MSFileInfoScanner.exe')
 
@@ -84,23 +84,27 @@ AppPublisher=Pacific Northwest National Laboratory
 AppPublisherURL=http://omics.pnl.gov/software
 AppSupportURL=http://omics.pnl.gov/software
 AppUpdatesURL=http://omics.pnl.gov/software
-DefaultDirName={pf}\MSFileInfoScanner
+ArchitecturesAllowed=x64 x86
+ArchitecturesInstallIn64BitMode=x64
+DefaultDirName={autopf}\MSFileInfoScanner
 DefaultGroupName=PAST Toolkit
-AppCopyright=� PNNL
+AppCopyright=© PNNL
 ;LicenseFile=.\License.rtf
-PrivilegesRequired=poweruser
+PrivilegesRequired=admin
 OutputBaseFilename=MSFileInfoScanner_Installer
 VersionInfoVersion={#ApplicationVersion}
 VersionInfoCompany=PNNL
 VersionInfoDescription=MS File Info Scanner
 VersionInfoCopyright=PNNL
-DisableFinishedPage=true
+DisableFinishedPage=yes
+DisableWelcomePage=no
 ShowLanguageDialog=no
-ChangesAssociations=false
-EnableDirDoesntExistWarning=false
-AlwaysShowDirOnReadyPage=true
+ChangesAssociations=no
+WizardStyle=modern
+EnableDirDoesntExistWarning=no
+AlwaysShowDirOnReadyPage=yes
 UninstallDisplayIcon={app}\delete_16x.ico
-ShowTasksTreeLines=true
+ShowTasksTreeLines=yes
 OutputDir=.\Output
 
 [Registry]
