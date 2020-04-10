@@ -513,7 +513,9 @@ namespace MSFileInfoScanner
                     if (device.DeviceType == Device.MS || device.DeviceType == Device.MSAnalog)
                         continue;
 
+                    // Note: This method calls GetChromatogramData2D
                     var chromatogramData = xcaliburAccessor.GetChromatogramData(device.DeviceType, device.DeviceNumber);
+
                     if (chromatogramData.Count == 0)
                         continue;
 
