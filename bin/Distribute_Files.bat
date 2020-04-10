@@ -57,7 +57,12 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\BrukerDataR
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.dll"             C:\DMS_Programs\MSFileInfoScannerExe /y /d
 
 @echo off
+echo.
 echo About to copy to \\pnl\projects\OmicsSW\DMS_Programs
+echo.
+echo Be sure you have built the DLL in Debug mode
+echo.
+
 pause
 @echo on
 
