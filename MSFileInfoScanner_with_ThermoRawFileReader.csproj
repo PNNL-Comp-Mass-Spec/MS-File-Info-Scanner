@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0807EDD3-878A-42AE-9507-F1CC2CC2D3A9}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MSFileInfoScanner</RootNamespace>
+    <AssemblyName>MSFileInfoScanner</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <NoWarn>0162</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BrukerDataReader">
+      <HintPath>Lib\BrukerDataReader.dll</HintPath>
+    </Reference>
+    <Reference Include="ChemstationMSFileReader">
+      <HintPath>Lib\ChemstationMSFileReader.dll</HintPath>
+    </Reference>
+    <Reference Include="Ionic.Zip">
+      <HintPath>Lib\Ionic.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="MSFileInfoScannerInterfaces, Version=1.1.5988.17918, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\MSFileInfoScannerInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="NetCDFReader">
+      <HintPath>Lib\NetCDFReader.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="ProteowizardWrapper">
+      <HintPath>Lib\ProteowizardWrapper.dll</HintPath>
+    </Reference>
+    <Reference Include="pwiz_bindings_cli">
+      <HintPath>Lib\pwiz_bindings_cli.dll</HintPath>
+    </Reference>
+    <Reference Include="SpectraTypeClassifier, Version=1.1.5988.17918, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\SpectraTypeClassifier.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="ThermoFisher.CommonCore.BackgroundSubtraction">
+      <HintPath>Lib\ThermoFisher.CommonCore.BackgroundSubtraction.dll</HintPath>
+    </Reference>
+    <Reference Include="ThermoFisher.CommonCore.Data">
+      <HintPath>Lib\ThermoFisher.CommonCore.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="ThermoFisher.CommonCore.MassPrecisionEstimator">
+      <HintPath>Lib\ThermoFisher.CommonCore.MassPrecisionEstimator.dll</HintPath>
+    </Reference>
+    <Reference Include="ThermoFisher.CommonCore.RawFileReader">
+      <HintPath>Lib\ThermoFisher.CommonCore.RawFileReader.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="clsAgilentGCDFolderInfoScanner.cs" />
+    <Compile Include="clsAgilentIonTrapDFolderInfoScanner.cs" />
+    <Compile Include="clsAgilentOrQStarWiffFileInfoScanner.cs" />
+    <Compile Include="clsAgilentTOFDFolderInfoScanner.cs" />
+    <Compile Include="clsAxisInfo.cs" />
+    <Compile Include="clsBrukerOneFolderInfoScanner.cs" />
+    <Compile Include="clsBrukerXmassFolderInfoScanner.cs" />
+    <Compile Include="clsDeconToolsIsosInfoScanner.cs" />
+    <Compile Include="clsFileIntegrityChecker.cs" />
+    <Compile Include="clsFilterDataArrayMaxCount.cs" />
+    <Compile Include="clsThermoRawFileInfoScanner.cs" />
+    <Compile Include="clsLCMSDataPlotter.cs" />
+    <Compile Include="clsMassLynxNativeIO.cs" />
+    <Compile Include="clsMicromassRawFolderInfoScanner.cs" />
+    <Compile Include="clsMSFileInfoDataCache.cs" />
+    <Compile Include="clsMSFileInfoProcessorBaseClass.cs" />
+    <Compile Include="clsMSFileInfoScanner.cs" />
+    <Compile Include="clsOxyplotUtilities.cs" />
+    <Compile Include="clsPlotContainerBase.cs" />
+    <Compile Include="clsPlotUtilities.cs" />
+    <Compile Include="clsPythonPlotContainer3D.cs" />
+    <Compile Include="clsPythonPlotContainer.cs" />
+    <Compile Include="clsPythonPlotContainer2D.cs" />
+    <Compile Include="CommandLineOptions.cs" />
+    <Compile Include="DatasetStats\DatasetSummaryStats.cs" />
+    <Compile Include="DatasetStats\ExtendedStatsInfo.cs" />
+    <Compile Include="DatasetStats\InstrumentFileInfo.cs" />
+    <Compile Include="DatasetStats\ScanStatsEntry.cs" />
+    <Compile Include="DatasetStats\SummaryStatDetails.cs" />
+    <Compile Include="GenericFileInfoScanner.cs" />
+    <Compile Include="DatasetStats\clsDatasetFileInfo.cs" />
+    <Compile Include="DatasetStats\clsDatasetStatsSummarizer.cs" />
+    <Compile Include="DatasetStats\clsSampleInfo.cs" />
+    <Compile Include="MassLynxData\MSData.cs" />
+    <Compile Include="MassLynxData\MSFunctionInfo.cs" />
+    <Compile Include="MassLynxData\MSHeaderInfo.cs" />
+    <Compile Include="MassLynxData\NumberConversion.cs" />
+    <Compile Include="MassLynxData\RawDataUtils.cs" />
+    <Compile Include="MassLynxData\RawFunctionDescriptorRecord.cs" />
+    <Compile Include="MassLynxData\RawScanIndexRecordCompressedScan.cs" />
+    <Compile Include="MassLynxData\RawScanIndexRecord.cs" />
+    <Compile Include="MassLynxData\ScanIndexRecord.cs" />
+    <Compile Include="MassLynxData\MassLynxScanStats.cs" />
+    <Compile Include="modMain.cs" />
+    <Compile Include="clsPlotContainer.cs" />
+    <Compile Include="clsProteowizardDataParser.cs" />
+    <Compile Include="clsTICandBPIPlotter.cs" />
+    <Compile Include="clsUIMFInfoScanner.cs" />
+    <Compile Include="clsZippedImagingFilesScanner.cs" />
+    <Compile Include="MSFileInfoProcessorInterface.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MathNet.Numerics">
+      <Version>4.9.0</Version>
+    </PackageReference>
+    <PackageReference Include="OxyPlot.Wpf">
+      <Version>2.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="PRISM-DatabaseUtils">
+      <Version>1.0.9</Version>
+    </PackageReference>
+    <PackageReference Include="PRISM-Library">
+      <Version>2.6.4</Version>
+    </PackageReference>
+    <None Include="App.config" />
+    <PackageReference Include="System.Data.SQLite.Core">
+      <Version>1.0.111</Version>
+    </PackageReference>
+    <PackageReference Include="UIMFLibrary">
+      <Version>3.7.3</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ThermoRawFileReader\ThermoRawFileReader.csproj">
+      <Project>{9a814c6c-bd10-4ce3-bd68-bb4774fb10a8}</Project>
+      <Name>ThermoRawFileReader</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if exist "$(TargetDir)pwiz_bindings_cli.dll" del "$(TargetDir)pwiz_bindings_cli.dll"
+if exist "$(TargetDir)SQLite.Interop.dll" (del "$(TargetDir)SQLite.Interop.dll")
+rem if not exist "$(TargetDir)x86" mkdir "$(TargetDir)x86"
+rem if not exist "$(TargetDir)x64" mkdir "$(TargetDir)x64"
+rem xcopy "$(ProjectDir)Lib\x86\SQLite.Interop.dll" "$(TargetDir)x86" /D /Y
+rem xcopy "$(ProjectDir)Lib\x64\SQLite.Interop.dll" "$(TargetDir)x64" /D /Y
+xcopy "$(ProjectDir)Lib\netcdf.dll" "$(TargetDir)" /D /Y
+xcopy "$(ProjectDir)Python\MSFileInfoScanner_Plotter.py"  "$(TargetDir)" /D /Y</PostBuildEvent>
+  </PropertyGroup>
+</Project>
