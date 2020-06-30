@@ -379,6 +379,17 @@ namespace MSFileInfoScanner
 
         }
 
+        private bool ShowPeriodicMessageNow(int currentCount)
+        {
+            return
+                currentCount < 25 ||
+                currentCount < 100 && currentCount % 10 == 0 ||
+                currentCount < 1000 && currentCount % 100 == 0 ||
+                currentCount < 10000 && currentCount % 1000 == 0 ||
+                currentCount < 100000 && currentCount % 10000 == 0 ||
+                currentCount % 100000 == 0;
+        }
+
         [HandleProcessCorruptedStateExceptions]
         public void StoreChromatogramInfo(DatasetFileInfo datasetFileInfo, out bool ticStored, out bool srmDataCached, out double runtimeMinutes)
         {
@@ -547,293 +558,63 @@ namespace MSFileInfoScanner
 
                 parserInfo.MinScanIndexWithoutScanTimes = int.MaxValue;
 
-                try
+                var attemptNumber = 1;
+                while (true)
                 {
-                    mPWiz.GetScanTimesAndMsLevels(mCancellationToken.Token, out scanTimes, out msLevels, MonitorScanTimeLoadingProgress);
-                }
-                catch (OperationCanceledException)
-                {
-                    // mCancellationToken.Cancel was called in MonitorScanTimeLoadingProgress
-
-                    // Determine the scan index where GetScanTimesAndMsLevels exited the for loop
-                    for (var scanIndex = 0; scanIndex <= scanTimes.Length - 1; scanIndex++)
-                    {
-                        if (msLevels[scanIndex] > 0) continue;
-
-                        minScanIndexWithoutScanTimes = scanIndex;
-                        break;
-                    }
-
-                    if (!mGetScanTimesAutoAborted && minScanIndexWithoutScanTimes < int.MaxValue)
-                    {
-                        // Manually aborted; shrink the arrays to reflect the amount of data that was actually loaded
-                        Array.Resize(ref scanTimes, minScanIndexWithoutScanTimes);
-                        Array.Resize(ref msLevels, minScanIndexWithoutScanTimes);
-                    }
-                }
-
-                var spectrumCount = scanTimes.Length;
-
-                // The scan times returned by .GetScanTimesAndMsLevels() are the acquisition time in seconds from the start of the analysis
-                // Convert these to minutes
-                for (var scanIndex = 0; scanIndex <= spectrumCount - 1; scanIndex++)
-                {
-                    if (scanIndex >= minScanIndexWithoutScanTimes)
-                        break;
-
-                    var scanTimeMinutes = scanTimes[scanIndex] / 60.0;
-                    scanTimes[scanIndex] = scanTimeMinutes;
-                }
-
-                Console.WriteLine();
-                OnStatusEvent("Reading spectra");
-                var lastDebugProgressTime = DateTime.UtcNow;
-                var lastStatusProgressTime = DateTime.UtcNow;
-                var skippedEmptyScans = 0;
-
-                var scanNumber = 0;
-                var scansStored  = 0;
-                var ticAndBpiScansStored = 0;
-
-                var scanCountHMS = 0;
-                var scanCountHMSn = 0;
-                var scanCountMS = 0;
-                var scanCountMSn = 0;
-
-                for (var scanIndex = 0; scanIndex <= spectrumCount - 1; scanIndex++)
-                {
+                    var useAlternateMethod = (attemptNumber > 1);
 
                     try
                     {
-                        var computeTIC = true;
-                        var computeBPI = true;
 
-                        // Obtain the raw mass spectrum
-                        var msDataSpectrum = mPWiz.GetSpectrum(scanIndex);
+                        mPWiz.GetScanTimesAndMsLevels(mCancellationToken.Token,
+                            out scanTimes, out msLevels, MonitorScanTimeLoadingProgress, useAlternateMethod);
 
-                        scanNumber = scanIndex + 1;
+                        break;
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // mCancellationToken.Cancel was called in MonitorScanTimeLoadingProgress
 
-                        if (scanIndex >= minScanIndexWithoutScanTimes)
+                        // Determine the scan index where GetScanTimesAndMsLevels exited the for loop
+                        for (var scanIndex = 0; scanIndex <= scanTimes.Length - 1; scanIndex++)
                         {
-                            // msDataSpectrum.RetentionTime is already in minutes
-                            scanTimes[scanIndex] = msDataSpectrum.RetentionTime ?? 0;
+                            if (msLevels[scanIndex] > 0) continue;
 
-                            if (msDataSpectrum.Level >= byte.MinValue && msDataSpectrum.Level <= byte.MaxValue)
-                            {
-                                msLevels[scanIndex] = (byte)msDataSpectrum.Level;
-                            }
+                            parserInfo.MinScanIndexWithoutScanTimes = scanIndex;
+                            break;
                         }
 
-                        var scanStatsEntry = new ScanStatsEntry
+                        if (!mGetScanTimesAutoAborted && parserInfo.MinScanIndexWithoutScanTimes < int.MaxValue)
                         {
-                            ScanNumber = scanNumber,
-                            ScanType = msDataSpectrum.Level
-                        };
-
-                        if (msLevels[scanIndex] > 1)
-                        {
-                            if (HighResMS2)
-                            {
-                                scanStatsEntry.ScanTypeName = "HMSn";
-                                scanCountHMSn++;
-                            }
-                            else
-                            {
-                                scanStatsEntry.ScanTypeName = "MSn";
-                                scanCountMSn++;
-                            }
-                        }
-                        else
-                        {
-                            if (HighResMS1)
-                            {
-                                scanStatsEntry.ScanTypeName = "HMS";
-                                scanCountHMS++;
-                            }
-                            else
-                            {
-                                scanStatsEntry.ScanTypeName = "MS";
-                                scanCountMS++;
-                            }
+                            // Manually aborted; shrink the arrays to reflect the amount of data that was actually loaded
+                            Array.Resize(ref scanTimes, parserInfo.MinScanIndexWithoutScanTimes);
+                            Array.Resize(ref msLevels, parserInfo.MinScanIndexWithoutScanTimes);
                         }
 
-                        var driftTimeMsec = msDataSpectrum.DriftTimeMsec ?? 0;
-
-                        scanStatsEntry.ScanFilterText = driftTimeMsec > 0 ? "IMS" : string.Empty;
-                        scanStatsEntry.ExtendedScanInfo.ScanFilterText = scanStatsEntry.ScanFilterText;
-
-                        scanStatsEntry.DriftTimeMsec = driftTimeMsec.ToString("0.0###");
-
-                        scanStatsEntry.ElutionTime = scanTimes[scanIndex].ToString("0.0###");
-
-                        // Bump up runtimeMinutes if necessary
-                        if (scanTimes[scanIndex] > runtimeMinutes)
-                        {
-                            runtimeMinutes = scanTimes[scanIndex];
-                        }
-
-                        var spectrum = mPWiz.GetSpectrumObject(scanIndex);
-
-                        if (MSDataFileReader.TryGetCVParamDouble(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out var tic))
-                        {
-                            // For timsTOF data, this is the TIC of the entire frame
-                            scanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(tic, 5);
-                            computeTIC = false;
-                        }
-
-                        if (MSDataFileReader.TryGetCVParamDouble(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, out var bpi))
-                        {
-                            // For timsTOF data, this is the BPI of the entire frame
-                            // Additionally, for timsTOF data, MS_base_peak_m_z is not defined
-                            scanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(bpi, 5);
-
-                            if (MSDataFileReader.TryGetCVParamDouble(spectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z, out var basePeakMzFromCvParams))
-                            {
-                                scanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(basePeakMzFromCvParams, 5);
-                                computeBPI = false;
-                            }
-                        }
-
-                        if (string.IsNullOrEmpty(scanStatsEntry.ScanFilterText))
-                        {
-                            if (spectrum?.scanList?.scans.Count > 0)
-                            {
-                                // Bruker timsTOF datasets will have CVParam "inverse reduced ion mobility" for IMS spectra; check for this
-                                foreach (var scanItem in spectrum.scanList.scans)
-                                {
-                                    if (MSDataFileReader.TryGetCVParam(scanItem.cvParams, pwiz.CLI.cv.CVID.MS_inverse_reduced_ion_mobility, out _))
-                                    {
-                                        scanStatsEntry.ScanFilterText = "IMS";
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        // Base peak signal to noise ratio
-                        scanStatsEntry.BasePeakSignalToNoiseRatio = "0";
-
-                        scanStatsEntry.IonCount = msDataSpectrum.Mzs.Length;
-                        scanStatsEntry.IonCountRaw = scanStatsEntry.IonCount;
-
-                        if ((computeBPI || computeTIC) && scanStatsEntry.IonCount > 0)
-                        {
-                            // Step through the raw data to compute the BPI and TIC
-
-                            var mzList = msDataSpectrum.Mzs;
-                            var intensities = msDataSpectrum.Intensities;
-
-                            tic = 0;
-                            bpi = 0;
-                            double basePeakMZ = 0;
-
-                            for (var index = 0; index <= mzList.Length - 1; index++)
-                            {
-                                tic += intensities[index];
-                                if (intensities[index] > bpi)
-                                {
-                                    bpi = intensities[index];
-                                    basePeakMZ = mzList[index];
-                                }
-                            }
-
-                            scanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(tic, 5);
-                            scanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(bpi, 5);
-                            scanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(basePeakMZ, 5);
-                        }
-
-                        var addScan = !skipExistingScans || skipExistingScans && !mDatasetStatsSummarizer.HasScanNumber(scanNumber);
-
-                        if (addScan)
-                        {
-                            if (skipScansWithNoIons && scanStatsEntry.IonCount == 0)
-                            {
-                                skippedEmptyScans++;
-
-                                if (skippedEmptyScans < 25 ||
-                                    skippedEmptyScans < 100 && skippedEmptyScans % 10 == 0 ||
-                                    skippedEmptyScans < 1000 && skippedEmptyScans % 100 == 0 ||
-                                    skippedEmptyScans < 10000 && skippedEmptyScans % 1000 == 0 ||
-                                    skippedEmptyScans < 100000 && skippedEmptyScans % 10000 == 0 ||
-                                    skippedEmptyScans % 100000 == 0)
-                                {
-                                    ConsoleMsgUtils.ShowDebug("Skipping scan {0:N0} since no ions; {1:N0} total skipped scans", scanNumber, skippedEmptyScans);
-                                }
-                            }
-                            else
-                            {
-                                if (maxScansToTrackInDetail < 0 || scansStored < maxScansToTrackInDetail) {
-                                    mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
-                                    scansStored += 1;
-                                }
-                            }
-
-                        }
-
-                        if (mSaveTICAndBPI && !ticStored && (maxScansForTicAndBpi < 0 || ticAndBpiScansStored < maxScansForTicAndBpi))
-                        {
-                            mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimes[scanIndex], bpi, tic);
-                            ticAndBpiScansStored += 1;
-                        }
-
-                        if (mSaveLCMS2DPlots && addScan)
-                        {
-                            mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimes[scanIndex], msDataSpectrum.Mzs.Length, msDataSpectrum.Mzs, msDataSpectrum.Intensities);
-                        }
-
-                        if (mCheckCentroidingStatus)
-                        {
-                            mDatasetStatsSummarizer.ClassifySpectrum(msDataSpectrum.Mzs, msLevels[scanIndex], "Scan " + scanStatsEntry.ScanNumber);
-                        }
-
-                        scanCountSuccess += 1;
+                        break;
                     }
                     catch (Exception ex)
                     {
-                        OnErrorEvent("Error loading header info for scan " + scanNumber, ex);
-                        scanCountError += 1;
+                        var baseMessage = "Exception calling mPWiz.GetScanTimesAndMsLevels";
+                        var alternateMethodFlag = useAlternateMethod ? " (useAlternateMethod = true)" : string.Empty;
+
+                        OnWarningEvent(string.Format("{0}{1}: {2}", baseMessage, alternateMethodFlag, ex.Message));
+                        attemptNumber++;
+
+                        if (attemptNumber > 2)
+                            throw new Exception(baseMessage, ex);
                     }
-
-                    if (DateTime.UtcNow.Subtract(lastStatusProgressTime).TotalMinutes > 5)
-                    {
-                        OnStatusEvent(string.Format("Reading spectra, loaded {0:N0} / {1:N0} spectra; " +
-                                                    "{2:N0} HMS spectra; {3:N0} HMSn spectra; " +
-                                                    "{4:N0} MS spectra; {5:N0} MSn spectra; " +
-                                                    "max elution time is {6:F2} minutes",
-                                                    scanNumber, spectrumCount,
-                                                    scanCountHMS, scanCountHMSn,
-                                                    scanCountMS, scanCountMSn,
-                                                    runtimeMinutes));
-
-                        lastStatusProgressTime = DateTime.UtcNow;
-                        lastDebugProgressTime = DateTime.UtcNow;
-                        continue;
-                    }
-
-                    if (DateTime.UtcNow.Subtract(lastDebugProgressTime).TotalSeconds < 15)
-                        continue;
-
-                    lastDebugProgressTime = DateTime.UtcNow;
-                    var percentComplete = scanNumber / (float)spectrumCount * 100;
-
-                    var percentCompleteOverall = clsMSFileInfoProcessorBaseClass.ComputeIncrementalProgress(
-                        PROGRESS_SCAN_TIMES_LOADED,
-                        clsMSFileInfoProcessorBaseClass.PROGRESS_SPECTRA_LOADED,
-                        percentComplete);
-
-                    OnProgressUpdate(string.Format("Spectra processed: {0:N0}", scanNumber), percentCompleteOverall);
                 }
 
-                mDatasetStatsSummarizer.StoreScanTypeTotals(scanCountHMS, scanCountHMSn,
-                                                            scanCountMS, scanCountMSn,
-                                                            runtimeMinutes);
+                StoreMSSpectraInfoForScans(scanTimes, msLevels, parserInfo);
 
-                var scanCountTotal = scanCountSuccess + scanCountError;
+                var scanCountTotal = parserInfo.ScanCountSuccess + parserInfo.ScanCountError;
                 if (scanCountTotal == 0)
                     return false;
 
                 // Return True if at least 50% of the spectra were successfully read
-                return scanCountSuccess >= scanCountTotal / 2.0;
+                return parserInfo.ScanCountSuccess >= scanCountTotal / 2.0;
+
             }
             catch (AccessViolationException)
             {
@@ -853,6 +634,290 @@ namespace MSFileInfoScanner
                 return false;
             }
 
+        }
+
+        /// <summary>
+        /// Read the spectra from the data file
+        /// </summary>
+        /// <param name="scanTimes">Array of scan times</param>
+        /// <param name="msLevels">List of msLevels</param>
+        /// <param name="parserInfo">ProteoWizard parser tracking variables</param>
+        private void StoreMSSpectraInfoForScans(
+            double[] scanTimes,
+            IList<byte> msLevels,
+            ProteoWizardParserInfo parserInfo)
+        {
+            var spectrumCount = scanTimes.Length;
+
+            parserInfo.ResetCounts();
+
+            // The scan times returned by .GetScanTimesAndMsLevels() are the acquisition time in seconds from the start of the analysis
+            // Convert these to minutes
+            for (var scanIndex = 0; scanIndex <= spectrumCount - 1; scanIndex++)
+            {
+                if (scanIndex >= parserInfo.MinScanIndexWithoutScanTimes)
+                    break;
+
+                var scanTimeMinutes = scanTimes[scanIndex] / 60.0;
+                scanTimes[scanIndex] = scanTimeMinutes;
+            }
+
+            Console.WriteLine();
+            OnStatusEvent("Reading spectra");
+            var lastDebugProgressTime = DateTime.UtcNow;
+            var lastStatusProgressTime = DateTime.UtcNow;
+
+            for (var scanIndex = 0; scanIndex <= spectrumCount - 1; scanIndex++)
+            {
+                var scanNumber = scanIndex + 1;
+
+                StoreSingleSpectrum(scanTimes, msLevels, parserInfo, scanIndex);
+
+                if (DateTime.UtcNow.Subtract(lastStatusProgressTime).TotalMinutes > 5)
+                {
+                    OnStatusEvent(string.Format("Reading spectra, loaded {0:N0} / {1:N0} spectra; " +
+                                                "{2:N0} HMS spectra; {3:N0} HMSn spectra; " +
+                                                "{4:N0} MS spectra; {5:N0} MSn spectra; " +
+                                                "max elution time is {6:F2} minutes",
+                        scanNumber, spectrumCount,
+                        parserInfo.ScanCountHMS, parserInfo.ScanCountHMSn,
+                        parserInfo.ScanCountMS, parserInfo.ScanCountMSn,
+                        parserInfo.RuntimeMinutes));
+
+                    lastStatusProgressTime = DateTime.UtcNow;
+                    lastDebugProgressTime = DateTime.UtcNow;
+                    continue;
+                }
+
+                if (DateTime.UtcNow.Subtract(lastDebugProgressTime).TotalSeconds < 15)
+                    continue;
+
+                lastDebugProgressTime = DateTime.UtcNow;
+                var percentComplete = scanNumber / (float)spectrumCount * 100;
+
+                var percentCompleteOverall = clsMSFileInfoProcessorBaseClass.ComputeIncrementalProgress(
+                    PROGRESS_SCAN_TIMES_LOADED,
+                    clsMSFileInfoProcessorBaseClass.PROGRESS_SPECTRA_LOADED,
+                    percentComplete);
+
+                OnProgressUpdate(string.Format("Spectra processed: {0:N0}", scanNumber), percentCompleteOverall);
+            }
+
+
+            mDatasetStatsSummarizer.StoreScanTypeTotals(
+                parserInfo.ScanCountHMS, parserInfo.ScanCountHMSn,
+                parserInfo.ScanCountMS, parserInfo.ScanCountMSn,
+                parserInfo.RuntimeMinutes);
+
+        }
+
+        private void StoreSingleSpectrum(
+            double[] scanTimes,
+            IList<byte> msLevels,
+            ProteoWizardParserInfo parserInfo,
+            int scanIndex)
+        {
+
+            var scanNumber = scanIndex + 1;
+
+            try
+            {
+                var computeTIC = true;
+                var computeBPI = true;
+
+                // Obtain the raw mass spectrum
+                var msDataSpectrum = mPWiz.GetSpectrum(scanIndex);
+
+                if (scanIndex >= parserInfo.MinScanIndexWithoutScanTimes)
+                {
+                    // msDataSpectrum.RetentionTime is already in minutes
+                    scanTimes[scanIndex] = msDataSpectrum.RetentionTime ?? 0;
+
+                    if (msDataSpectrum.Level >= byte.MinValue && msDataSpectrum.Level <= byte.MaxValue)
+                    {
+                        msLevels[scanIndex] = (byte)msDataSpectrum.Level;
+                    }
+                }
+
+                var scanStatsEntry = new ScanStatsEntry
+                {
+                    ScanNumber = scanNumber,
+                    ScanType = msDataSpectrum.Level
+                };
+
+                if (msLevels[scanIndex] > 1)
+                {
+                    if (HighResMS2)
+                    {
+                        scanStatsEntry.ScanTypeName = "HMSn";
+                        parserInfo.ScanCountHMSn++;
+                    }
+                    else
+                    {
+                        scanStatsEntry.ScanTypeName = "MSn";
+                        parserInfo.ScanCountMSn++;
+                    }
+                }
+                else
+                {
+                    if (HighResMS1)
+                    {
+                        scanStatsEntry.ScanTypeName = "HMS";
+                        parserInfo.ScanCountHMS++;
+                    }
+                    else
+                    {
+                        scanStatsEntry.ScanTypeName = "MS";
+                        parserInfo.ScanCountMS++;
+                    }
+                }
+
+                var driftTimeMsec = msDataSpectrum.DriftTimeMsec ?? 0;
+
+                scanStatsEntry.ScanFilterText = driftTimeMsec > 0 ? "IMS" : string.Empty;
+                scanStatsEntry.ExtendedScanInfo.ScanFilterText = scanStatsEntry.ScanFilterText;
+
+                scanStatsEntry.DriftTimeMsec = driftTimeMsec.ToString("0.0###");
+
+                scanStatsEntry.ElutionTime = scanTimes[scanIndex].ToString("0.0###");
+
+                // Bump up runtimeMinutes if necessary
+                if (scanTimes[scanIndex] > parserInfo.RuntimeMinutes)
+                {
+                    parserInfo.RuntimeMinutes = scanTimes[scanIndex];
+                }
+
+                var spectrum = mPWiz.GetSpectrumObject(scanIndex);
+
+                if (MSDataFileReader.TryGetCVParamDouble(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out var tic))
+                {
+                    // For timsTOF data, this is the TIC of the entire frame
+                    scanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(tic, 5);
+                    computeTIC = false;
+                }
+
+                if (MSDataFileReader.TryGetCVParamDouble(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_base_peak_intensity, out var bpi))
+                {
+                    // For timsTOF data, this is the BPI of the entire frame
+                    // Additionally, for timsTOF data, MS_base_peak_m_z is not defined
+                    scanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(bpi, 5);
+
+                    if (MSDataFileReader.TryGetCVParamDouble(spectrum.scanList.scans[0].cvParams, pwiz.CLI.cv.CVID.MS_base_peak_m_z,
+                        out var basePeakMzFromCvParams))
+                    {
+                        scanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(basePeakMzFromCvParams, 5);
+                        computeBPI = false;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(scanStatsEntry.ScanFilterText))
+                {
+                    if (spectrum.scanList?.scans.Count > 0)
+                    {
+                        // Bruker timsTOF datasets will have CVParam "inverse reduced ion mobility" for IMS spectra; check for this
+                        foreach (var scanItem in spectrum.scanList.scans)
+                        {
+                            if (MSDataFileReader.TryGetCVParam(scanItem.cvParams, pwiz.CLI.cv.CVID.MS_inverse_reduced_ion_mobility, out _))
+                            {
+                                scanStatsEntry.ScanFilterText = "IMS";
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Base peak signal to noise ratio
+                scanStatsEntry.BasePeakSignalToNoiseRatio = "0";
+
+                scanStatsEntry.IonCount = msDataSpectrum.Mzs.Length;
+                scanStatsEntry.IonCountRaw = scanStatsEntry.IonCount;
+
+                if ((computeBPI || computeTIC) && scanStatsEntry.IonCount > 0)
+                {
+                    // Step through the raw data to compute the BPI and TIC
+
+                    var mzList = msDataSpectrum.Mzs;
+                    var intensities = msDataSpectrum.Intensities;
+
+                    tic = 0;
+                    bpi = 0;
+                    double basePeakMZ = 0;
+
+                    for (var index = 0; index <= mzList.Length - 1; index++)
+                    {
+                        tic += intensities[index];
+                        if (intensities[index] > bpi)
+                        {
+                            bpi = intensities[index];
+                            basePeakMZ = mzList[index];
+                        }
+                    }
+
+                    scanStatsEntry.TotalIonIntensity = StringUtilities.ValueToString(tic, 5);
+                    scanStatsEntry.BasePeakIntensity = StringUtilities.ValueToString(bpi, 5);
+                    scanStatsEntry.BasePeakMZ = StringUtilities.ValueToString(basePeakMZ, 5);
+                }
+
+                var addScan = !parserInfo.SkipExistingScans || parserInfo.SkipExistingScans && !mDatasetStatsSummarizer.HasScanNumber(scanNumber);
+
+                if (addScan)
+                {
+                    if (parserInfo.SkipScansWithNoIons && scanStatsEntry.IonCount == 0)
+                    {
+                        parserInfo.SkippedEmptyScans++;
+
+                        if (ShowPeriodicMessageNow(parserInfo.SkippedEmptyScans))
+                        {
+                            OnDebugEvent(string.Format("Skipping scan {0:N0} since no ions; {1:N0} total skipped scans", scanNumber, parserInfo.SkippedEmptyScans));
+                        }
+                    }
+                    else
+                    {
+                        if (parserInfo.MaxScansToTrackInDetail < 0 || parserInfo.ScansStored < parserInfo.MaxScansToTrackInDetail)
+                        {
+                            mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
+                            parserInfo.ScansStored += 1;
+                        }
+                    }
+                }
+
+                if (mSaveTICAndBPI && !parserInfo.TicStored &&
+                    (parserInfo.MaxScansForTicAndBpi < 0 || parserInfo.TicAndBpiScansStored < parserInfo.MaxScansForTicAndBpi))
+                {
+                    mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimes[scanIndex], bpi, tic);
+                    parserInfo.TicAndBpiScansStored += 1;
+                }
+
+                if (mSaveLCMS2DPlots && addScan)
+                {
+                    mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimes[scanIndex], msDataSpectrum.Mzs.Length,
+                        msDataSpectrum.Mzs, msDataSpectrum.Intensities);
+                }
+
+                if (mCheckCentroidingStatus)
+                {
+                    mDatasetStatsSummarizer.ClassifySpectrum(msDataSpectrum.Mzs, msLevels[scanIndex], "Scan " + scanStatsEntry.ScanNumber);
+                }
+
+                parserInfo.ScanCountSuccess += 1;
+            }
+            catch (Exception ex)
+            {
+                parserInfo.ScanCountError += 1;
+
+                if (ShowPeriodicMessageNow(parserInfo.ScanCountError))
+                {
+                    OnWarningEvent(string.Format("Error loading header info for scan {0}: {1}", scanNumber, ex.Message));
+                    if (parserInfo.ScanCountSuccess > 0)
+                    {
+                        var statusMessage = string.Format("{0} / {1} scans loaded successfully",
+                            parserInfo.ScanCountSuccess,
+                            parserInfo.ScanCountSuccess + parserInfo.ScanCountError);
+
+                        ConsoleMsgUtils.ShowDebugCustom(statusMessage, emptyLinesBeforeMessage: 0);
+                    }
+                }
+            }
         }
 
         private void Store2DPlotData(
