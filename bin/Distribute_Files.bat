@@ -23,6 +23,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\ThermoRawFi
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\Thermo*.dll"                     \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\BrukerDataReader.dll"            \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.dll"             \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.pdb"             \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
 
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.dll"           C:\DMS_Programs\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.xml"           C:\DMS_Programs\MSFileInfoScanner /y /d
@@ -39,6 +40,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\ThermoRawFi
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\Thermo*.dll"                     C:\DMS_Programs\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\BrukerDataReader.dll"            C:\DMS_Programs\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.dll"             C:\DMS_Programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.pdb"             C:\DMS_Programs\MSFileInfoScanner /y /d
 
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner.exe"               C:\DMS_Programs\MSFileInfoScannerExe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner.xml"               C:\DMS_Programs\MSFileInfoScannerExe /y /d
@@ -55,6 +57,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\ThermoRawFi
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\Thermo*.dll"                     C:\DMS_Programs\MSFileInfoScannerExe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\BrukerDataReader.dll"            C:\DMS_Programs\MSFileInfoScannerExe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.dll"             C:\DMS_Programs\MSFileInfoScannerExe /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.pdb"             C:\DMS_Programs\MSFileInfoScannerExe /y /d
 
 @echo off
 echo.
@@ -81,6 +84,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\ThermoRawFi
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\Thermo*.dll"                     \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\BrukerDataReader.dll"            \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.dll"             \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.pdb"             \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.dll" \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution /y
 
@@ -99,6 +103,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\ThermoRawFi
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\Thermo*.dll"                     \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\BrukerDataReader.dll"            \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.dll"             \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.pdb"             \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner.exe"               \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\SpectraTypeClassifier.dll"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y
@@ -113,6 +118,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\ThermoRawFi
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\Thermo*.dll"                     \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\BrukerDataReader.dll"            \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.dll"             \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.pdb"             \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y /d
 
 
 
