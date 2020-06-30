@@ -160,7 +160,7 @@ namespace MSFileInfoScanner.DatasetStats
             // ScanCountMS, ScanCountHMS, ScanCountMSn, and ScanCountHMSn
 
             OnWarningEvent(string.Format(
-                               "This dataset has a large number of spectra; detailed scan info was stored for {0:N0} of the {1:N0} total spectra. " +
+                               "This dataset has a large number of missing spectra; detailed scan info was stored for {0:N0} of the {1:N0} total spectra. " +
                                "Will now extrapolate the scan counts based on the stored data.",
                                totalScansInSummaryStats, ScanCountMS + ScanCountHMS + ScanCountMSn + ScanCountHMSn));
 
