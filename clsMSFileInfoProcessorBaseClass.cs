@@ -1261,8 +1261,8 @@ namespace MSFileInfoScanner
                 var ticStored = false;
                 var srmDataCached = false;
                 double runtimeMinutes = 0;
-                // Note that SRM .Wiff files will only have chromatograms, and no spectra
 
+                // Note that SRM .Wiff files will only have chromatograms, and no spectra
                 if (pWiz.ChromatogramCount > 0)
                 {
                     // Process the chromatograms
