@@ -152,6 +152,28 @@ namespace MSFileInfoScanner
             return indexMatch;
         }
 
+        private int GetSpectrumCountWithRetry(MSDataFileReader pWiz, int maxAttempts = 3)
+        {
+            var attemptCount = 0;
+            while (attemptCount < maxAttempts)
+            {
+                try
+                {
+                    attemptCount++;
+                    var spectrumCount = pWiz.SpectrumCount;
+
+                    return spectrumCount;
+                }
+                catch (Exception ex)
+                {
+                    OnDebugEvent(string.Format("Attempt {0} to retrieve .SpectrumCount failed: {1}", attemptCount, ex.Message));
+                    Thread.Sleep(50 + attemptCount * 250);
+                }
+            }
+
+            return 0;
+        }
+
         private void MonitorScanTimeLoadingProgress(int scansLoaded, int totalScans)
         {
 
@@ -401,7 +423,9 @@ namespace MSFileInfoScanner
                     {
                         // This chromatogram is the TIC
 
-                        var storeInTICAndBPIPlot = (mSaveTICAndBPI && mPWiz.SpectrumCount == 0);
+                        var spectrumCount = GetSpectrumCountWithRetry(mPWiz);
+
+                        var storeInTICAndBPIPlot = (mSaveTICAndBPI && spectrumCount == 0);
 
                         ProcessTIC(scanTimes, intensities, ticScanTimes, ticScanNumbers, ref runtimeMinutes, storeInTICAndBPIPlot);
 
