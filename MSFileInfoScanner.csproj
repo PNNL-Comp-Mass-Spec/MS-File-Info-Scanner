@@ -140,6 +140,7 @@
     <Compile Include="clsZippedImagingFilesScanner.cs" />
     <Compile Include="MSFileInfoProcessorInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProteowizardParserInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics">
