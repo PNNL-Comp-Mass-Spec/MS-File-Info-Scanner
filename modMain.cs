@@ -19,7 +19,7 @@ namespace MSFileInfoScanner
     /// -------------------------------------------------------------------------------
     static class modMain
     {
-        public const string PROGRAM_DATE = "April 10, 2020";
+        public const string PROGRAM_DATE = "June 29, 2020";
 
         private static DateTime mLastProgressTime;
 
@@ -61,6 +61,8 @@ namespace MSFileInfoScanner
                                             " [/C] [/M:nnn] [/H] [/QZ]" +
                                             " [/CF] [/R] [/Z]" +
                                             " [/PostToDMS] [/PythonPlot]");
+
+            cmdLineParser.AddParamFileKey("Conf");
 
             var result = cmdLineParser.ParseArgs(args);
             var options = result.ParsedResults;
