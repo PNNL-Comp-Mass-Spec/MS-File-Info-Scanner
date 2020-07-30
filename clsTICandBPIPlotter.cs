@@ -526,6 +526,64 @@ namespace MSFileInfoScanner
 
             return plotContainer;
         }
+
+        private void RemoveZeroesAtFrontAndBack(clsChromatogramInfo chromatogramInfo)
+        {
+            const int MAX_POINTS_TO_CHECK = 100;
+            var pointsChecked = 0;
+
+            // See if the last few values are zero, but the data before them is non-zero
+            // If this is the case, remove the final entries
+
+            var indexNonZeroValue = -1;
+            var zeroPointCount = 0;
+            for (var index = chromatogramInfo.ScanCount - 1; index >= 0; index += -1)
+            {
+                if (Math.Abs(chromatogramInfo.GetDataPoint(index).Intensity) < float.Epsilon)
+                {
+                    zeroPointCount += 1;
+                }
+                else
+                {
+                    indexNonZeroValue = index;
+                    break;
+                }
+                pointsChecked += 1;
+                if (pointsChecked >= MAX_POINTS_TO_CHECK)
+                    break;
+            }
+
+            if (zeroPointCount > 0 && indexNonZeroValue >= 0)
+            {
+                chromatogramInfo.RemoveRange(indexNonZeroValue + 1, zeroPointCount);
+            }
+
+            // Now check the first few values
+            indexNonZeroValue = -1;
+            zeroPointCount = 0;
+            for (var index = 0; index <= chromatogramInfo.ScanCount - 1; index++)
+            {
+                if (Math.Abs(chromatogramInfo.GetDataPoint(index).Intensity) < float.Epsilon)
+                {
+                    zeroPointCount += 1;
+                }
+                else
+                {
+                    indexNonZeroValue = index;
+                    break;
+                }
+                pointsChecked += 1;
+                if (pointsChecked >= MAX_POINTS_TO_CHECK)
+                    break;
+            }
+
+            if (zeroPointCount > 0 && indexNonZeroValue >= 0)
+            {
+                chromatogramInfo.RemoveRange(0, indexNonZeroValue);
+            }
+
+        }
+
         /// <summary>
         /// Clear BPI and TIC data
         /// </summary>
@@ -615,63 +673,6 @@ namespace MSFileInfoScanner
 
         }
 
-        private void RemoveZeroesAtFrontAndBack(clsChromatogramInfo chromatogramInfo)
-        {
-            const int MAX_POINTS_TO_CHECK = 100;
-            var pointsChecked = 0;
-
-            // See if the last few values are zero, but the data before them is non-zero
-            // If this is the case, remove the final entries
-
-            var indexNonZeroValue = -1;
-            var zeroPointCount = 0;
-            for (var index = chromatogramInfo.ScanCount - 1; index >= 0; index += -1)
-            {
-                if (Math.Abs(chromatogramInfo.GetDataPoint(index).Intensity) < float.Epsilon)
-                {
-                    zeroPointCount += 1;
-                }
-                else
-                {
-                    indexNonZeroValue = index;
-                    break;
-                }
-                pointsChecked += 1;
-                if (pointsChecked >= MAX_POINTS_TO_CHECK)
-                    break;
-            }
-
-            if (zeroPointCount > 0 && indexNonZeroValue >= 0)
-            {
-                chromatogramInfo.RemoveRange(indexNonZeroValue + 1, zeroPointCount);
-            }
-
-            // Now check the first few values
-            indexNonZeroValue = -1;
-            zeroPointCount = 0;
-            for (var index = 0; index <= chromatogramInfo.ScanCount - 1; index++)
-            {
-                if (Math.Abs(chromatogramInfo.GetDataPoint(index).Intensity) < float.Epsilon)
-                {
-                    zeroPointCount += 1;
-                }
-                else
-                {
-                    indexNonZeroValue = index;
-                    break;
-                }
-                pointsChecked += 1;
-                if (pointsChecked >= MAX_POINTS_TO_CHECK)
-                    break;
-            }
-
-            if (zeroPointCount > 0 && indexNonZeroValue >= 0)
-            {
-                chromatogramInfo.RemoveRange(0, indexNonZeroValue);
-            }
-
-        }
-
         private void ValidateMSLevel(clsChromatogramInfo chromatogramInfo)
         {
             var msLevelDefined = false;
@@ -755,7 +756,6 @@ namespace MSFileInfoScanner
                 }
 
                 return mScans[index];
-
             }
 
             /// <summary>
