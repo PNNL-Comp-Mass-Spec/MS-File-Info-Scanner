@@ -34,6 +34,7 @@ def process_file(dataFilePath):
     outputFilePath = str(dataFile.with_suffix('.png'))
 
     if len(data.columns) == 2:
+        # 2D Plot
         print('Output:', outputFilePath)
         print()
         print('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '"')
@@ -43,6 +44,7 @@ def process_file(dataFilePath):
         return
 
     if len(data.columns) == 3:
+        # 3D Plot
         print('Output:', outputFilePath)
         print()
         print('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '" vs. "' + data.columns[2] + '"')
@@ -52,6 +54,7 @@ def process_file(dataFilePath):
         return
 
     if len(data.columns) == 4:
+        # 3D Plot, with a custom color for each data point
         print('Output:', outputFilePath)
         print()
         print('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '" vs. "' + data.columns[2] + '" coloring by ' + data.columns[3])
@@ -104,7 +107,7 @@ def set_title_and_labels(ax, plt, baseFontSize, title, xDataMin, xDataMax, xAxis
 
     plt.title(titleToUse, fontsize=baseFontSize+1)
 
-    # Assure that the X axis minimimum is not negative
+    # Assure that the X axis minimum is not negative
     xmin, xmax = plt.xlim()
 
     if xmin < 0:
@@ -301,7 +304,7 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
         sc = ax.scatter(xData, yData, c=zData, vmin=normMin, vmax=normMax, s=1, cmap=cm, alpha=1)
 
     if not chargeData:
-        # Optionally show a color scale an intensity legend
+        # Optionally show a color scale intensity legend
         # plt.colorbar(sc)
         pass
 
@@ -323,13 +326,13 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
 def plot_lc_mz(outputFilePath, columnNames, lc_scan_num, mz, intensities, title, r_label, l_label):
     plt = generate_heat_map(columnNames, lc_scan_num, mz, intensities, title, r_label, l_label, False)
     plt.savefig(outputFilePath)
-    print('2D plot created')
+    print('3D plot created')
 
 def plot_lc_mz_by_charge(outputFilePath, columnNames, lc_scan_num, mz, intensities, charge, title, r_label, l_label):
     plt = generate_heat_map(columnNames, lc_scan_num, mz, charge, title, r_label, l_label, True)
 
     plt.savefig(outputFilePath)
-    print('2D plot created')
+    print('3D plot (colored by charge) created')
 
 import sys
 

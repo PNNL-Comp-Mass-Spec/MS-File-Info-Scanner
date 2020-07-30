@@ -2140,7 +2140,7 @@ namespace MSFileInfoScanner
 
             const int MAX_ACCESS_ATTEMPTS = 2;
 
-            // If maxLevelsToRecurse is <=0 then we recurse infinitely
+            // If maxLevelsToRecurse is <=0, we recurse infinitely
 
             DirectoryInfo inputDirectory = null;
 

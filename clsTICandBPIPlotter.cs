@@ -53,6 +53,10 @@ namespace MSFileInfoScanner
 
         public bool BPIAutoMinMaxY { get; set; }
 
+        /// <summary>
+        /// Plot title abbreviation
+        /// </summary>
+        /// <remarks>This name is included in the plot title and is used when creating the .png file</remarks>
         public string BPIPlotAbbrev { get; set; } = "BPI";
 
         // ReSharper disable IdentifierTypo
@@ -85,6 +89,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Plot title abbreviation
         /// </summary>
+        /// <remarks>This name is included in the plot title and is used when creating the .png file</remarks>
         public string TICPlotAbbrev { get; set; } = "TIC";
 
         // ReSharper disable IdentifierTypo
@@ -310,7 +315,7 @@ namespace MSFileInfoScanner
             // Round maxScan down to the nearest multiple of 10
             maxScan = (int)Math.Ceiling(maxScan / 10.0) * 10;
 
-            // Multiple maxIntensity by 2% and then round up to the nearest integer
+            // Multiply maxIntensity by 2% and then round up to the nearest integer
             maxIntensity = Math.Ceiling(maxIntensity * 1.02);
 
             var myPlot = clsOxyPlotUtilities.GetBasicPlotModel(plotTitle, xAxisLabel, yAxisLabel);

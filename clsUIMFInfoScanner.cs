@@ -159,7 +159,6 @@ namespace MSFileInfoScanner
             }
 
             datasetFileInfo.OverallQualityScore = overallScore;
-
         }
 
         private void ConstructTICAndBPI(
@@ -186,7 +185,6 @@ namespace MSFileInfoScanner
                 dctTIC = new SortedDictionary<int, double>();
                 dctBPI = new SortedDictionary<int, double>();
             }
-
         }
 
         public override string GetDatasetNameViaPath(string dataFilePath)
@@ -525,7 +523,6 @@ namespace MSFileInfoScanner
             }
 
             Console.WriteLine();
-
         }
 
         /// <summary>
@@ -837,7 +834,7 @@ namespace MSFileInfoScanner
                             if (startTimes.Count > 0)
                             {
                                 // Compute the runtime
-                                // Luckily, even if startTime is -479.993 and entTime is -417.509, this works out to a positive, accurate runtime
+                                // Luckily, even if startTime is -479.993 and endTime is -417.509, this works out to a positive, accurate runtime
                                 endTime = startTimes[startTimes.Count - 1];
                                 runTimeMinutes = endTime + endTimeAddon - startTime;
                             }
@@ -903,7 +900,6 @@ namespace MSFileInfoScanner
             PostProcessTasks();
 
             return !readError;
-
         }
 
     }

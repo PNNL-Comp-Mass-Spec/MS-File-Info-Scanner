@@ -55,7 +55,6 @@ namespace MSFileInfoScanner
                 "BottomRight=" + AnnotationBottomRight};
 
             return string.Join(";", plotOptions);
-
         }
 
         protected void OpenDebugFile(string dataSource)
