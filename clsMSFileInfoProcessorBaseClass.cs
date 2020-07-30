@@ -28,7 +28,7 @@ namespace MSFileInfoScanner
         /// </summary>
         protected clsMSFileInfoProcessorBaseClass()
         {
-            mTICAndBPIPlot = new clsTICandBPIPlotter("TICAndBPIPlot", true);
+            mTICAndBPIPlot = new clsTICandBPIPlotter("TICAndBPIPlot", false);
             RegisterEvents(mTICAndBPIPlot);
 
             mInstrumentSpecificPlots = new List<clsTICandBPIPlotter>();
@@ -1133,7 +1133,7 @@ namespace MSFileInfoScanner
 
         }
 
-        private List<string> GetDeviceTableHTML(IEnumerable<DeviceInfo> deviceList)
+        private IEnumerable<string> GetDeviceTableHTML(IEnumerable<DeviceInfo> deviceList)
         {
             var deviceTypeRow = new StringBuilder();
             var deviceNameRow = new StringBuilder();
