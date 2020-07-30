@@ -34,9 +34,9 @@ Syntax:
 
 ```
 MSFileInfoScanner.exe
- /I:InputFileNameOrDirectoryPath [/O:OutputFolderName]
+ /I:InputFileNameOrDirectoryPath [/O:OutputDirectoryPath]
  [/P:ParamFilePath] [/S[:MaxLevel]] [/IE] [/L:LogFilePath]
- [/LC[:MaxPointsToPlot]] [/NoTIC] [/LCGrad]
+ [/LC[:MaxPointsToPlot]] [/TIC] [/LCGrad]
  [/DI] [/SS] [/QS] [/CC]
  [/MS2MzMin:MzValue] [/NoHash]
  [/DST:DatasetStatsFileName]
@@ -49,7 +49,7 @@ MSFileInfoScanner.exe
 Use `/I` to specify the name of a file or directory to scan
 * The path can contain the wildcard character *
 
-The output directory name is optional
+The output directory path is optional
 * If omitted, the output files will be created in the program directory
 
 The parameter file switch `/P` is optional
@@ -70,7 +70,7 @@ Use `/LCDiv` to specify the divisor to use when creating the overview 2D LCMS pl
 * Use `/LCDiv:0` to disable creation of the overview plots
 
 By default, the MS File Info Scanner creates TIC and BPI plots, showing intensity vs. time
-* Use `/NoTIC` to disable creating TIC and BPI plots
+* Use `/TIC:False` to disable creating TIC and BPI plots; also disables any device specific plots
 * Plots created:
   * Separate BPI plots for MS and MS2 spectra
   * Single TIC plot for all spectra
@@ -146,14 +146,27 @@ with the following settings
   * `DSInfoDBPostingEnabled`
   * `DSInfoStoredProcedure`
 
-Use `/PythonPlot` to create plots with Python instead of OxyPlot
-* Looks for `python.exe` in directories that start with "Python3" or "Python 3" on Windows, searching below:
-  * C:\Program Files
-  * C:\Program Files (x86)
-  * C:\Users\Username\AppData\Local\Programs
-  * C:\ProgramData\Anaconda3
-  * C:\
-* Assumes Python is at `/usr/bin/python3` on Linux
+By default, plots are created using OxyPlot, which only works on Windows
+* Use `/PythonPlot` to create plots with Python instead of OxyPlot
+  * Alternatively, set `PythonPlot` to `True` in the parameter file
+
+On Windows, MS File Info Scanner looks for `python.exe` in directories that start with "Python3" or "Python 3", searching below:
+* C:\Program Files
+* C:\Program Files (x86)
+* C:\Users\Username\AppData\Local\Programs
+* C:\ProgramData\Anaconda3
+* C:\
+
+On Linux, assumes Python is at `/usr/bin/python3`
+
+Python plotting requires that three libraries be installed
+* numpy
+* matplotlib
+* pandas
+
+For Python library installation options, see the `Python_Setup.txt` file on GitHub
+* https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/Python/Python_Setup.txt
+
 
 Known file extensions: .RAW, .WIFF, .BAF, .MCF, .MCF_IDX, .UIMF, .CSV\
 Known directory extensions: .D, .RAW
