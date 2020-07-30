@@ -62,6 +62,10 @@ Source: ..\bin\UIMFLibrary.dll                                       ; DestDir: 
 
 Source: ..\Readme.md                                                 ; DestDir: {app}
 Source: ..\RevisionHistory.txt                                       ; DestDir: {app}
+
+Source: ..\Python\MSFileInfoScanner_Plotter.py                       ; DestDir: {app}
+Source: ..\Python\Python_Setup.txt                                   ; DestDir: {app}
+
 Source: Images\delete_16x.ico                                        ; DestDir: {app}
 
 [Dirs]
