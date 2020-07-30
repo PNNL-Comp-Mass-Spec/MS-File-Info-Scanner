@@ -172,7 +172,7 @@ namespace MSFileInfoScanner
         public CommandLineOptions()
         {
             InputDataFilePath = string.Empty;
-            OutputDirectoryName = string.Empty;
+            OutputDirectoryPath = string.Empty;
             ParameterFilePath = string.Empty;
             LogFilePath = string.Empty;
 

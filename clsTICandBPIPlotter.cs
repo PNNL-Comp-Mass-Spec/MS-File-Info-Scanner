@@ -544,9 +544,9 @@ namespace MSFileInfoScanner
         /// Save BPI and TIC plots
         /// </summary>
         /// <param name="datasetName"></param>
-        /// <param name="outputFolderPath"></param>
+        /// <param name="outputDirectory"></param>
         /// <returns>True if success, false if an error</returns>
-        public bool SaveTICAndBPIPlotFiles(string datasetName, string outputFolderPath)
+        public bool SaveTICAndBPIPlotFiles(string datasetName, string outputDirectory)
         {
 
             try
@@ -575,7 +575,7 @@ namespace MSFileInfoScanner
 
                 if (bpiPlotMS1.SeriesCount > 0)
                 {
-                    var pngFile = new FileInfo(Path.Combine(outputFolderPath, datasetName + "_" + BPIPlotAbbrev + "_MS.png"));
+                    var pngFile = new FileInfo(Path.Combine(outputDirectory, datasetName + "_" + BPIPlotAbbrev + "_MS.png"));
                     successMS1 = bpiPlotMS1.SaveToPNG(pngFile, 1024, 600, 96);
                     AddRecentFile(pngFile.FullName, eOutputFileTypes.BPIMS);
                 }
@@ -585,7 +585,7 @@ namespace MSFileInfoScanner
 
                 if (bpiPlotMS2.SeriesCount > 0)
                 {
-                    var pngFile = new FileInfo(Path.Combine(outputFolderPath, datasetName + "_" + BPIPlotAbbrev + "_MSn.png"));
+                    var pngFile = new FileInfo(Path.Combine(outputDirectory, datasetName + "_" + BPIPlotAbbrev + "_MSn.png"));
                     successMS2 = bpiPlotMS2.SaveToPNG(pngFile, 1024, 600, 96);
                     AddRecentFile(pngFile.FullName, eOutputFileTypes.BPIMSn);
                 }
@@ -595,7 +595,7 @@ namespace MSFileInfoScanner
 
                 if (ticPlot.SeriesCount > 0)
                 {
-                    var pngFile = new FileInfo(Path.Combine(outputFolderPath, datasetName + "_" + TICPlotAbbrev + ".png"));
+                    var pngFile = new FileInfo(Path.Combine(outputDirectory, datasetName + "_" + TICPlotAbbrev + ".png"));
                     successTIC = ticPlot.SaveToPNG(pngFile, 1024, 600, 96);
                     AddRecentFile(pngFile.FullName, eOutputFileTypes.TIC);
                 }

@@ -151,7 +151,7 @@ namespace MSFileInfoScanner
 
             OnDebugEvent(string.Format("{0} {1}", PythonPath, args));
 
-            var progRunner = new ProgRunner
+            var programRunner = new ProgRunner
             {
                 Arguments = args,
                 CreateNoWindow = true,
@@ -163,7 +163,7 @@ namespace MSFileInfoScanner
                 WorkDir = workDir.FullName
             };
 
-            RegisterEvents(progRunner);
+            RegisterEvents(programRunner);
 
             const int MAX_RUNTIME_SECONDS = 600;
             const int MONITOR_INTERVAL_MILLISECONDS = 1000;
@@ -172,12 +172,12 @@ namespace MSFileInfoScanner
             try
             {
                 // Start the program executing
-                progRunner.StartAndMonitorProgram();
+                programRunner.StartAndMonitorProgram();
 
                 var startTime = DateTime.UtcNow;
 
                 // Loop until program is complete, or until MAX_RUNTIME_SECONDS seconds elapses
-                while (progRunner.State != ProgRunner.States.NotMonitoring)
+                while (programRunner.State != ProgRunner.States.NotMonitoring)
                 {
                     ProgRunner.SleepMilliseconds(MONITOR_INTERVAL_MILLISECONDS);
 
@@ -185,7 +185,7 @@ namespace MSFileInfoScanner
                         continue;
 
                     OnErrorEvent(string.Format("Plot creation with Python has taken more than {0:F0} minutes; aborting", MAX_RUNTIME_SECONDS / 60.0));
-                    progRunner.StopMonitoringProgram(kill: true);
+                    programRunner.StopMonitoringProgram(kill: true);
 
                     runtimeExceeded = true;
                     break;
@@ -203,14 +203,14 @@ namespace MSFileInfoScanner
                 return false;
 
             // Examine the exit code
-            if (progRunner.ExitCode == 0)
+            if (programRunner.ExitCode == 0)
             {
                 var success = RenameTempPngFile(exportFile, workDir);
 
                 return success;
             }
 
-            OnErrorEvent("Python ExitCode = " + progRunner.ExitCode);
+            OnErrorEvent("Python ExitCode = " + programRunner.ExitCode);
             return false;
         }
 

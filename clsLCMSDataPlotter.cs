@@ -1629,7 +1629,6 @@ namespace MSFileInfoScanner
             myPlot.IsLegendVisible = false;
 
             return plotContainer;
-
         }
 
         /// <summary>
@@ -1780,7 +1779,6 @@ namespace MSFileInfoScanner
             plotContainer.YAxisInfo.Maximum = maxMzToUse;
 
             return plotContainer;
-
         }
 
         /// <summary>
@@ -1805,12 +1803,12 @@ namespace MSFileInfoScanner
             return (int)Math.Round(value / 1000.0 / 1000, 0) + "M";
         }
 
-        public bool Save2DPlots(string datasetName, string outputFolderPath)
+        public bool Save2DPlots(string datasetName, string outputDirectory)
         {
-            return Save2DPlots(datasetName, outputFolderPath, string.Empty, string.Empty);
+            return Save2DPlots(datasetName, outputDirectory, string.Empty, string.Empty);
         }
 
-        public bool Save2DPlots(string datasetName, string outputFolderPath, string fileNameSuffixAddon, string scanModeSuffixAddon)
+        public bool Save2DPlots(string datasetName, string outputDirectory, string fileNameSuffixAddon, string scanModeSuffixAddon)
         {
 
             try
@@ -1856,7 +1854,7 @@ namespace MSFileInfoScanner
                 if (ms1Plot.SeriesCount > 0)
                 {
                     var pngFilename = datasetName + "_" + fileNameSuffixAddon + "LCMS" + scanModeSuffixAddon + ".png";
-                    var pngFile = new FileInfo(Path.Combine(outputFolderPath, pngFilename));
+                    var pngFile = new FileInfo(Path.Combine(outputDirectory, pngFilename));
                     successMS1 = ms1Plot.SaveToPNG(pngFile, 1024, 700, 96);
                     AddRecentFile(pngFile.FullName, eOutputFileTypes.LCMS);
                 }
@@ -1866,7 +1864,7 @@ namespace MSFileInfoScanner
 
                 if (ms2Plot.SeriesCount > 0)
                 {
-                    var pngFile = new FileInfo(Path.Combine(outputFolderPath, datasetName + "_" + fileNameSuffixAddon + "LCMS_MSn" + scanModeSuffixAddon + ".png"));
+                    var pngFile = new FileInfo(Path.Combine(outputDirectory, datasetName + "_" + fileNameSuffixAddon + "LCMS_MSn" + scanModeSuffixAddon + ".png"));
                     successMS2 = ms2Plot.SaveToPNG(pngFile, 1024, 700, 96);
                     AddRecentFile(pngFile.FullName, eOutputFileTypes.LCMSMSn);
                 }

@@ -93,7 +93,7 @@ namespace MSFileInfoScanner
                 int returnCode;
                 if (options.RecurseDirectories)
                 {
-                    if (scanner.ProcessMSFilesAndRecurseDirectories(options.InputDataFilePath, options.OutputDirectoryName, options.MaxLevelsToRecurse))
+                    if (scanner.ProcessMSFilesAndRecurseDirectories(options.InputDataFilePath, options.OutputDirectoryPath, options.MaxLevelsToRecurse))
                     {
                         returnCode = 0;
                         processingError = false;
@@ -106,7 +106,7 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    if (scanner.ProcessMSFileOrDirectoryWildcard(options.InputDataFilePath, options.OutputDirectoryName, true))
+                    if (scanner.ProcessMSFileOrDirectoryWildcard(options.InputDataFilePath, options.OutputDirectoryPath, true))
                     {
                         returnCode = 0;
                         processingError = false;
