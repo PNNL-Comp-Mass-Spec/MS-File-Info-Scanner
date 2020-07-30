@@ -910,15 +910,15 @@ namespace MSFileInfoScanner
 
             var top = IntToEngineeringNotation(lcmsPlotter.Options.MaxPointsToPlot);
 
-            if (file1.Length > 0 || file2.Length > 0)
-            {
-                writer.WriteLine("    <tr>");
-                writer.WriteLine("      <td valign=\"middle\">LCMS<br>(Top " + top + ")</td>");
-                writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
-                writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
-                writer.WriteLine("    </tr>");
-                writer.WriteLine();
-            }
+            if (file1.Length <= 0 && file2.Length <= 0)
+                return;
+
+            writer.WriteLine("    <tr>");
+            writer.WriteLine("      <td valign=\"middle\">LCMS<br>(Top " + top + ")</td>");
+            writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
+            writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
+            writer.WriteLine("    </tr>");
+            writer.WriteLine();
 
         }
 
@@ -927,15 +927,16 @@ namespace MSFileInfoScanner
 
             var file1 = mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS);
             var file2 = mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn);
-            if (file1.Length > 0 || file2.Length > 0)
-            {
-                writer.WriteLine("    <tr>");
-                writer.WriteLine("      <td valign=\"middle\">BPI</td>");
-                writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
-                writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
-                writer.WriteLine("    </tr>");
-                writer.WriteLine();
-            }
+
+            if (file1.Length <= 0 && file2.Length <= 0)
+                return;
+
+            writer.WriteLine("    <tr>");
+            writer.WriteLine("      <td valign=\"middle\">BPI</td>");
+            writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
+            writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
+            writer.WriteLine("    </tr>");
+            writer.WriteLine();
 
         }
 
