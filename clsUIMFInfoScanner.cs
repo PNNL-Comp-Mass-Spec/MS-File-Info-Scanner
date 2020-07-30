@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
 using PRISM;
 using ThermoFisher.CommonCore.Data.Business;
@@ -643,12 +644,11 @@ namespace MSFileInfoScanner
                     // ReSharper restore CommentTypo
 
                     double runTimeMinutes = 0;
+                    var globalParamsHasValidDateStarted = false;
 
                     // First examine globalParams.DateStarted
                     try
                     {
-
-                        var validStartTime = false;
                         var reportedDateStartedText = globalParams.GetValueString(GlobalParamKeyType.DateStarted);
 
                         if (!DateTime.TryParse(reportedDateStartedText, out var reportedDateStarted))
@@ -670,7 +670,7 @@ namespace MSFileInfoScanner
                                 // To get the correct year, simply add 1600
 
                                 reportedDateStarted = reportedDateStarted.AddYears(1600);
-                                validStartTime = true;
+                                globalParamsHasValidDateStarted = true;
 
                             }
                             else if (reportedDateStarted.Year < 2000 || reportedDateStarted.Year > DateTime.Now.Year + 1)
@@ -679,15 +679,14 @@ namespace MSFileInfoScanner
                                 OnWarningEvent(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + reportedDateStartedText + "; " +
                                     "will use the time the datafile was last modified");
                                 inaccurateStartTime = true;
-
                             }
                             else
                             {
-                                validStartTime = true;
+                                globalParamsHasValidDateStarted = true;
                             }
                         }
 
-                        if (validStartTime)
+                        if (globalParamsHasValidDateStarted)
                         {
                             datasetFileInfo.AcqTimeStart = reportedDateStarted;
 
@@ -838,9 +837,48 @@ namespace MSFileInfoScanner
                                 endTime = startTimes[startTimes.Count - 1];
                                 runTimeMinutes = endTime + endTimeAddon - startTime;
                             }
+                            else
+                            {
+                                // ReSharper disable once IdentifierTypo
+                                var dcompMatcher = new Regex(@"(?<BaseName>.+)_DComp\d+\.uimf", RegexOptions.IgnoreCase);
+                                var match = dcompMatcher.Match(uimfFile.Name);
 
+                                DateTime fileModificationTime;
+                                if (match.Success && uimfFile.DirectoryName != null)
+                                {
+                                    var baseName = match.Groups["BaseName"].Value;
+                                    var parentFile = new FileInfo(Path.Combine(uimfFile.DirectoryName, baseName + UIMF_FILE_EXTENSION));
+                                    if (parentFile.Exists && parentFile.LastWriteTime < uimfFile.LastWriteTime)
+                                    {
+                                        OnWarningEvent("Using LastWriteTime from the parent .UIMF file: " +
+                                                       PathUtils.CompactPathString(parentFile.FullName, 120));
+                                        fileModificationTime = parentFile.LastWriteTime;
+                                    }
+                                    else
+                                    {
+                                        fileModificationTime = uimfFile.LastWriteTime;
+                                    }
+                                }
+                                else
+                                {
+                                    fileModificationTime = uimfFile.LastWriteTime;
+                                }
+
+                                if (globalParamsHasValidDateStarted && fileModificationTime > datasetFileInfo.AcqTimeStart)
+                                {
+                                    var apparentRuntimeMinutes = fileModificationTime.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes;
+                                    if (apparentRuntimeMinutes / 60.0 < 6)
+                                    {
+                                        // Run time is less than 6 hours; update AcqTimeEnd
+                                        OnWarningEvent(
+                                            "None of the frames has a StartTime defined; " +
+                                            "computing acquisition length using DateStarted from the Global_Params table " +
+                                            "along with the file modification time");
+                                        datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(apparentRuntimeMinutes);
+                                    }
+                                }
+                            }
                         }
-
                     }
                     else
                     {
