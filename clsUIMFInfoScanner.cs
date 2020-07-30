@@ -722,17 +722,17 @@ namespace MSFileInfoScanner
                         // If the reported start time is zero, step back until a non-zero start time is reported
 
                         var frameIndex = masterFrameNumList.Length - 1;
-                        double endTime;
-                        do
+                        double endTime = 0;
+                        while (frameIndex >= 0)
                         {
                             frameParams = uimfReader.GetFrameParams(masterFrameNumList[frameIndex]);
                             endTime = frameParams.GetValueDouble(FrameParamKeyType.StartTimeMinutes);
 
-                            if (Math.Abs(endTime) < float.Epsilon)
-                            {
-                                frameIndex -= 1;
-                            }
-                        } while (Math.Abs(endTime) < float.Epsilon && frameIndex >= 0);
+                            if (Math.Abs(endTime) > float.Epsilon)
+                                break;
+
+                            frameIndex -= 1;
+                        };
 
                         // Check whether the StartTime and EndTime values are based on ticks
                         if (startTime >= 1E+17 && endTime > 1E+17)

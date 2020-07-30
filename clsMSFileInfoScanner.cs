@@ -2156,7 +2156,7 @@ namespace MSFileInfoScanner
             var processedFileList = new List<string>();
 
             var retryCount = 0;
-            do
+            while (true)
             {
                 try
                 {
@@ -2178,14 +2178,9 @@ namespace MSFileInfoScanner
                 {
                     return false;
                 }
+
                 // Wait 1 second, then try again
                 SleepNow(1);
-            } while (retryCount < MAX_ACCESS_ATTEMPTS);
-
-            if (inputDirectory == null)
-            {
-                ReportError("Unable to instantiate a directory info object for " + inputDirectoryPath);
-                return false;
             }
 
             try
@@ -2215,7 +2210,7 @@ namespace MSFileInfoScanner
                 foreach (var fileItem in inputDirectory.GetFiles(fileNameMatch))
                 {
                     retryCount = 0;
-                    do
+                    while (true)
                     {
 
                         try
@@ -2264,7 +2259,7 @@ namespace MSFileInfoScanner
                                 }
                             }
 
-                            // Exit the Do loop
+                            // Exit the while loop
                             break;
 
                         }
@@ -2289,8 +2284,7 @@ namespace MSFileInfoScanner
 
                         // Wait 1 second, then try again
                         SleepNow(1);
-
-                    } while (retryCount < MAX_ACCESS_ATTEMPTS);
+                    }
 
                     if (fileProcessed)
                     {
@@ -2337,7 +2331,7 @@ namespace MSFileInfoScanner
                 foreach (var subdirectory in inputDirectory.GetDirectories(fileNameMatch))
                 {
                     retryCount = 0;
-                    do
+                    while (true)
                     {
                         try
                         {
@@ -2387,7 +2381,7 @@ namespace MSFileInfoScanner
 
                             }
 
-                            // Exit the Do loop
+                            // Exit the while loop
                             break;
 
                         }
@@ -2412,7 +2406,7 @@ namespace MSFileInfoScanner
 
                         // Wait 1 second, then try again
                         SleepNow(1);
-                    } while (retryCount < MAX_ACCESS_ATTEMPTS);
+                    }
 
                     if (AbortProcessing)
                         break;
@@ -2429,7 +2423,7 @@ namespace MSFileInfoScanner
                     foreach (var subdirectory in inputDirectory.GetDirectories())
                     {
                         retryCount = 0;
-                        do
+                        while (true)
                         {
                             try
                             {
@@ -2469,7 +2463,7 @@ namespace MSFileInfoScanner
 
                             // Wait 1 second, then try again
                             SleepNow(1);
-                        } while (retryCount < MAX_ACCESS_ATTEMPTS);
+                        }
 
                         if (!success && !IgnoreErrorsWhenRecursing)
                         {
