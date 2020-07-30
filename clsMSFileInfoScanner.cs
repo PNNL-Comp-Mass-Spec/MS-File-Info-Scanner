@@ -5,6 +5,7 @@ using System.IO;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScannerInterfaces;
 using PRISM;
+using PRISM.FileProcessor;
 using PRISMDatabaseUtils;
 
 namespace MSFileInfoScanner
@@ -541,29 +542,7 @@ namespace MSFileInfoScanner
                 appName = Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
             }
 
-            try
-            {
-                var appDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
-
-                if (string.IsNullOrWhiteSpace(appName))
-                    return appDataDirectory;
-
-                var appDirectory = new DirectoryInfo(Path.Combine(appDataDirectory, appName));
-
-                if (!appDirectory.Exists)
-                {
-                    appDirectory.Create();
-                }
-
-                return appDirectory.FullName;
-
-            }
-            catch (Exception ex)
-            {
-                ConsoleMsgUtils.ShowError("Error in GetAppDataDirectoryPath", ex);
-                return Path.GetTempPath();
-            }
-
+            return ProcessFilesOrDirectoriesBase.GetAppDataDirectoryPath(appName);
         }
 
         public static string GetAppDirectoryPath()
