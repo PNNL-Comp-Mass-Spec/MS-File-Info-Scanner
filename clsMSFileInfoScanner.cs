@@ -1261,6 +1261,11 @@ namespace MSFileInfoScanner
                     }
                 }
             }
+            else if (SystemInfo.IsLinux)
+            {
+                OnWarningEvent("Plotting with OxyPlot is not supported on Linux; " +
+                               "you should set PlotWithPython=True in the parameter file or use -PythonPlot at the command line");
+            }
 
             if (ShowDebugInfo)
                 mLCMS2DPlotOptions.DeleteTempFiles = false;
