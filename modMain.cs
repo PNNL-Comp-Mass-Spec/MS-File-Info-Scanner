@@ -19,7 +19,7 @@ namespace MSFileInfoScanner
     /// -------------------------------------------------------------------------------
     static class modMain
     {
-        public const string PROGRAM_DATE = "June 29, 2020";
+        public const string PROGRAM_DATE = "July 30, 2020";
 
         private static DateTime mLastProgressTime;
 
@@ -50,17 +50,18 @@ namespace MSFileInfoScanner
             cmdLineParser.ContactInfo = "Program written by Matthew Monroe for PNNL (Richland, WA) in 2005" + Environment.NewLine +
                                         "E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov" + Environment.NewLine + "Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/";
 
-            cmdLineParser.UsageExamples.Add("Program syntax:" + Environment.NewLine + Path.GetFileName(exePath) +
-                                            " /I:InputFileNameOrDirectoryPath [/O:OutputDirectoryName]" +
-                                            " [/P:ParamFilePath] [/S[:MaxLevel]] [/IE] [/L:LogFilePath]" +
-                                            " [/LC[:MaxPointsToPlot]] [/NoTIC] [/LCGrad]" +
-                                            " [/DI] [/SS] [/QS] [/CC]" +
-                                            " [/MS2MzMin:MzValue] [/NoHash]" +
-                                            " [/DST:DatasetStatsFileName]" +
-                                            " [/ScanStart:0] [/ScanEnd:0] [/Debug]" +
-                                            " [/C] [/M:nnn] [/H] [/QZ]" +
-                                            " [/CF] [/R] [/Z]" +
-                                            " [/PostToDMS] [/PythonPlot]");
+            cmdLineParser.UsageExamples.Add("Program syntax:" + Environment.NewLine + Path.GetFileName(exePath) + "\n" +
+                                            " /I:InputFileNameOrDirectoryPath [/O:OutputDirectoryPath]\n" +
+                                            " [/P:ParamFilePath] [/S[:MaxLevel]] [/IE] [/L:LogFilePath]\n" +
+                                            " [/LC[:MaxPointsToPlot]] [/TIC] [/LCGrad]\n" +
+                                            " [/DI] [/SS] [/QS] [/CC]\n" +
+                                            " [/MS2MzMin:MzValue] [/NoHash]\n" +
+                                            " [/DST:DatasetStatsFileName]\n" +
+                                            " [/ScanStart:0] [/ScanEnd:0] [/Debug]\n" +
+                                            " [/C] [/M:nnn] [/H] [/QZ]\n" +
+                                            " [/CF] [/R] [/Z]\n" +
+                                            " [/PostToDMS] [/PythonPlot]\n" +
+                                            " [/CreateParamFile]");
 
             cmdLineParser.AddParamFileKey("Conf");
 

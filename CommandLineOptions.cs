@@ -8,49 +8,56 @@ namespace MSFileInfoScanner
     internal class CommandLineOptions
     {
         // This path can contain wildcard characters, e.g. C:\*.raw
-        [Option("I", ArgPosition = 1, Required = true, HelpShowsDefault = false,
+        [Option("InputDataFilePath", "I", ArgPosition = 1, Required = true, HelpShowsDefault = false,
             HelpText = "The name of a file or directory to scan; the path can contain the wildcard character *")]
         public string InputDataFilePath { get; set; }
 
-        [Option("O", HelpShowsDefault = false,
+        [Option("OutputDirectory", "O", HelpShowsDefault = false,
             HelpText = "Output directory name.  If omitted, the output files will be created in the program directory.")]
-        public string OutputDirectoryName { get; set; }
+        public string OutputDirectoryPath { get; set; }
 
-        [Option("P", HelpShowsDefault = false,
+        [Option("ParameterFile", "P", HelpShowsDefault = false,
             HelpText = "Param file path. If supplied, it should point to a valid XML parameter file. If omitted, defaults are used.")]
         public string ParameterFilePath { get; set; }
 
+        /// <summary>
+        /// When true, recurse subdirectories
+        /// </summary>
+        /// <remarks>
+        /// This will be auto-set to true if MaxLevelsToRecurse is defined in the parameter file or if /S is used at the command line
+        /// This functionality is enabled by the ArgExistsProperty option
+        /// </remarks>
         public bool RecurseDirectories { get; set; }
 
-        [Option("S", ArgExistsProperty = nameof(RecurseDirectories), HelpShowsDefault = false,
-            HelpText = "If supplied, process all valid files in the input directory and subdirectories. " +
-                       "Include a number after /S (like /S:2) to limit the level of subdirectories to examine.")]
+        [Option("MaxLevelsToRecurse", "S", ArgExistsProperty = nameof(RecurseDirectories), HelpShowsDefault = false,
+            HelpText = "If supplied, process all valid files in the input directory and subdirectories.\n" +
+                       "Include a number after /S (like /S:2) to limit the level of subdirectories to examine (0 means to recurse infinitely).")]
         public int MaxLevelsToRecurse { get; set; }
 
-        [Option("IE", HelpShowsDefault = false,
+        [Option("IgnoreErrorsWhenRecursing", "IE", HelpShowsDefault = false,
             HelpText = "Ignore errors when recursing.")]
         public bool IgnoreErrorsWhenRecursing { get; set; }
 
-        [Option("L", HelpShowsDefault = false,
+        [Option("LogFile", "L", HelpShowsDefault = false,
             HelpText = "File path for logging messages.")]
         public string LogFilePath { get; set; }
 
-        [Option("LC", "2D", ArgExistsProperty = nameof(SaveLCMS2DPlots),
-            HelpText = "Create 2D LCMS plots (this process could take several minutes for each dataset), using the top N points." +
+        [Option("LCMS2DMaxPointsToPlot", "LC", "2D", ArgExistsProperty = nameof(SaveLCMS2DPlots),
+            HelpText = "Create 2D LCMS plots (this process could take several minutes for each dataset), using the top N points.\n" +
                        "To plot the top 20000 points, use /LC:20000.")]
         public int LCMS2DMaxPointsToPlot { get; set; }
 
-        [Option("LCDiv",
-            HelpText = "The divisor to use when creating the overview 2D LCMS plots. " +
+        [Option("LCMSPlotDivisor", "LCDiv",
+            HelpText = "The divisor to use when creating the overview 2D LCMS plots.\n" +
                        "Use /LCDiv:0 to disable creation of the overview plots.")]
         public int LCMS2DOverviewPlotDivisor { get; set; }
 
-        [Option("NoTIC", HelpShowsDefault = false,
-            HelpText = "Disable saving TIC and BPI plots.  Also disables any device specific plots")]
+        [Option("SaveTICAndBPIPlots", "TIC", HelpShowsDefault = false,
+            HelpText = "Use /TIC:False to disable saving TIC and BPI plots; also disables any device specific plots")]
         public bool SaveTICAndBPIPlots { get; set; }
 
-        [Option("LCGrad", HelpShowsDefault = false,
-            HelpText = "Save a series of 2D LC plots, each using a different color scheme. " +
+        [Option("CreateGradientPlots", "LCGrad", HelpShowsDefault = false,
+            HelpText = "Save a series of 2D LC plots, each using a different color scheme.\n" +
                        "The default color scheme is OxyPalettes.Jet")]
         public bool TestLCMSGradientColorSchemes { get; set; }
 
@@ -60,27 +67,34 @@ namespace MSFileInfoScanner
             Min = 1)]
         public int DatasetID { get; set; }
 
-        [Option("DI", HelpShowsDefault = false,
+        [Option("CreateDatasetInfoFile", "DI", HelpShowsDefault = false,
             HelpText = "If supplied, create a dataset info XML file for each dataset.")]
         public bool CreateDatasetInfoFile { get; set; }
 
-        [Option("SS", HelpShowsDefault = false,
+        [Option("CreateScanStatsFile", "SS", HelpShowsDefault = false,
             HelpText = "If supplied, create a _ScanStats.txt  file for each dataset.")]
         public bool CreateScanStatsFile { get; set; }
 
-        [Option("QS", HelpShowsDefault = false,
+        [Option("ComputeQualityScores", "QS", HelpShowsDefault = false,
             HelpText = "If supplied, compute an overall quality score for the data in each datasets.")]
         public bool ComputeOverallQualityScores { get; set; }
 
-        [Option("CC", HelpShowsDefault = false,
+        [Option("CheckCentroidingStatus", "CC", HelpShowsDefault = false,
             HelpText = "If supplied, check spectral data for whether it is centroided or profile")]
         public bool CheckCentroidingStatus { get; set; }
 
+        /// <summary>
+        /// When true, create 2D LCMS plots
+        /// </summary>
+        /// <remarks>
+        /// This will be auto-set to true if LCMS2DMaxPointsToPlot is defined in the parameter file or if /LC is used at the command line
+        /// This functionality is enabled by the ArgExistsProperty option
+        /// </remarks>
         public bool SaveLCMS2DPlots { get; set; }
 
         [Option("MS2MzMin", HelpShowsDefault = false,
-            HelpText = "If supplied, specifies a minimum m/z value that all MS/MS spectra should have. " +
-                       "Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold. " +
+            HelpText = "If supplied, specifies a minimum m/z value that all MS/MS spectra should have.\n" +
+                       "Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold.\n" +
                        "Useful for validating instrument files where the sample is iTRAQ or TMT labeled " +
                        "and it is important to detect the reporter ions in the MS/MS spectra. " +
                        "\n  - select the default iTRAQ m/z (" + clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ_STRING + ") using /MS2MzMin:iTRAQ" +
@@ -90,76 +104,81 @@ namespace MSFileInfoScanner
 
         public float MS2MzMin { get; set; }
 
-        [Option("NoHash", HelpShowsDefault = false,
+        [Option("DisableInstrumentHash", "NoHash", HelpShowsDefault = false,
             HelpText = "If supplied, disables creating a SHA-1 hash for the primary instrument data file(s).")]
         public bool DisableInstrumentHash { get; set; }
 
+        /// <summary>
+        /// When true, update (or create) a tab-delimited text file with overview stats for each dataset
+        /// </summary>
+        /// <remarks>
+        /// This will be auto-set to true if DatasetStatsTextFileName is defined in the parameter file or if /DST is used at the command line
+        /// This functionality is enabled by the ArgExistsProperty option
+        /// </remarks>
         public bool UpdateDatasetStatsTextFile { get; set; }
 
-        [Option("DST", ArgExistsProperty = nameof(UpdateDatasetStatsTextFile), HelpShowsDefault = false,
-            HelpText = "If supplied, update (or create) a tab-delimited text file with overview stats for the dataset. " +
+        [Option("DatasetStatsTextFileName", "DST", ArgExistsProperty = nameof(UpdateDatasetStatsTextFile), HelpShowsDefault = false,
+            HelpText = "If supplied, update (or create) a tab-delimited text file with overview stats for the dataset.\n" +
                        "If /DI is used, will include detailed scan counts; otherwise, will just have the dataset name, " +
-                       "acquisition date, and (if available) sample name and comment. " +
+                       "acquisition date, and (if available) sample name and comment.\n" +
                        "By default, the file is named " + DatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME + "; " +
                        "to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt")]
         public string DatasetStatsTextFileName { get; set; }
 
         [Option("ScanStart", "Start", HelpShowsDefault = false,
-            HelpText = "Use to limit the scan range to process; " +
-                       "useful for files where the first few scans are corrupt. " +
+            HelpText = "Use to limit the scan range to process; useful for files where the first few scans are corrupt.\n" +
                        "For example, to start processing at scan 10, use /ScanStart:10",
             Min = 0)]
         public int ScanStart { get; set; }
 
         [Option("ScanEnd", "End", HelpShowsDefault = false,
-            HelpText = "Use to limit the scan range to process; " +
-                       "useful for files where the first few scans are corrupt. " +
+            HelpText = "Use to limit the scan range to process; useful for files where the first few scans are corrupt.\n" +
                        "For example, to start processing at scan 10, use /ScanStart:10",
             Min = 0)]
         public int ScanEnd { get; set; }
 
-        [Option("Debug", HelpShowsDefault = false,
+        [Option("ShowDebugInfo", "Debug", HelpShowsDefault = false,
             HelpText = "If supplied, display debug information at the console, " +
-                       "including showing the scan number prior to reading each scan's data. " +
+                       "including showing the scan number prior to reading each scan's data.\n" +
                        "Also, when /Debug is enabled, temporary files for creating plots with Python will not be deleted.")]
         public bool ShowDebugInfo { get; set; }
 
-        [Option("C", "CheckIntegrity", HelpShowsDefault = false,
+        [Option("CheckFileIntegrity", "CheckIntegrity", "C", HelpShowsDefault = false,
             HelpText = "Use to perform an integrity check on all known file types; " +
-                       "this process will open known file types and verify that they contain the expected data. " +
+                       "this process will open known file types and verify that they contain the expected data.\n" +
                        "This option is only used if you specify an Input Directory and use a wildcard; " +
                        "you will typically also want to use /S when using /C.")]
         public bool CheckFileIntegrity { get; set; }
 
-        [Option("M",
+        [Option("MaximumTextFileLinesToCheck", "M",
             HelpText = "Use to define the maximum number of lines to process when checking text or csv files.", Min = 1)]
         public int MaximumTextFileLinesToCheck { get; set; }
 
-        [Option("H", HelpShowsDefault = false,
+        [Option("ComputeFileHashes", "H", HelpShowsDefault = false,
             HelpText = "If supplied, compute SHA-1 file hashes when verifying file integrity.")]
         public bool ComputeFileHashes { get; set; }
 
-        [Option("QZ", HelpShowsDefault = false,
+        [Option("ZipFileCheckAllData", "QZ", HelpShowsDefault = false,
             HelpText = "If supplied, run a quick zip-file validation test when verifying file integrity " +
                        "(the test does not check all data in the .Zip file).")]
         public bool ZipFileCheckAllData { get; set; }
 
-        [Option("CF", HelpShowsDefault = false,
-            HelpText = "If supplied, save/load information from the acquisition time file (cache file). " +
+        [Option("UseCacheFiles", "CF", HelpShowsDefault = false,
+            HelpText = "If supplied, save/load information from the acquisition time file (cache file).\n" +
                        "This option is auto-enabled if you use /C.")]
         public bool UseCacheFiles { get; set; }
 
-        [Option("R", HelpShowsDefault = false,
+        [Option("ReprocessingExistingFiles", "R", HelpShowsDefault = false,
             HelpText = "If supplied, reprocess files that are already defined in the acquisition time file.")]
         public bool ReprocessingExistingFiles { get; set; }
 
-        [Option("Z", HelpShowsDefault = false,
+        [Option("ReprocessIfCachedSizeIsZero", "Z", HelpShowsDefault = false,
             HelpText = "If supplied, reprocess files that are already defined in the acquisition time file " +
                         "only if their cached size is 0 bytes.")]
         public bool ReprocessIfCachedSizeIsZero { get; set; }
 
-        [Option("PostToDMS", HelpShowsDefault = false,
-            HelpText = "If supplied, store the dataset info in the DMS database. " +
+        [Option("PostResultsToDMS", "PostToDMS", HelpShowsDefault = false,
+            HelpText = "If supplied, store the dataset info in the DMS database.\n" +
                        "To customize the server name and/or stored procedure to use for posting, " +
                        "use an XML parameter file with settings DSInfoConnectionString, " +
                        "DSInfoDBPostingEnabled, and DSInfoStoredProcedure")]
@@ -177,7 +196,9 @@ namespace MSFileInfoScanner
             LogFilePath = string.Empty;
 
             RecurseDirectories = false;
-            MaxLevelsToRecurse = 2;
+
+            // If maxLevelsToRecurse is <=0, we recurse infinitely
+            MaxLevelsToRecurse = 0;
             IgnoreErrorsWhenRecursing = false;
 
             ReprocessingExistingFiles = false;
