@@ -8,6 +8,8 @@ using PRISM;
 using PRISM.FileProcessor;
 using PRISMDatabaseUtils;
 
+// ReSharper disable UnusedMember.Global
+
 namespace MSFileInfoScanner
 {
     /// <summary>
