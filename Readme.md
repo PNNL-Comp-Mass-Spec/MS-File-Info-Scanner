@@ -56,8 +56,8 @@ The output directory path is optional
 
 The parameter file switch `/P` is optional
 * If provided, it should point to a valid XML parameter file
-  * Example postsed parameter file: [MSFileInfoScanner_ProcessingOptions.xml](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions.xml)
-* Most of the options can alternatively be defined using a Key=value parameter file, as described below for the `/Conf` argument
+  * Example parameter file: [MSFileInfoScanner_ProcessingOptions.xml](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions.xml)
+* Most of the options can alternatively be defined using a Key=Value parameter file, as described below for the `/Conf` argument
 
 Use `/S` to process all valid files in the input directory and subdirectories
 * Include a number after /S (like `/S:2`) to limit the level of subdirectories to examine
@@ -152,18 +152,18 @@ with the following settings :
 
 By default, plots are created using OxyPlot, which only works on Windows
 * Use `/PythonPlot` to create plots with Python instead of OxyPlot
-  * Alternatively, set `PythonPlot` to `True` in the parameter file
+  * Alternatively, set `PythonPlot` to `True` in the key/value parameter file
 
 The processing options can be specified in a parameter file using `/ParamFile:Options.conf` or `/Conf:Options.conf`
 * Define options using the format `ArgumentName=Value`
 * Lines starting with `#` or `;` will be treated as comments
 * Additional arguments on the command line can supplement or override the arguments in the parameter file
 
-Use `/CreateParamFile` to create an example parameter file
+Use `/CreateParamFile` to create an example key/value parameter file
 * By default, the example parameter file content is shown at the console
 * To create a file named Options.conf, use `/CreateParamFile:Options.conf`
 
-Use `/Conf` to define a key/value parameter file with settings
+Use `/Conf` to define a key/value parameter file with settings to load
 * Example Key=Value parameter files
   * [MSFileInfoScanner_ProcessingOptions_NoPlots.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_NoPlots.txt)
   * [MSFileInfoScanner_ProcessingOptions_TICandBPI.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_TICandBPI.txt)
