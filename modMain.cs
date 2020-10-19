@@ -60,7 +60,8 @@ namespace MSFileInfoScanner
 
             cmdLineParser.UsageExamples.Add("Program syntax:" + Environment.NewLine + Path.GetFileName(exePath) + "\n" +
                                             " /I:InputFileNameOrDirectoryPath [/O:OutputDirectoryPath]\n" +
-                                            " [/P:ParamFilePath] [/S[:MaxLevel]] [/IE] [/L:LogFilePath]\n" +
+                                            " [/P:XMLParameterFilePath] [/S[:MaxLevel]] " +
+                                            " [/IE] [/L:LogFilePath]\n" +
                                             " [/LC[:MaxPointsToPlot]] [/TIC] [/LCGrad]\n" +
                                             " [/DI] [/SS] [/QS] [/CC]\n" +
                                             " [/MS2MzMin:MzValue] [/NoHash]\n" +
@@ -69,7 +70,7 @@ namespace MSFileInfoScanner
                                             " [/C] [/M:nnn] [/H] [/QZ]\n" +
                                             " [/CF] [/R] [/Z]\n" +
                                             " [/PostToDMS] [/PythonPlot]\n" +
-                                            " [/CreateParamFile]");
+                                            " [/Conf:KeyValueParamFilePath] [/CreateParamFile]");
 
             cmdLineParser.AddParamFileKey("Conf");
 

@@ -35,7 +35,8 @@ Syntax:
 ```
 MSFileInfoScanner.exe
  /I:InputFileNameOrDirectoryPath [/O:OutputDirectoryPath]
- [/P:ParamFilePath] [/S[:MaxLevel]] [/IE] [/L:LogFilePath]
+ [/P:XMLParameterFilePath] [/S[:MaxLevel]] 
+ [/IE] [/L:LogFilePath]
  [/LC[:MaxPointsToPlot]] [/TIC] [/LCGrad]
  [/DI] [/SS] [/QS] [/CC]
  [/MS2MzMin:MzValue] [/NoHash]
@@ -44,6 +45,7 @@ MSFileInfoScanner.exe
  [/C] [/M:nnn] [/H] [/QZ]
  [/CF] [/R] [/Z]
  [/PostToDMS] [/PythonPlot]
+ [/Conf:KeyValueParamFilePath] [/CreateParamFile]
 ```
 
 Use `/I` to specify the name of a file or directory to scan
