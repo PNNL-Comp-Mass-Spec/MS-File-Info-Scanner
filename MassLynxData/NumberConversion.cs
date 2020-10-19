@@ -5,23 +5,21 @@ namespace MSFileInfoScanner.MassLynxData
     internal static class NumberConversion
     {
         private const long OFFSET_4 = 4294967296L;
-        private const long MAXINT_4 = 2147483647;
-        private const Int32 OFFSET_2 = 65536;
+        private const long MAX_INT_4 = 2147483647;
+        private const int OFFSET_2 = 65536;
 
-        private const Int16 MAXINT_2 = 32767;
-        public static Int32 UnsignedToInt32(long value)
+        private const short MAX_INT_2 = 32767;
+        public static int UnsignedToInt32(long value)
         {
-            if (value <= MAXINT_4)
+            if (value <= MAX_INT_4)
             {
-                return (Int32)value;
+                return (int)value;
             }
-            else
-            {
-                return (Int32)(value - OFFSET_4);
-            }
+
+            return (int)(value - OFFSET_4);
         }
 
-        public static long Int32ToUnsigned(Int32 value)
+        public static long Int32ToUnsigned(int value)
         {
             if (value < 0)
             {
@@ -31,22 +29,20 @@ namespace MSFileInfoScanner.MassLynxData
             return value;
         }
 
-        public static Int16 UnsignedToInt16(Int32 value)
+        public static short UnsignedToInt16(int value)
         {
             if (value < 0 || value >= OFFSET_2)
                 throw new ArgumentOutOfRangeException(nameof(value));
 
-            if (value <= MAXINT_2)
+            if (value <= MAX_INT_2)
             {
-                return (Int16)value;
+                return (short)value;
             }
-            else
-            {
-                return (Int16)(value - OFFSET_2);
-            }
+
+            return (short)(value - OFFSET_2);
         }
 
-        public static Int32 Int16ToUnsigned(Int16 value)
+        public static int Int16ToUnsigned(short value)
         {
             if (value < 0)
             {

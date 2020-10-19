@@ -109,7 +109,7 @@ namespace MSFileInfoScanner.MassLynxData
             maskBPUncalibratedDataChannelNumber = (int)CreateMask(0, 27);
         }
 
-        private Int32 ExtractFromBitsInt32(int packedValue, byte startBit, byte endBit)
+        private int ExtractFromBitsInt32(int packedValue, byte startBit, byte endBit)
         {
             int unpackedValue;
 
