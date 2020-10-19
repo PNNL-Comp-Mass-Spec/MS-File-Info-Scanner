@@ -2,16 +2,18 @@ using System;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
-//
-// Updated in March 2012 to use ProteoWizard to read data from QTrap .Wiff files
-// (cannot read MS data or TIC values from Agilent .Wiff files)
-
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// <para>Agilent TOF or QStar .Wiff file scanner</para>
+    /// <para>
+    /// Updated in March 2012 to use ProteoWizard to read data from QTrap .Wiff files
+    /// (cannot read MS data or TIC values from Agilent .Wiff files)
+    /// </para>
+    /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
     public class clsAgilentTOFOrQStarWiffFileInfoScanner : clsMSFileInfoProcessorBaseClass
     {
-
         // Note: The extension must be in all caps
         public const string AGILENT_TOF_OR_QSTAR_FILE_EXTENSION = ".WIFF";
 
@@ -80,8 +82,6 @@ namespace MSFileInfoScanner
             PostProcessTasks();
 
             return true;
-
         }
-
     }
 }

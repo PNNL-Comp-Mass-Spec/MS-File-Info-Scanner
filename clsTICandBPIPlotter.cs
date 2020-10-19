@@ -12,6 +12,7 @@ namespace MSFileInfoScanner
     // ReSharper disable once IdentifierTypo
     public class clsTICandBPIPlotter : EventNotifier
     {
+        // Ignore Spelling: OxyPlot
 
         #region "Constants, Enums, Structures"
         public enum eOutputFileTypes
@@ -263,7 +264,6 @@ namespace MSFileInfoScanner
             bool autoMinMaxY,
             bool yAxisExponentialNotation)
         {
-
             var minScan = int.MaxValue;
             var maxScan = 0;
             double scanTimeMax = 0;
@@ -274,7 +274,6 @@ namespace MSFileInfoScanner
 
             foreach (var dataPoint in chromatogramData.Scans)
             {
-
                 if (msLevelFilter != 0 && dataPoint.MSLevel != msLevelFilter &&
                     !(msLevelFilter == 2 && dataPoint.MSLevel >= 2))
                 {
@@ -437,7 +436,6 @@ namespace MSFileInfoScanner
             bool autoMinMaxY,
             bool yAxisExponentialNotation)
         {
-
             double scanTimeMax = 0;
             double maxIntensity = 0;
 
@@ -581,7 +579,6 @@ namespace MSFileInfoScanner
             {
                 chromatogramInfo.RemoveRange(0, indexNonZeroValue);
             }
-
         }
 
         /// <summary>
@@ -611,10 +608,8 @@ namespace MSFileInfoScanner
         /// <returns>True if success, false if an error</returns>
         public bool SaveTICAndBPIPlotFiles(string datasetName, string outputDirectory)
         {
-
             try
             {
-
                 mRecentFiles.Clear();
 
                 // Check whether all of the spectra have .MSLevel = 0
@@ -670,7 +665,6 @@ namespace MSFileInfoScanner
                 OnErrorEvent("Error in SaveTICAndBPIPlotFiles", ex);
                 return false;
             }
-
         }
 
         private void ValidateMSLevel(clsChromatogramInfo chromatogramInfo)
@@ -694,7 +688,6 @@ namespace MSFileInfoScanner
                     chromatogramInfo.GetDataPoint(index).MSLevel = 1;
                 }
             }
-
         }
 
         private class clsChromatogramDataPoint
@@ -707,7 +700,6 @@ namespace MSFileInfoScanner
 
         private class clsChromatogramInfo
         {
-
             public int ScanCount => mScans.Count;
 
             public IEnumerable<clsChromatogramDataPoint> Scans => mScans;
@@ -793,9 +785,7 @@ namespace MSFileInfoScanner
                     mScanNumbers.Remove(scanNumber);
                 }
             }
-
         }
-
     }
 }
 

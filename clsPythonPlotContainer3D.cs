@@ -11,6 +11,7 @@ namespace MSFileInfoScanner
     /// </summary>
     internal class clsPythonPlotContainer3D : clsPythonPlotContainer
     {
+        // Ignore Spelling: autoscale, gridline, png
 
         public Dictionary<int, List<ScatterPoint>> PointsByCharge { get; }
 
@@ -47,7 +48,6 @@ namespace MSFileInfoScanner
 
             try
             {
-
                 using (var writer = new StreamWriter(new FileStream(exportFile.FullName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)))
                 {
                     // Plot options: set of square brackets with semicolon separated key/value pairs
@@ -94,7 +94,6 @@ namespace MSFileInfoScanner
                         }
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -124,7 +123,6 @@ namespace MSFileInfoScanner
                 OnErrorEvent("Error creating 3D plot with Python using " + exportFile.Name, ex);
                 return false;
             }
-
         }
 
         public void ClearData()

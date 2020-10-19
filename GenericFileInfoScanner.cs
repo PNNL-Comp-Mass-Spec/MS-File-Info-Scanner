@@ -84,8 +84,6 @@ namespace MSFileInfoScanner
             PostProcessTasks();
 
             return true;
-
         }
-
     }
 }

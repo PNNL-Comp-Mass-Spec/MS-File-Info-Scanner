@@ -10,6 +10,7 @@ namespace MSFileInfoScanner
     /// </summary>
     internal class clsPythonPlotContainer2D : clsPythonPlotContainer
     {
+        // Ignore Spelling: Autoscale, Gridline, png
 
         public List<DataPoint> Data { get; private set; }
 
@@ -46,7 +47,6 @@ namespace MSFileInfoScanner
 
             try
             {
-
                 using (var writer = new StreamWriter(new FileStream(exportFile.FullName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)))
                 {
                     // Plot options: set of square brackets with semicolon separated key/value pairs
@@ -69,7 +69,6 @@ namespace MSFileInfoScanner
                         writer.WriteLine(dataPoint.X + "\t" + dataPoint.Y);
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -99,7 +98,6 @@ namespace MSFileInfoScanner
                 OnErrorEvent("Error creating 2D plot with Python using " + exportFile.Name, ex);
                 return false;
             }
-
         }
 
         public void ClearData()

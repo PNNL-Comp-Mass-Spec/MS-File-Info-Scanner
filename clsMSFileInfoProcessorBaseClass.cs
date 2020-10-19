@@ -10,12 +10,16 @@ using PRISM;
 using ThermoFisher.CommonCore.Data.Business;
 using ThermoRawFileReader;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2007
-
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// Base class for MS file info scanners
+    /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2007</remarks>
     public abstract class clsMSFileInfoProcessorBaseClass : iMSFileInfoProcessor
     {
+        // Ignore Spelling: Abu, html, href, AcqTime
+
         public const int PROGRESS_SPECTRA_LOADED = 90;
         public const int PROGRESS_SAVED_TIC_AND_BPI_PLOT = 92;
         public const int PROGRESS_SAVED_2D_PLOTS = 99;
@@ -176,7 +180,7 @@ namespace MSFileInfoScanner
         /// Minimum m/z value that MS/mS spectra should have
         /// </summary>
         /// <remarks>
-        /// Useful for validating instrument files where the sample is iTRAQ or TMT labelled
+        /// Useful for validating instrument files where the sample is iTRAQ or TMT labeled
         /// and it is important to detect the reporter ions in the MS/MS spectra
         /// </remarks>
         public override float MS2MzMin
@@ -308,7 +312,6 @@ namespace MSFileInfoScanner
                 default:
                     throw new Exception("Unrecognized option, " + eOption);
             }
-
         }
 
         /// <summary>
@@ -371,7 +374,6 @@ namespace MSFileInfoScanner
 
         private bool CreateDatasetInfoFile(string inputFileName, string outputDirectoryPath)
         {
-
             bool success;
 
             try
@@ -391,7 +393,6 @@ namespace MSFileInfoScanner
                 {
                     OnErrorEvent("Error calling DatasetStatsSummarizer.CreateDatasetInfoFile: " + mDatasetStatsSummarizer.ErrorMessage);
                 }
-
             }
             catch (Exception ex)
             {
@@ -411,7 +412,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public bool CreateDatasetScanStatsFile(string inputFileName, string outputDirectoryPath)
         {
-
             bool success;
 
             try
@@ -430,7 +430,6 @@ namespace MSFileInfoScanner
                 {
                     OnErrorEvent("Error calling DatasetStatsSummarizer.CreateScanStatsFile: " + mDatasetStatsSummarizer.ErrorMessage);
                 }
-
             }
             catch (Exception ex)
             {
@@ -439,7 +438,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         /// <summary>
@@ -448,7 +446,6 @@ namespace MSFileInfoScanner
         /// <returns></returns>
         public override string GetDatasetInfoXML()
         {
-
             try
             {
                 if (mDatasetStatsSummarizer.DatasetFileInfo.DatasetID == 0 && mDatasetID > 0)
@@ -457,7 +454,6 @@ namespace MSFileInfoScanner
                 }
 
                 return mDatasetStatsSummarizer.CreateDatasetInfoXML();
-
             }
             catch (Exception ex)
             {
@@ -465,7 +461,6 @@ namespace MSFileInfoScanner
             }
 
             return string.Empty;
-
         }
 
         /// <summary>
@@ -507,12 +502,10 @@ namespace MSFileInfoScanner
             {
                 scanEnd = scanCount;
             }
-
         }
 
         private void InitializeLocalVariables()
         {
-
             mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR;
 
             mSaveTICAndBPI = false;
@@ -794,7 +787,6 @@ namespace MSFileInfoScanner
                         successOverall = false;
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -845,14 +837,12 @@ namespace MSFileInfoScanner
                 }
 
                 return true;
-
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error creating QC plot HTML file: " + ex.Message, ex);
                 return false;
             }
-
         }
 
         private void AppendHTMLHeader(TextWriter writer, string datasetName)
@@ -919,12 +909,10 @@ namespace MSFileInfoScanner
             writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
             writer.WriteLine("    </tr>");
             writer.WriteLine();
-
         }
 
         private void AppendBPIPlots(TextWriter writer)
         {
-
             var file1 = mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS);
             var file2 = mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn);
 
@@ -937,7 +925,6 @@ namespace MSFileInfoScanner
             writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
             writer.WriteLine("    </tr>");
             writer.WriteLine();
-
         }
 
         private void AppendAdditionalPlots(TextWriter writer)
@@ -979,7 +966,6 @@ namespace MSFileInfoScanner
                 {
                     plotsForDevice.Add(GenerateQCFigureHTML(file3, 250));
                 }
-
             }
 
             // Append rows and columns to the table for HTML in plotsByDeviceType
@@ -1005,7 +991,6 @@ namespace MSFileInfoScanner
 
         private void AppendTICAndSummaryStats(TextWriter writer, DatasetSummaryStats summaryStats)
         {
-
             writer.WriteLine("    <tr>");
 
             if (HideEmptyHTMLSections && summaryStats.ScanTypeStats.Count == 0)
@@ -1077,7 +1062,6 @@ namespace MSFileInfoScanner
             writer.WriteLine("</body>");
             writer.WriteLine("</html>");
             writer.WriteLine();
-
         }
 
         private string GenerateQCFigureHTML(string filename, int widthPixels)
@@ -1126,11 +1110,9 @@ namespace MSFileInfoScanner
                                  @"<tr><td class=""DataCell"">" + scanType + "</td>" +
                                  @"<td class=""DataCentered"">" + scanCount + "</td>" +
                                  @"<td class=""DataCell"">" + scanFilterText + "</td></tr>");
-
             }
 
             writer.WriteLine(indent + "</table>");
-
         }
 
         private IEnumerable<string> GetDeviceTableHTML(IEnumerable<DeviceInfo> deviceList)
@@ -1215,7 +1197,6 @@ namespace MSFileInfoScanner
             bool highResMS1 = true,
             bool highResMS2 = true)
         {
-
             try
             {
                 // Open the instrument data using the ProteoWizardWrapper
@@ -1238,10 +1219,8 @@ namespace MSFileInfoScanner
                             {
                                 datasetFileInfo.AcqTimeStart = runStartTime;
                             }
-
                         }
                     }
-
                 }
                 catch (Exception)
                 {
@@ -1285,7 +1264,6 @@ namespace MSFileInfoScanner
 
                 pWiz.Dispose();
                 ProgRunner.GarbageCollectNow();
-
             }
             catch (AccessViolationException)
             {
@@ -1404,7 +1382,6 @@ namespace MSFileInfoScanner
             {
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1491,7 +1468,6 @@ namespace MSFileInfoScanner
             {
                 return false;
             }
-
         }
 
         protected void UpdateDatasetStatsSummarizerUsingDatasetFileInfo(DatasetFileInfo datasetFileInfo, bool copyFileSystemTimes = true)
@@ -1511,7 +1487,6 @@ namespace MSFileInfoScanner
             mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
 
             mDatasetStatsSummarizer.DatasetFileInfo.DeviceList.AddRange(datasetFileInfo.DeviceList);
-
         }
 
         /// <summary>
@@ -1537,7 +1512,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public bool UpdateDatasetStatsTextFile(string inputFileName, string outputDirectoryPath, string datasetStatsFilename)
         {
-
             bool success;
 
             try
@@ -1552,7 +1526,6 @@ namespace MSFileInfoScanner
                 {
                     OnErrorEvent("Error calling datasetStatsSummarizer.UpdateDatasetStatsTextFile: " + mDatasetStatsSummarizer.ErrorMessage);
                 }
-
             }
             catch (Exception ex)
             {
@@ -1561,7 +1534,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         private void UpdatePlotWithPython()
@@ -1593,7 +1565,6 @@ namespace MSFileInfoScanner
                 mLCMS2DPlot.Options.DeleteTempFiles = !ShowDebugInfo;
                 mLCMS2DPlotOverview.Options.DeleteTempFiles = !ShowDebugInfo;
             }
-
         }
 
         /// <summary>
@@ -1605,7 +1576,6 @@ namespace MSFileInfoScanner
         /// <returns>True if valid data, false if at least 10% of the spectra has a minimum m/z higher than the threshold</returns>
         protected bool ValidateMS2MzMin()
         {
-
             var validData = mDatasetStatsSummarizer.ValidateMS2MzMin(MS2MzMin, out var errorOrWarningMsg, MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED);
 
             if (validData && string.IsNullOrWhiteSpace(errorOrWarningMsg))
@@ -1626,7 +1596,6 @@ namespace MSFileInfoScanner
 
             return validData;
         }
-
     }
 }
 

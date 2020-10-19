@@ -11,6 +11,8 @@ namespace MSFileInfoScanner
     /// </summary>
     internal abstract class clsPythonPlotContainer : clsPlotContainerBase
     {
+        // Ignore Spelling: Tmp, usr
+
         protected const string TMP_FILE_SUFFIX = "_TmpExportData";
 
         protected int mSeriesCount;
@@ -190,8 +192,6 @@ namespace MSFileInfoScanner
                     runtimeExceeded = true;
                     break;
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -241,7 +241,6 @@ namespace MSFileInfoScanner
 
         private bool RenameTempPngFile(FileSystemInfo exportFile, FileSystemInfo workDir)
         {
-
             string newFileName = null;
 
             try
@@ -278,7 +277,6 @@ namespace MSFileInfoScanner
 
                 return false;
             }
-
         }
     }
 }

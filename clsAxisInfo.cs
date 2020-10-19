@@ -6,6 +6,8 @@ namespace MSFileInfoScanner
 {
     class clsAxisInfo
     {
+        // Ignore Spelling: Autoscale, Gridline
+
         public const string DEFAULT_AXIS_LABEL_FORMAT = "#,##0";
 
         public const string EXPONENTIAL_FORMAT = "0.00E+00";
@@ -95,7 +97,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="min"></param>
         /// <param name="max"></param>
-        /// <remarks>Set min and max to 0 to enable autoscaling</remarks>
+        /// <remarks>Set min and max to 0 to enable auto scaling</remarks>
         public void SetRange(double min, double max)
         {
             if (Math.Abs(min) < float.Epsilon && Math.Abs(max) < float.Epsilon)
@@ -108,8 +110,6 @@ namespace MSFileInfoScanner
 
             Minimum = min;
             Maximum = max;
-
         }
-
     }
 }

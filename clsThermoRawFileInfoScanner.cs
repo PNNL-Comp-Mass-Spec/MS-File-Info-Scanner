@@ -9,12 +9,15 @@ using SpectraTypeClassifier;
 using ThermoFisher.CommonCore.Data.Business;
 using ThermoRawFileReader;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
-
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// Thermo .raw file info scanner
+    /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
     public class clsThermoRawFileInfoScanner : clsMSFileInfoProcessorBaseClass
     {
+        // Ignore Spelling: xcalibur
 
         // Note: The extension must be in all caps
         public const string THERMO_RAW_FILE_EXTENSION = ".RAW";
@@ -38,8 +41,7 @@ namespace MSFileInfoScanner
             ICollection<Device> deviceMatchList,
             ICollection<Device> deviceSkipList)
         {
-
-            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+            // ReSharper disable once ForEachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var device in xcaliburAccessor.FileInfo.Devices)
             {
                 if (deviceMatchList.Count > 0 && !deviceMatchList.Contains(device.Key))
@@ -54,7 +56,6 @@ namespace MSFileInfoScanner
                     datasetFileInfo.DeviceList.Add(deviceInfo);
                 }
             }
-
         }
 
         /// <summary>
@@ -119,18 +120,15 @@ namespace MSFileInfoScanner
                 {
                     overallScore = 0;
                 }
-
             }
 
             datasetFileInfo.OverallQualityScore = overallScore;
-
         }
 
         private clsSpectrumTypeClassifier.eCentroidStatusConstants GetCentroidStatus(
             int scanNumber,
             clsScanInfo scanInfo)
         {
-
             if (scanInfo.IsCentroided)
             {
                 if (mIsProfileM.IsMatch(scanInfo.FilterText))
@@ -197,12 +195,10 @@ namespace MSFileInfoScanner
 
             for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
             {
-
                 clsScanInfo scanInfo;
 
                 try
                 {
-
                     var success = xcaliburAccessor.GetScanInfo(scanNumber, out scanInfo);
 
                     if (success)
@@ -242,7 +238,6 @@ namespace MSFileInfoScanner
                         scanStatsEntry.ExtendedScanInfo.ScanFilterText = scanInfo.FilterText;
 
                         mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
-
                     }
                 }
                 catch (Exception ex)
@@ -283,9 +278,7 @@ namespace MSFileInfoScanner
                                 mDatasetStatsSummarizer.ClassifySpectrum(mzList, scanInfo.MSLevel, centroidingStatus, "Scan " + scanNumber);
                             }
                         }
-
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -303,11 +296,9 @@ namespace MSFileInfoScanner
 
                 var percentComplete = scansProcessed / (float)totalScansToProcess * 100;
                 OnProgressUpdate(string.Format("Spectra processed: {0:N0}", scansProcessed), percentComplete);
-
             }
 
             Console.WriteLine();
-
         }
 
         /// <summary>
@@ -420,9 +411,7 @@ namespace MSFileInfoScanner
                             readError = true;
                         }
                     }
-
                 }
-
             }
 
             if (!readError)
@@ -456,7 +445,6 @@ namespace MSFileInfoScanner
                         {
                             datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
                         }
-
                     }
                     catch (Exception)
                     {
@@ -550,7 +538,6 @@ namespace MSFileInfoScanner
 
                         devicePlot.AddDataTICOnly(scanNumber, 1, scanTimeMinutes, dataPoint.Value);
                     }
-
                 }
             }
 
@@ -602,7 +589,6 @@ namespace MSFileInfoScanner
             PostProcessTasks();
 
             return !readError;
-
         }
 
         private void StoreExtendedScanInfo(
@@ -686,8 +672,6 @@ namespace MSFileInfoScanner
             {
                 // Ignore any errors here
             }
-
         }
-
     }
 }

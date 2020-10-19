@@ -4,13 +4,16 @@ using System.IO;
 using MSFileInfoScanner.DatasetStats;
 using PRISM;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
-
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// Agilent TOF .D folder Info Scanner
+    /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012</remarks>
     // ReSharper disable once IdentifierTypo
     public class clsAgilentTOFDFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
+        // Ignore Spelling: AcqData, AcqTime
 
         // Note: The extension must be in all caps
         public const string AGILENT_DATA_FOLDER_D_EXTENSION = ".D";
@@ -53,13 +56,11 @@ namespace MSFileInfoScanner
 
             try
             {
-
                 // Open the Contents.xml file
                 var filePath = Path.Combine(directoryPath, AGILENT_XML_CONTENTS_FILE);
 
                 using (var reader = new System.Xml.XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
-
                     while (!reader.EOF)
                     {
                         reader.Read();
@@ -90,21 +91,16 @@ namespace MSFileInfoScanner
                                             datasetFileInfo.AcqTimeStart = acquisitionStartTime.ToLocalTime();
                                             success = true;
                                         }
-
                                     }
                                     catch (Exception)
                                     {
                                         // Ignore errors here
                                     }
-
                                 }
                                 break;
                         }
-
                     }
-
                 }
-
             }
             catch (Exception ex)
             {
@@ -114,7 +110,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         /// <summary>
@@ -127,7 +122,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         private bool ProcessTimeSegmentFile(string directoryPath, DatasetFileInfo datasetFileInfo, out double totalAcqTimeMinutes)
         {
-
             var success = false;
 
             double startTime = 0;
@@ -144,7 +138,6 @@ namespace MSFileInfoScanner
 
                 using (var reader = new System.Xml.XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
-
                     while (!reader.EOF)
                     {
                         reader.Read();
@@ -181,22 +174,18 @@ namespace MSFileInfoScanner
                             case System.Xml.XmlNodeType.EndElement:
                                 if (reader.Name == "TimeSegment")
                                 {
-                                    // Store the acqtime for this time segment
+                                    // Store the AcqTime for this time segment
 
                                     if (endTime > startTime)
                                     {
                                         success = true;
                                         totalAcqTimeMinutes += endTime - startTime;
                                     }
-
                                 }
                                 break;
                         }
-
                     }
-
                 }
-
             }
             catch (Exception ex)
             {
@@ -206,7 +195,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         /// <summary>
@@ -293,7 +281,6 @@ namespace MSFileInfoScanner
                             mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(addnlFile);
                         }
                         primaryFileAdded = true;
-
                     }
 
                     if (!primaryFileAdded)
@@ -330,7 +317,6 @@ namespace MSFileInfoScanner
 
                     // Read the raw data to create the TIC and BPI
                     ReadBinaryData(rootDirectory.FullName, datasetFileInfo, acquisitionLengthMinutes);
-
                 }
 
                 if (success)
@@ -343,7 +329,6 @@ namespace MSFileInfoScanner
                     mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
                     mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
                 }
-
             }
             catch (Exception ex)
             {
@@ -354,12 +339,10 @@ namespace MSFileInfoScanner
             PostProcessTasks();
 
             return success;
-
         }
 
         private void ReadBinaryData(string dataDirectoryPath, DatasetFileInfo datasetFileInfo, double acquisitionLengthMinutes)
         {
-
             try
             {
                 // Open the data directory using the ProteoWizardWrapper
@@ -382,7 +365,6 @@ namespace MSFileInfoScanner
                             }
                         }
                     }
-
                 }
                 catch (Exception)
                 {
@@ -408,7 +390,6 @@ namespace MSFileInfoScanner
                     // Process the chromatograms
                     pWizParser.StoreChromatogramInfo(datasetFileInfo, out ticStored, out _, out runtimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
-
                 }
 
                 if (pWiz.SpectrumCount > 0)
@@ -427,14 +408,11 @@ namespace MSFileInfoScanner
 
                 pWiz.Dispose();
                 ProgRunner.GarbageCollectNow();
-
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Exception reading the Binary Data in the Agilent TOF .D directory using ProteoWizard: " + ex.Message, ex);
             }
-
         }
-
     }
 }

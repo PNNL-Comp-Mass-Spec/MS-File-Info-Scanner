@@ -6,20 +6,28 @@ using PRISM;
 
 namespace MSFileInfoScanner
 {
-    /// -------------------------------------------------------------------------------
+    /// <summary>
+    /// <para>
     /// This program scans a series of MS data files (or data directories) and extracts the acquisition start and end times,
     /// number of spectra, and the total size of the Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
-    ///
+    /// </para>
+    /// </summary>
+    /// <remarks>
+    /// <para>
     /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
     /// Program started in 2005
     /// Copyright 2005, Battelle Memorial Institute.  All Rights Reserved.
-    ///
+    /// </para>
+    /// <para>
     /// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
     /// Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
-    /// -------------------------------------------------------------------------------
+    /// </para>
+    /// </remarks>
     static class modMain
     {
-        public const string PROGRAM_DATE = "July 30, 2020";
+        // Ignore Spelling: OxyPlot, Conf, nnn
+
+        public const string PROGRAM_DATE = "October 19, 2020";
 
         private static DateTime mLastProgressTime;
 

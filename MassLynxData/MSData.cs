@@ -38,7 +38,6 @@ namespace MSFileInfoScanner.MassLynxData
             {
                 FunctionInfo[functionNumber] = new MSFunctionInfo(functionNumber);
             }
-
         }
     }
 }

@@ -6,16 +6,14 @@ using System.Xml;
 using MSFileInfoScanner.DatasetStats;
 using PRISM;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2008
-
 namespace MSFileInfoScanner
 {
     /// <summary>
     /// Check the integrity of files in a given directory
     /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2008</remarks>
     public class clsFileIntegrityChecker : EventNotifier
     {
-
         public clsFileIntegrityChecker()
         {
             InitializeLocalVariables();
@@ -80,7 +78,7 @@ namespace MSFileInfoScanner
 
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide variables"
 
         private string mStatusMessage;
         private int mMaximumTextFileLinesToCheck;
@@ -158,7 +156,6 @@ namespace MSFileInfoScanner
             }
 
             return hexBuilder.ToString().ToLower();
-
         }
 
         /// <summary>
@@ -392,7 +389,6 @@ namespace MSFileInfoScanner
                     "mass:",
                     "Charge"
                 }, false, false, 1);
-
             }
             else if (fileNameLower == "lcq_profile.txt")
             {
@@ -400,7 +396,6 @@ namespace MSFileInfoScanner
                 //  Datafile FullScanSumBP FullScanMaxBP ZoomScanSumBP ZoomScanMaxBP SumTIC MaxTIC
                 //  OU_CN32_002_run3_3Apr08_Draco_07-12-25.9.9.1.dta 11861 11861 0 0 13482 13482
                 fileIsValid = CheckTextFileWork(filePath, 1, 0, "Datafile", false);
-
             }
             else if (fileName.Equals("XTandem_Processing_Log.txt", StringComparison.OrdinalIgnoreCase))
             {
@@ -409,7 +404,6 @@ namespace MSFileInfoScanner
                 //  2008-05-16 10:48:19	loading spectra
                 //  2008-05-16 10:48:23	.
                 fileIsValid = CheckTextFileWork(filePath, 1, 1, true, true);
-
             }
             else if (fileNameLower == "mass_correction_tags.txt")
             {
@@ -417,7 +411,6 @@ namespace MSFileInfoScanner
                 //  6C13    	6.02013	-
                 //  6C132N15	8.0143	-
                 fileIsValid = CheckTextFileWork(filePath, 1, 1, true);
-
             }
             else if (fileNameLower.EndsWith("_ModDefs.txt".ToLower()))
             {
@@ -487,7 +480,6 @@ namespace MSFileInfoScanner
                 //  HitNum	FScore	Probability	negOnly
                 //  1	9.5844	1	0
                 fileIsValid = CheckTextFileWork(filePath, 1, 3, "HitNum", true);
-
             }
             else if (fileNameLower == "PeptideProphet_Coefficients.txt")
             {
@@ -495,7 +487,6 @@ namespace MSFileInfoScanner
                 //  CS	Xcorr	DeltaCn2	RankSp	DelM	Const
                 //  1	5.49	4.643	-0.455	-0.84	0.646
                 fileIsValid = CheckTextFileWork(filePath, 1, 5, "CS", true);
-
             }
             else if (fileNameLower == "sequest.log")
             {
@@ -510,11 +501,9 @@ namespace MSFileInfoScanner
                 //    Arch:WIN32  CPU:1  Tid:40000  Name:p1
                 //    Arch:LINUXI386  CPU:4  Tid:80000  Name:node18
                 fileIsValid = CheckTextFileWork(filePath, 5, 0);
-
             }
 
             return fileIsValid;
-
         }
 
         /// <summary>
@@ -671,7 +660,6 @@ namespace MSFileInfoScanner
             bool charCountSkipsBlankLines,
             int requiredTextMinMatchCount)
         {
-
             // Open the text file and read the text line-by-line
             // Check for a minimum number of lines being present, a minimum number of tab characters, and a minimum number of commas
             // Additionally, look for lines that start with the text defined in requiredTextLineHeaders()
@@ -726,7 +714,6 @@ namespace MSFileInfoScanner
                 // Open the file
                 using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
-
                     // Read each line and examine it
                     while (!reader.EndOfStream && linesRead < maximumTextFileLinesToCheck)
                     {
@@ -754,7 +741,6 @@ namespace MSFileInfoScanner
                                     errorLogged = true;
                                     break;
                                 }
-
                             }
 
                             if (minimumCommaCount > 0)
@@ -771,7 +757,6 @@ namespace MSFileInfoScanner
                                     errorLogged = true;
                                     break;
                                 }
-
                             }
 
                             if (needToCheckLineHeaders)
@@ -783,11 +768,8 @@ namespace MSFileInfoScanner
                                 // All conditions have been met; no need to continue reading the file
                                 break;
                             }
-
                         }
-
                     }
-
                 }
 
                 if (textLineHeaders.Count > 0 && !errorLogged)
@@ -804,7 +786,6 @@ namespace MSFileInfoScanner
                     LogFileIntegrityError(filePath, errorMessage);
                     errorLogged = true;
                 }
-
             }
             catch (Exception ex)
             {
@@ -814,7 +795,6 @@ namespace MSFileInfoScanner
             }
 
             return !errorLogged;
-
         }
 
         /// <summary>
@@ -894,7 +874,6 @@ namespace MSFileInfoScanner
             }
 
             return lineIsValid;
-
         }
 
         /// <summary>
@@ -939,7 +918,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         private bool CheckParamsFile(string filePath)
         {
-
             const string MASS_TOLERANCE_LINE = "peptide_mass_tolerance";
             const string FRAGMENT_TOLERANCE_LINE = "fragment_ion_tolerance";
             const int MAX_LINES_TO_READ = 50;
@@ -957,7 +935,6 @@ namespace MSFileInfoScanner
                     var reader =
                         new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
-
                     // Read each line in the file and look for the expected parameter lines
                     while (!reader.EndOfStream && linesRead < MAX_LINES_TO_READ)
                     {
@@ -983,9 +960,7 @@ namespace MSFileInfoScanner
                             break;
                         }
                     }
-
                 }
-
             }
             catch (Exception ex)
             {
@@ -995,7 +970,6 @@ namespace MSFileInfoScanner
             }
 
             return fileIsValid;
-
         }
 
         /// <summary>
@@ -1006,7 +980,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         private bool CheckTICFile(string filePath)
         {
-
             const string ICR2LS_LINE_START = "ICR-2LS";
             const string VERSION_LINE_START = "VERSION";
 
@@ -1022,7 +995,6 @@ namespace MSFileInfoScanner
                     var reader =
                         new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
-
                     // Confirm that the first two lines look like:
                     //  ICR-2LS Data File (GA Anderson & JE Bruce); output from MASIC by Matthew E Monroe
                     //  Version 2.4.2974.38283; February 22, 2008
@@ -1056,11 +1028,8 @@ namespace MSFileInfoScanner
                             // This code shouldn't be reached
                             break;
                         }
-
                     }
-
                 }
-
             }
             catch (Exception ex)
             {
@@ -1069,7 +1038,6 @@ namespace MSFileInfoScanner
             }
 
             return fileIsValid;
-
         }
 
         /// <summary>
@@ -1080,7 +1048,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         private bool CheckZIPFile(string filePath)
         {
-
             // minutes/MB
             const float MAX_THREAD_RATE_CHECK_ALL_DATA = 0.25f;
 
@@ -1174,7 +1141,6 @@ namespace MSFileInfoScanner
             } while (zipLibTest.ThreadState != ThreadState.Stopped);
 
             return mZipFileWorkParams.ZipIsValid;
-
         }
 
         private void CheckZipFileWork()
@@ -1200,7 +1166,6 @@ namespace MSFileInfoScanner
 
                     LogFileIntegrityError(mZipFileWorkParams.FilePath, message);
                 }
-
             }
             catch (Exception ex)
             {
@@ -1209,7 +1174,6 @@ namespace MSFileInfoScanner
             }
 
             mZipFileWorkParams.ZipIsValid = zipIsValid;
-
         }
 
         /// <summary>
@@ -1222,7 +1186,6 @@ namespace MSFileInfoScanner
         /// <remarks>Extracts each file in the zip file to a temporary file.  Will return false if you run out of disk space</remarks>
         private bool CheckZipFileIntegrity(string zipFilePath, bool checkAllData, bool throwExceptionIfInvalid)
         {
-
             var tempPath = string.Empty;
             bool zipIsValid;
 
@@ -1238,7 +1201,6 @@ namespace MSFileInfoScanner
 
             try
             {
-
                 if (checkAllData)
                 {
                     // Obtain a random file name
@@ -1247,7 +1209,6 @@ namespace MSFileInfoScanner
                     // Open the zip file
                     using (var zipFile = new Ionic.Zip.ZipFile(zipFilePath))
                     {
-
                         // Extract each file to tempPath
                         foreach (var fileEntry in zipFile.Entries)
                         {
@@ -1259,20 +1220,16 @@ namespace MSFileInfoScanner
                                                                 FileShare.ReadWrite);
                                 fileEntry.Extract(testStream);
                                 testStream.Close();
-
                             }
                         }
-
                     }
 
                     zipIsValid = true;
-
                 }
                 else
                 {
                     zipIsValid = Ionic.Zip.ZipFile.CheckZip(zipFilePath);
                 }
-
             }
             catch (Exception)
             {
@@ -1298,7 +1255,6 @@ namespace MSFileInfoScanner
             }
 
             return zipIsValid;
-
         }
 
         /// <summary>
@@ -1325,7 +1281,6 @@ namespace MSFileInfoScanner
                 // scan_num,charge,abundance,mz,fit,average_mw,monoisotopic_mw,mostabundant_mw,fwhm,signal_noise,mono_abundance,mono_plus2_abundance
                 headerRequired = "scan_num";
                 minimumCommaCount = 10;
-
             }
             else if (fileNameLower.EndsWith("_scans.csv"))
             {
@@ -1501,7 +1456,6 @@ namespace MSFileInfoScanner
             }
 
             return xmlIsValid;
-
         }
 
         /// <summary>
@@ -1528,7 +1482,6 @@ namespace MSFileInfoScanner
             IReadOnlyCollection<string> requiredElementNames,
             IReadOnlyCollection<string> requiredAttributeNames)
         {
-
             var elementsRead = 0;
 
             var errorLogged = false;
@@ -1568,7 +1521,6 @@ namespace MSFileInfoScanner
                     {
                         using (var xmlReader = new XmlTextReader(reader))
                         {
-
                             // Read each of the nodes and examine them
 
                             while (xmlReader.Read())
@@ -1593,7 +1545,6 @@ namespace MSFileInfoScanner
 
                                 if (needToCheckAttributeNames && xmlReader.HasAttributes)
                                 {
-
                                     while (xmlReader.MoveToNextAttribute())
                                     {
                                         var totalMatchesInList = FindItemNameInList(xmlReader.Name, requiredAttributes);
@@ -1617,7 +1568,6 @@ namespace MSFileInfoScanner
                                     break;
                                 }
                             }
-
                         }
                         // xmlReader
                     }
@@ -1644,7 +1594,6 @@ namespace MSFileInfoScanner
                         LogFileIntegrityError(filePath, errorMessage);
                         errorLogged = true;
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -1652,7 +1601,6 @@ namespace MSFileInfoScanner
                     LogFileIntegrityError(filePath, ex.Message);
                     errorLogged = true;
                 }
-
             }
             catch (Exception ex)
             {
@@ -1661,7 +1609,6 @@ namespace MSFileInfoScanner
             }
 
             return !errorLogged;
-
         }
 
         /// <summary>
@@ -1709,7 +1656,6 @@ namespace MSFileInfoScanner
 
                 foreach (var dataFile in directoryInfo.GetFiles())
                 {
-
                     try
                     {
                         // Assume True for now
@@ -1792,7 +1738,6 @@ namespace MSFileInfoScanner
                                 default:
                                     // Do not check this file (but add it to udtFileStats anyway)
                                     break;
-
                             }
                         }
 
@@ -1816,15 +1761,12 @@ namespace MSFileInfoScanner
                         {
                             udtDirectoryStats.FileCountFailIntegrity++;
                         }
-
                     }
                     catch (Exception ex)
                     {
                         LogErrors("CheckIntegrityOfFilesInDirectory", "Error checking file " + dataFile.FullName, ex);
                     }
-
                 }
-
             }
             catch (Exception ex)
             {
@@ -1953,7 +1895,6 @@ namespace MSFileInfoScanner
                 // No need to continue checking additional lines
                 needToCheckItems = false;
             }
-
         }
 
         /// <summary>
@@ -2041,7 +1982,6 @@ namespace MSFileInfoScanner
                                              int maximumTextFileLinesToCheck = 50,
                                              bool caseSensitiveElementNames = false)
         {
-
             var linesRead = 0;
 
             var allElementsFound = false;
@@ -2067,7 +2007,6 @@ namespace MSFileInfoScanner
                 // Open the file
                 using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
-
                     // Read each line and examine it
                     while (!reader.EndOfStream && linesRead < maximumTextFileLinesToCheck)
                     {
@@ -2099,15 +2038,12 @@ namespace MSFileInfoScanner
                                 allElementsFound = true;
                             }
                             break;
-
                         }
 
                         if (allElementsFound)
                             break;
                     }
-
                 }
-
             }
             catch (Exception ex)
             {
@@ -2115,7 +2051,6 @@ namespace MSFileInfoScanner
             }
 
             return allElementsFound;
-
         }
 
         public static udtDirectoryStatsType GetNewFolderStats(string directoryPath)
@@ -2143,7 +2078,6 @@ namespace MSFileInfoScanner
             mComputeFileHashes = false;
 
             mStatusMessage = string.Empty;
-
         }
 
         private void LogErrors(string source, string message, Exception ex)
@@ -2163,7 +2097,6 @@ namespace MSFileInfoScanner
             {
                 OnErrorEvent(source + ": " + messageWithoutCRLF, ex);
             }
-
         }
 
         private void LogFileIntegrityError(string filePath, string errorMessage)
@@ -2186,7 +2119,6 @@ namespace MSFileInfoScanner
                 // Return the hash, formatted as a string
                 return ByteArrayToString(arrHash);
             }
-
         }
 
         public string Sha1CalcFile(string path)
@@ -2203,7 +2135,6 @@ namespace MSFileInfoScanner
                 // Return the hash, formatted as a string
                 return ByteArrayToString(arrHash);
             }
-
         }
 
         /// <summary>
@@ -2286,6 +2217,5 @@ namespace MSFileInfoScanner
                 xmlReader.Read();
             }
         }
-
     }
 }

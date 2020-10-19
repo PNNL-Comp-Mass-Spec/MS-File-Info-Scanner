@@ -8,12 +8,10 @@ namespace MSFileInfoScanner
 {
     public class clsOxyPlotUtilities
     {
-
 #pragma warning disable CS3002 // Return type is not CLS-compliant
         public static PlotModel GetBasicPlotModel(string title, string xAxisLabel, string yAxisLabel)
 #pragma warning restore CS3002 // Argument type is not CLS-compliant
         {
-
             var myPlot = new PlotModel
             {
                 Title = string.Copy(title),
@@ -37,7 +35,6 @@ namespace MSFileInfoScanner
             myPlot.PlotAreaBackground = OxyColor.FromRgb(243, 243, 243);
 
             return myPlot;
-
         }
 
 #pragma warning disable CS3001 // Argument type is not CLS-compliant
@@ -65,7 +62,6 @@ namespace MSFileInfoScanner
             };
 
             return axis;
-
         }
 
         /// <summary>
@@ -101,6 +97,5 @@ namespace MSFileInfoScanner
                 currentAxis.MinorGridlineThickness = 0;
             }
         }
-
     }
 }

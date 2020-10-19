@@ -4,16 +4,14 @@ using System.IO;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScanner.MassLynxData;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
-
 namespace MSFileInfoScanner
 {
     /// <summary>
     /// Class for reading data from Waters mass spectrometers (previously Micromass)
     /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
     public class clsMicromassRawFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
-
         // Note: The extension must be in all caps
         public const string MICROMASS_RAW_FOLDER_EXTENSION = ".RAW";
 
@@ -45,7 +43,6 @@ namespace MSFileInfoScanner
             {
                 return new TimeSpan(0, 0, 0);
             }
-
         }
 
         /// <summary>
@@ -91,7 +88,6 @@ namespace MSFileInfoScanner
                 PostProcessTasks();
 
                 return true;
-
             }
             catch (Exception)
             {
@@ -102,7 +98,6 @@ namespace MSFileInfoScanner
 
         private void ProcessRawDirectory(DirectoryInfo datasetDirectory, DatasetFileInfo datasetFileInfo, out List<FileInfo> primaryDataFiles)
         {
-
             primaryDataFiles = new List<FileInfo>();
 
             // Sum up the sizes of all of the files in this directory
@@ -166,7 +161,6 @@ namespace MSFileInfoScanner
             clsMassLynxNativeIO nativeFileIO,
             MSHeaderInfo headerInfo)
         {
-
             var newStartDate = DateTime.Parse(headerInfo.AcquDate + " " + headerInfo.AcquTime);
 
             var functionCount = nativeFileIO.GetFunctionCount(datasetDirectory.FullName);
@@ -223,6 +217,5 @@ namespace MSFileInfoScanner
                 }
             }
         }
-
     }
 }

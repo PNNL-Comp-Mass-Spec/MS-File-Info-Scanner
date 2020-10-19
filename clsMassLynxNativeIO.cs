@@ -4,68 +4,75 @@ using System.Diagnostics;
 using System.IO;
 using MSFileInfoScanner.MassLynxData;
 
+// ReSharper disable UnusedMember.Global
 // ReSharper disable BuiltInTypeReferenceStyle
 namespace MSFileInfoScanner
 {
-
+    /// <summary>
+    /// <para>
     /// This class can read data from MassLynx data files using native disk access,
     ///  obviating the need to have MassLynx installed
-    ///
+    /// </para>
+    /// <para>
     /// Note that native file IO is significantly slower than utilizing the
     ///  MassLynx API access functions (see clsMassLynxReader3 and clsMassLynxReader4)
-    ///
-    /// Written by Matthew Monroe for PNNL in Jan 2004
-    /// Portions of this code were written at UNC in 2001
-    ///
+    /// </para>
+    /// <para>
     /// VB6 version Last modified January 22, 2004
     /// Updated to VB.NET September 17, 2005, though did not upgrade the extended function info functions or data point reading options
     /// Updated to C# in May 2016
+    /// </para>
+    /// </summary>
+    /// <remarks>
+    /// Written by Matthew Monroe for PNNL in Jan 2004
+    /// Portions of this code were written at UNC in 2001
+    /// </remarks>
     internal class clsMassLynxNativeIO
     {
+        // Ignore Spelling: Acqu, func, CLng
 
         //-------------------------------
         //-- Start Native IO Headers
 
-        //Private Structure RAWHEADER
+        //Private Structure RAW_HEADER
         //	Dim nVersionMajor As Short 'Major version of file format.
         //	Dim nVersionMinor As Short 'Minor version of file format.
-        //	Dim szAcquName As String 'Acquired filename, no extn.
-        //	Dim szAcquDate As String 'Acquired date: DD-MMM-YYYY.
-        //	Dim szAcquTime As String 'Acquired time: HH:MM:SS (24 hr).
-        //	Dim szJobCode As String
-        //	Dim szTaskCode As String
-        //	Dim szUserName As String
-        //	Dim szLabName As String
-        //	Dim szInstrument As String
-        //	Dim szConditions As String
-        //	Dim szSampleDesc As String 'Sample description.
-        //	'szSampleDesc As String 'Sample description.
-        //	Dim szSubmitter As String
-        //	Dim szSampleID As String
-        //	Dim szBottleNumber As String
-        //	Dim lfSolventDelay As Double 'Solvent delay in decimal minutes.
+        //	Dim AcquName As String 'Acquired filename, no extension
+        //	Dim AcquDate As String 'Acquired date: DD-MMM-YYYY.
+        //	Dim AcquTime As String 'Acquired time: HH:MM:SS (24 hr).
+        //	Dim JobCode As String
+        //	Dim TaskCode As String
+        //	Dim UserName As String
+        //	Dim LabName As String
+        //	Dim Instrument As String
+        //	Dim Conditions As String
+        //	Dim SampleDescription As String 'Sample description.
+        //	Dim Submitter As String
+        //	Dim SampleID As String
+        //	Dim BottleNumber As String
+        //	Dim SolventDelay As Double 'Solvent delay in decimal minutes.
         //	Dim bResolved As Integer 'TRUE if resolved data file.
-        //	Dim szPepFileName As String 'Assoc pep/embl filename-inc. dir+ext.
-        //	Dim szProcess As String
-        //	Dim bEncypted As Integer
-        //	' Fields added for Maldi-Tof support SCR
-        //	Dim nAutosamplerType As Integer
-        //	Dim szGasName As String
-        //	Dim szInstrumentType As String
+        //	Dim PepFileName As String 'Assoc pep/EMBL filename-inc. directory+extension.
+        //	Dim Process As String
+        //	Dim bEncrypted As Integer
+        //	' Fields added for MALDI-TOF support SCR
+        //	Dim nAutoSamplerType As Integer
+        //	Dim GasName As String
+        //	Dim InstrumentType As String
         //	' Plate description string
-        //	Dim szPlateDesc As String
-        //	'Analogue chanel offset times
-        //       Dim afAnalogOffset() As Single              ' 1-based array, ranging from 1 to 4
-        //	Dim nMuxStream As Integer
+        //	Dim PlateDescription As String
+        //	'Analogue channel offset times
+        //  Dim AnalogOffset() As Single              ' 1-based array, ranging from 1 to 4
+        //	Dim MultiplexStream As Integer
         //   End Structure
 
         //   '***
-        //   '*** DMRAWHEADER ***
+        //   '*** DM_RAW_HEADER ***
         //   '*** Used at the DM level of MassLynx.
         //   '***
-        //   Private Structure DMRAWHEADER
-        //       Dim sRawHeader As RAWHEADER
-        //       Dim wFuncsInFile As Short
+        //   Private Structure DM_RAW_HEADER
+        //       Dim RawHeader As RAW_HEADER
+        //       Dim FunctionsInFile As Short
         //       Dim wAnalogsInFile As Short
         //'   End Structure
 
@@ -94,6 +101,7 @@ namespace MSFileInfoScanner
         }
 
         private eErrorCodeConstants mErrorCode;
+
         public string GetErrorMessage()
         {
             string message;
@@ -165,7 +173,6 @@ namespace MSFileInfoScanner
                     versionMajor = mMSData.HeaderInfo.VersionMajor;
                     versionMinor = mMSData.HeaderInfo.VersionMinor;
                 }
-
             }
             catch (Exception ex)
             {
@@ -174,7 +181,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         /// <summary>
@@ -185,7 +191,6 @@ namespace MSFileInfoScanner
         /// <returns> True if success, false if failure</returns>
         public bool GetFileInfo(string massLynxDataDirectoryPath, out MSHeaderInfo headerInfo)
         {
-
             bool success;
 
             headerInfo = new MSHeaderInfo();
@@ -205,7 +210,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         /// <summary>
@@ -234,7 +238,6 @@ namespace MSFileInfoScanner
             }
 
             return acquisitionDataTypeID;
-
         }
 
         /// <summary>
@@ -249,7 +252,6 @@ namespace MSFileInfoScanner
             int functionNumber,
             out short functionType)
         {
-
             return GetFunctionInfo(massLynxDataDirectoryPath, functionNumber,
                                    out _, out _, out _,
                                    out _, out _,
@@ -323,7 +325,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         /// <summary>
@@ -361,7 +362,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         /// <summary>
@@ -386,7 +386,6 @@ namespace MSFileInfoScanner
             }
 
             return functionCount;
-
         }
 
         /// <summary>
@@ -485,7 +484,6 @@ namespace MSFileInfoScanner
             out float massStart,
             out float massEnd)
         {
-
             // Returns scan information in the out variables
             // Function returns True if no error, False if an error
             // Note that if LoadMSScanHeader returns 0, indicating no data points, this function will still return True
@@ -552,7 +550,6 @@ namespace MSFileInfoScanner
         /// <returns></returns>
         public bool IsFunctionMsMs(string massLynxDataDirectoryPath, int functionNumber)
         {
-
             if (GetFunctionInfo(massLynxDataDirectoryPath, functionNumber, out short functionType))
             {
                 return functionType != 0;
@@ -570,7 +567,6 @@ namespace MSFileInfoScanner
         /// <returns></returns>
         public bool IsSpectrumContinuumData(string massLynxDataDirectoryPath, int functionNumber, int scanNumber = 1)
         {
-
             if (GetScanInfoEx(massLynxDataDirectoryPath, functionNumber, scanNumber,
                               out _, out _, out _, out _,
                               out _, out _, out _,
@@ -613,7 +609,6 @@ namespace MSFileInfoScanner
 
             try
             {
-
                 if (Directory.Exists(massLynxDataDirectoryPath))
                 {
                     // Read the header information from the current file
@@ -629,7 +624,6 @@ namespace MSFileInfoScanner
                     thisMSData.InitializeFunctionInfo(0);
                     return false;
                 }
-
             }
             catch (Exception ex)
             {
@@ -654,12 +648,10 @@ namespace MSFileInfoScanner
         /// <returns>The function count, or 0 on failure</returns>
         private int LoadMSFunctionInfo(MSData thisMSData, string massLynxDataDirectoryPath)
         {
-
             var fileValidated = false;
 
             try
             {
-
                 var massLynxFile = new FileInfo(massLynxDataDirectoryPath);
                 string cleanMassLynxDataFolderPath;
 
@@ -688,7 +680,7 @@ namespace MSFileInfoScanner
                 thisMSData.UserSuppliedDataDirPath = massLynxDataDirectoryPath;
                 thisMSData.CurrentDataDirPath = cleanMassLynxDataFolderPath;
 
-                // Use sFuncInfo to read the header information from the current file
+                // Use FunctionInfo to read the header information from the current file
                 var functionCount = NativeIOGetFunctionCount(cleanMassLynxDataFolderPath);
                 thisMSData.InitializeFunctionInfo(functionCount);
 
@@ -702,7 +694,6 @@ namespace MSFileInfoScanner
                 // Note that the function array is 1-based
                 for (var functionNumber = 1; functionNumber <= thisMSData.FunctionCount; functionNumber++)
                 {
-
                     if (NativeIOGetFunctionInfo(cleanMassLynxDataFolderPath, thisMSData.FunctionInfo[functionNumber]))
                     {
                         float startMass;
@@ -756,7 +747,6 @@ namespace MSFileInfoScanner
                 }
 
                 return thisMSData.FunctionCount;
-
             }
             catch (Exception ex)
             {
@@ -771,7 +761,6 @@ namespace MSFileInfoScanner
 
                 return thisMSData.FunctionCount;
             }
-
         }
 
         /// <summary>
@@ -792,7 +781,6 @@ namespace MSFileInfoScanner
 
             try
             {
-
                 scanStatsSingleScan.Calibrated = false;
                 scanStatsSingleScan.Continuum = false;
                 scanStatsSingleScan.Overload = false;
@@ -825,7 +813,6 @@ namespace MSFileInfoScanner
                     scanStatsSingleScan.RetentionTime = scanIndexRecord.ScanTime;
 
                     scanStatsSingleScan.SetMass = scanIndexRecord.SetMass;
-
                 }
             }
             catch (Exception ex)
@@ -880,12 +867,11 @@ namespace MSFileInfoScanner
             }
 
             return validDataFolder;
-
         }
 
+        // ReSharper disable once UnusedMember.Local
         private bool ConstructValidDataFilePath(string desiredDataFilePath, out string dataFilePath)
         {
-
             // Make sure the dataFilePath contains ".raw"
             if (desiredDataFilePath.ToLower().IndexOf(".raw", StringComparison.Ordinal) < 0)
             {
@@ -928,12 +914,10 @@ namespace MSFileInfoScanner
         /// <returns>The number of functions, 0 if an error</returns>
         private int NativeIOGetFunctionCount(string dataDirPath)
         {
-
             var functionCount = 0;
 
             try
             {
-
                 var functionsFilePath = Path.Combine(dataDirPath, "_functns.inf");
                 var functionsFile = new FileInfo(functionsFilePath);
 
@@ -943,7 +927,6 @@ namespace MSFileInfoScanner
                 {
                     functionCount = (int)(functionsFile.Length / RawFunctionDescriptorRecord.NATIVE_FUNCTION_INFO_SIZE_BYTES);
                 }
-
             }
             catch (Exception ex)
             {
@@ -951,7 +934,6 @@ namespace MSFileInfoScanner
             }
 
             return functionCount;
-
         }
 
         /// <summary>
@@ -962,10 +944,8 @@ namespace MSFileInfoScanner
         /// <returns>True if success, False if failure</returns>
         private bool NativeIOGetFunctionInfo(string dataDirPath, MSFunctionInfo msFunctionInfo)
         {
-
             try
             {
-
                 var functionsFilePath = Path.Combine(dataDirPath, "_functns.inf");
                 var functionsFile = new FileInfo(functionsFilePath);
 
@@ -1024,7 +1004,6 @@ namespace MSFileInfoScanner
                     {
                         nativeFunctionInfo.SegmentEndMasses[index] = reader.ReadInt32();
                     }
-
                 } // end using
 
                 var success = true;
@@ -1132,7 +1111,6 @@ namespace MSFileInfoScanner
                         // This is unexpected
                         Debug.WriteLine("Scan count values do not agree in NativeIOGetFunctionInfo");
                     }
-
                 }
 
                 return success;
@@ -1142,7 +1120,6 @@ namespace MSFileInfoScanner
                 Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOGetFunctionInfo:" + ex.Message);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1157,10 +1134,8 @@ namespace MSFileInfoScanner
         /// </remarks>
         private int NativeIOGetScanCount(string dataDirPath, MSFunctionInfo msFunctionInfo)
         {
-
             try
             {
-
                 var indexFilePath = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(msFunctionInfo.FunctionNumber) + ".idx");
                 var indexFile = new FileInfo(indexFilePath);
 
@@ -1182,7 +1157,6 @@ namespace MSFileInfoScanner
                 Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOGetScanCount:" + ex.Message);
                 return 0;
             }
-
         }
 
         /// <summary>
@@ -1204,14 +1178,13 @@ namespace MSFileInfoScanner
             out ScanIndexRecord scanIndexRecord,
             bool scanOffsetAndPeakCountOnly = false)
         {
-
             // This is used for most files
             var nativeScanIndexRecord = new RawScanIndexRecord(mRawDataUtils);
 
             // This is used for files with msFunctionInfo.AcquisitionDataType = 0
-            // The difference is that udtRawScanIndexRecordType ends in an Integer then a Long
-            //  while this udt ends in a Long, then an Integer
-            // When this udt is used, its values are copied to nativeScanIndexRecord directly after reading
+            // The difference is that structure RawScanIndexRecordType ends in an Int16 then a Int32
+            //  while this structure ends in a Int32, then an Int16
+            // When this structure is used, its values are copied to nativeScanIndexRecord directly after reading
             var nativeScanIndexRecordCompressedScan = new RawScanIndexRecordCompressedScan();
 
             // Initialize the output variable
@@ -1221,7 +1194,6 @@ namespace MSFileInfoScanner
 
             try
             {
-
                 var indexFilePath = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(msFunctionInfo.FunctionNumber) + ".idx");
                 // indexFilePath  = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(msFunctionInfo.FunctionNumber) + ".sts");
 
@@ -1236,7 +1208,6 @@ namespace MSFileInfoScanner
 
                 using (var reader = new BinaryReader(new FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
-
                     // The ScanCount stored in the function index file is always 0 rather than the correct number of scans
                     // Thus, we can determine the number of scans in the function by dividing the size of the file (in bytes)
                     //  by the size of each RawScanIndexRecord
@@ -1326,7 +1297,6 @@ namespace MSFileInfoScanner
                         // This will get populated later
                         scanIndexRecord.SetMass = 0;
                     }
-
                 }
                 return success;
             }
@@ -1335,7 +1305,6 @@ namespace MSFileInfoScanner
                 Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOGetScanInfo:" + ex.Message);
                 return false;
             }
-
         }
 
         private void NativeIOParseCalibrationCoefficients(
@@ -1374,7 +1343,6 @@ namespace MSFileInfoScanner
                     break;
                 }
             }
-
         }
 
         /// <summary>
@@ -1392,7 +1360,6 @@ namespace MSFileInfoScanner
 
             try
             {
-
                 var headerFilePath = Path.Combine(thisMSData.CurrentDataDirPath, "_HEADER.TXT");
                 var headerFile = new FileInfo(headerFilePath);
 
@@ -1427,7 +1394,6 @@ namespace MSFileInfoScanner
                             functionNumber = CIntSafe(dataLine.Substring(CAL_FUNCTION_NAME.Length, colonIndex - CAL_FUNCTION_NAME.Length));
                             if (functionNumber >= 1 && functionNumber <= thisMSData.FunctionCount)
                             {
-
                                 NativeIOParseCalibrationCoefficients(
                                     keyValue,
                                     out var calibrationCoefficientCount,
@@ -1436,7 +1402,6 @@ namespace MSFileInfoScanner
 
                                 thisMSData.FunctionInfo[functionNumber].CalibrationCoefficientCount = calibrationCoefficientCount;
                                 thisMSData.FunctionInfo[functionNumber].CalTypeID = calibrationTypeID;
-
                             }
                             else
                             {
@@ -1465,7 +1430,6 @@ namespace MSFileInfoScanner
                 Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOReadCalInfoFromHeader:" + ex.Message);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1476,13 +1440,10 @@ namespace MSFileInfoScanner
         /// <returns>True if successful, False if not</returns>
         private bool NativeIOReadHeader(string dataDirPath, out MSHeaderInfo headerInfo)
         {
-
             headerInfo = new MSHeaderInfo();
 
             try
             {
-
-
                 var headerFilePath = Path.Combine(dataDirPath, "_HEADER.TXT");
                 var headerFile = new FileInfo(headerFilePath);
 
@@ -1597,15 +1558,12 @@ namespace MSFileInfoScanner
                 }
 
                 return true;
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOReadHeader:" + ex.Message);
                 return false;
             }
-
         }
-
     }
 }

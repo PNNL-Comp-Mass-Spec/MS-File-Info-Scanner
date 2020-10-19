@@ -12,6 +12,8 @@ namespace MSFileInfoScanner
     [CLSCompliant(false)]
     public class clsProteoWizardDataParser : EventNotifier
     {
+        // Ignore Spelling: timsTOF
+
         private const int PROGRESS_START = 0;
         private const int PROGRESS_SCAN_TIMES_LOADED = 10;
 
@@ -146,7 +148,6 @@ namespace MSFileInfoScanner
                 {
                     indexMatch = items.Count - 1;
                 }
-
             }
 
             return indexMatch;
@@ -176,7 +177,6 @@ namespace MSFileInfoScanner
 
         private void MonitorScanTimeLoadingProgress(int scansLoaded, int totalScans)
         {
-
             if (DateTime.UtcNow.Subtract(mLastScanLoadingDebugProgressTime).TotalSeconds < 30)
                 return;
 
@@ -241,7 +241,6 @@ namespace MSFileInfoScanner
             IDictionary<int, Dictionary<double, double>> dct2DDataProduct,
             IDictionary<int, float> dct2DDataScanTimes)
         {
-
             // Attempt to parse out the product m/z
             var parentMZFound = ExtractQ1MZ(chromatogramID, out var parentMZ);
             var productMZFound = ExtractQ3MZ(chromatogramID, out var productMZ);
@@ -309,11 +308,8 @@ namespace MSFileInfoScanner
                     {
                         dct2DDataScanTimes[scanNumber] = scanTimes[index];
                     }
-
                 }
-
             }
-
         }
 
         private void ProcessTIC(
@@ -342,7 +338,6 @@ namespace MSFileInfoScanner
                     // Use this TIC chromatogram for this dataset since there are no normal Mass Spectra
                     mTICAndBPIPlot.AddDataTICOnly(scanNumber, 1, scanTimes[scanIndex], intensities[scanIndex]);
                 }
-
             }
 
             // Make sure ticScanTimes is sorted
@@ -374,9 +369,7 @@ namespace MSFileInfoScanner
                     ticScanTimes.Add(ticScanTimesArray[index]);
                     ticScanNumbers.Add(ticScanNumbersArray[index]);
                 }
-
             }
-
         }
 
         private bool ShowPeriodicMessageNow(int currentCount)
@@ -455,7 +448,6 @@ namespace MSFileInfoScanner
 
                         srmDataCached = true;
                     }
-
                 }
                 catch (AccessViolationException)
                 {
@@ -472,7 +464,6 @@ namespace MSFileInfoScanner
                 {
                     OnErrorEvent("Error processing chromatogram " + chromatogramIndex + " with ProteoWizard: " + ex.Message, ex);
                 }
-
             }
 
             if (!mSaveLCMS2DPlots)
@@ -565,7 +556,6 @@ namespace MSFileInfoScanner
 
                     try
                     {
-
                         mPWiz.GetScanTimesAndMsLevels(mCancellationToken.Token,
                             out scanTimes, out msLevels, MonitorScanTimeLoadingProgress, useAlternateMethod);
 
@@ -614,7 +604,6 @@ namespace MSFileInfoScanner
 
                 // Return True if at least 50% of the spectra were successfully read
                 return parserInfo.ScanCountSuccess >= scanCountTotal / 2.0;
-
             }
             catch (AccessViolationException)
             {
@@ -633,7 +622,6 @@ namespace MSFileInfoScanner
                 OnErrorEvent("Error reading instrument data with ProteoWizard: " + ex.Message, ex);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -703,12 +691,10 @@ namespace MSFileInfoScanner
                 OnProgressUpdate(string.Format("Spectra processed: {0:N0}", scanNumber), percentCompleteOverall);
             }
 
-
             mDatasetStatsSummarizer.StoreScanTypeTotals(
                 parserInfo.ScanCountHMS, parserInfo.ScanCountHMSn,
                 parserInfo.ScanCountMS, parserInfo.ScanCountMSn,
                 parserInfo.RuntimeMinutes);
-
         }
 
         private void StoreSingleSpectrum(
@@ -717,7 +703,6 @@ namespace MSFileInfoScanner
             ProteoWizardParserInfo parserInfo,
             int scanIndex)
         {
-
             var scanNumber = scanIndex + 1;
 
             try
@@ -939,12 +924,10 @@ namespace MSFileInfoScanner
 
             Store2DPlotDataWork(dct2DDataParent, dct2DDataScanTimes, 1, max2DDataCount, scanNumMin2D, scanNumMax2D);
             Store2DPlotDataWork(dct2DDataProduct, dct2DDataScanTimes, 2, max2DDataCount, scanNumMin2D, scanNumMax2D);
-
         }
 
         private void Store2DPlotDataPoint(IDictionary<int, Dictionary<double, double>> dct2DData, int scanNumber, double mz, double intensity)
         {
-
             if (dct2DData.TryGetValue(scanNumber, out var obj2DMzAndIntensity))
             {
                 if (obj2DMzAndIntensity.TryGetValue(mz, out var currentIntensity))
@@ -964,7 +947,6 @@ namespace MSFileInfoScanner
 
             // Store the data for this scan
             dct2DData[scanNumber] = obj2DMzAndIntensity;
-
         }
 
         private void Store2DPlotDataWork(
@@ -1005,15 +987,13 @@ namespace MSFileInfoScanner
 
             if (scanNumMin2D / (double)scanNumMax2D > 0.5)
             {
-                // Zoom in the 2D plot to prevent all of the the data from being scrunched to the right
+                // Zoom in the 2D plot to prevent all of the data from being scrunched to the right
                 mLCMS2DPlot.Options.UseObservedMinScan = true;
             }
-
         }
 
         private string StripExtraFromChromatogramID(string chromatogramIdText)
         {
-
             // If text looks like:
             // SRM SIC Q1=506.6 Q3=132.1 sample=1 period=1 experiment=1 transition=0
 
@@ -1024,7 +1004,6 @@ namespace MSFileInfoScanner
                 return chromatogramIdText;
 
             return chromatogramIdText.Substring(0, charIndex).TrimEnd();
-
         }
 
         private void UpdateDataRanges(
@@ -1059,7 +1038,6 @@ namespace MSFileInfoScanner
                 }
             }
         }
-
     }
 }
 

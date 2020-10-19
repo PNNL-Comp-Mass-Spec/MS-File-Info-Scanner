@@ -19,6 +19,8 @@ namespace MSFileInfoScanner
     /// </summary>
     internal class clsPlotContainer : clsPlotContainerBase
     {
+        // Ignore Spelling: OxyPlot, png, Arial
+
         private const double PIXELS_PER_DIP = 1.25;
 
         public const int DEFAULT_BASE_FONT_SIZE = 16;
@@ -91,7 +93,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         // ReSharper disable once UnusedMember.Global
@@ -155,7 +156,6 @@ namespace MSFileInfoScanner
                     var success = SaveToFile(newFileInfo, fileFormat, width, height, resolution);
                     if (success)
                         successOverall = true;
-
                 }
 
                 if (!matchFound)
@@ -181,7 +181,6 @@ namespace MSFileInfoScanner
             var drawVisual = new DrawingVisual();
             using (var drawContext = drawVisual.RenderOpen())
             {
-
                 var myCanvas = new Rect(0, 0, width, height);
 
                 drawContext.DrawImage(plotBitmap, myCanvas);
@@ -288,7 +287,6 @@ namespace MSFileInfoScanner
 
                 drawContext.DrawText(newText, position);
             }
-
         }
 
         private void AddText(string textToAdd, DrawingContext drawContext, int canvasWidth, int canvasHeight, HorizontalAlignment hAlign, VerticalAlignment vAlign, int padding)
@@ -381,7 +379,6 @@ namespace MSFileInfoScanner
             }
 
             return seriesColor;
-
         }
 
         // ReSharper disable once UnusedMember.Local
@@ -397,7 +394,6 @@ namespace MSFileInfoScanner
             var fontSizePixels = fontSizePoints * 1.33;
             return (int)Math.Round(fontSizePixels, 0);
         }
-
     }
 }
 

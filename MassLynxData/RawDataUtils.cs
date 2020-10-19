@@ -4,7 +4,6 @@ namespace MSFileInfoScanner.MassLynxData
 {
     internal class RawDataUtils
     {
-
         // Function Info Masks
         private short maskFunctionType;
         private short maskIonMode;
@@ -112,7 +111,6 @@ namespace MSFileInfoScanner.MassLynxData
 
         private Int32 ExtractFromBitsInt32(int packedValue, byte startBit, byte endBit)
         {
-
             int unpackedValue;
 
             if (endBit < 31)
@@ -243,7 +241,6 @@ namespace MSFileInfoScanner.MassLynxData
                     break;
             }
             return unpackedIntensity;
-
         }
 
         private float UnpackBasePeakIntensity(short packedBasePeakIntensity, int packedBasePeakInfo)
@@ -355,8 +352,6 @@ namespace MSFileInfoScanner.MassLynxData
                     break;
             }
             return unpackedMass;
-
         }
-
     }
 }

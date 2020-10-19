@@ -5,12 +5,15 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
-
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// Bruker one folder info scanner
+    /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
     public class clsBrukerOneFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
+        // Ignore Spelling: acqu, fid, ser, yyyy-MMM-dd hh:mm:ss
 
         public const string BRUKER_ONE_FOLDER_NAME = "1";
         private const string BRUKER_LOCK_FILE = "LOCK";
@@ -46,7 +49,6 @@ namespace MSFileInfoScanner
             }
 
             return datasetName;
-
         }
 
         public static bool IsZippedSFolder(string filePath)
@@ -100,7 +102,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         private bool ParseBrukerAcquFile(string directoryPath, DatasetFileInfo datasetFileInfo)
@@ -134,7 +135,6 @@ namespace MSFileInfoScanner
                         break;
                     }
                 }
-
             }
             catch (Exception)
             {
@@ -143,7 +143,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         private bool ParseBrukerLockFile(string directoryPath, DatasetFileInfo datasetFileInfo)
@@ -171,7 +170,6 @@ namespace MSFileInfoScanner
                         }
                     }
                 }
-
             }
             catch (Exception)
             {
@@ -180,7 +178,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         /// <summary>
@@ -193,7 +190,6 @@ namespace MSFileInfoScanner
         /// <returns>True if success and also if no matching Zip files were found; returns False if error</returns>
         private bool ParseBrukerZippedSFolders(DirectoryInfo zippedSFilesDirectoryInfo, DatasetFileInfo datasetFileInfo)
         {
-
             bool success;
 
             datasetFileInfo.FileSizeBytes = 0;
@@ -223,10 +219,8 @@ namespace MSFileInfoScanner
                         // Compute the SHA-1 hash of the zip file (e.g. s001.zip)
                         mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(zippedSFile);
                     }
-
                 }
                 success = true;
-
             }
             catch (Exception)
             {
@@ -234,12 +228,11 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         private bool ParseICRDirectory(DirectoryInfo icrDirectory, DatasetFileInfo datasetFileInfo)
         {
-            // Look for and open the .Pek file in icrDirectory
+            // Look for and open the .Pek file in the directory
             // Count the number of PEK_FILE_FILENAME_LINE lines
 
             var fileListCount = 0;
@@ -267,7 +260,6 @@ namespace MSFileInfoScanner
                         }
                     }
                     success = true;
-
                 }
                 catch (Exception)
                 {
@@ -285,7 +277,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         private bool ParseTICDirectory(DirectoryInfo ticDirectoryInfo, DatasetFileInfo datasetFileInfo, out DateTime ticModificationDate)
@@ -353,7 +344,6 @@ namespace MSFileInfoScanner
                     success = true;
 
                     ticModificationDate = ticFile.LastWriteTime;
-
                 }
                 catch (Exception)
                 {
@@ -371,7 +361,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         /// <summary>
@@ -383,7 +372,6 @@ namespace MSFileInfoScanner
         /// <remarks>If a Bruker 1 directory, it must contain file acqu and typically contains file LOCK</remarks>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
-
             ResetResults();
 
             DirectoryInfo zippedSFilesDirectoryInfo = null;
@@ -594,7 +582,6 @@ namespace MSFileInfoScanner
                         // Set success to true anyway since we do have enough information to save the MS file info
                         success = true;
                     }
-
                 }
                 catch (Exception)
                 {
@@ -619,8 +606,6 @@ namespace MSFileInfoScanner
             PostProcessTasks();
 
             return success;
-
         }
-
     }
 }

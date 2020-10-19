@@ -9,7 +9,6 @@ namespace MSFileInfoScanner.DatasetStats
 {
     public class DatasetFileInfo
     {
-
         /// <summary>
         /// File creation time (local time)
         /// </summary>
@@ -134,7 +133,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="hashType"></param>
         public void AddInstrumentFile(string instrumentFileRelativePath, long fileSizeBytes, string hashValue, HashUtilities.HashTypeConstants hashType)
         {
-
             if (InstrumentFiles.ContainsKey(instrumentFileRelativePath))
             {
                 throw new DuplicateNameException("Duplicate key in AddInstrumentFile; Instrument file already defined: " +
@@ -158,7 +156,6 @@ namespace MSFileInfoScanner.DatasetStats
             }
 
             InstrumentFiles.Add(instrumentFileRelativePath, instFileInfo);
-
         }
 
         public void AddInstrumentFileNoHash(FileInfo instrumentFile)
@@ -171,6 +168,5 @@ namespace MSFileInfoScanner.DatasetStats
         {
             return string.Format("Dataset {0}, ScanCount={1}", DatasetName, ScanCount);
         }
-
     }
 }

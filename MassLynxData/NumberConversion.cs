@@ -2,10 +2,8 @@
 
 namespace MSFileInfoScanner.MassLynxData
 {
-
     internal static class NumberConversion
     {
-
         private const long OFFSET_4 = 4294967296L;
         private const long MAXINT_4 = 2147483647;
         private const Int32 OFFSET_2 = 65536;

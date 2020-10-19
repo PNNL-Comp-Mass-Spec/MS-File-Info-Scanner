@@ -37,7 +37,7 @@ namespace MSFileInfoScanner.DatasetStats
         }
 
         public override string ToString()
-		{
+        {
             return SampleName;
         }
     }

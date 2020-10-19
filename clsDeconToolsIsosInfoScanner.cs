@@ -6,12 +6,15 @@ using MSFileInfoScanner.DatasetStats;
 using PRISM;
 using ThermoRawFileReader;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2013
-
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// DeconTools .isos info scanner
+    /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2013</remarks>
     public class clsDeconToolsIsosInfoScanner : clsMSFileInfoProcessorBaseClass
     {
+        // Ignore Spelling: isos, mw, deisotoped
 
         /// <summary>
         /// Constructor
@@ -65,7 +68,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
-
             try
             {
                 if (dataFilePath.ToUpper().EndsWith(DECONTOOLS_ISOS_FILE_SUFFIX))
@@ -76,7 +78,6 @@ namespace MSFileInfoScanner
                 }
 
                 return string.Empty;
-
             }
             catch (Exception)
             {
@@ -98,7 +99,6 @@ namespace MSFileInfoScanner
             }
 
             return colIndexScanOrFrameNum;
-
         }
 
         private void LoadData(FileInfo isosFile, DatasetFileInfo datasetFileInfo)
@@ -198,7 +198,6 @@ namespace MSFileInfoScanner
 
                             mTICAndBPIPlot.AddData(currentScan, udtCurrentScan.MSLevel, udtCurrentScan.ElutionTime, bpi, tic);
                         }
-
                     }
 
                     currentScan = isosData[index].Scan;
@@ -218,12 +217,10 @@ namespace MSFileInfoScanner
                     ionList.Add(udtIon);
                 }
             }
-
         }
 
         private List<udtIsosDataType> LoadIsosFile(string isosFilePath, float maxFit)
         {
-
             var dctColumnInfo = new Dictionary<string, int>
             {
                 {"charge", -1},
@@ -289,7 +286,6 @@ namespace MSFileInfoScanner
                         {
                             isosData.Add(udtIsosData);
                         }
-
                     }
                     catch (Exception)
                     {
@@ -311,17 +307,14 @@ namespace MSFileInfoScanner
                     {
                         lastScanParseErrors++;
                     }
-
                 }
             }
 
             return isosData;
-
         }
 
         private List<udtScansDataType> LoadScansFile(string scansFilePath)
         {
-
             const string FILTERED_SCANS_SUFFIX = "_filtered_scans.csv";
 
             var dctColumnInfo = new Dictionary<string, int>
@@ -409,7 +402,6 @@ namespace MSFileInfoScanner
                             {
                                 udtScanData.FilterText = infoText;
                             }
-
                         }
 
                         scanData.Add(udtScanData);
@@ -451,18 +443,15 @@ namespace MSFileInfoScanner
                         };
 
                         mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
-
                     }
                     catch (Exception ex)
                     {
                         OnWarningEvent("Warning: Ignoring scan " + dataColumns[dctColumnInfo["scan_num"]] + " since data conversion error: " + ex.Message);
                     }
-
                 }
             }
 
             return scanData;
-
         }
 
         private void ParseColumnHeaders(Dictionary<string, int> dctColumnInfo, IList<string> dataColumns, string fileDescription)
@@ -490,7 +479,6 @@ namespace MSFileInfoScanner
         /// <remarks>Will also read the _scans.csv file if present (to determine ElutionTime and MSLevel</remarks>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
-
             ResetResults();
 
             var isosFile = new FileInfo(dataFilePath);
@@ -538,9 +526,7 @@ namespace MSFileInfoScanner
             PostProcessTasks();
 
             return true;
-
         }
-
     }
 }
 

@@ -6,13 +6,11 @@ namespace MSFileInfoScanner
 {
     class clsPlotUtilities
     {
-
         public static void GetAxisFormatInfo(
             IList<double> dataPoints,
             bool integerData,
             clsAxisInfo axisInfo)
         {
-
             var absValueMin = dataPoints.Count == 0 ? 0 : Math.Abs(dataPoints[0]);
             var absValueMax = absValueMin;
 
@@ -31,7 +29,6 @@ namespace MSFileInfoScanner
             bool integerData,
             clsAxisInfo axisInfo)
         {
-
             if (Math.Abs(absValueMin) < float.Epsilon && Math.Abs(absValueMax) < float.Epsilon)
             {
                 axisInfo.StringFormat = "0";

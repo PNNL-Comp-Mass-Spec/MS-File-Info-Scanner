@@ -2,13 +2,14 @@ using System;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
-
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// Agilent ion trap .D folder info scanner
+    /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
     public class clsAgilentIonTrapDFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
-
         // Note: The extension must be in all caps
         public const string AGILENT_ION_TRAP_D_EXTENSION = ".D";
         private const string AGILENT_YEP_FILE = "Analysis.yep";
@@ -22,7 +23,6 @@ namespace MSFileInfoScanner
 
         private bool ExtractMethodLineDate(string dataLine, out DateTime methodDate)
         {
-
             var success = false;
             methodDate = DateTime.MinValue;
 
@@ -57,7 +57,6 @@ namespace MSFileInfoScanner
 
         private TimeSpan SecondsToTimeSpan(double seconds)
         {
-
             TimeSpan timeSpanItem;
 
             try
@@ -70,7 +69,6 @@ namespace MSFileInfoScanner
             }
 
             return timeSpanItem;
-
         }
 
         private void ParseRunLogFile(string directoryPath, DatasetFileInfo datasetFileInfo)
@@ -86,7 +84,6 @@ namespace MSFileInfoScanner
 
                 using (var reader = new StreamReader(Path.Combine(directoryPath, AGILENT_RUN_LOG_FILE)))
                 {
-
                     processedFirstMethodLine = false;
                     endDateFound = false;
                     while (!reader.EndOfStream)
@@ -144,14 +141,12 @@ namespace MSFileInfoScanner
                         datasetFileInfo.AcqTimeEnd = methodDate;
                     }
                 }
-
             }
             catch (Exception ex)
             {
                 // Run.log file not found
                 OnWarningEvent("Error in ParseRunLogFile: " + ex.Message);
             }
-
         }
 
         private void ParseAnalysisCDFFile(string directoryPath, DatasetFileInfo datasetFileInfo)
@@ -195,13 +190,12 @@ namespace MSFileInfoScanner
             {
                 netCDFReader?.CloseMSCdfFile();
             }
-
         }
 
         /// <summary>
         /// Process the data file
         /// </summary>
-        /// <param name="dataFilePath">Dataset directory ptah</param>
+        /// <param name="dataFilePath">Dataset directory path</param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
@@ -289,7 +283,6 @@ namespace MSFileInfoScanner
                 UpdateDatasetStatsSummarizerUsingDatasetFileInfo(datasetFileInfo);
 
                 PostProcessTasks();
-
             }
             catch (Exception)
             {
@@ -300,6 +293,5 @@ namespace MSFileInfoScanner
 
             return success;
         }
-
     }
 }

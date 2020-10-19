@@ -2,10 +2,12 @@ using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScannerInterfaces;
 using PRISM;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
-
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// MS file info scanner interface
+    /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
     public abstract class iMSFileInfoProcessor : EventNotifier
     {
         public enum ProcessingOptions

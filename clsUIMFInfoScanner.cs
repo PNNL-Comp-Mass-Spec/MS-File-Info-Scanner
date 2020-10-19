@@ -8,12 +8,15 @@ using PRISM;
 using ThermoFisher.CommonCore.Data.Business;
 using UIMFLibrary;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// UIMF Info Scanner
+    /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)</remarks>
     public class clsUIMFInfoScanner : clsMSFileInfoProcessorBaseClass
     {
+        // Ignore Spelling: Addon, Sarc, ns, AcqTimeEnd
 
         // Note: The extension must be in all caps
         public const string UIMF_FILE_EXTENSION = ".UIMF";
@@ -39,10 +42,9 @@ namespace MSFileInfoScanner
             if (mLCMS2DPlot.ScanCountCached > 0)
             {
                 // Obtain the overall average intensity value using the data cached in mLCMS2DPlot
-                // This avoids having to reload all of the data using uimfReader
+                // This avoids having to reload all of the data using the UIMFReader
                 const int msLevelFilter = 1;
                 overallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(msLevelFilter);
-
             }
             else
             {
@@ -62,7 +64,7 @@ namespace MSFileInfoScanner
                     if (!dctMasterFrameList.TryGetValue(frameNumber, out var eFrameType))
                     {
                         OnWarningEvent(string.Format(
-                                           "Frametype {0} not found in dictionary dctMasterFrameList; ignoring frame {1} in ComputeQualityScores",
+                                           "FrameType {0} not found in dictionary dctMasterFrameList; ignoring frame {1} in ComputeQualityScores",
                                            eFrameType, frameNumber));
 
                         continue;
@@ -143,9 +145,7 @@ namespace MSFileInfoScanner
                         overallAvgIntensitySum += intensitySum / ionCount;
 
                         overallAvgCount++;
-
                     }
-
                 }
 
                 if (overallAvgCount > 0)
@@ -156,7 +156,6 @@ namespace MSFileInfoScanner
                 {
                     overallScore = 0;
                 }
-
             }
 
             datasetFileInfo.OverallQualityScore = overallScore;
@@ -178,7 +177,6 @@ namespace MSFileInfoScanner
 
                 Console.WriteLine("  Loading BPI values");
                 dctBPI = uimfReader.GetBPIByFrame(frameStart, frameEnd, 0, 0);
-
             }
             catch (Exception ex)
             {
@@ -284,7 +282,7 @@ namespace MSFileInfoScanner
                 if (!dctMasterFrameList.TryGetValue(frameNumber, out var eFrameType))
                 {
                     OnWarningEvent(string.Format(
-                        "Frametype {0} not found in dictionary dctMasterFrameList; ignoring frame {1} in LoadFrameDetails",
+                        "FrameType {0} not found in dictionary dctMasterFrameList; ignoring frame {1} in LoadFrameDetails",
                         eFrameType, frameNumber));
 
                     continue;
@@ -495,14 +493,12 @@ namespace MSFileInfoScanner
                                     }
                                 }
                             }
-
                         }
                         catch (Exception ex)
                         {
                             OnWarningEvent("Error loading m/z and intensity values for frame " + frameNumber + ": " + ex.Message);
                         }
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -520,7 +516,6 @@ namespace MSFileInfoScanner
 
                 var percentComplete = masterFrameNumIndex / (float)masterFrameNumList.Count * 100;
                 OnProgressUpdate(string.Format("Frames processed: {0:N0}", masterFrameNumIndex), percentComplete);
-
             }
 
             Console.WriteLine();
@@ -535,7 +530,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
-
             ResetResults();
 
             DataReader uimfReader = null;
@@ -671,7 +665,6 @@ namespace MSFileInfoScanner
 
                                 reportedDateStarted = reportedDateStarted.AddYears(1600);
                                 globalParamsHasValidDateStarted = true;
-
                             }
                             else if (reportedDateStarted.Year < 2000 || reportedDateStarted.Year > DateTime.Now.Year + 1)
                             {
@@ -693,7 +686,6 @@ namespace MSFileInfoScanner
                             // Update the end time to match the start time; we'll update it below using the start/end times obtained from the frame parameters
                             datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
                         }
-
                     }
                     catch (Exception ex2)
                     {
@@ -731,7 +723,7 @@ namespace MSFileInfoScanner
                                 break;
 
                             frameIndex--;
-                        };
+                        }
 
                         // Check whether the StartTime and EndTime values are based on ticks
                         if (startTime >= 1E+17 && endTime > 1E+17)
@@ -790,7 +782,7 @@ namespace MSFileInfoScanner
                             }
 
                             // ReSharper disable once CommentTypo
-                            // Some datasets erroneously have zeroes stored in the .UIMF file for the StartTime of the last two frames; example: Sarc_MS2_26_2Apr11_Cheetah_11-02-18_inverse
+                            // Some datasets erroneously have zeros stored in the .UIMF file for the StartTime of the last two frames; example: Sarc_MS2_26_2Apr11_Cheetah_11-02-18_inverse
                             // Check for this and remove them
 
                             var frameCountRemoved = 0;
@@ -903,7 +895,6 @@ namespace MSFileInfoScanner
                             }
                         }
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -939,7 +930,6 @@ namespace MSFileInfoScanner
 
             return !readError;
         }
-
     }
 }
 

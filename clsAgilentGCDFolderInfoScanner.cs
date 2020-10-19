@@ -6,12 +6,15 @@ using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
 using PRISM;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
-
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// Agilent GC .D folder info scanner
+    /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012</remarks>
     public class clsAgilentGCDFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
+        // Ignore Spelling: acqmeth, AcqTimes
 
         // Note: The extension must be in all caps
         public const string AGILENT_DATA_FOLDER_D_EXTENSION = ".D";
@@ -64,7 +67,6 @@ namespace MSFileInfoScanner
 
         private bool ExtractRunTime(string runTimeText, out double runTimeMinutes)
         {
-
             var reMatch = mExtractTime.Match(runTimeText);
 
             if (reMatch.Success)
@@ -77,7 +79,6 @@ namespace MSFileInfoScanner
 
             runTimeMinutes = 0;
             return false;
-
         }
 
         private bool ParseAcqMethodFile(string directoryPath, DatasetFileInfo datasetFileInfo)
@@ -89,7 +90,7 @@ namespace MSFileInfoScanner
 
             try
             {
-                // Open the acqmeth.txt file
+                // Open the acquisition method file
                 var filePath = Path.Combine(directoryPath, AGILENT_ACQ_METHOD_FILE);
                 if (!File.Exists(filePath))
                 {
@@ -109,7 +110,6 @@ namespace MSFileInfoScanner
 
                 using (var reader = new StreamReader(filePath))
                 {
-
                     while (!reader.EndOfStream)
                     {
                         var dataLine = reader.ReadLine();
@@ -153,7 +153,6 @@ namespace MSFileInfoScanner
                 }
 
                 success = runTimeFound;
-
             }
             catch (Exception ex)
             {
@@ -169,7 +168,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         private bool ParseGCIniFile(string directoryPath, DatasetFileInfo datasetFileInfo)
@@ -189,7 +187,6 @@ namespace MSFileInfoScanner
 
                 using (var reader = new StreamReader(filePath))
                 {
-
                     while (!reader.EndOfStream)
                     {
                         var dataLine = reader.ReadLine();
@@ -213,7 +210,6 @@ namespace MSFileInfoScanner
                         }
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -229,7 +225,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         private bool ProcessChemstationMSDataFile(string datafilePath, DatasetFileInfo datasetFileInfo)
@@ -241,7 +236,6 @@ namespace MSFileInfoScanner
             {
                 using (var reader = new ChemstationMSFileReader.clsChemstationDataMSFileReader(datafilePath))
                 {
-
                     datasetFileInfo.AcqTimeStart = reader.Header.AcqDate;
                     datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(reader.Header.RetentionTimeMinutesEnd);
 
@@ -307,7 +301,6 @@ namespace MSFileInfoScanner
 
                                     mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevel, spectrum.RetentionTimeMinutes, ionsMZ.Length, ionsMZ, ionsIntensity);
                                 }
-
                             }
 
                             if (mCheckCentroidingStatus)
@@ -316,15 +309,11 @@ namespace MSFileInfoScanner
                                 mzDoubles.AddRange(mzList.Select(ion => (double)ion));
                                 mDatasetStatsSummarizer.ClassifySpectrum(mzDoubles, msLevel, "Scan " + scanStatsEntry.ScanNumber);
                             }
-
                         }
-
                     }
-
                 }
 
                 success = true;
-
             }
             catch (Exception ex)
             {
@@ -334,7 +323,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         /// <summary>
@@ -346,7 +334,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
-
             var success = false;
             var acqTimeDetermined = false;
 
@@ -401,7 +388,6 @@ namespace MSFileInfoScanner
                     {
                         acqTimeDetermined = true;
                     }
-
                 }
 
                 if (!success)
@@ -417,7 +403,6 @@ namespace MSFileInfoScanner
 
                     if (methodFile.Exists)
                     {
-
                         // ReSharper disable once CommentTypo
                         // Update the AcqTimes only if the LastWriteTime of the acqmeth.txt or GC.ini file is within the next 60 minutes of .AcqTimeEnd
                         if (!success || methodFile.LastWriteTime.Subtract(datasetFileInfo.AcqTimeEnd).TotalMinutes < 60)
@@ -438,7 +423,6 @@ namespace MSFileInfoScanner
 
                             mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
                         }
-
                     }
                 }
 
@@ -446,7 +430,7 @@ namespace MSFileInfoScanner
                 {
                     try
                     {
-                        // Parse the acqmeth.txt file to determine the actual values for .AcqTimeStart and .AcqTimeEnd
+                        // Parse the acquisition method file to determine the actual values for .AcqTimeStart and .AcqTimeEnd
                         success = ParseAcqMethodFile(dataFilePath, datasetFileInfo);
 
                         if (!success)
@@ -454,7 +438,6 @@ namespace MSFileInfoScanner
                             // Try to extract Runtime from the GC.ini file
                             success = ParseGCIniFile(dataFilePath, datasetFileInfo);
                         }
-
                     }
                     catch (Exception)
                     {
@@ -475,7 +458,6 @@ namespace MSFileInfoScanner
                     mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
                     mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
                 }
-
             }
             catch (Exception ex)
             {
@@ -486,6 +468,5 @@ namespace MSFileInfoScanner
             PostProcessTasks();
             return success;
         }
-
     }
 }

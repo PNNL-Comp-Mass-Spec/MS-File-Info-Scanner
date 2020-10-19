@@ -3,6 +3,8 @@ namespace MSFileInfoScanner.DatasetStats
 {
     public class ScanStatsEntry
     {
+        // Ignore Spelling: centroiding
+
         public const string SCAN_STATS_COL_ION_INJECTION_TIME = "Ion Injection Time (ms)";
         public const string SCAN_STATS_COL_SCAN_SEGMENT = "Scan Segment";
         public const string SCAN_STATS_COL_SCAN_EVENT = "Scan Event";
@@ -147,5 +149,4 @@ namespace MSFileInfoScanner.DatasetStats
             return string.Format("Scan {0}: {1}", ScanNumber, ScanFilterText);
         }
     }
-
 }

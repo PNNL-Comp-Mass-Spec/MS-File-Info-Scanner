@@ -9,8 +9,10 @@ namespace MSFileInfoScanner
 {
     public class clsMSFileInfoDataCache : EventNotifier
     {
+        // Ignore Spelling: AcqTime, yyyy-MM-dd, HH:mm:ss
 
         #region "Constants and Enums"
+
         private const string MS_FILE_INFO_DATA_TABLE = "MSFileInfoTable";
         public const string COL_NAME_DATASET_ID = "DatasetID";
         public const string COL_NAME_DATASET_NAME = "DatasetName";
@@ -65,6 +67,7 @@ namespace MSFileInfoScanner
             Sha1Hash = 5,
             InfoLastModified = 6
         }
+
         #endregion
 
         private enum eCachedResultsStateConstants
@@ -74,7 +77,7 @@ namespace MSFileInfoScanner
             Modified = 2
         }
 
-        #region "Classwide Variables"
+        #region "Class wide variables"
         private string mAcquisitionTimeFilePath;
 
         private string mDirectoryIntegrityInfoFilePath;
@@ -142,7 +145,6 @@ namespace MSFileInfoScanner
                     }
                 }
             }
-
         }
 
         public bool CachedMSInfoContainsDataset(string datasetName)
@@ -215,7 +217,6 @@ namespace MSFileInfoScanner
         private bool DatasetTableContainsPrimaryKeyValue(
             DataSet dsDataset, string tableName, string valueToFind, out DataRow rowMatch)
         {
-
             try
             {
                 if (dsDataset == null || dsDataset.Tables[tableName].Rows.Count == 0)
@@ -224,7 +225,7 @@ namespace MSFileInfoScanner
                     return false;
                 }
 
-                // Look for valueToFind in dsDataset
+                // Look for valueToFind in the dataset
                 try
                 {
                     rowMatch = dsDataset.Tables[tableName].Rows.Find(valueToFind);
@@ -241,14 +242,12 @@ namespace MSFileInfoScanner
                     rowMatch = null;
                     return false;
                 }
-
             }
             catch (Exception)
             {
                 rowMatch = null;
                 return false;
             }
-
         }
 
         public void InitializeVariables()
@@ -389,7 +388,6 @@ namespace MSFileInfoScanner
 
                             PopulateDirectoryIntegrityInfoDataRow(directoryID, directoryStats, newRow, infoLastModified);
                             mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].Rows.Add(newRow);
-
                         }
                         catch (Exception)
                         {
@@ -397,11 +395,9 @@ namespace MSFileInfoScanner
                         }
                     }
                 }
-
             }
 
             mDirectoryIntegrityInfoResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
-
         }
 
         private void LoadCachedMSFileInfoResults()
@@ -469,7 +465,6 @@ namespace MSFileInfoScanner
 
                             PopulateMSInfoDataRow(datasetFileInfo, newRow, infoLastModified);
                             mMSFileInfoDataset.Tables[MS_FILE_INFO_DATA_TABLE].Rows.Add(newRow);
-
                         }
                         catch (Exception)
                         {
@@ -477,11 +472,9 @@ namespace MSFileInfoScanner
                         }
                     }
                 }
-
             }
 
             mMSFileInfoCachedResultsState = eCachedResultsStateConstants.InitializedButUnmodified;
-
         }
 
         private DateTime ParseDate(string dateText)
@@ -555,7 +548,6 @@ namespace MSFileInfoScanner
             var success2 = SaveCachedDirectoryIntegrityInfoResults(clearCachedData);
 
             return success1 && success2;
-
         }
 
         public bool SaveCachedDirectoryIntegrityInfoResults(bool clearCachedData)
@@ -576,14 +568,12 @@ namespace MSFileInfoScanner
                 // Write all of mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE) to the results file
                 using (var writer = new StreamWriter(new FileStream(mDirectoryIntegrityInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
-
                     writer.WriteLine(ConstructHeaderLine(iMSFileInfoScanner.eDataFileTypeConstants.DirectoryIntegrityInfo));
 
                     foreach (DataRow currentRow in mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].Rows)
                     {
                         WriteDirectoryIntegrityInfoDataLine(writer, currentRow);
                     }
-
                 }
 
                 mCachedDirectoryIntegrityInfoLastSaveTime = DateTime.UtcNow;
@@ -599,7 +589,6 @@ namespace MSFileInfoScanner
                 }
 
                 success = true;
-
             }
             catch (Exception ex)
             {
@@ -608,12 +597,10 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         public bool SaveCachedMSInfoResults(bool clearCachedData)
         {
-
             var success = false;
 
             if (mMSFileInfoDataset != null &&
@@ -627,14 +614,12 @@ namespace MSFileInfoScanner
                     // Write all of mMSFileInfoDataset.Tables(MS_FILE_INFO_DATA_TABLE) to the results file
                     using (var writer = new StreamWriter(new FileStream(mAcquisitionTimeFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                     {
-
                         writer.WriteLine(ConstructHeaderLine(iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo));
 
                         foreach (DataRow currentRow in mMSFileInfoDataset.Tables[MS_FILE_INFO_DATA_TABLE].Rows)
                         {
                             WriteMSInfoDataLine(writer, currentRow);
                         }
-
                     }
 
                     mCachedMSInfoResultsLastSaveTime = DateTime.UtcNow;
@@ -650,7 +635,6 @@ namespace MSFileInfoScanner
                     }
 
                     success = true;
-
                 }
                 catch (Exception ex)
                 {
@@ -660,7 +644,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         public bool UpdateCachedMSFileInfo(DatasetFileInfo datasetFileInfo)
@@ -703,7 +686,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         public bool UpdateCachedDirectoryIntegrityInfo(
@@ -761,7 +743,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         private void WriteMSInfoDataLine(TextWriter writer, DataRow currentRow)
@@ -777,7 +758,6 @@ namespace MSFileInfoScanner
                 currentRow[COL_NAME_FILE_SIZE_BYTES] + '\t' +
                 currentRow[COL_NAME_INFO_LAST_MODIFIED] + '\t' +
                 ((DateTime)currentRow[COL_NAME_FILE_MODIFICATION_DATE]).ToString("yyyy-MM-dd HH:mm:ss"));
-
         }
 
         private void WriteDirectoryIntegrityInfoDataLine(TextWriter writer, DataRow currentRow)

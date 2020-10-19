@@ -6,27 +6,24 @@ using System.Xml;
 using PRISM;
 using SpectraTypeClassifier;
 
-// -------------------------------------------------------------------------------
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-// Program started May 7, 2009
-// Ported from clsMASICScanStatsParser to clsDatasetStatsSummarizer in February 2010
-//
-// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
-// Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
-// -------------------------------------------------------------------------------
-//
-// Licensed under the 2-Clause BSD License; you may not use this file except
-// in compliance with the License.  You may obtain a copy of the License at
-// https://opensource.org/licenses/BSD-2-Clause
-//
-
 namespace MSFileInfoScanner.DatasetStats
 {
     /// <summary>
-    /// This class computes aggregate stats for a dataset
+    /// <para>This class computes aggregate stats for a dataset</para>
+    /// <para>
+    /// Program started May 7, 2009
+    /// Ported from clsMASICScanStatsParser to clsDatasetStatsSummarizer in February 2010
+    /// </para>
+    /// <para>
+    /// Licensed under the 2-Clause BSD License; you may not use this file except
+    /// in compliance with the License.  You may obtain a copy of the License at
+    /// https://opensource.org/licenses/BSD-2-Clause
+    /// </para>
     /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)</remarks>
     public class DatasetStatsSummarizer : EventNotifier
     {
+        // Ignore Spelling: yyyy-MM-dd hh:mm:ss tt, utf, AcqTime
 
         #region "Constants and Enums"
 
@@ -38,7 +35,7 @@ namespace MSFileInfoScanner.DatasetStats
 
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide variables"
 
         private readonly SortedSet<int> mDatasetScanNumbers;
 
@@ -377,7 +374,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <remarks></remarks>
         public bool ComputeScanStatsSummary(List<ScanStatsEntry> scanStats, out DatasetSummaryStats summaryStats)
         {
-
             summaryStats = new DatasetSummaryStats();
 
             try
@@ -401,7 +397,6 @@ namespace MSFileInfoScanner.DatasetStats
 
                 foreach (var statEntry in scanStats)
                 {
-
                     if (statEntry.ScanType > 1)
                     {
                         // MSn spectrum
@@ -439,14 +434,12 @@ namespace MSFileInfoScanner.DatasetStats
                 summaryStats.MSnStats.BPIMedian = AssureNumeric(MathNet.Numerics.Statistics.Statistics.Median(bpiListMSn));
 
                 return true;
-
             }
             catch (Exception ex)
             {
                 ReportError("Error in ComputeScanStatsSummary", ex);
                 return false;
             }
-
         }
 
         private void ComputeScanStatsUpdateDetails(
@@ -456,7 +449,6 @@ namespace MSFileInfoScanner.DatasetStats
             ICollection<double> ticList,
             ICollection<double> bpiList)
         {
-
             if (!string.IsNullOrWhiteSpace(scanStats.ElutionTime))
             {
                 if (double.TryParse(scanStats.ElutionTime, out var elutionTime))
@@ -489,7 +481,6 @@ namespace MSFileInfoScanner.DatasetStats
             }
 
             summaryStatDetails.ScanCount++;
-
         }
 
         /// <summary>
@@ -521,7 +512,6 @@ namespace MSFileInfoScanner.DatasetStats
             DatasetFileInfo datasetInfo,
             SampleInfo sampleInfo)
         {
-
             try
             {
                 if (scanStats == null)
@@ -540,14 +530,12 @@ namespace MSFileInfoScanner.DatasetStats
                 }
 
                 return true;
-
             }
             catch (Exception ex)
             {
                 ReportError("Error in CreateDatasetInfoFile", ex);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -613,7 +601,6 @@ namespace MSFileInfoScanner.DatasetStats
         // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(string datasetName, List<ScanStatsEntry> scanStats, DatasetFileInfo datasetInfo)
         {
-
             return CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, new SampleInfo());
         }
 
@@ -632,7 +619,6 @@ namespace MSFileInfoScanner.DatasetStats
             DatasetFileInfo datasetInfo,
             SampleInfo sampleInfo)
         {
-
             var includeCentroidStats = false;
 
             try
@@ -755,7 +741,6 @@ namespace MSFileInfoScanner.DatasetStats
 
                 if (datasetInfo.InstrumentFiles.Count > 0)
                 {
-
                     writer.WriteStartElement("InstrumentFiles");
 
                     foreach (var instrumentFile in datasetInfo.InstrumentFiles)
@@ -832,7 +817,6 @@ namespace MSFileInfoScanner.DatasetStats
                         writer.WriteElementString("CentroidMS1ScansClassifiedAsProfile", centroidedMS1SpectraClassifiedAsProfile.ToString());
                         writer.WriteElementString("CentroidMS2ScansClassifiedAsProfile", centroidedMSnSpectraClassifiedAsProfile.ToString());
                     }
-
                 }
 
                 writer.WriteEndElement();   // AcquisitionInfo EndElement
@@ -870,7 +854,6 @@ namespace MSFileInfoScanner.DatasetStats
 
                 // Return the XML as text
                 return reader.ReadToEnd();
-
             }
             catch (Exception ex)
             {
@@ -879,7 +862,6 @@ namespace MSFileInfoScanner.DatasetStats
 
             // This code will only be reached if an exception occurs
             return string.Empty;
-
         }
 
         /// <summary>
@@ -937,7 +919,6 @@ namespace MSFileInfoScanner.DatasetStats
                 using (var scanStatsWriter = new StreamWriter(new FileStream(scanStatsFile.FullName, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 using (var scanStatsExWriter = new StreamWriter(new FileStream(scanStatsExFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
-
                     var includeDriftTime = false;
 
                     foreach (var scanStatsEntry in scanStats)
@@ -989,7 +970,6 @@ namespace MSFileInfoScanner.DatasetStats
 
                     foreach (var scanStatsEntry in scanStats)
                     {
-
                         dataValues.Clear();
 
                         // Dataset ID
@@ -1054,9 +1034,7 @@ namespace MSFileInfoScanner.DatasetStats
                         dataValues.Add(scanStatsEntry.ExtendedScanInfo.ScanFilterText);
 
                         scanStatsExWriter.WriteLine(string.Join("\t", dataValues));
-
                     }
-
                 }
 
                 return true;
@@ -1066,7 +1044,6 @@ namespace MSFileInfoScanner.DatasetStats
                 ReportError("Error in CreateScanStatsFile", ex);
                 return false;
             }
-
         }
 
         private string FixNull(string text)
@@ -1218,10 +1195,9 @@ namespace MSFileInfoScanner.DatasetStats
         /// <remarks></remarks>
         public bool UpdateDatasetScanType(int scanNumber, int scanType, string scanTypeName)
         {
-
             var matchFound = false;
 
-            // Look for scan scanNumber in mDatasetScanStats
+            // Look for scanNumber in mDatasetScanStats
             for (var index = 0; index <= mDatasetScanStats.Count - 1; index++)
             {
                 if (mDatasetScanStats[index].ScanNumber != scanNumber) continue;
@@ -1235,7 +1211,6 @@ namespace MSFileInfoScanner.DatasetStats
             }
 
             return matchFound;
-
         }
 
         /// <summary>
@@ -1267,7 +1242,6 @@ namespace MSFileInfoScanner.DatasetStats
             DatasetFileInfo datasetInfo,
             SampleInfo sampleInfo)
         {
-
             var writeHeaders = false;
 
             try
@@ -1304,7 +1278,6 @@ namespace MSFileInfoScanner.DatasetStats
                 // Create or open the output file
                 using (var writer = new StreamWriter(new FileStream(datasetStatsFilePath, FileMode.Append, FileAccess.Write, FileShare.Read)))
                 {
-
                     if (writeHeaders)
                     {
                         // Write the header line
@@ -1344,18 +1317,15 @@ namespace MSFileInfoScanner.DatasetStats
                     };
 
                     writer.WriteLine(string.Join("\t", dataValues));
-
                 }
 
                 return true;
-
             }
             catch (Exception ex)
             {
                 ReportError("Error in UpdateDatasetStatsTextFile", ex);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1374,7 +1344,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// </remarks>
         public bool ValidateMS2MzMin(float requiredMzMin, out string errorOrWarningMsg, int maxPercentAllowedFailed)
         {
-
             // First examine MS2 spectra
             var validMS2 = ValidateMSnMzMin(
                 2,
@@ -1439,7 +1408,6 @@ namespace MSFileInfoScanner.DatasetStats
             out int scanCountWithData,
             out string errorOrWarningMsg)
         {
-
             scanCountWithData = 0;
             scanCountForMSLevel = 0;
 
@@ -1459,7 +1427,6 @@ namespace MSFileInfoScanner.DatasetStats
                 {
                     scanCountInvalid++;
                 }
-
             }
 
             string spectraType;
@@ -1504,8 +1471,6 @@ namespace MSFileInfoScanner.DatasetStats
 
             return percentInvalid < maxPercentAllowedFailed;
         }
-
     }
-
 }
 

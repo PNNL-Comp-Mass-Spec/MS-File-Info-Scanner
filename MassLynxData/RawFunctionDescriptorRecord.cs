@@ -1,13 +1,11 @@
 ﻿
 namespace MSFileInfoScanner.MassLynxData
 {
-
     /// <summary>
     /// Used when reading the _functns.inf file
     /// </summary>
     class RawFunctionDescriptorRecord
     {
-
         /// <summary>
         /// Total record size, in bytes
         /// </summary>

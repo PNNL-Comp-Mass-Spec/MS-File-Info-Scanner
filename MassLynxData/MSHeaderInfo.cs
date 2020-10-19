@@ -86,7 +86,7 @@ namespace MSFileInfoScanner.MassLynxData
         public string PlateDesc {get; set; }
 
         /// <summary>
-        /// Mux stream
+        /// Multiplex stream
         /// </summary>
         public int MuxStream {get; set; }
 

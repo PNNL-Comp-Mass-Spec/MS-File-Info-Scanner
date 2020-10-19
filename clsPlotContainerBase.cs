@@ -7,6 +7,8 @@ namespace MSFileInfoScanner
 {
     internal abstract class clsPlotContainerBase : EventNotifier
     {
+        // Ignore Spelling: yyyy-MM-dd hh:mm:ss
+
         protected StreamWriter mLogWriter;
 
         public string AnnotationBottomLeft { get; set; }
@@ -87,6 +89,5 @@ namespace MSFileInfoScanner
         {
             mLogWriter?.WriteLine(DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") + ": " + message);
         }
-
     }
 }

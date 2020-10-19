@@ -32,7 +32,6 @@ namespace MSFileInfoScanner.DatasetStats
             Length = 0;
             Hash = string.Empty;
             HashType = HashUtilities.HashTypeConstants.Undefined;
-
         }
     }
 }

@@ -6,7 +6,6 @@ namespace MSFileInfoScanner
 {
     public class clsFilterDataArrayMaxCount
     {
-
         // This class can be used to select the top N data points in a list, sorting descending
         // It does not require a full sort of the data, which allows for faster filtering of the data
         //
@@ -149,7 +148,6 @@ namespace MSFileInfoScanner
                     // Nothing to filter
                     UpdateProgress(4f / SUBTASK_STEP_COUNT * 100.0f);
                     return;
-
                 }
 
                 // In order to speed up the sorting, we're first going to make a histogram
@@ -236,7 +234,7 @@ namespace MSFileInfoScanner
                 if (binToSort >= 0)
                 {
                     // Find the data with intensity >= histogramBinStartIntensity(binToSort)
-                    // We actually only need to sort the data in bin binToSort
+                    // We actually only need to sort the data in binToSort
 
                     var binToSortAbundanceMinimum = histogramBinStartIntensity[binToSort];
                     double binToSortAbundanceMaximum = maxAbundance + 1;
@@ -272,7 +270,6 @@ namespace MSFileInfoScanner
                             {
                                 // Skip this data point
                                 mDataValues[index] = GetSkippedDataPoint(mDataValues[index]);
-
                             }
                             else if (mDataValues[index].Item1 < binToSortAbundanceMaximum)
                             {
@@ -352,13 +349,11 @@ namespace MSFileInfoScanner
                 }
 
                 UpdateProgress(4f / SUBTASK_STEP_COUNT * 100.0f);
-
             }
             catch (Exception ex)
             {
                 throw new Exception("Error in FilterDataByMaxDataCountToKeep: " + ex.Message, ex);
             }
-
         }
 
         /// <summary>
@@ -393,11 +388,9 @@ namespace MSFileInfoScanner
 
                 // Re-sort, this time on the data index value (.Item2)
                 dataValuesAndIndices.Sort(new clsSortByIndex());
-
             }
 
             UpdateProgress(3f / subtaskStepCount * 100.0f);
-
         }
         private void UpdateProgress(float progress)
         {

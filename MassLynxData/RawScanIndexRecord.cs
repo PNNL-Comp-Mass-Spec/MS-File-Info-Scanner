@@ -111,6 +111,5 @@ namespace MSFileInfoScanner.MassLynxData
         {
             mRawDataUtils = rawDataUtils;
         }
-
     }
 }

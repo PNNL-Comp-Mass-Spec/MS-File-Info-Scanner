@@ -4,12 +4,15 @@ using System.IO;
 using System.Linq;
 using MSFileInfoScanner.DatasetStats;
 
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// Zipped imaging file scanner
+    /// </summary>
+    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)</remarks>
     public class clsZippedImagingFilesScanner : clsMSFileInfoProcessorBaseClass
     {
+        // Ignore Spelling: AcqStartTime, AcqEndTime
 
         public const string ZIPPED_IMAGING_FILE_SEARCH_SPEC = "0_R*.zip";
 
@@ -26,7 +29,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         private void DetermineAcqStartEndTime(FileInfo zipFile, DatasetFileInfo datasetFileInfo)
         {
-
             var success = false;
 
             try
@@ -45,7 +47,6 @@ namespace MSFileInfoScanner
                 {
                     using (var zipEntry = zipFileReader.GetEnumerator())
                     {
-
                         while (zipEntry.MoveNext())
                         {
                             if (zipEntry.Current == null)
@@ -107,18 +108,15 @@ namespace MSFileInfoScanner
                     if (success)
                         break;
                 }
-
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error in DetermineAcqStartEndTime: " + ex.Message);
             }
-
         }
 
         private DirectoryInfo GetDatasetDirectory(string dataFilePath)
         {
-
             // First see if dataFilePath points to a valid file
             var datasetFile = new FileInfo(dataFilePath);
 
@@ -147,7 +145,6 @@ namespace MSFileInfoScanner
                 {
                     datasetName = datasetName.Substring(0, datasetName.Length - 2);
                 }
-
             }
             catch (Exception)
             {
@@ -155,12 +152,10 @@ namespace MSFileInfoScanner
             }
 
             return datasetName;
-
         }
 
         public static bool IsZippedImagingFile(string imagingFilePath)
         {
-
             if (string.IsNullOrWhiteSpace(imagingFilePath))
             {
                 return false;
@@ -185,7 +180,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
-
             ResetResults();
 
             try
@@ -214,7 +208,6 @@ namespace MSFileInfoScanner
                     // 0_R*.zip files not found
                     OnErrorEvent(ZIPPED_IMAGING_FILE_SEARCH_SPEC + "files not found in " + datasetDirectory.FullName);
                     return false;
-
                 }
 
                 var firstImagingFile = zipFiles.First();
@@ -276,8 +269,6 @@ namespace MSFileInfoScanner
                 OnErrorEvent("Exception processing Zipped Imaging Files: " + ex.Message);
                 return false;
             }
-
         }
-
     }
 }

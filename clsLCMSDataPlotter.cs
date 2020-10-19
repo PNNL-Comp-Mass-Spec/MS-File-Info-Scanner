@@ -16,9 +16,9 @@ namespace MSFileInfoScanner
     /// To keep the plot from being too dense, it will filter the data to show at most MaxPointsToPlot data points
     /// Furthermore, it will bin the data by MZResolution m/z units (necessary if the data is not centroided)
     /// </summary>
-    /// <remarks></remarks>
     public class clsLCMSDataPlotter : EventNotifier
     {
+        // Ignore Spelling: OxyPlot, deisotoped
 
         #region "Constants, Enums, Structures"
 
@@ -182,7 +182,6 @@ namespace MSFileInfoScanner
                             }
 
                             return AddScan(scanNumber, msLevel, scanTimeMinutes, ionList);
-
                         }
                     }
                 }
@@ -216,7 +215,6 @@ namespace MSFileInfoScanner
                 }
 
                 AddScanCheckData(scanNumber, msLevel, scanTimeMinutes, ionCountNew, ionsMZFiltered, ionsIntensityFiltered, chargeFiltered);
-
             }
             catch (Exception ex)
             {
@@ -225,7 +223,6 @@ namespace MSFileInfoScanner
             }
 
             return true;
-
         }
 
         public bool AddScan(int scanNumber, int msLevel, float scanTimeMinutes, int ionCount, double[] ionsMZ, double[] ionsIntensity)
@@ -250,7 +247,6 @@ namespace MSFileInfoScanner
                 }
 
                 ionList = (from item in highIntensityIons orderby item.MZ select item).ToList();
-
             }
             else
             {
@@ -269,7 +265,6 @@ namespace MSFileInfoScanner
             }
 
             return AddScan(scanNumber, msLevel, scanTimeMinutes, ionList);
-
         }
 
         public bool AddScan(int scanNumber, int msLevel, float scanTimeMinutes, List<udtMSIonType> ionList)
@@ -345,7 +340,6 @@ namespace MSFileInfoScanner
                 }
 
                 AddScanCheckData(scanNumber, msLevel, scanTimeMinutes, ionCountNew, ionsMZFiltered, ionsIntensityFiltered, charge);
-
             }
             catch (Exception ex)
             {
@@ -354,7 +348,6 @@ namespace MSFileInfoScanner
             }
 
             return true;
-
         }
 
         private void AddScanCheckData(int scanNumber, int msLevel, float scanTimeMinutes, int ionCount, double[] ionsMZFiltered, float[] ionsIntensityFiltered, byte[] chargeFiltered)
@@ -413,13 +406,11 @@ namespace MSFileInfoScanner
             {
                 // Step through the scans and reduce the number of points in memory
                 TrimCachedData(Options.MaxPointsToPlot, Options.MinPointsPerSpectrum);
-
             }
         }
 
         public bool AddScanSkipFilters(clsScanData sourceData)
         {
-
             bool success;
 
             try
@@ -447,7 +438,6 @@ namespace MSFileInfoScanner
                     {
                         // Step through the scans and reduce the number of points in memory
                         TrimCachedData(Options.MaxPointsToPlot, Options.MinPointsPerSpectrum);
-
                     }
                 }
 
@@ -460,7 +450,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-
         }
 
         public void ClearRecentFileInfo()
@@ -608,18 +597,16 @@ namespace MSFileInfoScanner
                     ionCountNew++;
                 }
                 ionCount = ionCountNew;
-
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error in clsLCMSDataPlotter.CentroidMSData: " + ex.Message, ex);
             }
-
         }
 
         private void DiscardDataToLimitIonCount(clsScanData msSpectrum, double mzIgnoreRangeStart, double mzIgnoreRangeEnd, int maxIonCountToRetain)
         {
-            // When this is true, then will write a text file of the mass spectrum before before and after it is filtered
+            // When this is true, then will write a text file of the mass spectrum before and after it is filtered
             // Used for debugging
             var writeDebugData = false;
             StreamWriter writer = null;
@@ -712,7 +699,6 @@ namespace MSFileInfoScanner
                             msSpectrum.Charge[ionCountNew] = msSpectrum.Charge[ionIndex];
                             ionCountNew++;
                         }
-
                     }
                 }
                 else
@@ -738,13 +724,11 @@ namespace MSFileInfoScanner
                     }
                     writer.Close();
                 }
-
             }
             catch (Exception ex)
             {
                 throw new Exception("Error in clsLCMSDataPlotter.DiscardDataToLimitIonCount: " + ex.Message, ex);
             }
-
         }
 
         /// <summary>
@@ -830,7 +814,6 @@ namespace MSFileInfoScanner
         /// </remarks>
         private void TrimCachedData(int targetDataPointCount, int minPointsPerSpectrum)
         {
-
             try
             {
                 var filterDataArray = new clsFilterDataArrayMaxCount
@@ -895,7 +878,6 @@ namespace MSFileInfoScanner
                             // Retain the top minPointsPerSpectrum points in this spectrum
 
                             DiscardDataToLimitIonCount(mScans[scanIndex], 0, 0, minPointsPerSpectrum);
-
                         }
                         else
                         {
@@ -927,7 +909,6 @@ namespace MSFileInfoScanner
                             }
 
                             mScans[scanIndex].IonCount = ionCountNew;
-
                         }
 
                         if (mScans[scanIndex].IonsMZ.Length > 5 && mScans[scanIndex].IonCount < mScans[scanIndex].IonsMZ.Length / 2.0)
@@ -941,30 +922,24 @@ namespace MSFileInfoScanner
                                 mLastGCTime = DateTime.UtcNow;
                                 ProgRunner.GarbageCollectNow();
                             }
-
                         }
-
                     }
 
                     // Bump up the total point count cached
                     mPointCountCached += mScans[scanIndex].IonCount;
-
                 }
 
                 // Update mPointCountCachedAfterLastTrim
                 mPointCountCachedAfterLastTrim = mPointCountCached;
-
             }
             catch (Exception ex)
             {
                 throw new Exception("Error in clsLCMSDataPlotter.TrimCachedData: " + ex.Message, ex);
             }
-
         }
 
         private void UpdateAbsValueRange(IEnumerable<double> dataPoints, ref double min, ref double max)
         {
-
             foreach (var currentValAbs in from value in dataPoints select Math.Abs(value))
             {
                 min = Math.Min(min, currentValAbs);
@@ -1019,7 +994,6 @@ namespace MSFileInfoScanner
                     mScans[index].UpdateMSLevel(1);
                 }
             }
-
         }
 
         #region "Plotting Functions"
@@ -1052,12 +1026,10 @@ namespace MSFileInfoScanner
 
                 myPlot.Series.Add(series);
             }
-
         }
 
         private void AddPythonPlotSeriesMonoMassVsScan(IList<List<ScatterPoint>> pointsByCharge, clsPythonPlotContainer3D plotContainer)
         {
-
             plotContainer.MarkerSize = GetMarkerSize(mScans.Count, pointsByCharge);
 
             for (var charge = 0; charge <= pointsByCharge.Count - 1; charge++)
@@ -1067,7 +1039,6 @@ namespace MSFileInfoScanner
 
                 plotContainer.AddData(pointsByCharge[charge], charge);
             }
-
         }
 
         private void AddOxyPlotSeriesMzVsScan(
@@ -1106,7 +1077,6 @@ namespace MSFileInfoScanner
             float colorScaleMinIntensity, float colorScaleMaxIntensity,
             clsPythonPlotContainer3D plotContainer)
         {
-
             plotContainer.PlotTitle = title;
             plotContainer.ColorScaleMinIntensity = colorScaleMinIntensity;
             plotContainer.ColorScaleMaxIntensity = colorScaleMaxIntensity;
@@ -1171,7 +1141,6 @@ namespace MSFileInfoScanner
             out double minMZ, out double maxMZ,
             out float colorScaleMinIntensity, out float colorScaleMaxIntensity)
         {
-
             colorScaleMinIntensity = 0;
             colorScaleMaxIntensity = 0;
 
@@ -1342,7 +1311,6 @@ namespace MSFileInfoScanner
                     series[mScans[scanIndex].Charge[ionIndex]].Add(dataPoint);
 
                     UpdateMinMax(mScans[scanIndex].IonsMZ[ionIndex], ref minMZ, ref maxMZ);
-
                 }
 
                 UpdateMinMax(mScans[scanIndex].ScanTimeMinutes, ref scanTimeMin, ref scanTimeMax);
@@ -1359,7 +1327,6 @@ namespace MSFileInfoScanner
             }
 
             return series;
-
         }
 
         private List<ScatterPoint> GetMzVsScanSeries(
@@ -1374,7 +1341,6 @@ namespace MSFileInfoScanner
             bool writeDebugData = false,
             TextWriter debugWriter = null)
         {
-
             var points = new List<ScatterPoint>();
 
             var intensityList = new List<float>();
@@ -1392,7 +1358,6 @@ namespace MSFileInfoScanner
 
             for (var scanIndex = 0; scanIndex <= mScans.Count - 1; scanIndex++)
             {
-
                 if (msLevelFilter != 0 && mScans[scanIndex].MSLevel != msLevelFilter)
                 {
                     continue;
@@ -1565,7 +1530,6 @@ namespace MSFileInfoScanner
                 }
 
                 plotContainer.AnnotationBottomRight = caption;
-
             }
 
             // Override the auto-computed X axis range
@@ -1721,7 +1685,6 @@ namespace MSFileInfoScanner
                 }
 
                 plotContainer.AnnotationBottomRight = caption;
-
             }
 
             // Override the auto-computed X axis range
@@ -1810,7 +1773,6 @@ namespace MSFileInfoScanner
 
         public bool Save2DPlots(string datasetName, string outputDirectory, string fileNameSuffixAddon, string scanModeSuffixAddon)
         {
-
             try
             {
                 ClearRecentFileInfo();
@@ -1870,14 +1832,12 @@ namespace MSFileInfoScanner
                 }
 
                 return successMS1 && successMS2;
-
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error in clsLCMSDataPlotter.Save2DPlots: " + ex.Message, ex);
                 return false;
             }
-
         }
 
         #endregion
@@ -1891,7 +1851,6 @@ namespace MSFileInfoScanner
         /// <remarks></remarks>
         public class clsScanData
         {
-
             public int IonCount { get; set; }
 
             public double[] IonsMZ;
@@ -1952,12 +1911,10 @@ namespace MSFileInfoScanner
 
         public class udtMSIonTypeComparer : IComparer<udtMSIonType>
         {
-
             public int Compare(udtMSIonType x, udtMSIonType y)
             {
                 return x.MZ.CompareTo(y.MZ);
             }
         }
-
     }
 }

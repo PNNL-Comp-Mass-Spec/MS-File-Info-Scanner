@@ -7,7 +7,12 @@ namespace MSFileInfoScanner
 {
     internal class CommandLineOptions
     {
-        // This path can contain wildcard characters, e.g. C:\*.raw
+        // Ignore Spelling: ArgExistsProperty, centroiding, csv, OxyPlot
+
+        /// <summary>
+        /// Input file path
+        /// </summary>
+        /// <remarks>This path can contain wildcard characters, e.g. C:\*.raw</remarks>
         [Option("InputDataFilePath", "I", ArgPosition = 1, Required = true, HelpShowsDefault = false,
             HelpText = "The name of a file or directory to scan; the path can contain the wildcard character *")]
         public string InputDataFilePath { get; set; }
@@ -246,11 +251,11 @@ namespace MSFileInfoScanner
 
             if (!string.IsNullOrWhiteSpace(MS2MzMinString))
             {
-                if (MS2MzMinString.StartsWith("itraq", StringComparison.OrdinalIgnoreCase))
+                if (MS2MzMinString.StartsWith("iTRAQ", StringComparison.OrdinalIgnoreCase))
                 {
                     MS2MzMin = clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ;
                 }
-                else if (MS2MzMinString.StartsWith("tmt", StringComparison.OrdinalIgnoreCase))
+                else if (MS2MzMinString.StartsWith("TMT", StringComparison.OrdinalIgnoreCase))
                 {
                     MS2MzMin = clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT;
                 }

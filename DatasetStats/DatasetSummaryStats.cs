@@ -4,7 +4,6 @@ namespace MSFileInfoScanner.DatasetStats
 {
     public class DatasetSummaryStats
     {
-
         public double ElutionTimeMax { get; set; }
 
         public SummaryStatDetails MSStats { get;}
@@ -44,6 +43,5 @@ namespace MSFileInfoScanner.DatasetStats
             MSnStats.Clear();
             ScanTypeStats.Clear();
         }
-
     }
 }
