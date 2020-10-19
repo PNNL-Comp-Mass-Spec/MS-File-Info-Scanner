@@ -317,7 +317,7 @@ namespace MSFileInfoScanner
             // Multiply maxIntensity by 2% and then round up to the nearest integer
             maxIntensity = Math.Ceiling(maxIntensity * 1.02);
 
-            var myPlot = clsOxyPlotUtilities.GetBasicPlotModel(plotTitle, xAxisLabel, yAxisLabel);
+            var myPlot = OxyPlotUtilities.GetBasicPlotModel(plotTitle, xAxisLabel, yAxisLabel);
 
             if (yAxisExponentialNotation)
             {
@@ -328,10 +328,10 @@ namespace MSFileInfoScanner
 
             // Update the axis format codes if the data values are small or the range of data is small
             var xVals = (from item in points select item.X).ToList();
-            clsOxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[0], xVals, true);
+            OxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[0], xVals, true);
 
             var yVals = (from item in points select item.Y).ToList();
-            clsOxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
+            OxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
 
             var plotContainer = new clsPlotContainer(myPlot, mWriteDebug, mDataSource)
             {
@@ -397,7 +397,7 @@ namespace MSFileInfoScanner
             }
 
             // Assure that we don't see ticks between scan numbers
-            clsOxyPlotUtilities.ValidateMajorStep(myPlot.Axes[0]);
+            OxyPlotUtilities.ValidateMajorStep(myPlot.Axes[0]);
 
             // Override the auto-computed Y axis range
             if (autoMinMaxY)
@@ -486,11 +486,11 @@ namespace MSFileInfoScanner
 
             // Assume the X axis is plotting integers
             var xVals = (from item in points select item.X).ToList();
-            clsPlotUtilities.GetAxisFormatInfo(xVals, true, plotContainer.XAxisInfo);
+            PlotUtilities.GetAxisFormatInfo(xVals, true, plotContainer.XAxisInfo);
 
             // Assume the Y axis is plotting doubles
             var yVals = (from item in points select item.Y).ToList();
-            clsPlotUtilities.GetAxisFormatInfo(yVals, false, plotContainer.YAxisInfo);
+            PlotUtilities.GetAxisFormatInfo(yVals, false, plotContainer.YAxisInfo);
 
             // Possibly add a label showing the maximum elution time
             if (scanTimeMax > 0)

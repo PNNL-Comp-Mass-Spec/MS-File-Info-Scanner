@@ -6,8 +6,10 @@ using OxyPlot.Axes;
 
 namespace MSFileInfoScanner
 {
-    public class clsOxyPlotUtilities
+    public static class OxyPlotUtilities
     {
+        // Ignore Spelling: Arial
+
 #pragma warning disable CS3002 // Return type is not CLS-compliant
         public static PlotModel GetBasicPlotModel(string title, string xAxisLabel, string yAxisLabel)
 #pragma warning restore CS3002 // Argument type is not CLS-compliant
@@ -80,7 +82,7 @@ namespace MSFileInfoScanner
                 return;
 
             var axisInfo = new clsAxisInfo(currentAxis.MajorStep, currentAxis.MinorGridlineThickness, currentAxis.Title);
-            clsPlotUtilities.GetAxisFormatInfo(dataPoints, integerData, axisInfo);
+            PlotUtilities.GetAxisFormatInfo(dataPoints, integerData, axisInfo);
 
             currentAxis.StringFormat = axisInfo.StringFormat;
             currentAxis.MajorStep = axisInfo.MajorStep;

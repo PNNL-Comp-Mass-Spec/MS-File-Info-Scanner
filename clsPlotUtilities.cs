@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace MSFileInfoScanner
 {
-    class clsPlotUtilities
+    internal static class PlotUtilities
     {
         public static void GetAxisFormatInfo(
             IList<double> dataPoints,

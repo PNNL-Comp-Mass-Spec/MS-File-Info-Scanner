@@ -1485,7 +1485,7 @@ namespace MSFileInfoScanner
                 yAxisLabel = "m/z";
             }
 
-            var myPlot = clsOxyPlotUtilities.GetBasicPlotModel(plotTitle, "LC Scan Number", yAxisLabel);
+            var myPlot = OxyPlotUtilities.GetBasicPlotModel(plotTitle, "LC Scan Number", yAxisLabel);
 
             if (Options.PlottingDeisotopedData)
             {
@@ -1499,10 +1499,10 @@ namespace MSFileInfoScanner
 
             // Update the axis format codes if the data values are small or the range of data is small
             var xVals = (from item in pointsByCharge.First() select item.X).ToList();
-            clsOxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[0], xVals, true);
+            OxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[0], xVals, true);
 
             var yVals = (from item in pointsByCharge.First() select item.Y).ToList();
-            clsOxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
+            OxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
 
             var plotContainer = new clsPlotContainer(myPlot)
             {
@@ -1564,7 +1564,7 @@ namespace MSFileInfoScanner
             }
 
             // Assure that we don't see ticks between scan numbers
-            clsOxyPlotUtilities.ValidateMajorStep(myPlot.Axes[0]);
+            OxyPlotUtilities.ValidateMajorStep(myPlot.Axes[0]);
 
             double maxMzToUse;
 
@@ -1659,10 +1659,10 @@ namespace MSFileInfoScanner
             // Update the axis format codes if the data values are small or the range of data is small
 
             // Assume the X axis is plotting integers
-            clsPlotUtilities.GetAxisFormatInfo(xMin, xMax, true, plotContainer.XAxisInfo);
+            PlotUtilities.GetAxisFormatInfo(xMin, xMax, true, plotContainer.XAxisInfo);
 
             // Assume the Y axis is plotting doubles
-            clsPlotUtilities.GetAxisFormatInfo(yMin, yMax, false, plotContainer.YAxisInfo);
+            PlotUtilities.GetAxisFormatInfo(yMin, yMax, false, plotContainer.YAxisInfo);
 
             // Add a label showing the number of points displayed
             plotContainer.AnnotationBottomLeft = pointsToPlot.ToString("0,000") + " points plotted";
