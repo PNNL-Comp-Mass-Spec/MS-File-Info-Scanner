@@ -22,7 +22,8 @@ namespace MSFileInfoScanner
         public string OutputDirectoryPath { get; set; }
 
         [Option("ParameterFile", "P", HelpShowsDefault = false,
-            HelpText = "Param file path. If supplied, it should point to a valid XML parameter file. If omitted, defaults are used.")]
+            HelpText = "XML parameter file path. If supplied, it should point to a valid XML parameter file.\n" +
+                       "Most options can alternatively be set using a Key=Value parameter file, which can be seen with /CreateParamFile")]
         public string ParameterFilePath { get; set; }
 
         /// <summary>
@@ -124,7 +125,7 @@ namespace MSFileInfoScanner
 
         [Option("DatasetStatsTextFileName", "DST", ArgExistsProperty = nameof(UpdateDatasetStatsTextFile), HelpShowsDefault = false,
             HelpText = "If supplied, update (or create) a tab-delimited text file with overview stats for the dataset.\n" +
-                       "If /DI is used, will include detailed scan counts; otherwise, will just have the dataset name, " +
+                       "If /DI is used (or CreateDatasetInfoFile=True), will include detailed scan counts; otherwise, will just have the dataset name, " +
                        "acquisition date, and (if available) sample name and comment.\n" +
                        "By default, the file is named " + DatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME + "; " +
                        "to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt")]

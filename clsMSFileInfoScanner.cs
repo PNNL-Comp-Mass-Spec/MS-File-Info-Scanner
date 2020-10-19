@@ -385,7 +385,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Minimum m/z value that MS/mS spectra should have
+        /// Minimum m/z value that MS/MS spectra should have
         /// </summary>
         /// <remarks>
         /// Useful for validating instrument files where the sample is iTRAQ or TMT labeled
@@ -806,6 +806,11 @@ namespace MSFileInfoScanner
             }
         }
 
+        /// <summary>
+        /// Read settings from an XML-based parameter file
+        /// </summary>
+        /// <param name="parameterFilePath"></param>
+        /// <returns></returns>
         public override bool LoadParameterFileSettings(string parameterFilePath)
         {
             var settingsFile = new XmlSettingsFileAccessor();
