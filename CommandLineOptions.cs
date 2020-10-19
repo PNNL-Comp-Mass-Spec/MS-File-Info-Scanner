@@ -173,9 +173,9 @@ namespace MSFileInfoScanner
                        "This option is auto-enabled if you use /C.")]
         public bool UseCacheFiles { get; set; }
 
-        [Option("ReprocessingExistingFiles", "R", HelpShowsDefault = false,
+        [Option("ReprocessExistingFiles", "R", HelpShowsDefault = false,
             HelpText = "If supplied, reprocess files that are already defined in the acquisition time file.")]
-        public bool ReprocessingExistingFiles { get; set; }
+        public bool ReprocessExistingFiles { get; set; }
 
         [Option("ReprocessIfCachedSizeIsZero", "Z", HelpShowsDefault = false,
             HelpText = "If supplied, reprocess files that are already defined in the acquisition time file " +
@@ -206,7 +206,7 @@ namespace MSFileInfoScanner
             MaxLevelsToRecurse = 0;
             IgnoreErrorsWhenRecursing = false;
 
-            ReprocessingExistingFiles = false;
+            ReprocessExistingFiles = false;
             ReprocessIfCachedSizeIsZero = false;
             UseCacheFiles = false;
 
@@ -291,7 +291,7 @@ namespace MSFileInfoScanner
             // Note: These values will be overridden if /P was used and they are defined in the parameter file
 
             scanner.UseCacheFiles = UseCacheFiles;
-            scanner.ReprocessExistingFiles = ReprocessingExistingFiles;
+            scanner.ReprocessExistingFiles = ReprocessExistingFiles;
             scanner.ReprocessIfCachedSizeIsZero = ReprocessIfCachedSizeIsZero;
 
             scanner.PlotWithPython = PlotWithPython;
@@ -317,7 +317,7 @@ namespace MSFileInfoScanner
             scanner.DatasetStatsTextFileName = DatasetStatsTextFileName;
 
             scanner.CheckFileIntegrity = CheckFileIntegrity;
-            scanner.RecheckFileIntegrityForExistingDirectories = ReprocessingExistingFiles;
+            scanner.RecheckFileIntegrityForExistingDirectories = ReprocessExistingFiles;
 
             scanner.MaximumTextFileLinesToCheck = MaximumTextFileLinesToCheck;
             scanner.ComputeFileHashes = ComputeFileHashes;
