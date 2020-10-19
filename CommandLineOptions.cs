@@ -69,7 +69,7 @@ namespace MSFileInfoScanner
         [Option("DatasetID", HelpShowsDefault = false,
             HelpText = "Define the dataset's DatasetID value (where # is an integer); " +
                        "only appropriate if processing a single dataset",
-            Min = 1)]
+            Min = 0)]
         public int DatasetID { get; set; }
 
         [Option("CreateDatasetInfoFile", "DI", HelpShowsDefault = false,
