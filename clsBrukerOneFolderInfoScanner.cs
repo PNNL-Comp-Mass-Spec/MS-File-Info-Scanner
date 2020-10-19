@@ -210,7 +210,7 @@ namespace MSFileInfoScanner
                         foreach (var zipEntry in zipFileReader.Entries)
                         {
                             datasetFileInfo.FileSizeBytes += zipEntry.UncompressedSize;
-                            datasetFileInfo.ScanCount += 1;
+                            datasetFileInfo.ScanCount++;
                         }
                     }
 
@@ -262,7 +262,7 @@ namespace MSFileInfoScanner
 
                             if (dataLine.StartsWith(PEK_FILE_FILENAME_LINE))
                             {
-                                fileListCount += 1;
+                                fileListCount++;
                             }
                         }
                     }
@@ -328,7 +328,7 @@ namespace MSFileInfoScanner
                                     break;
                                 }
 
-                                fileListCount += 1;
+                                fileListCount++;
                             }
                             else
                             {

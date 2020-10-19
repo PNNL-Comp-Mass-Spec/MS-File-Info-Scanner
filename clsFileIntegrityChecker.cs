@@ -731,7 +731,7 @@ namespace MSFileInfoScanner
                     while (!reader.EndOfStream && linesRead < maximumTextFileLinesToCheck)
                     {
                         var dataLine = reader.ReadLine();
-                        linesRead += 1;
+                        linesRead++;
 
                         bool success;
                         if (charCountSkipsBlankLines && dataLine.Trim().Length == 0)
@@ -845,7 +845,7 @@ namespace MSFileInfoScanner
             if (dataLine.EndsWith(charToCount.ToString()) && charCount > 1 && charCount > minimumCharCount)
             {
                 // Decrement the char count by one since the line ends in the character we're counting
-                charCount -= 1;
+                charCount--;
             }
 
             if (charCount < minimumCharCount)
@@ -962,7 +962,7 @@ namespace MSFileInfoScanner
                     while (!reader.EndOfStream && linesRead < MAX_LINES_TO_READ)
                     {
                         var dataLine = reader.ReadLine();
-                        linesRead += 1;
+                        linesRead++;
 
                         if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
@@ -1030,7 +1030,7 @@ namespace MSFileInfoScanner
                     while (!reader.EndOfStream && linesRead < 2)
                     {
                         var dataLine = reader.ReadLine();
-                        linesRead += 1;
+                        linesRead++;
 
                         if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
@@ -1605,7 +1605,7 @@ namespace MSFileInfoScanner
                                     }
                                 }
 
-                                elementsRead += 1;
+                                elementsRead++;
                                 if (maximumXMLElementNodesToCheck > 0 && elementsRead >= MaximumXMLElementNodesToCheck)
                                 {
                                     break;
@@ -1811,10 +1811,10 @@ namespace MSFileInfoScanner
 
                         udtFileStats.Add(udtNewFile);
 
-                        udtDirectoryStats.FileCount += 1;
+                        udtDirectoryStats.FileCount++;
                         if (!passedIntegrityCheck)
                         {
-                            udtDirectoryStats.FileCountFailIntegrity += 1;
+                            udtDirectoryStats.FileCountFailIntegrity++;
                         }
 
                     }
@@ -1885,7 +1885,7 @@ namespace MSFileInfoScanner
                 matchIndex = text.IndexOf(searchChar, matchIndex + 1);
                 if (matchIndex >= 0)
                 {
-                    charCount += 1;
+                    charCount++;
                 }
                 else
                 {
@@ -1931,7 +1931,7 @@ namespace MSFileInfoScanner
                         if (textToSearch.StartsWith(lineHeaderEnum.Current.Key))
                         {
                             requiredTextItems[lineHeaderEnum.Current.Key] = true;
-                            requiredTextMatchCount += 1;
+                            requiredTextMatchCount++;
                             break;
                         }
                     }
@@ -1940,7 +1940,7 @@ namespace MSFileInfoScanner
                         if (textToSearch.Contains(lineHeaderEnum.Current.Key))
                         {
                             requiredTextItems[lineHeaderEnum.Current.Key] = true;
-                            requiredTextMatchCount += 1;
+                            requiredTextMatchCount++;
                             break;
                         }
                     }
@@ -2072,7 +2072,7 @@ namespace MSFileInfoScanner
                     while (!reader.EndOfStream && linesRead < maximumTextFileLinesToCheck)
                     {
                         var dataLine = reader.ReadLine();
-                        linesRead += 1;
+                        linesRead++;
 
                         if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
@@ -2092,7 +2092,7 @@ namespace MSFileInfoScanner
                             }
 
                             elementFound[index] = true;
-                            elementMatchCount += 1;
+                            elementMatchCount++;
 
                             if (elementMatchCount == elementFound.Length)
                             {
@@ -2236,7 +2236,7 @@ namespace MSFileInfoScanner
             {
                 if (requiredItem.Value)
                 {
-                    matchCount += 1;
+                    matchCount++;
                 }
                 else
                 {

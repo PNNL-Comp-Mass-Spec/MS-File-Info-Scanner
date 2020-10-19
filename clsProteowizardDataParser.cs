@@ -117,7 +117,7 @@ namespace MSFileInfoScanner
                 indexMatch ^= -1;
                 if (indexMatch == items.Count)
                 {
-                    indexMatch -= 1;
+                    indexMatch--;
                 }
 
                 if (indexMatch > 0)
@@ -125,7 +125,7 @@ namespace MSFileInfoScanner
                     // Possibly decrement indexMatch
                     if (Math.Abs(items[indexMatch - 1] - valToFind) < Math.Abs(items[indexMatch] - valToFind))
                     {
-                        indexMatch -= 1;
+                        indexMatch--;
                     }
                 }
 
@@ -134,7 +134,7 @@ namespace MSFileInfoScanner
                     // Possible increment indexMatch
                     if (Math.Abs(items[indexMatch + 1] - valToFind) < Math.Abs(items[indexMatch] - valToFind))
                     {
-                        indexMatch += 1;
+                        indexMatch++;
                     }
                 }
 
@@ -876,7 +876,7 @@ namespace MSFileInfoScanner
                         if (parserInfo.MaxScansToTrackInDetail < 0 || parserInfo.ScansStored < parserInfo.MaxScansToTrackInDetail)
                         {
                             mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
-                            parserInfo.ScansStored += 1;
+                            parserInfo.ScansStored++;
                         }
                     }
                 }
@@ -885,7 +885,7 @@ namespace MSFileInfoScanner
                     (parserInfo.MaxScansForTicAndBpi < 0 || parserInfo.TicAndBpiScansStored < parserInfo.MaxScansForTicAndBpi))
                 {
                     mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimes[scanIndex], bpi, tic);
-                    parserInfo.TicAndBpiScansStored += 1;
+                    parserInfo.TicAndBpiScansStored++;
                 }
 
                 if (mSaveLCMS2DPlots && addScan)
@@ -899,11 +899,11 @@ namespace MSFileInfoScanner
                     mDatasetStatsSummarizer.ClassifySpectrum(msDataSpectrum.Mzs, msLevels[scanIndex], "Scan " + scanStatsEntry.ScanNumber);
                 }
 
-                parserInfo.ScanCountSuccess += 1;
+                parserInfo.ScanCountSuccess++;
             }
             catch (Exception ex)
             {
-                parserInfo.ScanCountError += 1;
+                parserInfo.ScanCountError++;
 
                 if (ShowPeriodicMessageNow(parserInfo.ScanCountError))
                 {

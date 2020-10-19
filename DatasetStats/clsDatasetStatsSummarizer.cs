@@ -424,7 +424,7 @@ namespace MSFileInfoScanner.DatasetStats
                     var scanTypeKey = statEntry.ScanTypeName + SCAN_TYPE_STATS_SEP_CHAR + statEntry.ScanFilterText;
                     if (summaryStats.ScanTypeStats.ContainsKey(scanTypeKey))
                     {
-                        summaryStats.ScanTypeStats[scanTypeKey] += 1;
+                        summaryStats.ScanTypeStats[scanTypeKey]++;
                     }
                     else
                     {
@@ -488,7 +488,7 @@ namespace MSFileInfoScanner.DatasetStats
                 bpiList.Add(bpi);
             }
 
-            summaryStatDetails.ScanCount += 1;
+            summaryStatDetails.ScanCount++;
 
         }
 

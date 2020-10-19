@@ -603,7 +603,7 @@ namespace MSFileInfoScanner
 
                 for (var index = 0; index <= scanDataSorted.Length - 1; index++)
                 {
-                    scanCount += 1;
+                    scanCount++;
                     var scanNumber = scanCount;
 
                     if (scanDataSorted[index].AcqTime < acqTimeStart)
@@ -780,7 +780,7 @@ namespace MSFileInfoScanner
                                         bpi = 0;
                                         msLevel = 1;
 
-                                        scanCount += 1;
+                                        scanCount++;
                                     }
                                 }
                                 break;

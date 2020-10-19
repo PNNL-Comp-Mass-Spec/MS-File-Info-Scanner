@@ -541,14 +541,14 @@ namespace MSFileInfoScanner
             {
                 if (Math.Abs(chromatogramInfo.GetDataPoint(index).Intensity) < float.Epsilon)
                 {
-                    zeroPointCount += 1;
+                    zeroPointCount++;
                 }
                 else
                 {
                     indexNonZeroValue = index;
                     break;
                 }
-                pointsChecked += 1;
+                pointsChecked++;
                 if (pointsChecked >= MAX_POINTS_TO_CHECK)
                     break;
             }
@@ -565,14 +565,14 @@ namespace MSFileInfoScanner
             {
                 if (Math.Abs(chromatogramInfo.GetDataPoint(index).Intensity) < float.Epsilon)
                 {
-                    zeroPointCount += 1;
+                    zeroPointCount++;
                 }
                 else
                 {
                     indexNonZeroValue = index;
                     break;
                 }
-                pointsChecked += 1;
+                pointsChecked++;
                 if (pointsChecked >= MAX_POINTS_TO_CHECK)
                     break;
             }

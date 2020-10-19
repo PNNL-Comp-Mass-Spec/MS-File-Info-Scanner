@@ -155,7 +155,7 @@ namespace MSFileInfoScanner
                         else
                         {
                             // Need to sort
-                            mSortingWarnCount += 1;
+                            mSortingWarnCount++;
                             if (mSortingWarnCount <= 10)
                             {
                                 Console.WriteLine("  Sorting m/z data (this typically shouldn't be required for Thermo data, though can occur for high res orbitrap data)");
@@ -211,7 +211,7 @@ namespace MSFileInfoScanner
 
                         chargeFiltered[ionCountNew] = 0;
 
-                        ionCountNew += 1;
+                        ionCountNew++;
                     }
                 }
 
@@ -302,7 +302,7 @@ namespace MSFileInfoScanner
                     else
                     {
                         // Need to sort
-                        mSortingWarnCount += 1;
+                        mSortingWarnCount++;
                         if (mSortingWarnCount <= 10)
                         {
                             Console.WriteLine("  Sorting m/z data (this typically shouldn't be required for Thermo data, though can occur for high res orbitrap data)");
@@ -340,7 +340,7 @@ namespace MSFileInfoScanner
 
                         charge[ionCountNew] = ionList[index].Charge;
 
-                        ionCountNew += 1;
+                        ionCountNew++;
                     }
                 }
 
@@ -383,7 +383,7 @@ namespace MSFileInfoScanner
             if (scanData.IonCount > maxAllowableIonCount)
             {
                 // Do not keep more than 50,000 ions
-                mSpectraFoundExceedingMaxIonCount += 1;
+                mSpectraFoundExceedingMaxIonCount++;
 
                 // Display a message at the console the first 10 times we encounter spectra with over maxAllowableIonCount ions
                 // In addition, display a new message every time a new max value is encountered
@@ -567,7 +567,7 @@ namespace MSFileInfoScanner
                             {
                                 break;
                             }
-                            indexAdjacent -= 1;
+                            indexAdjacent--;
                         }
 
                         // Examine adjacent data points to the right (higher m/z)
@@ -586,12 +586,12 @@ namespace MSFileInfoScanner
                             {
                                 break;
                             }
-                            indexAdjacent += 1;
+                            indexAdjacent++;
                         }
 
                         ionsIntensity[index] = -ionsIntensity[index];
                     }
-                    pointerIndex -= 1;
+                    pointerIndex--;
                 }
 
                 // Now consolidate the data by copying in place
@@ -605,7 +605,7 @@ namespace MSFileInfoScanner
                     ionsMZ[ionCountNew] = ionsMZ[index];
                     ionsIntensity[ionCountNew] = -ionsIntensity[index];
                     chargeFiltered[ionCountNew] = chargeFiltered[index];
-                    ionCountNew += 1;
+                    ionCountNew++;
                 }
                 ionCount = ionCountNew;
 
@@ -710,7 +710,7 @@ namespace MSFileInfoScanner
                             msSpectrum.IonsMZ[ionCountNew] = msSpectrum.IonsMZ[ionIndex];
                             msSpectrum.IonsIntensity[ionCountNew] = msSpectrum.IonsIntensity[ionIndex];
                             msSpectrum.Charge[ionCountNew] = msSpectrum.Charge[ionIndex];
-                            ionCountNew += 1;
+                            ionCountNew++;
                         }
 
                     }
@@ -851,7 +851,7 @@ namespace MSFileInfoScanner
                         for (var ionIndex = 0; ionIndex <= mScans[scanIndex].IonCount - 1; ionIndex++)
                         {
                             filterDataArray.AddDataPoint(mScans[scanIndex].IonsIntensity[ionIndex], masterIonIndex);
-                            masterIonIndex += 1;
+                            masterIonIndex++;
                         }
                     }
                 }
@@ -884,9 +884,9 @@ namespace MSFileInfoScanner
                             // If the point's intensity is >= 0, then we keep it
                             if (filterDataArray.GetAbundanceByIndex(masterIonIndex) >= 0)
                             {
-                                ionCountNew += 1;
+                                ionCountNew++;
                             }
-                            masterIonIndex += 1;
+                            masterIonIndex++;
                         }
 
                         if (ionCountNew < minPointsPerSpectrum)
@@ -920,10 +920,10 @@ namespace MSFileInfoScanner
                                         mScans[scanIndex].Charge[ionCountNew] = mScans[scanIndex].Charge[ionIndex];
                                     }
 
-                                    ionCountNew += 1;
+                                    ionCountNew++;
                                 }
 
-                                masterIonIndex += 1;
+                                masterIonIndex++;
                             }
 
                             mScans[scanIndex].IonCount = ionCountNew;

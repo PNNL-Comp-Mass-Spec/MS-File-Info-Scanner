@@ -195,11 +195,11 @@ namespace MSFileInfoScanner
                     {
                         if (dataPoint.Item1 >= histogramBinStartIntensity[targetBin + 1])
                         {
-                            targetBin += 1;
+                            targetBin++;
                         }
                     }
 
-                    histogramBinCounts[targetBin] += 1;
+                    histogramBinCounts[targetBin]++;
 
                     if (dataPoint.Item1 < histogramBinStartIntensity[targetBin])
                     {
@@ -286,7 +286,7 @@ namespace MSFileInfoScanner
                             }
                             else
                             {
-                                dataCountImplicitlyIncluded += 1;
+                                dataCountImplicitlyIncluded++;
                             }
 
                             if (index % 10000 == 0)
@@ -315,7 +315,7 @@ namespace MSFileInfoScanner
                         {
                             while (binnedData[index].Item2 > mDataValues[originalDataArrayIndex].Item2)
                             {
-                                originalDataArrayIndex += 1;
+                                originalDataArrayIndex++;
                             }
 
                             if (Math.Abs(binnedData[index].Item1 - mSkipDataPointFlag) < float.Epsilon)
@@ -329,7 +329,7 @@ namespace MSFileInfoScanner
                                     Console.WriteLine("Index mis-match in FilterDataByMaxDataCountToKeep; this code shouldn't be reached");
                                 }
                             }
-                            originalDataArrayIndex += 1;
+                            originalDataArrayIndex++;
 
                             if (binnedDataCount < 1000 || index % 100 == 0)
                             {

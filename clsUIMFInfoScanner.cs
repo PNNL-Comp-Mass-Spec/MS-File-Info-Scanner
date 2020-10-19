@@ -122,7 +122,7 @@ namespace MSFileInfoScanner
                                 mzList[targetIndex] = mzList[ionIndex];
                                 intensityList[targetIndex] = intensityList[ionIndex];
                             }
-                            targetIndex += 1;
+                            targetIndex++;
                         }
                     }
 
@@ -142,7 +142,7 @@ namespace MSFileInfoScanner
 
                         overallAvgIntensitySum += intensitySum / ionCount;
 
-                        overallAvgCount += 1;
+                        overallAvgCount++;
 
                     }
 
@@ -471,7 +471,7 @@ namespace MSFileInfoScanner
                                     {
                                         mzList[targetIndex] = mzList[ionIndex];
                                         ionsIntensity[targetIndex] = intensityList[ionIndex];
-                                        targetIndex += 1;
+                                        targetIndex++;
                                     }
                                 }
 
@@ -730,7 +730,7 @@ namespace MSFileInfoScanner
                             if (Math.Abs(endTime) > float.Epsilon)
                                 break;
 
-                            frameIndex -= 1;
+                            frameIndex--;
                         };
 
                         // Check whether the StartTime and EndTime values are based on ticks
@@ -797,7 +797,7 @@ namespace MSFileInfoScanner
                             while (Math.Abs(startTimes[startTimes.Count - 1]) < float.Epsilon)
                             {
                                 startTimes.RemoveAt(startTimes.Count - 1);
-                                frameCountRemoved += 1;
+                                frameCountRemoved++;
                                 if (startTimes.Count == 0)
                                     break;
                             }

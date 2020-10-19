@@ -108,7 +108,7 @@ namespace MSFileInfoScanner
 
                     overallAvgIntensitySum += intensitySum / massIntensityPairs.GetLength(1);
 
-                    overallAvgCount += 1;
+                    overallAvgCount++;
                 }
 
                 if (overallAvgCount > 0)

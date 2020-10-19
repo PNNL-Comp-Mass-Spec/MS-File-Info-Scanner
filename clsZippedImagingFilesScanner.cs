@@ -78,7 +78,7 @@ namespace MSFileInfoScanner
                             }
 
                             // Bump up the scan count
-                            datasetFileInfo.ScanCount += 1;
+                            datasetFileInfo.ScanCount++;
 
                             // Add a Scan Stats entry
                             var scanStatsEntry = new ScanStatsEntry

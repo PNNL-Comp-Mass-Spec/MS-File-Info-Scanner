@@ -247,7 +247,7 @@ namespace MSFileInfoScanner
             {
                 while (!reader.EndOfStream)
                 {
-                    rowNumber += 1;
+                    rowNumber++;
                     var dataLine = reader.ReadLine();
 
                     if (string.IsNullOrWhiteSpace(dataLine))
@@ -309,7 +309,7 @@ namespace MSFileInfoScanner
 
                     if (parseError)
                     {
-                        lastScanParseErrors += 1;
+                        lastScanParseErrors++;
                     }
 
                 }
@@ -358,7 +358,7 @@ namespace MSFileInfoScanner
             {
                 while (!reader.EndOfStream)
                 {
-                    rowNumber += 1;
+                    rowNumber++;
                     var dataLine = reader.ReadLine();
 
                     if (string.IsNullOrWhiteSpace(dataLine))

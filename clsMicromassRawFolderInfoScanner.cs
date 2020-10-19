@@ -134,7 +134,7 @@ namespace MSFileInfoScanner
                     primaryDataFiles.Add(item);
                 }
 
-                fileCount += 1;
+                fileCount++;
             }
 
             var nativeFileIO = new clsMassLynxNativeIO();
