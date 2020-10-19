@@ -122,6 +122,7 @@
     <Compile Include="DatasetStats\clsDatasetFileInfo.cs" />
     <Compile Include="DatasetStats\clsDatasetStatsSummarizer.cs" />
     <Compile Include="DatasetStats\clsSampleInfo.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MassLynxData\MSData.cs" />
     <Compile Include="MassLynxData\MSFunctionInfo.cs" />
     <Compile Include="MassLynxData\MSHeaderInfo.cs" />
