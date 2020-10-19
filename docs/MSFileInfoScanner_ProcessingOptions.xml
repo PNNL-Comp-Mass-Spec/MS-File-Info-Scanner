@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sections>
+  <section name="MSFileInfoScannerSettings">
+    <item key="DSInfoConnectionString" value="Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;" />
+    <item key="DSInfoDBPostingEnabled" value="False" />
+    <item key="DSInfoStoredProcedure" value="UpdateDatasetFileInfoXML" />
+
+    <item key="LogMessagesToFile" value="False" />
+    <item key="LogFilePath" value="" />
+
+    <item key="LogDirectoryPath" value="" />
+
+    <item key="UseCacheFiles" value="False" />
+    <item key="ReprocessExistingFiles" value="False" />
+    <item key="ReprocessIfCachedSizeIsZero" value="False" />
+
+    <item key="CopyFileLocalOnReadError" value="False" />
+
+    <item key="SaveTICAndBPIPlots" value="True" />
+    <item key="SaveLCMS2DPlots" value="True" />
+    <item key="CheckCentroidingStatus" value="True" />
+
+    <item key="MS2MzMin" value="0" />
+    <item key="DisableInstrumentHash" value="False" />
+
+    <item key="LCMS2DPlotMZResolution" value="0.4" />
+    <item key="LCMS2DPlotMinPointsPerSpectrum" value="2" />
+
+    <item key="LCMS2DPlotMaxPointsToPlot" value="200000" />
+    <item key="LCMS2DPlotMinIntensity" value="0" />
+
+    <item key="LCMS2DOverviewPlotDivisor" value="10" />
+
+    <item key="ScanStart" value="0" />
+    <item key="ScanEnd" value="0" />
+
+    <item key="ComputeOverallQualityScores" value="True" />
+    <item key="CreateDatasetInfoFile" value="True" />
+    <item key="CreateScanStatsFile" value="True" />
+
+    <item key="UpdateDatasetStatsTextFile" value="False" />
+    <item key="DatasetStatsTextFileName" value="MSFileInfo_DatasetStats.txt" />
+
+    <item key="CheckFileIntegrity" value="False" />
+    <item key="RecheckFileIntegrityForExistingDirectories" value="False" />
+
+    <item key="MaximumTextFileLinesToCheck" value="500" />
+    <item key="MaximumXMLElementNodesToCheck" value="500" />
+    <item key="ComputeFileHashes" value="False" />
+    <item key="ZipFileCheckAllData" value="True" />
+
+    <item key="IgnoreErrorsWhenRecursing" value="False" />
+  </section>
+</sections>

@@ -55,7 +55,9 @@ The output directory path is optional
 * If omitted, the output files will be created in the program directory
 
 The parameter file switch `/P` is optional
-* If provided, it should point to a valid XML parameter file. If omitted, defaults are used
+* If provided, it should point to a valid XML parameter file
+  * Example postsed parameter file: [MSFileInfoScanner_ProcessingOptions.xml](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions.xml)
+* Most of the options can alternatively be defined using a Key=value parameter file, as described below for the `/Conf` argument
 
 Use `/S` to process all valid files in the input directory and subdirectories
 * Include a number after /S (like `/S:2`) to limit the level of subdirectories to examine
@@ -143,7 +145,7 @@ only if their cached size is 0 bytes
 
 Use `/PostToDMS` to store the dataset info in the DMS database
 * To customize the server name and/or stored procedure to use for posting, use an XML parameter file
-with the following settings 
+with the following settings :
   * `DSInfoConnectionString`
   * `DSInfoDBPostingEnabled`
   * `DSInfoStoredProcedure`
@@ -152,6 +154,27 @@ By default, plots are created using OxyPlot, which only works on Windows
 * Use `/PythonPlot` to create plots with Python instead of OxyPlot
   * Alternatively, set `PythonPlot` to `True` in the parameter file
 
+The processing options can be specified in a parameter file using `/ParamFile:Options.conf` or `/Conf:Options.conf`
+* Define options using the format `ArgumentName=Value`
+* Lines starting with `#` or `;` will be treated as comments
+* Additional arguments on the command line can supplement or override the arguments in the parameter file
+
+Use `/CreateParamFile` to create an example parameter file
+* By default, the example parameter file content is shown at the console
+* To create a file named Options.conf, use `/CreateParamFile:Options.conf`
+
+Use `/Conf` to define a key/value parameter file with settings
+* Example Key=Value parameter files
+  * [MSFileInfoScanner_ProcessingOptions_NoPlots.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_NoPlots.txt)
+  * [MSFileInfoScanner_ProcessingOptions_TICandBPI.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_TICandBPI.txt)
+  * [MSFileInfoScanner_ProcessingOptions_AllPlots.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_AllPlots.txt)
+  * [MSFileInfoScanner_ProcessingOptions_AllPlots_ValidateTMT.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_AllPlots_ValidateTMT.txt)
+
+Known file extensions: .RAW, .WIFF, .BAF, .MCF, .MCF_IDX, .UIMF, .CSV\
+Known directory extensions: .D, .RAW
+
+## Python Plotting Requirements
+
 On Windows, MS File Info Scanner looks for `python.exe` in directories that start with "Python3" or "Python 3", searching below:
 * C:\Program Files
 * C:\Program Files (x86)
@@ -159,7 +182,7 @@ On Windows, MS File Info Scanner looks for `python.exe` in directories that star
 * C:\ProgramData\Anaconda3
 * C:\
 
-On Linux, assumes Python is at `/usr/bin/python3`
+On Linux, the program assumes Python is at `/usr/bin/python3`
 
 Python plotting requires that three libraries be installed
 * numpy
@@ -168,10 +191,6 @@ Python plotting requires that three libraries be installed
 
 For Python library installation options, see the `Python_Setup.txt` file on GitHub
 * https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/Python/Python_Setup.txt
-
-
-Known file extensions: .RAW, .WIFF, .BAF, .MCF, .MCF_IDX, .UIMF, .CSV\
-Known directory extensions: .D, .RAW
 
 ## Contacts
 
