@@ -16,6 +16,7 @@ namespace MSFileInfoScanner
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)</remarks>
     public class clsUIMFInfoScanner : clsMSFileInfoProcessorBaseClass
     {
+        // ReSharper disable once CommentTypo
         // Ignore Spelling: Addon, Sarc, ns, AcqTimeEnd
 
         // Note: The extension must be in all caps
@@ -26,12 +27,12 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="uimfReader"></param>
         /// <param name="datasetFileInfo"></param>
-        /// <param name="dctMasterFrameList"></param>
+        /// <param name="masterFrameList"></param>
         /// <param name="masterFrameNumList"></param>
         private void ComputeQualityScores(
             DataReader uimfReader,
             DatasetFileInfo datasetFileInfo,
-            IReadOnlyDictionary<int, UIMFData.FrameType> dctMasterFrameList,
+            IReadOnlyDictionary<int, UIMFData.FrameType>masterFrameList,
             IReadOnlyList<int> masterFrameNumList)
         {
             float overallScore;
@@ -61,10 +62,10 @@ namespace MSFileInfoScanner
                 for (var masterFrameNumIndex = 0; masterFrameNumIndex <= masterFrameNumList.Count - 1; masterFrameNumIndex++)
                 {
                     var frameNumber = masterFrameNumList[masterFrameNumIndex];
-                    if (!dctMasterFrameList.TryGetValue(frameNumber, out var eFrameType))
+                    if (!masterFrameList.TryGetValue(frameNumber, out var eFrameType))
                     {
                         OnWarningEvent(string.Format(
-                                           "FrameType {0} not found in dictionary dctMasterFrameList; ignoring frame {1} in ComputeQualityScores",
+                                           "FrameType {0} not found in dictionary masterFrameList; ignoring frame {1} in ComputeQualityScores",
                                            eFrameType, frameNumber));
 
                         continue;
@@ -201,7 +202,7 @@ namespace MSFileInfoScanner
 
         private void LoadFrameDetails(
             DataReader uimfReader,
-            IReadOnlyDictionary<int, UIMFData.FrameType> dctMasterFrameList,
+            IReadOnlyDictionary<int, UIMFData.FrameType> masterFrameList,
             IReadOnlyList<int> masterFrameNumList)
         {
             const int BAD_TIC_OR_BPI = int.MinValue;
@@ -279,10 +280,10 @@ namespace MSFileInfoScanner
             {
                 var frameNumber = masterFrameNumList[masterFrameNumIndex];
 
-                if (!dctMasterFrameList.TryGetValue(frameNumber, out var eFrameType))
+                if (!masterFrameList.TryGetValue(frameNumber, out var eFrameType))
                 {
                     OnWarningEvent(string.Format(
-                        "FrameType {0} not found in dictionary dctMasterFrameList; ignoring frame {1} in LoadFrameDetails",
+                        "FrameType {0} not found in dictionary masterFrameList; ignoring frame {1} in LoadFrameDetails",
                         eFrameType, frameNumber));
 
                     continue;
@@ -599,18 +600,18 @@ namespace MSFileInfoScanner
             {
                 // Read the file info
 
-                var dctMasterFrameList = new Dictionary<int, UIMFData.FrameType>();
+                var masterFrameList = new Dictionary<int, UIMFData.FrameType>();
 
                 try
                 {
                     // Construct a master list of frame numbers and frame types
-                    dctMasterFrameList = uimfReader.GetMasterFrameList();
+                    masterFrameList = uimfReader.GetMasterFrameList();
 
-                    if (dctMasterFrameList.Count > 0)
+                    if (masterFrameList.Count > 0)
                     {
                         // Copy the frame numbers into an array so that we can assure it's sorted
-                        masterFrameNumList = new int[dctMasterFrameList.Keys.Count];
-                        dctMasterFrameList.Keys.CopyTo(masterFrameNumList, 0);
+                        masterFrameNumList = new int[masterFrameList.Keys.Count];
+                        masterFrameList.Keys.CopyTo(masterFrameNumList, 0);
 
                         Array.Sort(masterFrameNumList);
                     }
@@ -905,13 +906,13 @@ namespace MSFileInfoScanner
                 {
                     // Load data from each frame
                     // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
-                    LoadFrameDetails(uimfReader, dctMasterFrameList, masterFrameNumList);
+                    LoadFrameDetails(uimfReader, masterFrameList, masterFrameNumList);
                 }
 
                 if (mComputeOverallQualityScores)
                 {
                     // Note that this call will also create the TICs and BPIs
-                    ComputeQualityScores(uimfReader, datasetFileInfo, dctMasterFrameList, masterFrameNumList);
+                    ComputeQualityScores(uimfReader, datasetFileInfo, masterFrameList, masterFrameNumList);
                 }
             }
 
