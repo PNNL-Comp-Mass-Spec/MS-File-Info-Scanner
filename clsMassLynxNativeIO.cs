@@ -1333,7 +1333,7 @@ namespace MSFileInfoScanner
 
             for (var calIndex = calibrationParameters.Length - 1; calIndex >= 0; calIndex += -1)
             {
-                if (calibrationParameters[calIndex].ToUpper().StartsWith("T"))
+                if (calibrationParameters[calIndex].StartsWith("T", StringComparison.OrdinalIgnoreCase))
                 {
                     calibrationParameters[calIndex] = calibrationParameters[calIndex].Substring(1);
                     if (short.TryParse(calibrationParameters[calIndex], out var calTypeID))

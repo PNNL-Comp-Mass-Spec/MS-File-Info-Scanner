@@ -116,7 +116,7 @@ namespace MSFileInfoScanner
                     datasetFileInfo.AcqTimeEnd = item.LastWriteTime;
                 }
 
-                if (item.Name.ToLower() == "_header.txt")
+                if (string.Equals(item.Name, "_header.txt", StringComparison.OrdinalIgnoreCase))
                 {
                     // Assign the file's modification time to .AcqTimeStart and .AcqTimeEnd
                     // These will get updated below to more precise values
@@ -124,7 +124,7 @@ namespace MSFileInfoScanner
                     datasetFileInfo.AcqTimeEnd = item.LastWriteTime;
                 }
 
-                if (item.Extension.ToLower().Equals(".dat"))
+                if (item.Extension.Equals(".dat", StringComparison.OrdinalIgnoreCase))
                 {
                     primaryDataFiles.Add(item);
                 }

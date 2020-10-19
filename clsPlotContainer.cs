@@ -83,7 +83,7 @@ namespace MSFileInfoScanner
                 throw new ArgumentNullException(nameof(pngFile), "PNG file instance cannot be blank");
 
             bool success;
-            if (pngFile.Extension.ToLower() != ".png")
+            if (!string.Equals(pngFile.Extension, ".png", StringComparison.OrdinalIgnoreCase))
             {
                 success = SaveToFileLoop(new FileInfo(pngFile.FullName + ".png"), ImageFileFormat.PNG, width, height, resolution);
             }
@@ -102,7 +102,7 @@ namespace MSFileInfoScanner
                 throw new ArgumentNullException(nameof(jpgFile), "JPG file instance cannot be blank");
 
             bool success;
-            if (jpgFile.Extension.ToLower() != ".jpg")
+            if (!string.Equals(jpgFile.Extension, ".jpg", StringComparison.OrdinalIgnoreCase))
             {
                 success = SaveToFileLoop(new FileInfo(jpgFile.FullName + ".jpg"), ImageFileFormat.JPG, width, height, resolution);
             }

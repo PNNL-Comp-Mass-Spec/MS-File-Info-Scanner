@@ -334,7 +334,7 @@ namespace MSFileInfoScanner
             var rowNumber = 0;
             var colIndexScanInfo = -1;
 
-            if (!File.Exists(scansFilePath) && scansFilePath.ToLower().EndsWith(FILTERED_SCANS_SUFFIX.ToLower()))
+            if (!File.Exists(scansFilePath) && scansFilePath.EndsWith(FILTERED_SCANS_SUFFIX, StringComparison.OrdinalIgnoreCase))
             {
                 scansFilePath = scansFilePath.Substring(0, scansFilePath.Length - FILTERED_SCANS_SUFFIX.Length) + "_scans.csv";
             }

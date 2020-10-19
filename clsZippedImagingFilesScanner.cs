@@ -141,7 +141,7 @@ namespace MSFileInfoScanner
                 var datasetDirectory = GetDatasetDirectory(dataFilePath);
                 datasetName = datasetDirectory.Name;
 
-                if (datasetName.ToLower().EndsWith(".d"))
+                if (datasetName.EndsWith(".d", StringComparison.OrdinalIgnoreCase))
                 {
                     datasetName = datasetName.Substring(0, datasetName.Length - 2);
                 }
@@ -163,7 +163,7 @@ namespace MSFileInfoScanner
 
             var imagingFile = new FileInfo(imagingFilePath);
 
-            if (imagingFile.Name.ToLower().StartsWith(ZIPPED_IMAGING_FILE_NAME_PREFIX.ToLower()) && imagingFile.Extension.ToLower() == ".zip")
+            if (imagingFile.Name.StartsWith(ZIPPED_IMAGING_FILE_NAME_PREFIX, StringComparison.OrdinalIgnoreCase) && string.Equals(imagingFile.Extension, ".zip", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }

@@ -197,7 +197,7 @@ namespace MSFileInfoScanner
                 return null;
             }
 
-            var acquisitionMethodFiles = (from methodFile in dotMethodFiles where methodFile.Name.ToLower().EndsWith("apexacquisition.method") select methodFile).ToList();
+            var acquisitionMethodFiles = (from methodFile in dotMethodFiles where methodFile.Name.EndsWith("apexacquisition.method", StringComparison.OrdinalIgnoreCase) select methodFile).ToList();
 
             if (acquisitionMethodFiles.Count == 0)
             {
@@ -850,7 +850,7 @@ namespace MSFileInfoScanner
                 var datasetDirectory = GetDatasetFolder(dataFilePath);
                 datasetName = datasetDirectory.Name;
 
-                if (datasetName.ToLower().EndsWith(".d"))
+                if (datasetName.EndsWith(".d", StringComparison.OrdinalIgnoreCase))
                 {
                     datasetName = datasetName.Substring(0, datasetName.Length - 2);
                 }
