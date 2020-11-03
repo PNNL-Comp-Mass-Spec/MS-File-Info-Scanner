@@ -10,7 +10,7 @@ namespace MSFileInfoScanner
     /// Zipped imaging file scanner
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)</remarks>
-    public class clsZippedImagingFilesScanner : clsMSFileInfoProcessorBaseClass
+    public class ZippedImagingFilesScanner : clsMSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: AcqStartTime, AcqEndTime
 

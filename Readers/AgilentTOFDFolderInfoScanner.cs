@@ -11,7 +11,7 @@ namespace MSFileInfoScanner
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012</remarks>
     // ReSharper disable once IdentifierTypo
-    public class clsAgilentTOFDFolderInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class AgilentTOFDFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: AcqData, AcqTime
 

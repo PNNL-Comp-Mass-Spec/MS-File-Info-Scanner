@@ -8,7 +8,7 @@ namespace MSFileInfoScanner
     /// Agilent ion trap .D folder info scanner
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
-    public class clsAgilentIonTrapDFolderInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class AgilentIonTrapDFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
         // Note: The extension must be in all caps
         public const string AGILENT_ION_TRAP_D_EXTENSION = ".D";

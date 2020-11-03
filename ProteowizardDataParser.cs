@@ -10,7 +10,7 @@ using pwiz.ProteowizardWrapper;
 namespace MSFileInfoScanner
 {
     [CLSCompliant(false)]
-    public class clsProteoWizardDataParser : EventNotifier
+    public class ProteoWizardDataParser : EventNotifier
     {
         // Ignore Spelling: timsTOF
 

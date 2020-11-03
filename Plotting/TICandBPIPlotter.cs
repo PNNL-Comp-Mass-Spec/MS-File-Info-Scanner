@@ -10,7 +10,7 @@ using ThermoFisher.CommonCore.Data.Business;
 namespace MSFileInfoScanner
 {
     // ReSharper disable once IdentifierTypo
-    public class clsTICandBPIPlotter : EventNotifier
+    public class TICandBPIPlotter : EventNotifier
     {
         // Ignore Spelling: OxyPlot
 
@@ -690,7 +690,7 @@ namespace MSFileInfoScanner
             }
         }
 
-        private class clsChromatogramDataPoint
+        private class ChromatogramDataPoint
         {
             public int ScanNum { get; set; }
             public float TimeMinutes { get; set; }
@@ -698,7 +698,7 @@ namespace MSFileInfoScanner
             public int MSLevel { get; set; }
         }
 
-        private class clsChromatogramInfo
+        private class ChromatogramInfo
         {
             public int ScanCount => mScans.Count;
 

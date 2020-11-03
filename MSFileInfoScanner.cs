@@ -33,7 +33,7 @@ namespace MSFileInfoScanner
     /// Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
     /// </para>
     /// </remarks>
-    public sealed class clsMSFileInfoScanner : iMSFileInfoScanner
+    public sealed class MSFileInfoScanner : iMSFileInfoScanner
     {
         // Ignore Spelling: OxyPlot, yyyy-MM-dd, hh:mm:ss tt, centroiding, utf, idx, xtr, Shimadzu
 

@@ -5,7 +5,7 @@ using PRISM;
 
 namespace MSFileInfoScanner
 {
-    internal abstract class clsPlotContainerBase : EventNotifier
+    internal abstract class PlotContainerBase : EventNotifier
     {
         // Ignore Spelling: yyyy-MM-dd hh:mm:ss
 

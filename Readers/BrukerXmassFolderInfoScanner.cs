@@ -14,7 +14,7 @@ namespace MSFileInfoScanner
     /// Bruker XMass folder info scanner
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)</remarks>
-    public class clsBrukerXmassFolderInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class BrukerXmassFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
         // ReSharper disable CommentTypo
 
@@ -1394,7 +1394,7 @@ namespace MSFileInfoScanner
             }
         }
 
-        private class clsScanDataSortComparer : IComparer<udtMCFScanInfoType>
+        private class ScanDataSortComparer : IComparer<udtMCFScanInfoType>
         {
             public int Compare(udtMCFScanInfoType x, udtMCFScanInfoType y)
             {

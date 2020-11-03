@@ -14,7 +14,7 @@ namespace MSFileInfoScanner
     /// UIMF Info Scanner
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)</remarks>
-    public class clsUIMFInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class UIMFInfoScanner : clsMSFileInfoProcessorBaseClass
     {
         // ReSharper disable once CommentTypo
         // Ignore Spelling: Addon, Sarc, ns, AcqTimeEnd

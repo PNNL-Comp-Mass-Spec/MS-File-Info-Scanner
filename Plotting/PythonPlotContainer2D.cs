@@ -8,7 +8,7 @@ namespace MSFileInfoScanner
     /// <summary>
     /// Python data container for 2D data
     /// </summary>
-    internal class clsPythonPlotContainer2D : clsPythonPlotContainer
+    internal class PythonPlotContainer2D : clsPythonPlotContainer
     {
         // Ignore Spelling: Autoscale, Gridline, png
 

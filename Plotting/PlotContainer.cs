@@ -17,7 +17,7 @@ namespace MSFileInfoScanner
     /// <summary>
     /// OxyPlot container
     /// </summary>
-    internal class clsPlotContainer : clsPlotContainerBase
+    internal class PlotContainer : clsPlotContainerBase
     {
         // Ignore Spelling: OxyPlot, png, Arial
 

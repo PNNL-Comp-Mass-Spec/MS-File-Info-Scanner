@@ -12,7 +12,7 @@ namespace MSFileInfoScanner
     /// Check the integrity of files in a given directory
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2008</remarks>
-    public class clsFileIntegrityChecker : EventNotifier
+    public class FileIntegrityChecker : EventNotifier
     {
         public clsFileIntegrityChecker()
         {

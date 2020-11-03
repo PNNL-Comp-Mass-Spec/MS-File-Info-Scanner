@@ -16,7 +16,7 @@ namespace MSFileInfoScanner
     /// Base class for MS file info scanners
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2007</remarks>
-    public abstract class clsMSFileInfoProcessorBaseClass : iMSFileInfoProcessor
+    public abstract class MSFileInfoProcessorBaseClass : iMSFileInfoProcessor
     {
         // Ignore Spelling: Abu, html, href, AcqTime
 

@@ -12,7 +12,7 @@ namespace MSFileInfoScanner
     /// DeconTools .isos info scanner
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2013</remarks>
-    public class clsDeconToolsIsosInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class DeconToolsIsosInfoScanner : clsMSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: isos, mw, deisotoped
 

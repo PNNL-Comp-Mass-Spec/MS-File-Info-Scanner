@@ -7,7 +7,7 @@ using PRISM;
 
 namespace MSFileInfoScanner
 {
-    public class clsMSFileInfoDataCache : EventNotifier
+    public class MSFileInfoDataCache : EventNotifier
     {
         // Ignore Spelling: AcqTime, yyyy-MM-dd, HH:mm:ss
 

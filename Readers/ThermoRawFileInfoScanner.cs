@@ -15,7 +15,7 @@ namespace MSFileInfoScanner
     /// Thermo .raw file info scanner
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
-    public class clsThermoRawFileInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class ThermoRawFileInfoScanner : clsMSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: xcalibur
 

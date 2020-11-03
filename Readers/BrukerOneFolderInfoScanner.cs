@@ -11,7 +11,7 @@ namespace MSFileInfoScanner
     /// Bruker one folder info scanner
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
-    public class clsBrukerOneFolderInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class BrukerOneFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: acqu, fid, ser, yyyy-MMM-dd hh:mm:ss
 

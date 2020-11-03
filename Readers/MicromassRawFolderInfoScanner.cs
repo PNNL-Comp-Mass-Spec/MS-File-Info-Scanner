@@ -10,7 +10,7 @@ namespace MSFileInfoScanner
     /// Class for reading data from Waters mass spectrometers (previously Micromass)
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
-    public class clsMicromassRawFolderInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class MicromassRawFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
         // Note: The extension must be in all caps
         public const string MICROMASS_RAW_FOLDER_EXTENSION = ".RAW";

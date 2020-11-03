@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace MSFileInfoScanner
 {
-    public class clsFilterDataArrayMaxCount
+    public class FilterDataArrayMaxCount
     {
         // This class can be used to select the top N data points in a list, sorting descending
         // It does not require a full sort of the data, which allows for faster filtering of the data
@@ -400,7 +400,7 @@ namespace MSFileInfoScanner
         }
     }
 
-    class clsSortByIndex : IComparer<Tuple<float, int>>
+    class SortByIndex : IComparer<Tuple<float, int>>
     {
         public int Compare(Tuple<float, int> x, Tuple<float, int> y)
         {

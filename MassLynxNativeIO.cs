@@ -27,7 +27,7 @@ namespace MSFileInfoScanner
     /// Written by Matthew Monroe for PNNL in Jan 2004
     /// Portions of this code were written at UNC in 2001
     /// </remarks>
-    internal class clsMassLynxNativeIO
+    internal class MassLynxNativeIO
     {
         // Ignore Spelling: Acqu, func, CLng
 

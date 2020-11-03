@@ -16,7 +16,7 @@ namespace MSFileInfoScanner
     /// To keep the plot from being too dense, it will filter the data to show at most MaxPointsToPlot data points
     /// Furthermore, it will bin the data by MZResolution m/z units (necessary if the data is not centroided)
     /// </summary>
-    public class clsLCMSDataPlotter : EventNotifier
+    public class LCMSDataPlotter : EventNotifier
     {
         // Ignore Spelling: OxyPlot, deisotoped
 
@@ -1849,7 +1849,7 @@ namespace MSFileInfoScanner
         /// If you decrease .IonCount, you can optionally call .ShrinkArrays to reduce the allocated space
         /// </summary>
         /// <remarks></remarks>
-        public class clsScanData
+        public class ScanData
         {
             public int IonCount { get; set; }
 

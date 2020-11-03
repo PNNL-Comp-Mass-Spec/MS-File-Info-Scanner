@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace MSFileInfoScanner
 {
-    class clsAxisInfo
+    class AxisInfo
     {
         // Ignore Spelling: Autoscale, Gridline
 

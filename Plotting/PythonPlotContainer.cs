@@ -9,7 +9,7 @@ namespace MSFileInfoScanner
     /// <summary>
     /// Python data container base class
     /// </summary>
-    internal abstract class clsPythonPlotContainer : clsPlotContainerBase
+    internal abstract class PythonPlotContainer : clsPlotContainerBase
     {
         // Ignore Spelling: Tmp, usr
 

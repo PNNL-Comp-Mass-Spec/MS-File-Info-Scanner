@@ -12,7 +12,7 @@ namespace SpectraTypeClassifier
     /// <remarks>From http://stackoverflow.com/questions/4140719/i-need-c-sharp-function-that-will-calculate-median </remarks>
     [CLSCompliant(true)]
     [Obsolete("Use MathNet.Numerics.Statistics.Statistics.Median()")]
-    public class clsMedianUtilities
+    public class MedianUtilities
     {
 
         private readonly Random mRandom;

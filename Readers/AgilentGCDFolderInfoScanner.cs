@@ -12,7 +12,7 @@ namespace MSFileInfoScanner
     /// Agilent GC .D folder info scanner
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012</remarks>
-    public class clsAgilentGCDFolderInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class AgilentGCDFolderInfoScanner : clsMSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: acqmeth, AcqTimes
 
@@ -29,7 +29,7 @@ namespace MSFileInfoScanner
 
         private readonly Regex mExtractTime;
 
-        private class clsLineMatchSearchInfo
+        private class LineMatchSearchInfo
         {
             public bool MatchLineStart { get; }
 
