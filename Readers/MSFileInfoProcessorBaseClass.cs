@@ -10,7 +10,7 @@ using PRISM;
 using ThermoFisher.CommonCore.Data.Business;
 using ThermoRawFileReader;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     /// <summary>
     /// Base class for MS file info scanners

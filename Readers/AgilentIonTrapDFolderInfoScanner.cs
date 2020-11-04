@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     /// <summary>
     /// Agilent ion trap .D folder info scanner

@@ -7,7 +7,7 @@ using OxyPlot.Series;
 using PRISM;
 using ThermoFisher.CommonCore.Data.Business;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Plotting
 {
     // ReSharper disable once IdentifierTypo
     public class TICandBPIPlotter : EventNotifier

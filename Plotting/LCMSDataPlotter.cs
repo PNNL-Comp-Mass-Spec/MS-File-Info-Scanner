@@ -8,7 +8,7 @@ using OxyPlot.Axes;
 using OxyPlot.Series;
 using PRISM;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Plotting
 {
     /// <summary>
     /// This class tracks the m/z and intensity values for a series of spectra

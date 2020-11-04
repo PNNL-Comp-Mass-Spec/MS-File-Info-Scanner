@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using PRISM;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Plotting
 {
     /// <summary>
     /// Python data container base class

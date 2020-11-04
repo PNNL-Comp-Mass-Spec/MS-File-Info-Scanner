@@ -3,7 +3,7 @@ using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScannerInterfaces;
 using PRISM;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Options
 {
     internal class CommandLineOptions
     {

@@ -4,7 +4,7 @@ using System.IO;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScanner.MassLynxData;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     /// <summary>
     /// Class for reading data from Waters mass spectrometers (previously Micromass)

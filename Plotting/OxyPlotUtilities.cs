@@ -4,7 +4,7 @@ using System.Linq;
 using OxyPlot;
 using OxyPlot.Axes;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Plotting
 {
     public static class OxyPlotUtilities
     {

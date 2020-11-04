@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using OxyPlot;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Plotting
 {
     /// <summary>
     /// Python data container for 2D data

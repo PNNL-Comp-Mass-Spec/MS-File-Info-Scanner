@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
 using PRISM;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     /// <summary>
     /// Agilent GC .D folder info scanner

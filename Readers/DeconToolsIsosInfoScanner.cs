@@ -6,7 +6,7 @@ using MSFileInfoScanner.DatasetStats;
 using PRISM;
 using ThermoRawFileReader;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     /// <summary>
     /// DeconTools .isos info scanner

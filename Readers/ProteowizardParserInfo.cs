@@ -1,5 +1,5 @@
 ﻿
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     public class ProteoWizardParserInfo
     {

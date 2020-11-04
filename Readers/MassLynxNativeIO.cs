@@ -6,7 +6,7 @@ using MSFileInfoScanner.MassLynxData;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable BuiltInTypeReferenceStyle
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     /// <summary>
     /// <para>

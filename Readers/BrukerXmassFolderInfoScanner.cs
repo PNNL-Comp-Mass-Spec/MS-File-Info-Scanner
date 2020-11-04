@@ -8,7 +8,7 @@ using System.Xml;
 using MSFileInfoScanner.DatasetStats;
 using PRISM;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     /// <summary>
     /// Bruker XMass folder info scanner

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using OxyPlot.Series;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Plotting
 {
     /// <summary>
     /// Python data container for 3D data

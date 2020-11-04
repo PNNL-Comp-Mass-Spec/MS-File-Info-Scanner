@@ -1,8 +1,7 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Plotting
 {
     class AxisInfo
     {

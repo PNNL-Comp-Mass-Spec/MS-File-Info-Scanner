@@ -8,7 +8,7 @@ using PRISM;
 using ThermoFisher.CommonCore.Data.Business;
 using UIMFLibrary;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     /// <summary>
     /// UIMF Info Scanner

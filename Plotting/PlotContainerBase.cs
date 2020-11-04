@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using PRISM;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Plotting
 {
     internal abstract class PlotContainerBase : EventNotifier
     {

@@ -2,7 +2,7 @@
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     class GenericFileInfoScanner : MSFileInfoProcessorBaseClass
     {

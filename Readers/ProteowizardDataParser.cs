@@ -7,7 +7,7 @@ using MSFileInfoScanner.DatasetStats;
 using PRISM;
 using pwiz.ProteowizardWrapper;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     [CLSCompliant(false)]
     public class ProteoWizardDataParser : EventNotifier

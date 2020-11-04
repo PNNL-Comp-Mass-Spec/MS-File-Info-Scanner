@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using MSFileInfoScanner.DatasetStats;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     /// <summary>
     /// Zipped imaging file scanner

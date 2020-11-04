@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -10,10 +11,8 @@ using LinearColorAxis = OxyPlot.Axes.LinearColorAxis;
 
 // ReSharper disable RedundantNameQualifier
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Plotting
 {
-    using System.Globalization;
-
     /// <summary>
     /// OxyPlot container
     /// </summary>

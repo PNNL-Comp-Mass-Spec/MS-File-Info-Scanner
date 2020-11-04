@@ -4,7 +4,7 @@ using System.IO;
 using MSFileInfoScanner.DatasetStats;
 using PRISM;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     /// <summary>
     /// Agilent TOF .D folder Info Scanner
