@@ -14,15 +14,16 @@ namespace SpectraTypeClassifier
     [Obsolete("Use MathNet.Numerics.Statistics.Statistics.Median()")]
     public class MedianUtilities
     {
+        // Ignore Spelling: Corman et al
 
         private readonly Random mRandom;
-        public enum eEventListCountBehaviorType
+        public enum EventListCountBehaviorType
         {
             ReportMidpointAverage = 0,
             ReportNearest = 1
         }
 
-        public eEventListCountBehaviorType EvenNumberedListCountBehavior { get; set; }
+        public EventListCountBehaviorType EvenNumberedListCountBehavior { get; set; }
 
         /// <summary>
         /// Constructor
@@ -30,37 +31,36 @@ namespace SpectraTypeClassifier
         public MedianUtilities()
         {
             mRandom = new Random();
-            EvenNumberedListCountBehavior = eEventListCountBehaviorType.ReportMidpointAverage;
+            EvenNumberedListCountBehavior = EventListCountBehaviorType.ReportMidpointAverage;
         }
 
         /// <summary>
         /// Partitions the given list around a pivot element such that all elements on left of pivot are less than or equal to pivot
-        /// and the ones at thr right are greater than pivot. This method can be used for sorting, N-order statistics such as
+        /// and the ones at the right are greater than pivot. This method can be used for sorting, N-order statistics such as
         /// as median finding algorithms.
         /// Pivot is selected randomly if random number generator is supplied else its selected as last element in the list.
         /// Reference: Introduction to Algorithms 3rd Edition, Corman et al, pp 171
         /// </summary>
-        private int Partition(IList<double> lstData, int startIndex, int endIndex, Random oRandom)
+        private int Partition(IList<double> dataPoints, int startIndex, int endIndex, Random oRandom)
         {
             if (oRandom != null)
             {
-                Swap(lstData, endIndex, oRandom.Next(startIndex, endIndex));
+                Swap(dataPoints, endIndex, oRandom.Next(startIndex, endIndex));
             }
 
-            var pivot = lstData[endIndex];
+            var pivot = dataPoints[endIndex];
             var lastLow = startIndex - 1;
             for (var i = startIndex; i <= endIndex - 1; i++)
             {
-                if (lstData[i].CompareTo(pivot) <= 0)
+                if (dataPoints[i].CompareTo(pivot) <= 0)
                 {
-                    lastLow += 1;
-                    Swap(lstData, i, lastLow);
+                    lastLow++;
+                    Swap(dataPoints, i, lastLow);
                 }
             }
-            lastLow += 1;
-            Swap(lstData, endIndex, lastLow);
+            lastLow++;
+            Swap(dataPoints, endIndex, lastLow);
             return lastLow;
-
         }
 
         /// <summary>
@@ -68,9 +68,9 @@ namespace SpectraTypeClassifier
         /// Note: specified list will be mutated in the process.
         /// Reference: Introduction to Algorithms 3rd Edition, Corman et al, pp 216
         /// </summary>
-        public double NthOrderStatistic(IList<double> lstData, int n)
+        public double NthOrderStatistic(IList<double> dataPoints, int n)
         {
-            return NthOrderStatistic(lstData, n, 0, lstData.Count - 1, mRandom);
+            return NthOrderStatistic(dataPoints, n, 0, dataPoints.Count - 1, mRandom);
         }
 
         /// <summary>
@@ -79,9 +79,9 @@ namespace SpectraTypeClassifier
         /// Reference: Introduction to Algorithms 3rd Edition, Corman et al, pp 216
         /// </summary>
         // ReSharper disable once UnusedMember.Global
-        public double NthOrderStatistic(IList<double> lstData, int n, Random oRandom)
+        public double NthOrderStatistic(IList<double> dataPoints, int n, Random oRandom)
         {
-            return NthOrderStatistic(lstData, n, 0, lstData.Count - 1, oRandom);
+            return NthOrderStatistic(dataPoints, n, 0, dataPoints.Count - 1, oRandom);
         }
 
         /// <summary>
@@ -89,14 +89,14 @@ namespace SpectraTypeClassifier
         /// Note: specified list will be mutated in the process.
         /// Reference: Introduction to Algorithms 3rd Edition, Corman et al, pp 216
         /// </summary>
-        private double NthOrderStatistic(IList<double> lstData, int n, int startIndex, int endIndex, Random oRandom)
+        private double NthOrderStatistic(IList<double> dataPoints, int n, int startIndex, int endIndex, Random oRandom)
         {
             while (true)
             {
-                var pivotIndex = Partition(lstData, startIndex, endIndex, oRandom);
+                var pivotIndex = Partition(dataPoints, startIndex, endIndex, oRandom);
                 if (pivotIndex == n)
                 {
-                    return lstData[pivotIndex];
+                    return dataPoints[pivotIndex];
                 }
 
                 if (n < pivotIndex)
@@ -108,79 +108,75 @@ namespace SpectraTypeClassifier
                     startIndex = pivotIndex + 1;
                 }
             }
-
         }
 
         /// <summary>
         /// Swap two items in a list
         /// </summary>
-        public void Swap(IList<double> lstData, int i, int j)
+        public void Swap(IList<double> dataPoints, int i, int j)
         {
             if (i == j)
             {
                 // Swap is not required
                 return;
             }
-            var temp = lstData[i];
-            lstData[i] = lstData[j];
-            lstData[j] = temp;
+            var temp = dataPoints[i];
+            dataPoints[i] = dataPoints[j];
+            dataPoints[j] = temp;
         }
 
         /// <summary>
-        /// Compute the median of the values in lstData
+        /// Compute the median of the values in dataPoints
         /// </summary>
-        /// <remarks>lstData will be mutated (changed) when determining the median</remarks>
-        public double Median(IList<double> lstData)
+        /// <remarks>dataPoints will be mutated (changed) when determining the median</remarks>
+        public double Median(IList<double> dataPoints)
         {
-            var median = MathNet.Numerics.Statistics.Statistics.Median(lstData);
+            var median = MathNet.Numerics.Statistics.Statistics.Median(dataPoints);
             return median;
         }
 
         /// <summary>
-        /// Compute the median of the values in lstData
+        /// Compute the median of the values in dataPoints
         /// </summary>
-        /// <remarks>lstData will be mutated (changed) when determining the median</remarks>
-        public double Median_Old(IList<double> lstData)
+        /// <remarks>dataPoints will be mutated (changed) when determining the median</remarks>
+        public double Median_Old(IList<double> dataPoints)
         {
-
-            if (lstData == null || lstData.Count < 1)
+            if (dataPoints == null || dataPoints.Count < 1)
             {
                 // List is empty
                 return 0;
             }
 
-            if (lstData.Count <= 1)
+            if (dataPoints.Count == 1)
             {
                 // Only 1 item; the median is the value
-                return lstData.First();
+                return dataPoints[0];
             }
 
-            var midPoint1 = Convert.ToInt32(Math.Floor((lstData.Count - 1) / 2.0));
-            var median1 = NthOrderStatistic(lstData, midPoint1);
+            var midPoint1 = Convert.ToInt32(Math.Floor((dataPoints.Count - 1) / 2.0));
+            var median1 = NthOrderStatistic(dataPoints, midPoint1);
 
-            if (lstData.Count % 2 > 0 || EvenNumberedListCountBehavior == eEventListCountBehaviorType.ReportNearest)
+            if (dataPoints.Count % 2 > 0 || EvenNumberedListCountBehavior == EventListCountBehaviorType.ReportNearest)
             {
                 return median1;
             }
 
             // List contains an even number of elements
-            var midPoint2 = Convert.ToInt32(lstData.Count / 2);
-            var median2 = NthOrderStatistic(lstData, midPoint2);
+            var midPoint2 = Convert.ToInt32(dataPoints.Count / 2);
+            var median2 = NthOrderStatistic(dataPoints, midPoint2);
 
             // Median is the average of the two middle points
             return (median1 + median2) / 2.0;
-
         }
 
         /// <summary>
-        /// Compute the median of a subset of lstData, selected using getValue
+        /// Compute the median of a subset of dataPoints, selected using getValue
         /// </summary>
         // ReSharper disable once UnusedMember.Global
-        public double Median(IEnumerable<double> lstData, Func<double, double> getValue)
+        public double Median(IEnumerable<double> dataPoints, Func<double, double> getValue)
         {
-            var lstDataSubset = lstData.Select(getValue).ToList();
-            return Median(lstDataSubset);
+            var dataPointsSubset = dataPoints.Select(getValue).ToList();
+            return Median(dataPointsSubset);
         }
-
     }
 }
