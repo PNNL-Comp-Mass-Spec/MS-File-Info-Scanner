@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScannerInterfaces;
+using MSFileInfoScanner.Options;
 using PRISM;
 using SpectraTypeClassifier;
 using ThermoFisher.CommonCore.Data.Business;
 using ThermoRawFileReader;
 
-namespace MSFileInfoScanner
+namespace MSFileInfoScanner.Readers
 {
     /// <summary>
     /// Thermo .raw file info scanner
@@ -26,9 +26,16 @@ namespace MSFileInfoScanner
         private readonly Regex mIsProfileM;
 
         /// <summary>
+        /// Parameterless constructor
+        /// </summary>
+        public ThermoRawFileInfoScanner() : this(new InfoScannerOptions(), new LCMSDataPlotterOptions())
+        { }
+
+        /// <summary>
         /// Constructor
         /// </summary>
-        public clsThermoRawFileInfoScanner()
+        public ThermoRawFileInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
+            base(options, lcms2DPlotOptions)
         {
             mIsCentroid = new Regex("([FI]TMS [+-] c .+)|([FI]TMS {[^ ]+} +[+-] c .+)|(^ *[+-] c .+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -170,13 +177,13 @@ namespace MSFileInfoScanner
         {
             OnStatusEvent("  Loading scan details");
 
-            if (mSaveTICAndBPI)
+            if (Options.SaveTICAndBPIPlots)
             {
                 // Initialize the TIC and BPI arrays
                 InitializeTICAndBPI();
             }
 
-            if (mSaveLCMS2DPlots)
+            if (Options.SaveLCMS2DPlots)
             {
                 InitializeLCMS2DPlot();
             }
@@ -203,7 +210,7 @@ namespace MSFileInfoScanner
 
                     if (success)
                     {
-                        if (mSaveTICAndBPI)
+                        if (Options.SaveTICAndBPIPlots)
                         {
                             mTICAndBPIPlot.AddData(
                                 scanNumber,
@@ -248,7 +255,7 @@ namespace MSFileInfoScanner
 
                 try
                 {
-                    if (mSaveLCMS2DPlots || mCheckCentroidingStatus)
+                    if (Options.SaveLCMS2DPlots || Options.CheckCentroidingStatus)
                     {
                         // Also need to load the raw data
 
@@ -257,12 +264,12 @@ namespace MSFileInfoScanner
 
                         if (ionCount > 0)
                         {
-                            if (mSaveLCMS2DPlots)
+                            if (Options.SaveLCMS2DPlots)
                             {
                                 mLCMS2DPlot.AddScan2D(scanNumber, scanInfo.MSLevel, (float)scanInfo.RetentionTime, ionCount, massIntensityPairs);
                             }
 
-                            if (mCheckCentroidingStatus)
+                            if (Options.CheckCentroidingStatus)
                             {
                                 var mzCount = massIntensityPairs.GetLength(1);
 
@@ -326,7 +333,7 @@ namespace MSFileInfoScanner
             // Future, optional: Determine the DatasetID
             // Unfortunately, this is not present in metadata.txt
             // datasetID = LookupDatasetID(datasetName)
-            var datasetID = DatasetID;
+            var datasetID = Options.DatasetID;
 
             // Record the file size and Dataset ID
             datasetFileInfo.FileSystemCreationTime = rawFile.CreationTime;
@@ -374,7 +381,7 @@ namespace MSFileInfoScanner
 
                 if (!string.Equals(MSFileInfoScanner.GetAppDirectoryPath().Substring(0, 2), rawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
                 {
-                    if (mCopyFileLocalOnReadError)
+                    if (Options.CopyFileLocalOnReadError)
                     {
                         // Copy the file locally and try again
 
@@ -453,21 +460,21 @@ namespace MSFileInfoScanner
                         datasetFileInfo.ScanCount = 0;
                     }
 
-                    if (mSaveTICAndBPI || mCreateDatasetInfoFile || mCreateScanStatsFile ||
-                        mSaveLCMS2DPlots || mCheckCentroidingStatus || MS2MzMin > 0)
+                    if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFile ||
+                        Options.SaveLCMS2DPlots || Options.CheckCentroidingStatus || Options.MS2MzMin > 0)
                     {
                         // Load data from each scan
                         // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
                         LoadScanDetails(xcaliburAccessor);
                     }
 
-                    if (mComputeOverallQualityScores)
+                    if (Options.ComputeOverallQualityScores)
                     {
                         // Note that this call will also create the TICs and BPIs
                         ComputeQualityScores(xcaliburAccessor, datasetFileInfo);
                     }
 
-                    if (MS2MzMin > 0 && datasetFileInfo.ScanCount > 0)
+                    if (Options.MS2MzMin > 0 && datasetFileInfo.ScanCount > 0)
                     {
                         // Verify that all of the MS2 spectra have m/z values below the required minimum
                         // Useful for validating that reporter ions can be detected
@@ -492,7 +499,7 @@ namespace MSFileInfoScanner
             // Now add any non-mass spec devices
             AddThermoDevices(xcaliburAccessor, datasetFileInfo, new SortedSet<Device>(), deviceFilterList);
 
-            if (mSaveTICAndBPI && datasetFileInfo.DeviceList.Count > 0)
+            if (Options.SaveTICAndBPIPlots && datasetFileInfo.DeviceList.Count > 0)
             {
                 mInstrumentSpecificPlots.Clear();
 

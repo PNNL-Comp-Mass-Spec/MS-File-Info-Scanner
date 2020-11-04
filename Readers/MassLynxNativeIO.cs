@@ -1179,7 +1179,7 @@ namespace MSFileInfoScanner.Readers
             bool scanOffsetAndPeakCountOnly = false)
         {
             // This is used for most files
-            var nativeScanIndexRecord = new RawScanIndexRecord(mRawDataUtils);
+            var nativeScanIndexRecord = new RawScanIndexRecord();
 
             // This is used for files with msFunctionInfo.AcquisitionDataType = 0
             // The difference is that structure RawScanIndexRecordType ends in an Int16 then a Int32

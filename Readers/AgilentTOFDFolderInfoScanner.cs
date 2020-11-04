@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScanner.Options;
 using PRISM;
 
 namespace MSFileInfoScanner.Readers
@@ -29,6 +30,15 @@ namespace MSFileInfoScanner.Readers
         public const string AGILENT_XML_CONTENTS_FILE = "Contents.xml";
 
         public const string AGILENT_TIME_SEGMENT_FILE = "MSTS.xml";
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="lcms2DPlotOptions"></param>
+        public AgilentTOFDFolderInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
+            base(options, lcms2DPlotOptions)
+        { }
 
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
@@ -272,7 +282,7 @@ namespace MSFileInfoScanner.Readers
                         if (!addnlFile.Exists)
                             continue;
 
-                        if (mDisableInstrumentHash)
+                        if (Options.DisableInstrumentHash)
                         {
                             mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(addnlFile);
                         }

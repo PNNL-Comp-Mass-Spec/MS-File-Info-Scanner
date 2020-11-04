@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScanner.Options;
 
 namespace MSFileInfoScanner.Readers
 {
@@ -9,7 +10,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        public GenericFileInfoScanner()
+        public GenericFileInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
+            base(options, lcms2DPlotOptions)
         {
             HideEmptyHTMLSections = true;
         }
@@ -56,7 +58,7 @@ namespace MSFileInfoScanner.Readers
             // Future, optional: Determine the DatasetID
             // Unfortunately, this is not present in metadata.txt
             // datasetID = LookupDatasetID(datasetName)
-            var datasetID = DatasetID;
+            var datasetID = Options.DatasetID;
 
             // Record the file size and Dataset ID
             datasetFileInfo.FileSystemCreationTime = instrumentDataFile.CreationTime;

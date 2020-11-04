@@ -5,7 +5,8 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScannerInterfaces;
+using MSFileInfoScanner.Options;
+using MSFileInfoScanner.Plotting;
 using PRISM;
 using ThermoFisher.CommonCore.Data.Business;
 using ThermoRawFileReader;
@@ -16,7 +17,7 @@ namespace MSFileInfoScanner.Readers
     /// Base class for MS file info scanners
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2007</remarks>
-    public abstract class MSFileInfoProcessorBaseClass : iMSFileInfoProcessor
+    public abstract class MSFileInfoProcessorBaseClass : EventNotifier
     {
         // Ignore Spelling: Abu, html, href, AcqTime
 
@@ -30,7 +31,7 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        protected MSFileInfoProcessorBaseClass()
+        protected MSFileInfoProcessorBaseClass(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions)
         {
             mTICAndBPIPlot = new TICandBPIPlotter("TICAndBPIPlot", false);
             RegisterEvents(mTICAndBPIPlot);
@@ -46,6 +47,11 @@ namespace MSFileInfoScanner.Readers
             mLCMS2DPlotOverview = new LCMSDataPlotter();
             RegisterEvents(mLCMS2DPlotOverview);
 
+            Options = options;
+
+            mLCMS2DPlot.Options = lcms2DPlotOptions;
+            mLCMS2DPlotOverview.Options = lcms2DPlotOptions.Clone();
+
             InitializeLocalVariables();
         }
 
@@ -60,45 +66,6 @@ namespace MSFileInfoScanner.Readers
         #endregion
 
         #region "Member variables"
-
-        protected bool mSaveTICAndBPI;
-        protected bool mSaveLCMS2DPlots;
-
-        protected bool mCheckCentroidingStatus;
-        protected bool mComputeOverallQualityScores;
-
-        /// <summary>
-        /// When True, creates an XML file with dataset info
-        /// </summary>
-        protected bool mCreateDatasetInfoFile;
-
-        /// <summary>
-        /// When True, creates a _ScanStats.txt file
-        /// </summary>
-        protected bool mCreateScanStatsFile;
-
-        private int mLCMS2DOverviewPlotDivisor;
-
-        /// <summary>
-        /// When True, adds a new row to a tab-delimited text file that has dataset stats
-        /// </summary>
-        private bool mUpdateDatasetStatsTextFile;
-
-        private string mDatasetStatsTextFileName;
-        private int mScanStart;
-        private int mScanEnd;
-
-        private float mMS2MzMin;
-
-        protected bool mShowDebugInfo;
-
-        private int mDatasetID;
-
-        protected bool mDisableInstrumentHash;
-
-        protected bool mCopyFileLocalOnReadError;
-
-        private bool mPlotWithPython;
 
         /// <summary>
         /// This variable tracks TIC and BPI data (vs. scan)
@@ -122,32 +89,9 @@ namespace MSFileInfoScanner.Readers
         #region "Properties"
 
         /// <summary>
-        /// This property allows the parent class to define the DatasetID value
+        /// Processing error code
         /// </summary>
-        public override int DatasetID
-        {
-            get => mDatasetID;
-            set => mDatasetID = value;
-        }
-
-        /// <summary>
-        /// Dataset stats file name
-        /// </summary>
-        public override string DatasetStatsTextFileName
-        {
-            get => mDatasetStatsTextFileName;
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                {
-                    // Do not update mDatasetStatsTextFileName
-                }
-                else
-                {
-                    mDatasetStatsTextFileName = value;
-                }
-            }
-        }
+        public MSFileInfoScanner.MSFileScannerErrorCodes ErrorCode { get; protected set; }
 
         /// <summary>
         /// When true, do not include the Scan Type table in the QC Plot HTML file
@@ -157,162 +101,32 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// LC/MS 2D plot options
         /// </summary>
-        public override clsLCMSDataPlotterOptions LCMS2DPlotOptions
-        {
-            get => mLCMS2DPlot.Options;
-            set
-            {
-                mLCMS2DPlot.Options = value;
-                mLCMS2DPlotOverview.Options = value.Clone();
-            }
-        }
-
-        /// <summary>
-        /// LC/MS 2D overview plot divisor
-        /// </summary>
-        public override int LCMS2DOverviewPlotDivisor
-        {
-            get => mLCMS2DOverviewPlotDivisor;
-            set => mLCMS2DOverviewPlotDivisor = value;
-        }
-
-        /// <summary>
-        /// Minimum m/z value that MS/mS spectra should have
-        /// </summary>
-        /// <remarks>
-        /// Useful for validating instrument files where the sample is iTRAQ or TMT labeled
-        /// and it is important to detect the reporter ions in the MS/MS spectra
-        /// </remarks>
-        public override float MS2MzMin
-        {
-            get => mMS2MzMin;
-            set => mMS2MzMin = value;
-        }
+        public LCMSDataPlotterOptions LCMS2DPlotOptions => mLCMS2DPlot.Options;
 
         /// <summary>
         /// This will be True if the dataset has too many MS/MS spectra
         /// where the minimum m/z value is larger than MS2MzMin
         /// </summary>
-        public override bool MS2MzMinValidationError { get; set; }
+        public bool MS2MzMinValidationError { get; set; }
 
         /// <summary>
         /// This will be True if the dataset has some MS/MS spectra
         /// where the minimum m/z value is larger than MS2MzMin
         /// (no more than 10% of the spectra)
         /// </summary>
-        public override bool MS2MzMinValidationWarning { get; set; }
+        public bool MS2MzMinValidationWarning { get; set; }
 
         /// <summary>
         /// MS2MzMin validation error or warning message
         /// </summary>
-        public override string MS2MzMinValidationMessage { get; set; }
+        public string MS2MzMinValidationMessage { get; set; }
 
         /// <summary>
-        /// First scan to process
+        /// Processing Options
         /// </summary>
-        public override int ScanStart
-        {
-            get => mScanStart;
-            set => mScanStart = value;
-        }
-
-        /// <summary>
-        /// When ScanEnd is > 0, then will stop processing at the specified scan number
-        /// </summary>
-        public override int ScanEnd
-        {
-            get => mScanEnd;
-            set => mScanEnd = value;
-        }
-
-        /// <summary>
-        /// Set to True to show debug info
-        /// </summary>
-        public override bool ShowDebugInfo
-        {
-            get => mShowDebugInfo;
-            set => mShowDebugInfo = value;
-        }
+        public InfoScannerOptions Options { get; }
 
         #endregion
-
-        /// <summary>
-        /// Get a processing option
-        /// </summary>
-        /// <param name="eOption"></param>
-        /// <returns></returns>
-        public override bool GetOption(ProcessingOptions eOption)
-        {
-            switch (eOption)
-            {
-                case ProcessingOptions.CreateTICAndBPI:
-                    return mSaveTICAndBPI;
-                case ProcessingOptions.ComputeOverallQualityScores:
-                    return mComputeOverallQualityScores;
-                case ProcessingOptions.CreateDatasetInfoFile:
-                    return mCreateDatasetInfoFile;
-                case ProcessingOptions.CreateLCMS2DPlots:
-                    return mSaveLCMS2DPlots;
-                case ProcessingOptions.CopyFileLocalOnReadError:
-                    return mCopyFileLocalOnReadError;
-                case ProcessingOptions.UpdateDatasetStatsTextFile:
-                    return mUpdateDatasetStatsTextFile;
-                case ProcessingOptions.CreateScanStatsFile:
-                    return mCreateScanStatsFile;
-                case ProcessingOptions.CheckCentroidingStatus:
-                    return mCheckCentroidingStatus;
-                case ProcessingOptions.PlotWithPython:
-                    return mPlotWithPython;
-                case ProcessingOptions.DisableInstrumentHash:
-                    return mDisableInstrumentHash;
-            }
-
-            throw new Exception("Unrecognized option, " + eOption);
-        }
-
-        /// <summary>
-        /// Set a processing option
-        /// </summary>
-        /// <param name="eOption"></param>
-        /// <param name="value"></param>
-        public override void SetOption(ProcessingOptions eOption, bool value)
-        {
-            switch (eOption)
-            {
-                case ProcessingOptions.CreateTICAndBPI:
-                    mSaveTICAndBPI = value;
-                    break;
-                case ProcessingOptions.ComputeOverallQualityScores:
-                    mComputeOverallQualityScores = value;
-                    break;
-                case ProcessingOptions.CreateDatasetInfoFile:
-                    mCreateDatasetInfoFile = value;
-                    break;
-                case ProcessingOptions.CreateLCMS2DPlots:
-                    mSaveLCMS2DPlots = value;
-                    break;
-                case ProcessingOptions.CopyFileLocalOnReadError:
-                    mCopyFileLocalOnReadError = value;
-                    break;
-                case ProcessingOptions.UpdateDatasetStatsTextFile:
-                    mUpdateDatasetStatsTextFile = value;
-                    break;
-                case ProcessingOptions.CreateScanStatsFile:
-                    mCreateScanStatsFile = value;
-                    break;
-                case ProcessingOptions.CheckCentroidingStatus:
-                    mCheckCentroidingStatus = value;
-                    break;
-                case ProcessingOptions.PlotWithPython:
-                    mPlotWithPython = value;
-                    break;
-                case ProcessingOptions.DisableInstrumentHash:
-                    mDisableInstrumentHash = value;
-                    break;
-                default:
-                    throw new Exception("Unrecognized option, " + eOption);
-            }
-        }
 
         /// <summary>
         /// Add a new TICAndBPIPlotter instance to mInstrumentSpecificPlots
@@ -338,7 +152,7 @@ namespace MSFileInfoScanner.Readers
 
             if (filesBySize.Count > 0)
             {
-                if (mDisableInstrumentHash)
+                if (Options.DisableInstrumentHash)
                 {
                     mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(filesBySize.Last());
                 }
@@ -382,9 +196,9 @@ namespace MSFileInfoScanner.Readers
                 var datasetInfoFilePath = Path.Combine(outputDirectoryPath, datasetName);
                 datasetInfoFilePath += DatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
 
-                if (mDatasetStatsSummarizer.DatasetFileInfo.DatasetID == 0 && mDatasetID > 0)
+                if (mDatasetStatsSummarizer.DatasetFileInfo.DatasetID == 0 && Options.DatasetID > 0)
                 {
-                    mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID;
+                    mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = Options.DatasetID;
                 }
 
                 success = mDatasetStatsSummarizer.CreateDatasetInfoFile(datasetName, datasetInfoFilePath);
@@ -409,7 +223,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="inputFileName">Input file name</param>
         /// <param name="outputDirectoryPath">Output directory path</param>
         /// <returns>True if success; False if failure</returns>
-        /// <remarks></remarks>
         public bool CreateDatasetScanStatsFile(string inputFileName, string outputDirectoryPath)
         {
             bool success;
@@ -419,9 +232,9 @@ namespace MSFileInfoScanner.Readers
                 var datasetName = GetDatasetNameViaPath(inputFileName);
                 var scanStatsFilePath = Path.Combine(outputDirectoryPath, datasetName) + "_ScanStats.txt";
 
-                if (mDatasetStatsSummarizer.DatasetFileInfo.DatasetID == 0 && mDatasetID > 0)
+                if (mDatasetStatsSummarizer.DatasetFileInfo.DatasetID == 0 && Options.DatasetID > 0)
                 {
-                    mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID;
+                    mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = Options.DatasetID;
                 }
 
                 success = mDatasetStatsSummarizer.CreateScanStatsFile(scanStatsFilePath);
@@ -444,13 +257,13 @@ namespace MSFileInfoScanner.Readers
         /// Get the dataset info as XML
         /// </summary>
         /// <returns></returns>
-        public override string GetDatasetInfoXML()
+        public string GetDatasetInfoXML()
         {
             try
             {
-                if (mDatasetStatsSummarizer.DatasetFileInfo.DatasetID == 0 && mDatasetID > 0)
+                if (mDatasetStatsSummarizer.DatasetFileInfo.DatasetID == 0 && Options.DatasetID > 0)
                 {
-                    mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = mDatasetID;
+                    mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = Options.DatasetID;
                 }
 
                 return mDatasetStatsSummarizer.CreateDatasetInfoXML();
@@ -485,18 +298,18 @@ namespace MSFileInfoScanner.Readers
         /// <remarks></remarks>
         private void GetStartAndEndScans(int scanCount, int scanNumFirst, out int scanStart, out int scanEnd)
         {
-            if (mScanStart > 0)
+            if (Options.ScanStart > 0)
             {
-                scanStart = mScanStart;
+                scanStart = Options.ScanStart;
             }
             else
             {
                 scanStart = scanNumFirst;
             }
 
-            if (mScanEnd > 0 && mScanEnd < scanCount)
+            if (Options.ScanEnd > 0 && Options.ScanEnd < scanCount)
             {
-                scanEnd = mScanEnd;
+                scanEnd = Options.ScanEnd;
             }
             else
             {
@@ -506,36 +319,11 @@ namespace MSFileInfoScanner.Readers
 
         private void InitializeLocalVariables()
         {
-            mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR;
-
-            mSaveTICAndBPI = false;
-            mSaveLCMS2DPlots = false;
-            mCheckCentroidingStatus = false;
-
-            mComputeOverallQualityScores = false;
-
-            mCreateDatasetInfoFile = false;
-            mCreateScanStatsFile = false;
-
-            mUpdateDatasetStatsTextFile = false;
-            mDatasetStatsTextFileName = DatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME;
-
-            mScanStart = 0;
-            mScanEnd = 0;
-            mMS2MzMin = 0;
-
-            mShowDebugInfo = false;
-
-            mDatasetID = 0;
-            mDisableInstrumentHash = false;
-
-            mCopyFileLocalOnReadError = false;
-
             MS2MzMinValidationError = false;
             MS2MzMinValidationWarning = false;
             MS2MzMinValidationMessage = string.Empty;
 
-            ErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.NoError;
+            ErrorCode = MSFileInfoScanner.MSFileScannerErrorCodes.NoError;
 
             HideEmptyHTMLSections = false;
         }
@@ -602,7 +390,7 @@ namespace MSFileInfoScanner.Readers
         /// <param name="inputFileName"></param>
         /// <param name="outputDirectoryPath"></param>
         /// <returns></returns>
-        public override bool CreateOutputFiles(string inputFileName, string outputDirectoryPath)
+        public bool CreateOutputFiles(string inputFileName, string outputDirectoryPath)
         {
             bool successOverall;
 
@@ -635,24 +423,24 @@ namespace MSFileInfoScanner.Readers
 
                 UpdatePlotWithPython();
 
-                if (mPlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
+                if (Options.PlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
                 {
                     OnWarningEvent("Updating PlotWithPython to True in mLCMS2DPlot; this is typically set by ProcessMSDataset");
                     mLCMS2DPlot.Options.PlotWithPython = true;
                 }
 
-                if (mLCMS2DPlot.Options.DeleteTempFiles && ShowDebugInfo)
+                if (mLCMS2DPlot.Options.DeleteTempFiles && Options.ShowDebugInfo)
                 {
                     OnWarningEvent("Updating DeleteTempFiles to False in mLCMS2DPlot; this is typically set by ProcessMSDataset");
                     mLCMS2DPlot.Options.DeleteTempFiles = false;
                 }
 
-                if (mSaveTICAndBPI || mSaveLCMS2DPlots)
+                if (Options.SaveTICAndBPIPlots || Options.SaveLCMS2DPlots)
                 {
                     OnProgressUpdate("Saving plots", PROGRESS_SPECTRA_LOADED);
                 }
 
-                if (mSaveTICAndBPI)
+                if (Options.SaveTICAndBPIPlots)
                 {
                     // Write out the TIC and BPI plots
                     var success = mTICAndBPIPlot.SaveTICAndBPIPlotFiles(datasetName, outputDirectory.FullName);
@@ -676,12 +464,12 @@ namespace MSFileInfoScanner.Readers
                     OnProgressUpdate("TIC and BPI plots saved", PROGRESS_SAVED_TIC_AND_BPI_PLOT);
                 }
 
-                if (mSaveLCMS2DPlots)
+                if (Options.SaveLCMS2DPlots)
                 {
                     // Determine the number of times we'll be calling Save2DPlots or CreateOverview2DPlots
                     var lcMSPlotStepsTotal = 1;
 
-                    if (mLCMS2DOverviewPlotDivisor > 0)
+                    if (mLCMS2DPlot.Options.LCMS2DOverviewPlotDivisor > 0)
                     {
                         lcMSPlotStepsTotal++;
                     }
@@ -689,7 +477,7 @@ namespace MSFileInfoScanner.Readers
                     if (mLCMS2DPlot.Options.PlottingDeisotopedData)
                     {
                         lcMSPlotStepsTotal++;
-                        if (mLCMS2DOverviewPlotDivisor > 0)
+                        if (mLCMS2DPlot.Options.LCMS2DOverviewPlotDivisor > 0)
                         {
                             lcMSPlotStepsTotal++;
                         }
@@ -707,11 +495,11 @@ namespace MSFileInfoScanner.Readers
                     }
                     else
                     {
-                        if (mLCMS2DOverviewPlotDivisor > 0)
+                        if (mLCMS2DPlot.Options.LCMS2DOverviewPlotDivisor > 0)
                         {
                             // Also save the Overview 2D Plots
                             // Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-                            var success4 = CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DOverviewPlotDivisor);
+                            var success4 = CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DPlot.Options.LCMS2DOverviewPlotDivisor);
                             lcMSPlotStepsComplete++;
                             ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
 
@@ -735,9 +523,9 @@ namespace MSFileInfoScanner.Readers
                             lcMSPlotStepsComplete++;
                             ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
 
-                            if (mLCMS2DOverviewPlotDivisor > 0)
+                            if (mLCMS2DPlot.Options.LCMS2DOverviewPlotDivisor > 0)
                             {
-                                CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DOverviewPlotDivisor, "_zoom");
+                                CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DPlot.Options.LCMS2DOverviewPlotDivisor, "_zoom");
                                 lcMSPlotStepsComplete++;
                                 ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
                             }
@@ -748,7 +536,7 @@ namespace MSFileInfoScanner.Readers
                     OnProgressUpdate("2D plots saved", PROGRESS_SAVED_2D_PLOTS);
                 }
 
-                if (mCreateDatasetInfoFile)
+                if (Options.CreateDatasetInfoFile)
                 {
                     // Create the _DatasetInfo.xml file
                     var success = CreateDatasetInfoFile(inputFileName, outputDirectory.FullName);
@@ -759,7 +547,7 @@ namespace MSFileInfoScanner.Readers
                     createQCPlotHTMLFile = true;
                 }
 
-                if (mCreateScanStatsFile)
+                if (Options.CreateScanStatsFile)
                 {
                     // Create the _ScanStats.txt file
                     var success = CreateDatasetScanStatsFile(inputFileName, outputDirectory.FullName);
@@ -769,10 +557,10 @@ namespace MSFileInfoScanner.Readers
                     }
                 }
 
-                if (mUpdateDatasetStatsTextFile)
+                if (Options.UpdateDatasetStatsTextFile)
                 {
                     // Add a new row to the MSFileInfo_DatasetStats.txt file
-                    var success = UpdateDatasetStatsTextFile(inputFileName, outputDirectory.FullName, mDatasetStatsTextFileName);
+                    var success = UpdateDatasetStatsTextFile(inputFileName, outputDirectory.FullName, Options.DatasetStatsTextFileName);
                     if (!success)
                     {
                         successOverall = false;
@@ -1020,7 +808,7 @@ namespace MSFileInfoScanner.Readers
             writer.WriteLine("      <td align=\"center\">DMS <a href=\"http://dms2.pnl.gov/dataset/show/" + datasetName + "\">Dataset Detail Report</a></td>");
 
             var datasetInfoFileName = datasetName + DatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
-            if (mCreateDatasetInfoFile || File.Exists(Path.Combine(outputDirectoryPath, datasetInfoFileName)))
+            if (Options.CreateDatasetInfoFile || File.Exists(Path.Combine(outputDirectoryPath, datasetInfoFileName)))
             {
                 writer.WriteLine("      <td align=\"center\"><a href=\"" + datasetInfoFileName + "\">Dataset Info XML file</a></td>");
             }
@@ -1114,6 +902,12 @@ namespace MSFileInfoScanner.Readers
 
             writer.WriteLine(indent + "</table>");
         }
+
+        /// <summary>
+        /// Returns the dataset name for the given file
+        /// </summary>
+        /// <param name="dataFilePath"></param>
+        public abstract string GetDatasetNameViaPath(string dataFilePath);
 
         private IEnumerable<string> GetDeviceTableHTML(IEnumerable<DeviceInfo> deviceList)
         {
@@ -1283,6 +1077,15 @@ namespace MSFileInfoScanner.Readers
             ShowInstrumentFiles();
         }
 
+        /// <summary>
+        /// Process the dataset
+        /// </summary>
+        /// <param name="dataFilePath"></param>
+        /// <param name="datasetFileInfo"></param>
+        /// <returns>True if success, False if an error or if the file has no scans</returns>
+        /// <remarks></remarks>
+        public abstract bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo);
+
         private void ReportProgressSaving2DPlots(int lcMSPlotStepsComplete, int lcMSPlotStepsTotal)
         {
             OnProgressUpdate("Saving 2D plots ", ComputeIncrementalProgress(
@@ -1366,7 +1169,7 @@ namespace MSFileInfoScanner.Readers
 
                 mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = 0;
 
-                if (mDisableInstrumentHash)
+                if (Options.DisableInstrumentHash)
                 {
                     mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(instrumentFile);
                 }
@@ -1451,7 +1254,7 @@ namespace MSFileInfoScanner.Readers
                     if (!dataFile.Exists)
                         continue;
 
-                    if (mDisableInstrumentHash)
+                    if (Options.DisableInstrumentHash)
                     {
                         mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(dataFile);
                     }
@@ -1538,32 +1341,32 @@ namespace MSFileInfoScanner.Readers
 
         private void UpdatePlotWithPython()
         {
-            mTICAndBPIPlot.PlotWithPython = mPlotWithPython;
+            mTICAndBPIPlot.PlotWithPython = Options.PlotWithPython;
 
             foreach (var plotContainer in mInstrumentSpecificPlots)
             {
-                plotContainer.PlotWithPython = mPlotWithPython;
+                plotContainer.PlotWithPython = Options.PlotWithPython;
             }
 
-            if (mPlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
+            if (Options.PlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
             {
                 // This code shouldn't be reached; this setting should have already propagated
-                mLCMS2DPlot.Options.PlotWithPython = mPlotWithPython;
-                mLCMS2DPlotOverview.Options.PlotWithPython = mPlotWithPython;
+                mLCMS2DPlot.Options.PlotWithPython = Options.PlotWithPython;
+                mLCMS2DPlotOverview.Options.PlotWithPython = Options.PlotWithPython;
             }
 
-            mTICAndBPIPlot.DeleteTempFiles = !ShowDebugInfo;
+            mTICAndBPIPlot.DeleteTempFiles = !Options.ShowDebugInfo;
 
             foreach (var plotContainer in mInstrumentSpecificPlots)
             {
-                plotContainer.DeleteTempFiles = !ShowDebugInfo;
+                plotContainer.DeleteTempFiles = !Options.ShowDebugInfo;
             }
 
-            if (mPlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
+            if (Options.PlotWithPython && !mLCMS2DPlot.Options.PlotWithPython)
             {
                 // This code shouldn't be reached; this setting should have already propagated
-                mLCMS2DPlot.Options.DeleteTempFiles = !ShowDebugInfo;
-                mLCMS2DPlotOverview.Options.DeleteTempFiles = !ShowDebugInfo;
+                mLCMS2DPlot.Options.DeleteTempFiles = !Options.ShowDebugInfo;
+                mLCMS2DPlotOverview.Options.DeleteTempFiles = !Options.ShowDebugInfo;
             }
         }
 
@@ -1576,7 +1379,7 @@ namespace MSFileInfoScanner.Readers
         /// <returns>True if valid data, false if at least 10% of the spectra has a minimum m/z higher than the threshold</returns>
         protected bool ValidateMS2MzMin()
         {
-            var validData = mDatasetStatsSummarizer.ValidateMS2MzMin(MS2MzMin, out var errorOrWarningMsg, MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED);
+            var validData = mDatasetStatsSummarizer.ValidateMS2MzMin(Options.MS2MzMin, out var errorOrWarningMsg, MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED);
 
             if (validData && string.IsNullOrWhiteSpace(errorOrWarningMsg))
                 return true;

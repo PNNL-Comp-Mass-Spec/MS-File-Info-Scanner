@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScanner.Options;
 
 namespace MSFileInfoScanner.Readers
 {
@@ -16,6 +17,21 @@ namespace MSFileInfoScanner.Readers
     {
         // Note: The extension must be in all caps
         public const string AGILENT_TOF_OR_QSTAR_FILE_EXTENSION = ".WIFF";
+
+        /// <summary>
+        /// Parameterless constructor
+        /// </summary>
+        public AgilentTOFOrQStarWiffFileInfoScanner() : this(new InfoScannerOptions(), new LCMSDataPlotterOptions())
+        { }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="lcms2DPlotOptions"></param>
+        public AgilentTOFOrQStarWiffFileInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
+            base(options, lcms2DPlotOptions)
+        { }
 
         public override string GetDatasetNameViaPath(string dataFilePath)
         {

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScanner.Options;
 using PRISM;
 
 namespace MSFileInfoScanner.Readers
@@ -45,9 +46,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <returns></returns>
-        /// <remarks></remarks>
-        public clsAgilentGCDFolderInfoScanner()
+        public AgilentGCDFolderInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
+            base(options, lcms2DPlotOptions)
         {
             mExtractTime = new Regex("([0-9.]+) min", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
         }
@@ -284,7 +284,7 @@ namespace MSFileInfoScanner.Readers
 
                             mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
 
-                            if (mSaveTICAndBPI)
+                            if (Options.SaveTICAndBPIPlots)
                             {
                                 mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevel, spectrum.RetentionTimeMinutes, spectrum.BasePeakAbundance, spectrum.TIC);
 
@@ -303,7 +303,7 @@ namespace MSFileInfoScanner.Readers
                                 }
                             }
 
-                            if (mCheckCentroidingStatus)
+                            if (Options.CheckCentroidingStatus)
                             {
                                 var mzDoubles = new List<double>(mzList.Count);
                                 mzDoubles.AddRange(mzList.Select(ion => (double)ion));
@@ -331,7 +331,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="dataFilePath"></param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
-        /// <remarks></remarks>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
             var success = false;

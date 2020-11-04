@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScanner.Options;
 
 namespace MSFileInfoScanner.Readers
 {
@@ -31,6 +32,15 @@ namespace MSFileInfoScanner.Readers
         private const string PEK_FILE_FILENAME_LINE = "Filename:";
 
         private readonly DateTime MINIMUM_ACCEPTABLE_ACQ_START_TIME = new DateTime(1975, 1, 1);
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="lcms2DPlotOptions"></param>
+        public BrukerOneFolderInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
+            base(options, lcms2DPlotOptions)
+        { }
 
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
@@ -409,7 +419,7 @@ namespace MSFileInfoScanner.Readers
                     }
                     else
                     {
-                        if (mDisableInstrumentHash)
+                        if (Options.DisableInstrumentHash)
                         {
                             mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(brukerDatasetFile);
                         }
@@ -446,7 +456,7 @@ namespace MSFileInfoScanner.Readers
                         if (!instrumentDataFile.Exists)
                             continue;
 
-                        if (mDisableInstrumentHash)
+                        if (Options.DisableInstrumentHash)
                         {
                             mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(instrumentDataFile);
                         }

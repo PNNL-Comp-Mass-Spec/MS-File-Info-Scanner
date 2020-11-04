@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScanner.Options;
 
 namespace MSFileInfoScanner.Readers
 {
@@ -17,6 +18,15 @@ namespace MSFileInfoScanner.Readers
         public const string ZIPPED_IMAGING_FILE_SEARCH_SPEC = "0_R*.zip";
 
         public const string ZIPPED_IMAGING_FILE_NAME_PREFIX = "0_R";
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="lcms2DPlotOptions"></param>
+        public ZippedImagingFilesScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
+            base(options, lcms2DPlotOptions)
+        { }
 
         /// <summary>
         /// Examines the subdirectories in the specified zip file
@@ -239,7 +249,7 @@ namespace MSFileInfoScanner.Readers
                     // Examine all of the apexAcquisition.method files in this zip file
                     DetermineAcqStartEndTime(zipFile, datasetFileInfo);
 
-                    if (mDisableInstrumentHash)
+                    if (Options.DisableInstrumentHash)
                     {
                         mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(zipFile);
                     }

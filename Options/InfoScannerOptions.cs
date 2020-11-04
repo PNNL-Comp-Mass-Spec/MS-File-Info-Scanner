@@ -1,11 +1,10 @@
 ﻿using System;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScannerInterfaces;
 using PRISM;
 
 namespace MSFileInfoScanner.Options
 {
-    internal class CommandLineOptions
+    public class InfoScannerOptions
     {
         // Ignore Spelling: ArgExistsProperty, centroiding, csv, OxyPlot
 
@@ -44,15 +43,40 @@ namespace MSFileInfoScanner.Options
             HelpText = "Ignore errors when recursing.")]
         public bool IgnoreErrorsWhenRecursing { get; set; }
 
+        private string mLogFilePath;
+
         [Option("LogFile", "L", HelpShowsDefault = false,
             HelpText = "File path for logging messages.")]
-        public string LogFilePath { get; set; }
+        public string LogFilePath
+        {
+            get => mLogFilePath;
+            set
+            {
+                mLogFilePath = value;
+                LogMessagesToFile = !string.IsNullOrWhiteSpace(mLogFilePath);
+            }
 
+        }
+
+        [Option("LogDirectoryPath", HelpShowsDefault = false,
+            HelpText = "Directory to create log files")]
+        public string LogDirectoryPath { get; set; }
+
+        public bool LogMessagesToFile { get; private set; }
+
+        /// <summary>
+        /// Maximum points to plot on each LC/MS 2D plot
+        /// </summary>
+        /// <remarks>This value cannot be updated after class MSFileInfoScanner is instantiated</remarks>
         [Option("LCMS2DMaxPointsToPlot", "LC", "2D", ArgExistsProperty = nameof(SaveLCMS2DPlots),
             HelpText = "Create 2D LCMS plots (this process could take several minutes for each dataset), using the top N points.\n" +
                        "To plot the top 20000 points, use /LC:20000.")]
         public int LCMS2DMaxPointsToPlot { get; set; }
 
+        /// <summary>
+        /// The divisor to use when creating the overview 2D LCMS plots
+        /// </summary>
+        /// <remarks>This value cannot be updated after class MSFileInfoScanner is instantiated</remarks>
         [Option("LCMSPlotDivisor", "LCDiv",
             HelpText = "The divisor to use when creating the overview 2D LCMS plots.\n" +
                        "Use /LCDiv:0 to disable creation of the overview plots.")]
@@ -88,6 +112,10 @@ namespace MSFileInfoScanner.Options
         [Option("CheckCentroidingStatus", "CC", HelpShowsDefault = false,
             HelpText = "If supplied, check spectral data for whether it is centroided or profile")]
         public bool CheckCentroidingStatus { get; set; }
+
+        [Option("CopyFileLocalOnReadError", "CopyLocalOnError", HelpShowsDefault = false,
+            HelpText = "When true, if an error is encountered while reading the file, copy it to the local drive and try again")]
+        public bool CopyFileLocalOnReadError { get; set; }
 
         /// <summary>
         /// When true, create 2D LCMS plots
@@ -149,16 +177,40 @@ namespace MSFileInfoScanner.Options
                        "Also, when /Debug is enabled, temporary files for creating plots with Python will not be deleted.")]
         public bool ShowDebugInfo { get; set; }
 
+        private bool mCheckFileIntegrity;
+
         [Option("CheckFileIntegrity", "CheckIntegrity", "C", HelpShowsDefault = false,
             HelpText = "Use to perform an integrity check on all known file types; " +
                        "this process will open known file types and verify that they contain the expected data.\n" +
                        "This option is only used if you specify an Input Directory and use a wildcard; " +
                        "you will typically also want to use /S when using /C.")]
-        public bool CheckFileIntegrity { get; set; }
+        public bool CheckFileIntegrity
+        {
+            get => mCheckFileIntegrity;
+            set
+            {
+                mCheckFileIntegrity = value;
+                if (mCheckFileIntegrity)
+                {
+                    // Make sure Cache Files are enabled
+                    UseCacheFiles = true;
+                }
+            }
+        }
 
+        /// <summary>
+        /// Maximum number of lines to process when checking text or csv files
+        /// </summary>
+        /// <remarks>This value cannot be updated after class MSFileInfoScanner is instantiated</remarks>
         [Option("MaximumTextFileLinesToCheck", "M",
             HelpText = "Use to define the maximum number of lines to process when checking text or csv files.", Min = 1)]
         public int MaximumTextFileLinesToCheck { get; set; }
+
+        /// <summary>
+        /// Maximum number of XML nodes to examine
+        /// </summary>
+        /// <remarks>This value cannot be updated after class MSFileInfoScanner is instantiated</remarks>
+        public int MaximumXMLElementNodesToCheck { get; set; }
 
         [Option("ComputeFileHashes", "H", HelpShowsDefault = false,
             HelpText = "If supplied, compute SHA-1 file hashes when verifying file integrity.")]
@@ -190,16 +242,24 @@ namespace MSFileInfoScanner.Options
                        "DSInfoDBPostingEnabled, and DSInfoStoredProcedure")]
         public bool PostResultsToDMS { get; set; }
 
+        [Option("DatabaseConnectionString", "ConnectionString", HelpShowsDefault = true,
+            HelpText = "Connection string for storing dataset info in DMS")]
+        public string DatabaseConnectionString { get; set; } = "Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;";
+
+        [Option("DSInfoStoredProcedure",HelpShowsDefault = true,
+            HelpText = "Procedure to call to store dataset info in DMS")]
+        public string DSInfoStoredProcedure { get; set; } = "UpdateDatasetFileInfoXML";
+
         [Option("PythonPlot", "Python", HelpShowsDefault = false,
             HelpText = "If supplied, create plots with Python instead of OxyPlot")]
         public bool PlotWithPython { get; set; }
 
-        public CommandLineOptions()
+        public InfoScannerOptions()
         {
             InputDataFilePath = string.Empty;
             OutputDirectoryPath = string.Empty;
             ParameterFilePath = string.Empty;
-            LogFilePath = string.Empty;
+            mLogFilePath = string.Empty;
 
             RecurseDirectories = false;
 
@@ -213,11 +273,13 @@ namespace MSFileInfoScanner.Options
 
             SaveTICAndBPIPlots = true;
             SaveLCMS2DPlots = false;
-            LCMS2DMaxPointsToPlot = clsLCMSDataPlotterOptions.DEFAULT_MAX_POINTS_TO_PLOT;
-            LCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR;
+            LCMS2DMaxPointsToPlot = LCMSDataPlotterOptions.DEFAULT_MAX_POINTS_TO_PLOT;
+            LCMS2DOverviewPlotDivisor = LCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR;
             TestLCMSGradientColorSchemes = false;
 
             CheckCentroidingStatus = false;
+            CopyFileLocalOnReadError = false;
+
             MS2MzMin = 0;
             DisableInstrumentHash = false;
 
@@ -236,7 +298,7 @@ namespace MSFileInfoScanner.Options
             ComputeFileHashes = false;
             ZipFileCheckAllData = true;
 
-            MaximumTextFileLinesToCheck = clsFileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK;
+            MaximumTextFileLinesToCheck = FileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK;
 
             PostResultsToDMS = false;
             PlotWithPython = false;
@@ -285,60 +347,6 @@ namespace MSFileInfoScanner.Options
             }
 
             return true;
-        }
-
-        public void CopyToScanner(MSFileInfoScanner scanner)
-        {
-            // Note: These values will be overridden if /P was used and they are defined in the parameter file
-
-            scanner.UseCacheFiles = UseCacheFiles;
-            scanner.ReprocessExistingFiles = ReprocessExistingFiles;
-            scanner.ReprocessIfCachedSizeIsZero = ReprocessIfCachedSizeIsZero;
-
-            scanner.PlotWithPython = PlotWithPython;
-            scanner.SaveTICAndBPIPlots = SaveTICAndBPIPlots;
-            scanner.SaveLCMS2DPlots = SaveLCMS2DPlots;
-            scanner.LCMS2DPlotMaxPointsToPlot = LCMS2DMaxPointsToPlot;
-            scanner.LCMS2DOverviewPlotDivisor = LCMS2DOverviewPlotDivisor;
-            scanner.TestLCMSGradientColorSchemes = TestLCMSGradientColorSchemes;
-
-            scanner.CheckCentroidingStatus = CheckCentroidingStatus;
-            scanner.MS2MzMin = MS2MzMin;
-            scanner.DisableInstrumentHash = DisableInstrumentHash;
-
-            scanner.ScanStart = ScanStart;
-            scanner.ScanEnd = ScanEnd;
-            scanner.ShowDebugInfo = ShowDebugInfo;
-
-            scanner.ComputeOverallQualityScores = ComputeOverallQualityScores;
-            scanner.CreateDatasetInfoFile = CreateDatasetInfoFile;
-            scanner.CreateScanStatsFile = CreateScanStatsFile;
-
-            scanner.UpdateDatasetStatsTextFile = UpdateDatasetStatsTextFile;
-            scanner.DatasetStatsTextFileName = DatasetStatsTextFileName;
-
-            scanner.CheckFileIntegrity = CheckFileIntegrity;
-            scanner.RecheckFileIntegrityForExistingDirectories = ReprocessExistingFiles;
-
-            scanner.MaximumTextFileLinesToCheck = MaximumTextFileLinesToCheck;
-            scanner.ComputeFileHashes = ComputeFileHashes;
-            scanner.ZipFileCheckAllData = ZipFileCheckAllData;
-
-            scanner.IgnoreErrorsWhenRecursing = IgnoreErrorsWhenRecursing;
-
-            if (LogFilePath.Length > 0)
-            {
-                scanner.LogMessagesToFile = true;
-                scanner.LogFilePath = LogFilePath;
-            }
-
-            scanner.DatasetIDOverride = DatasetID;
-            scanner.DSInfoDBPostingEnabled = PostResultsToDMS;
-
-            if (!string.IsNullOrEmpty(ParameterFilePath))
-            {
-                scanner.LoadParameterFileSettings(ParameterFilePath);
-            }
         }
     }
 }

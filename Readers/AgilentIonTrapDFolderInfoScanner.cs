@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScanner.Options;
 
 namespace MSFileInfoScanner.Readers
 {
@@ -20,6 +21,15 @@ namespace MSFileInfoScanner.Readers
         private const string RUN_LOG_FILE_INSTRUMENT_RUNNING = "Instrument running sample";
 
         private const string RUN_LOG_INSTRUMENT_RUN_COMPLETED = "Instrument run completed";
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="lcms2DPlotOptions"></param>
+        public AgilentIonTrapDFolderInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
+            base(options, lcms2DPlotOptions)
+        { }
 
         private bool ExtractMethodLineDate(string dataLine, out DateTime methodDate)
         {
@@ -228,7 +238,7 @@ namespace MSFileInfoScanner.Readers
                     datasetFileInfo.AcqTimeStart = yepFile.LastWriteTime;
                     datasetFileInfo.AcqTimeEnd = yepFile.LastWriteTime;
 
-                    if (mDisableInstrumentHash)
+                    if (Options.DisableInstrumentHash)
                     {
                         mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(yepFile);
                     }

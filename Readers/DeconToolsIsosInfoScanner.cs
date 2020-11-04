@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScanner.Options;
+using MSFileInfoScanner.Plotting;
 using PRISM;
 using ThermoRawFileReader;
 
@@ -106,13 +108,13 @@ namespace MSFileInfoScanner.Readers
         {
             // Cache the data in the _isos.csv and _scans.csv files
 
-            if (mSaveTICAndBPI)
+            if (Options.SaveTICAndBPIPlots)
             {
                 // Initialize the TIC and BPI arrays
                 InitializeTICAndBPI();
             }
 
-            if (mSaveLCMS2DPlots)
+            if (Options.SaveLCMS2DPlots)
             {
                 InitializeLCMS2DPlot();
             }
@@ -171,7 +173,7 @@ namespace MSFileInfoScanner.Readers
 
             for (var index = 0; index <= isosData.Count - 1; index++)
             {
-                if (isosData[index].Scan > currentScan || index == isosData.Count - 1)
+                if (isosData[index].Scan > currentScanNumber || index == isosData.Count - 1)
                 {
                     // Store the cached values
 
@@ -182,7 +184,7 @@ namespace MSFileInfoScanner.Readers
                         ionList.Sort(new LCMSDataPlotter.MSIonTypeComparer());
                         mLCMS2DPlot.AddScan(currentScanNumber, currentScan.MSLevel, currentScan.ElutionTime, ionList);
 
-                        if (scansFileIsMissing && mSaveTICAndBPI)
+                        if (scansFileIsMissing && Options.SaveTICAndBPIPlots)
                         {
                             // Determine the TIC and BPI values using the data from the .isos file
                             double tic = 0;
@@ -201,7 +203,7 @@ namespace MSFileInfoScanner.Readers
                         }
                     }
 
-                    currentScan = isosData[index].Scan;
+                    currentScanNumber = isosData[index].Scan;
                     ionList.Clear();
                 }
 
@@ -407,9 +409,9 @@ namespace MSFileInfoScanner.Readers
 
                         scanList.Add(scanData);
 
-                        if (mSaveTICAndBPI)
+                        if (Options.SaveTICAndBPIPlots)
                         {
-                            mTICAndBPIPlot.AddData(udtScanData.Scan, udtScanData.MSLevel, udtScanData.ElutionTime, udtScanData.BasePeakIntensity, udtScanData.TotalIonCurrent);
+                            mTICAndBPIPlot.AddData(scanData.Scan, scanData.MSLevel, scanData.ElutionTime, scanData.BasePeakIntensity, scanData.TotalIonCurrent);
                         }
 
                         string scanTypeName;
@@ -490,7 +492,7 @@ namespace MSFileInfoScanner.Readers
                 return false;
             }
 
-            var datasetID = DatasetID;
+            var datasetID = Options.DatasetID;
 
             // Record the file size and Dataset ID
             datasetFileInfo.FileSystemCreationTime = isosFile.CreationTime;
@@ -509,7 +511,7 @@ namespace MSFileInfoScanner.Readers
 
             mDatasetStatsSummarizer.ClearCachedData();
 
-            if (mSaveTICAndBPI || mCreateDatasetInfoFile || mCreateScanStatsFile || mSaveLCMS2DPlots)
+            if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFile || Options.SaveLCMS2DPlots)
             {
                 // Load data from each scan
                 // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File

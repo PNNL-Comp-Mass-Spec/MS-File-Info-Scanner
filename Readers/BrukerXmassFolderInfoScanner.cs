@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SQLite;
 using System.IO;
 using System.Linq;
-using System.Data.SQLite;
 using System.Xml;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScanner.Options;
 using PRISM;
 
 namespace MSFileInfoScanner.Readers
@@ -68,6 +69,15 @@ namespace MSFileInfoScanner.Readers
             SpotNumber = 6
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="lcms2DPlotOptions"></param>
+        public BrukerXmassFolderInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
+            base(options, lcms2DPlotOptions)
+        { }
+
         private void AddDatasetScan(
             int scanNumber,
             int msLevel,
@@ -77,7 +87,7 @@ namespace MSFileInfoScanner.Readers
             string scanTypeName,
             ref double maxRunTimeMinutes)
         {
-            if (mSaveTICAndBPI && scanNumber > 0)
+            if (Options.SaveTICAndBPIPlots && scanNumber > 0)
             {
                 mTICAndBPIPlot.AddData(scanNumber, msLevel, elutionTime, bpi, tic);
             }
@@ -496,13 +506,13 @@ namespace MSFileInfoScanner.Readers
                 var metadataNameToID = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
                 var scanData = new Dictionary<string, MCFScanInfoType>();
 
-                if (mSaveTICAndBPI)
+                if (Options.SaveTICAndBPIPlots)
                 {
                     // Initialize the TIC and BPI arrays
                     InitializeTICAndBPI();
                 }
 
-                if (mSaveLCMS2DPlots)
+                if (Options.SaveLCMS2DPlots)
                 {
                     InitializeLCMS2DPlot();
                 }
@@ -674,7 +684,7 @@ namespace MSFileInfoScanner.Readers
 
             try
             {
-                if (mSaveTICAndBPI)
+                if (Options.SaveTICAndBPIPlots)
                 {
                     // Initialize the TIC and BPI arrays
                     InitializeTICAndBPI();
@@ -1014,13 +1024,13 @@ namespace MSFileInfoScanner.Readers
                     if (!success)
                     {
                         // Use ProteoWizard to extract the scan counts and acquisition time information
-                        // If mSaveLCMS2DPlots = True, this method will also read the m/z and intensity values from each scan so that we can make 2D plots
+                        // If Options.SaveLCMS2DPlots= True, this method will also read the m/z and intensity values from each scan so that we can make 2D plots
                         ParseBAFFile(primaryInstrumentFile, datasetFileInfo, out bafFileChecked);
                     }
 
                     if (datasetFileInfo.ScanCount == 0 ||
-                        mSaveTICAndBPI && mTICAndBPIPlot.CountBPI + mTICAndBPIPlot.CountTIC == 0 ||
-                        mSaveLCMS2DPlots && mLCMS2DPlot.ScanCountCached == 0)
+                        Options.SaveTICAndBPIPlots && mTICAndBPIPlot.CountBPI + mTICAndBPIPlot.CountTIC == 0 ||
+                        Options.SaveLCMS2DPlots && mLCMS2DPlot.ScanCountCached == 0)
                     {
                         // If a ser or fid file exists, we can read the data from it to create the TIC and BPI plots, plus also the 2D plot
 
@@ -1050,7 +1060,7 @@ namespace MSFileInfoScanner.Readers
                         if (fileToAdd.FullName.Equals(primaryInstrumentFile.FullName))
                             continue;
 
-                        if (mDisableInstrumentHash)
+                        if (Options.DisableInstrumentHash)
                         {
                             mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(fileToAdd);
                         }
@@ -1114,7 +1124,7 @@ namespace MSFileInfoScanner.Readers
                     settingsFile = acqusFile;
                 }
 
-                var needToSaveTICAndBPI = mSaveTICAndBPI && mTICAndBPIPlot.CountBPI + mTICAndBPIPlot.CountTIC == 0;
+                var needToSaveTICAndBPI = Options.SaveTICAndBPIPlots && mTICAndBPIPlot.CountBPI + mTICAndBPIPlot.CountTIC == 0;
                 var lastProgressTime = DateTime.UtcNow;
 
                 // Note that this starts at 2 seconds, but is extended after each progress message is shown (maxing out at 30 seconds)
@@ -1210,7 +1220,7 @@ namespace MSFileInfoScanner.Readers
 
                     if (mzList.Length > 0)
                     {
-                        if (mSaveLCMS2DPlots)
+                        if (Options.SaveLCMS2DPlots)
                         {
                             var massIntensityPairs = new double[2, mzList.Length + 1];
 

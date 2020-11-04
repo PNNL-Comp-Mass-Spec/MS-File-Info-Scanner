@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScanner.Options;
+using MSFileInfoScanner.Plotting;
 using PRISM;
 using ThermoFisher.CommonCore.Data.Business;
 using UIMFLibrary;
@@ -21,6 +23,15 @@ namespace MSFileInfoScanner.Readers
 
         // Note: The extension must be in all caps
         public const string UIMF_FILE_EXTENSION = ".UIMF";
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="lcms2DPlotOptions"></param>
+        public UIMFInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
+            base(options, lcms2DPlotOptions)
+        { }
 
         /// <summary>
         /// This function is used to determine one or more overall quality scores
@@ -212,7 +223,7 @@ namespace MSFileInfoScanner.Readers
 
             TICandBPIPlotter pressurePlot;
 
-            if (mSaveTICAndBPI)
+            if (Options.SaveTICAndBPIPlots)
             {
                 // Initialize the TIC and BPI arrays
                 InitializeTICAndBPI();
@@ -243,7 +254,7 @@ namespace MSFileInfoScanner.Readers
                 pressurePlot = new TICandBPIPlotter();
             }
 
-            if (mSaveLCMS2DPlots)
+            if (Options.SaveLCMS2DPlots)
             {
                 InitializeLCMS2DPlot();
             }
@@ -354,7 +365,7 @@ namespace MSFileInfoScanner.Readers
                         tic = BAD_TIC_OR_BPI;
                     }
 
-                    if (mSaveTICAndBPI)
+                    if (Options.SaveTICAndBPIPlots)
                     {
                         if (bpi > BAD_TIC_OR_BPI && tic > BAD_TIC_OR_BPI)
                         {
@@ -428,7 +439,7 @@ namespace MSFileInfoScanner.Readers
 
                     mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
 
-                    if (mSaveLCMS2DPlots || mCheckCentroidingStatus)
+                    if (Options.SaveLCMS2DPlots|| Options.CheckCentroidingStatus)
                     {
                         try
                         {
@@ -483,12 +494,12 @@ namespace MSFileInfoScanner.Readers
                                         Array.Resize(ref ionsIntensity, ionCount);
                                     }
 
-                                    if (mSaveLCMS2DPlots)
+                                    if (Options.SaveLCMS2DPlots)
                                     {
                                         mLCMS2DPlot.AddScan(frameNumber, msLevel, (float)elutionTime, ionCount, mzList, ionsIntensity);
                                     }
 
-                                    if (mCheckCentroidingStatus)
+                                    if (Options.CheckCentroidingStatus)
                                     {
                                         mDatasetStatsSummarizer.ClassifySpectrum(ionCount, mzList, msLevel, "Frame " + frameNumber);
                                     }
@@ -902,14 +913,14 @@ namespace MSFileInfoScanner.Readers
                     OnWarningEvent("Exception extracting acquisition time information: " + ex.Message);
                 }
 
-                if (mSaveTICAndBPI || mCreateDatasetInfoFile || mCreateScanStatsFile || mSaveLCMS2DPlots)
+                if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFile || Options.SaveLCMS2DPlots)
                 {
                     // Load data from each frame
                     // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
                     LoadFrameDetails(uimfReader, masterFrameList, masterFrameNumList);
                 }
 
-                if (mComputeOverallQualityScores)
+                if (Options.ComputeOverallQualityScores)
                 {
                     // Note that this call will also create the TICs and BPIs
                     ComputeQualityScores(uimfReader, datasetFileInfo, masterFrameList, masterFrameNumList);
