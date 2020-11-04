@@ -11,6 +11,7 @@ namespace SpectraTypeClassifier
     [CLSCompliant(true)]
     public class SpectrumTypeClassifier : EventNotifier
     {
+        // Ignore Spelling: ppmDiffs, PpmDiffThreshold
 
         #region "Constants and Enums"
 
@@ -597,11 +598,11 @@ namespace SpectraTypeClassifier
                     {
                         if (IsDataCentroided(ppmDiffs))
                         {
-                            centroidedRegions += 1;
+                            centroidedRegions++;
                         }
                         else
                         {
-                            profileModeRegions += 1;
+                            profileModeRegions++;
                         }
                     }
 
@@ -623,11 +624,11 @@ namespace SpectraTypeClassifier
             {
                 if (IsDataCentroided(ppmDiffs))
                 {
-                    centroidedRegions += 1;
+                    centroidedRegions++;
                 }
                 else
                 {
-                    profileModeRegions += 1;
+                    profileModeRegions++;
                 }
             }
 
