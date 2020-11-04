@@ -4,6 +4,8 @@ using System.IO;
 using System.Threading;
 using System.Xml;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScanner.Options;
+using MSFileInfoScanner.Readers;
 using PRISM;
 
 namespace MSFileInfoScanner
@@ -14,8 +16,16 @@ namespace MSFileInfoScanner
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2008</remarks>
     public class FileIntegrityChecker : EventNotifier
     {
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
+        public FileIntegrityChecker(InfoScannerOptions options)
         {
             InitializeLocalVariables();
+            MaximumTextFileLinesToCheck = options.MaximumTextFileLinesToCheck;
+            MaximumXMLElementNodesToCheck = options.MaximumXMLElementNodesToCheck;
         }
 
         #region "Constants and Enums"
@@ -1709,10 +1719,10 @@ namespace MSFileInfoScanner
                                     // File was not in fileIgnoreList
                                     // Re-check using clsThermoRawFileInfoScanner
 
-                                    msInfoScanner = new clsThermoRawFileInfoScanner();
-                                    msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, false);
-                                    msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, false);
-                                    msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, false);
+                                    msInfoScanner = new ThermoRawFileInfoScanner();
+                                    msInfoScanner.Options.SaveTICAndBPIPlots = false;
+                                    msInfoScanner.Options.ComputeOverallQualityScores = false;
+                                    msInfoScanner.Options.CreateDatasetInfoFile = false;
 
                                     passedIntegrityCheck = msInfoScanner.ProcessDataFile(dataFile.FullName, datasetFileInfo);
                                     break;
@@ -1721,10 +1731,10 @@ namespace MSFileInfoScanner
                                     // File was not in fileIgnoreList
                                     // Re-check using clsAgilentTOFOrQTRAPWiffFileInfoScanner
 
-                                    msInfoScanner = new clsAgilentTOFOrQStarWiffFileInfoScanner();
-                                    msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, false);
-                                    msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, false);
-                                    msInfoScanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, false);
+                                    msInfoScanner = new AgilentTOFOrQStarWiffFileInfoScanner();
+                                    msInfoScanner.Options.SaveTICAndBPIPlots = false;
+                                    msInfoScanner.Options.ComputeOverallQualityScores = false;
+                                    msInfoScanner.Options.CreateDatasetInfoFile = false;
 
                                     passedIntegrityCheck = msInfoScanner.ProcessDataFile(dataFile.FullName, datasetFileInfo);
                                     break;
