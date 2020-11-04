@@ -27,7 +27,7 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsMedianUtilities()
+        public MedianUtilities()
         {
             mRandom = new Random();
             EvenNumberedListCountBehavior = eEventListCountBehaviorType.ReportMidpointAverage;

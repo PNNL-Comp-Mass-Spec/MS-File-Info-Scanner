@@ -193,7 +193,7 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsSpectrumTypeClassifier()
+        public SpectrumTypeClassifier()
         {
             mCentroidedSpectra = new Dictionary<int, int>();
             mCentroidedSpectraClassifiedAsProfile = new Dictionary<int, int>();
