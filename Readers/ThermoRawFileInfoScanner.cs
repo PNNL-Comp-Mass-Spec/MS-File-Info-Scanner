@@ -125,7 +125,7 @@ namespace MSFileInfoScanner
             datasetFileInfo.OverallQualityScore = overallScore;
         }
 
-        private clsSpectrumTypeClassifier.eCentroidStatusConstants GetCentroidStatus(
+        private SpectrumTypeClassifier.eCentroidStatusConstants GetCentroidStatus(
             int scanNumber,
             clsScanInfo scanInfo)
         {
@@ -136,7 +136,7 @@ namespace MSFileInfoScanner
                     OnWarningEvent("Warning: Scan " + scanNumber + " appears to be profile mode data, yet XRawFileIO reported it to be centroid");
                 }
 
-                return clsSpectrumTypeClassifier.eCentroidStatusConstants.Centroid;
+                return SpectrumTypeClassifier.eCentroidStatusConstants.Centroid;
             }
 
             if (mIsCentroid.IsMatch(scanInfo.FilterText))
@@ -144,7 +144,7 @@ namespace MSFileInfoScanner
                 OnWarningEvent("Warning: Scan " + scanNumber + " appears to be centroided data, yet XRawFileIO reported it to be profile");
             }
 
-            return clsSpectrumTypeClassifier.eCentroidStatusConstants.Profile;
+            return SpectrumTypeClassifier.eCentroidStatusConstants.Profile;
         }
 
         /// <summary>

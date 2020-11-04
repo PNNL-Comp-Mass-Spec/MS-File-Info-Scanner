@@ -41,7 +41,7 @@ namespace MSFileInfoScanner.DatasetStats
 
         private readonly List<ScanStatsEntry> mDatasetScanStats;
 
-        private readonly clsSpectrumTypeClassifier mSpectraTypeClassifier;
+        private readonly SpectrumTypeClassifier mSpectraTypeClassifier;
 
         private bool mDatasetSummaryStatsUpToDate;
 
@@ -94,7 +94,7 @@ namespace MSFileInfoScanner.DatasetStats
 
             ErrorMessage = string.Empty;
 
-            mSpectraTypeClassifier = new clsSpectrumTypeClassifier();
+            mSpectraTypeClassifier = new SpectrumTypeClassifier();
             RegisterEvents(mSpectraTypeClassifier);
 
             mDatasetScanNumbers = new SortedSet<int>();
@@ -271,7 +271,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="spectrumTitle"></param>
         public void ClassifySpectrum(List<double> mzList, int msLevel, string spectrumTitle)
         {
-            ClassifySpectrum(mzList, msLevel, clsSpectrumTypeClassifier.eCentroidStatusConstants.Unknown, spectrumTitle);
+            ClassifySpectrum(mzList, msLevel, SpectrumTypeClassifier.eCentroidStatusConstants.Unknown, spectrumTitle);
         }
 
         /// <summary>
@@ -281,7 +281,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="msLevel"></param>
         /// <param name="centroidingStatus"></param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
-        public void ClassifySpectrum(List<double> mzList, int msLevel, clsSpectrumTypeClassifier.eCentroidStatusConstants centroidingStatus, string spectrumTitle)
+        public void ClassifySpectrum(List<double> mzList, int msLevel, SpectrumTypeClassifier.eCentroidStatusConstants centroidingStatus, string spectrumTitle)
         {
             mSpectraTypeClassifier.CheckSpectrum(mzList, msLevel, centroidingStatus, spectrumTitle);
         }
@@ -314,7 +314,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </remarks>
         public void ClassifySpectrum(int ionCount, double[] mzArray, int msLevel, string spectrumTitle)
         {
-            mSpectraTypeClassifier.CheckSpectrum(ionCount, mzArray, msLevel, clsSpectrumTypeClassifier.eCentroidStatusConstants.Unknown, spectrumTitle);
+            mSpectraTypeClassifier.CheckSpectrum(ionCount, mzArray, msLevel, SpectrumTypeClassifier.eCentroidStatusConstants.Unknown, spectrumTitle);
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace MSFileInfoScanner.DatasetStats
             int ionCount,
             double[] mzArray,
             int msLevel,
-            clsSpectrumTypeClassifier.eCentroidStatusConstants centroidingStatus,
+            SpectrumTypeClassifier.eCentroidStatusConstants centroidingStatus,
             string spectrumTitle)
         {
             mSpectraTypeClassifier.CheckSpectrum(ionCount, mzArray, msLevel, centroidingStatus, spectrumTitle);

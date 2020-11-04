@@ -13,7 +13,7 @@ namespace MSFileInfoScannerUnitTests
         [Test]
         public void TestStats()
         {
-            var classifier = new clsSpectrumTypeClassifier();
+            var classifier = new SpectrumTypeClassifier();
             RegisterEvents(classifier);
 
             var lstProfileMZs = new List<double>
@@ -27,14 +27,14 @@ namespace MSFileInfoScannerUnitTests
                 716.30354, 716.31383, 716.32412
             };
 
-            classifier.CheckSpectrum(lstProfileMZs, 1, false, clsSpectrumTypeClassifier.eCentroidStatusConstants.Profile);
+            classifier.CheckSpectrum(lstProfileMZs, 1, false, SpectrumTypeClassifier.eCentroidStatusConstants.Profile);
 
             var lstCentroidMZs = new List<double>
             {
                 500.29,500.34,501.18,502.18,503.18,504.18,505.17,506.17,507.17,507.24,507.30
             };
 
-            classifier.CheckSpectrum(lstCentroidMZs, 2, false, clsSpectrumTypeClassifier.eCentroidStatusConstants.Centroid);
+            classifier.CheckSpectrum(lstCentroidMZs, 2, false, SpectrumTypeClassifier.eCentroidStatusConstants.Centroid);
 
             for (var scan = 1; scan < 19; scan++)
             {
@@ -47,8 +47,8 @@ namespace MSFileInfoScannerUnitTests
 
                     // Purposely mis-classify the spectrum every 10 scans
                     var centroidingStatusMS1 = scan % 10 == 0
-                                                ? clsSpectrumTypeClassifier.eCentroidStatusConstants.Centroid
-                                                : clsSpectrumTypeClassifier.eCentroidStatusConstants.Profile;
+                                                ? SpectrumTypeClassifier.eCentroidStatusConstants.Centroid
+                                                : SpectrumTypeClassifier.eCentroidStatusConstants.Profile;
 
                     classifier.CheckSpectrum(updatedProfileMZs, 1, false, centroidingStatusMS1);
 
@@ -62,8 +62,8 @@ namespace MSFileInfoScannerUnitTests
                 // Purposely mis-classify the spectrum every 4 scans
                 // (though the SpectrumClassifier class doesn't really care if this happens)
                 var centroidingStatusMS2 = scan % 4 == 0
-                                            ? clsSpectrumTypeClassifier.eCentroidStatusConstants.Profile
-                                            : clsSpectrumTypeClassifier.eCentroidStatusConstants.Centroid;
+                                            ? SpectrumTypeClassifier.eCentroidStatusConstants.Profile
+                                            : SpectrumTypeClassifier.eCentroidStatusConstants.Centroid;
 
                 classifier.CheckSpectrum(updatedCentroidMZs, 2, false, centroidingStatusMS2);
             }
@@ -136,7 +136,7 @@ namespace MSFileInfoScannerUnitTests
         [Test]
         public void TestSparseCentroidSpectrum1()
         {
-            var classifier = new clsSpectrumTypeClassifier();
+            var classifier = new SpectrumTypeClassifier();
             RegisterEvents(classifier);
 
             // This sparse data has a median ppm difference of 49.6 ppm, but when we parse the data by region, 75% of the regions appear centroided
@@ -162,7 +162,7 @@ namespace MSFileInfoScannerUnitTests
         [Test]
         public void TestSparseCentroidSpectrum2()
         {
-            var classifier = new clsSpectrumTypeClassifier();
+            var classifier = new SpectrumTypeClassifier();
             RegisterEvents(classifier);
 
             // This sparse data has a median ppm difference of 274 ppm
@@ -190,7 +190,7 @@ namespace MSFileInfoScannerUnitTests
         [Test]
         public void TestSparseCentroidSpectrum3()
         {
-            var classifier = new clsSpectrumTypeClassifier();
+            var classifier = new SpectrumTypeClassifier();
             RegisterEvents(classifier);
 
             // This sparse data has a median ppm difference of 22752 ppm
@@ -217,7 +217,7 @@ namespace MSFileInfoScannerUnitTests
         [Test]
         public void TestSparseCentroidSpectrum4()
         {
-            var classifier = new clsSpectrumTypeClassifier();
+            var classifier = new SpectrumTypeClassifier();
             RegisterEvents(classifier);
 
             // This sparse data has a median ppm difference of 44.9 ppm, but when we parse the data by region, 66% of the regions appear centroided
@@ -246,7 +246,7 @@ namespace MSFileInfoScannerUnitTests
         [Test]
         public void TestProfileSpectrum()
         {
-            var classifier = new clsSpectrumTypeClassifier();
+            var classifier = new SpectrumTypeClassifier();
             RegisterEvents(classifier);
 
             var lstProfileMZs = new List<double>
@@ -292,7 +292,7 @@ namespace MSFileInfoScannerUnitTests
         /// Use this method to chain events between classes
         /// </summary>
         /// <param name="classifier"></param>
-        private void RegisterEvents(clsSpectrumTypeClassifier classifier)
+        private void RegisterEvents(SpectrumTypeClassifier classifier)
         {
             classifier.RaiseDebugEvents = true;
             classifier.DebugEvent += SourceClass_DebugEvent;
