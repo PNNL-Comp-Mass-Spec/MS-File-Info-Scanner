@@ -40,8 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="clsMedianUtilities.cs" />
-    <Compile Include="clsSpectrumTypeClassifier.cs" />
+    <Compile Include="MedianUtilities.cs" />
+    <Compile Include="SpectrumTypeClassifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
