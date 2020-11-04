@@ -14,7 +14,7 @@ namespace MSFileInfoScanner
     /// Bruker XMass folder info scanner
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)</remarks>
-    public class BrukerXmassFolderInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class BrukerXmassFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
         // ReSharper disable CommentTypo
 

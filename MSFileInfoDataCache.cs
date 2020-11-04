@@ -256,10 +256,10 @@ namespace MSFileInfoScanner
             mCachedMSInfoResultsLastSaveTime = DateTime.UtcNow;
             mCachedDirectoryIntegrityInfoLastSaveTime = DateTime.UtcNow;
 
-            mDirectoryIntegrityInfoFilePath = Path.Combine(clsMSFileInfoScanner.GetAppDirectoryPath(), clsMSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.DirectoryIntegrityInfo));
+            mDirectoryIntegrityInfoFilePath = Path.Combine(MSFileInfoScanner.GetAppDirectoryPath(), MSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.DirectoryIntegrityInfo));
 
-            mAcquisitionTimeFilePath = Path.Combine(clsMSFileInfoScanner.GetAppDirectoryPath(), clsMSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo));
-            clsMSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo);
+            mAcquisitionTimeFilePath = Path.Combine(MSFileInfoScanner.GetAppDirectoryPath(), MSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo));
+            MSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo);
 
             InitializeDatasets();
         }
@@ -342,7 +342,7 @@ namespace MSFileInfoScanner
             // Clear the Folder Integrity Info Table
             ClearCachedDirectoryIntegrityInfoResults();
 
-            clsMSFileInfoScanner.ValidateDataFilePath(ref mDirectoryIntegrityInfoFilePath, iMSFileInfoScanner.eDataFileTypeConstants.DirectoryIntegrityInfo);
+            MSFileInfoScanner.ValidateDataFilePath(ref mDirectoryIntegrityInfoFilePath, iMSFileInfoScanner.eDataFileTypeConstants.DirectoryIntegrityInfo);
 
             OnDebugEvent("Loading cached directory integrity info from: " + Path.GetFileName(mDirectoryIntegrityInfoFilePath));
 
@@ -407,7 +407,7 @@ namespace MSFileInfoScanner
             // Clear the MS Info Table
             ClearCachedMSInfoResults();
 
-            clsMSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo);
+            MSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, iMSFileInfoScanner.eDataFileTypeConstants.MSFileInfo);
 
             OnDebugEvent("Loading cached acquisition time file data from: " + Path.GetFileName(mAcquisitionTimeFilePath));
 
@@ -773,7 +773,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Destructor
         /// </summary>
-        ~clsMSFileInfoDataCache()
+        ~MSFileInfoDataCache()
         {
             SaveCachedResults();
         }

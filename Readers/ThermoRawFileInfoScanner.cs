@@ -15,7 +15,7 @@ namespace MSFileInfoScanner
     /// Thermo .raw file info scanner
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
-    public class ThermoRawFileInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class ThermoRawFileInfoScanner : MSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: xcalibur
 
@@ -372,7 +372,7 @@ namespace MSFileInfoScanner
                 ErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.ThermoRawFileReaderError;
                 readError = true;
 
-                if (!string.Equals(clsMSFileInfoScanner.GetAppDirectoryPath().Substring(0, 2), rawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
+                if (!string.Equals(MSFileInfoScanner.GetAppDirectoryPath().Substring(0, 2), rawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
                 {
                     if (mCopyFileLocalOnReadError)
                     {
@@ -380,7 +380,7 @@ namespace MSFileInfoScanner
 
                         try
                         {
-                            dataFilePathLocal = Path.Combine(clsMSFileInfoScanner.GetAppDirectoryPath(), Path.GetFileName(dataFilePath));
+                            dataFilePathLocal = Path.Combine(MSFileInfoScanner.GetAppDirectoryPath(), Path.GetFileName(dataFilePath));
 
                             if (!string.Equals(dataFilePathLocal, dataFilePath, StringComparison.InvariantCultureIgnoreCase))
                             {

@@ -30,7 +30,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Constructor
         /// </summary>
-        protected clsMSFileInfoProcessorBaseClass()
+        protected MSFileInfoProcessorBaseClass()
         {
             mTICAndBPIPlot = new clsTICandBPIPlotter("TICAndBPIPlot", false);
             RegisterEvents(mTICAndBPIPlot);

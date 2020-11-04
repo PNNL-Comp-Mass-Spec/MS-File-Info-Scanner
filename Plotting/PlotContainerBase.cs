@@ -61,7 +61,7 @@ namespace MSFileInfoScanner
 
         protected void OpenDebugFile(string dataSource)
         {
-            var logDirectory = clsMSFileInfoScanner.GetAppDataDirectoryPath();
+            var logDirectory = MSFileInfoScanner.GetAppDataDirectoryPath();
 
             string logFileName;
             if (string.IsNullOrWhiteSpace(dataSource))

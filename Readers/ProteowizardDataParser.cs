@@ -209,7 +209,7 @@ namespace MSFileInfoScanner
                 return;
             }
 
-            var percentCompleteOverall = clsMSFileInfoProcessorBaseClass.ComputeIncrementalProgress(
+            var percentCompleteOverall = MSFileInfoProcessorBaseClass.ComputeIncrementalProgress(
                 PROGRESS_START,
                 PROGRESS_SCAN_TIMES_LOADED,
                 percentComplete);
@@ -683,9 +683,9 @@ namespace MSFileInfoScanner
                 lastDebugProgressTime = DateTime.UtcNow;
                 var percentComplete = scanNumber / (float)spectrumCount * 100;
 
-                var percentCompleteOverall = clsMSFileInfoProcessorBaseClass.ComputeIncrementalProgress(
+                var percentCompleteOverall = MSFileInfoProcessorBaseClass.ComputeIncrementalProgress(
                     PROGRESS_SCAN_TIMES_LOADED,
-                    clsMSFileInfoProcessorBaseClass.PROGRESS_SPECTRA_LOADED,
+                    MSFileInfoProcessorBaseClass.PROGRESS_SPECTRA_LOADED,
                     percentComplete);
 
                 OnProgressUpdate(string.Format("Spectra processed: {0:N0}", scanNumber), percentCompleteOverall);

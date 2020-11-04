@@ -12,7 +12,7 @@ namespace MSFileInfoScanner
     /// Agilent GC .D folder info scanner
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012</remarks>
-    public class AgilentGCDFolderInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class AgilentGCDFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: acqmeth, AcqTimes
 

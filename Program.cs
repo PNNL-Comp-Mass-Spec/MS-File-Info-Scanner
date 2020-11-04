@@ -9,7 +9,7 @@ namespace MSFileInfoScanner
     /// <summary>
     /// <para>
     /// This program scans a series of MS data files (or data directories) and extracts the acquisition start and end times,
-    /// number of spectra, and the total size of the Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
+    /// number of spectra, and the total size of the Results are saved to MSFileInfoScanner.DefaultAcquisitionTimeFilename
     /// </para>
     /// </summary>
     /// <remarks>
@@ -43,11 +43,11 @@ namespace MSFileInfoScanner
             var exePath = PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppPath();
             var cmdLineParser = new CommandLineParser<CommandLineOptions>(exeName, GetAppVersion());
 
-            var scannerInfo = new clsMSFileInfoScanner();
+            var scannerInfo = new MSFileInfoScanner();
             cmdLineParser.ProgramInfo = "This program will scan a series of MS data files (or data directories) and " +
                                         "extract the acquisition start and end times, number of spectra, and the " +
                                         "total size of the data, saving the values in the file " +
-                                        clsMSFileInfoScanner.DefaultAcquisitionTimeFilename + ". " +
+                                        MSFileInfoScanner.DefaultAcquisitionTimeFilename + ". " +
                                         "Supported file types are Thermo .RAW files, Agilent Ion Trap (.D directories), " +
                                         "Agilent or QStar/QTrap .WIFF files, MassLynx .Raw directories, Bruker 1 directories, " +
                                         "Bruker XMass analysis.baf files, .UIMF files (IMS), " +
@@ -87,7 +87,7 @@ namespace MSFileInfoScanner
 
             try
             {
-                var scanner = new clsMSFileInfoScanner();
+                var scanner = new MSFileInfoScanner();
 
                 scanner.DebugEvent += MSFileScanner_DebugEvent;
                 scanner.ErrorEvent += MSFileScanner_ErrorEvent;

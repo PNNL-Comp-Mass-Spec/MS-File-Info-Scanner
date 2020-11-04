@@ -103,8 +103,8 @@ namespace MSFileInfoScanner
                        "Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold.\n" +
                        "Useful for validating instrument files where the sample is iTRAQ or TMT labeled " +
                        "and it is important to detect the reporter ions in the MS/MS spectra. " +
-                       "\n  - select the default iTRAQ m/z (" + clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ_STRING + ") using /MS2MzMin:iTRAQ" +
-                       "\n  - select the default TMT m/z (" + clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT_STRING + ") using /MS2MzMin:TMT" +
+                       "\n  - select the default iTRAQ m/z (" + MSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ_STRING + ") using /MS2MzMin:iTRAQ" +
+                       "\n  - select the default TMT m/z (" + MSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT_STRING + ") using /MS2MzMin:TMT" +
                        "\n  - specify a m/z value using /MS2MzMin:110")]
         public string MS2MzMinString { get; set; }
 
@@ -254,11 +254,11 @@ namespace MSFileInfoScanner
             {
                 if (MS2MzMinString.StartsWith("iTRAQ", StringComparison.OrdinalIgnoreCase))
                 {
-                    MS2MzMin = clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ;
+                    MS2MzMin = MSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ;
                 }
                 else if (MS2MzMinString.StartsWith("TMT", StringComparison.OrdinalIgnoreCase))
                 {
-                    MS2MzMin = clsMSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT;
+                    MS2MzMin = MSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT;
                 }
                 else
                 {
@@ -287,7 +287,7 @@ namespace MSFileInfoScanner
             return true;
         }
 
-        public void CopyToScanner(clsMSFileInfoScanner scanner)
+        public void CopyToScanner(MSFileInfoScanner scanner)
         {
             // Note: These values will be overridden if /P was used and they are defined in the parameter file
 

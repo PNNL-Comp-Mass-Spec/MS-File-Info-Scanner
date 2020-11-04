@@ -12,7 +12,7 @@ namespace MSFileInfoScanner
     /// </para>
     /// </summary>
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
-    public class AgilentTOFOrQStarWiffFileInfoScanner : clsMSFileInfoProcessorBaseClass
+    public class AgilentTOFOrQStarWiffFileInfoScanner : MSFileInfoProcessorBaseClass
     {
         // Note: The extension must be in all caps
         public const string AGILENT_TOF_OR_QSTAR_FILE_EXTENSION = ".WIFF";

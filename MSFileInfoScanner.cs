@@ -15,7 +15,7 @@ namespace MSFileInfoScanner
     /// <summary>
     /// <para>
     /// This program scans a series of MS data files (or data directories) and extracts the acquisition start and end times,
-    /// number of spectra, and the total size of the Results are saved to clsMSFileScanner.DefaultAcquisitionTimeFilename
+    /// number of spectra, and the total size of the Results are saved to MSFileInfoScanner.DefaultAcquisitionTimeFilename
     /// </para>
     /// <para>
     /// Supported file types are Thermo .RAW files, Agilent Ion Trap (.D directories), Agilent or QStar/QTrap .WIFF files,
@@ -40,13 +40,13 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsMSFileInfoScanner()
+        public MSFileInfoScanner()
         {
             mFileIntegrityChecker = new clsFileIntegrityChecker();
             RegisterEvents(mFileIntegrityChecker);
             mFileIntegrityChecker.FileIntegrityFailure += FileIntegrityChecker_FileIntegrityFailure;
 
-            mMSFileInfoDataCache = new clsMSFileInfoDataCache();
+            mMSFileInfoDataCache = new MSFileInfoDataCache();
             RegisterEvents(mMSFileInfoDataCache);
 
             SetErrorCode(eMSFileScannerErrorCodes.NoError);
@@ -177,7 +177,7 @@ namespace MSFileInfoScanner
 
         private iMSFileInfoProcessor mMSInfoScanner;
 
-        private readonly clsMSFileInfoDataCache mMSFileInfoDataCache;
+        private readonly MSFileInfoDataCache mMSFileInfoDataCache;
 
         private DateTime mLastWriteTimeFileIntegrityDetails;
         private DateTime mLastWriteTimeFileIntegrityFailure;
@@ -497,8 +497,8 @@ namespace MSFileInfoScanner
                 {
                     if (mMSFileInfoDataCache.CachedDirectoryIntegrityInfoContainsDirectory(datasetDirectory.FullName, out directoryID, out var dataRow))
                     {
-                        var cachedFileCount = (int)dataRow[clsMSFileInfoDataCache.COL_NAME_FILE_COUNT];
-                        var cachedCountFailIntegrity = (int)dataRow[clsMSFileInfoDataCache.COL_NAME_COUNT_FAIL_INTEGRITY];
+                        var cachedFileCount = (int)dataRow[MSFileInfoDataCache.COL_NAME_FILE_COUNT];
+                        var cachedCountFailIntegrity = (int)dataRow[MSFileInfoDataCache.COL_NAME_COUNT_FAIL_INTEGRITY];
 
                         if (cachedFileCount == fileCount && cachedCountFailIntegrity == 0)
                         {
@@ -639,7 +639,7 @@ namespace MSFileInfoScanner
 
                     // Over 10% of the MS/MS spectra have a minimum m/z value larger than the required minimum
                     var errorMsg = string.Format("Over {0}% of the MS/MS spectra have a minimum m/z value larger than the required minimum; " +
-                                                 "reporter ion peaks likely could not be detected", clsMSFileInfoProcessorBaseClass.MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED);
+                                                 "reporter ion peaks likely could not be detected", MSFileInfoProcessorBaseClass.MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED);
 
                     if (!string.IsNullOrWhiteSpace(MS2MzMinValidationMessage))
                     {
@@ -1671,7 +1671,7 @@ namespace MSFileInfoScanner
                                 long cachedSizeBytes;
                                 try
                                 {
-                                    cachedSizeBytes = (long)dataRow[clsMSFileInfoDataCache.COL_NAME_FILE_SIZE_BYTES];
+                                    cachedSizeBytes = (long)dataRow[MSFileInfoDataCache.COL_NAME_FILE_SIZE_BYTES];
                                 }
                                 catch (Exception)
                                 {

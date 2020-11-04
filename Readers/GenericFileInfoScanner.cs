@@ -4,7 +4,7 @@ using MSFileInfoScanner.DatasetStats;
 
 namespace MSFileInfoScanner
 {
-    class GenericFileInfoScanner : clsMSFileInfoProcessorBaseClass
+    class GenericFileInfoScanner : MSFileInfoProcessorBaseClass
     {
         /// <summary>
         /// Constructor
