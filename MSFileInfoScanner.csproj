@@ -102,7 +102,7 @@
     <Compile Include="Readers\ThermoRawFileInfoScanner.cs" />
     <Compile Include="Plotting\LCMSDataPlotter.cs" />
     <Compile Include="Readers\MassLynxNativeIO.cs" />
-    <Compile Include="Readers\MicromassRawFolderInfoScanner.cs" />
+    <Compile Include="Readers\WatersRawFolderInfoScanner.cs" />
     <Compile Include="MSFileInfoDataCache.cs" />
     <Compile Include="Readers\MSFileInfoProcessorBaseClass.cs" />
     <Compile Include="MSFileInfoScanner.cs" />
