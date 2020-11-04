@@ -27,14 +27,14 @@ namespace MSFileInfoScannerUnitTests
                 716.30354, 716.31383, 716.32412
             };
 
-            classifier.CheckSpectrum(lstProfileMZs, 1, false, SpectrumTypeClassifier.eCentroidStatusConstants.Profile);
+            classifier.CheckSpectrum(lstProfileMZs, 1, false, SpectrumTypeClassifier.CentroidStatusConstants.Profile);
 
             var lstCentroidMZs = new List<double>
             {
                 500.29,500.34,501.18,502.18,503.18,504.18,505.17,506.17,507.17,507.24,507.30
             };
 
-            classifier.CheckSpectrum(lstCentroidMZs, 2, false, SpectrumTypeClassifier.eCentroidStatusConstants.Centroid);
+            classifier.CheckSpectrum(lstCentroidMZs, 2, false, SpectrumTypeClassifier.CentroidStatusConstants.Centroid);
 
             for (var scan = 1; scan < 19; scan++)
             {
@@ -47,8 +47,8 @@ namespace MSFileInfoScannerUnitTests
 
                     // Purposely mis-classify the spectrum every 10 scans
                     var centroidingStatusMS1 = scan % 10 == 0
-                                                ? SpectrumTypeClassifier.eCentroidStatusConstants.Centroid
-                                                : SpectrumTypeClassifier.eCentroidStatusConstants.Profile;
+                                                ? SpectrumTypeClassifier.CentroidStatusConstants.Centroid
+                                                : SpectrumTypeClassifier.CentroidStatusConstants.Profile;
 
                     classifier.CheckSpectrum(updatedProfileMZs, 1, false, centroidingStatusMS1);
 
@@ -62,8 +62,8 @@ namespace MSFileInfoScannerUnitTests
                 // Purposely mis-classify the spectrum every 4 scans
                 // (though the SpectrumClassifier class doesn't really care if this happens)
                 var centroidingStatusMS2 = scan % 4 == 0
-                                            ? SpectrumTypeClassifier.eCentroidStatusConstants.Profile
-                                            : SpectrumTypeClassifier.eCentroidStatusConstants.Centroid;
+                                            ? SpectrumTypeClassifier.CentroidStatusConstants.Profile
+                                            : SpectrumTypeClassifier.CentroidStatusConstants.Centroid;
 
                 classifier.CheckSpectrum(updatedCentroidMZs, 2, false, centroidingStatusMS2);
             }

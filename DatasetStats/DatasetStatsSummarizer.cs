@@ -271,7 +271,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="spectrumTitle"></param>
         public void ClassifySpectrum(List<double> mzList, int msLevel, string spectrumTitle)
         {
-            ClassifySpectrum(mzList, msLevel, SpectrumTypeClassifier.eCentroidStatusConstants.Unknown, spectrumTitle);
+            ClassifySpectrum(mzList, msLevel, SpectrumTypeClassifier.CentroidStatusConstants.Unknown, spectrumTitle);
         }
 
         /// <summary>
@@ -281,7 +281,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="msLevel"></param>
         /// <param name="centroidingStatus"></param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
-        public void ClassifySpectrum(List<double> mzList, int msLevel, SpectrumTypeClassifier.eCentroidStatusConstants centroidingStatus, string spectrumTitle)
+        public void ClassifySpectrum(List<double> mzList, int msLevel, SpectrumTypeClassifier.CentroidStatusConstants centroidingStatus, string spectrumTitle)
         {
             mSpectraTypeClassifier.CheckSpectrum(mzList, msLevel, centroidingStatus, spectrumTitle);
         }
@@ -314,7 +314,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </remarks>
         public void ClassifySpectrum(int ionCount, double[] mzArray, int msLevel, string spectrumTitle)
         {
-            mSpectraTypeClassifier.CheckSpectrum(ionCount, mzArray, msLevel, SpectrumTypeClassifier.eCentroidStatusConstants.Unknown, spectrumTitle);
+            mSpectraTypeClassifier.CheckSpectrum(ionCount, mzArray, msLevel, SpectrumTypeClassifier.CentroidStatusConstants.Unknown, spectrumTitle);
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace MSFileInfoScanner.DatasetStats
             int ionCount,
             double[] mzArray,
             int msLevel,
-            SpectrumTypeClassifier.eCentroidStatusConstants centroidingStatus,
+            SpectrumTypeClassifier.CentroidStatusConstants centroidingStatus,
             string spectrumTitle)
         {
             mSpectraTypeClassifier.CheckSpectrum(ionCount, mzArray, msLevel, centroidingStatus, spectrumTitle);
