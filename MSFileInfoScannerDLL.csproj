@@ -116,7 +116,7 @@
     <Compile Include="DatasetStats\InstrumentFileInfo.cs" />
     <Compile Include="DatasetStats\ScanStatsEntry.cs" />
     <Compile Include="DatasetStats\SummaryStatDetails.cs" />
-    <Compile Include="GenericFileInfoScanner.cs" />
+    <Compile Include="Readers\GenericFileInfoScanner.cs" />
     <Compile Include="DatasetStats\DatasetFileInfo.cs" />
     <Compile Include="DatasetStats\DatasetStatsSummarizer.cs" />
     <Compile Include="DatasetStats\SampleInfo.cs" />
