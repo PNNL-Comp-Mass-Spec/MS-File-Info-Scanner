@@ -29,7 +29,7 @@ namespace SpectraTypeClassifier
         /// </summary>
         private const double FRACTION_REGIONS_PROFILE = 2.0 / 3.0;
 
-        public enum eCentroidStatusConstants
+        public enum CentroidStatusConstants
         {
             Unknown = 0,
             Profile = 1,
@@ -86,7 +86,6 @@ namespace SpectraTypeClassifier
         /// </summary>
         /// <returns></returns>
         public int CentroidedMS1Spectra => (from item in mCentroidedSpectra where item.Key <= 1 select item.Value).Sum();
-
 
         /// <summary>
         /// Number of centroided MS2 spectra
@@ -209,7 +208,6 @@ namespace SpectraTypeClassifier
         /// <returns>True on success, false if an error</returns>
         public bool CheckCDTAFile(string concatenatedDtaPath)
         {
-
             var dtLastStatusTime = DateTime.UtcNow;
 
             var splitChars = new[] { ' ' };
@@ -224,16 +222,16 @@ namespace SpectraTypeClassifier
                 // Read the m/z values in the _dta.txt file
                 // Using a simple text reader here for speed purposes
 
-                using (var srDtaFile = new StreamReader(new FileStream(concatenatedDtaPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var dtaFileReader = new StreamReader(new FileStream(concatenatedDtaPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    var lstMZs = new List<double>(2000);
-                    var lstPpmDiffs = new List<double>(2000);
+                    var mzValues = new List<double>(2000);
+                    var ppmDiffs = new List<double>(2000);
 
                     double previousMz = 0;
 
-                    while (!srDtaFile.EndOfStream)
+                    while (!dtaFileReader.EndOfStream)
                     {
-                        var dataLine = srDtaFile.ReadLine();
+                        var dataLine = dtaFileReader.ReadLine();
 
                         if (string.IsNullOrEmpty(dataLine))
                             continue;
@@ -243,15 +241,17 @@ namespace SpectraTypeClassifier
                             // DTA header line
 
                             // Process the data for the previous spectrum
-                            CheckPPMDiffs(lstMZs, lstPpmDiffs, 2, eCentroidStatusConstants.Unknown);
+                            CheckPPMDiffs(mzValues, ppmDiffs, 2, CentroidStatusConstants.Unknown);
 
                             // Reset the previous m/z value and skip the next line (since it has parent ion m/z and charge)
-                            if (!srDtaFile.EndOfStream)
-                                srDtaFile.ReadLine();
+                            if (!dtaFileReader.EndOfStream)
+                            {
+                                dtaFileReader.ReadLine();
+                            }
 
                             previousMz = 0;
-                            lstMZs.Clear();
-                            lstPpmDiffs.Clear();
+                            mzValues.Clear();
+                            ppmDiffs.Clear();
 
                             if (DateTime.UtcNow.Subtract(dtLastStatusTime).TotalSeconds >= 30)
                             {
@@ -268,25 +268,23 @@ namespace SpectraTypeClassifier
                             continue;
                         }
 
-                        lstMZs.Add(mz);
+                        mzValues.Add(mz);
 
                         if (previousMz > 0 && mz > previousMz)
                         {
                             var delMassPPM = 1000000.0 * (mz - previousMz) / mz;
-                            lstPpmDiffs.Add(delMassPPM);
+                            ppmDiffs.Add(delMassPPM);
                         }
                         previousMz = mz;
                     }
 
                     // Process the data for the previous spectrum
-                    CheckPPMDiffs(lstMZs, lstPpmDiffs, 2, eCentroidStatusConstants.Unknown);
-
+                    CheckPPMDiffs(mzValues, ppmDiffs, 2, CentroidStatusConstants.Unknown);
                 }
 
                 ProcessingComplete?.Invoke(TotalSpectra);
 
                 return true;
-
             }
             catch (Exception ex)
             {
@@ -294,29 +292,28 @@ namespace SpectraTypeClassifier
                 OnErrorEvent(mErrorMessage, ex);
                 return false;
             }
-
         }
 
         /// <summary>
-        /// Examines lstPpmDiffs to determine if the data is centroided data
+        /// Examines ppmDiffs to determine if the data is centroided data
         /// </summary>
-        /// <param name="lstMZs"></param>
-        /// <param name="lstPpmDiffs"></param>
+        /// <param name="mzValues"></param>
+        /// <param name="ppmDiffs"></param>
         /// <param name="msLevel">1 for MS1, 2 for MS2, etc.</param>
         /// <param name="centroidingStatus">Expected centroid mode</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         /// <remarks>
-        /// Increments class property TotalSpectra if lstPpmDiffs is not empty
+        /// Increments class property TotalSpectra if ppmDiffs is not empty
         /// Increments class property CentroidedSpectra if the data is centroided
         /// </remarks>
         private void CheckPPMDiffs(
-            ICollection<double> lstMZs,
-            IList<double> lstPpmDiffs,
+            ICollection<double> mzValues,
+            IList<double> ppmDiffs,
             int msLevel,
-            eCentroidStatusConstants centroidingStatus,
+            CentroidStatusConstants centroidingStatus,
             string spectrumTitle = "")
         {
-            if (lstPpmDiffs.Count <= 0)
+            if (ppmDiffs.Count == 0)
                 return;
 
             IncrementDictionaryByMSLevel(mTotalSpectra, msLevel);
@@ -329,32 +326,32 @@ namespace SpectraTypeClassifier
                     OnDebugEvent("Examining " + spectrumTitle);
             }
 
-            var empiricalCentroidStatus = eCentroidStatusConstants.Profile;
-            if (IsDataCentroided(lstPpmDiffs, spectrumTitle))
+            var empiricalCentroidStatus = CentroidStatusConstants.Profile;
+            if (IsDataCentroided(ppmDiffs, spectrumTitle))
             {
-                empiricalCentroidStatus = eCentroidStatusConstants.Centroid;
+                empiricalCentroidStatus = CentroidStatusConstants.Centroid;
             }
             else
             {
                 // Data appears profile
                 // Examine the data by region to confirm that at least two thirds of the regions have profile mode data
-                if (IsDataCentroidedInRegions(lstMZs, DEFAULT_REGION_COUNT, spectrumTitle))
+                if (IsDataCentroidedInRegions(mzValues, DEFAULT_REGION_COUNT, spectrumTitle))
                 {
                     // When examining regions, the data appears centroided
-                    empiricalCentroidStatus = eCentroidStatusConstants.Centroid;
+                    empiricalCentroidStatus = CentroidStatusConstants.Centroid;
                 }
             }
 
-            if (centroidingStatus == eCentroidStatusConstants.Centroid && empiricalCentroidStatus == eCentroidStatusConstants.Profile)
+            if (centroidingStatus == CentroidStatusConstants.Centroid && empiricalCentroidStatus == CentroidStatusConstants.Profile)
             {
                 // The empirical algorithm has classified a centroid spectrum as profile
                 // Change it back to centroid
-                empiricalCentroidStatus = eCentroidStatusConstants.Centroid;
+                empiricalCentroidStatus = CentroidStatusConstants.Centroid;
 
                 IncrementDictionaryByMSLevel(mCentroidedSpectraClassifiedAsProfile, msLevel);
             }
 
-            if (empiricalCentroidStatus == eCentroidStatusConstants.Centroid)
+            if (empiricalCentroidStatus == CentroidStatusConstants.Centroid)
             {
                 IncrementDictionaryByMSLevel(mCentroidedSpectra, msLevel);
             }
@@ -370,162 +367,160 @@ namespace SpectraTypeClassifier
             {
                 dctSpectrumCounts[msLevel] = 1;
             }
-
         }
 
         /// <summary>
-        /// Step through the MZ values in array dblMZs and compute the ppm-based mass difference between adjacent points
+        /// Step through the MZ values in array mzValues and compute the ppm-based mass difference between adjacent points
         /// </summary>
-        /// <param name="lstMZs"></param>
+        /// <param name="mzValues"></param>
         /// <param name="msLevel"></param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         /// <remarks>
-        /// Increments class property TotalSpectra if lstMZs is not empty
+        /// Increments class property TotalSpectra if mzValues is not empty
         /// Increments class property CentroidedSpectra if the data is centroided
         /// </remarks>
-        public void CheckSpectrum(List<double> lstMZs, int msLevel, string spectrumTitle = "")
+        public void CheckSpectrum(List<double> mzValues, int msLevel, string spectrumTitle = "")
         {
-            CheckSpectrum(lstMZs, msLevel, false, eCentroidStatusConstants.Unknown, spectrumTitle);
+            CheckSpectrum(mzValues, msLevel, false, CentroidStatusConstants.Unknown, spectrumTitle);
         }
 
         /// <summary>
-        /// Step through the MZ values in array dblMZs and compute the ppm-based mass difference between adjacent points
+        /// Step through the MZ values in array mzValues and compute the ppm-based mass difference between adjacent points
         /// </summary>
-        /// <param name="lstMZs"></param>
+        /// <param name="mzValues"></param>
         /// <param name="msLevel"></param>
         /// <param name="centroidingStatus"></param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         /// <remarks>
-        /// Increments class property TotalSpectra if lstMZs is not empty
+        /// Increments class property TotalSpectra if mzValues is not empty
         /// Increments class property CentroidedSpectra if the data is centroided
         /// </remarks>
-        public void CheckSpectrum(List<double> lstMZs, int msLevel, eCentroidStatusConstants centroidingStatus, string spectrumTitle = "")
+        public void CheckSpectrum(List<double> mzValues, int msLevel, CentroidStatusConstants centroidingStatus, string spectrumTitle = "")
         {
-            CheckSpectrum(lstMZs, msLevel, false, centroidingStatus, spectrumTitle);
+            CheckSpectrum(mzValues, msLevel, false, centroidingStatus, spectrumTitle);
         }
 
         /// <summary>
-        /// Step through the MZ values in array dblMZs and compute the ppm-based mass difference between adjacent points
+        /// Step through the MZ values in array mzValues and compute the ppm-based mass difference between adjacent points
         /// </summary>
-        /// <param name="lstMZs"></param>
+        /// <param name="mzValues"></param>
         /// <param name="msLevel"></param>
         /// <param name="assumeSorted"></param>
         /// <param name="centroidingStatus"></param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         /// <remarks>
-        /// Increments class property TotalSpectra if lstMZs is not empty
+        /// Increments class property TotalSpectra if mzValues is not empty
         /// Increments class property CentroidedSpectra if the data is centroided
         /// </remarks>
         public void CheckSpectrum(
-            List<double> lstMZs,
+            List<double> mzValues,
             int msLevel,
             bool assumeSorted,
-            eCentroidStatusConstants centroidingStatus = eCentroidStatusConstants.Unknown,
+            CentroidStatusConstants centroidingStatus = CentroidStatusConstants.Unknown,
             string spectrumTitle = "")
         {
             if (!assumeSorted)
             {
                 // Check whether sorting is required
-                for (var i = 1; i <= lstMZs.Count - 1; i++)
+                for (var i = 1; i <= mzValues.Count - 1; i++)
                 {
-                    if (lstMZs[i] < lstMZs[i - 1])
+                    if (mzValues[i] < mzValues[i - 1])
                     {
-                        lstMZs.Sort();
+                        mzValues.Sort();
                         break;
                     }
                 }
             }
 
-            var lstPpmDiffs = new List<double>(lstMZs.Count);
+            var ppmDiffs = new List<double>(mzValues.Count);
 
-            for (var i = 1; i <= lstMZs.Count - 1; i++)
+            for (var i = 1; i <= mzValues.Count - 1; i++)
             {
-                var mz = lstMZs[i];
-                var previousMz = lstMZs[i - 1];
+                var mz = mzValues[i];
+                var previousMz = mzValues[i - 1];
 
                 if (previousMz > 0 && mz > previousMz)
                 {
                     var delMassPPM = 1000000.0 * (mz - previousMz) / mz;
-                    lstPpmDiffs.Add(delMassPPM);
+                    ppmDiffs.Add(delMassPPM);
                 }
             }
 
-            CheckPPMDiffs(lstMZs, lstPpmDiffs, msLevel, centroidingStatus, spectrumTitle);
-
+            CheckPPMDiffs(mzValues, ppmDiffs, msLevel, centroidingStatus, spectrumTitle);
         }
 
         /// <summary>
-        /// Step through the MZ values in array dblMZs and compute the ppm-based mass difference between adjacent points
+        /// Step through the MZ values in array mzValues and compute the ppm-based mass difference between adjacent points
         /// </summary>
-        /// <param name="dblMZs"></param>
+        /// <param name="mzValues"></param>
         /// <param name="msLevel"></param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
-        public void CheckSpectrum(double[] dblMZs, int msLevel, string spectrumTitle = "")
+        public void CheckSpectrum(double[] mzValues, int msLevel, string spectrumTitle = "")
         {
-            CheckSpectrum(dblMZs.Length, dblMZs, msLevel, eCentroidStatusConstants.Unknown, spectrumTitle);
+            CheckSpectrum(mzValues.Length, mzValues, msLevel, CentroidStatusConstants.Unknown, spectrumTitle);
         }
 
         /// <summary>
-        /// Step through the MZ values in array dblMZs and compute the ppm-based mass difference between adjacent points
+        /// Step through the MZ values in array mzValues and compute the ppm-based mass difference between adjacent points
         /// </summary>
-        /// <param name="ionCount">Number of items in dblMZs; if -1, then parses all data in dblMZs</param>
-        /// <param name="dblMZs"></param>
+        /// <param name="ionCount">Number of items in mzValues; if -1, then parses all data in mzValues</param>
+        /// <param name="mzValues"></param>
         /// <param name="msLevel"></param>
         /// <param name="centroidingStatus"></param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void CheckSpectrum(
             int ionCount,
-            double[] dblMZs,
+            double[] mzValues,
             int msLevel,
-            eCentroidStatusConstants centroidingStatus = eCentroidStatusConstants.Unknown,
+            CentroidStatusConstants centroidingStatus = CentroidStatusConstants.Unknown,
             string spectrumTitle = "")
         {
             if (ionCount < 0)
             {
-                ionCount = dblMZs.Length;
+                ionCount = mzValues.Length;
             }
 
-            // Possibly sort dblMZs
+            // Possibly sort mzValues
             for (var i = 1; i <= ionCount - 1; i++)
             {
-                if (dblMZs[i] < dblMZs[i - 1])
+                if (mzValues[i] < mzValues[i - 1])
                 {
                     // Sort required
-                    Array.Sort(dblMZs);
+                    Array.Sort(mzValues);
                     break;
                 }
             }
 
-            var lstPpmDiffs = new List<double>(ionCount);
+            var ppmDiffs = new List<double>(ionCount);
 
             for (var i = 1; i <= ionCount - 1; i++)
             {
-                var mz = dblMZs[i];
-                var previousMz = dblMZs[i - 1];
+                var mz = mzValues[i];
+                var previousMz = mzValues[i - 1];
 
                 if (previousMz > 0 && mz > previousMz)
                 {
                     var delMassPPM = 1000000.0 * (mz - previousMz) / mz;
-                    lstPpmDiffs.Add(delMassPPM);
+                    ppmDiffs.Add(delMassPPM);
                 }
             }
 
-            CheckPPMDiffs(dblMZs.ToList(), lstPpmDiffs, msLevel, centroidingStatus, spectrumTitle);
+            CheckPPMDiffs(mzValues.ToList(), ppmDiffs, msLevel, centroidingStatus, spectrumTitle);
         }
 
         /// <summary>
-        /// Computes the median of the ppm m/z difference values in lstPpmDiffs
+        /// Computes the median of the ppm m/z difference values in ppmDiffs
         /// </summary>
-        /// <param name="lstPpmDiffs">List of mass difference values between adjacent data points, converted to ppm</param>
+        /// <param name="ppmDiffs">List of mass difference values between adjacent data points, converted to ppm</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         /// <returns>True if the median is at least as large as PpmDiffThreshold</returns>
-        /// <remarks>Returns false if lstPpmDiffs has fewer than 4 data points (thus indicating sparse spectra)</remarks>
-        public bool IsDataCentroided(IList<double> lstPpmDiffs, string spectrumTitle = "")
+        /// <remarks>Returns false if ppmDiffs has fewer than 4 data points (thus indicating sparse spectra)</remarks>
+        public bool IsDataCentroided(IList<double> ppmDiffs, string spectrumTitle = "")
         {
-            if (lstPpmDiffs.Count < 4)
+            if (ppmDiffs.Count < 4)
                 return true;
 
-            var medianDelMassPPM = MathNet.Numerics.Statistics.Statistics.Median(lstPpmDiffs);
+            var medianDelMassPPM = MathNet.Numerics.Statistics.Statistics.Median(ppmDiffs);
             bool centroided;
             string spectrumDescription;
             string comparison;
@@ -539,7 +534,6 @@ namespace SpectraTypeClassifier
             }
             else
             {
-
                 // Centroided data
                 centroided = true;
                 spectrumDescription = "Centroided";
@@ -554,27 +548,26 @@ namespace SpectraTypeClassifier
             NotifyDebug(spectrumTitle, msg);
 
             return centroided;
-
         }
 
         /// <summary>
         /// Divide the data into 5 regions, then call IsDataCentroided for the data in each region
         /// </summary>
-        /// <param name="lstMZs">m/z values to examine</param>
+        /// <param name="mzValues">m/z values to examine</param>
         /// <param name="regionCount">Regions to divide data into</param>
         /// <param name="spectrumTitle">Regions to divide data into</param>
         /// <returns>
         /// True if less than one third of the regions appears to be profile mode
         /// False if two thirds of the regions is profile mode</returns>
-        private bool IsDataCentroidedInRegions(ICollection<double> lstMZs, int regionCount, string spectrumTitle)
+        private bool IsDataCentroidedInRegions(ICollection<double> mzValues, int regionCount, string spectrumTitle)
         {
-            if (lstMZs.Count < 2)
+            if (mzValues.Count < 2)
                 return false;
 
             if (regionCount < 1)
                 regionCount = 1;
 
-            var sortedMZs = lstMZs.Distinct().OrderBy(item => item).ToList();
+            var sortedMZs = mzValues.Distinct().OrderBy(item => item).ToList();
 
             var minimumMz = sortedMZs.First();
             var maximumMz = sortedMZs.Last();
@@ -587,7 +580,7 @@ namespace SpectraTypeClassifier
             if (mzBinSize < 1)
                 mzBinSize = 1;
 
-            var lstPpmDiffs = new List<double>(2000);
+            var ppmDiffs = new List<double>(2000);
             double previousMz = 0;
 
             var startMz = minimumMz;
@@ -596,13 +589,13 @@ namespace SpectraTypeClassifier
             var centroidedRegions = 0;
             var profileModeRegions = 0;
 
-            foreach (var mz in lstMZs)
+            foreach (var mz in mzValues)
             {
                 if (mz >= endMz)
                 {
-                    if (lstPpmDiffs.Count > 0)
+                    if (ppmDiffs.Count > 0)
                     {
-                        if (IsDataCentroided(lstPpmDiffs))
+                        if (IsDataCentroided(ppmDiffs))
                         {
                             centroidedRegions += 1;
                         }
@@ -612,7 +605,7 @@ namespace SpectraTypeClassifier
                         }
                     }
 
-                    lstPpmDiffs.Clear();
+                    ppmDiffs.Clear();
                     startMz += mzBinSize;
                     endMz = startMz + mzBinSize;
                     continue;
@@ -621,14 +614,14 @@ namespace SpectraTypeClassifier
                 if (previousMz > 0 && mz > previousMz)
                 {
                     var delMassPPM = 1000000.0 * (mz - previousMz) / mz;
-                    lstPpmDiffs.Add(delMassPPM);
+                    ppmDiffs.Add(delMassPPM);
                 }
                 previousMz = mz;
             }
 
-            if (lstPpmDiffs.Count > 0)
+            if (ppmDiffs.Count > 0)
             {
-                if (IsDataCentroided(lstPpmDiffs))
+                if (IsDataCentroided(ppmDiffs))
                 {
                     centroidedRegions += 1;
                 }
@@ -653,10 +646,14 @@ namespace SpectraTypeClassifier
             string msg;
 
             if (centroided)
+            {
                 msg = string.Format("  Data originally appeared to be profile mode, but {0} / {1} regions appear centroided",
                     centroidedRegions, regionsWithData);
+            }
             else
+            {
                 msg = string.Format("  {0} / {1} regions have profile mode data", profileModeRegions, regionsWithData);
+            }
 
             NotifyDebug(spectrumTitle, msg);
 
@@ -689,6 +686,5 @@ namespace SpectraTypeClassifier
             mCentroidedSpectra.Clear();
             mCentroidedSpectraClassifiedAsProfile.Clear();
         }
-
     }
 }
