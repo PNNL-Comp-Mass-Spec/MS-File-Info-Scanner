@@ -79,7 +79,7 @@ namespace MSFileInfoScanner.Readers
         //-- End Native IO Headers
         //-------------------------------
 
-        private enum eErrorCodeConstants
+        private enum ErrorCodeConstants
         {
             NoError = 0,
             InvalidDataFolderPath = 1,
@@ -94,13 +94,13 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsMassLynxNativeIO()
+        public MassLynxNativeIO()
         {
             mMSData = new MSData();
             mRawDataUtils = new RawDataUtils();
         }
 
-        private eErrorCodeConstants mErrorCode;
+        private ErrorCodeConstants mErrorCode;
 
         public string GetErrorMessage()
         {
@@ -108,16 +108,16 @@ namespace MSFileInfoScanner.Readers
 
             switch (mErrorCode)
             {
-                case eErrorCodeConstants.NoError:
+                case ErrorCodeConstants.NoError:
                     message = string.Empty;
                     break;
-                case eErrorCodeConstants.InvalidDataFolderPath:
+                case ErrorCodeConstants.InvalidDataFolderPath:
                     message = "Invalid data directory path";
                     break;
-                case eErrorCodeConstants.DataFolderHeaderReadError:
+                case ErrorCodeConstants.DataFolderHeaderReadError:
                     message = "The data directory header read error";
                     break;
-                case eErrorCodeConstants.DataFolderReadError:
+                case ErrorCodeConstants.DataFolderReadError:
                     message = "Data directory read error";
                     break;
                 default:
@@ -632,7 +632,7 @@ namespace MSFileInfoScanner.Readers
                 if (!success)
                 {
                     // Assume invalid data file
-                    SetErrorCode(eErrorCodeConstants.DataFolderReadError);
+                    SetErrorCode(ErrorCodeConstants.DataFolderReadError);
                     thisMSData.InitializeFunctionInfo(0);
                 }
             }
@@ -755,7 +755,7 @@ namespace MSFileInfoScanner.Readers
                 if (!fileValidated)
                 {
                     // Assume invalid data file
-                    SetErrorCode(eErrorCodeConstants.DataFolderReadError);
+                    SetErrorCode(ErrorCodeConstants.DataFolderReadError);
                     thisMSData.InitializeFunctionInfo(0);
                 }
 
@@ -821,16 +821,16 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
-        private void SetErrorCode(eErrorCodeConstants eNewErrorCode)
+        private void SetErrorCode(ErrorCodeConstants newErrorCode)
         {
-            mErrorCode = eNewErrorCode;
+            mErrorCode = newErrorCode;
         }
 
         private bool ValidateDataFolder(string massLynxDataDirectoryPath)
         {
             // Returns True if valid, False if not valid
 
-            mErrorCode = eErrorCodeConstants.NoError;
+            mErrorCode = ErrorCodeConstants.NoError;
             var validDataFolder = false;
 
             if (string.IsNullOrEmpty(massLynxDataDirectoryPath))
@@ -856,14 +856,14 @@ namespace MSFileInfoScanner.Readers
                 }
                 else
                 {
-                    if (mErrorCode == eErrorCodeConstants.NoError)
-                        SetErrorCode(eErrorCodeConstants.DataFolderReadError);
+                    if (mErrorCode == ErrorCodeConstants.NoError)
+                        SetErrorCode(ErrorCodeConstants.DataFolderReadError);
                 }
             }
             else
             {
                 validDataFolder = true;
-                mErrorCode = eErrorCodeConstants.NoError;
+                mErrorCode = ErrorCodeConstants.NoError;
             }
 
             return validDataFolder;
@@ -875,7 +875,7 @@ namespace MSFileInfoScanner.Readers
             // Make sure the dataFilePath contains ".raw"
             if (desiredDataFilePath.ToLower().IndexOf(".raw", StringComparison.Ordinal) < 0)
             {
-                SetErrorCode(eErrorCodeConstants.InvalidDataFolderPath);
+                SetErrorCode(ErrorCodeConstants.InvalidDataFolderPath);
                 dataFilePath = string.Empty;
                 return false;
             }

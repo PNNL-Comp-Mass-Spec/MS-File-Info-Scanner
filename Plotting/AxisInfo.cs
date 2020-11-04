@@ -28,7 +28,7 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsAxisInfo(string title = "Undefined")
+        public AxisInfo(string title = "Undefined")
         {
             AutoScale = true;
             MajorStep = double.NaN;
@@ -40,7 +40,7 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsAxisInfo(double majorStep, double minorGridlineThickness, string title = "Undefined")
+        public AxisInfo(double majorStep, double minorGridlineThickness, string title = "Undefined")
         {
             AutoScale = true;
             MajorStep = majorStep;

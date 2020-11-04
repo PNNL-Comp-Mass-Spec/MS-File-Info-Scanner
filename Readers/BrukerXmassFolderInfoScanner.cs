@@ -44,7 +44,7 @@ namespace MSFileInfoScanner.Readers
         // ReSharper disable once IdentifierTypo
         private const string BRUKER_AUTOMS_FILE = "AutoMS.txt";
 
-        private struct udtMCFScanInfoType
+        private struct MCFScanInfoType
         {
             public double ScanMode;
             public int MSLevel;
@@ -57,7 +57,7 @@ namespace MSFileInfoScanner.Readers
             public string SpotNumber;
         }
 
-        private enum eMcfMetadataFields
+        private enum McfMetadataFields
         {
             ScanMode = 0,
             MSLevel = 1,
@@ -243,41 +243,41 @@ namespace MSFileInfoScanner.Readers
             return null;
         }
 
-        private bool GetMetaDataFieldAndTable(eMcfMetadataFields eMcfMetadataField, out string fieldName, out string tableName)
+        private bool GetMetaDataFieldAndTable(McfMetadataFields mcfMetadataField, out string fieldName, out string tableName)
         {
-            switch (eMcfMetadataField)
+            switch (mcfMetadataField)
             {
-                case eMcfMetadataFields.ScanMode:
+                case McfMetadataFields.ScanMode:
                     fieldName = "pScanMode";
                     tableName = "MetaDataInt";
                     break;
 
-                case eMcfMetadataFields.MSLevel:
+                case McfMetadataFields.MSLevel:
                     fieldName = "pMSLevel";
                     tableName = "MetaDataInt";
                     break;
 
-                case eMcfMetadataFields.RT:
+                case McfMetadataFields.RT:
                     fieldName = "pRT";
                     tableName = "MetaDataDouble";
                     break;
 
-                case eMcfMetadataFields.BPI:
+                case McfMetadataFields.BPI:
                     fieldName = "pIntMax";
                     tableName = "MetaDataDouble";
                     break;
 
-                case eMcfMetadataFields.TIC:
+                case McfMetadataFields.TIC:
                     fieldName = "pTic";
                     tableName = "MetaDataDouble";
                     break;
 
-                case eMcfMetadataFields.AcqTime:
+                case McfMetadataFields.AcqTime:
                     fieldName = "pDateTime";
                     tableName = "MetaDataString";
                     break;
 
-                case eMcfMetadataFields.SpotNumber:
+                case McfMetadataFields.SpotNumber:
                     fieldName = "pSpotNo";
                     tableName = "MetaDataString";
                     break;
@@ -428,8 +428,8 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 // Instantiate the ProteoWizard Data Parser class
-                var pWizParser = new clsProteoWizardDataParser(pWiz, mDatasetStatsSummarizer, mTICAndBPIPlot, mLCMS2DPlot,
-                                                               mSaveLCMS2DPlots, mSaveTICAndBPI, mCheckCentroidingStatus)
+                var pWizParser = new ProteoWizardDataParser(pWiz, mDatasetStatsSummarizer, mTICAndBPIPlot, mLCMS2DPlot,
+                                                            Options.SaveLCMS2DPlots, Options.SaveTICAndBPIPlots, Options.CheckCentroidingStatus)
                 {
                     HighResMS1 = true,
                     HighResMS2 = true
@@ -494,7 +494,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 var metadataNameToID = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-                var scanData = new Dictionary<string, udtMCFScanInfoType>();
+                var scanData = new Dictionary<string, MCFScanInfoType>();
 
                 if (mSaveTICAndBPI)
                 {
@@ -564,23 +564,23 @@ namespace MSFileInfoScanner.Readers
                 {
                     cnDB.Open();
 
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.AcqTime);
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.ScanMode);
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.MSLevel);
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.RT);
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.BPI);
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.TIC);
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, eMcfMetadataFields.SpotNumber);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.AcqTime);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.ScanMode);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.MSLevel);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.RT);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.BPI);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.TIC);
+                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.SpotNumber);
 
                     cnDB.Close();
                 }
 
                 // Parse each entry in scanData
                 // Copy the values to a generic list so that we can sort them
-                var scanDataSorted = new udtMCFScanInfoType[scanData.Count];
+                var scanDataSorted = new MCFScanInfoType[scanData.Count];
                 scanData.Values.CopyTo(scanDataSorted, 0);
 
-                var scanDataComparer = new clsScanDataSortComparer();
+                var scanDataComparer = new ScanDataSortComparer();
                 Array.Sort(scanDataSorted, scanDataComparer);
 
                 var acqTimeStart = DateTime.MaxValue;
@@ -1249,12 +1249,12 @@ namespace MSFileInfoScanner.Readers
         private void ReadAndStoreMcfIndexData(
             SQLiteConnection cnDB,
             IReadOnlyDictionary<string, int> metadataNameToID,
-            IDictionary<string, udtMCFScanInfoType> scanData,
-            eMcfMetadataFields eMcfMetadataField)
+            IDictionary<string, MCFScanInfoType> scanData,
+            McfMetadataFields mcfMetadataField)
         {
             var cmd = new SQLiteCommand(cnDB);
 
-            if (!GetMetaDataFieldAndTable(eMcfMetadataField, out var fieldName, out var tableName))
+            if (!GetMetaDataFieldAndTable(mcfMetadataField, out var fieldName, out var tableName))
             {
                 return;
             }
@@ -1271,25 +1271,25 @@ namespace MSFileInfoScanner.Readers
                         var metaDataValue = ReadDbString(drReader, "Value");
 
                         bool newEntry;
-                        if (scanData.TryGetValue(scanGuid, out var udtScanInfo))
+                        if (scanData.TryGetValue(scanGuid, out var scanInfo))
                         {
                             newEntry = false;
                         }
                         else
                         {
-                            udtScanInfo = new udtMCFScanInfoType();
+                            scanInfo = new MCFScanInfoType();
                             newEntry = true;
                         }
 
-                        UpdateScanInfo(eMcfMetadataField, metaDataValue, ref udtScanInfo);
+                        UpdateScanInfo(mcfMetadataField, metaDataValue, ref scanInfo);
 
                         if (newEntry)
                         {
-                            scanData.Add(scanGuid, udtScanInfo);
+                            scanData.Add(scanGuid, scanInfo);
                         }
                         else
                         {
-                            scanData[scanGuid] = udtScanInfo;
+                            scanData[scanGuid] = scanInfo;
                         }
                     }
                 }
@@ -1338,54 +1338,54 @@ namespace MSFileInfoScanner.Readers
             return 0;
         }
 
-        private void UpdateScanInfo(eMcfMetadataFields eMcfMetadataField, string dataValue, ref udtMCFScanInfoType udtScanInfo)
+        private void UpdateScanInfo(McfMetadataFields mcfMetadataField, string dataValue, ref MCFScanInfoType scanInfo)
         {
-            switch (eMcfMetadataField)
+            switch (mcfMetadataField)
             {
-                case eMcfMetadataFields.ScanMode:
+                case McfMetadataFields.ScanMode:
                     if (int.TryParse(dataValue, out var scanMode))
                     {
-                        udtScanInfo.ScanMode = scanMode;
+                        scanInfo.ScanMode = scanMode;
                     }
                     break;
 
-                case eMcfMetadataFields.MSLevel:
+                case McfMetadataFields.MSLevel:
                     if (int.TryParse(dataValue, out var msLevel))
                     {
-                        udtScanInfo.MSLevel = msLevel;
+                        scanInfo.MSLevel = msLevel;
                     }
                     break;
 
-                case eMcfMetadataFields.RT:
+                case McfMetadataFields.RT:
                     if (double.TryParse(dataValue, out var retentionTime))
                     {
-                        udtScanInfo.RT = retentionTime;
+                        scanInfo.RT = retentionTime;
                     }
                     break;
 
-                case eMcfMetadataFields.BPI:
+                case McfMetadataFields.BPI:
                     if (double.TryParse(dataValue, out var bpi))
                     {
-                        udtScanInfo.BPI = bpi;
+                        scanInfo.BPI = bpi;
                     }
                     break;
 
-                case eMcfMetadataFields.TIC:
+                case McfMetadataFields.TIC:
                     if (double.TryParse(dataValue, out var tic))
                     {
-                        udtScanInfo.TIC = tic;
+                        scanInfo.TIC = tic;
                     }
                     break;
 
-                case eMcfMetadataFields.AcqTime:
+                case McfMetadataFields.AcqTime:
                     if (DateTime.TryParse(dataValue, out var acqTime))
                     {
-                        udtScanInfo.AcqTime = acqTime;
+                        scanInfo.AcqTime = acqTime;
                     }
                     break;
 
-                case eMcfMetadataFields.SpotNumber:
-                    udtScanInfo.SpotNumber = dataValue;
+                case McfMetadataFields.SpotNumber:
+                    scanInfo.SpotNumber = dataValue;
                     break;
 
                 default:
@@ -1394,9 +1394,9 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
-        private class ScanDataSortComparer : IComparer<udtMCFScanInfoType>
+        private class ScanDataSortComparer : IComparer<MCFScanInfoType>
         {
-            public int Compare(udtMCFScanInfoType x, udtMCFScanInfoType y)
+            public int Compare(MCFScanInfoType x, MCFScanInfoType y)
             {
                 if (x.RT < y.RT)
                 {

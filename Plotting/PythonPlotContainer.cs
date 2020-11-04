@@ -9,7 +9,7 @@ namespace MSFileInfoScanner.Plotting
     /// <summary>
     /// Python data container base class
     /// </summary>
-    internal abstract class PythonPlotContainer : clsPlotContainerBase
+    internal abstract class PythonPlotContainer : PlotContainerBase
     {
         // Ignore Spelling: Tmp, usr
 
@@ -29,9 +29,9 @@ namespace MSFileInfoScanner.Plotting
 
         public override int SeriesCount => mSeriesCount;
 
-        public clsAxisInfo XAxisInfo { get; }
+        public AxisInfo XAxisInfo { get; }
 
-        public clsAxisInfo YAxisInfo { get; }
+        public AxisInfo YAxisInfo { get; }
 
         /// <summary>
         /// True if the Python .exe could be found, otherwise false
@@ -46,7 +46,7 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="yAxisTitle"></param>
         /// <param name="writeDebug"></param>
         /// <param name="dataSource"></param>
-        protected clsPythonPlotContainer(
+        protected PythonPlotContainer(
             string plotTitle = "Undefined", string xAxisTitle = "X", string yAxisTitle = "Y",
             bool writeDebug = false, string dataSource = "") : base(writeDebug, dataSource)
         {
@@ -58,8 +58,8 @@ namespace MSFileInfoScanner.Plotting
             if (PythonPath == null)
                 PythonPath = string.Empty;
 
-            XAxisInfo = new clsAxisInfo(xAxisTitle);
-            YAxisInfo = new clsAxisInfo(yAxisTitle);
+            XAxisInfo = new AxisInfo(xAxisTitle);
+            YAxisInfo = new AxisInfo(yAxisTitle);
         }
 
         /// <summary>

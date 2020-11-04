@@ -102,16 +102,16 @@ namespace MSFileInfoScannerUnitTests
         public void TestMedian()
         {
 #pragma warning disable 618
-            var medianUtilities = new clsMedianUtilities();
+            var medianUtilities = new MedianUtilities();
 
             var testValues = new List<double> { 5, 9, 20, 6, 8, 9.2, 9.5, 12, 15, 18, 20, 15 };
 
             var median = MathNet.Numerics.Statistics.Statistics.Median(testValues);
 
-            medianUtilities.EvenNumberedListCountBehavior = clsMedianUtilities.eEventListCountBehaviorType.ReportMidpointAverage;
+            medianUtilities.EvenNumberedListCountBehavior = MedianUtilities.EventListCountBehaviorType.ReportMidpointAverage;
             var medianMidpointAverage = medianUtilities.Median_Old(testValues);
 
-            medianUtilities.EvenNumberedListCountBehavior = clsMedianUtilities.eEventListCountBehaviorType.ReportNearest;
+            medianUtilities.EvenNumberedListCountBehavior = MedianUtilities.EventListCountBehaviorType.ReportNearest;
             var medianReportNearest = medianUtilities.Median_Old(testValues);
 
             testValues.Sort();

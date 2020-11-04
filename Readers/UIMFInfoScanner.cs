@@ -62,11 +62,11 @@ namespace MSFileInfoScanner.Readers
                 for (var masterFrameNumIndex = 0; masterFrameNumIndex <= masterFrameNumList.Count - 1; masterFrameNumIndex++)
                 {
                     var frameNumber = masterFrameNumList[masterFrameNumIndex];
-                    if (!masterFrameList.TryGetValue(frameNumber, out var eFrameType))
+                    if (!masterFrameList.TryGetValue(frameNumber, out var frameType))
                     {
                         OnWarningEvent(string.Format(
                                            "FrameType {0} not found in dictionary masterFrameList; ignoring frame {1} in ComputeQualityScores",
-                                           eFrameType, frameNumber));
+                                           frameType, frameNumber));
 
                         continue;
                     }
@@ -100,7 +100,7 @@ namespace MSFileInfoScanner.Readers
 
                     // Process all of the IMS scans in this Frame to compute a summed spectrum representative of the frame
                     // Scans likely range from 0 to frameParams.Scans-1, but we'll use frameParams.Scans just to be safe
-                    var ionCount = uimfReader.GetSpectrum(frameNumber, frameNumber, eFrameType, 0, frameParams.Scans, out mzList, out intensityList);
+                    var ionCount = uimfReader.GetSpectrum(frameNumber, frameNumber, frameType, 0, frameParams.Scans, out mzList, out intensityList);
 
                     if (ionCount <= 0)
                     {
@@ -210,7 +210,7 @@ namespace MSFileInfoScanner.Readers
             // The StartTime value for each frame is the number of minutes since 12:00 am
             // If acquiring data from 11:59 pm through 12:00 am, the StartTime will reset to zero
 
-            clsTICandBPIPlotter pressurePlot;
+            TICandBPIPlotter pressurePlot;
 
             if (mSaveTICAndBPI)
             {
@@ -240,7 +240,7 @@ namespace MSFileInfoScanner.Readers
             }
             else
             {
-                pressurePlot = new clsTICandBPIPlotter();
+                pressurePlot = new TICandBPIPlotter();
             }
 
             if (mSaveLCMS2DPlots)
@@ -280,11 +280,11 @@ namespace MSFileInfoScanner.Readers
             {
                 var frameNumber = masterFrameNumList[masterFrameNumIndex];
 
-                if (!masterFrameList.TryGetValue(frameNumber, out var eFrameType))
+                if (!masterFrameList.TryGetValue(frameNumber, out var frameType))
                 {
                     OnWarningEvent(string.Format(
                         "FrameType {0} not found in dictionary masterFrameList; ignoring frame {1} in LoadFrameDetails",
-                        eFrameType, frameNumber));
+                        frameType, frameNumber));
 
                     continue;
                 }
@@ -309,7 +309,7 @@ namespace MSFileInfoScanner.Readers
                         frameParams = null;
                     }
 
-                    if (frameParams == null || eFrameType == UIMFData.FrameType.Calibration)
+                    if (frameParams == null || frameType == UIMFData.FrameType.Calibration)
                     {
                         continue;
                     }
@@ -445,7 +445,7 @@ namespace MSFileInfoScanner.Readers
                             // In UIMF files from IMS08, prior to December 1, 2014, if Frame_Parameters.Scans = 374, Frame_Scans will have scans 0 through 373
                             // in UIMF files from IMS08, after December 1, 2014     if Frame_Parameters.Scans = 374, Frame_Scans will have scans 1 through 374
 
-                            var ionCount = uimfReader.GetSpectrum(frameNumber, frameNumber, eFrameType, 0, frameParams.Scans, out mzList, out intensityList);
+                            var ionCount = uimfReader.GetSpectrum(frameNumber, frameNumber, frameType, 0, frameParams.Scans, out mzList, out intensityList);
 
                             if (ionCount > 0)
                             {

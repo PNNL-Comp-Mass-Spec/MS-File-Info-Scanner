@@ -132,7 +132,7 @@ namespace MSFileInfoScanner.Readers
                 fileCount++;
             }
 
-            var nativeFileIO = new clsMassLynxNativeIO();
+            var nativeFileIO = new MassLynxNativeIO();
 
             if (nativeFileIO.GetFileInfo(datasetDirectory.FullName, out var headerInfo))
             {
@@ -158,7 +158,7 @@ namespace MSFileInfoScanner.Readers
         private void ReadMassLynxAcquisitionInfo(
             FileSystemInfo datasetDirectory,
             DatasetFileInfo datasetFileInfo,
-            clsMassLynxNativeIO nativeFileIO,
+            MassLynxNativeIO nativeFileIO,
             MSHeaderInfo headerInfo)
         {
             var newStartDate = DateTime.Parse(headerInfo.AcquDate + " " + headerInfo.AcquTime);

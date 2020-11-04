@@ -18,20 +18,20 @@ namespace MSFileInfoScanner.Plotting
             {
                 Title = string.Copy(title),
                 TitleFont = "Arial",
-                TitleFontSize = clsPlotContainer.DEFAULT_BASE_FONT_SIZE + 4,
+                TitleFontSize = PlotContainer.DEFAULT_BASE_FONT_SIZE + 4,
                 TitleFontWeight = FontWeights.Normal
             };
 
             myPlot.Padding = new OxyThickness(myPlot.Padding.Left, myPlot.Padding.Top, 30, myPlot.Padding.Bottom);
 
-            myPlot.Axes.Add(MakeLinearAxis(AxisPosition.Bottom, xAxisLabel, clsPlotContainer.DEFAULT_BASE_FONT_SIZE));
+            myPlot.Axes.Add(MakeLinearAxis(AxisPosition.Bottom, xAxisLabel, PlotContainer.DEFAULT_BASE_FONT_SIZE));
             myPlot.Axes[0].Minimum = 0;
 
-            myPlot.Axes.Add(MakeLinearAxis(AxisPosition.Left, yAxisLabel, clsPlotContainer.DEFAULT_BASE_FONT_SIZE));
+            myPlot.Axes.Add(MakeLinearAxis(AxisPosition.Left, yAxisLabel, PlotContainer.DEFAULT_BASE_FONT_SIZE));
 
             // Adjust the font sizes
-            myPlot.Axes[0].FontSize = clsPlotContainer.DEFAULT_BASE_FONT_SIZE;
-            myPlot.Axes[1].FontSize = clsPlotContainer.DEFAULT_BASE_FONT_SIZE;
+            myPlot.Axes[0].FontSize = PlotContainer.DEFAULT_BASE_FONT_SIZE;
+            myPlot.Axes[1].FontSize = PlotContainer.DEFAULT_BASE_FONT_SIZE;
 
             // Set the background color
             myPlot.PlotAreaBackground = OxyColor.FromRgb(243, 243, 243);
@@ -59,7 +59,7 @@ namespace MSFileInfoScanner.Plotting
                 MajorTickSize = 8,
                 MajorGridlineStyle = LineStyle.None,
                 MinorGridlineStyle = LineStyle.None,
-                StringFormat = clsAxisInfo.DEFAULT_AXIS_LABEL_FORMAT,
+                StringFormat = AxisInfo.DEFAULT_AXIS_LABEL_FORMAT,
                 Font = "Arial"
             };
 
@@ -73,7 +73,6 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="currentAxis"></param>
         /// <param name="dataPoints"></param>
         /// <param name="integerData"></param>
-        /// <remarks></remarks>
 #pragma warning disable CS3001 // Argument type is not CLS-compliant
         public static void UpdateAxisFormatCodeIfSmallValues(Axis currentAxis, List<double> dataPoints, bool integerData)
 #pragma warning restore CS3001
@@ -81,7 +80,7 @@ namespace MSFileInfoScanner.Plotting
             if (!dataPoints.Any())
                 return;
 
-            var axisInfo = new clsAxisInfo(currentAxis.MajorStep, currentAxis.MinorGridlineThickness, currentAxis.Title);
+            var axisInfo = new AxisInfo(currentAxis.MajorStep, currentAxis.MinorGridlineThickness, currentAxis.Title);
             PlotUtilities.GetAxisFormatInfo(dataPoints, integerData, axisInfo);
 
             currentAxis.StringFormat = axisInfo.StringFormat;

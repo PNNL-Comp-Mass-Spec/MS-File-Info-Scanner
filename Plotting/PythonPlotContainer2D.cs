@@ -8,7 +8,7 @@ namespace MSFileInfoScanner.Plotting
     /// <summary>
     /// Python data container for 2D data
     /// </summary>
-    internal class PythonPlotContainer2D : clsPythonPlotContainer
+    internal class PythonPlotContainer2D : PythonPlotContainer
     {
         // Ignore Spelling: Autoscale, Gridline, png
 
@@ -22,7 +22,7 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="yAxisTitle"></param>
         /// <param name="writeDebug"></param>
         /// <param name="dataSource"></param>
-        public clsPythonPlotContainer2D(
+        public PythonPlotContainer2D(
             string plotTitle = "Undefined", string xAxisTitle = "X", string yAxisTitle = "Y",
             bool writeDebug = false, string dataSource = "") : base(plotTitle, xAxisTitle, yAxisTitle, writeDebug, dataSource)
         {

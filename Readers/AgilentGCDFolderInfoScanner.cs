@@ -35,7 +35,7 @@ namespace MSFileInfoScanner.Readers
 
             public bool Matched { get; set; }
 
-            public clsLineMatchSearchInfo(bool bMatchLineStart)
+            public LineMatchSearchInfo(bool bMatchLineStart)
             {
                 MatchLineStart = bMatchLineStart;
                 Matched = false;
@@ -98,11 +98,11 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 // Populate a dictionary var with the text strings for finding lines with runtime information
-                // Note that "Post Run" occurs twice in the file, so we use clsLineMatchSearchInfo.Matched to track whether or not the text has been matched
-                var dctRunTimeText = new Dictionary<string, clsLineMatchSearchInfo>
+                // Note that "Post Run" occurs twice in the file, so we use LineMatchSearchInfo.Matched to track whether or not the text has been matched
+                var dctRunTimeText = new Dictionary<string, LineMatchSearchInfo>
                 {
-                    {ACQ_METHOD_FILE_EQUILIBRATION_TIME_LINE, new clsLineMatchSearchInfo(true)},
-                    {ACQ_METHOD_FILE_RUN_TIME_LINE, new clsLineMatchSearchInfo(true)}
+                    {ACQ_METHOD_FILE_EQUILIBRATION_TIME_LINE, new LineMatchSearchInfo(true)},
+                    {ACQ_METHOD_FILE_RUN_TIME_LINE, new LineMatchSearchInfo(true)}
                 };
 
                 // We could also add in the "Post Run" time for determining total acquisition time, but we don't do this, to stay consistent with run times reported by the MS file

@@ -9,7 +9,7 @@ namespace MSFileInfoScanner.Plotting
         public static void GetAxisFormatInfo(
             IList<double> dataPoints,
             bool integerData,
-            clsAxisInfo axisInfo)
+            AxisInfo axisInfo)
         {
             var absValueMin = dataPoints.Count == 0 ? 0 : Math.Abs(dataPoints[0]);
             var absValueMax = absValueMin;
@@ -27,7 +27,7 @@ namespace MSFileInfoScanner.Plotting
             double absValueMin,
             double absValueMax,
             bool integerData,
-            clsAxisInfo axisInfo)
+            AxisInfo axisInfo)
         {
             if (Math.Abs(absValueMin) < float.Epsilon && Math.Abs(absValueMax) < float.Epsilon)
             {
@@ -41,7 +41,7 @@ namespace MSFileInfoScanner.Plotting
             {
                 if (absValueMax >= 1000000)
                 {
-                    axisInfo.StringFormat = clsAxisInfo.EXPONENTIAL_FORMAT;
+                    axisInfo.StringFormat = AxisInfo.EXPONENTIAL_FORMAT;
                 }
                 return;
             }
@@ -50,7 +50,7 @@ namespace MSFileInfoScanner.Plotting
 
             if (absValueMax < 0.02)
             {
-                axisInfo.StringFormat = clsAxisInfo.EXPONENTIAL_FORMAT;
+                axisInfo.StringFormat = AxisInfo.EXPONENTIAL_FORMAT;
             }
             else if (absValueMax < 0.2)
             {
@@ -64,7 +64,7 @@ namespace MSFileInfoScanner.Plotting
             }
             else if (absValueMax >= 1000000)
             {
-                axisInfo.StringFormat = clsAxisInfo.EXPONENTIAL_FORMAT;
+                axisInfo.StringFormat = AxisInfo.EXPONENTIAL_FORMAT;
             }
 
             if (absValueMax - absValueMin < 1E-05)

@@ -369,7 +369,7 @@ namespace MSFileInfoScanner
             {
                 // File open failed
                 OnErrorEvent("Call to .OpenRawFile failed for: " + rawFile.FullName);
-                ErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.ThermoRawFileReaderError;
+                ErrorCode = MSFileInfoScanner.MSFileScannerErrorCodes.ThermoRawFileReaderError;
                 readError = true;
 
                 if (!string.Equals(MSFileInfoScanner.GetAppDirectoryPath().Substring(0, 2), rawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
@@ -397,7 +397,7 @@ namespace MSFileInfoScanner
                                 {
                                     // File open failed
                                     OnErrorEvent("Call to .OpenRawFile failed for: " + rawFile.FullName);
-                                    ErrorCode = iMSFileInfoScanner.eMSFileScannerErrorCodes.ThermoRawFileReaderError;
+                                    ErrorCode = MSFileInfoScanner.MSFileScannerErrorCodes.ThermoRawFileReaderError;
                                     readError = true;
                                 }
                                 else

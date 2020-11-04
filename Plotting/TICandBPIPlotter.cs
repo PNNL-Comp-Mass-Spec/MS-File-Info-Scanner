@@ -15,16 +15,23 @@ namespace MSFileInfoScanner.Plotting
         // Ignore Spelling: OxyPlot
 
         #region "Constants, Enums, Structures"
-        public enum eOutputFileTypes
+
+        // ReSharper disable InconsistentNaming
+        // ReSharper disable IdentifierTypo
+
+        public enum OutputFileTypes
         {
             TIC = 0,
             BPIMS = 1,
             BPIMSn = 2
         }
 
-        private struct udtOutputFileInfoType
+        // ReSharper restore IdentifierTypo
+        // ReSharper restore InconsistentNaming
+
+        private struct OutputFileInfoType
         {
-            public eOutputFileTypes FileType;
+            public OutputFileTypes FileType;
             public string FileName;
             public string FilePath;
         }
@@ -36,14 +43,14 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Data stored in mTIC will get plotted for all scans, both MS and MS/MS
         /// </summary>
-        private clsChromatogramInfo mTIC;
+        private ChromatogramInfo mTIC;
 
         /// <summary>
         /// Data stored in mBPI will be plotted separately for MS and MS/MS spectra
         /// </summary>
-        private clsChromatogramInfo mBPI;
+        private ChromatogramInfo mBPI;
 
-        private readonly List<udtOutputFileInfoType> mRecentFiles;
+        private readonly List<OutputFileInfoType> mRecentFiles;
 
         private readonly string mDataSource;
         private readonly bool mWriteDebug;
@@ -111,9 +118,9 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="dataSource"></param>
         /// <param name="writeDebug"></param>
         // ReSharper disable once IdentifierTypo
-        public clsTICandBPIPlotter(string dataSource = "", bool writeDebug = false)
+        public TICandBPIPlotter(string dataSource = "", bool writeDebug = false)
         {
-            mRecentFiles = new List<udtOutputFileInfoType>();
+            mRecentFiles = new List<OutputFileInfoType>();
 
             mDataSource = dataSource;
             mWriteDebug = writeDebug;
@@ -139,15 +146,15 @@ namespace MSFileInfoScanner.Plotting
             mTIC.AddPoint(scanNumber, msLevel, scanTimeMinutes, tic);
         }
 
-        private void AddRecentFile(string filePath, eOutputFileTypes eFileType)
+        private void AddRecentFile(string filePath, OutputFileTypes fileType)
         {
-            var udtOutputFileInfo = default(udtOutputFileInfoType);
+            var outputFileInfo = default(OutputFileInfoType);
 
-            udtOutputFileInfo.FileType = eFileType;
-            udtOutputFileInfo.FileName = Path.GetFileName(filePath);
-            udtOutputFileInfo.FilePath = filePath;
+            outputFileInfo.FileType = fileType;
+            outputFileInfo.FileName = Path.GetFileName(filePath);
+            outputFileInfo.FilePath = filePath;
 
-            mRecentFiles.Add(udtOutputFileInfo);
+            mRecentFiles.Add(outputFileInfo);
         }
 
         private void AddOxyPlotSeries(PlotModel myPlot, IReadOnlyCollection<DataPoint> points)
@@ -160,15 +167,11 @@ namespace MSFileInfoScanner.Plotting
                 return;
             }
 
-            var eSymbolType = MarkerType.None;
-            if (points.Count == 1)
-            {
-                eSymbolType = MarkerType.Circle;
-            }
+            var symbolType = points.Count == 1 ? MarkerType.Circle : MarkerType.None;
 
             series.Color = OxyColors.Black;
             series.StrokeThickness = 1;
-            series.MarkerType = eSymbolType;
+            series.MarkerType = symbolType;
 
             if (points.Count == 1)
             {
@@ -184,14 +187,14 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Returns the file name of the recently saved file of the given type
         /// </summary>
-        /// <param name="eFileType">File type to find</param>
+        /// <param name="fileType">File type to find</param>
         /// <returns>File name if found; empty string if this file type was not saved</returns>
         /// <remarks>The list of recent files gets cleared each time you call SaveTICAndBPIPlotFiles() or Reset()</remarks>
-        public string GetRecentFileInfo(eOutputFileTypes eFileType)
+        public string GetRecentFileInfo(OutputFileTypes fileType)
         {
             for (var index = 0; index <= mRecentFiles.Count - 1; index++)
             {
-                if (mRecentFiles[index].FileType == eFileType)
+                if (mRecentFiles[index].FileType == fileType)
                 {
                     return mRecentFiles[index].FileName;
                 }
@@ -202,16 +205,16 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Returns the file name and path of the recently saved file of the given type
         /// </summary>
-        /// <param name="eFileType">File type to find</param>
+        /// <param name="fileType">File type to find</param>
         /// <param name="fileName">File name (output)</param>
         /// <param name="filePath">File Path (output)</param>
         /// <returns>True if a match was found; otherwise returns false</returns>
         /// <remarks>The list of recent files gets cleared each time you call SaveTICAndBPIPlotFiles() or Reset()</remarks>
-        public bool GetRecentFileInfo(eOutputFileTypes eFileType, out string fileName, out string filePath)
+        public bool GetRecentFileInfo(OutputFileTypes fileType, out string fileName, out string filePath)
         {
             for (var index = 0; index <= mRecentFiles.Count - 1; index++)
             {
-                if (mRecentFiles[index].FileType == eFileType)
+                if (mRecentFiles[index].FileType == fileType)
                 {
                     fileName = mRecentFiles[index].FileName;
                     filePath = mRecentFiles[index].FilePath;
@@ -225,8 +228,8 @@ namespace MSFileInfoScanner.Plotting
             return false;
         }
 
-        private clsPlotContainerBase InitializePlot(
-            clsChromatogramInfo chromatogramData,
+        private PlotContainerBase InitializePlot(
+            ChromatogramInfo chromatogramData,
             string plotTitle,
             int msLevelFilter,
             string xAxisLabel,
@@ -238,10 +241,8 @@ namespace MSFileInfoScanner.Plotting
             {
                 return InitializePythonPlot(chromatogramData, plotTitle, msLevelFilter, xAxisLabel, yAxisLabel, autoMinMaxY, yAxisExponentialNotation);
             }
-            else
-            {
-                return InitializeOxyPlot(chromatogramData, plotTitle, msLevelFilter, xAxisLabel, yAxisLabel, autoMinMaxY, yAxisExponentialNotation);
-            }
+
+            return InitializeOxyPlot(chromatogramData, plotTitle, msLevelFilter, xAxisLabel, yAxisLabel, autoMinMaxY, yAxisExponentialNotation);
         }
 
         /// <summary>
@@ -255,8 +256,8 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="autoMinMaxY"></param>
         /// <param name="yAxisExponentialNotation"></param>
         /// <returns>OxyPlot PlotContainer</returns>
-        private clsPlotContainer InitializeOxyPlot(
-            clsChromatogramInfo chromatogramData,
+        private PlotContainer InitializeOxyPlot(
+            ChromatogramInfo chromatogramData,
             string plotTitle,
             int msLevelFilter,
             string xAxisLabel,
@@ -306,7 +307,7 @@ namespace MSFileInfoScanner.Plotting
             if (points.Count == 0)
             {
                 // Nothing to plot
-                var emptyContainer = new clsPlotContainer(new PlotModel(), mWriteDebug, mDataSource);
+                var emptyContainer = new PlotContainer(new PlotModel(), mWriteDebug, mDataSource);
                 emptyContainer.WriteDebugLog("points.Count == 0 in InitializeOxyPlot for plot " + plotTitle);
                 return emptyContainer;
             }
@@ -321,7 +322,7 @@ namespace MSFileInfoScanner.Plotting
 
             if (yAxisExponentialNotation)
             {
-                myPlot.Axes[1].StringFormat = clsAxisInfo.EXPONENTIAL_FORMAT;
+                myPlot.Axes[1].StringFormat = AxisInfo.EXPONENTIAL_FORMAT;
             }
 
             AddOxyPlotSeries(myPlot, points);
@@ -333,9 +334,9 @@ namespace MSFileInfoScanner.Plotting
             var yVals = (from item in points select item.Y).ToList();
             OxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
 
-            var plotContainer = new clsPlotContainer(myPlot, mWriteDebug, mDataSource)
+            var plotContainer = new PlotContainer(myPlot, mWriteDebug, mDataSource)
             {
-                FontSizeBase = clsPlotContainer.DEFAULT_BASE_FONT_SIZE
+                FontSizeBase = PlotContainer.DEFAULT_BASE_FONT_SIZE
             };
 
             plotContainer.WriteDebugLog(string.Format("Instantiated plotContainer for plot {0}: {1} data points", plotTitle, points.Count));
@@ -368,7 +369,7 @@ namespace MSFileInfoScanner.Plotting
                 //     Text = caption,
                 //     Stroke = OxyColors.Black,
                 //     StrokeThickness = 2,
-                //     FontSize = clsPlotContainer.DEFAULT_BASE_FONT_SIZE
+                //     FontSize = PlotContainer.DEFAULT_BASE_FONT_SIZE
                 // };
                 //
                 // scanTimeMaxText.TextPosition = new DataPoint(maxScan, 0);
@@ -427,8 +428,8 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="autoMinMaxY"></param>
         /// <param name="yAxisExponentialNotation"></param>
         /// <returns>Python PlotContainer</returns>
-        private clsPythonPlotContainer InitializePythonPlot(
-            clsChromatogramInfo chromatogramData,
+        private PythonPlotContainer InitializePythonPlot(
+            ChromatogramInfo chromatogramData,
             string plotTitle,
             int msLevelFilter,
             string xAxisLabel,
@@ -466,18 +467,18 @@ namespace MSFileInfoScanner.Plotting
             if (points.Count == 0)
             {
                 // Nothing to plot
-                var emptyContainer = new clsPythonPlotContainer2D();
+                var emptyContainer = new PythonPlotContainer2D();
                 return emptyContainer;
             }
 
-            var plotContainer = new clsPythonPlotContainer2D(plotTitle, xAxisLabel, yAxisLabel)
+            var plotContainer = new PythonPlotContainer2D(plotTitle, xAxisLabel, yAxisLabel)
             {
                 DeleteTempFiles = DeleteTempFiles
             };
 
             if (yAxisExponentialNotation)
             {
-                plotContainer.YAxisInfo.StringFormat = clsAxisInfo.EXPONENTIAL_FORMAT;
+                plotContainer.YAxisInfo.StringFormat = AxisInfo.EXPONENTIAL_FORMAT;
             }
 
             plotContainer.SetData(points);
@@ -525,7 +526,7 @@ namespace MSFileInfoScanner.Plotting
             return plotContainer;
         }
 
-        private void RemoveZeroesAtFrontAndBack(clsChromatogramInfo chromatogramInfo)
+        private void RemoveZeroesAtFrontAndBack(ChromatogramInfo chromatogramInfo)
         {
             const int MAX_POINTS_TO_CHECK = 100;
             var pointsChecked = 0;
@@ -588,8 +589,8 @@ namespace MSFileInfoScanner.Plotting
         {
             if (mBPI == null)
             {
-                mBPI = new clsChromatogramInfo();
-                mTIC = new clsChromatogramInfo();
+                mBPI = new ChromatogramInfo();
+                mTIC = new ChromatogramInfo();
             }
             else
             {
@@ -635,7 +636,7 @@ namespace MSFileInfoScanner.Plotting
                 {
                     var pngFile = new FileInfo(Path.Combine(outputDirectory, datasetName + "_" + BPIPlotAbbrev + "_MS.png"));
                     successMS1 = bpiPlotMS1.SaveToPNG(pngFile, 1024, 600, 96);
-                    AddRecentFile(pngFile.FullName, eOutputFileTypes.BPIMS);
+                    AddRecentFile(pngFile.FullName, OutputFileTypes.BPIMS);
                 }
 
                 var bpiPlotMS2 = InitializePlot(mBPI, datasetName + " - " + BPIPlotAbbrev + " - MS2 Spectra", 2, BPIXAxisLabel, BPIYAxisLabel, BPIAutoMinMaxY, BPIYAxisExponentialNotation);
@@ -645,7 +646,7 @@ namespace MSFileInfoScanner.Plotting
                 {
                     var pngFile = new FileInfo(Path.Combine(outputDirectory, datasetName + "_" + BPIPlotAbbrev + "_MSn.png"));
                     successMS2 = bpiPlotMS2.SaveToPNG(pngFile, 1024, 600, 96);
-                    AddRecentFile(pngFile.FullName, eOutputFileTypes.BPIMSn);
+                    AddRecentFile(pngFile.FullName, OutputFileTypes.BPIMSn);
                 }
 
                 var ticPlot = InitializePlot(mTIC, datasetName + " - " + TICPlotAbbrev + " - All Spectra", 0, TICXAxisLabel, TICYAxisLabel, TICAutoMinMaxY, TICYAxisExponentialNotation);
@@ -655,7 +656,7 @@ namespace MSFileInfoScanner.Plotting
                 {
                     var pngFile = new FileInfo(Path.Combine(outputDirectory, datasetName + "_" + TICPlotAbbrev + ".png"));
                     successTIC = ticPlot.SaveToPNG(pngFile, 1024, 600, 96);
-                    AddRecentFile(pngFile.FullName, eOutputFileTypes.TIC);
+                    AddRecentFile(pngFile.FullName, OutputFileTypes.TIC);
                 }
 
                 return successMS1 && successMS2 && successTIC;
@@ -667,7 +668,7 @@ namespace MSFileInfoScanner.Plotting
             }
         }
 
-        private void ValidateMSLevel(clsChromatogramInfo chromatogramInfo)
+        private void ValidateMSLevel(ChromatogramInfo chromatogramInfo)
         {
             var msLevelDefined = false;
 
@@ -702,18 +703,18 @@ namespace MSFileInfoScanner.Plotting
         {
             public int ScanCount => mScans.Count;
 
-            public IEnumerable<clsChromatogramDataPoint> Scans => mScans;
+            public IEnumerable<ChromatogramDataPoint> Scans => mScans;
 
-            private readonly List<clsChromatogramDataPoint> mScans;
+            private readonly List<ChromatogramDataPoint> mScans;
 
             private readonly SortedSet<int> mScanNumbers;
 
             /// <summary>
             /// Constructor
             /// </summary>
-            public clsChromatogramInfo()
+            public ChromatogramInfo()
             {
-                mScans = new List<clsChromatogramDataPoint>();
+                mScans = new List<ChromatogramDataPoint>();
                 mScanNumbers = new SortedSet<int>();
             }
 
@@ -724,7 +725,7 @@ namespace MSFileInfoScanner.Plotting
                     throw new Exception("Scan " + scanNumber + " has already been added to the TIC or BPI; programming error");
                 }
 
-                var dataPoint = new clsChromatogramDataPoint
+                var dataPoint = new ChromatogramDataPoint
                 {
                     ScanNum = scanNumber,
                     TimeMinutes = scanTimeMinutes,
@@ -736,7 +737,7 @@ namespace MSFileInfoScanner.Plotting
                 mScanNumbers.Add(scanNumber);
             }
 
-            public clsChromatogramDataPoint GetDataPoint(int index)
+            public ChromatogramDataPoint GetDataPoint(int index)
             {
                 if (mScans.Count == 0)
                 {

@@ -514,17 +514,17 @@ namespace MSFileInfoScanner
                     return;
                 }
 
-                mFileIntegrityChecker.CheckIntegrityOfFilesInDirectory(directoryPath, out var udtDirectoryStats, out var udtFileStats, processedFileList);
+                mFileIntegrityChecker.CheckIntegrityOfFilesInDirectory(directoryPath, out var directoryStats, out var fileStats, processedFileList);
 
                 if (UseCacheFiles)
                 {
-                    if (!mMSFileInfoDataCache.UpdateCachedDirectoryIntegrityInfo(udtDirectoryStats, out directoryID))
+                    if (!mMSFileInfoDataCache.UpdateCachedDirectoryIntegrityInfo(directoryStats, out directoryID))
                     {
                         directoryID = -1;
                     }
                 }
 
-                WriteFileIntegrityDetails(mFileIntegrityDetailsWriter, directoryID, udtFileStats);
+                WriteFileIntegrityDetails(mFileIntegrityDetailsWriter, directoryID, fileStats);
             }
             catch (Exception ex)
             {
@@ -2683,12 +2683,12 @@ namespace MSFileInfoScanner
         private void WriteFileIntegrityDetails(
             TextWriter writer,
             int directoryID,
-            IEnumerable<clsFileIntegrityChecker.udtFileStatsType> udtFileStats)
+            IEnumerable<FileIntegrityChecker.FileStatsType> fileStats)
         {
             if (writer == null)
                 return;
 
-            foreach (var item in udtFileStats)
+            foreach (var item in fileStats)
             {
                 // Note: HH:mm:ss corresponds to time in 24 hour format
                 writer.WriteLine(

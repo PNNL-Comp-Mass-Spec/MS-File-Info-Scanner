@@ -16,7 +16,7 @@ namespace MSFileInfoScanner.Plotting
     /// <summary>
     /// OxyPlot container
     /// </summary>
-    internal class PlotContainer : clsPlotContainerBase
+    internal class PlotContainer : PlotContainerBase
     {
         // Ignore Spelling: OxyPlot, png, Arial
 
@@ -59,7 +59,7 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="writeDebug"></param>
         /// <param name="dataSource"></param>
         /// <remarks></remarks>
-        public clsPlotContainer(
+        public PlotContainer(
             PlotModel thePlot,
             bool writeDebug = false,
             string dataSource = "") : base(writeDebug, dataSource)

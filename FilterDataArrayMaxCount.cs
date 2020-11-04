@@ -67,7 +67,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsFilterDataArrayMaxCount()
+        public FilterDataArrayMaxCount()
         {
             mSkipDataPointFlag = DEFAULT_SKIP_DATA_POINT_FLAG;
             Clear();
@@ -205,7 +205,7 @@ namespace MSFileInfoScanner
                         {
                             // This is unexpected
                             Console.WriteLine(
-                                "Unexpected code reached in clsFilterDataArrayMaxCount.FilterDataByMaxDataCountToKeep");
+                                "Unexpected code reached in FilterDataArrayMaxCount.FilterDataByMaxDataCountToKeep");
                         }
                     }
 
@@ -387,7 +387,7 @@ namespace MSFileInfoScanner
                 UpdateProgress(2.666f / subtaskStepCount * 100.0f);
 
                 // Re-sort, this time on the data index value (.Item2)
-                dataValuesAndIndices.Sort(new clsSortByIndex());
+                dataValuesAndIndices.Sort(new SortByIndex());
             }
 
             UpdateProgress(3f / subtaskStepCount * 100.0f);

@@ -26,7 +26,7 @@ namespace MSFileInfoScanner.Plotting
         /// </summary>
         /// <param name="writeDebug"></param>
         /// <param name="dataSource"></param>
-        protected clsPlotContainerBase(bool writeDebug = false, string dataSource = "")
+        protected PlotContainerBase(bool writeDebug = false, string dataSource = "")
         {
             AnnotationBottomLeft = string.Empty;
             AnnotationBottomRight = string.Empty;

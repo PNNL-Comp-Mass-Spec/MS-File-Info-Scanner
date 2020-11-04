@@ -20,9 +20,9 @@ namespace MSFileInfoScanner.Readers
         private readonly MSDataFileReader mPWiz;
 
         private readonly DatasetStatsSummarizer mDatasetStatsSummarizer;
-        private readonly clsTICandBPIPlotter mTICAndBPIPlot;
+        private readonly TICandBPIPlotter mTICAndBPIPlot;
 
-        private readonly clsLCMSDataPlotter mLCMS2DPlot;
+        private readonly LCMSDataPlotter mLCMS2DPlot;
         private readonly bool mSaveLCMS2DPlots;
         private readonly bool mSaveTICAndBPI;
 
@@ -56,11 +56,11 @@ namespace MSFileInfoScanner.Readers
         /// <param name="saveLCMS2DPlots"></param>
         /// <param name="saveTICAndBPI"></param>
         /// <param name="checkCentroidingStatus"></param>
-        public clsProteoWizardDataParser(
+        public ProteoWizardDataParser(
             MSDataFileReader pWiz,
             DatasetStatsSummarizer datasetStatsSummarizer,
-            clsTICandBPIPlotter ticAndBPIPlot,
-            clsLCMSDataPlotter lcms2DPlot,
+            TICandBPIPlotter ticAndBPIPlot,
+            LCMSDataPlotter lcms2DPlot,
             bool saveLCMS2DPlots,
             bool saveTICAndBPI,
             bool checkCentroidingStatus)

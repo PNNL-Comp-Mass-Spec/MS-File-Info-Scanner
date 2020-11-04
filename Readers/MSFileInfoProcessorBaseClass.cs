@@ -32,18 +32,18 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         protected MSFileInfoProcessorBaseClass()
         {
-            mTICAndBPIPlot = new clsTICandBPIPlotter("TICAndBPIPlot", false);
+            mTICAndBPIPlot = new TICandBPIPlotter("TICAndBPIPlot", false);
             RegisterEvents(mTICAndBPIPlot);
 
-            mInstrumentSpecificPlots = new List<clsTICandBPIPlotter>();
+            mInstrumentSpecificPlots = new List<TICandBPIPlotter>();
 
             mDatasetStatsSummarizer = new DatasetStatsSummarizer();
             RegisterEvents(mDatasetStatsSummarizer);
 
-            mLCMS2DPlot = new clsLCMSDataPlotter();
+            mLCMS2DPlot = new LCMSDataPlotter();
             RegisterEvents(mLCMS2DPlot);
 
-            mLCMS2DPlotOverview = new clsLCMSDataPlotter();
+            mLCMS2DPlotOverview = new LCMSDataPlotter();
             RegisterEvents(mLCMS2DPlotOverview);
 
             InitializeLocalVariables();
@@ -103,17 +103,17 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// This variable tracks TIC and BPI data (vs. scan)
         /// </summary>
-        protected readonly clsTICandBPIPlotter mTICAndBPIPlot;
+        protected readonly TICandBPIPlotter mTICAndBPIPlot;
 
         /// <summary>
         /// This variable tracks UIMF pressure vs. frame (using mTIC)
         /// It also tracks data associated with other devices tracked by .raw files (e.g. LC pressure vs. scan)
         /// </summary>
-        protected readonly List<clsTICandBPIPlotter> mInstrumentSpecificPlots;
+        protected readonly List<TICandBPIPlotter> mInstrumentSpecificPlots;
 
-        protected readonly clsLCMSDataPlotter mLCMS2DPlot;
+        protected readonly LCMSDataPlotter mLCMS2DPlot;
 
-        private readonly clsLCMSDataPlotter mLCMS2DPlotOverview;
+        private readonly LCMSDataPlotter mLCMS2DPlotOverview;
 
         protected readonly DatasetStatsSummarizer mDatasetStatsSummarizer;
 
@@ -315,12 +315,12 @@ namespace MSFileInfoScanner.Readers
         }
 
         /// <summary>
-        /// Add a new clsTICAndBPIPlotter instance to mInstrumentSpecificPlots
+        /// Add a new TICAndBPIPlotter instance to mInstrumentSpecificPlots
         /// </summary>
         /// <param name="dataSource"></param>
-        protected clsTICandBPIPlotter AddInstrumentSpecificPlot(string dataSource)
+        protected TICandBPIPlotter AddInstrumentSpecificPlot(string dataSource)
         {
-            var plotContainer = new clsTICandBPIPlotter(dataSource, true);
+            var plotContainer = new TICandBPIPlotter(dataSource, true);
             RegisterEvents(plotContainer);
             mInstrumentSpecificPlots.Add(plotContainer);
 
@@ -728,8 +728,8 @@ namespace MSFileInfoScanner.Readers
                         if (successOverall && mLCMS2DPlot.Options.PlottingDeisotopedData)
                         {
                             // Create two more plots 2D plots, but this with a smaller maximum m/z
-                            mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
-                            mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = clsLCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
+                            mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = LCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
+                            mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = LCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
 
                             mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName, string.Empty, "_zoom");
                             lcMSPlotStepsComplete++;
@@ -884,9 +884,9 @@ namespace MSFileInfoScanner.Readers
             writer.WriteLine("  <table>");
         }
 
-        private void AppendLCMS2DPlots(TextWriter writer, clsLCMSDataPlotter lcmsPlotter)
+        private void AppendLCMS2DPlots(TextWriter writer, LCMSDataPlotter lcmsPlotter)
         {
-            var file1 = lcmsPlotter.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMS);
+            var file1 = lcmsPlotter.GetRecentFileInfo(LCMSDataPlotter.OutputFileTypes.LCMS);
 
             string file2;
             if (lcmsPlotter.Options.PlottingDeisotopedData)
@@ -895,7 +895,7 @@ namespace MSFileInfoScanner.Readers
             }
             else
             {
-                file2 = lcmsPlotter.GetRecentFileInfo(clsLCMSDataPlotter.eOutputFileTypes.LCMSMSn);
+                file2 = lcmsPlotter.GetRecentFileInfo(LCMSDataPlotter.OutputFileTypes.LCMSMSn);
             }
 
             var top = IntToEngineeringNotation(lcmsPlotter.Options.MaxPointsToPlot);
@@ -913,8 +913,8 @@ namespace MSFileInfoScanner.Readers
 
         private void AppendBPIPlots(TextWriter writer)
         {
-            var file1 = mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS);
-            var file2 = mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn);
+            var file1 = mTICAndBPIPlot.GetRecentFileInfo(TICandBPIPlotter.OutputFileTypes.BPIMS);
+            var file2 = mTICAndBPIPlot.GetRecentFileInfo(TICandBPIPlotter.OutputFileTypes.BPIMSn);
 
             if (file1.Length <= 0 && file2.Length <= 0)
                 return;
@@ -937,9 +937,9 @@ namespace MSFileInfoScanner.Readers
             {
                 var deviceType = plotContainer.DeviceType;
 
-                var file1 = plotContainer.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC);
-                var file2 = plotContainer.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMS);
-                var file3 = plotContainer.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.BPIMSn);
+                var file1 = plotContainer.GetRecentFileInfo(TICandBPIPlotter.OutputFileTypes.TIC);
+                var file2 = plotContainer.GetRecentFileInfo(TICandBPIPlotter.OutputFileTypes.BPIMS);
+                var file3 = plotContainer.GetRecentFileInfo(TICandBPIPlotter.OutputFileTypes.BPIMSn);
 
                 if (file1.Length == 0 && file2.Length == 0 && file3.Length == 0)
                 {
@@ -999,7 +999,7 @@ namespace MSFileInfoScanner.Readers
             }
             else
             {
-                var qcFigureHTML = GenerateQCFigureHTML(mTICAndBPIPlot.GetRecentFileInfo(clsTICandBPIPlotter.eOutputFileTypes.TIC), 250);
+                var qcFigureHTML = GenerateQCFigureHTML(mTICAndBPIPlot.GetRecentFileInfo(TICandBPIPlotter.OutputFileTypes.TIC), 250);
 
                 writer.WriteLine("      <td valign=\"middle\">TIC</td>");
                 writer.WriteLine("      <td>" + qcFigureHTML + "</td>");
@@ -1228,9 +1228,9 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 // Instantiate the ProteoWizard Data Parser class
-                var pWizParser = new clsProteoWizardDataParser(pWiz, mDatasetStatsSummarizer, mTICAndBPIPlot,
-                                                               mLCMS2DPlot, mSaveLCMS2DPlots, mSaveTICAndBPI,
-                                                               mCheckCentroidingStatus)
+                var pWizParser = new ProteoWizardDataParser(pWiz, mDatasetStatsSummarizer, mTICAndBPIPlot,
+                                                               mLCMS2DPlot, Options.SaveLCMS2DPlots, Options.SaveTICAndBPIPlots,
+                                                               Options.CheckCentroidingStatus)
                 {
                     HighResMS1 = highResMS1,
                     HighResMS2 = highResMS2

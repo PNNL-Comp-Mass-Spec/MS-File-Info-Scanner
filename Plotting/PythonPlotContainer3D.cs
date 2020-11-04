@@ -9,7 +9,7 @@ namespace MSFileInfoScanner.Plotting
     /// <summary>
     /// Python data container for 3D data
     /// </summary>
-    internal class PythonPlotContainer3D : clsPythonPlotContainer
+    internal class PythonPlotContainer3D : PythonPlotContainer
     {
         // Ignore Spelling: autoscale, gridline, png
 
@@ -19,16 +19,16 @@ namespace MSFileInfoScanner.Plotting
         public float ColorScaleMaxIntensity { get; set; }
         public double MarkerSize { get; set; }
 
-        public clsAxisInfo ZAxisInfo { get; }
+        public AxisInfo ZAxisInfo { get; }
 
-        public clsPythonPlotContainer3D(
+        public PythonPlotContainer3D(
             string plotTitle = "Undefined", string xAxisTitle = "X", string yAxisTitle = "Y", string zAxisTitle = "Z",
             bool writeDebug = false, string dataSource = "") : base(plotTitle, xAxisTitle, yAxisTitle, writeDebug, dataSource)
         {
             PointsByCharge = new Dictionary<int, List<ScatterPoint>>();
             ClearData();
 
-            ZAxisInfo = new clsAxisInfo(zAxisTitle);
+            ZAxisInfo = new AxisInfo(zAxisTitle);
         }
 
         /// <summary>
