@@ -23,27 +23,16 @@ namespace MSFileInfoScanner
         /// Data values to track, along with their associated data indices
         /// </summary>
         private List<Tuple<float, int>> mDataValues;
-
-        private int mMaximumDataCountToKeep;
-
         private float mSkipDataPointFlag;
-        private bool mTotalIntensityPercentageFilterEnabled;
-
         private float mTotalIntensityPercentageFilter;
-        // Value between 0 and 100
-        private float mProgress;
 
         public event ProgressChangedEventHandler ProgressChanged;
         public delegate void ProgressChangedEventHandler(float progress);
 
         #region "Properties"
-        public int MaximumDataCountToLoad
-        {
-            get => mMaximumDataCountToKeep;
-            set => mMaximumDataCountToKeep = value;
-        }
+        public int MaximumDataCountToLoad { get; set; }
 
-        public float Progress => mProgress;
+        public float Progress { get; private set; }
 
         public float SkipDataPointFlag
         {
@@ -51,11 +40,7 @@ namespace MSFileInfoScanner
             set => mSkipDataPointFlag = value;
         }
 
-        public bool TotalIntensityPercentageFilterEnabled
-        {
-            get => mTotalIntensityPercentageFilterEnabled;
-            set => mTotalIntensityPercentageFilterEnabled = value;
-        }
+        public bool TotalIntensityPercentageFilterEnabled { get; set; }
 
         public float TotalIntensityPercentageFilter
         {
@@ -88,9 +73,9 @@ namespace MSFileInfoScanner
         /// </summary>
         public void Clear()
         {
-            mMaximumDataCountToKeep = 400000;
+            MaximumDataCountToLoad = 400000;
 
-            mTotalIntensityPercentageFilterEnabled = false;
+            TotalIntensityPercentageFilterEnabled = false;
             mTotalIntensityPercentageFilter = 90;
 
             mDataValues = new List<Tuple<float, int>>();
@@ -142,7 +127,7 @@ namespace MSFileInfoScanner
                     return;
                 }
 
-                if (mDataValues.Count <= mMaximumDataCountToKeep)
+                if (mDataValues.Count <= MaximumDataCountToLoad)
                 {
                     // Loaded less than mMaximumDataCountToKeep data points
                     // Nothing to filter
@@ -222,7 +207,7 @@ namespace MSFileInfoScanner
                 for (var index = binCount - 1; index >= 0; index += -1)
                 {
                     pointTotal = pointTotal + histogramBinCounts[index];
-                    if (pointTotal >= mMaximumDataCountToKeep)
+                    if (pointTotal >= MaximumDataCountToLoad)
                     {
                         binToSort = index;
                         break;
@@ -294,13 +279,13 @@ namespace MSFileInfoScanner
 
                         var binnedDataCount = binnedData.Count;
 
-                        if (mMaximumDataCountToKeep - dataCountImplicitlyIncluded - binnedDataCount == 0)
+                        if (MaximumDataCountToLoad - dataCountImplicitlyIncluded - binnedDataCount == 0)
                         {
                             // No need to sort and examine the data for BinToSort since we'll ultimately include all of it
                         }
                         else
                         {
-                            SortAndMarkPointsToSkip(binnedData, mMaximumDataCountToKeep - dataCountImplicitlyIncluded, SUBTASK_STEP_COUNT);
+                            SortAndMarkPointsToSkip(binnedData, MaximumDataCountToLoad - dataCountImplicitlyIncluded, SUBTASK_STEP_COUNT);
                         }
 
                         // Synchronize the data in binToSortAbundances and binToSortDataIndices with mDataValues
@@ -345,7 +330,7 @@ namespace MSFileInfoScanner
                     // This shouldn't normally be necessary
 
                     // We have to sort all of the data; this can be quite slow
-                    SortAndMarkPointsToSkip(mDataValues, mMaximumDataCountToKeep, SUBTASK_STEP_COUNT);
+                    SortAndMarkPointsToSkip(mDataValues, MaximumDataCountToLoad, SUBTASK_STEP_COUNT);
                 }
 
                 UpdateProgress(4f / SUBTASK_STEP_COUNT * 100.0f);
@@ -394,9 +379,9 @@ namespace MSFileInfoScanner
         }
         private void UpdateProgress(float progress)
         {
-            mProgress = progress;
+            Progress = progress;
 
-            ProgressChanged?.Invoke(mProgress);
+            ProgressChanged?.Invoke(Progress);
         }
     }
 

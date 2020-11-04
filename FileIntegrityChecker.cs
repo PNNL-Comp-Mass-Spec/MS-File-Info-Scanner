@@ -89,17 +89,12 @@ namespace MSFileInfoScanner
 
         #region "Class wide variables"
 
-        private string mStatusMessage;
         private int mMaximumTextFileLinesToCheck;
 
         private int mMaximumXMLElementNodesToCheck;
-        private bool mZipFileCheckAllData;
         private float mZipFileLargeSizeThresholdMB;
 
         private bool mFastZippedSFileCheck;
-
-        private bool mComputeFileHashes;
-
         private ZipFileWorkParamsType mZipFileWorkParams;
 
         public event FileIntegrityFailureEventHandler FileIntegrityFailure;
@@ -112,11 +107,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// When True, then computes an MD5 hash on every file
         /// </summary>
-        public bool ComputeFileHashes
-        {
-            get => mComputeFileHashes;
-            set => mComputeFileHashes = value;
-        }
+        public bool ComputeFileHashes { get; set; }
 
         public int MaximumTextFileLinesToCheck
         {
@@ -140,16 +131,12 @@ namespace MSFileInfoScanner
             }
         }
 
-        public string StatusMessage => mStatusMessage;
+        public string StatusMessage { get; private set; }
 
         /// <summary>
         /// When True, then performs an exhaustive CRC check of each Zip file; otherwise, performs a quick test
         /// </summary>
-        public bool ZipFileCheckAllData
-        {
-            get => mZipFileCheckAllData;
-            set => mZipFileCheckAllData = value;
-        }
+        public bool ZipFileCheckAllData { get; set; }
 
         #endregion
 
@@ -1065,7 +1052,7 @@ namespace MSFileInfoScanner
 
             float maxExecutionTimeMinutes;
 
-            var zipFileCheckAllData = mZipFileCheckAllData;
+            var zipFileCheckAllData = ZipFileCheckAllData;
 
             // Either run a fast check, or entirely skip this .Zip file if it's too large
             var fileInfo = new FileInfo(filePath);
@@ -1758,7 +1745,7 @@ namespace MSFileInfoScanner
                             FailIntegrity = !passedIntegrityCheck
                         };
 
-                        if (mComputeFileHashes)
+                        if (ComputeFileHashes)
                         {
                             newFile.FileHash = Sha1CalcFile(dataFile.FullName);
                         }
@@ -2079,21 +2066,21 @@ namespace MSFileInfoScanner
             mMaximumTextFileLinesToCheck = DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK;
             mMaximumXMLElementNodesToCheck = DEFAULT_MAXIMUM_XML_ELEMENT_NODES_TO_CHECK;
 
-            mZipFileCheckAllData = true;
+            ZipFileCheckAllData = true;
 
             mFastZippedSFileCheck = true;
             mZipFileLargeSizeThresholdMB = 500;
 
-            mComputeFileHashes = false;
+            ComputeFileHashes = false;
 
-            mStatusMessage = string.Empty;
+            StatusMessage = string.Empty;
         }
 
         private void LogErrors(string source, string message, Exception ex)
         {
-            mStatusMessage = string.Copy(message);
+            StatusMessage = string.Copy(message);
 
-            var messageWithoutCRLF = mStatusMessage.Replace(Environment.NewLine, "; ");
+            var messageWithoutCRLF = StatusMessage.Replace(Environment.NewLine, "; ");
 
             if (string.IsNullOrEmpty(source))
                 source = "Unknown_Source";
