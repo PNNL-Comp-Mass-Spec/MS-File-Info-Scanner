@@ -173,28 +173,34 @@ namespace MSFileInfoScanner.Readers
             datasetFileInfo.OverallQualityScore = overallScore;
         }
 
+        /// <summary>
+        /// Obtain the TIC and BPI for each MS frame
+        /// </summary>
+        /// <param name="uimfReader"></param>
+        /// <param name="frameStart"></param>
+        /// <param name="frameEnd"></param>
+        /// <param name="ticByFrame">Keys are frame number, values are the total ion current (total intensity) for the frame</param>
+        /// <param name="bpiByFrame">Keys are frame number, values are the base peak intensity for the frame</param>
         private void ConstructTICAndBPI(
             DataReader uimfReader,
             int frameStart,
             int frameEnd,
-            out SortedDictionary<int, double> dctTIC,
-            out SortedDictionary<int, double> dctBPI)
+            out SortedDictionary<int, double> ticByFrame,
+            out SortedDictionary<int, double> bpiByFrame)
         {
             try
             {
-                // Obtain the TIC and BPI for each MS frame
-
                 Console.WriteLine("  Loading TIC values");
-                dctTIC = uimfReader.GetTICByFrame(frameStart, frameEnd, 0, 0);
+                ticByFrame = uimfReader.GetTICByFrame(frameStart, frameEnd, 0, 0);
 
                 Console.WriteLine("  Loading BPI values");
-                dctBPI = uimfReader.GetBPIByFrame(frameStart, frameEnd, 0, 0);
+                bpiByFrame = uimfReader.GetBPIByFrame(frameStart, frameEnd, 0, 0);
             }
             catch (Exception ex)
             {
                 OnErrorEvent("Error obtaining TIC and BPI for overall dataset: " + ex.Message);
-                dctTIC = new SortedDictionary<int, double>();
-                dctBPI = new SortedDictionary<int, double>();
+                ticByFrame = new SortedDictionary<int, double>();
+                bpiByFrame = new SortedDictionary<int, double>();
             }
         }
 
@@ -276,7 +282,7 @@ namespace MSFileInfoScanner.Readers
             GetStartAndEndScans(globalParams.NumFrames, out var frameStart, out var frameEnd);
 
             // Construct the TIC and BPI (of all frames)
-            ConstructTICAndBPI(uimfReader, frameStart, frameEnd, out var dctTIC, out var dctBPI);
+            ConstructTICAndBPI(uimfReader, frameStart, frameEnd, out var ticByFrame, out var bpiByFrame);
 
             Console.Write("  Loading frame details");
 
@@ -355,12 +361,12 @@ namespace MSFileInfoScanner.Readers
                     // Compute the elution time (in minutes) of this frame
                     var elutionTime = frameStartTimeCurrent + frameStartTimeAddon - frameStartTimeInitial;
 
-                    if (!dctBPI.TryGetValue(frameNumber, out var bpi))
+                    if (!bpiByFrame.TryGetValue(frameNumber, out var bpi))
                     {
                         bpi = BAD_TIC_OR_BPI;
                     }
 
-                    if (!dctTIC.TryGetValue(frameNumber, out var tic))
+                    if (!ticByFrame.TryGetValue(frameNumber, out var tic))
                     {
                         tic = BAD_TIC_OR_BPI;
                     }

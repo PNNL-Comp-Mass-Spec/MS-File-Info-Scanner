@@ -238,9 +238,9 @@ namespace MSFileInfoScanner.Readers
             List<float> ticScanTimes,
             IReadOnlyList<int> ticScanNumbers,
             ref double runtimeMinutes,
-            IDictionary<int, Dictionary<double, double>> dct2DDataParent,
-            IDictionary<int, Dictionary<double, double>> dct2DDataProduct,
-            IDictionary<int, float> dct2DDataScanTimes)
+            IDictionary<int, Dictionary<double, double>> parent2DData,
+            IDictionary<int, Dictionary<double, double>> product2DData,
+            IDictionary<int, float> scanTime2DData)
         {
             // Attempt to parse out the product m/z
             var parentMZFound = ExtractQ1MZ(chromatogramID, out var parentMZ);
@@ -293,21 +293,21 @@ namespace MSFileInfoScanner.Readers
 
                 if (mSaveLCMS2DPlots && intensities[index] > 0)
                 {
-                    // Store the m/z and intensity values in dct2DDataParent and dct2DDataProduct
+                    // Store the m/z and intensity values in parent2DData and product2DData
 
                     if (parentMZFound)
                     {
-                        Store2DPlotDataPoint(dct2DDataParent, scanNumber, parentMZ, intensities[index]);
+                        Store2DPlotDataPoint(parent2DData, scanNumber, parentMZ, intensities[index]);
                     }
 
                     if (productMZFound)
                     {
-                        Store2DPlotDataPoint(dct2DDataProduct, scanNumber, productMZ, intensities[index]);
+                        Store2DPlotDataPoint(product2DData, scanNumber, productMZ, intensities[index]);
                     }
 
-                    if (!dct2DDataScanTimes.ContainsKey(scanNumber))
+                    if (!scanTime2DData.ContainsKey(scanNumber))
                     {
-                        dct2DDataScanTimes[scanNumber] = scanTimes[index];
+                        scanTime2DData[scanNumber] = scanTimes[index];
                     }
                 }
             }
@@ -391,14 +391,14 @@ namespace MSFileInfoScanner.Readers
             var ticScanNumbers = new List<int>();
 
             // This dictionary tracks the m/z and intensity values for parent (Q1) ions of each scan
-            // Key is ScanNumber; Value is a dictionary holding m/z and intensity values for that scan
-            var dct2DDataParent = new Dictionary<int, Dictionary<double, double>>();
+            // Keys are ScanNumber; Value are a dictionary holding m/z and intensity values for each scan
+            var parent2DData = new Dictionary<int, Dictionary<double, double>>();
 
             // This dictionary tracks the m/z and intensity values for product (Q3) ions of each scan
-            var dct2DDataProduct = new Dictionary<int, Dictionary<double, double>>();
+            var product2DData = new Dictionary<int, Dictionary<double, double>>();
 
-            // This dictionary tracks the scan times for each scan number tracked by dct2DDataParent and/or dct2DDataProduct
-            var dct2DDataScanTimes = new Dictionary<int, float>();
+            // This dictionary tracks the scan times for each scan number tracked by parent2DData and/or product2DData
+            var scanTime2DData = new Dictionary<int, float>();
 
             // Note that even for a small .Wiff file (1.5 MB), obtaining the first chromatogram will take some time (20 to 60 seconds)
             // The chromatogram at index 0 should be the TIC
@@ -444,8 +444,8 @@ namespace MSFileInfoScanner.Readers
                     {
                         // This chromatogram is an SRM scan
 
-                        ProcessSRM(chromatogramID, scanTimes, intensities, ticScanTimes, ticScanNumbers, ref runtimeMinutes, dct2DDataParent,
-                                   dct2DDataProduct, dct2DDataScanTimes);
+                        ProcessSRM(chromatogramID, scanTimes, intensities, ticScanTimes, ticScanNumbers, ref runtimeMinutes, parent2DData,
+                                   product2DData, scanTime2DData);
 
                         srmDataCached = true;
                     }
@@ -472,16 +472,16 @@ namespace MSFileInfoScanner.Readers
                 return;
             }
 
-            if (dct2DDataParent.Count <= 0 && dct2DDataProduct.Count <= 0)
+            if (parent2DData.Count <= 0 && product2DData.Count <= 0)
             {
                 return;
             }
 
-            // Now that all of the chromatograms have been processed, transfer data from dct2DDataParent and dct2DDataProduct into mLCMS2DPlot
+            // Now that all of the chromatograms have been processed, transfer data from parent2DData and product2DData into mLCMS2DPlot
             mLCMS2DPlot.Options.MS1PlotTitle = "Q1 m/z";
             mLCMS2DPlot.Options.MS2PlotTitle = "Q3 m/z";
 
-            Store2DPlotData(dct2DDataScanTimes, dct2DDataParent, dct2DDataProduct);
+            Store2DPlotData(scanTime2DData, parent2DData, product2DData);
         }
 
         /// <summary>
@@ -907,9 +907,9 @@ namespace MSFileInfoScanner.Readers
         }
 
         private void Store2DPlotData(
-            IReadOnlyDictionary<int, float> dct2DDataScanTimes,
-            Dictionary<int, Dictionary<double, double>> dct2DDataParent,
-            Dictionary<int, Dictionary<double, double>> dct2DDataProduct)
+            IReadOnlyDictionary<int, float> scanTime2DData,
+            IReadOnlyDictionary<int, Dictionary<double, double>> parent2DData,
+            IReadOnlyDictionary<int, Dictionary<double, double>> product2DData)
         {
             // This variable keeps track of the length of the largest Dictionary(Of Double, Double) var in dct2DData
             var max2DDataCount = 1;
@@ -917,14 +917,14 @@ namespace MSFileInfoScanner.Readers
             var scanNumMin2D = int.MaxValue;
             var scanNumMax2D = 0;
 
-            // Determine the min/max scan numbers in dct2DDataParent
+            // Determine the min/max scan numbers in parent2DData
             // Also determine max2DDataCount
 
-            UpdateDataRanges(dct2DDataParent, ref max2DDataCount, ref scanNumMin2D, ref scanNumMax2D);
-            UpdateDataRanges(dct2DDataProduct, ref max2DDataCount, ref scanNumMin2D, ref scanNumMax2D);
+            UpdateDataRanges(parent2DData, ref max2DDataCount, ref scanNumMin2D, ref scanNumMax2D);
+            UpdateDataRanges(product2DData, ref max2DDataCount, ref scanNumMin2D, ref scanNumMax2D);
 
-            Store2DPlotDataWork(dct2DDataParent, dct2DDataScanTimes, 1, max2DDataCount, scanNumMin2D, scanNumMax2D);
-            Store2DPlotDataWork(dct2DDataProduct, dct2DDataScanTimes, 2, max2DDataCount, scanNumMin2D, scanNumMax2D);
+            Store2DPlotDataWork(parent2DData, scanTime2DData, 1, max2DDataCount, scanNumMin2D, scanNumMax2D);
+            Store2DPlotDataWork(product2DData, scanTime2DData, 2, max2DDataCount, scanNumMin2D, scanNumMax2D);
         }
 
         private void Store2DPlotDataPoint(IDictionary<int, Dictionary<double, double>> dct2DData, int scanNumber, double mz, double intensity)
@@ -951,8 +951,8 @@ namespace MSFileInfoScanner.Readers
         }
 
         private void Store2DPlotDataWork(
-            Dictionary<int, Dictionary<double, double>> dct2DData,
-            IReadOnlyDictionary<int, float> dct2DDataScanTimes,
+            IReadOnlyDictionary<int, Dictionary<double, double>> dataByScan,
+            IReadOnlyDictionary<int, float> scanTime2DData,
             int msLevel,
             int max2DDataCount,
             int scanNumMin2D,
@@ -961,29 +961,27 @@ namespace MSFileInfoScanner.Readers
             var mzList = new double[max2DDataCount];
             var intensityList = new double[max2DDataCount];
 
-            if (dct2DData == null)
+            if (dataByScan == null)
             {
                 return;
             }
 
-            using (var dct2DEnum = dct2DData.GetEnumerator())
+            foreach (var item in dataByScan)
             {
-                while (dct2DEnum.MoveNext())
-                {
-                    var int2DPlotScanNum = dct2DEnum.Current.Key;
+                var scanNumber = item.Key;
 
-                    var obj2DMzAndIntensity = dct2DEnum.Current.Value;
+                var mzAndIntensityList = item.Value;
 
-                    obj2DMzAndIntensity.Keys.CopyTo(mzList, 0);
-                    obj2DMzAndIntensity.Values.CopyTo(intensityList, 0);
+                mzAndIntensityList.Keys.CopyTo(mzList, 0);
+                mzAndIntensityList.Values.CopyTo(intensityList, 0);
 
-                    // Make sure the data is sorted
-                    Array.Sort(mzList, intensityList, 0, obj2DMzAndIntensity.Count);
+                // Make sure the data is sorted
+                Array.Sort(mzList, intensityList, 0, mzAndIntensityList.Count);
 
-                    // Store the data
-                    mLCMS2DPlot.AddScan(dct2DEnum.Current.Key, msLevel, dct2DDataScanTimes[int2DPlotScanNum], obj2DMzAndIntensity.Count, mzList,
-                                        intensityList);
-                }
+                // Store the data
+                mLCMS2DPlot.AddScan(
+                    scanNumber, msLevel, scanTime2DData[scanNumber],
+                    mzAndIntensityList.Count, mzList, intensityList);
             }
 
             if (scanNumMin2D / (double)scanNumMax2D > 0.5)
@@ -995,10 +993,10 @@ namespace MSFileInfoScanner.Readers
 
         private string StripExtraFromChromatogramID(string chromatogramIdText)
         {
-            // If text looks like:
+            // If text looks is of this form:
             // SRM SIC Q1=506.6 Q3=132.1 sample=1 period=1 experiment=1 transition=0
 
-            // then remove text from sample= on
+            // remove "sample=" and any text after it
 
             var charIndex = chromatogramIdText.IndexOf("sample=", StringComparison.InvariantCultureIgnoreCase);
             if (charIndex <= 0)
@@ -1008,34 +1006,31 @@ namespace MSFileInfoScanner.Readers
         }
 
         private void UpdateDataRanges(
-            Dictionary<int, Dictionary<double, double>> dct2DData,
+            IReadOnlyDictionary<int, Dictionary<double, double>> dataByScan,
             ref int max2DDataCount,
             ref int scanNumMin2D,
             ref int scanNumMax2D)
         {
-            if (dct2DData == null)
+            if (dataByScan == null)
                 return;
 
-            using (var dct2DEnum = dct2DData.GetEnumerator())
+            foreach (var item in dataByScan)
             {
-                while (dct2DEnum.MoveNext())
+                var scanNumber = item.Key;
+
+                if (item.Value.Count > max2DDataCount)
                 {
-                    var int2DPlotScanNum = dct2DEnum.Current.Key;
+                    max2DDataCount = item.Value.Count;
+                }
 
-                    if (dct2DEnum.Current.Value.Count > max2DDataCount)
-                    {
-                        max2DDataCount = dct2DEnum.Current.Value.Count;
-                    }
+                if (scanNumber < scanNumMin2D)
+                {
+                    scanNumMin2D = scanNumber;
+                }
 
-                    if (int2DPlotScanNum < scanNumMin2D)
-                    {
-                        scanNumMin2D = int2DPlotScanNum;
-                    }
-
-                    if (int2DPlotScanNum > scanNumMax2D)
-                    {
-                        scanNumMax2D = int2DPlotScanNum;
-                    }
+                if (scanNumber > scanNumMax2D)
+                {
+                    scanNumMax2D = scanNumber;
                 }
             }
         }

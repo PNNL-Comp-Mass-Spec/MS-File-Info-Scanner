@@ -26,19 +26,28 @@ namespace MSFileInfoScanner.Readers
         private const string ACQ_METHOD_FILE_EQUILIBRATION_TIME_LINE = "Equilibration Time";
         private const string ACQ_METHOD_FILE_RUN_TIME_LINE = "Run Time";
 
-        private const string ACQ_METHOD_FILE_POST_RUN_LINE = "(Post Run)";
-
         private readonly Regex mExtractTime;
 
         private class LineMatchSearchInfo
         {
+            /// <summary>
+            /// When true, examine the start of the line for search text
+            /// When false, look for the search text anywhere in the line
+            /// </summary>
             public bool MatchLineStart { get; }
 
+            /// <summary>
+            /// This is set to true if the search text is found
+            /// </summary>
             public bool Matched { get; set; }
 
-            public LineMatchSearchInfo(bool bMatchLineStart)
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            /// <param name="matchLineStart">True if the text we are searching for must match the start of the line</param>
+            public LineMatchSearchInfo(bool matchLineStart)
             {
-                MatchLineStart = bMatchLineStart;
+                MatchLineStart = matchLineStart;
                 Matched = false;
             }
         }
@@ -97,16 +106,19 @@ namespace MSFileInfoScanner.Readers
                     return false;
                 }
 
-                // Populate a dictionary var with the text strings for finding lines with runtime information
+                // Populate a dictionary with the text strings for finding lines with runtime information
                 // Note that "Post Run" occurs twice in the file, so we use LineMatchSearchInfo.Matched to track whether or not the text has been matched
-                var dctRunTimeText = new Dictionary<string, LineMatchSearchInfo>
+                // Keys in this dictionary are text to find; values are match search info
+                var runTimeTextLabels = new Dictionary<string, LineMatchSearchInfo>
                 {
                     {ACQ_METHOD_FILE_EQUILIBRATION_TIME_LINE, new LineMatchSearchInfo(true)},
                     {ACQ_METHOD_FILE_RUN_TIME_LINE, new LineMatchSearchInfo(true)}
                 };
 
                 // We could also add in the "Post Run" time for determining total acquisition time, but we don't do this, to stay consistent with run times reported by the MS file
-                // dctRunTimeText.Add(ACQ_METHOD_FILE_POST_RUN_LINE, New clsLineMatchSearchInfo(False))
+
+                // ACQ_METHOD_FILE_POST_RUN_LINE = "(Post Run)";
+                // runTimeTextLabels.Add(ACQ_METHOD_FILE_POST_RUN_LINE, New clsLineMatchSearchInfo(False))
 
                 using (var reader = new StreamReader(filePath))
                 {
@@ -117,15 +129,15 @@ namespace MSFileInfoScanner.Readers
                         if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
 
-                        foreach (var key in dctRunTimeText.Keys)
+                        foreach (var key in runTimeTextLabels.Keys)
                         {
-                            if (dctRunTimeText[key].Matched)
+                            if (runTimeTextLabels[key].Matched)
                             {
                                 continue;
                             }
 
                             bool matchSuccess;
-                            if (dctRunTimeText[key].MatchLineStart)
+                            if (runTimeTextLabels[key].MatchLineStart)
                             {
                                 matchSuccess = dataLine.StartsWith(key);
                             }
@@ -144,7 +156,7 @@ namespace MSFileInfoScanner.Readers
                                 continue;
                             }
 
-                            dctRunTimeText[key].Matched = true;
+                            runTimeTextLabels[key].Matched = true;
                             totalRuntime += runTime;
                             runTimeFound = true;
                             break;

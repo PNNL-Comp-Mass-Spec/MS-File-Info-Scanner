@@ -221,7 +221,9 @@ namespace MSFileInfoScanner.Readers
 
         private List<IsosDataType> LoadIsosFile(string isosFilePath, float maxFit)
         {
-            var dctColumnInfo = new Dictionary<string, int>
+            // Keys in this dictionary are column names
+            // Values are the column index, or -1 if not present
+            var columnMapping = new Dictionary<string, int>
             {
                 {"charge", -1},
                 {"abundance", -1},
@@ -255,7 +257,7 @@ namespace MSFileInfoScanner.Readers
                     if (rowNumber == 1)
                     {
                         // Parse the header row
-                        ParseColumnHeaders(dctColumnInfo, dataColumns, "_isos.csv");
+                        ParseColumnHeaders(columnMapping, dataColumns, "_isos.csv");
 
                         colIndexScanOrFrameNum = GetScanOrFrameColIndex(dataColumns, "_isos.csv");
 
@@ -271,11 +273,11 @@ namespace MSFileInfoScanner.Readers
                         int.TryParse(dataColumns[colIndexScanOrFrameNum], out isosItem.Scan);
                         currentScan = isosItem.Scan;
 
-                        byte.TryParse(dataColumns[dctColumnInfo["charge"]], out isosItem.Charge);
-                        double.TryParse(dataColumns[dctColumnInfo["abundance"]], out isosItem.Abundance);
-                        double.TryParse(dataColumns[dctColumnInfo["mz"]], out isosItem.MZ);
-                        float.TryParse(dataColumns[dctColumnInfo["fit"]], out isosItem.Fit);
-                        double.TryParse(dataColumns[dctColumnInfo["monoisotopic_mw"]], out isosItem.MonoMass);
+                        byte.TryParse(dataColumns[columnMapping["charge"]], out isosItem.Charge);
+                        double.TryParse(dataColumns[columnMapping["abundance"]], out isosItem.Abundance);
+                        double.TryParse(dataColumns[columnMapping["mz"]], out isosItem.MZ);
+                        float.TryParse(dataColumns[columnMapping["fit"]], out isosItem.Fit);
+                        double.TryParse(dataColumns[columnMapping["monoisotopic_mw"]], out isosItem.MonoMass);
 
                         if (isosItem.Charge > 1)
                         {
@@ -317,7 +319,9 @@ namespace MSFileInfoScanner.Readers
         {
             const string FILTERED_SCANS_SUFFIX = "_filtered_scans.csv";
 
-            var dctColumnInfo = new Dictionary<string, int>
+            // Keys in this dictionary are column names
+            // Values are the column index, or -1 if not present
+            var columnMapping = new Dictionary<string, int>
             {
                 {"type", -1},
                 {"bpi", -1},
@@ -362,7 +366,7 @@ namespace MSFileInfoScanner.Readers
                     if (rowNumber == 1)
                     {
                         // Parse the header row
-                        ParseColumnHeaders(dctColumnInfo, dataColumns, "_scans.csv");
+                        ParseColumnHeaders(columnMapping, dataColumns, "_scans.csv");
 
                         colIndexScanOrFrameNum = GetScanOrFrameColIndex(dataColumns, "_scans.csv");
 
@@ -386,12 +390,12 @@ namespace MSFileInfoScanner.Readers
 
                         int.TryParse(dataColumns[colIndexScanOrFrameNum], out scanData.Scan);
                         float.TryParse(dataColumns[colIndexScanOrFrameTime], out scanData.ElutionTime);
-                        int.TryParse(dataColumns[dctColumnInfo["type"]], out scanData.MSLevel);
-                        double.TryParse(dataColumns[dctColumnInfo["bpi"]], out scanData.BasePeakIntensity);
-                        double.TryParse(dataColumns[dctColumnInfo["bpi_mz"]], out scanData.BasePeakMZ);
-                        double.TryParse(dataColumns[dctColumnInfo["tic"]], out scanData.TotalIonCurrent);
-                        int.TryParse(dataColumns[dctColumnInfo["num_peaks"]], out scanData.NumPeaks);
-                        int.TryParse(dataColumns[dctColumnInfo["num_deisotoped"]], out scanData.NumDeisotoped);
+                        int.TryParse(dataColumns[columnMapping["type"]], out scanData.MSLevel);
+                        double.TryParse(dataColumns[columnMapping["bpi"]], out scanData.BasePeakIntensity);
+                        double.TryParse(dataColumns[columnMapping["bpi_mz"]], out scanData.BasePeakMZ);
+                        double.TryParse(dataColumns[columnMapping["tic"]], out scanData.TotalIonCurrent);
+                        int.TryParse(dataColumns[columnMapping["num_peaks"]], out scanData.NumPeaks);
+                        int.TryParse(dataColumns[columnMapping["num_deisotoped"]], out scanData.NumDeisotoped);
 
                         if (colIndexScanInfo > 0)
                         {
@@ -446,7 +450,7 @@ namespace MSFileInfoScanner.Readers
                     }
                     catch (Exception ex)
                     {
-                        OnWarningEvent("Warning: Ignoring scan " + dataColumns[dctColumnInfo["scan_num"]] + " since data conversion error: " + ex.Message);
+                        OnWarningEvent("Warning: Ignoring scan " + dataColumns[columnMapping["scan_num"]] + " since data conversion error: " + ex.Message);
                     }
                 }
             }
@@ -454,14 +458,20 @@ namespace MSFileInfoScanner.Readers
             return scanList;
         }
 
-        private void ParseColumnHeaders(Dictionary<string, int> dctColumnInfo, IList<string> dataColumns, string fileDescription)
+        /// <summary>
+        /// Update the column mapping using the actual column names
+        /// </summary>
+        /// <param name="columnMapping">Dictionary where keys are column names and values are the column index, or -1 if not present</param>
+        /// <param name="dataColumns">Column names from the header row of the input file</param>
+        /// <param name="fileDescription"></param>
+        private void ParseColumnHeaders(Dictionary<string, int> columnMapping, IList<string> dataColumns, string fileDescription)
         {
-            foreach (var columnName in dctColumnInfo.Keys.ToList())
+            foreach (var columnName in columnMapping.Keys.ToList())
             {
                 var colIndex = dataColumns.IndexOf(columnName);
                 if (colIndex >= 0)
                 {
-                    dctColumnInfo[columnName] = colIndex;
+                    columnMapping[columnName] = colIndex;
                 }
                 else
                 {
