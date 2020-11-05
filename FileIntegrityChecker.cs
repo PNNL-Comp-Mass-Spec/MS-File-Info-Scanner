@@ -16,6 +16,13 @@ namespace MSFileInfoScanner
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2008</remarks>
     public class FileIntegrityChecker : EventNotifier
     {
+        // ReSharper disable CommentTypo
+
+        // Ignore Spelling: frag, Cn, Xc, Filt, dta, fht, Scannum, PeakScanStart, StatMomentsDataCountUsed, Hyperscore, lcq
+        // Ignore Spelling: extract_msn, ver, amu, Acetyl, Oxy, IodoAcet, Xcorr, Const, Tid, Prot, acqu, acqus, ftms
+        // Ignore Spelling: sptype, mw, mostabundant_mw, fwhm, deisotoped, bioml, taxon, Wiff
+
+        // ReSharper restore CommentTypo
 
         /// <summary>
         /// Constructor
@@ -431,7 +438,7 @@ namespace MSFileInfoScanner
             else if (fileNameLower.EndsWith("_ModSummary.txt".ToLower()))
             {
                 // Example contents:
-                //  Modification_Symbol	Modification_Mass	Target_Residues	Modification_Type	Mass_Correction_Tag	Occurence_Count
+                //  Modification_Symbol	Modification_Mass	Target_Residues	Modification_Type	Mass_Correction_Tag	Occurrence_Count
                 fileIsValid = CheckTextFileWork(filePath, 1, 4, "Modification_Symbol", true);
 
                 // PHRP
@@ -1298,7 +1305,7 @@ namespace MSFileInfoScanner
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         private bool CheckXMLFile(string filePath)
         {
-            // Examine the parent directory name to determine the type of XML file filePath most likely is
+            // Examine the parent directory name to determine the type of XML the file most likely is
 
             bool xmlIsValid;
 
@@ -1461,7 +1468,7 @@ namespace MSFileInfoScanner
         /// <param name="filePath">File Path</param>
         /// <param name="minimumElementCount">Minimum number of XML elements that must be in the file; maximum number of elements is defined by mMaximumXMLElementNodesToCheck</param>
         /// <param name="requiredElementNames">Optional list of element names that must be found (within the first mMaximumXMLElementNodesToCheck elements); the names are case-sensitive</param>
-        /// <param name="requiredAttributeNames">Optional list of attribute names that must be found  (within the first mMaximumXMLElementNodesToCheck elements); the names are case-sensitive</param>
+        /// <param name="requiredAttributeNames">Optional list of attribute names that must be found (within the first mMaximumXMLElementNodesToCheck elements); the names are case-sensitive</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         private bool CheckXMLFileWork(
             string filePath,
@@ -2107,7 +2114,7 @@ namespace MSFileInfoScanner
 
         public string Sha1CalcFile(string path)
         {
-            // Calculates the Sha-1 hash of a given file
+            // Calculates the SHA-1 hash of a given file
 
             var sha1Hasher = new System.Security.Cryptography.SHA1CryptoServiceProvider();
 

@@ -22,8 +22,8 @@ namespace MSFileInfoScanner.MassLynxData
         /// <remarks>4 bytes</remarks>
         public int StartScanOffset { get; set; }
 
-        // The next 4 bytes are stored as a Long Integer, but are in fact
-        //   seven different numbers packed into one Long Integer:
+        // The next 4 bytes are stored as a 32-bit integer, but are in fact
+        //   seven different numbers packed into one integer:
         //   bits 0-21: number of spectral peaks in scan
         //   bits 22-26: segment number (MTOF function)
         //   bit 27: use following continuum data flag
@@ -54,7 +54,7 @@ namespace MSFileInfoScanner.MassLynxData
         //   with the information stored in packed form:
 
         // The method used to pack the data depends on the Acquisition data type
-        // Note that the data type ID is stored in packed form in udtRawFunctionDescriptorRecord.PackedFunctionInfo
+        // Note that the data type ID is stored in packed form in rawFunctionDescriptorRecord.PackedFunctionInfo
 
         // After unpacking, it is stored in .FunctionInfo().AcquisitionDataType
 
@@ -82,6 +82,8 @@ namespace MSFileInfoScanner.MassLynxData
         //   bits 20-47: mass * 128
 
         // For Acquisition Data Type ID 9, 11, and 12 (High accuracy calibrated, enhanced uncalibrated, and enhanced calibrated)
+
+        // ReSharper disable once CommentTypo
 
         // Note that this is the form for the LCT and various Q-TOF's
         //   bits 0-15: intensity

@@ -373,7 +373,7 @@ namespace MSFileInfoScanner.Readers
         }
 
         /// <summary>
-        /// // Process a Bruker 1 directory or Bruker s001.zip file, specified by dataFilePath
+        /// Process a Bruker 1 directory or Bruker s001.zip file, specified by dataFilePath
         /// </summary>
         /// <param name="dataFilePath">Bruker 1 directory path or Bruker s001.zip file</param>
         /// <param name="datasetFileInfo"></param>
