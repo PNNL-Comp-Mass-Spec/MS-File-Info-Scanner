@@ -392,6 +392,11 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 var datasetName = GetDatasetNameViaPath(inputFileName);
+                if (string.IsNullOrWhiteSpace(datasetName))
+                {
+                    OnWarningEvent("Dataset name returned by GetDatasetNameViaPath is an empty string");
+                }
+
                 successOverall = true;
                 var createQCPlotHTMLFile = false;
 
@@ -584,10 +589,20 @@ namespace MSFileInfoScanner.Readers
         {
             try
             {
+                string htmlFileName;
+                if (Options.UseDatasetNameForHtmlPlotsFile && datasetName.Length > 0)
+                {
+                    htmlFileName = datasetName + ".html";
+                }
+                else
+                {
+                    htmlFileName = "index.html";
+                }
+
                 // Obtain the dataset summary stats (they will be auto-computed if not up to date)
                 var summaryStats = mDatasetStatsSummarizer.GetDatasetSummaryStats();
 
-                var htmlFilePath = Path.Combine(outputDirectoryPath, "index.html");
+                var htmlFilePath = Path.Combine(outputDirectoryPath, htmlFileName);
 
                 using (var writer = new StreamWriter(new FileStream(htmlFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {

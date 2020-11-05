@@ -6,7 +6,7 @@ namespace MSFileInfoScanner.Options
 {
     public class InfoScannerOptions
     {
-        // Ignore Spelling: ArgExistsProperty, centroiding, csv, OxyPlot
+        // Ignore Spelling: ArgExistsProperty, centroiding, csv, OxyPlot, Html
 
         /// <summary>
         /// Input file path
@@ -90,6 +90,12 @@ namespace MSFileInfoScanner.Options
             HelpText = "Save a series of 2D LC plots, each using a different color scheme.\n" +
                        "The default color scheme is OxyPalettes.Jet")]
         public bool TestLCMSGradientColorSchemes { get; set; }
+
+        [Option("UseDatasetNameForHtmlPlotsFile", "CustomHtmlPlotsFile", HelpShowsDefault = false,
+            HelpText = "The HTML file for viewing plots is named index.html by default;\n" +
+                       "set this to True to name the file based on the input file name\n" +
+                       "This is auto-set to true if the input file spec has a wildcard")]
+        public bool UseDatasetNameForHtmlPlotsFile { get; set; }
 
         [Option("DatasetID", HelpShowsDefault = false,
             HelpText = "Define the dataset's DatasetID value (where # is an integer); " +
@@ -276,6 +282,8 @@ namespace MSFileInfoScanner.Options
             LCMS2DMaxPointsToPlot = LCMSDataPlotterOptions.DEFAULT_MAX_POINTS_TO_PLOT;
             LCMS2DOverviewPlotDivisor = LCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR;
             TestLCMSGradientColorSchemes = false;
+
+            UseDatasetNameForHtmlPlotsFile = false;
 
             CheckCentroidingStatus = false;
             CopyFileLocalOnReadError = false;
