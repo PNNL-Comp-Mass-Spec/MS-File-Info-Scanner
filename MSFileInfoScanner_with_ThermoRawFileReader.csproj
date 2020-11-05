@@ -86,6 +86,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Options\LCMSDataPlotterOptions.cs" />
     <Compile Include="Readers\AgilentGCDFolderInfoScanner.cs" />
     <Compile Include="Readers\AgilentIonTrapDFolderInfoScanner.cs" />
     <Compile Include="Readers\AgilentOrQStarWiffFileInfoScanner.cs" />
