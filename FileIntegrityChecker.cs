@@ -1775,27 +1775,6 @@ namespace MSFileInfoScanner
             return false;
         }
 
-        /// <summary>
-        /// Checks the integrity of each file in the given directory (provided the extension is recognized)
-        /// Will populate directoryStats with stats on the files in this directory
-        /// Will populate fileDetails with the name of each file parsed, plus details on the files
-        /// </summary>
-        /// <param name="directoryPath">Folder to examine</param>
-        /// <param name="directoryStats">Stats on the directory, including number of files and number of files that failed the integrity check</param>
-        /// <param name="fileStats">Details on each file checked; use folderStatsType.FileCount to determine the number of entries in fileStats </param>
-        /// <param name="filesToIgnore">List of files to skip; can be file names or full file paths</param>
-        /// <returns>Returns True if all files pass the integrity checks; otherwise, returns False</returns>
-        /// <remarks>Note that fileStats will never be shrunk in size; only increased as needed</remarks>
-        [Obsolete("Use CheckIntegrityOfFilesInDirectory")]
-        public bool CheckIntegrityOfFilesInFolder(
-            string directoryPath,
-            out DirectoryStatsType directoryStats,
-            out List<FileStatsType> fileStats,
-            List<string> filesToIgnore)
-        {
-            return CheckIntegrityOfFilesInDirectory(directoryPath, out directoryStats, out fileStats, filesToIgnore);
-        }
-
         private Dictionary<string, bool> ConvertTextListToDictionary(IReadOnlyCollection<string> requiredTextItems)
         {
             var requiredTextDictionary = new Dictionary<string, bool>();

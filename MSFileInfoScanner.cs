@@ -136,10 +136,6 @@ namespace MSFileInfoScanner
             NoError = 0,
             InvalidInputFilePath = 1,
             InvalidOutputDirectoryPath = 2,
-
-            [Obsolete("Use InvalidOutputDirectoryPath")]
-            InvalidOutputFolderPath = 2,
-
             ParameterFileNotFound = 3,
             FilePathError = 4,
 
@@ -178,10 +174,6 @@ namespace MSFileInfoScanner
         {
             MSFileInfo = 0,
             DirectoryIntegrityInfo = 1,
-
-            [Obsolete("Use DirectoryIntegrityInfo")]
-            FolderIntegrityInfo = 1,
-
             FileIntegrityDetails = 2,
             FileIntegrityErrors = 3
         }
@@ -469,18 +461,6 @@ namespace MSFileInfoScanner
             };
 
             return extensionsToParse;
-        }
-
-        [Obsolete("Use GetKnownDirectoryExtensions")]
-        public string[] GetKnownFolderExtensions()
-        {
-            return GetKnownDirectoryExtensionsList().ToArray();
-        }
-
-        [Obsolete("Use GetKnownDirectoryExtensionsList")]
-        public List<string> GetKnownFolderExtensionsList()
-        {
-            return GetKnownDirectoryExtensionsList();
         }
 
         /// <summary>
@@ -1756,36 +1736,6 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Main processing function, with input file / directory path, plus output directory path
-        /// </summary>
-        /// <param name="inputFileOrFolderPath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <returns>True if success, False if an error</returns>
-        [Obsolete("Use ProcessMSFileOrDirectory")]
-        public bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputDirectoryPath)
-        {
-            return ProcessMSFileOrDirectory(inputFileOrFolderPath, outputDirectoryPath);
-        }
-
-        /// <summary>
-        /// Main processing function with input / output paths, error code reset flag, and processing state
-        /// </summary>
-        /// <param name="inputFileOrFolderPath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="resetErrorCode"></param>
-        /// <param name="msFileProcessingState"></param>
-        /// <returns>True if success, False if an error</returns>
-        [Obsolete("Use ProcessMSFileOrDirectory")]
-        public bool ProcessMSFileOrFolder(
-            string inputFileOrFolderPath,
-            string outputDirectoryPath,
-            bool resetErrorCode,
-            out MSFileProcessingStateConstants msFileProcessingState)
-        {
-            return ProcessMSFileOrDirectory(inputFileOrFolderPath, outputDirectoryPath, resetErrorCode, out msFileProcessingState);
-        }
-
-        /// <summary>
         /// Calls ProcessMSFileOrDirectory for all files in inputFilePathOrDirectory and below having a known extension
         ///  Known extensions are:
         ///   .Raw for Thermo files
@@ -1897,40 +1847,6 @@ namespace MSFileInfoScanner
             }
 
             return success;
-        }
-
-        /// <summary>
-        /// Calls ProcessMSFileOrDirectory for all files in inputFileOrFolderPath and below having a known extension
-        /// </summary>
-        /// <param name="inputFileOrFolderPath">Path to the input file or directory; can contain a wildcard (* or ?)</param>
-        /// <param name="outputDirectoryPath">Folder to write any results files to</param>
-        /// <param name="resetErrorCode"></param>
-        /// <returns>True if success, False if an error</returns>
-        [Obsolete("Use ProcessMSFileOrDirectoryWildcard")]
-        public bool ProcessMSFileOrFolderWildcard(string inputFileOrFolderPath, string outputDirectoryPath, bool resetErrorCode)
-        {
-            return ProcessMSFileOrDirectoryWildcard(inputFileOrFolderPath, outputDirectoryPath, resetErrorCode);
-        }
-
-        /// <summary>
-        /// Calls ProcessMSFileOrDirectory for all files in inputFilePathOrFolder and below having a known extension
-        ///  Known extensions are:
-        ///   .Raw for Thermo files
-        ///   .Wiff for Agilent TOF files and for Q-Star files
-        ///   .Baf for Bruker XMASS directories (contains file analysis.baf, and hopefully files scan.xml and Log.txt)
-        /// For each directory that does not have any files matching a known extension, will then look for special directory names:
-        ///   Folders matching *.Raw for Micromass data
-        ///   Folders matching *.D for Agilent Ion Trap data
-        ///   A directory named 1 for Bruker FTICR-MS data
-        /// </summary>
-        /// <param name="inputFilePathOrFolder">Path to the input file or directory; can contain a wildcard (* or ?)</param>
-        /// <param name="outputDirectoryPath">Folder to write any results files to</param>
-        /// <param name="recurseFoldersMaxLevels">Maximum directory depth to process; Set to 0 to process all directories</param>
-        /// <returns>True if success, False if an error</returns>
-        [Obsolete("Use ProcessMSFilesAndRecurseDirectories")]
-        public bool ProcessMSFilesAndRecurseFolders(string inputFilePathOrFolder, string outputDirectoryPath, int recurseFoldersMaxLevels)
-        {
-            return ProcessMSFilesAndRecurseDirectories(inputFilePathOrFolder, outputDirectoryPath, recurseFoldersMaxLevels);
         }
 
         private bool RecurseDirectoriesWork(

@@ -1083,55 +1083,6 @@ namespace MSFileInfoScanner.Plotting
             plotContainer.AddData(points, 0);
         }
 
-        [Obsolete("Use MathNet.Numerics.Statistics.Statistics.Median")]
-        private float ComputeMedian(float[] values, int itemCount)
-        {
-            var average = false;
-
-            if (values == null || values.Length < 1 || itemCount < 1)
-            {
-                // List is empty (or itemCount = 0)
-                return 0;
-            }
-
-            if (itemCount <= 1)
-            {
-                // Only 1 item; the median is the value
-                return values[0];
-            }
-
-            // Sort values ascending, then find the midpoint
-            Array.Sort(values, 0, itemCount);
-
-            int midpointIndex;
-            if (itemCount % 2 == 0)
-            {
-                // Even number
-                midpointIndex = (int)Math.Floor(itemCount / 2.0) - 1;
-                average = true;
-            }
-            else
-            {
-                // Odd number
-                midpointIndex = (int)Math.Floor(itemCount / 2.0);
-            }
-
-            if (midpointIndex > itemCount)
-                midpointIndex = itemCount - 1;
-            if (midpointIndex < 0)
-                midpointIndex = 0;
-
-            if (average)
-            {
-                // Even number of items
-                // Return the average of the two middle points
-                return (values[midpointIndex] + values[midpointIndex + 1]) / 2;
-            }
-
-            // Odd number of items
-            return values[midpointIndex];
-        }
-
         private IList<List<ScatterPoint>> GetDataToPlot(
             int msLevelFilter, bool skipTrimCachedData,
             out int pointsToPlot, out double scanTimeMax,
