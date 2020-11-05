@@ -220,7 +220,7 @@ namespace MSFileInfoScanner.Readers
                         }
                     }
 
-                    if (mDisableInstrumentHash)
+                    if (Options.DisableInstrumentHash)
                     {
                         mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(zippedSFile);
                     }

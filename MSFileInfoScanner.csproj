@@ -44,10 +44,6 @@
     <Reference Include="Ionic.Zip">
       <HintPath>Lib\Ionic.Zip.dll</HintPath>
     </Reference>
-    <Reference Include="MSFileInfoScannerInterfaces, Version=1.1.5988.17918, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Lib\MSFileInfoScannerInterfaces.dll</HintPath>
-    </Reference>
     <Reference Include="NetCDFReader">
       <HintPath>Lib\NetCDFReader.dll</HintPath>
     </Reference>

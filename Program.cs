@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using MSFileInfoScannerInterfaces;
+using MSFileInfoScanner.Options;
 using PRISM;
 
 namespace MSFileInfoScanner
@@ -41,7 +41,7 @@ namespace MSFileInfoScanner
         {
             var exeName = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name;
             var exePath = PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppPath();
-            var cmdLineParser = new CommandLineParser<CommandLineOptions>(exeName, GetAppVersion());
+            var cmdLineParser = new CommandLineParser<InfoScannerOptions>(exeName, GetAppVersion());
 
             var scannerInfo = new MSFileInfoScanner();
             cmdLineParser.ProgramInfo = "This program will scan a series of MS data files (or data directories) and " +
@@ -87,7 +87,7 @@ namespace MSFileInfoScanner
 
             try
             {
-                var scanner = new MSFileInfoScanner();
+                var scanner = new MSFileInfoScanner(options);
 
                 scanner.DebugEvent += MSFileScanner_DebugEvent;
                 scanner.ErrorEvent += MSFileScanner_ErrorEvent;
@@ -95,7 +95,12 @@ namespace MSFileInfoScanner
                 scanner.StatusEvent += MSFileScanner_MessageEvent;
                 scanner.ProgressUpdate += MSFileScanner_ProgressUpdate;
 
-                options.CopyToScanner(scanner);
+
+                if (!string.IsNullOrEmpty(options.ParameterFilePath))
+                {
+                    scanner.LoadParameterFileSettings(options.ParameterFilePath);
+                }
+
                 scanner.ShowCurrentProcessingOptions();
 
                 bool processingError;
@@ -141,7 +146,7 @@ namespace MSFileInfoScanner
 
                     System.Threading.Thread.Sleep(1500);
                 }
-                else if (scanner.ErrorCode == iMSFileInfoScanner.eMSFileScannerErrorCodes.MS2MzMinValidationWarning)
+                else if (scanner.ErrorCode == MSFileInfoScanner.MSFileScannerErrorCodes.MS2MzMinValidationWarning)
                 {
                     ConsoleMsgUtils.ShowWarning("MS2MzMin validation warning: " + scanner.MS2MzMinValidationMessage);
                 }

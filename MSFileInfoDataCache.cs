@@ -2,7 +2,6 @@
 using System.Data;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScannerInterfaces;
 using PRISM;
 
 namespace MSFileInfoScanner

@@ -2,8 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Reflection;
+using System.Threading;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScannerInterfaces;
+using MSFileInfoScanner.Options;
+using MSFileInfoScanner.Plotting;
+using MSFileInfoScanner.Readers;
 using PRISM;
 using PRISM.FileProcessor;
 using PRISMDatabaseUtils;
@@ -33,66 +37,42 @@ namespace MSFileInfoScanner
     /// Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
     /// </para>
     /// </remarks>
-    public sealed class MSFileInfoScanner : iMSFileInfoScanner
+    public sealed class MSFileInfoScanner : EventNotifier
     {
         // Ignore Spelling: OxyPlot, yyyy-MM-dd, hh:mm:ss tt, centroiding, utf, idx, xtr, Shimadzu
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public MSFileInfoScanner()
+        public MSFileInfoScanner() : this(new InfoScannerOptions())
         {
-            mFileIntegrityChecker = new clsFileIntegrityChecker();
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public MSFileInfoScanner(InfoScannerOptions options)
+        {
+            Options = options;
+
+            mFileIntegrityChecker = new FileIntegrityChecker(options);
             RegisterEvents(mFileIntegrityChecker);
             mFileIntegrityChecker.FileIntegrityFailure += FileIntegrityChecker_FileIntegrityFailure;
 
             mMSFileInfoDataCache = new MSFileInfoDataCache();
             RegisterEvents(mMSFileInfoDataCache);
 
-            SetErrorCode(eMSFileScannerErrorCodes.NoError);
-
-            IgnoreErrorsWhenRecursing = false;
+            SetErrorCode(MSFileScannerErrorCodes.NoError);
 
             DatasetInfoXML = string.Empty;
-            UseCacheFiles = false;
 
-            LogMessagesToFile = false;
             mLogFilePath = string.Empty;
             mLogDirectoryPath = string.Empty;
 
-            ReprocessExistingFiles = false;
-            ReprocessIfCachedSizeIsZero = false;
-            RecheckFileIntegrityForExistingDirectories = false;
+            mLCMS2DPlotOptions = new LCMSDataPlotterOptions(Options);
 
-            CreateDatasetInfoFile = false;
-
-            UpdateDatasetStatsTextFile = false;
-            mDatasetStatsTextFileName = DatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME;
-
-            SaveTICAndBPIPlots = false;
-            SaveLCMS2DPlots = false;
-            CheckCentroidingStatus = false;
-
-            mLCMS2DPlotOptions = new clsLCMSDataPlotterOptions();
-            mLCMS2DOverviewPlotDivisor = clsLCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR;
-
-            ScanStart = 0;
-            ScanEnd = 0;
-            ShowDebugInfo = false;
-
-            ComputeOverallQualityScores = false;
-
-            CopyFileLocalOnReadError = false;
-
-            mCheckFileIntegrity = false;
-
-            DSInfoConnectionString = "Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;";
-            DSInfoDBPostingEnabled = false;
-            DSInfoStoredProcedure = "UpdateDatasetFileInfoXML";
-            DatasetIDOverride = 0;
-
-            mFileIntegrityDetailsFilePath = Path.Combine(GetAppDirectoryPath(), DefaultDataFileName(eDataFileTypeConstants.FileIntegrityDetails));
-            mFileIntegrityErrorsFilePath = Path.Combine(GetAppDirectoryPath(), DefaultDataFileName(eDataFileTypeConstants.FileIntegrityErrors));
+            mFileIntegrityDetailsFilePath = Path.Combine(GetAppDirectoryPath(), DefaultDataFileName(DataFileTypeConstants.FileIntegrityDetails));
+            mFileIntegrityErrorsFilePath = Path.Combine(GetAppDirectoryPath(), DefaultDataFileName(DataFileTypeConstants.FileIntegrityErrors));
 
             mMSFileInfoDataCache.InitializeVariables();
 
@@ -102,7 +82,7 @@ namespace MSFileInfoScanner
             mLastCheckForAbortProcessingFile = oneHourAgo;
         }
 
-        #region "Constants and Enums"
+        #region "Constants"
 
         public const string DEFAULT_ACQUISITION_TIME_FILENAME_TXT = "DatasetTimeFile.txt";
 
@@ -136,12 +116,74 @@ namespace MSFileInfoScanner
 
         private const bool SKIP_FILES_IN_ERROR = true;
 
-        private enum eMessageTypeConstants
+        #endregion
+
+        #region "Enums"
+
+        private enum MessageTypeConstants
         {
             Normal = 0,
             ErrorMsg = 1,
             Warning = 2,
             Debug = 3
+        }
+
+        /// <summary>
+        /// MSFileInfoScanner error codes
+        /// </summary>
+        public enum MSFileScannerErrorCodes
+        {
+            NoError = 0,
+            InvalidInputFilePath = 1,
+            InvalidOutputDirectoryPath = 2,
+
+            [Obsolete("Use InvalidOutputDirectoryPath")]
+            InvalidOutputFolderPath = 2,
+
+            ParameterFileNotFound = 3,
+            FilePathError = 4,
+
+            ParameterFileReadError = 5,
+            UnknownFileExtension = 6,
+            InputFileAccessError = 7,
+            InputFileReadError = 8,
+            OutputFileWriteError = 9,
+            FileIntegrityCheckError = 10,
+
+            DatabasePostingError = 11,
+            MS2MzMinValidationError = 12,
+            MS2MzMinValidationWarning = 13,
+
+            ThermoRawFileReaderError = 14,
+            DatasetHasNoSpectra = 15,
+
+            UnspecifiedError = -1
+        }
+
+        /// <summary>
+        /// Processing state constants
+        /// </summary>
+        public enum MSFileProcessingStateConstants
+        {
+            NotProcessed = 0,
+            SkippedSinceFoundInCache = 1,
+            FailedProcessing = 2,
+            ProcessedSuccessfully = 3
+        }
+
+        /// <summary>
+        /// Data file type constants
+        /// </summary>
+        public enum DataFileTypeConstants
+        {
+            MSFileInfo = 0,
+            DirectoryIntegrityInfo = 1,
+
+            [Obsolete("Use DirectoryIntegrityInfo")]
+            FolderIntegrityInfo = 1,
+
+            FileIntegrityDetails = 2,
+            FileIntegrityErrors = 3
         }
 
         #endregion
@@ -152,12 +194,7 @@ namespace MSFileInfoScanner
 
         private string mFileIntegrityErrorsFilePath;
 
-        private string mDatasetStatsTextFileName;
-        private bool mCheckFileIntegrity;
-
-        private readonly clsLCMSDataPlotterOptions mLCMS2DPlotOptions;
-
-        private int mLCMS2DOverviewPlotDivisor;
+        private readonly LCMSDataPlotterOptions mLCMS2DPlotOptions;
 
         private string mLogFilePath;
 
@@ -169,13 +206,13 @@ namespace MSFileInfoScanner
         // If blank, mOutputDirectoryPath will be used; if mOutputDirectoryPath is also blank, the log is created in the same directory as the executing assembly
         private string mLogDirectoryPath;
 
-        private readonly clsFileIntegrityChecker mFileIntegrityChecker;
+        private readonly FileIntegrityChecker mFileIntegrityChecker;
 
         private StreamWriter mFileIntegrityDetailsWriter;
 
         private StreamWriter mFileIntegrityErrorsWriter;
 
-        private iMSFileInfoProcessor mMSInfoScanner;
+        private MSFileInfoProcessorBaseClass mMSInfoScanner;
 
         private readonly MSFileInfoDataCache mMSFileInfoDataCache;
 
@@ -186,81 +223,72 @@ namespace MSFileInfoScanner
         #endregion
 
         #region "Processing Options and Interface Functions"
-        public override string AcquisitionTimeFilename
+
+        public bool AbortProcessing { get; set; }
+
+        public string AcquisitionTimeFilename
         {
-            get => GetDataFileFilename(eDataFileTypeConstants.MSFileInfo);
-            set => SetDataFileFilename(value, eDataFileTypeConstants.MSFileInfo);
+            get => GetDataFileFilename(DataFileTypeConstants.MSFileInfo);
+            set => SetDataFileFilename(value, DataFileTypeConstants.MSFileInfo);
         }
 
         /// <summary>
-        /// When true, checks the integrity of every file in every directory processed
+        /// Returns the dataset info, formatted as XML
         /// </summary>
-        public override bool CheckFileIntegrity
-        {
-            get => mCheckFileIntegrity;
-            set
-            {
-                mCheckFileIntegrity = value;
-                if (mCheckFileIntegrity)
-                {
-                    // Make sure Cache Files are enabled
-                    UseCacheFiles = true;
-                }
-            }
-        }
+        public string DatasetInfoXML { get; private set; }
 
-        public override string GetDataFileFilename(eDataFileTypeConstants eDataFileType)
+        public string GetDataFileFilename(DataFileTypeConstants dataFileType)
         {
-            switch (eDataFileType)
+            switch (dataFileType)
             {
-                case eDataFileTypeConstants.MSFileInfo:
+                case DataFileTypeConstants.MSFileInfo:
                     return mMSFileInfoDataCache.AcquisitionTimeFilePath;
-                case eDataFileTypeConstants.DirectoryIntegrityInfo:
+                case DataFileTypeConstants.DirectoryIntegrityInfo:
                     return mMSFileInfoDataCache.DirectoryIntegrityInfoFilePath;
-                case eDataFileTypeConstants.FileIntegrityDetails:
+                case DataFileTypeConstants.FileIntegrityDetails:
                     return mFileIntegrityDetailsFilePath;
-                case eDataFileTypeConstants.FileIntegrityErrors:
+                case DataFileTypeConstants.FileIntegrityErrors:
                     return mFileIntegrityErrorsFilePath;
                 default:
                     return string.Empty;
             }
         }
 
-        public override void SetDataFileFilename(string filePath, eDataFileTypeConstants eDataFileType)
+        public void SetDataFileFilename(string filePath, DataFileTypeConstants dataFileType)
         {
-            switch (eDataFileType)
+            switch (dataFileType)
             {
-                case eDataFileTypeConstants.MSFileInfo:
+                case DataFileTypeConstants.MSFileInfo:
                     mMSFileInfoDataCache.AcquisitionTimeFilePath = filePath;
                     break;
-                case eDataFileTypeConstants.DirectoryIntegrityInfo:
+                case DataFileTypeConstants.DirectoryIntegrityInfo:
                     mMSFileInfoDataCache.DirectoryIntegrityInfoFilePath = filePath;
                     break;
-                case eDataFileTypeConstants.FileIntegrityDetails:
+                case DataFileTypeConstants.FileIntegrityDetails:
                     mFileIntegrityDetailsFilePath = filePath;
                     break;
-                case eDataFileTypeConstants.FileIntegrityErrors:
+                case DataFileTypeConstants.FileIntegrityErrors:
                     mFileIntegrityErrorsFilePath = filePath;
                     break;
                 default:
                     // Unknown file type
-                    throw new ArgumentOutOfRangeException(nameof(eDataFileType));
+                    throw new ArgumentOutOfRangeException(nameof(dataFileType));
             }
         }
 
-        public static string DefaultAcquisitionTimeFilename => DefaultDataFileName(eDataFileTypeConstants.MSFileInfo);
+        public static string DefaultAcquisitionTimeFilename => DefaultDataFileName(DataFileTypeConstants.MSFileInfo);
 
-        public static string DefaultDataFileName(eDataFileTypeConstants eDataFileType)
+        public static string DefaultDataFileName(DataFileTypeConstants dataFileType)
         {
-            switch (eDataFileType)
+            switch (dataFileType)
             {
-                case eDataFileTypeConstants.MSFileInfo:
+                case DataFileTypeConstants.MSFileInfo:
                     return DEFAULT_ACQUISITION_TIME_FILENAME_TXT;
-                case eDataFileTypeConstants.DirectoryIntegrityInfo:
+                case DataFileTypeConstants.DirectoryIntegrityInfo:
                     return DEFAULT_DIRECTORY_INTEGRITY_INFO_FILENAME_TXT;
-                case eDataFileTypeConstants.FileIntegrityDetails:
+                case DataFileTypeConstants.FileIntegrityDetails:
                     return DEFAULT_FILE_INTEGRITY_DETAILS_FILENAME_TXT;
-                case eDataFileTypeConstants.FileIntegrityErrors:
+                case DataFileTypeConstants.FileIntegrityErrors:
                     return DEFAULT_FILE_INTEGRITY_ERRORS_FILENAME_TXT;
                 default:
                     return "UnknownFileType.txt";
@@ -268,172 +296,25 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// When True, computes a SHA-1 hash on every file using mFileIntegrityChecker
+        /// Processing error code
         /// </summary>
-        /// <remarks>
-        /// Note, when this is false, the program computes the SHA-1 hash of the primary dataset file (or files),
-        /// unless DisableInstrumentHash is true
-        /// </remarks>
-        public override bool ComputeFileHashes
-        {
-            get
-            {
-                if (mFileIntegrityChecker != null)
-                {
-                    return mFileIntegrityChecker.ComputeFileHashes;
-                }
-
-                return false;
-            }
-            set
-            {
-                if (mFileIntegrityChecker != null)
-                {
-                    mFileIntegrityChecker.ComputeFileHashes = value;
-                }
-            }
-        }
-
-        public override string DatasetStatsTextFileName
-        {
-            get => mDatasetStatsTextFileName;
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                {
-                    // Do not update mDatasetStatsTextFileName
-                }
-                else
-                {
-                    mDatasetStatsTextFileName = value;
-                }
-            }
-        }
-
-        /// <summary>
-        /// By default, will compute the SHA-1 hash of only the primary dataset file
-        /// Disable by setting this to true
-        /// </summary>
-        public bool DisableInstrumentHash { get; set; }
-
-        public override float LCMS2DPlotMZResolution
-        {
-            get => mLCMS2DPlotOptions.MZResolution;
-            set => mLCMS2DPlotOptions.MZResolution = value;
-        }
-
-        public override int LCMS2DPlotMaxPointsToPlot
-        {
-            get => mLCMS2DPlotOptions.MaxPointsToPlot;
-            set => mLCMS2DPlotOptions.MaxPointsToPlot = value;
-        }
-
-        public override int LCMS2DOverviewPlotDivisor
-        {
-            get => mLCMS2DOverviewPlotDivisor;
-            set => mLCMS2DOverviewPlotDivisor = value;
-        }
-
-        public override int LCMS2DPlotMinPointsPerSpectrum
-        {
-            get => mLCMS2DPlotOptions.MinPointsPerSpectrum;
-            set => mLCMS2DPlotOptions.MinPointsPerSpectrum = value;
-        }
-
-        public override float LCMS2DPlotMinIntensity
-        {
-            get => mLCMS2DPlotOptions.MinIntensity;
-            set => mLCMS2DPlotOptions.MinIntensity = value;
-        }
-
-        public override int MaximumTextFileLinesToCheck
-        {
-            get
-            {
-                if (mFileIntegrityChecker != null)
-                {
-                    return mFileIntegrityChecker.MaximumTextFileLinesToCheck;
-                }
-
-                return 0;
-            }
-            set
-            {
-                if (mFileIntegrityChecker != null)
-                {
-                    mFileIntegrityChecker.MaximumTextFileLinesToCheck = value;
-                }
-            }
-        }
-
-        public override int MaximumXMLElementNodesToCheck
-        {
-            get
-            {
-                if (mFileIntegrityChecker != null)
-                {
-                    return mFileIntegrityChecker.MaximumTextFileLinesToCheck;
-                }
-
-                return 0;
-            }
-            set
-            {
-                if (mFileIntegrityChecker != null)
-                {
-                    mFileIntegrityChecker.MaximumTextFileLinesToCheck = value;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Minimum m/z value that MS/MS spectra should have
-        /// </summary>
-        /// <remarks>
-        /// Useful for validating instrument files where the sample is iTRAQ or TMT labeled
-        /// and it is important to detect the reporter ions in the MS/MS spectra
-        /// </remarks>
-        public override float MS2MzMin { get; set; }
+        public MSFileScannerErrorCodes ErrorCode { get; private set; }
 
         /// <summary>
         /// MS2MzMin validation error or warning Message
         /// </summary>
-        public override string MS2MzMinValidationMessage { get; set; }
+        public string MS2MzMinValidationMessage { get; private set; }
 
         /// <summary>
-        /// Set to True to print out a series of 2D plots, each using a different color scheme
+        /// Processing options
         /// </summary>
-        public bool TestLCMSGradientColorSchemes
-        {
-            get => mLCMS2DPlotOptions.TestGradientColorSchemes;
-            set => mLCMS2DPlotOptions.TestGradientColorSchemes = value;
-        }
-
-        public override bool ZipFileCheckAllData
-        {
-            get
-            {
-                if (mFileIntegrityChecker != null)
-                {
-                    return mFileIntegrityChecker.ZipFileCheckAllData;
-                }
-
-                return false;
-            }
-            set
-            {
-                if (mFileIntegrityChecker != null)
-                {
-                    mFileIntegrityChecker.ZipFileCheckAllData = value;
-                }
-            }
-        }
+        public InfoScannerOptions Options { get; }
 
         #endregion
 
         private void AutoSaveCachedResults()
         {
-            if (UseCacheFiles)
+            if (Options.UseCacheFiles)
             {
                 mMSFileInfoDataCache.AutosaveCachedResults();
             }
@@ -493,7 +374,7 @@ namespace MSFileInfoScanner
                 }
 
                 var checkDirectory = true;
-                if (UseCacheFiles && !forceRecheck)
+                if (Options.UseCacheFiles && !forceRecheck)
                 {
                     if (mMSFileInfoDataCache.CachedDirectoryIntegrityInfoContainsDirectory(datasetDirectory.FullName, out directoryID, out var dataRow))
                     {
@@ -516,7 +397,7 @@ namespace MSFileInfoScanner
 
                 mFileIntegrityChecker.CheckIntegrityOfFilesInDirectory(directoryPath, out var directoryStats, out var fileStats, processedFileList);
 
-                if (UseCacheFiles)
+                if (Options.UseCacheFiles)
                 {
                     if (!mMSFileInfoDataCache.UpdateCachedDirectoryIntegrityInfo(directoryStats, out directoryID))
                     {
@@ -537,12 +418,11 @@ namespace MSFileInfoScanner
         /// For example: C:\Users\username\AppData\Roaming\MSFileInfoScanner
         /// </summary>
         /// <param name="appName"></param>
-        /// <returns></returns>
         public static string GetAppDataDirectoryPath(string appName = "")
         {
             if (string.IsNullOrWhiteSpace(appName))
             {
-                appName = Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
+                appName = Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().GetName().Name);
             }
 
             return ProcessFilesOrDirectoriesBase.GetAppDataDirectoryPath(appName);
@@ -551,10 +431,10 @@ namespace MSFileInfoScanner
         public static string GetAppDirectoryPath()
         {
             // Could use Application.StartupPath, but .GetExecutingAssembly is better
-            return Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
 
-        public override string[] GetKnownDirectoryExtensions()
+        public string[] GetKnownDirectoryExtensions()
         {
             return GetKnownDirectoryExtensionsList().ToArray();
         }
@@ -563,14 +443,14 @@ namespace MSFileInfoScanner
         {
             var extensionsToParse = new List<string>
             {
-                clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION.ToUpper(),
-                clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION.ToUpper()
+                AgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION.ToUpper(),
+                WatersRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION.ToUpper()
             };
 
             return extensionsToParse;
         }
 
-        public override string[] GetKnownFileExtensions()
+        public string[] GetKnownFileExtensions()
         {
             return GetKnownFileExtensionsList().ToArray();
         }
@@ -579,20 +459,20 @@ namespace MSFileInfoScanner
         {
             var extensionsToParse = new List<string>
             {
-                clsThermoRawFileInfoScanner.THERMO_RAW_FILE_EXTENSION.ToUpper(),
-                clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION.ToUpper(),
-                clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION.ToUpper(),
-                clsBrukerXmassFolderInfoScanner.BRUKER_MCF_FILE_EXTENSION.ToUpper(),
-                clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_EXTENSION.ToUpper(),
-                clsUIMFInfoScanner.UIMF_FILE_EXTENSION.ToUpper(),
-                clsDeconToolsIsosInfoScanner.DECONTOOLS_CSV_FILE_EXTENSION.ToUpper()
+                ThermoRawFileInfoScanner.THERMO_RAW_FILE_EXTENSION.ToUpper(),
+                AgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION.ToUpper(),
+                BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION.ToUpper(),
+                BrukerXmassFolderInfoScanner.BRUKER_MCF_FILE_EXTENSION.ToUpper(),
+                BrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_EXTENSION.ToUpper(),
+                UIMFInfoScanner.UIMF_FILE_EXTENSION.ToUpper(),
+                DeconToolsIsosInfoScanner.DECONTOOLS_CSV_FILE_EXTENSION.ToUpper()
             };
 
             return extensionsToParse;
         }
 
         [Obsolete("Use GetKnownDirectoryExtensions")]
-        public override string[] GetKnownFolderExtensions()
+        public string[] GetKnownFolderExtensions()
         {
             return GetKnownDirectoryExtensionsList().ToArray();
         }
@@ -606,36 +486,35 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Get the error message, or an empty string if no error
         /// </summary>
-        /// <returns></returns>
-        public override string GetErrorMessage()
+        public string GetErrorMessage()
         {
             switch (ErrorCode)
             {
-                case eMSFileScannerErrorCodes.NoError:
+                case MSFileScannerErrorCodes.NoError:
                     return string.Empty;
-                case eMSFileScannerErrorCodes.InvalidInputFilePath:
+                case MSFileScannerErrorCodes.InvalidInputFilePath:
                     return "Invalid input file path";
-                case eMSFileScannerErrorCodes.InvalidOutputDirectoryPath:
+                case MSFileScannerErrorCodes.InvalidOutputDirectoryPath:
                     return "Invalid output directory path";
-                case eMSFileScannerErrorCodes.ParameterFileNotFound:
+                case MSFileScannerErrorCodes.ParameterFileNotFound:
                     return "Parameter file not found";
-                case eMSFileScannerErrorCodes.FilePathError:
+                case MSFileScannerErrorCodes.FilePathError:
                     return "General file path error";
-                case eMSFileScannerErrorCodes.ParameterFileReadError:
+                case MSFileScannerErrorCodes.ParameterFileReadError:
                     return "Parameter file read error";
-                case eMSFileScannerErrorCodes.UnknownFileExtension:
+                case MSFileScannerErrorCodes.UnknownFileExtension:
                     return "Unknown file extension";
-                case eMSFileScannerErrorCodes.InputFileReadError:
+                case MSFileScannerErrorCodes.InputFileReadError:
                     return "Input file read error";
-                case eMSFileScannerErrorCodes.InputFileAccessError:
+                case MSFileScannerErrorCodes.InputFileAccessError:
                     return "Input file access error";
-                case eMSFileScannerErrorCodes.OutputFileWriteError:
+                case MSFileScannerErrorCodes.OutputFileWriteError:
                     return "Error writing output file";
-                case eMSFileScannerErrorCodes.FileIntegrityCheckError:
+                case MSFileScannerErrorCodes.FileIntegrityCheckError:
                     return "Error checking file integrity";
-                case eMSFileScannerErrorCodes.DatabasePostingError:
+                case MSFileScannerErrorCodes.DatabasePostingError:
                     return "Database posting error";
-                case eMSFileScannerErrorCodes.MS2MzMinValidationError:
+                case MSFileScannerErrorCodes.MS2MzMinValidationError:
 
                     // Over 10% of the MS/MS spectra have a minimum m/z value larger than the required minimum
                     var errorMsg = string.Format("Over {0}% of the MS/MS spectra have a minimum m/z value larger than the required minimum; " +
@@ -649,7 +528,7 @@ namespace MSFileInfoScanner
                     {
                         return errorMsg;
                     }
-                case eMSFileScannerErrorCodes.MS2MzMinValidationWarning:
+                case MSFileScannerErrorCodes.MS2MzMinValidationWarning:
                     var warningMsg = "Some of the MS/MS spectra have a minimum m/z value larger than the required minimum; " +
                                      "reporter ion peaks likely could not be detected";
 
@@ -662,7 +541,7 @@ namespace MSFileInfoScanner
                         return warningMsg;
                     }
 
-                case eMSFileScannerErrorCodes.UnspecifiedError:
+                case MSFileScannerErrorCodes.UnspecifiedError:
                     return "Unspecified localized error";
                 default:
                     // This shouldn't happen
@@ -709,24 +588,24 @@ namespace MSFileInfoScanner
 
         private void LoadCachedResults(bool forceLoad)
         {
-            if (UseCacheFiles)
+            if (Options.UseCacheFiles)
             {
                 mMSFileInfoDataCache.LoadCachedResults(forceLoad);
             }
         }
 
-        private void LogMessage(string message, eMessageTypeConstants eMessageType = eMessageTypeConstants.Normal)
+        private void LogMessage(string message, MessageTypeConstants messageType = MessageTypeConstants.Normal)
         {
             // Note that ProcessMSFileOrDirectory() will update mOutputDirectoryPath, which is used here if mLogDirectoryPath is blank
 
-            if (mLogFile == null && LogMessagesToFile)
+            if (mLogFile == null && Options.LogMessagesToFile)
             {
                 try
                 {
                     if (string.IsNullOrEmpty(mLogFilePath))
                     {
                         // Auto-name the log file
-                        mLogFilePath = Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                        mLogFilePath = Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location);
                         mLogFilePath += "_log_" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
                     }
 
@@ -777,34 +656,34 @@ namespace MSFileInfoScanner
                 }
                 catch (Exception)
                 {
-                    // Error creating the log file; set mLogMessagesToFile to false so we don't repeatedly try to create it
-                    LogMessagesToFile = false;
+                    // Error creating the log file; clear the log file path so that we don't repeatedly try to create it
+                    Options.LogFilePath = string.Empty;
                 }
             }
 
             if (mLogFile != null)
             {
-                string messageType;
-                switch (eMessageType)
+                string messageTypeName;
+                switch (messageType)
                 {
-                    case eMessageTypeConstants.Debug:
-                        messageType = "Debug";
+                    case MessageTypeConstants.Debug:
+                        messageTypeName = "Debug";
                         break;
-                    case eMessageTypeConstants.Normal:
-                        messageType = "Normal";
+                    case MessageTypeConstants.Normal:
+                        messageTypeName = "Normal";
                         break;
-                    case eMessageTypeConstants.ErrorMsg:
-                        messageType = "Error";
+                    case MessageTypeConstants.ErrorMsg:
+                        messageTypeName = "Error";
                         break;
-                    case eMessageTypeConstants.Warning:
-                        messageType = "Warning";
+                    case MessageTypeConstants.Warning:
+                        messageTypeName = "Warning";
                         break;
                     default:
-                        messageType = "Unknown";
+                        messageTypeName = "Unknown";
                         break;
                 }
 
-                mLogFile.WriteLine(DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") + '\t' + messageType + '\t' + message);
+                mLogFile.WriteLine(DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") + '\t' + messageTypeName + '\t' + message);
             }
         }
 
@@ -812,8 +691,7 @@ namespace MSFileInfoScanner
         /// Read settings from an XML-based parameter file
         /// </summary>
         /// <param name="parameterFilePath"></param>
-        /// <returns></returns>
-        public override bool LoadParameterFileSettings(string parameterFilePath)
+        public bool LoadParameterFileSettings(string parameterFilePath)
         {
             var settingsFile = new XmlSettingsFileAccessor();
 
@@ -832,7 +710,7 @@ namespace MSFileInfoScanner
                     if (!File.Exists(parameterFilePath))
                     {
                         ReportError("Parameter file not found: " + parameterFilePath);
-                        SetErrorCode(eMSFileScannerErrorCodes.ParameterFileNotFound);
+                        SetErrorCode(MSFileScannerErrorCodes.ParameterFileNotFound);
                         return false;
                     }
                 }
@@ -847,62 +725,63 @@ namespace MSFileInfoScanner
                     }
                     else
                     {
-                        DSInfoConnectionString = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoConnectionString", DSInfoConnectionString);
-                        DSInfoDBPostingEnabled = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoDBPostingEnabled", DSInfoDBPostingEnabled);
-                        DSInfoStoredProcedure = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoStoredProcedure", DSInfoStoredProcedure);
+                        Options.DatabaseConnectionString = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoConnectionString", Options.DatabaseConnectionString);
+                        Options.PostResultsToDMS = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoDBPostingEnabled", Options.PostResultsToDMS);
+                        Options.DSInfoStoredProcedure = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoStoredProcedure", Options.DSInfoStoredProcedure);
 
-                        LogMessagesToFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogMessagesToFile", LogMessagesToFile);
-                        LogFilePath = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogFilePath", LogFilePath);
+                        // Obsolete: Options.LogMessagesToFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogMessagesToFile", Options.LogMessagesToFile);
+                        // If LogFilePath is defined, logging is enabled
+                        Options.LogFilePath = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogFilePath", Options.LogFilePath);
 
                         var legacyLogDir = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogFolderPath", string.Empty);
                         if (!string.IsNullOrEmpty(legacyLogDir))
                         {
-                            LogDirectoryPath = legacyLogDir;
+                            Options.LogDirectoryPath = legacyLogDir;
                             OnWarningEvent("Update the parameter file to switch from LogFolderPath to LogDirectoryPath");
                         }
 
-                        LogDirectoryPath = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogDirectoryPath", LogDirectoryPath);
+                        Options.LogDirectoryPath = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogDirectoryPath", Options.LogDirectoryPath);
 
-                        UseCacheFiles = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UseCacheFiles", UseCacheFiles);
-                        ReprocessExistingFiles = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessExistingFiles", ReprocessExistingFiles);
-                        ReprocessIfCachedSizeIsZero = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessIfCachedSizeIsZero", ReprocessIfCachedSizeIsZero);
+                        Options.UseCacheFiles = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UseCacheFiles", Options.UseCacheFiles);
+                        Options.ReprocessExistingFiles = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessExistingFiles", Options.ReprocessExistingFiles);
+                        Options.ReprocessIfCachedSizeIsZero = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessIfCachedSizeIsZero", Options.ReprocessIfCachedSizeIsZero);
 
-                        CopyFileLocalOnReadError = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CopyFileLocalOnReadError", CopyFileLocalOnReadError);
+                        Options.CopyFileLocalOnReadError = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CopyFileLocalOnReadError", Options.CopyFileLocalOnReadError);
 
-                        SaveTICAndBPIPlots = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveTICAndBPIPlots", SaveTICAndBPIPlots);
-                        SaveLCMS2DPlots = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveLCMS2DPlots", SaveLCMS2DPlots);
-                        CheckCentroidingStatus = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckCentroidingStatus", CheckCentroidingStatus);
+                        Options.SaveTICAndBPIPlots = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveTICAndBPIPlots", Options.SaveTICAndBPIPlots);
+                        Options.SaveLCMS2DPlots = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveLCMS2DPlots", Options.SaveLCMS2DPlots);
+                        Options.CheckCentroidingStatus = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckCentroidingStatus", Options.CheckCentroidingStatus);
 
-                        MS2MzMin = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MS2MzMin", MS2MzMin);
-                        DisableInstrumentHash = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DisableInstrumentHash", DisableInstrumentHash);
+                        Options.MS2MzMin = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MS2MzMin", Options.MS2MzMin);
+                        Options.DisableInstrumentHash = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DisableInstrumentHash", Options.DisableInstrumentHash);
 
-                        LCMS2DPlotMZResolution = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMZResolution", LCMS2DPlotMZResolution);
-                        LCMS2DPlotMinPointsPerSpectrum = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinPointsPerSpectrum", LCMS2DPlotMinPointsPerSpectrum);
+                        mLCMS2DPlotOptions.MZResolution = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMZResolution", mLCMS2DPlotOptions.MZResolution);
+                        mLCMS2DPlotOptions.MinPointsPerSpectrum = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinPointsPerSpectrum", mLCMS2DPlotOptions.MinPointsPerSpectrum);
 
-                        LCMS2DPlotMaxPointsToPlot = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMaxPointsToPlot", LCMS2DPlotMaxPointsToPlot);
-                        LCMS2DPlotMinIntensity = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinIntensity", LCMS2DPlotMinIntensity);
+                        mLCMS2DPlotOptions.MaxPointsToPlot = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMaxPointsToPlot", mLCMS2DPlotOptions.MaxPointsToPlot);
+                        mLCMS2DPlotOptions.MinIntensity = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinIntensity", mLCMS2DPlotOptions.MinIntensity);
 
-                        LCMS2DOverviewPlotDivisor = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DOverviewPlotDivisor", LCMS2DOverviewPlotDivisor);
+                        mLCMS2DPlotOptions.LCMS2DOverviewPlotDivisor = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DOverviewPlotDivisor", mLCMS2DPlotOptions.LCMS2DOverviewPlotDivisor);
 
-                        ScanStart = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanStart", ScanStart);
-                        ScanEnd = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanEnd", ScanEnd);
+                        Options.ScanStart = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanStart", Options.ScanStart);
+                        Options.ScanEnd = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanEnd", Options.ScanEnd);
 
-                        ComputeOverallQualityScores = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeOverallQualityScores", ComputeOverallQualityScores);
-                        CreateDatasetInfoFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateDatasetInfoFile", CreateDatasetInfoFile);
-                        CreateScanStatsFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateScanStatsFile", CreateScanStatsFile);
+                        Options.ComputeOverallQualityScores = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeOverallQualityScores", Options.ComputeOverallQualityScores);
+                        Options.CreateDatasetInfoFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateDatasetInfoFile", Options.CreateDatasetInfoFile);
+                        Options.CreateScanStatsFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateScanStatsFile", Options.CreateScanStatsFile);
 
-                        UpdateDatasetStatsTextFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UpdateDatasetStatsTextFile", UpdateDatasetStatsTextFile);
-                        DatasetStatsTextFileName = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DatasetStatsTextFileName", DatasetStatsTextFileName);
+                        Options.UpdateDatasetStatsTextFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UpdateDatasetStatsTextFile", Options.UpdateDatasetStatsTextFile);
+                        Options.DatasetStatsTextFileName = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DatasetStatsTextFileName", Options.DatasetStatsTextFileName);
 
-                        CheckFileIntegrity = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckFileIntegrity", CheckFileIntegrity);
-                        RecheckFileIntegrityForExistingDirectories = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "RecheckFileIntegrityForExistingDirectories", RecheckFileIntegrityForExistingDirectories);
+                        Options.CheckFileIntegrity = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckFileIntegrity", Options.CheckFileIntegrity);
+                        Options.ReprocessExistingFiles = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "RecheckFileIntegrityForExistingDirectories", Options.ReprocessExistingFiles);
 
-                        MaximumTextFileLinesToCheck = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MaximumTextFileLinesToCheck", MaximumTextFileLinesToCheck);
-                        MaximumXMLElementNodesToCheck = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MaximumXMLElementNodesToCheck", MaximumXMLElementNodesToCheck);
-                        ComputeFileHashes = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeFileHashes", ComputeFileHashes);
-                        ZipFileCheckAllData = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ZipFileCheckAllData", ZipFileCheckAllData);
+                        Options.MaximumTextFileLinesToCheck = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MaximumTextFileLinesToCheck", Options.MaximumTextFileLinesToCheck);
+                        Options.MaximumXMLElementNodesToCheck = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MaximumXMLElementNodesToCheck", Options.MaximumXMLElementNodesToCheck);
+                        Options.ComputeFileHashes = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeFileHashes", Options.ComputeFileHashes);
+                        Options.ZipFileCheckAllData = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ZipFileCheckAllData", Options.ZipFileCheckAllData);
 
-                        IgnoreErrorsWhenRecursing = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "IgnoreErrorsWhenRecursing", IgnoreErrorsWhenRecursing);
+                        Options.IgnoreErrorsWhenRecursing = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "IgnoreErrorsWhenRecursing", Options.IgnoreErrorsWhenRecursing);
                     }
                 }
                 else
@@ -922,21 +801,21 @@ namespace MSFileInfoScanner
 
         private void OpenFileIntegrityDetailsFile()
         {
-            OpenFileIntegrityOutputFile(eDataFileTypeConstants.FileIntegrityDetails, ref mFileIntegrityDetailsFilePath, ref mFileIntegrityDetailsWriter);
+            OpenFileIntegrityOutputFile(DataFileTypeConstants.FileIntegrityDetails, ref mFileIntegrityDetailsFilePath, ref mFileIntegrityDetailsWriter);
         }
 
         private void OpenFileIntegrityErrorsFile()
         {
-            OpenFileIntegrityOutputFile(eDataFileTypeConstants.FileIntegrityErrors, ref mFileIntegrityErrorsFilePath, ref mFileIntegrityErrorsWriter);
+            OpenFileIntegrityOutputFile(DataFileTypeConstants.FileIntegrityErrors, ref mFileIntegrityErrorsFilePath, ref mFileIntegrityErrorsWriter);
         }
 
-        private void OpenFileIntegrityOutputFile(eDataFileTypeConstants eDataFileType, ref string filePath, ref StreamWriter writer)
+        private void OpenFileIntegrityOutputFile(DataFileTypeConstants dataFileType, ref string filePath, ref StreamWriter writer)
         {
             var openedExistingFile = false;
             FileStream fsFileStream = null;
 
-            var defaultFileName = DefaultDataFileName(eDataFileType);
-            ValidateDataFilePath(ref filePath, eDataFileType);
+            var defaultFileName = DefaultDataFileName(dataFileType);
+            ValidateDataFilePath(ref filePath, dataFileType);
 
             try
             {
@@ -973,7 +852,7 @@ namespace MSFileInfoScanner
 
                     if (!openedExistingFile)
                     {
-                        writer.WriteLine(mMSFileInfoDataCache.ConstructHeaderLine(eDataFileType));
+                        writer.WriteLine(mMSFileInfoDataCache.ConstructHeaderLine(dataFileType));
                     }
                 }
             }
@@ -994,9 +873,9 @@ namespace MSFileInfoScanner
         /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
         /// </summary>
         /// <returns>True if success; false if failure</returns>
-        public override bool PostDatasetInfoToDB()
+        public bool PostDatasetInfoToDB()
         {
-            return PostDatasetInfoToDB(DatasetInfoXML, DSInfoConnectionString, DSInfoStoredProcedure);
+            return PostDatasetInfoToDB(DatasetInfoXML, Options.DatabaseConnectionString, Options.DSInfoStoredProcedure);
         }
 
         /// <summary>
@@ -1004,9 +883,9 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="datasetInfoXML">Database info XML</param>
         /// <returns>True if success; false if failure</returns>
-        public override bool PostDatasetInfoToDB(string datasetInfoXML)
+        public bool PostDatasetInfoToDB(string datasetInfoXML)
         {
-            return PostDatasetInfoToDB(datasetInfoXML, DSInfoConnectionString, DSInfoStoredProcedure);
+            return PostDatasetInfoToDB(datasetInfoXML, Options.DatabaseConnectionString, Options.DSInfoStoredProcedure);
         }
 
         /// <summary>
@@ -1015,7 +894,7 @@ namespace MSFileInfoScanner
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
-        public override bool PostDatasetInfoToDB(string connectionString, string storedProcedureName)
+        public bool PostDatasetInfoToDB(string connectionString, string storedProcedureName)
         {
             return PostDatasetInfoToDB(DatasetInfoXML, connectionString, storedProcedureName);
         }
@@ -1027,7 +906,7 @@ namespace MSFileInfoScanner
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
-        public override bool PostDatasetInfoToDB(string datasetInfoXML, string connectionString, string storedProcedureName)
+        public bool PostDatasetInfoToDB(string datasetInfoXML, string connectionString, string storedProcedureName)
         {
             const int MAX_RETRY_COUNT = 3;
             const int SEC_BETWEEN_RETRIES = 20;
@@ -1059,7 +938,7 @@ namespace MSFileInfoScanner
                 if (string.IsNullOrEmpty(connectionString))
                 {
                     ReportError("Connection string not defined; unable to post the dataset info to the database");
-                    SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
+                    SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                     return false;
                 }
 
@@ -1087,7 +966,7 @@ namespace MSFileInfoScanner
                 else
                 {
                     ReportError("Error calling stored procedure, return code = " + returnParam.Value.CastDBVal<string>());
-                    SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
+                    SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                     success = false;
                 }
 
@@ -1099,7 +978,7 @@ namespace MSFileInfoScanner
             catch (Exception ex)
             {
                 HandleException("Error calling stored procedure", ex);
-                SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
+                SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                 success = false;
             }
 
@@ -1114,7 +993,7 @@ namespace MSFileInfoScanner
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
-        public override bool PostDatasetInfoUseDatasetID(int datasetID, string connectionString, string storedProcedureName)
+        public bool PostDatasetInfoUseDatasetID(int datasetID, string connectionString, string storedProcedureName)
         {
             return PostDatasetInfoUseDatasetID(datasetID, DatasetInfoXML, connectionString, storedProcedureName);
         }
@@ -1128,7 +1007,7 @@ namespace MSFileInfoScanner
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
-        public override bool PostDatasetInfoUseDatasetID(int datasetID, string datasetInfoXML, string connectionString, string storedProcedureName)
+        public bool PostDatasetInfoUseDatasetID(int datasetID, string datasetInfoXML, string connectionString, string storedProcedureName)
         {
             const int MAX_RETRY_COUNT = 3;
             const int SEC_BETWEEN_RETRIES = 20;
@@ -1137,9 +1016,9 @@ namespace MSFileInfoScanner
 
             try
             {
-                if (datasetID == 0 && DatasetIDOverride > 0)
+                if (datasetID == 0 && Options.DatasetID > 0)
                 {
-                    datasetID = DatasetIDOverride;
+                    datasetID = Options.DatasetID;
                 }
 
                 ReportMessage("  Posting DatasetInfo XML to the database (using Dataset ID " + datasetID + ")");
@@ -1164,7 +1043,7 @@ namespace MSFileInfoScanner
                 if (string.IsNullOrEmpty(connectionString))
                 {
                     ReportError("Connection string not defined; unable to post the dataset info to the database");
-                    SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
+                    SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                     return false;
                 }
 
@@ -1192,58 +1071,44 @@ namespace MSFileInfoScanner
                 else
                 {
                     ReportError("Error calling stored procedure, return code = " + returnParam.Value.CastDBVal<string>());
-                    SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
+                    SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                     success = false;
                 }
             }
             catch (Exception ex)
             {
                 HandleException("Error calling stored procedure", ex);
-                SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
+                SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                 success = false;
             }
 
             return success;
         }
 
-        private bool ProcessMSDataset(string inputFileOrDirectoryPath, iMSFileInfoProcessor scanner, string datasetName, string outputDirectoryPath)
+        private bool ProcessMSDataset(string inputFileOrDirectoryPath, MSFileInfoProcessorBaseClass scanner, string datasetName, string outputDirectoryPath)
         {
             var datasetFileInfo = new DatasetFileInfo();
             if (!string.IsNullOrWhiteSpace(datasetName))
                 datasetFileInfo.DatasetName = datasetName;
 
-            // Set the processing options
-            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateTICAndBPI, SaveTICAndBPIPlots);
-            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateLCMS2DPlots, SaveLCMS2DPlots);
-            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CheckCentroidingStatus, CheckCentroidingStatus);
-            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.ComputeOverallQualityScores, ComputeOverallQualityScores);
-            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateDatasetInfoFile, CreateDatasetInfoFile);
-            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CreateScanStatsFile, CreateScanStatsFile);
-            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.CopyFileLocalOnReadError, CopyFileLocalOnReadError);
-            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.PlotWithPython, PlotWithPython);
-            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.UpdateDatasetStatsTextFile, UpdateDatasetStatsTextFile);
-            scanner.SetOption(iMSFileInfoProcessor.ProcessingOptions.DisableInstrumentHash, DisableInstrumentHash);
-
-            scanner.DatasetStatsTextFileName = mDatasetStatsTextFileName;
-
-            if (PlotWithPython)
+            if (Options.PlotWithPython)
             {
                 mLCMS2DPlotOptions.PlotWithPython = true;
 
-                if (SaveTICAndBPIPlots || SaveLCMS2DPlots)
+                if (Options.SaveTICAndBPIPlots || Options.SaveLCMS2DPlots)
                 {
                     // Make sure that Python exists
-                    if (!clsPythonPlotContainer.PythonInstalled)
+                    if (!PythonPlotContainer.PythonInstalled)
                     {
                         ReportError("Could not find the python executable");
                         var debugMsg = "Paths searched:";
-                        foreach (var item in clsPythonPlotContainer.PythonPathsToCheck())
+                        foreach (var item in PythonPlotContainer.PythonPathsToCheck())
                         {
                             debugMsg += "\n  " + item;
                         }
                         OnDebugEvent(debugMsg);
 
-                        SetErrorCode(eMSFileScannerErrorCodes.OutputFileWriteError);
+                        SetErrorCode(MSFileScannerErrorCodes.OutputFileWriteError);
                         return false;
                     }
                 }
@@ -1254,18 +1119,8 @@ namespace MSFileInfoScanner
                                "you should set PlotWithPython=True in the parameter file or use -PythonPlot at the command line");
             }
 
-            if (ShowDebugInfo)
+            if (Options.ShowDebugInfo)
                 mLCMS2DPlotOptions.DeleteTempFiles = false;
-
-            scanner.LCMS2DPlotOptions = mLCMS2DPlotOptions;
-            scanner.LCMS2DOverviewPlotDivisor = mLCMS2DOverviewPlotDivisor;
-
-            scanner.ScanStart = ScanStart;
-            scanner.ScanEnd = ScanEnd;
-            scanner.MS2MzMin = MS2MzMin;
-            scanner.ShowDebugInfo = ShowDebugInfo;
-
-            scanner.DatasetID = DatasetIDOverride;
 
             var retryCount = 0;
             bool success;
@@ -1303,6 +1158,10 @@ namespace MSFileInfoScanner
                     // Make an entry anyway; probably a corrupted file
                     success = true;
                 }
+                else
+                {
+                    SetErrorCode(scanner.ErrorCode, true);
+                }
             }
 
             if (success)
@@ -1310,13 +1169,13 @@ namespace MSFileInfoScanner
                 success = scanner.CreateOutputFiles(inputFileOrDirectoryPath, outputDirectoryPath);
                 if (!success)
                 {
-                    SetErrorCode(eMSFileScannerErrorCodes.OutputFileWriteError);
+                    SetErrorCode(MSFileScannerErrorCodes.OutputFileWriteError);
                 }
 
                 // Cache the Dataset Info XML
                 DatasetInfoXML = scanner.GetDatasetInfoXML();
 
-                if (UseCacheFiles)
+                if (Options.UseCacheFiles)
                 {
                     // Update the results database
                     mMSFileInfoDataCache.UpdateCachedMSFileInfo(datasetFileInfo);
@@ -1325,12 +1184,12 @@ namespace MSFileInfoScanner
                     AutoSaveCachedResults();
                 }
 
-                if (DSInfoDBPostingEnabled)
+                if (Options.PostResultsToDMS)
                 {
                     var dbSuccess = PostDatasetInfoToDB(DatasetInfoXML);
                     if (!dbSuccess)
                     {
-                        SetErrorCode(eMSFileScannerErrorCodes.DatabasePostingError);
+                        SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                         success = false;
                     }
                 }
@@ -1338,16 +1197,16 @@ namespace MSFileInfoScanner
                 if (scanner.MS2MzMinValidationError)
                 {
                     MS2MzMinValidationMessage = scanner.MS2MzMinValidationMessage;
-                    SetErrorCode(eMSFileScannerErrorCodes.MS2MzMinValidationError);
+                    SetErrorCode(MSFileScannerErrorCodes.MS2MzMinValidationError);
                     success = false;
                 }
                 else if (scanner.MS2MzMinValidationWarning)
                 {
                     MS2MzMinValidationMessage = scanner.MS2MzMinValidationMessage;
-                    SetErrorCode(eMSFileScannerErrorCodes.MS2MzMinValidationWarning);
+                    SetErrorCode(MSFileScannerErrorCodes.MS2MzMinValidationWarning);
                 }
 
-                if (datasetFileInfo.ScanCount == 0 && ErrorCode == eMSFileScannerErrorCodes.NoError)
+                if (datasetFileInfo.ScanCount == 0 && ErrorCode == MSFileScannerErrorCodes.NoError)
                 {
                     if (scanner is GenericFileInfoScanner)
                     {
@@ -1356,7 +1215,7 @@ namespace MSFileInfoScanner
                     else
                     {
                         OnWarningEvent("Dataset has no spectra: " + inputFileOrDirectoryPath);
-                        SetErrorCode(eMSFileScannerErrorCodes.DatasetHasNoSpectra);
+                        SetErrorCode(MSFileScannerErrorCodes.DatasetHasNoSpectra);
                     }
                 }
             }
@@ -1378,7 +1237,7 @@ namespace MSFileInfoScanner
         /// <param name="inputFileOrDirectoryPath"></param>
         /// <param name="outputDirectoryPath"></param>
         /// <returns>True if success, False if an error</returns>
-        public override bool ProcessMSFileOrDirectory(string inputFileOrDirectoryPath, string outputDirectoryPath)
+        public bool ProcessMSFileOrDirectory(string inputFileOrDirectoryPath, string outputDirectoryPath)
         {
             return ProcessMSFileOrDirectory(inputFileOrDirectoryPath, outputDirectoryPath, true, out _);
         }
@@ -1389,30 +1248,30 @@ namespace MSFileInfoScanner
         /// <param name="inputFileOrDirectoryPath"></param>
         /// <param name="outputDirectoryPath"></param>
         /// <param name="resetErrorCode"></param>
-        /// <param name="eMSFileProcessingState"></param>
+        /// <param name="msFileProcessingState"></param>
         /// <returns>True if success, False if an error</returns>
-        public override bool ProcessMSFileOrDirectory(
+        public bool ProcessMSFileOrDirectory(
             string inputFileOrDirectoryPath,
             string outputDirectoryPath,
             bool resetErrorCode,
-            out eMSFileProcessingStateConstants eMSFileProcessingState)
+            out MSFileProcessingStateConstants msFileProcessingState)
         {
             // Note: inputFileOrDirectoryPath must be a known MS data file or MS data directory
             // See function ProcessMSFilesAndRecurseDirectories for more details
             // This function returns True if it processed a file (or the dataset was processed previously)
             // When SKIP_FILES_IN_ERROR = True, it also returns True if the file type was a known type but the processing failed
             // If the file type is unknown, or if an error occurs, it returns false
-            // eMSFileProcessingState will be updated based on whether the file is processed, skipped, etc.
+            // msFileProcessingState will be updated based on whether the file is processed, skipped, etc.
 
             var success = false;
 
             if (resetErrorCode)
             {
-                SetErrorCode(eMSFileScannerErrorCodes.NoError);
+                SetErrorCode(MSFileScannerErrorCodes.NoError);
                 MS2MzMinValidationMessage = string.Empty;
             }
 
-            eMSFileProcessingState = eMSFileProcessingStateConstants.NotProcessed;
+            msFileProcessingState = MSFileProcessingStateConstants.NotProcessed;
 
             if (string.IsNullOrEmpty(outputDirectoryPath))
             {
@@ -1465,7 +1324,7 @@ namespace MSFileInfoScanner
                         else
                         // ReSharper disable once HeuristicUnreachableCode
                         {
-                            SetErrorCode(eMSFileScannerErrorCodes.FilePathError);
+                            SetErrorCode(MSFileScannerErrorCodes.FilePathError);
                             return false;
                         }
                     }
@@ -1475,10 +1334,10 @@ namespace MSFileInfoScanner
                     // Only continue if it's a known type
                     if (isDirectory)
                     {
-                        if (fileOrDirectoryInfo.Name == clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME)
+                        if (fileOrDirectoryInfo.Name == BrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME)
                         {
                             // Bruker 1 directory
-                            mMSInfoScanner = new clsBrukerOneFolderInfoScanner();
+                            mMSInfoScanner = new BrukerOneFolderInfoScanner(Options, mLCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
                         else
@@ -1490,50 +1349,50 @@ namespace MSFileInfoScanner
 
                             switch (Path.GetExtension(inputFileOrDirectoryPath).ToUpper())
                             {
-                                case clsAgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION:
+                                case AgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION:
                                     // Agilent .D directory or Bruker .D directory
 
-                                    if (Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_TDF_FILE_NAME).Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_SER_FILE_NAME).Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_FID_FILE_NAME).Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_idx").Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_xtr").Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME).Length > 0)
+                                    if (Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 ||
+                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_TDF_FILE_NAME).Length > 0 ||
+                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_SER_FILE_NAME).Length > 0 ||
+                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_FID_FILE_NAME).Length > 0 ||
+                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_idx").Length > 0 ||
+                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_xtr").Length > 0 ||
+                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 ||
+                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME).Length > 0)
                                     {
-                                        mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
+                                        mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
                                     }
-                                    else if (Directory.GetFiles(inputFileOrDirectoryPath, clsAgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 ||
-                                      Directory.GetFiles(inputFileOrDirectoryPath, clsAgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 ||
-                                      Directory.GetFiles(inputFileOrDirectoryPath, clsAgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0)
+                                    else if (Directory.GetFiles(inputFileOrDirectoryPath, AgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 ||
+                                      Directory.GetFiles(inputFileOrDirectoryPath, AgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 ||
+                                      Directory.GetFiles(inputFileOrDirectoryPath, AgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0)
                                     {
-                                        mMSInfoScanner = new clsAgilentGCDFolderInfoScanner();
+                                        mMSInfoScanner = new AgilentGCDFolderInfoScanner(Options, mLCMS2DPlotOptions);
                                     }
-                                    else if (Directory.GetDirectories(inputFileOrDirectoryPath, clsAgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Length > 0)
+                                    else if (Directory.GetDirectories(inputFileOrDirectoryPath, AgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Length > 0)
                                     {
-                                        mMSInfoScanner = new clsAgilentTOFDFolderInfoScanner();
+                                        mMSInfoScanner = new AgilentTOFDFolderInfoScanner(Options, mLCMS2DPlotOptions);
                                     }
                                     else
                                     {
-                                        mMSInfoScanner = new clsAgilentIonTrapDFolderInfoScanner();
+                                        mMSInfoScanner = new AgilentIonTrapDFolderInfoScanner(Options, mLCMS2DPlotOptions);
                                     }
 
                                     knownMSDataType = true;
                                     break;
 
-                                case clsMicromassRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION:
+                                case WatersRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION:
                                     // Micromass .Raw directory
-                                    mMSInfoScanner = new clsMicromassRawFolderInfoScanner();
+                                    mMSInfoScanner = new WatersRawFolderInfoScanner(Options, mLCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
                                 default:
                                     // Unknown directory extension (or no extension)
                                     // See if the directory contains one or more 0_R*.zip files
-                                    if (Directory.GetFiles(inputFileOrDirectoryPath, clsZippedImagingFilesScanner.ZIPPED_IMAGING_FILE_SEARCH_SPEC).Length > 0)
+                                    if (Directory.GetFiles(inputFileOrDirectoryPath, ZippedImagingFilesScanner.ZIPPED_IMAGING_FILE_SEARCH_SPEC).Length > 0)
                                     {
-                                        mMSInfoScanner = new clsZippedImagingFilesScanner();
+                                        mMSInfoScanner = new ZippedImagingFilesScanner(Options, mLCMS2DPlotOptions);
                                         knownMSDataType = true;
                                     }
                                     break;
@@ -1542,43 +1401,43 @@ namespace MSFileInfoScanner
                     }
                     else
                     {
-                        if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+                        if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
-                            mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
+                            mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
-                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_TDF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+                        else if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_TDF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
-                            mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
+                            mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
-                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+                        else if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
-                            mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
+                            mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
-                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+                        else if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
-                            mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
+                            mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
                         else if (string.Equals(fileOrDirectoryInfo.Extension, ".qgd", StringComparison.OrdinalIgnoreCase))
                         {
                             // Shimadzu GC file
                             // Use the generic scanner to read the file size, modification date, and compute the SHA-1 hash
-                            mMSInfoScanner = new GenericFileInfoScanner();
+                            mMSInfoScanner = new GenericFileInfoScanner(Options, mLCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
-                        else if (string.Equals(fileOrDirectoryInfo.Name, clsBrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+                        else if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
                             // If the directory also contains file BRUKER_EXTENSION_BAF_FILE_NAME then this is a Bruker XMass directory
                             var parentDirectory = Path.GetDirectoryName(fileOrDirectoryInfo.FullName);
                             if (!string.IsNullOrEmpty(parentDirectory))
                             {
-                                var pathCheck = Path.Combine(parentDirectory, clsBrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME);
+                                var pathCheck = Path.Combine(parentDirectory, BrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME);
                                 if (File.Exists(pathCheck))
                                 {
-                                    mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
+                                    mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
                                     knownMSDataType = true;
                                 }
                             }
@@ -1589,57 +1448,57 @@ namespace MSFileInfoScanner
                             // Examine the extension on inputFileOrDirectoryPath
                             switch (fileOrDirectoryInfo.Extension.ToUpper())
                             {
-                                case clsThermoRawFileInfoScanner.THERMO_RAW_FILE_EXTENSION:
+                                case ThermoRawFileInfoScanner.THERMO_RAW_FILE_EXTENSION:
                                     // Thermo .raw file
-                                    mMSInfoScanner = new clsThermoRawFileInfoScanner();
+                                    mMSInfoScanner = new ThermoRawFileInfoScanner(Options, mLCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
-                                case clsAgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION:
-                                    mMSInfoScanner = new clsAgilentTOFOrQStarWiffFileInfoScanner();
+                                case AgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION:
+                                    mMSInfoScanner = new AgilentTOFOrQStarWiffFileInfoScanner(Options, mLCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
-                                case clsBrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION:
-                                    mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
+                                case BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION:
+                                    mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
-                                case clsBrukerXmassFolderInfoScanner.BRUKER_MCF_FILE_EXTENSION:
-                                    mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
+                                case BrukerXmassFolderInfoScanner.BRUKER_MCF_FILE_EXTENSION:
+                                    mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
-                                case clsBrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_EXTENSION:
-                                    mMSInfoScanner = new clsBrukerXmassFolderInfoScanner();
+                                case BrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_EXTENSION:
+                                    mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
-                                case clsUIMFInfoScanner.UIMF_FILE_EXTENSION:
-                                    mMSInfoScanner = new clsUIMFInfoScanner();
+                                case UIMFInfoScanner.UIMF_FILE_EXTENSION:
+                                    mMSInfoScanner = new UIMFInfoScanner(Options, mLCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
-                                case clsDeconToolsIsosInfoScanner.DECONTOOLS_CSV_FILE_EXTENSION:
+                                case DeconToolsIsosInfoScanner.DECONTOOLS_CSV_FILE_EXTENSION:
 
-                                    if (fileOrDirectoryInfo.FullName.EndsWith(clsDeconToolsIsosInfoScanner.DECONTOOLS_ISOS_FILE_SUFFIX, StringComparison.InvariantCultureIgnoreCase))
+                                    if (fileOrDirectoryInfo.FullName.EndsWith(DeconToolsIsosInfoScanner.DECONTOOLS_ISOS_FILE_SUFFIX, StringComparison.InvariantCultureIgnoreCase))
                                     {
-                                        mMSInfoScanner = new clsDeconToolsIsosInfoScanner();
+                                        mMSInfoScanner = new DeconToolsIsosInfoScanner(Options, mLCMS2DPlotOptions);
                                         knownMSDataType = true;
                                     }
                                     break;
 
                                 default:
                                     // Unknown file extension; check for a zipped directory
-                                    if (clsBrukerOneFolderInfoScanner.IsZippedSFolder(fileOrDirectoryInfo.Name))
+                                    if (BrukerOneFolderInfoScanner.IsZippedSFolder(fileOrDirectoryInfo.Name))
                                     {
                                         // Bruker s001.zip file
-                                        mMSInfoScanner = new clsBrukerOneFolderInfoScanner();
+                                        mMSInfoScanner = new BrukerOneFolderInfoScanner(Options, mLCMS2DPlotOptions);
                                         knownMSDataType = true;
                                     }
-                                    else if (clsZippedImagingFilesScanner.IsZippedImagingFile(fileOrDirectoryInfo.Name))
+                                    else if (ZippedImagingFilesScanner.IsZippedImagingFile(fileOrDirectoryInfo.Name))
                                     {
-                                        mMSInfoScanner = new clsZippedImagingFilesScanner();
+                                        mMSInfoScanner = new ZippedImagingFilesScanner(Options, mLCMS2DPlotOptions);
                                         knownMSDataType = true;
                                     }
                                     break;
@@ -1650,7 +1509,7 @@ namespace MSFileInfoScanner
                     if (!knownMSDataType)
                     {
                         ReportError("Unknown file type: " + Path.GetFileName(inputFileOrDirectoryPath));
-                        SetErrorCode(eMSFileScannerErrorCodes.UnknownFileExtension);
+                        SetErrorCode(MSFileScannerErrorCodes.UnknownFileExtension);
                         return false;
                     }
 
@@ -1659,14 +1518,14 @@ namespace MSFileInfoScanner
 
                     var datasetName = mMSInfoScanner.GetDatasetNameViaPath(fileOrDirectoryInfo.FullName);
 
-                    if (UseCacheFiles && !ReprocessExistingFiles)
+                    if (Options.UseCacheFiles && !Options.ReprocessExistingFiles)
                     {
                         // See if the datasetName in inputFileOrDirectoryPath is already present in mCachedResults
                         // If it is present, don't process it (unless mReprocessIfCachedSizeIsZero = True and it's size is 0)
 
                         if (datasetName.Length > 0 && mMSFileInfoDataCache.CachedMSInfoContainsDataset(datasetName, out var dataRow))
                         {
-                            if (ReprocessIfCachedSizeIsZero)
+                            if (Options.ReprocessIfCachedSizeIsZero)
                             {
                                 long cachedSizeBytes;
                                 try
@@ -1682,7 +1541,7 @@ namespace MSFileInfoScanner
                                 {
                                     // File is present in mCachedResults, and its size is > 0, so we won't re-process it
                                     ReportMessage("  Skipping " + Path.GetFileName(inputFileOrDirectoryPath) + " since already in cached results");
-                                    eMSFileProcessingState = eMSFileProcessingStateConstants.SkippedSinceFoundInCache;
+                                    msFileProcessingState = MSFileProcessingStateConstants.SkippedSinceFoundInCache;
                                     return true;
                                 }
                             }
@@ -1690,7 +1549,7 @@ namespace MSFileInfoScanner
                             {
                                 // File is present in mCachedResults, and mReprocessIfCachedSizeIsZero=False, so we won't re-process it
                                 ReportMessage("  Skipping " + Path.GetFileName(inputFileOrDirectoryPath) + " since already in cached results");
-                                eMSFileProcessingState = eMSFileProcessingStateConstants.SkippedSinceFoundInCache;
+                                msFileProcessingState = MSFileProcessingStateConstants.SkippedSinceFoundInCache;
                                 return true;
                             }
                         }
@@ -1700,11 +1559,11 @@ namespace MSFileInfoScanner
                     success = ProcessMSDataset(inputFileOrDirectoryPath, mMSInfoScanner, datasetName, outputDirectoryPath);
                     if (success)
                     {
-                        eMSFileProcessingState = eMSFileProcessingStateConstants.ProcessedSuccessfully;
+                        msFileProcessingState = MSFileProcessingStateConstants.ProcessedSuccessfully;
                     }
                     else
                     {
-                        eMSFileProcessingState = eMSFileProcessingStateConstants.FailedProcessing;
+                        msFileProcessingState = MSFileProcessingStateConstants.FailedProcessing;
                     }
                 }
             }
@@ -1728,7 +1587,7 @@ namespace MSFileInfoScanner
         /// <param name="outputDirectoryPath">Directory to write any results files to</param>
         /// <param name="resetErrorCode"></param>
         /// <returns>True if success, False if an error</returns>
-        public override bool ProcessMSFileOrDirectoryWildcard(string inputFileOrDirectoryPath, string outputDirectoryPath, bool resetErrorCode)
+        public bool ProcessMSFileOrDirectoryWildcard(string inputFileOrDirectoryPath, string outputDirectoryPath, bool resetErrorCode)
         {
             var processedFileList = new List<string>();
 
@@ -1739,11 +1598,11 @@ namespace MSFileInfoScanner
                 // Possibly reset the error code
                 if (resetErrorCode)
                 {
-                    SetErrorCode(eMSFileScannerErrorCodes.NoError);
+                    SetErrorCode(MSFileScannerErrorCodes.NoError);
                 }
 
                 // See if inputFilePath contains a wildcard
-                eMSFileProcessingStateConstants eMSFileProcessingState;
+                MSFileProcessingStateConstants msFileProcessingState;
                 if (inputFileOrDirectoryPath != null &&
                     (inputFileOrDirectoryPath.IndexOf('*') >= 0 || inputFileOrDirectoryPath.IndexOf('?') >= 0))
                 {
@@ -1762,7 +1621,7 @@ namespace MSFileInfoScanner
                     else
                     {
                         // Use the current working directory
-                        inputDirectoryPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                        inputDirectoryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                     }
 
                     if (string.IsNullOrEmpty(inputDirectoryPath))
@@ -1777,10 +1636,10 @@ namespace MSFileInfoScanner
 
                     foreach (var fileItem in datasetDirectory.GetFiles(inputFileOrDirectoryPath))
                     {
-                        success = ProcessMSFileOrDirectory(fileItem.FullName, outputDirectoryPath, resetErrorCode, out eMSFileProcessingState);
+                        success = ProcessMSFileOrDirectory(fileItem.FullName, outputDirectoryPath, resetErrorCode, out msFileProcessingState);
 
-                        if (eMSFileProcessingState == eMSFileProcessingStateConstants.ProcessedSuccessfully ||
-                            eMSFileProcessingState == eMSFileProcessingStateConstants.FailedProcessing)
+                        if (msFileProcessingState == MSFileProcessingStateConstants.ProcessedSuccessfully ||
+                            msFileProcessingState == MSFileProcessingStateConstants.FailedProcessing)
                         {
                             processedFileList.Add(fileItem.FullName);
                         }
@@ -1804,9 +1663,9 @@ namespace MSFileInfoScanner
 
                     foreach (var directoryItem in datasetDirectory.GetDirectories(inputFileOrDirectoryPath))
                     {
-                        success = ProcessMSFileOrDirectory(directoryItem.FullName, outputDirectoryPath, resetErrorCode, out eMSFileProcessingState);
+                        success = ProcessMSFileOrDirectory(directoryItem.FullName, outputDirectoryPath, resetErrorCode, out msFileProcessingState);
 
-                        if (eMSFileProcessingState == eMSFileProcessingStateConstants.ProcessedSuccessfully || eMSFileProcessingState == eMSFileProcessingStateConstants.FailedProcessing)
+                        if (msFileProcessingState == MSFileProcessingStateConstants.ProcessedSuccessfully || msFileProcessingState == MSFileProcessingStateConstants.FailedProcessing)
                         {
                             processedFileList.Add(directoryItem.FullName);
                         }
@@ -1828,14 +1687,14 @@ namespace MSFileInfoScanner
                     if (AbortProcessing)
                         return false;
 
-                    if (mCheckFileIntegrity)
+                    if (Options.CheckFileIntegrity)
                     {
-                        CheckIntegrityOfFilesInDirectory(datasetDirectory.FullName, RecheckFileIntegrityForExistingDirectories, processedFileList);
+                        CheckIntegrityOfFilesInDirectory(datasetDirectory.FullName, Options.ReprocessExistingFiles, processedFileList);
                     }
 
                     if (matchCount == 0)
                     {
-                        if (ErrorCode == eMSFileScannerErrorCodes.NoError)
+                        if (ErrorCode == MSFileScannerErrorCodes.NoError)
                         {
                             ReportWarning("No match was found for the input file path:" + inputFileOrDirectoryPath);
                         }
@@ -1847,16 +1706,16 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    success = ProcessMSFileOrDirectory(inputFileOrDirectoryPath, outputDirectoryPath, resetErrorCode, out eMSFileProcessingState);
-                    if (!success && ErrorCode == eMSFileScannerErrorCodes.NoError)
+                    success = ProcessMSFileOrDirectory(inputFileOrDirectoryPath, outputDirectoryPath, resetErrorCode, out msFileProcessingState);
+                    if (!success && ErrorCode == MSFileScannerErrorCodes.NoError)
                     {
-                        SetErrorCode(eMSFileScannerErrorCodes.UnspecifiedError);
+                        SetErrorCode(MSFileScannerErrorCodes.UnspecifiedError);
                     }
 
                     if (AbortProcessing)
                         return false;
 
-                    if (mCheckFileIntegrity && inputFileOrDirectoryPath != null)
+                    if (Options.CheckFileIntegrity && inputFileOrDirectoryPath != null)
                     {
                         string directoryPath;
 
@@ -1877,7 +1736,7 @@ namespace MSFileInfoScanner
                         }
                         else
                         {
-                            CheckIntegrityOfFilesInDirectory(directoryPath, RecheckFileIntegrityForExistingDirectories, processedFileList);
+                            CheckIntegrityOfFilesInDirectory(directoryPath, Options.ReprocessExistingFiles, processedFileList);
                         }
                     }
                 }
@@ -1903,7 +1762,7 @@ namespace MSFileInfoScanner
         /// <param name="outputDirectoryPath"></param>
         /// <returns>True if success, False if an error</returns>
         [Obsolete("Use ProcessMSFileOrDirectory")]
-        public override bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputDirectoryPath)
+        public bool ProcessMSFileOrFolder(string inputFileOrFolderPath, string outputDirectoryPath)
         {
             return ProcessMSFileOrDirectory(inputFileOrFolderPath, outputDirectoryPath);
         }
@@ -1914,16 +1773,16 @@ namespace MSFileInfoScanner
         /// <param name="inputFileOrFolderPath"></param>
         /// <param name="outputDirectoryPath"></param>
         /// <param name="resetErrorCode"></param>
-        /// <param name="eMSFileProcessingState"></param>
+        /// <param name="msFileProcessingState"></param>
         /// <returns>True if success, False if an error</returns>
         [Obsolete("Use ProcessMSFileOrDirectory")]
-        public override bool ProcessMSFileOrFolder(
+        public bool ProcessMSFileOrFolder(
             string inputFileOrFolderPath,
             string outputDirectoryPath,
             bool resetErrorCode,
-            out eMSFileProcessingStateConstants eMSFileProcessingState)
+            out MSFileProcessingStateConstants msFileProcessingState)
         {
-            return ProcessMSFileOrDirectory(inputFileOrFolderPath, outputDirectoryPath, resetErrorCode, out eMSFileProcessingState);
+            return ProcessMSFileOrDirectory(inputFileOrFolderPath, outputDirectoryPath, resetErrorCode, out msFileProcessingState);
         }
 
         /// <summary>
@@ -1941,7 +1800,7 @@ namespace MSFileInfoScanner
         /// <param name="outputDirectoryPath">Directory to write any results files to</param>
         /// <param name="maxLevelsToRecurse">Maximum depth to recurse; Set to 0 to process all directories</param>
         /// <returns>True if success, False if an error</returns>
-        public override bool ProcessMSFilesAndRecurseDirectories(string inputFilePathOrDirectory, string outputDirectoryPath, int maxLevelsToRecurse)
+        public bool ProcessMSFilesAndRecurseDirectories(string inputFilePathOrDirectory, string outputDirectoryPath, int maxLevelsToRecurse)
         {
             bool success;
 
@@ -1963,7 +1822,7 @@ namespace MSFileInfoScanner
                         if (datasetFile.Directory != null && !datasetFile.Directory.Exists)
                         {
                             ReportError("Directory not found: " + datasetFile.DirectoryName);
-                            SetErrorCode(eMSFileScannerErrorCodes.InvalidInputFilePath);
+                            SetErrorCode(MSFileScannerErrorCodes.InvalidInputFilePath);
                             return false;
                         }
                     }
@@ -1976,7 +1835,7 @@ namespace MSFileInfoScanner
                     else
                     {
                         // Directory not found; use the current working directory
-                        inputDirectoryPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                        inputDirectoryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                     }
 
                     // Remove any directory information from inputFilePathOrDirectory
@@ -2022,7 +1881,7 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    SetErrorCode(eMSFileScannerErrorCodes.InvalidInputFilePath);
+                    SetErrorCode(MSFileScannerErrorCodes.InvalidInputFilePath);
                     return false;
                 }
             }
@@ -2048,7 +1907,7 @@ namespace MSFileInfoScanner
         /// <param name="resetErrorCode"></param>
         /// <returns>True if success, False if an error</returns>
         [Obsolete("Use ProcessMSFileOrDirectoryWildcard")]
-        public override bool ProcessMSFileOrFolderWildcard(string inputFileOrFolderPath, string outputDirectoryPath, bool resetErrorCode)
+        public bool ProcessMSFileOrFolderWildcard(string inputFileOrFolderPath, string outputDirectoryPath, bool resetErrorCode)
         {
             return ProcessMSFileOrDirectoryWildcard(inputFileOrFolderPath, outputDirectoryPath, resetErrorCode);
         }
@@ -2069,7 +1928,7 @@ namespace MSFileInfoScanner
         /// <param name="recurseFoldersMaxLevels">Maximum directory depth to process; Set to 0 to process all directories</param>
         /// <returns>True if success, False if an error</returns>
         [Obsolete("Use ProcessMSFilesAndRecurseDirectories")]
-        public override bool ProcessMSFilesAndRecurseFolders(string inputFilePathOrFolder, string outputDirectoryPath, int recurseFoldersMaxLevels)
+        public bool ProcessMSFilesAndRecurseFolders(string inputFilePathOrFolder, string outputDirectoryPath, int recurseFoldersMaxLevels)
         {
             return ProcessMSFilesAndRecurseDirectories(inputFilePathOrFolder, outputDirectoryPath, recurseFoldersMaxLevels);
         }
@@ -2096,7 +1955,7 @@ namespace MSFileInfoScanner
             bool success;
             var fileProcessed = false;
 
-            eMSFileProcessingStateConstants eMSFileProcessingState;
+            MSFileProcessingStateConstants msFileProcessingState;
 
             var processedFileList = new List<string>();
 
@@ -2168,9 +2027,9 @@ namespace MSFileInfoScanner
                                 }
 
                                 fileProcessed = true;
-                                success = ProcessMSFileOrDirectory(fileItem.FullName, outputDirectoryPath, true, out eMSFileProcessingState);
+                                success = ProcessMSFileOrDirectory(fileItem.FullName, outputDirectoryPath, true, out msFileProcessingState);
 
-                                if (eMSFileProcessingState == eMSFileProcessingStateConstants.ProcessedSuccessfully || eMSFileProcessingState == eMSFileProcessingStateConstants.FailedProcessing)
+                                if (msFileProcessingState == MSFileProcessingStateConstants.ProcessedSuccessfully || msFileProcessingState == MSFileProcessingStateConstants.FailedProcessing)
                                 {
                                     processedFileList.Add(fileItem.FullName);
                                 }
@@ -2185,16 +2044,16 @@ namespace MSFileInfoScanner
                             if (!fileProcessed && !processedZippedSFolder)
                             {
                                 // Check for other valid files
-                                if (clsBrukerOneFolderInfoScanner.IsZippedSFolder(fileItem.Name))
+                                if (BrukerOneFolderInfoScanner.IsZippedSFolder(fileItem.Name))
                                 {
                                     // Only process this file if there is not a subdirectory named "1" present"
-                                    if (inputDirectory.GetDirectories(clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME).Length < 1)
+                                    if (inputDirectory.GetDirectories(BrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME).Length < 1)
                                     {
                                         fileProcessed = true;
                                         processedZippedSFolder = true;
-                                        success = ProcessMSFileOrDirectory(fileItem.FullName, outputDirectoryPath, true, out eMSFileProcessingState);
+                                        success = ProcessMSFileOrDirectory(fileItem.FullName, outputDirectoryPath, true, out msFileProcessingState);
 
-                                        if (eMSFileProcessingState == eMSFileProcessingStateConstants.ProcessedSuccessfully || eMSFileProcessingState == eMSFileProcessingStateConstants.FailedProcessing)
+                                        if (msFileProcessingState == MSFileProcessingStateConstants.ProcessedSuccessfully || msFileProcessingState == MSFileProcessingStateConstants.FailedProcessing)
                                         {
                                             processedFileList.Add(fileItem.FullName);
                                         }
@@ -2246,9 +2105,9 @@ namespace MSFileInfoScanner
                         break;
                 }
 
-                if (mCheckFileIntegrity && !AbortProcessing)
+                if (Options.CheckFileIntegrity && !AbortProcessing)
                 {
-                    CheckIntegrityOfFilesInDirectory(inputDirectory.FullName, RecheckFileIntegrityForExistingDirectories, processedFileList);
+                    CheckIntegrityOfFilesInDirectory(inputDirectory.FullName, Options.ReprocessExistingFiles, processedFileList);
                 }
             }
             catch (Exception ex)
@@ -2277,9 +2136,9 @@ namespace MSFileInfoScanner
                         try
                         {
                             // Check whether the directory name is BRUKER_ONE_FOLDER = "1"
-                            if (subdirectory.Name == clsBrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME)
+                            if (subdirectory.Name == BrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME)
                             {
-                                success = ProcessMSFileOrDirectory(subdirectory.FullName, outputDirectoryPath, true, out eMSFileProcessingState);
+                                success = ProcessMSFileOrDirectory(subdirectory.FullName, outputDirectoryPath, true, out msFileProcessingState);
                                 if (!success)
                                 {
                                     fileProcessFailCount++;
@@ -2303,7 +2162,7 @@ namespace MSFileInfoScanner
                                         continue;
                                     }
 
-                                    success = ProcessMSFileOrDirectory(subdirectory.FullName, outputDirectoryPath, true, out eMSFileProcessingState);
+                                    success = ProcessMSFileOrDirectory(subdirectory.FullName, outputDirectoryPath, true, out msFileProcessingState);
                                     if (!success)
                                     {
                                         fileProcessFailCount++;
@@ -2370,7 +2229,7 @@ namespace MSFileInfoScanner
                                     success = RecurseDirectoriesWork(subdirectory.FullName, fileNameMatch, outputDirectoryPath, ref fileProcessCount, ref fileProcessFailCount, recursionLevel + 1, maxLevelsToRecurse);
                                 }
 
-                                if (!success && !IgnoreErrorsWhenRecursing)
+                                if (!success && !Options.IgnoreErrorsWhenRecursing)
                                 {
                                     break;
                                 }
@@ -2402,7 +2261,7 @@ namespace MSFileInfoScanner
                             SleepNow(1);
                         }
 
-                        if (!success && !IgnoreErrorsWhenRecursing)
+                        if (!success && !Options.IgnoreErrorsWhenRecursing)
                         {
                             break;
                         }
@@ -2421,14 +2280,14 @@ namespace MSFileInfoScanner
             return success;
         }
 
-        public override bool SaveCachedResults()
+        public bool SaveCachedResults()
         {
             return SaveCachedResults(true);
         }
 
-        public override bool SaveCachedResults(bool clearCachedData)
+        public bool SaveCachedResults(bool clearCachedData)
         {
-            if (UseCacheFiles)
+            if (Options.UseCacheFiles)
             {
                 return mMSFileInfoDataCache.SaveCachedResults(clearCachedData);
             }
@@ -2436,7 +2295,7 @@ namespace MSFileInfoScanner
             return true;
         }
 
-        public override bool SaveParameterFileSettings(string parameterFilePath)
+        public bool SaveParameterFileSettings(string parameterFilePath)
         {
             var settingsFile = new XmlSettingsFileAccessor();
 
@@ -2466,15 +2325,15 @@ namespace MSFileInfoScanner
             return true;
         }
 
-        private void SetErrorCode(eMSFileScannerErrorCodes eNewErrorCode, bool leaveExistingErrorCodeUnchanged = false)
+        private void SetErrorCode(MSFileScannerErrorCodes newErrorCode, bool leaveExistingErrorCodeUnchanged = false)
         {
-            if (leaveExistingErrorCodeUnchanged && ErrorCode != eMSFileScannerErrorCodes.NoError)
+            if (leaveExistingErrorCodeUnchanged && ErrorCode != MSFileScannerErrorCodes.NoError)
             {
                 // An error code is already defined; do not change it
                 return;
             }
 
-            ErrorCode = eNewErrorCode;
+            ErrorCode = newErrorCode;
         }
 
         /// <summary>
@@ -2497,7 +2356,7 @@ namespace MSFileInfoScanner
                 formattedError = errorMessage + ": " + ex.Message;
             }
 
-            LogMessage(formattedError, eMessageTypeConstants.ErrorMsg);
+            LogMessage(formattedError, MessageTypeConstants.ErrorMsg);
         }
 
         /// <summary>
@@ -2505,22 +2364,22 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="message"></param>
         /// <param name="allowLogToFile"></param>
-        /// <param name="eMessageType"></param>
+        /// <param name="messageType"></param>
         private void ReportMessage(
             string message,
             bool allowLogToFile = true,
-            eMessageTypeConstants eMessageType = eMessageTypeConstants.Normal)
+            MessageTypeConstants messageType = MessageTypeConstants.Normal)
         {
-            if (eMessageType == eMessageTypeConstants.Debug)
+            if (messageType == MessageTypeConstants.Debug)
                 OnDebugEvent(message);
-            if (eMessageType == eMessageTypeConstants.Warning)
+            if (messageType == MessageTypeConstants.Warning)
                 OnWarningEvent(message);
             else
                 OnStatusEvent(message);
 
             if (allowLogToFile)
             {
-                LogMessage(message, eMessageType);
+                LogMessage(message, messageType);
             }
         }
 
@@ -2535,7 +2394,7 @@ namespace MSFileInfoScanner
 
             if (allowLogToFile)
             {
-                LogMessage(message, eMessageTypeConstants.Warning);
+                LogMessage(message, MessageTypeConstants.Warning);
             }
         }
 
@@ -2548,54 +2407,54 @@ namespace MSFileInfoScanner
         {
             Console.WriteLine("Processing options");
             Console.WriteLine();
-            if (UseCacheFiles)
+            if (Options.UseCacheFiles)
             {
                 Console.WriteLine("CacheFiles are enabled");
-                if (ReprocessExistingFiles)
+                if (Options.ReprocessExistingFiles)
                     Console.WriteLine("Will reprocess files that are already defined in the acquisition time file");
-                else if (ReprocessIfCachedSizeIsZero)
+                else if (Options.ReprocessIfCachedSizeIsZero)
                     Console.WriteLine("Will reprocess files if their cached size is 0 bytes");
 
                 Console.WriteLine();
             }
 
-            if (PlotWithPython)
+            if (Options.PlotWithPython)
                 Console.WriteLine("Plot generator:     Python");
             else
                 Console.WriteLine("Plot generator:     OxyPlot");
 
-            Console.WriteLine("SaveTICAndBPIPlots: {0}", TrueFalseToEnabledDisabled(SaveTICAndBPIPlots));
-            Console.WriteLine("SaveLCMS2DPlots:    {0}", TrueFalseToEnabledDisabled(SaveLCMS2DPlots));
-            if (SaveLCMS2DPlots)
+            Console.WriteLine("SaveTICAndBPIPlots: {0}", TrueFalseToEnabledDisabled(Options.SaveTICAndBPIPlots));
+            Console.WriteLine("SaveLCMS2DPlots:    {0}", TrueFalseToEnabledDisabled(Options.SaveLCMS2DPlots));
+            if (Options.SaveLCMS2DPlots)
             {
-                Console.WriteLine("   MaxPointsToPlot:     {0:N0}", LCMS2DPlotMaxPointsToPlot);
-                Console.WriteLine("   OverviewPlotDivisor: {0}", LCMS2DOverviewPlotDivisor);
+                Console.WriteLine("   MaxPointsToPlot:     {0:N0}", mLCMS2DPlotOptions.MaxPointsToPlot);
+                Console.WriteLine("   OverviewPlotDivisor: {0}", mLCMS2DPlotOptions.LCMS2DOverviewPlotDivisor);
             }
             Console.WriteLine();
 
-            Console.WriteLine("CheckCentroidingStatus:         {0}", TrueFalseToEnabledDisabled(CheckCentroidingStatus));
-            Console.WriteLine("Compute Overall Quality Scores: {0}", TrueFalseToEnabledDisabled(ComputeOverallQualityScores));
-            Console.WriteLine("Create dataset info XML file:   {0}", TrueFalseToEnabledDisabled(CreateDatasetInfoFile));
-            Console.WriteLine("Create scan stats file:         {0}", TrueFalseToEnabledDisabled(CreateScanStatsFile));
-            Console.WriteLine("MS2MzMin:                       {0:N0}", MS2MzMin);
-            Console.WriteLine("SHA-1 hashing:                  {0}", TrueFalseToEnabledDisabled(!DisableInstrumentHash));
-            if (ScanStart > 0 || ScanEnd > 0)
+            Console.WriteLine("CheckCentroidingStatus:         {0}", TrueFalseToEnabledDisabled(Options.CheckCentroidingStatus));
+            Console.WriteLine("Compute Overall Quality Scores: {0}", TrueFalseToEnabledDisabled(Options.ComputeOverallQualityScores));
+            Console.WriteLine("Create dataset info XML file:   {0}", TrueFalseToEnabledDisabled(Options.CreateDatasetInfoFile));
+            Console.WriteLine("Create scan stats file:         {0}", TrueFalseToEnabledDisabled(Options.CreateScanStatsFile));
+            Console.WriteLine("MS2MzMin:                       {0:N0}", Options.MS2MzMin);
+            Console.WriteLine("SHA-1 hashing:                  {0}", TrueFalseToEnabledDisabled(!Options.DisableInstrumentHash));
+            if (Options.ScanStart > 0 || Options.ScanEnd > 0)
             {
-                Console.WriteLine("Start Scan:                     {0}", ScanStart);
-                Console.WriteLine("End Scan:                       {0}", ScanEnd);
+                Console.WriteLine("Start Scan:                     {0}", Options.ScanStart);
+                Console.WriteLine("End Scan:                       {0}", Options.ScanEnd);
             }
 
-            Console.WriteLine("Update dataset stats text file: {0}", TrueFalseToEnabledDisabled(UpdateDatasetStatsTextFile));
-            if (UpdateDatasetStatsTextFile)
-                Console.WriteLine("   Dataset stats file name: {0}", DatasetStatsTextFileName);
+            Console.WriteLine("Update dataset stats text file: {0}", TrueFalseToEnabledDisabled(Options.UpdateDatasetStatsTextFile));
+            if (Options.UpdateDatasetStatsTextFile)
+                Console.WriteLine("   Dataset stats file name: {0}", Options.DatasetStatsTextFileName);
 
-            if (CheckFileIntegrity)
+            if (Options.CheckFileIntegrity)
             {
                 Console.WriteLine();
                 Console.WriteLine("Check integrity of all known file types: enabled");
-                Console.WriteLine("   Maximum text file lines to check: {0}", MaximumTextFileLinesToCheck);
-                Console.WriteLine("   Compute the SHA-1 has of every file: {0}", TrueFalseToEnabledDisabled(ComputeFileHashes));
-                Console.WriteLine("   Check data inside .zip files: {0}", TrueFalseToEnabledDisabled(ZipFileCheckAllData));
+                Console.WriteLine("   Maximum text file lines to check: {0}", Options.MaximumTextFileLinesToCheck);
+                Console.WriteLine("   Compute the SHA-1 has of every file: {0}", TrueFalseToEnabledDisabled(Options.ComputeFileHashes));
+                Console.WriteLine("   Check data inside .zip files: {0}", TrueFalseToEnabledDisabled(Options.ZipFileCheckAllData));
             }
 
             Console.WriteLine();
@@ -2606,11 +2465,11 @@ namespace MSFileInfoScanner
             return option ? "Enabled" : "Disabled";
         }
 
-        public static bool ValidateDataFilePath(ref string filePath, eDataFileTypeConstants eDataFileType)
+        public static bool ValidateDataFilePath(ref string filePath, DataFileTypeConstants dataFileType)
         {
             if (string.IsNullOrEmpty(filePath))
             {
-                filePath = Path.Combine(GetAppDirectoryPath(), DefaultDataFileName(eDataFileType));
+                filePath = Path.Combine(GetAppDirectoryPath(), DefaultDataFileName(dataFileType));
             }
 
             return ValidateDataFilePathCheckDir(filePath);
@@ -2646,7 +2505,7 @@ namespace MSFileInfoScanner
 
         private void SleepNow(int sleepTimeSeconds)
         {
-            System.Threading.Thread.Sleep(sleepTimeSeconds * 10);
+            Thread.Sleep(sleepTimeSeconds * 10);
         }
 
         private bool ValidateExtensions(IList<string> extensions)
