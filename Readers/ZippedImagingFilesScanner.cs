@@ -36,7 +36,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="zipFile"></param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if at least one valid file is found; otherwise false</returns>
-        /// <remarks></remarks>
         private void DetermineAcqStartEndTime(FileInfo zipFile, DatasetFileInfo datasetFileInfo)
         {
             var success = false;
@@ -187,7 +186,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="dataFilePath"></param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
-        /// <remarks></remarks>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
             ResetResults();

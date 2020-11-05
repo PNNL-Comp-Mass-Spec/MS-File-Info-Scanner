@@ -535,8 +535,6 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Writes out the cache files immediately
         /// </summary>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public bool SaveCachedResults()
         {
             return SaveCachedResults(true);

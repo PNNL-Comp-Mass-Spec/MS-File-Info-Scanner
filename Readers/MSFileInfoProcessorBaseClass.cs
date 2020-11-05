@@ -170,7 +170,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="currentTaskProgressAtEnd">Progress at the start of the current subtask (value between 0 and 100)</param>
         /// <param name="subTaskProgress">Progress of the current subtask (value between 0 and 100)</param>
         /// <returns>Overall progress (value between 0 and 100)</returns>
-        /// <remarks></remarks>
         public static float ComputeIncrementalProgress(float currentTaskProgressAtStart, float currentTaskProgressAtEnd, float subTaskProgress)
         {
             if (subTaskProgress < 0)
@@ -256,7 +255,6 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Get the dataset info as XML
         /// </summary>
-        /// <returns></returns>
         public string GetDatasetInfoXML()
         {
             try
@@ -282,7 +280,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="scanCount">Number of scans in the file</param>
         /// <param name="scanStart">1 if mScanStart is zero; otherwise mScanStart</param>
         /// <param name="scanEnd">scanCount if mScanEnd is zero; otherwise Min(mScanEnd, scanCount)</param>
-        /// <remarks></remarks>
         protected void GetStartAndEndScans(int scanCount, out int scanStart, out int scanEnd)
         {
             GetStartAndEndScans(scanCount, 1, out scanStart, out scanEnd);
@@ -295,7 +292,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="scanNumFirst">The first scan number in the file (typically 1)</param>
         /// <param name="scanStart">1 if mScanStart is zero; otherwise mScanStart</param>
         /// <param name="scanEnd">scanCount if mScanEnd is zero; otherwise Min(mScanEnd, scanCount)</param>
-        /// <remarks></remarks>
         private void GetStartAndEndScans(int scanCount, int scanNumFirst, out int scanStart, out int scanEnd)
         {
             if (Options.ScanStart > 0)
@@ -389,7 +385,6 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         /// <param name="inputFileName"></param>
         /// <param name="outputDirectoryPath"></param>
-        /// <returns></returns>
         public bool CreateOutputFiles(string inputFileName, string outputDirectoryPath)
         {
             bool successOverall;
@@ -966,8 +961,6 @@ namespace MSFileInfoScanner.Readers
         /// For example, 50000 will be returned as 50K
         /// </summary>
         /// <param name="value"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         private string IntToEngineeringNotation(int value)
         {
             if (value < 1000)
@@ -1083,7 +1076,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="dataFilePath"></param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error or if the file has no scans</returns>
-        /// <remarks></remarks>
         public abstract bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo);
 
         private void ReportProgressSaving2DPlots(int lcMSPlotStepsComplete, int lcMSPlotStepsTotal)
@@ -1298,7 +1290,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="inputFileName">Input file name</param>
         /// <param name="outputDirectoryPath">Output directory path</param>
         /// <returns>True if success; False if failure</returns>
-        /// <remarks></remarks>
         // ReSharper disable once UnusedMember.Global
         public bool UpdateDatasetStatsTextFile(string inputFileName, string outputDirectoryPath)
         {
@@ -1312,7 +1303,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="outputDirectoryPath">Output directory path</param>
         /// <param name="datasetStatsFilename">Dataset stats file name</param>
         /// <returns>True if success; False if failure</returns>
-        /// <remarks></remarks>
         public bool UpdateDatasetStatsTextFile(string inputFileName, string outputDirectoryPath, string datasetStatsFilename)
         {
             bool success;

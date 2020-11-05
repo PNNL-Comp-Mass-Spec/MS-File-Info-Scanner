@@ -52,7 +52,6 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Get options as a semi colon separated list of key-value pairs
         /// </summary>
-        /// <returns></returns>
         public string GetOptions()
         {
             return GetOptions(new List<string>());
@@ -61,7 +60,6 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Get options as a semi colon separated list of key-value pairs
         /// </summary>
-        /// <returns></returns>
         public string GetOptions(List<string> additionalOptions)
         {
             var options = new List<string>();

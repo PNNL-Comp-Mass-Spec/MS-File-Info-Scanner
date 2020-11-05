@@ -159,7 +159,6 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="filePath">File path to check</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        /// <remarks></remarks>
         private bool CheckTextFile(string filePath)
         {
             var fileIsValid = true;
@@ -643,7 +642,6 @@ namespace MSFileInfoScanner
         /// <param name="charCountSkipsBlankLines"></param>
         /// <param name="requiredTextMinMatchCount"></param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        /// <remarks></remarks>
         private bool CheckTextFileWork(
             string filePath,
             int minimumLineCount,
@@ -806,7 +804,6 @@ namespace MSFileInfoScanner
         /// <param name="requireEqualCharsPerLine">If True, then each line must contain an equal occurrence count of the given character (based on the first line in the file)</param>
         /// <param name="errorMessage">Error message</param>
         /// <returns>True if the line is valid; otherwise False; when False, then updates errorMessage</returns>
-        /// <remarks></remarks>
         private bool CheckTextFileCountChars(string dataLine, ref bool blankLineRead, int linesRead,
                                              ref int expectedCharCount, char charToCount, string charDescription,
                                              int minimumCharCount, bool requireEqualCharsPerLine,
@@ -877,7 +874,6 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        /// <remarks></remarks>
         private bool CheckExtensionFreeFile(string filePath)
         {
             var lineIsValid = true;
@@ -911,7 +907,6 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        /// <remarks></remarks>
         private bool CheckParamsFile(string filePath)
         {
             const string MASS_TOLERANCE_LINE = "peptide_mass_tolerance";
@@ -973,7 +968,6 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        /// <remarks></remarks>
         private bool CheckTICFile(string filePath)
         {
             const string ICR2LS_LINE_START = "ICR-2LS";
@@ -1041,7 +1035,6 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="filePath">File path to check</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        /// <remarks></remarks>
         private bool CheckZIPFile(string filePath)
         {
             // minutes/MB
@@ -1258,7 +1251,6 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        /// <remarks></remarks>
         private bool CheckCSVFile(string filePath)
         {
             int minimumCommaCount;
@@ -1471,7 +1463,6 @@ namespace MSFileInfoScanner
         /// <param name="requiredElementNames">Optional list of element names that must be found (within the first mMaximumXMLElementNodesToCheck elements); the names are case-sensitive</param>
         /// <param name="requiredAttributeNames">Optional list of attribute names that must be found  (within the first mMaximumXMLElementNodesToCheck elements); the names are case-sensitive</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        /// <remarks></remarks>
         private bool CheckXMLFileWork(
             string filePath,
             int minimumElementCount,
@@ -1842,7 +1833,6 @@ namespace MSFileInfoScanner
         /// <param name="requiredTextItems">List of items to look for; values are set to True as each item is found</param>
         /// <param name="requiredTextMatchCount">Total number of items that have been matched; equivalent to the number of True entries in textLineHeaders</param>
         /// <param name="matchStart"></param>
-        /// <remarks></remarks>
         private void FindRequiredTextInLine(
             string textToSearch,
             ref bool needToCheckItems,
@@ -1897,7 +1887,6 @@ namespace MSFileInfoScanner
         /// Opens the file using a text reader and looks for XML elements parameters and PeakParameters
         /// </summary>
         /// <returns>True if this file contains the XML elements that indicate this is a Decon2LS XML settings file</returns>
-        /// <remarks></remarks>
         private bool FileIsDeconToolsXMLSettingsFile(string filePath)
         {
             return XMLFileContainsElements(filePath, new[]
@@ -1912,7 +1901,6 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="filePath">File to examine</param>
         /// <returns>True if this file contains the XML elements that indicate this is an XML settings file</returns>
-        /// <remarks></remarks>
         private bool FileIsXMLSettingsFile(string filePath)
         {
             // Note that section and item only have a less than sign because XMLFileContainsElements uses a simple stream reader and not an XmlTextReader
@@ -2142,7 +2130,6 @@ namespace MSFileInfoScanner
         /// <param name="requiredItemNames">Names to find; values are True if found</param>
         /// <param name="requiredItemMatchCountMinimum">Minimum number of items in requiredItemNames that needed to be found; 0 to require all items to be found</param>
         /// <param name="errorLogged">Set to True if any items were missing</param>
-        /// <remarks></remarks>
         private void ValidateRequiredTextFound(
             string filePath,
             string itemDescription,

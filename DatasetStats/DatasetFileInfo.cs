@@ -116,7 +116,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// Compute the SHA-1 hash of the given file, then add it to InstrumentFiles
         /// </summary>
         /// <param name="instrumentFile"></param>
-        /// <returns></returns>
         public bool AddInstrumentFile(FileInfo instrumentFile)
         {
             var sha1Hash = HashUtilities.ComputeFileHashSha1(instrumentFile.FullName);

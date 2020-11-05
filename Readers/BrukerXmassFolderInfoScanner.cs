@@ -123,7 +123,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="datasetDirectory"></param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if a valid file is found; otherwise false</returns>
-        /// <remarks></remarks>
         private void DetermineAcqStartTime(DirectoryInfo datasetDirectory, DatasetFileInfo datasetFileInfo)
         {
             var success = false;
@@ -879,7 +878,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="dataFilePath">Either the dataset directory containing the XMass files, or any of the XMass files in the dataset directory</param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
-        /// <remarks></remarks>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
             ResetResults();

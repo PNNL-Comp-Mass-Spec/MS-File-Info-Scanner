@@ -371,7 +371,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="scanStats">ScanStats data to parse</param>
         /// <param name="summaryStats">Stats output</param>
         /// <returns>>True if success, false if error</returns>
-        /// <remarks></remarks>
         public bool ComputeScanStatsSummary(List<ScanStatsEntry> scanStats, out DatasetSummaryStats summaryStats)
         {
             summaryStats = new DatasetSummaryStats();
@@ -489,7 +488,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="datasetInfoFilePath">File path to write the XML to</param>
         /// <returns>True if success; False if failure</returns>
-        /// <remarks></remarks>
         public bool CreateDatasetInfoFile(string datasetName, string datasetInfoFilePath)
         {
             return CreateDatasetInfoFile(datasetName, datasetInfoFilePath, mDatasetScanStats, DatasetFileInfo, SampleInfo);
@@ -504,7 +502,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="datasetInfo">Dataset Info</param>
         /// <param name="sampleInfo">Sample Info</param>
         /// <returns>True if success; False if failure</returns>
-        /// <remarks></remarks>
         public bool CreateDatasetInfoFile(
             string datasetName,
             string datasetInfoFilePath,
@@ -543,7 +540,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// Auto-determines the dataset name using Me.DatasetFileInfo.DatasetName
         /// </summary>
         /// <returns>XML (as string)</returns>
-        /// <remarks></remarks>
         public string CreateDatasetInfoXML()
         {
             return CreateDatasetInfoXML(DatasetFileInfo.DatasetName, mDatasetScanStats, DatasetFileInfo, SampleInfo);
@@ -554,7 +550,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         /// <param name="datasetName">Dataset Name</param>
         /// <returns>XML (as string)</returns>
-        /// <remarks></remarks>
         // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(string datasetName)
         {
@@ -568,7 +563,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="scanStats">Scan stats to parse</param>
         /// <param name="datasetInfo">Dataset Info</param>
         /// <returns>XML (as string)</returns>
-        /// <remarks></remarks>
         // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(List<ScanStatsEntry> scanStats, DatasetFileInfo datasetInfo)
         {
@@ -583,7 +577,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="datasetInfo">Dataset Info</param>
         /// <param name="sampleInfo">Sample Info</param>
         /// <returns>XML (as string)</returns>
-        /// <remarks></remarks>
         // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(List<ScanStatsEntry> scanStats, DatasetFileInfo datasetInfo, SampleInfo sampleInfo)
         {
@@ -597,7 +590,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="scanStats">Scan stats to parse</param>
         /// <param name="datasetInfo">Dataset Info</param>
         /// <returns>XML (as string)</returns>
-        /// <remarks></remarks>
         // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(string datasetName, List<ScanStatsEntry> scanStats, DatasetFileInfo datasetInfo)
         {
@@ -612,7 +604,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="datasetInfo">Dataset Info</param>
         /// <param name="sampleInfo"></param>
         /// <returns>XML (as string)</returns>
-        /// <remarks></remarks>
         public string CreateDatasetInfoXML(
             string datasetName,
             List<ScanStatsEntry> scanStats,
@@ -869,7 +860,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         /// <param name="scanStatsFilePath">File path to write the text file to</param>
         /// <returns>True if success; False if failure</returns>
-        /// <remarks></remarks>
         public bool CreateScanStatsFile(string scanStatsFilePath)
         {
             return CreateScanStatsFile(scanStatsFilePath, mDatasetScanStats, DatasetFileInfo);
@@ -882,7 +872,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="scanStats">Scan stats to parse</param>
         /// <param name="datasetInfo">Dataset Info</param>
         /// <returns>True if success; False if failure</returns>
-        /// <remarks></remarks>
         public bool CreateScanStatsFile(
             string scanStatsFilePath,
             List<ScanStatsEntry> scanStats,
@@ -1059,7 +1048,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Get the DatasetSummaryStats object
         /// </summary>
-        /// <returns></returns>
         public DatasetSummaryStats GetDatasetSummaryStats()
         {
             if (mDatasetSummaryStatsUpToDate)
@@ -1144,7 +1132,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// Return true if the given scan number has been stored using AddDatasetScan
         /// </summary>
         /// <param name="scanNumber"></param>
-        /// <returns></returns>
         public bool HasScanNumber(int scanNumber)
         {
             return mDatasetScanNumbers.Contains(scanNumber);
@@ -1192,7 +1179,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="scanType"></param>
         /// <param name="scanTypeName"></param>
         /// <returns>True if the scan was found and updated; otherwise false</returns>
-        /// <remarks></remarks>
         public bool UpdateDatasetScanType(int scanNumber, int scanType, string scanTypeName)
         {
             var matchFound = false;
@@ -1219,7 +1205,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="datasetInfoFilePath">File path to write the XML to</param>
         /// <returns>True if success; False if failure</returns>
-        /// <remarks></remarks>
         public bool UpdateDatasetStatsTextFile(string datasetName, string datasetInfoFilePath)
         {
             return UpdateDatasetStatsTextFile(datasetName, datasetInfoFilePath, mDatasetScanStats, DatasetFileInfo, SampleInfo);
@@ -1234,7 +1219,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="datasetInfo">Dataset Info</param>
         /// <param name="sampleInfo">Sample Info</param>
         /// <returns>True if success; False if failure</returns>
-        /// <remarks></remarks>
         public bool UpdateDatasetStatsTextFile(
             string datasetName,
             string datasetStatsFilePath,
@@ -1399,7 +1383,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="scanCountForMSLevel"></param>
         /// <param name="scanCountWithData"></param>
         /// <param name="errorOrWarningMsg"></param>
-        /// <returns></returns>
         private bool ValidateMSnMzMin(
             int msLevel,
             float requiredMzMin,

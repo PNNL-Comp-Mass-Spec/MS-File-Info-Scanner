@@ -21,7 +21,6 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <remarks></remarks>
         public DeconToolsIsosInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
             base(options, lcms2DPlotOptions)
         {
@@ -67,8 +66,6 @@ namespace MSFileInfoScanner.Readers
         /// Returns the dataset name for the given file
         /// </summary>
         /// <param name="dataFilePath"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             try

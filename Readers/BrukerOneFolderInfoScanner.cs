@@ -73,7 +73,6 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         /// <param name="dataLine"></param>
         /// <param name="acqDate"></param>
-        /// <returns></returns>
         private bool ParseBrukerDateFromArray(string dataLine, out DateTime acqDate)
         {
             bool success;

@@ -38,7 +38,6 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="width">PNG file width, in pixels</param>
         /// <param name="height">PNG file height, in pixels</param>
         /// <param name="resolution">Image resolution, in dots per inch</param>
-        /// <remarks></remarks>
         public override bool SaveToPNG(FileInfo pngFile, int width, int height, int resolution)
         {
             if (pngFile == null)

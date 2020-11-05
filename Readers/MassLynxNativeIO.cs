@@ -217,7 +217,6 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
         /// <param name="functionNumber">Function number</param>
-        /// <returns></returns>
         public short GetFunctionAcquisitionDataType(string massLynxDataDirectoryPath, int functionNumber)
         {
             short acquisitionDataTypeID = -1;
@@ -246,7 +245,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
         /// <param name="functionNumber">Function number</param>
         /// <param name="functionType">Output: function type (numeric code)</param>
-        /// <returns></returns>
         public bool GetFunctionInfo(
             string massLynxDataDirectoryPath,
             int functionNumber,
@@ -467,7 +465,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="overload"></param>
         /// <param name="massStart"></param>
         /// <param name="massEnd"></param>
-        /// <returns></returns>
         public bool GetScanInfoEx(
             string massLynxDataDirectoryPath,
             int functionNumber,
@@ -547,7 +544,6 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
         /// <param name="functionNumber"></param>
-        /// <returns></returns>
         public bool IsFunctionMsMs(string massLynxDataDirectoryPath, int functionNumber)
         {
             if (GetFunctionInfo(massLynxDataDirectoryPath, functionNumber, out short functionType))
@@ -564,7 +560,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
         /// <param name="functionNumber"></param>
         /// <param name="scanNumber"></param>
-        /// <returns></returns>
         public bool IsSpectrumContinuumData(string massLynxDataDirectoryPath, int functionNumber, int scanNumber = 1)
         {
             if (GetScanInfoEx(massLynxDataDirectoryPath, functionNumber, scanNumber,
@@ -582,7 +577,6 @@ namespace MSFileInfoScanner.Readers
         /// Return true if the directory is a validate Waters / Micromass / MassLynx data directory
         /// </summary>
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path; alternatively, the path to a file in the .raw directory</param>
-        /// <returns></returns>
         public bool IsMassLynxData(string massLynxDataDirectoryPath)
         {
             return ValidateDataFolder(massLynxDataDirectoryPath);

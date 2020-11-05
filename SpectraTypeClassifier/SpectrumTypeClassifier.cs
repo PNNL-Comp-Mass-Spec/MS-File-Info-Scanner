@@ -78,34 +78,29 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Number of centroided spectra
         /// </summary>
-        /// <returns></returns>
         public int CentroidedSpectra =>
             mCentroidedSpectra.Sum(item => item.Value);
 
         /// <summary>
         /// Number of centroided MS1 spectra
         /// </summary>
-        /// <returns></returns>
         public int CentroidedMS1Spectra => (from item in mCentroidedSpectra where item.Key <= 1 select item.Value).Sum();
 
         /// <summary>
         /// Number of centroided MS2 spectra
         /// </summary>
-        /// <returns></returns>
         public int CentroidedMSnSpectra =>
             (from item in mCentroidedSpectra where item.Key > 1 select item.Value).Sum();
 
         /// <summary>
         /// Number of MS1 spectra that empirically appears profile, but the calling class says is centroid
         /// </summary>
-        /// <returns></returns>
         public int CentroidedMS1SpectraClassifiedAsProfile =>
             (from item in mCentroidedSpectraClassifiedAsProfile where item.Key <= 1 select item.Value).Sum();
 
         /// <summary>
         /// Number of MSn spectra that empirically appears profile, but the calling class says is centroid
         /// </summary>
-        /// <returns></returns>
         public int CentroidedMSnSpectraClassifiedAsProfile =>
             (from item in mCentroidedSpectraClassifiedAsProfile where item.Key > 1 select item.Value).Sum();
 
@@ -125,7 +120,6 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Fraction of all spectra that are centroided
         /// </summary>
-        /// <returns></returns>
         public double FractionCentroided
         {
             get
@@ -143,7 +137,6 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Fraction of MSn spectra that are centroided
         /// </summary>
-        /// <returns></returns>
         public double FractionCentroidedMSn
         {
             get
@@ -173,19 +166,16 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Number of spectra analyzed
         /// </summary>
-        /// <returns></returns>
         public int TotalSpectra => mTotalSpectra.Sum(item => item.Value);
 
         /// <summary>
         /// Number of MS1 spectra analyzed
         /// </summary>
-        /// <returns></returns>
         public int TotalMS1Spectra => mTotalSpectra.Where(item => item.Key <= 1).Sum(item => item.Value);
 
         /// <summary>
         /// Number of MSn spectra analyzed
         /// </summary>
-        /// <returns></returns>
         public int TotalMSnSpectra => mTotalSpectra.Where(item => item.Key > 1).Sum(item => item.Value);
 
         #endregion

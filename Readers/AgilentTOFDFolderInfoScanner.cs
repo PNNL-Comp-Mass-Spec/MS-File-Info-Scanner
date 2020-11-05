@@ -59,7 +59,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="directoryPath"></param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if the file exists and the AcquiredTime entry was successfully parsed; otherwise false</returns>
-        /// <remarks></remarks>
         private bool ProcessContentsXMLFile(string directoryPath, DatasetFileInfo datasetFileInfo)
         {
             var success = false;
@@ -128,8 +127,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="directoryPath"></param>
         /// <param name="datasetFileInfo"></param>
         /// <param name="totalAcqTimeMinutes"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         private bool ProcessTimeSegmentFile(string directoryPath, DatasetFileInfo datasetFileInfo, out double totalAcqTimeMinutes)
         {
             var success = false;
@@ -213,7 +210,6 @@ namespace MSFileInfoScanner.Readers
         /// <param name="dataFilePath"></param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
-        /// <remarks></remarks>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
             var success = false;

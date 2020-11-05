@@ -48,7 +48,6 @@ namespace MSFileInfoScanner.MassLynxData
         /// </summary>
         /// <param name="startBit"></param>
         /// <param name="endBit"></param>
-        /// <returns></returns>
         /// <remarks>Returns a long value to allow for unsigned Int32 masks</remarks>
         private long CreateMask(byte startBit, byte endBit)
         {
@@ -193,7 +192,6 @@ namespace MSFileInfoScanner.MassLynxData
         /// <param name="packedBasePeakIntensity"></param>
         /// <param name="packedBasePeakInfo"></param>
         /// <param name="acquisitionDataType"></param>
-        /// <returns></returns>
         public float UnpackIntensity(short packedBasePeakIntensity, int packedBasePeakInfo, short acquisitionDataType)
         {
             // See note for Acquisition Data Types 9 to 12 below
@@ -264,7 +262,6 @@ namespace MSFileInfoScanner.MassLynxData
         /// <param name="packedBasePeakInfo"></param>
         /// <param name="acquisitionDataType"></param>
         /// <param name="processingFunctionIndexFile"></param>
-        /// <returns></returns>
         public double UnpackMass(int packedBasePeakInfo, short acquisitionDataType, bool processingFunctionIndexFile)
         {
             // See note for Acquisition Data Types 9 to 12 below

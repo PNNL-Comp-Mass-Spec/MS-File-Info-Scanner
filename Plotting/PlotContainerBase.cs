@@ -48,7 +48,6 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Get semicolon separated list of plot options
         /// </summary>
-        /// <returns></returns>
         protected string GetPlotOptions()
         {
             var plotOptions = new List<string> {

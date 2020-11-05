@@ -48,7 +48,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Display the scan count
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             return string.Format("ScanCount: {0}", ScanCount);
