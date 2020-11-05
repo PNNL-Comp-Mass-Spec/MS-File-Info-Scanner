@@ -4,6 +4,7 @@ using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScanner.Plotting;
 using PRISM;
 using pwiz.ProteowizardWrapper;
 
@@ -24,7 +25,7 @@ namespace MSFileInfoScanner.Readers
 
         private readonly LCMSDataPlotter mLCMS2DPlot;
         private readonly bool mSaveLCMS2DPlots;
-        private readonly bool mSaveTICAndBPI;
+        private readonly bool mSaveTICAndBPIPlots;
 
         private readonly bool mCheckCentroidingStatus;
 
@@ -71,7 +72,7 @@ namespace MSFileInfoScanner.Readers
             mLCMS2DPlot = lcms2DPlot;
 
             mSaveLCMS2DPlots = saveLCMS2DPlots;
-            mSaveTICAndBPI = saveTICAndBPI;
+            mSaveTICAndBPIPlots = saveTICAndBPI;
             mCheckCentroidingStatus = checkCentroidingStatus;
 
             mGetQ1MZ = new Regex("Q[0-9]=([0-9.]+)", RegexOptions.Compiled);
@@ -429,7 +430,7 @@ namespace MSFileInfoScanner.Readers
 
                         var spectrumCount = GetSpectrumCountWithRetry(mPWiz);
 
-                        var storeInTICAndBPIPlot = (mSaveTICAndBPI && spectrumCount == 0);
+                        var storeInTICAndBPIPlot = (mSaveTICAndBPIPlots && spectrumCount == 0);
 
                         ProcessTIC(scanTimes, intensities, ticScanTimes, ticScanNumbers, ref runtimeMinutes, storeInTICAndBPIPlot);
 
@@ -866,7 +867,7 @@ namespace MSFileInfoScanner.Readers
                     }
                 }
 
-                if (mSaveTICAndBPI && !parserInfo.TicStored &&
+                if (mSaveTICAndBPIPlots && !parserInfo.TicStored &&
                     (parserInfo.MaxScansForTicAndBpi < 0 || parserInfo.TicAndBpiScansStored < parserInfo.MaxScansForTicAndBpi))
                 {
                     mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimes[scanIndex], bpi, tic);
