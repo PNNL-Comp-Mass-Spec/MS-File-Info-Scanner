@@ -612,12 +612,10 @@ namespace MSFileInfoScanner.Readers
 
                     return true;
                 }
-                else
-                {
-                    SetErrorCode(eErrorCodeConstants.InvalidDataFolderPath);
-                    thisMSData.InitializeFunctionInfo(0);
-                    return false;
-                }
+
+                SetErrorCode(ErrorCodeConstants.InvalidDataFolderPath);
+                thisMSData.InitializeFunctionInfo(0);
+                return false;
             }
             catch (Exception ex)
             {
@@ -831,10 +829,8 @@ namespace MSFileInfoScanner.Readers
             {
                 return false;
             }
-            else
-            {
-                massLynxDataDirectoryPath = massLynxDataDirectoryPath.Trim();
-            }
+
+            massLynxDataDirectoryPath = massLynxDataDirectoryPath.Trim();
 
             if (mMSData.UserSuppliedDataDirPath == null)
             {

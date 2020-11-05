@@ -194,7 +194,8 @@ namespace MSFileInfoScanner.Readers
                         if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
 
-                        if (!dataLine.StartsWith("gc.runlength"))
+                        // ReSharper disable once StringLiteralTypo
+                        if (!dataLine.StartsWith("gc.runlength", StringComparison.OrdinalIgnoreCase))
                             continue;
 
                         // Runtime is the value after the equals sign
@@ -404,7 +405,7 @@ namespace MSFileInfoScanner.Readers
                     {
                         // ReSharper disable once CommentTypo
                         // Update the AcqTimes only if the LastWriteTime of the acqmeth.txt or GC.ini file is within the next 60 minutes of .AcqTimeEnd
-                        if (!success || methodFile.LastWriteTime.Subtract(datasetFileInfo.AcqTimeEnd).TotalMinutes < 60)
+                        if (methodFile.LastWriteTime.Subtract(datasetFileInfo.AcqTimeEnd).TotalMinutes < 60)
                         {
                             datasetFileInfo.AcqTimeStart = methodFile.LastWriteTime;
                             datasetFileInfo.AcqTimeEnd = methodFile.LastWriteTime;
