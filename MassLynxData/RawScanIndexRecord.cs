@@ -5,16 +5,12 @@ namespace MSFileInfoScanner.MassLynxData
     /// <summary>
     /// Used when reading the _func001.idx file
     /// </summary>
-    class RawScanIndexRecord
+    internal class RawScanIndexRecord
     {
-        private readonly RawDataUtils mRawDataUtils;
-
         /// <summary>
         /// Total record size, in bytes
         /// </summary>
         public const short RAW_SCAN_INDEX_RECORD_SIZE = 22;
-
-        #region "Properties"
 
         /// <summary>
         /// Start scan offset
@@ -102,16 +98,5 @@ namespace MSFileInfoScanner.MassLynxData
         /// </summary>
         /// <remarks>4 bytes</remarks>
         public int PackedBasePeakInfo { get; set; }
-
-        #endregion
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="rawDataUtils"></param>
-        public RawScanIndexRecord(RawDataUtils rawDataUtils)
-        {
-            mRawDataUtils = rawDataUtils;
-        }
     }
 }

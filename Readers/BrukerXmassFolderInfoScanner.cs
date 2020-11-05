@@ -40,7 +40,6 @@ namespace MSFileInfoScanner.Readers
 
         public const string BRUKER_SQLITE_INDEX_EXTENSION = ".MCF_IDX";
         private const string BRUKER_SCANINFO_XML_FILE = "scan.xml";
-        private const string BRUKER_XMASS_LOG_FILE = "log.txt";
 
         // ReSharper disable once IdentifierTypo
         private const string BRUKER_AUTOMS_FILE = "AutoMS.txt";
