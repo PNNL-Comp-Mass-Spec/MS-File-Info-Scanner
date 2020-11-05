@@ -1614,6 +1614,9 @@ namespace MSFileInfoScanner
 
                     var matchCount = 0;
 
+                    // Force this to true to avoid squashing newly-created index.html files
+                    Options.UseDatasetNameForHtmlPlotsFile = true;
+
                     foreach (var fileItem in datasetDirectory.GetFiles(inputFileOrDirectoryPath))
                     {
                         success = ProcessMSFileOrDirectory(fileItem.FullName, outputDirectoryPath, resetErrorCode, out msFileProcessingState);
@@ -1686,6 +1689,8 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
+                    // inputFileOrDirectoryPath does not have a * or ? wildcard
+
                     success = ProcessMSFileOrDirectory(inputFileOrDirectoryPath, outputDirectoryPath, resetErrorCode, out msFileProcessingState);
                     if (!success && ErrorCode == MSFileScannerErrorCodes.NoError)
                     {
@@ -1825,6 +1830,9 @@ namespace MSFileInfoScanner
                     var fileProcessFailCount = 0;
 
                     LoadCachedResults(false);
+
+                    // Force this to true to avoid squashing newly-created index.html files
+                    Options.UseDatasetNameForHtmlPlotsFile = true;
 
                     // Call RecurseDirectoriesWork
                     success = RecurseDirectoriesWork(inputDirectoryPath, inputFilePathOrDirectory, outputDirectoryPath, ref fileProcessCount, ref fileProcessFailCount, 1, maxLevelsToRecurse);
