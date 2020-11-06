@@ -83,7 +83,7 @@ namespace MSFileInfoScanner.Plotting
             if (!double.IsNaN(MajorStep))
                 options.Add("MajorStep=" + MajorStep);
 
-            if (additionalOptions != null && additionalOptions.Count > 0)
+            if (additionalOptions?.Count > 0)
                 options.AddRange(additionalOptions);
 
             return string.Join(";", options);

@@ -509,8 +509,8 @@ namespace MSFileInfoScanner
                         return errorMsg;
                     }
                 case MSFileScannerErrorCodes.MS2MzMinValidationWarning:
-                    var warningMsg = "Some of the MS/MS spectra have a minimum m/z value larger than the required minimum; " +
-                                     "reporter ion peaks likely could not be detected";
+                    const string warningMsg = "Some of the MS/MS spectra have a minimum m/z value larger than the required minimum; " +
+                                              "reporter ion peaks likely could not be detected";
 
                     if (!string.IsNullOrWhiteSpace(MS2MzMinValidationMessage))
                     {
@@ -1594,7 +1594,7 @@ namespace MSFileInfoScanner
                     var datasetFile = new FileInfo(cleanPath);
                     string inputDirectoryPath;
 
-                    if (datasetFile.Directory != null && datasetFile.Directory.Exists)
+                    if (datasetFile.Directory?.Exists == true)
                     {
                         inputDirectoryPath = datasetFile.DirectoryName;
                     }
@@ -1774,7 +1774,7 @@ namespace MSFileInfoScanner
                     if (Path.IsPathRooted(cleanPath))
                     {
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                        if (datasetFile.Directory != null && !datasetFile.Directory.Exists)
+                        if (datasetFile.Directory?.Exists == false)
                         {
                             ReportError("Directory not found: " + datasetFile.DirectoryName);
                             SetErrorCode(MSFileScannerErrorCodes.InvalidInputFilePath);
@@ -1783,7 +1783,7 @@ namespace MSFileInfoScanner
                     }
 
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                    if (datasetFile.Directory != null && datasetFile.Directory.Exists)
+                    if (datasetFile.Directory?.Exists == true)
                     {
                         inputDirectoryPath = datasetFile.DirectoryName;
                     }
@@ -1809,7 +1809,7 @@ namespace MSFileInfoScanner
                     }
                     else
                     {
-                        if (datasetDirectory.Parent != null && datasetDirectory.Parent.Exists)
+                        if (datasetDirectory.Parent?.Exists == true)
                         {
                             inputDirectoryPath = datasetDirectory.Parent.FullName;
                             inputFilePathOrDirectory = Path.GetFileName(inputFilePathOrDirectory);
@@ -2411,7 +2411,7 @@ namespace MSFileInfoScanner
                 {
                     // Make sure the directory exists
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                    if (datasetFile.Directory != null && !datasetFile.Directory.Exists)
+                    if (datasetFile.Directory?.Exists == false)
                     {
                         datasetFile.Directory.Create();
                     }

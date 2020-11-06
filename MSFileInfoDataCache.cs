@@ -230,12 +230,7 @@ namespace MSFileInfoScanner
                 {
                     rowMatch = dsDataset.Tables[tableName].Rows.Find(valueToFind);
 
-                    if (rowMatch == null)
-                    {
-                        return false;
-                    }
-
-                    return true;
+                    return rowMatch != null;
                 }
                 catch (Exception)
                 {
@@ -368,14 +363,14 @@ namespace MSFileInfoScanner
                         if (!IsNumber(splitLine[(int)DirectoryIntegrityInfoFileColumns.DirectoryID]))
                             continue;
 
-                        if (CachedDirectoryIntegrityInfoContainsDirectory(directoryPath, out var directoryID))
+                        if (CachedDirectoryIntegrityInfoContainsDirectory(directoryPath, out _))
                             continue;
 
                         try
                         {
                             var newRow = mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].NewRow();
 
-                            directoryID = Convert.ToInt32(splitLine[(int)DirectoryIntegrityInfoFileColumns.DirectoryID]);
+                            var directoryID = Convert.ToInt32(splitLine[(int)DirectoryIntegrityInfoFileColumns.DirectoryID]);
 
                             var directoryStats = new FileIntegrityChecker.DirectoryStatsType
                             {
@@ -601,8 +596,7 @@ namespace MSFileInfoScanner
         {
             var success = false;
 
-            if (mMSFileInfoDataset != null &&
-                mMSFileInfoDataset.Tables[MS_FILE_INFO_DATA_TABLE].Rows.Count > 0 &&
+            if (mMSFileInfoDataset?.Tables[MS_FILE_INFO_DATA_TABLE].Rows.Count > 0 &&
                 mMSFileInfoCachedResultsState == CachedResultsStateConstants.Modified)
             {
                 OnDebugEvent("Saving cached acquisition time file data to: " + Path.GetFileName(mAcquisitionTimeFilePath));

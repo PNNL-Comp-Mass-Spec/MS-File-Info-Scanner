@@ -162,7 +162,7 @@ namespace MSFileInfoScanner.Plotting
             // Generate a black curve with no symbols
             var series = new LineSeries();
 
-            if (points.Count <= 0)
+            if (points.Count == 0)
             {
                 return;
             }

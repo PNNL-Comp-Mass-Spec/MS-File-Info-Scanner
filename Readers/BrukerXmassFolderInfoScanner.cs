@@ -241,7 +241,7 @@ namespace MSFileInfoScanner.Readers
 
             foreach (var acquFile in acqusFiles)
             {
-                if (acquFile.Directory != null && acquFile.Directory.Name.Equals(dotDFolder.Name, StringComparison.OrdinalIgnoreCase))
+                if (acquFile.Directory?.Name.Equals(dotDFolder.Name, StringComparison.OrdinalIgnoreCase) == true)
                 {
                     return acquFile;
                 }
@@ -380,7 +380,7 @@ namespace MSFileInfoScanner.Readers
             if (manualOverride)
             {
                 // ReSharper disable once StringLiteralTypo
-                var newDataFilePath = @"c:\temp\analysis.baf";
+                const string newDataFilePath = @"c:\temp\analysis.baf";
                 bafFileInfo = new FileInfo(newDataFilePath);
             }
 
@@ -552,8 +552,6 @@ namespace MSFileInfoScanner.Readers
                             }
                         }
                     }
-
-                    cnDB.Close();
                 }
 
                 var mcfIndexFiles = datasetDirectory.GetFiles("*_1.mcf_idx").ToList();
@@ -579,8 +577,6 @@ namespace MSFileInfoScanner.Readers
                     ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.BPI);
                     ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.TIC);
                     ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.SpotNumber);
-
-                    cnDB.Close();
                 }
 
                 // Parse each entry in scanData

@@ -182,7 +182,7 @@ namespace MSFileInfoScanner.Readers
                 return currentTaskProgressAtEnd;
             }
 
-            return (float)(currentTaskProgressAtStart + (subTaskProgress / 100.0) * (currentTaskProgressAtEnd - currentTaskProgressAtStart));
+            return (float)(currentTaskProgressAtStart + subTaskProgress / 100.0 * (currentTaskProgressAtEnd - currentTaskProgressAtStart));
         }
 
         private bool CreateDatasetInfoFile(string inputFileName, string outputDirectoryPath)
@@ -604,6 +604,8 @@ namespace MSFileInfoScanner.Readers
 
                 var htmlFilePath = Path.Combine(outputDirectoryPath, htmlFileName);
 
+                OnDebugEvent("Creating file " + htmlFilePath);
+
                 using (var writer = new StreamWriter(new FileStream(htmlFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
                     // Add HTML headers and <table>
@@ -698,7 +700,7 @@ namespace MSFileInfoScanner.Readers
 
             var top = IntToEngineeringNotation(lcmsPlotter.Options.MaxPointsToPlot);
 
-            if (file1.Length <= 0 && file2.Length <= 0)
+            if (file1.Length == 0 && file2.Length == 0)
                 return;
 
             writer.WriteLine("    <tr>");
@@ -714,7 +716,7 @@ namespace MSFileInfoScanner.Readers
             var file1 = mTICAndBPIPlot.GetRecentFileInfo(TICandBPIPlotter.OutputFileTypes.BPIMS);
             var file2 = mTICAndBPIPlot.GetRecentFileInfo(TICandBPIPlotter.OutputFileTypes.BPIMSn);
 
-            if (file1.Length <= 0 && file2.Length <= 0)
+            if (file1.Length == 0 && file2.Length == 0)
                 return;
 
             writer.WriteLine("    <tr>");
@@ -937,7 +939,7 @@ namespace MSFileInfoScanner.Readers
             // This SortedSet is used to avoid displaying the same device twice
             var devicesDisplayed = new SortedSet<string>();
 
-            var tdFormatter = @"<td class=""DataCell"">{0}</td>";
+            const string tdFormatter = @"<td class=""DataCell"">{0}</td>";
 
             foreach (var device in deviceList)
             {
@@ -948,11 +950,11 @@ namespace MSFileInfoScanner.Readers
 
                 devicesDisplayed.Add(deviceKey);
 
-                deviceTypeRow.Append(string.Format(tdFormatter, device.DeviceDescription));
-                deviceNameRow.Append(string.Format(tdFormatter, device.InstrumentName));
-                deviceModelRow.Append(string.Format(tdFormatter, device.Model));
-                deviceSerialRow.Append(string.Format(tdFormatter, device.SerialNumber));
-                deviceSwVersionRow.Append(string.Format(tdFormatter, device.SoftwareVersion));
+                deviceTypeRow.AppendFormat(tdFormatter, device.DeviceDescription);
+                deviceNameRow.AppendFormat(tdFormatter, device.InstrumentName);
+                deviceModelRow.AppendFormat(tdFormatter, device.Model);
+                deviceSerialRow.AppendFormat(tdFormatter, device.SerialNumber);
+                deviceSwVersionRow.AppendFormat(tdFormatter, device.SoftwareVersion);
             }
 
             // Padding is: top right bottom left
@@ -1113,7 +1115,7 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         protected void ShowInstrumentFiles()
         {
-            if (mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles.Count <= 0)
+            if (mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles.Count == 0)
                 return;
 
             var fileInfo = new StringBuilder();
@@ -1125,8 +1127,8 @@ namespace MSFileInfoScanner.Readers
 
             foreach (var instrumentFile in mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles)
             {
-                fileInfo.AppendLine(string.Format("  {0}  {1,-30}  {2,12:N0} bytes",
-                                                  instrumentFile.Value.Hash, instrumentFile.Key, instrumentFile.Value.Length));
+                fileInfo.AppendFormat("  {0}  {1,-30}  {2,12:N0} bytes",
+                    instrumentFile.Value.Hash, instrumentFile.Key, instrumentFile.Value.Length).AppendLine();
             }
 
             OnDebugEvent(fileInfo.ToString());

@@ -371,23 +371,22 @@ namespace MSFileInfoScanner.Plotting
             // Instantiate a new ScanData var for this scan
             var scanData = new ScanData(scanNumber, msLevel, scanTimeMinutes, ionCount, ionsMZFiltered, ionsIntensityFiltered, chargeFiltered);
 
-            var maxAllowableIonCount = MAX_ALLOWABLE_ION_COUNT;
-            if (scanData.IonCount > maxAllowableIonCount)
+            if (scanData.IonCount > MAX_ALLOWABLE_ION_COUNT)
             {
                 // Do not keep more than 50,000 ions
                 mSpectraFoundExceedingMaxIonCount++;
 
-                // Display a message at the console the first 10 times we encounter spectra with over maxAllowableIonCount ions
+                // Display a message at the console the first 10 times we encounter spectra with over MAX_ALLOWABLE_ION_COUNT ions
                 // In addition, display a new message every time a new max value is encountered
                 if (mSpectraFoundExceedingMaxIonCount <= 10 || scanData.IonCount > mMaxIonCountReported)
                 {
                     Console.WriteLine();
-                    Console.WriteLine("Note: Scan " + scanNumber + " has " + scanData.IonCount + " ions; will only retain " + maxAllowableIonCount + " (trimmed " + mSpectraFoundExceedingMaxIonCount + " spectra)");
+                    Console.WriteLine("Note: Scan " + scanNumber + " has " + scanData.IonCount + " ions; will only retain " + MAX_ALLOWABLE_ION_COUNT + " (trimmed " + mSpectraFoundExceedingMaxIonCount + " spectra)");
 
                     mMaxIonCountReported = scanData.IonCount;
                 }
 
-                DiscardDataToLimitIonCount(scanData, 0, 0, maxAllowableIonCount);
+                DiscardDataToLimitIonCount(scanData, 0, 0, MAX_ALLOWABLE_ION_COUNT);
             }
 
             mScans.Add(scanData);
@@ -605,22 +604,14 @@ namespace MSFileInfoScanner.Plotting
 
         private void DiscardDataToLimitIonCount(ScanData msSpectrum, double mzIgnoreRangeStart, double mzIgnoreRangeEnd, int maxIonCountToRetain)
         {
-            // When this is true, then will write a text file of the mass spectrum before and after it is filtered
+            // When this is true, will write a text file of the mass spectrum before and after it is filtered
             // Used for debugging
             var writeDebugData = false;
             StreamWriter writer = null;
 
             try
             {
-                bool mzIgnoreRangeEnabled;
-                if (mzIgnoreRangeStart > 0 || mzIgnoreRangeEnd > 0)
-                {
-                    mzIgnoreRangeEnabled = true;
-                }
-                else
-                {
-                    mzIgnoreRangeEnabled = false;
-                }
+                var mzIgnoreRangeEnabled = mzIgnoreRangeStart > 0 || mzIgnoreRangeEnd > 0;
 
                 int ionCountNew;
                 if (msSpectrum.IonCount > maxIonCountToRetain)
@@ -1223,7 +1214,7 @@ namespace MSFileInfoScanner.Plotting
                 if (msLevelFilter != 0 && mScans[scanIndex].MSLevel != msLevelFilter)
                     continue;
 
-                if (mScans[scanIndex].Charge.Length <= 0)
+                if (mScans[scanIndex].Charge.Length == 0)
                     continue;
 
                 for (var ionIndex = 0; ionIndex <= mScans[scanIndex].IonCount - 1; ionIndex++)

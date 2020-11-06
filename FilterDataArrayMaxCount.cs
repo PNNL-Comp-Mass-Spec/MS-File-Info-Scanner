@@ -23,30 +23,22 @@ namespace MSFileInfoScanner
         /// Data values to track, along with their associated data indices
         /// </summary>
         private List<Tuple<float, int>> mDataValues;
-        private float mSkipDataPointFlag;
-        private float mTotalIntensityPercentageFilter;
 
         public event ProgressChangedEventHandler ProgressChanged;
         public delegate void ProgressChangedEventHandler(float progress);
 
         #region "Properties"
+
         public int MaximumDataCountToLoad { get; set; }
 
         public float Progress { get; private set; }
 
-        public float SkipDataPointFlag
-        {
-            get => mSkipDataPointFlag;
-            set => mSkipDataPointFlag = value;
-        }
+        public float SkipDataPointFlag { get; set; }
 
         public bool TotalIntensityPercentageFilterEnabled { get; set; }
 
-        public float TotalIntensityPercentageFilter
-        {
-            get => mTotalIntensityPercentageFilter;
-            set => mTotalIntensityPercentageFilter = value;
-        }
+        public float TotalIntensityPercentageFilter { get; set; }
+
         #endregion
 
         /// <summary>
@@ -54,7 +46,7 @@ namespace MSFileInfoScanner
         /// </summary>
         public FilterDataArrayMaxCount()
         {
-            mSkipDataPointFlag = DEFAULT_SKIP_DATA_POINT_FLAG;
+            SkipDataPointFlag = DEFAULT_SKIP_DATA_POINT_FLAG;
             Clear();
         }
 
@@ -76,7 +68,7 @@ namespace MSFileInfoScanner
             MaximumDataCountToLoad = 400000;
 
             TotalIntensityPercentageFilterEnabled = false;
-            mTotalIntensityPercentageFilter = 90;
+            TotalIntensityPercentageFilter = 90;
 
             mDataValues = new List<Tuple<float, int>>();
         }
@@ -97,7 +89,7 @@ namespace MSFileInfoScanner
         /// </summary>
         public void FilterData()
         {
-            if (mDataValues.Count <= 0)
+            if (mDataValues.Count == 0)
             {
                 // Nothing to do
                 return;
@@ -109,7 +101,7 @@ namespace MSFileInfoScanner
         private Tuple<float, int> GetSkippedDataPoint(Tuple<float, int> dataValue)
         {
             var indexSaved = dataValue.Item2;
-            return new Tuple<float, int>(mSkipDataPointFlag, indexSaved);
+            return new Tuple<float, int>(SkipDataPointFlag, indexSaved);
         }
 
         private void FilterDataByMaxDataCountToKeep()
@@ -206,7 +198,7 @@ namespace MSFileInfoScanner
                 var binToSort = -1;
                 for (var index = binCount - 1; index >= 0; index += -1)
                 {
-                    pointTotal = pointTotal + histogramBinCounts[index];
+                    pointTotal += histogramBinCounts[index];
                     if (pointTotal >= MaximumDataCountToLoad)
                     {
                         binToSort = index;
@@ -300,7 +292,7 @@ namespace MSFileInfoScanner
                                 originalDataArrayIndex++;
                             }
 
-                            if (Math.Abs(binnedData[index].Item1 - mSkipDataPointFlag) < float.Epsilon)
+                            if (Math.Abs(binnedData[index].Item1 - SkipDataPointFlag) < float.Epsilon)
                             {
                                 if (mDataValues[originalDataArrayIndex].Item2 == binnedData[index].Item2)
                                 {
@@ -385,7 +377,7 @@ namespace MSFileInfoScanner
         }
     }
 
-    class SortByIndex : IComparer<Tuple<float, int>>
+    internal class SortByIndex : IComparer<Tuple<float, int>>
     {
         public int Compare(Tuple<float, int> x, Tuple<float, int> y)
         {

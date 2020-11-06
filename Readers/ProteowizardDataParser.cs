@@ -472,7 +472,7 @@ namespace MSFileInfoScanner.Readers
                 return;
             }
 
-            if (parent2DData.Count <= 0 && product2DData.Count <= 0)
+            if (parent2DData.Count == 0 && product2DData.Count == 0)
             {
                 return;
             }
@@ -586,7 +586,7 @@ namespace MSFileInfoScanner.Readers
                     }
                     catch (Exception ex)
                     {
-                        var baseMessage = "Exception calling mPWiz.GetScanTimesAndMsLevels";
+                        const string baseMessage = "Exception calling mPWiz.GetScanTimesAndMsLevels";
                         var alternateMethodFlag = useAlternateMethod ? " (useAlternateMethod = true)" : string.Empty;
 
                         OnWarningEvent(string.Format("{0}{1}: {2}", baseMessage, alternateMethodFlag, ex.Message));

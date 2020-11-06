@@ -55,7 +55,6 @@ namespace MSFileInfoScanner.Options
                 mLogFilePath = value;
                 LogMessagesToFile = !string.IsNullOrWhiteSpace(mLogFilePath);
             }
-
         }
 
         [Option("LogDirectoryPath", HelpShowsDefault = false,

@@ -565,7 +565,7 @@ namespace MSFileInfoScanner.Readers
             // Future, optional: Determine the DatasetID
             // Unfortunately, this is not present in metadata.txt
             // datasetID = LookupDatasetID(datasetName)
-            var datasetID = 0;
+            const int datasetID = 0;
 
             datasetFileInfo.FileSystemCreationTime = uimfFile.CreationTime;
             datasetFileInfo.FileSystemModificationTime = uimfFile.LastWriteTime;

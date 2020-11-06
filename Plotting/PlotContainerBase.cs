@@ -64,7 +64,9 @@ namespace MSFileInfoScanner.Plotting
 
             string logFileName;
             if (string.IsNullOrWhiteSpace(dataSource))
+            {
                 logFileName = "TICAndBPIPlotter_Debug.txt";
+            }
             else
             {
                 logFileName = dataSource + ".txt";

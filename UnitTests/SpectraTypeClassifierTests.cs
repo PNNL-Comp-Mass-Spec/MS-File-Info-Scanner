@@ -38,7 +38,6 @@ namespace MSFileInfoScannerUnitTests
 
             for (var scan = 1; scan < 19; scan++)
             {
-
                 if (scan % 5 == 0)
                 {
                     // Profile mode
@@ -95,7 +94,6 @@ namespace MSFileInfoScannerUnitTests
 
             Assert.AreEqual(0.85, classifier.FractionCentroided, 0.001, "Fraction centroided");
             Assert.AreEqual(1, classifier.FractionCentroidedMSn, 0.001, "Fraction centroided MSn");
-
         }
 
         [Test]
@@ -301,7 +299,6 @@ namespace MSFileInfoScannerUnitTests
             classifier.WarningEvent += SourceClass_WarningEvent;
         }
 
-
         private void SourceClass_DebugEvent(string message)
         {
             ConsoleMsgUtils.ShowDebug(message);
@@ -321,6 +318,5 @@ namespace MSFileInfoScannerUnitTests
         {
             ConsoleMsgUtils.ShowError(message, ex);
         }
-
     }
 }

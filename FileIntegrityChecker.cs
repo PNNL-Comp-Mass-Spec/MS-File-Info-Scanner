@@ -168,8 +168,6 @@ namespace MSFileInfoScanner
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         private bool CheckTextFile(string filePath)
         {
-            var fileIsValid = true;
-
             var fileName = Path.GetFileName(filePath);
             if (fileName == null)
             {
@@ -187,7 +185,7 @@ namespace MSFileInfoScanner
                 //  Date	5/16/2008 7:49:00 PM
                 //  Processor	SeqCluster2
                 //  Tool	Sequest
-                fileIsValid = CheckTextFileWork(filePath, 10, 0, new List<string>
+                return CheckTextFileWork(filePath, 10, 0, new List<string>
                 {
                     "Job",
                     "Date",
@@ -197,14 +195,15 @@ namespace MSFileInfoScanner
 
                 // DEX Manager Summary File
             }
-            else if (fileNameLower == "DataExtractionSummary.txt".ToLower())
+
+            if (fileNameLower == "DataExtractionSummary.txt".ToLower())
             {
                 // Free form text file
                 // Example contents:
                 //  Job Number: 306839
                 //  Date: 5/16/2008 7:53:50 PM
                 //  Processor: Mash-01
-                fileIsValid = CheckTextFileWork(filePath, 5, 0, new List<string>
+                return CheckTextFileWork(filePath, 5, 0, new List<string>
                 {
                     "Job",
                     "Date",
@@ -214,7 +213,8 @@ namespace MSFileInfoScanner
 
                 // Analysis Manager MetaData file
             }
-            else if (fileNameLower == "metadata.txt")
+
+            if (fileNameLower == "metadata.txt")
             {
                 // Free form text file
                 // Example contents (I'm not sure if this file always looks like this):
@@ -223,41 +223,45 @@ namespace MSFileInfoScanner
                 //  OU_CN32_002_run3_3Apr08_Draco_07-12-25
                 //  Apr  4 2008 10:01AM
                 //  LTQ_Orb_1
-                fileIsValid = CheckTextFileWork(filePath, 2, 0, "Proteomics", false, false);
+                return CheckTextFileWork(filePath, 2, 0, "Proteomics", false, false);
 
                 // MASIC
             }
-            else if (fileNameLower.EndsWith("_ScanStats.txt".ToLower()))
+
+            if (fileNameLower.EndsWith("_ScanStats.txt".ToLower()))
             {
                 // Note: Header line could be missing, but the file should always contain data
                 // Example contents:
                 //  Dataset	ScanNumber	ScanTime	ScanType	TotalIonIntensity	BasePeakIntensity	BasePeakMZ	BasePeakSignalToNoiseRatio	IonCount	IonCountRaw
                 //  113591	1	0.00968	1	145331	12762	531.0419	70.11	3147	3147
-                fileIsValid = CheckTextFileWork(filePath, 1, 6, true);
+                return CheckTextFileWork(filePath, 1, 6, true);
 
                 // MASIC
             }
-            else if (fileNameLower.EndsWith("_ScanStatsConstant.txt".ToLower()))
+
+            if (fileNameLower.EndsWith("_ScanStatsConstant.txt".ToLower()))
             {
                 // Note: Header line could be missing, but the file should always contain data
                 // Example contents:
                 //  Setting	Value
                 //  AGC	On
-                fileIsValid = CheckTextFileWork(filePath, 1, 1, true);
+                return CheckTextFileWork(filePath, 1, 1, true);
 
                 // MASIC
             }
-            else if (fileNameLower.EndsWith("_ScanStatsEx.txt".ToLower()))
+
+            if (fileNameLower.EndsWith("_ScanStatsEx.txt".ToLower()))
             {
                 // Note: Header line could be missing, but the file should always contain data
                 // Example contents:
                 //  Dataset	ScanNumber	Ion Injection Time (ms)	Scan Segment	Scan Event	Master Index	Elapsed Scan Time (sec)	Charge State	Monoisotopic M/Z	MS2 Isolation Width	FT Analyzer Settings	FT Analyzer Message	FT Resolution	Conversion Parameter B	Conversion Parameter C	Conversion Parameter D	Conversion Parameter E	Collision Mode	Scan Filter Text
                 //  113591	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
-                fileIsValid = CheckTextFileWork(filePath, 1, 1, true);
+                return CheckTextFileWork(filePath, 1, 1, true);
 
                 // MASIC
             }
-            else if (fileNameLower.EndsWith("_MSMethod.txt".ToLower()))
+
+            if (fileNameLower.EndsWith("_MSMethod.txt".ToLower()))
             {
                 // Free form text file
                 // Example contents:
@@ -270,7 +274,7 @@ namespace MSFileInfoScanner
                 //  Last modified: 12/10/2007 by LTQ
                 //
                 //  MS Run Time (min): 99.50
-                fileIsValid = CheckTextFileWork(filePath, 10, 0, new List<string>
+                return CheckTextFileWork(filePath, 10, 0, new List<string>
                 {
                     "Instrument",
                     "Creator"
@@ -278,22 +282,24 @@ namespace MSFileInfoScanner
 
                 // MASIC
             }
-            else if (fileNameLower.EndsWith("_SICStats.txt".ToLower()))
+
+            if (fileNameLower.EndsWith("_SICStats.txt".ToLower()))
             {
                 // Note: Header line could be missing, but the file will usually (but not always) contain data
                 // Example contents:
                 //  Dataset	ParentIonIndex	MZ	SurveyScanNumber	FragScanNumber	OptimalPeakApexScanNumber	PeakApexOverrideParentIonIndex	CustomSICPeak	PeakScanStart	PeakScanEnd	PeakScanMaxIntensity	PeakMaxIntensity	PeakSignalToNoiseRatio	FWHMInScans	PeakArea	ParentIonIntensity	PeakBaselineNoiseLevel	PeakBaselineNoiseStDev	PeakBaselinePointsUsed	StatMomentsArea	CenterOfMassScan	PeakStDev	PeakSkew	PeakKSStat	StatMomentsDataCountUsed
                 //  113591	0	445.12	8	9	133	79	0	3	86	66	14881	0.4267	78	906920	11468	34870	22736	768	293248	68	6.36	-0.16	0.4162	5
-                fileIsValid = CheckTextFileWork(filePath, 0, 10, true);
+                return CheckTextFileWork(filePath, 0, 10, true);
 
                 // SEQUEST
             }
-            else if (fileNameLower.StartsWith("cat_log"))
+
+            if (fileNameLower.StartsWith("cat_log"))
             {
                 // Example contents:
                 //  5/16/2008 7:41:55 PM, 14418 'dta' files were concatenated to 'D:\DMS_Work\OU_CN32_002_run3_3Apr08_Draco_07-12-25_dta.txt', Normal,
                 //  5/16/2008 7:48:47 PM, 14418 'out' files were concatenated to 'D:\DMS_Work\OU_CN32_002_run3_3Apr08_Draco_07-12-25_out.txt', Normal,
-                fileIsValid = CheckTextFileWork(filePath, 1, 0, new List<string>
+                return CheckTextFileWork(filePath, 1, 0, new List<string>
                 {
                     "were concatenated",
                     "_dta.txt",
@@ -302,38 +308,42 @@ namespace MSFileInfoScanner
 
                 // SEQUEST
             }
-            else if (fileNameLower.EndsWith("_fht.txt"))
+
+            if (fileNameLower.EndsWith("_fht.txt"))
             {
                 // ReSharper disable CommentTypo
                 // Note: Header line could be missing, but the file should always contain data (unless no data was above the XCorr threshold (rare, but happens))
                 // Example contents:
                 //  HitNum	ScanNum	ScanCount	ChargeState	MH	XCorr	DelCn	Sp	Reference	MultiProtein	Peptide	DelCn2	RankSp	RankXc	DelM	XcRatio	PassFilt	MScore	NumTrypticEnds
                 //  1	10221	1	3	2618.37592	8.4305	0.0000	3751.6	P005|G3P_RABIT	+1	K.VIHDHFGIVEGLMTTVHAITATQK.T	0.5745	1	1	-0.00040	1.000	1	12.02	2
-                fileIsValid = CheckTextFileWork(filePath, 0, 10, true, true);
+                return CheckTextFileWork(filePath, 0, 10, true, true);
 
                 // SEQUEST
             }
-            else if (fileNameLower.EndsWith("_syn.txt"))
+
+            if (fileNameLower.EndsWith("_syn.txt"))
             {
                 // Note: Header line could be missing, but the file should always contain data (unless no data was above the XCorr threshold (rare, but happens))
                 // Example contents:
                 //  HitNum	ScanNum	ScanCount	ChargeState	MH	XCorr	DelCn	Sp	Reference	MultiProtein	Peptide	DelCn2	RankSp	RankXc	DelM	XcRatio	PassFilt	MScore	NumTrypticEnds
                 //  1	10221	1	3	2618.37592	8.4305	0.0000	3751.6	P005|G3P_RABIT	+1	K.VIHDHFGIVEGLMTTVHAITATQK.T	0.5745	1	1	-0.00040	1.000	1	12.02	2
-                fileIsValid = CheckTextFileWork(filePath, 0, 10, true, true);
+                return CheckTextFileWork(filePath, 0, 10, true, true);
 
                 // SEQUEST
             }
-            else if (fileNameLower.EndsWith("_fht_prot.txt"))
+
+            if (fileNameLower.EndsWith("_fht_prot.txt"))
             {
                 // Header line should always be present
                 // Example contents:
                 //  RankXc	ScanNum	ChargeState	MultiProteinID	Reference
                 //  1	9	1	1	CN32_0001
-                fileIsValid = CheckTextFileWork(filePath, 1, 4, "RankXc", true);
+                return CheckTextFileWork(filePath, 1, 4, "RankXc", true);
 
                 // SEQUEST
             }
-            else if (fileNameLower.EndsWith("_irr.txt"))
+
+            if (fileNameLower.EndsWith("_irr.txt"))
             {
                 // Header line should always be present
                 // Example contents:
@@ -341,32 +351,35 @@ namespace MSFileInfoScanner
                 //  9	1	1	4	6
 
                 // ReSharper disable once StringLiteralTypo
-                fileIsValid = CheckTextFileWork(filePath, 1, 4, "Scannum", true);
+                return CheckTextFileWork(filePath, 1, 4, "Scannum", true);
 
                 // SEQUEST
             }
-            else if (fileNameLower.EndsWith("_nli.txt"))
+
+            if (fileNameLower.EndsWith("_nli.txt"))
             {
                 // Note: Header line could be missing
                 // Example contents:
                 //  Scannum	NL1_Intensity	NL2_Intensity	NL3_Intensity
                 //  9	0	0	0
-                fileIsValid = CheckTextFileWork(filePath, 1, 3, true);
+                return CheckTextFileWork(filePath, 1, 3, true);
 
                 // X!Tandem
             }
-            else if (fileNameLower.EndsWith("_xt.txt"))
+
+            if (fileNameLower.EndsWith("_xt.txt"))
             {
                 // Header line should always be present
                 // Example contents:
                 //  Result_ID	Group_ID	Scan	Charge	Peptide_MH	Peptide_Hyperscore	Peptide_Expectation_Value_Log(e)	Multiple_Protein_Count	Peptide_Sequence	DeltaCn2	y_score	y_ions	b_score	b_ions	Delta_Mass	Peptide_Intensity_Log(I)
                 //  1	3125	3541	2	1990.0049	74.4	-10.174	0	R.TDMESALPVTVLSAEDIAK.T	0.6949	12.9	11	11.7	11	-0.0054	6.22
-                fileIsValid = CheckTextFileWork(filePath, 1, 10, true);
+                return CheckTextFileWork(filePath, 1, 10, true);
 
                 // ReSharper restore CommentTypo
 
             }
-            else if (fileNameLower == "lcq_dta.txt")
+
+            if (fileNameLower == "lcq_dta.txt")
             {
                 // Free form text file
                 // Example contents:
@@ -384,7 +397,7 @@ namespace MSFileInfoScanner
                 //
                 //     #     Scan   MasterScan   Precursor   Charge     (M+H)+
                 //  ------  ------  ----------  -----------  ------  -----------
-                fileIsValid = CheckTextFileWork(filePath, 6, 0, new List<string>
+                return CheckTextFileWork(filePath, 6, 0, new List<string>
                 {
                     "group scan",
                     "mass range",
@@ -392,29 +405,33 @@ namespace MSFileInfoScanner
                     "Charge"
                 }, false, false, 1);
             }
-            else if (fileNameLower == "lcq_profile.txt")
+
+            if (fileNameLower == "lcq_profile.txt")
             {
                 // Example contents:
                 //  Datafile FullScanSumBP FullScanMaxBP ZoomScanSumBP ZoomScanMaxBP SumTIC MaxTIC
                 //  OU_CN32_002_run3_3Apr08_Draco_07-12-25.9.9.1.dta 11861 11861 0 0 13482 13482
-                fileIsValid = CheckTextFileWork(filePath, 1, 0, "Datafile", false);
+                return CheckTextFileWork(filePath, 1, 0, "Datafile", false);
             }
-            else if (fileName.Equals("XTandem_Processing_Log.txt", StringComparison.OrdinalIgnoreCase))
+
+            if (fileName.Equals("XTandem_Processing_Log.txt", StringComparison.OrdinalIgnoreCase))
             {
                 // Example contents:
                 //  2008-05-16 10:48:19	X! Tandem starting
                 //  2008-05-16 10:48:19	loading spectra
                 //  2008-05-16 10:48:23	.
-                fileIsValid = CheckTextFileWork(filePath, 1, 1, true, true);
+                return CheckTextFileWork(filePath, 1, 1, true, true);
             }
-            else if (fileNameLower == "mass_correction_tags.txt")
+
+            if (fileNameLower == "mass_correction_tags.txt")
             {
                 // Example contents:
                 //  6C13    	6.02013	-
                 //  6C132N15	8.0143	-
-                fileIsValid = CheckTextFileWork(filePath, 1, 1, true);
+                return CheckTextFileWork(filePath, 1, 1, true);
             }
-            else if (fileNameLower.EndsWith("_ModDefs.txt".ToLower()))
+
+            if (fileNameLower.EndsWith("_ModDefs.txt".ToLower()))
             {
                 // Note: File could be empty
                 // Example contents:
@@ -423,36 +440,40 @@ namespace MSFileInfoScanner
                 //  @	57.0215	C	D	IodoAcet
                 //  &	-17.026549	Q	D	NH3_Loss
                 //  $	-18.0106	E	D	MinusH2O
-                fileIsValid = CheckTextFileWork(filePath, 0, 4, true);
+                return CheckTextFileWork(filePath, 0, 4, true);
 
                 // PHRP
             }
-            else if (fileNameLower.EndsWith("_ModDetails.txt".ToLower()))
+
+            if (fileNameLower.EndsWith("_ModDetails.txt".ToLower()))
             {
                 // Example contents:
                 //  Unique_Seq_ID	Mass_Correction_Tag	Position
-                fileIsValid = CheckTextFileWork(filePath, 1, 2, "Unique_Seq_ID", true);
+                return CheckTextFileWork(filePath, 1, 2, "Unique_Seq_ID", true);
 
                 // PHRP
             }
-            else if (fileNameLower.EndsWith("_ModSummary.txt".ToLower()))
+
+            if (fileNameLower.EndsWith("_ModSummary.txt".ToLower()))
             {
                 // Example contents:
                 //  Modification_Symbol	Modification_Mass	Target_Residues	Modification_Type	Mass_Correction_Tag	Occurrence_Count
-                fileIsValid = CheckTextFileWork(filePath, 1, 4, "Modification_Symbol", true);
+                return CheckTextFileWork(filePath, 1, 4, "Modification_Symbol", true);
 
                 // PHRP
             }
-            else if (fileNameLower.EndsWith("_ResultToSeqMap.txt".ToLower()))
+
+            if (fileNameLower.EndsWith("_ResultToSeqMap.txt".ToLower()))
             {
                 // Example contents:
                 //  Result_ID	Unique_Seq_ID
                 //  1	1
-                fileIsValid = CheckTextFileWork(filePath, 1, 1, "Result_ID", true);
+                return CheckTextFileWork(filePath, 1, 1, "Result_ID", true);
 
                 // PHRP
             }
-            else if (fileNameLower.EndsWith("_SeqInfo.txt".ToLower()))
+
+            if (fileNameLower.EndsWith("_SeqInfo.txt".ToLower()))
             {
                 // Example contents:
                 //  Unique_Seq_ID	Mod_Count	Mod_Description	Monoisotopic_Mass
@@ -463,34 +484,38 @@ namespace MSFileInfoScanner
                 // Row_ID	Unique_Seq_ID	Cleavage_State	Terminus_State	Mod_Count	Mod_Description	Monoisotopic_Mass
                 // 1	1	2	0	2	IodoAcet:3,IodoAcet:30	4436.0728061
 
-                fileIsValid = CheckTextFileWork(filePath, 1, 3, "Unique_Seq_ID", true, false);
+                return CheckTextFileWork(filePath, 1, 3, "Unique_Seq_ID", true, false);
 
                 // PHRP
             }
-            else if (fileNameLower.EndsWith("_SeqToProteinMap.txt".ToLower()))
+
+            if (fileNameLower.EndsWith("_SeqToProteinMap.txt".ToLower()))
             {
                 // Example contents:
                 //  Unique_Seq_ID	Cleavage_State	Terminus_State	Protein_Name	Protein_Expectation_Value_Log(e)	Protein_Intensity_Log(I)
                 //  1	2	0	P005|G3P_RABIT
-                fileIsValid = CheckTextFileWork(filePath, 1, 5, "Unique_Seq_ID", true);
+                return CheckTextFileWork(filePath, 1, 5, "Unique_Seq_ID", true);
 
                 // Peptide Prophet
             }
-            else if (fileNameLower.EndsWith("_PepProphet.txt".ToLower()))
+
+            if (fileNameLower.EndsWith("_PepProphet.txt".ToLower()))
             {
                 // Example contents:
                 //  HitNum	FScore	Probability	negOnly
                 //  1	9.5844	1	0
-                fileIsValid = CheckTextFileWork(filePath, 1, 3, "HitNum", true);
+                return CheckTextFileWork(filePath, 1, 3, "HitNum", true);
             }
-            else if (fileNameLower == "PeptideProphet_Coefficients.txt")
+
+            if (fileNameLower == "PeptideProphet_Coefficients.txt")
             {
                 // Example contents:
                 //  CS	Xcorr	DeltaCn2	RankSp	DelM	Const
                 //  1	5.49	4.643	-0.455	-0.84	0.646
-                fileIsValid = CheckTextFileWork(filePath, 1, 5, "CS", true);
+                return CheckTextFileWork(filePath, 1, 5, "CS", true);
             }
-            else if (fileNameLower == "sequest.log")
+
+            if (fileNameLower == "sequest.log")
             {
                 // Free form text file
                 // Example contents:
@@ -502,10 +527,10 @@ namespace MSFileInfoScanner
                 //
                 //    Arch:WIN32  CPU:1  Tid:40000  Name:p1
                 //    Arch:LINUXI386  CPU:4  Tid:80000  Name:node18
-                fileIsValid = CheckTextFileWork(filePath, 5, 0);
+                return CheckTextFileWork(filePath, 5, 0);
             }
 
-            return fileIsValid;
+            return true;
         }
 
         /// <summary>
@@ -902,7 +927,6 @@ namespace MSFileInfoScanner
 
                 case "sptype":
                     // Skip this file
-                    lineIsValid = true;
                     break;
             }
 
@@ -1227,12 +1251,8 @@ namespace MSFileInfoScanner
                     zipIsValid = Ionic.Zip.ZipFile.CheckZip(zipFilePath);
                 }
             }
-            catch (Exception)
+            catch (Exception) when (!throwExceptionIfInvalid)
             {
-                if (throwExceptionIfInvalid)
-                {
-                    throw;
-                }
                 zipIsValid = false;
             }
             finally
@@ -1314,7 +1334,7 @@ namespace MSFileInfoScanner
             var fileName = file.Name;
             if (file.Directory == null)
             {
-                var errorMessage = "Unable to determine the parent directory of the XML file";
+                const string errorMessage = "Unable to determine the parent directory of the XML file";
                 LogFileIntegrityError(filePath, errorMessage);
                 return false;
             }
@@ -1633,7 +1653,7 @@ namespace MSFileInfoScanner
             {
                 var filesToIgnoreSorted = new SortedSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
-                if (filesToIgnore != null && filesToIgnore.Count > 0)
+                if (filesToIgnore?.Count > 0)
                 {
                     foreach (var item in filesToIgnore)
                     {
@@ -1767,19 +1787,14 @@ namespace MSFileInfoScanner
                 LogErrors("CheckIntegrityOfFilesInFolder", "Error in CheckIntegrityOfFilesInDirectory", ex);
             }
 
-            if (directoryStats.FileCountFailIntegrity == 0)
-            {
-                return true;
-            }
-
-            return false;
+            return directoryStats.FileCountFailIntegrity == 0;
         }
 
         private Dictionary<string, bool> ConvertTextListToDictionary(IReadOnlyCollection<string> requiredTextItems)
         {
             var requiredTextDictionary = new Dictionary<string, bool>();
 
-            if (requiredTextItems != null && requiredTextItems.Count > 0)
+            if (requiredTextItems?.Count > 0)
             {
                 foreach (var lineHeader in requiredTextItems)
                 {
@@ -1795,7 +1810,7 @@ namespace MSFileInfoScanner
             var charCount = 0;
             var matchIndex = -1;
 
-            do
+            while (true)
             {
                 matchIndex = text.IndexOf(searchChar, matchIndex + 1);
                 if (matchIndex >= 0)
@@ -1806,7 +1821,7 @@ namespace MSFileInfoScanner
                 {
                     break;
                 }
-            } while (true);
+            }
 
             return charCount;
         }
@@ -1822,41 +1837,39 @@ namespace MSFileInfoScanner
         private void FindRequiredTextInLine(
             string textToSearch,
             ref bool needToCheckItems,
-            Dictionary<string, bool> requiredTextItems,
+            IDictionary<string, bool> requiredTextItems,
             ref int requiredTextMatchCount,
             bool matchStart)
         {
-            if (!needToCheckItems || requiredTextItems.Count <= 0)
+            if (!needToCheckItems || requiredTextItems.Count == 0)
             {
                 return;
             }
 
-            using (var lineHeaderEnum = requiredTextItems.GetEnumerator())
+            foreach (var item in requiredTextItems)
             {
-                while (lineHeaderEnum.MoveNext())
+                if (item.Value)
                 {
-                    if (lineHeaderEnum.Current.Value)
-                    {
-                        continue;
-                    }
+                    // The item has already been found
+                    continue;
+                }
 
-                    if (matchStart)
+                if (matchStart)
+                {
+                    if (textToSearch.StartsWith(item.Key))
                     {
-                        if (textToSearch.StartsWith(lineHeaderEnum.Current.Key))
-                        {
-                            requiredTextItems[lineHeaderEnum.Current.Key] = true;
-                            requiredTextMatchCount++;
-                            break;
-                        }
+                        requiredTextItems[item.Key] = true;
+                        requiredTextMatchCount++;
+                        break;
                     }
-                    else
+                }
+                else
+                {
+                    if (textToSearch.Contains(item.Key))
                     {
-                        if (textToSearch.Contains(lineHeaderEnum.Current.Key))
-                        {
-                            requiredTextItems[lineHeaderEnum.Current.Key] = true;
-                            requiredTextMatchCount++;
-                            break;
-                        }
+                        requiredTextItems[item.Key] = true;
+                        requiredTextMatchCount++;
+                        break;
                     }
                 }
             }
@@ -1911,16 +1924,13 @@ namespace MSFileInfoScanner
         {
             var matchFound = false;
 
-            using (var elementNames = requiredItemNames.GetEnumerator())
+            foreach (var item in requiredItemNames)
             {
-                while (elementNames.MoveNext())
+                if (item.Key.Equals(currentItemName))
                 {
-                    if (elementNames.Current.Key.Equals(currentItemName))
-                    {
-                        requiredItemNames[elementNames.Current.Key] = true;
-                        matchFound = true;
-                        break;
-                    }
+                    requiredItemNames[item.Key] = true;
+                    matchFound = true;
+                    break;
                 }
             }
 

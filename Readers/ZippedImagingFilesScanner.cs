@@ -54,64 +54,61 @@ namespace MSFileInfoScanner.Readers
 
                 foreach (var fileNameToFind in fileNamesToFind)
                 {
-                    using (var zipEntry = zipFileReader.GetEnumerator())
+                    foreach (var item in zipFileReader)
                     {
-                        while (zipEntry.MoveNext())
+                        if (item == null)
+                            continue;
+
+                        if (item.IsDirectory)
                         {
-                            if (zipEntry.Current == null)
-                                continue;
-
-                            if (zipEntry.Current.IsDirectory)
-                            {
-                                continue;
-                            }
-
-                            // Split the filename on the forward slash character
-                            var nameParts = zipEntry.Current.FileName.Split('/');
-
-                            if (nameParts.Length <= 0)
-                            {
-                                continue;
-                            }
-
-                            if (!string.Equals(nameParts[nameParts.Length - 1], fileNameToFind, StringComparison.OrdinalIgnoreCase))
-                                continue;
-
-                            if (zipEntry.Current.LastModified < datasetFileInfo.AcqTimeStart)
-                            {
-                                datasetFileInfo.AcqTimeStart = zipEntry.Current.LastModified;
-                            }
-
-                            if (zipEntry.Current.LastModified > datasetFileInfo.AcqTimeEnd)
-                            {
-                                datasetFileInfo.AcqTimeEnd = zipEntry.Current.LastModified;
-                            }
-
-                            // Bump up the scan count
-                            datasetFileInfo.ScanCount++;
-
-                            // Add a Scan Stats entry
-                            var scanStatsEntry = new ScanStatsEntry
-                            {
-                                ScanNumber = datasetFileInfo.ScanCount,
-                                ScanType = 1,
-                                ScanTypeName = "MALDI-HMS",
-                                ScanFilterText = string.Empty,
-                                ElutionTime = "0",
-                                TotalIonIntensity = "0",
-                                BasePeakIntensity = "0",
-                                BasePeakMZ = "0",
-                                BasePeakSignalToNoiseRatio = "0",
-                                IonCount = 0,
-                                IonCountRaw = 0
-                            };
-
-                            // Base peak signal to noise ratio
-
-                            mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
-
-                            success = true;
+                            continue;
                         }
+
+                        // Split the filename on the forward slash character
+                        var nameParts = item.FileName.Split('/');
+
+                        if (nameParts.Length == 0)
+                        {
+                            continue;
+                        }
+
+                        if (!string.Equals(nameParts[nameParts.Length - 1], fileNameToFind, StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        if (item.LastModified < datasetFileInfo.AcqTimeStart)
+                        {
+                            datasetFileInfo.AcqTimeStart = item.LastModified;
+                        }
+
+                        if (item.LastModified > datasetFileInfo.AcqTimeEnd)
+                        {
+                            datasetFileInfo.AcqTimeEnd = item.LastModified;
+                        }
+
+                        // Bump up the scan count
+                        datasetFileInfo.ScanCount++;
+
+                        // Add a Scan Stats entry
+                        var scanStatsEntry = new ScanStatsEntry
+                        {
+                            ScanNumber = datasetFileInfo.ScanCount,
+                            ScanType = 1,
+                            ScanTypeName = "MALDI-HMS",
+                            ScanFilterText = string.Empty,
+                            ElutionTime = "0",
+                            TotalIonIntensity = "0",
+                            BasePeakIntensity = "0",
+                            BasePeakMZ = "0",
+                            BasePeakSignalToNoiseRatio = "0",
+                            IonCount = 0,
+                            IonCountRaw = 0
+                        };
+
+                        // Base peak signal to noise ratio
+
+                        mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
+
+                        success = true;
                     }
 
                     if (success)
@@ -172,12 +169,8 @@ namespace MSFileInfoScanner.Readers
 
             var imagingFile = new FileInfo(imagingFilePath);
 
-            if (imagingFile.Name.StartsWith(ZIPPED_IMAGING_FILE_NAME_PREFIX, StringComparison.OrdinalIgnoreCase) && string.Equals(imagingFile.Extension, ".zip", StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            return false;
+            return imagingFile.Name.StartsWith(ZIPPED_IMAGING_FILE_NAME_PREFIX, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(imagingFile.Extension, ".zip", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
