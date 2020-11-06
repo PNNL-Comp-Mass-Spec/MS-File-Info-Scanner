@@ -614,42 +614,6 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, and minimum comma count
-        /// </summary>
-        /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string filePath, int minimumLineCount, int minimumTabCount,
-                                       int minimumCommaCount)
-        {
-            return CheckTextFileWork(filePath, minimumLineCount, minimumTabCount, minimumCommaCount, false,
-                                     false, new List<string>(), true, false, 0);
-        }
-
-        /// <summary>
-        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, minimum tab count, minimum comma count, requireEqualTabsPerLine, and requireEqualCommasPerLine
-        /// </summary>
-        /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string filePath, int minimumLineCount, int minimumTabCount,
-                                       int minimumCommaCount, bool requireEqualTabsPerLine,
-                                       bool requireEqualCommasPerLine)
-        {
-            return CheckTextFileWork(filePath, minimumLineCount, minimumTabCount, minimumCommaCount,
-                                     requireEqualTabsPerLine, requireEqualCommasPerLine, new List<string>(), true,
-                                     false, 0);
-        }
-
-        /// <summary>
-        /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, and single required text line header
-        /// </summary>
-        /// <returns>True if the file passes the integrity check; otherwise False</returns>
-        private bool CheckTextFileWork(string filePath, int minimumLineCount, string requiredTextLineHeader,
-                                       bool requiredTextMatchesLineStart)
-        {
-            return CheckTextFileWork(filePath, minimumLineCount, 0, 0, false, false,
-                                     new List<string> { requiredTextLineHeader }, requiredTextMatchesLineStart,
-                                     false, 0);
-        }
-
-        /// <summary>
         /// Overloaded form of CheckTextFileWork; takes filename, minimum line count, and array of required text line headers
         /// </summary>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
@@ -2163,29 +2127,6 @@ namespace MSFileInfoScanner
                 LogFileIntegrityError(filePath, errorMessage);
                 errorLogged = true;
             }
-        }
-
-        private string XMLTextReaderGetInnerText(XmlReader xmlReader)
-        {
-            var value = string.Empty;
-            bool success;
-
-            if (xmlReader.NodeType == XmlNodeType.Element)
-            {
-                // Advance the reader so that we can read the value
-                success = xmlReader.Read();
-            }
-            else
-            {
-                success = true;
-            }
-
-            if (success && xmlReader.NodeType != XmlNodeType.Whitespace && xmlReader.HasValue)
-            {
-                value = xmlReader.Value;
-            }
-
-            return value;
         }
 
         private void XMLTextReaderSkipWhitespace(XmlReader xmlReader)
