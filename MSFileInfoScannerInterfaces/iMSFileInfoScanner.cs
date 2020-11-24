@@ -8,7 +8,6 @@ namespace MSFileInfoScannerInterfaces
     // ReSharper disable once InconsistentNaming
     public abstract class iMSFileInfoScanner : EventNotifier
     {
-
         #region "Enums"
 
         /// <summary>

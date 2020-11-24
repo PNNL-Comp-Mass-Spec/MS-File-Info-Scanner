@@ -27,7 +27,7 @@ namespace MSFileInfoScanner
     {
         // Ignore Spelling: OxyPlot, Conf, nnn
 
-        public const string PROGRAM_DATE = "November 23, 2020";
+        public const string PROGRAM_DATE = "November 24, 2020";
 
         private static DateTime mLastProgressTime;
 
