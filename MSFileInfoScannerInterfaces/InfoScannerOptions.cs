@@ -1,5 +1,6 @@
 ﻿using System;
 using PRISM;
+// ReSharper disable UnusedMember.Global
 
 namespace MSFileInfoScannerInterfaces
 {
