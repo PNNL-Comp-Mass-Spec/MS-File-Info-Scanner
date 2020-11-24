@@ -2,6 +2,7 @@
 using System.Data;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScannerInterfaces;
 using PRISM;
 
 namespace MSFileInfoScanner
@@ -190,23 +191,23 @@ namespace MSFileInfoScanner
             mMaximumDirectoryIntegrityInfoDirectoryID = 0;
         }
 
-        public string ConstructHeaderLine(MSFileInfoScanner.DataFileTypeConstants dataFileType)
+        public string ConstructHeaderLine(iMSFileInfoScanner.DataFileTypeConstants dataFileType)
         {
             switch (dataFileType)
             {
-                case MSFileInfoScanner.DataFileTypeConstants.MSFileInfo:
+                case iMSFileInfoScanner.DataFileTypeConstants.MSFileInfo:
                     // Note: The order of the output should match MSFileInfoResultsFileColumns
                     return COL_NAME_DATASET_ID + '\t' + COL_NAME_DATASET_NAME + '\t' + COL_NAME_FILE_EXTENSION + '\t' + COL_NAME_ACQ_TIME_START + '\t' + COL_NAME_ACQ_TIME_END + '\t' + COL_NAME_SCAN_COUNT + '\t' + COL_NAME_FILE_SIZE_BYTES + '\t' + COL_NAME_INFO_LAST_MODIFIED + '\t' + COL_NAME_FILE_MODIFICATION_DATE;
 
-                case MSFileInfoScanner.DataFileTypeConstants.DirectoryIntegrityInfo:
+                case iMSFileInfoScanner.DataFileTypeConstants.DirectoryIntegrityInfo:
                     // Note: The order of the output should match DirectoryIntegrityInfoFileColumns
                     return COL_NAME_FOLDER_ID + '\t' + COL_NAME_FOLDER_PATH + '\t' + COL_NAME_FILE_COUNT + '\t' + COL_NAME_COUNT_FAIL_INTEGRITY + '\t' + COL_NAME_INFO_LAST_MODIFIED;
 
-                case MSFileInfoScanner.DataFileTypeConstants.FileIntegrityDetails:
+                case iMSFileInfoScanner.DataFileTypeConstants.FileIntegrityDetails:
                     // Note: The order of the output should match FileIntegrityDetailsFileColumns
                     return COL_NAME_FOLDER_ID + '\t' + COL_NAME_FILE_NAME + '\t' + COL_NAME_FILE_SIZE_BYTES + '\t' + COL_NAME_FILE_MODIFICATION_DATE + '\t' + COL_NAME_FAILED_INTEGRITY_CHECK + '\t' + COL_NAME_SHA1_HASH + '\t' + COL_NAME_INFO_LAST_MODIFIED;
 
-                case MSFileInfoScanner.DataFileTypeConstants.FileIntegrityErrors:
+                case iMSFileInfoScanner.DataFileTypeConstants.FileIntegrityErrors:
                     return "File_Path" + '\t' + "Error_Message" + '\t' + COL_NAME_INFO_LAST_MODIFIED;
 
                 default:
@@ -251,10 +252,10 @@ namespace MSFileInfoScanner
             mCachedMSInfoResultsLastSaveTime = DateTime.UtcNow;
             mCachedDirectoryIntegrityInfoLastSaveTime = DateTime.UtcNow;
 
-            mDirectoryIntegrityInfoFilePath = Path.Combine(MSFileInfoScanner.GetAppDirectoryPath(), MSFileInfoScanner.DefaultDataFileName(MSFileInfoScanner.DataFileTypeConstants.DirectoryIntegrityInfo));
+            mDirectoryIntegrityInfoFilePath = Path.Combine(MSFileInfoScanner.GetAppDirectoryPath(), MSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.DataFileTypeConstants.DirectoryIntegrityInfo));
 
-            mAcquisitionTimeFilePath = Path.Combine(MSFileInfoScanner.GetAppDirectoryPath(), MSFileInfoScanner.DefaultDataFileName(MSFileInfoScanner.DataFileTypeConstants.MSFileInfo));
-            MSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, MSFileInfoScanner.DataFileTypeConstants.MSFileInfo);
+            mAcquisitionTimeFilePath = Path.Combine(MSFileInfoScanner.GetAppDirectoryPath(), MSFileInfoScanner.DefaultDataFileName(iMSFileInfoScanner.DataFileTypeConstants.MSFileInfo));
+            MSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, iMSFileInfoScanner.DataFileTypeConstants.MSFileInfo);
 
             InitializeDatasets();
         }
@@ -337,7 +338,7 @@ namespace MSFileInfoScanner
             // Clear the Folder Integrity Info Table
             ClearCachedDirectoryIntegrityInfoResults();
 
-            MSFileInfoScanner.ValidateDataFilePath(ref mDirectoryIntegrityInfoFilePath, MSFileInfoScanner.DataFileTypeConstants.DirectoryIntegrityInfo);
+            MSFileInfoScanner.ValidateDataFilePath(ref mDirectoryIntegrityInfoFilePath, iMSFileInfoScanner.DataFileTypeConstants.DirectoryIntegrityInfo);
 
             OnDebugEvent("Loading cached directory integrity info from: " + Path.GetFileName(mDirectoryIntegrityInfoFilePath));
 
@@ -402,7 +403,7 @@ namespace MSFileInfoScanner
             // Clear the MS Info Table
             ClearCachedMSInfoResults();
 
-            MSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, MSFileInfoScanner.DataFileTypeConstants.MSFileInfo);
+            MSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, iMSFileInfoScanner.DataFileTypeConstants.MSFileInfo);
 
             OnDebugEvent("Loading cached acquisition time file data from: " + Path.GetFileName(mAcquisitionTimeFilePath));
 
@@ -561,7 +562,7 @@ namespace MSFileInfoScanner
                 // Write all of mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE) to the results file
                 using (var writer = new StreamWriter(new FileStream(mDirectoryIntegrityInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
-                    writer.WriteLine(ConstructHeaderLine(MSFileInfoScanner.DataFileTypeConstants.DirectoryIntegrityInfo));
+                    writer.WriteLine(ConstructHeaderLine(iMSFileInfoScanner.DataFileTypeConstants.DirectoryIntegrityInfo));
 
                     foreach (DataRow currentRow in mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].Rows)
                     {
@@ -606,7 +607,7 @@ namespace MSFileInfoScanner
                     // Write all of mMSFileInfoDataset.Tables(MS_FILE_INFO_DATA_TABLE) to the results file
                     using (var writer = new StreamWriter(new FileStream(mAcquisitionTimeFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                     {
-                        writer.WriteLine(ConstructHeaderLine(MSFileInfoScanner.DataFileTypeConstants.MSFileInfo));
+                        writer.WriteLine(ConstructHeaderLine(iMSFileInfoScanner.DataFileTypeConstants.MSFileInfo));
 
                         foreach (DataRow currentRow in mMSFileInfoDataset.Tables[MS_FILE_INFO_DATA_TABLE].Rows)
                         {

@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScanner.Options;
+using MSFileInfoScannerInterfaces;
 using PRISM;
 
 namespace MSFileInfoScanner.Readers

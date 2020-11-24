@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScanner.Options;
+using MSFileInfoScannerInterfaces;
 
 namespace MSFileInfoScanner.Readers
 {

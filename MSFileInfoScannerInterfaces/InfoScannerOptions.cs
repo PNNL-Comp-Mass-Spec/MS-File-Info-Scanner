@@ -1,12 +1,29 @@
 ﻿using System;
-using MSFileInfoScanner.DatasetStats;
 using PRISM;
 
-namespace MSFileInfoScanner.Options
+namespace MSFileInfoScannerInterfaces
 {
     public class InfoScannerOptions
     {
         // Ignore Spelling: ArgExistsProperty, centroiding, csv, OxyPlot, Html
+
+        public const string DEFAULT_DATASET_STATS_FILENAME = "MSFileInfo_DatasetStats.txt";
+
+        public const int DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK = 500;
+
+        /// <summary>
+        /// Default m/z threshold for iTRAQ labeled samples
+        /// </summary>
+        /// <remarks>All MS/MS spectra should have a scan range that starts below this value</remarks>
+        public const int MINIMUM_MZ_THRESHOLD_ITRAQ = 113;
+        public const string MINIMUM_MZ_THRESHOLD_ITRAQ_STRING = "113";
+
+        /// <summary>
+        /// Default m/z threshold for TMT labeled samples
+        /// </summary>
+        /// <remarks>All MS/MS spectra should have a scan range that starts below this value</remarks>
+        public const int MINIMUM_MZ_THRESHOLD_TMT = 126;
+        public const string MINIMUM_MZ_THRESHOLD_TMT_STRING = "126";
 
         /// <summary>
         /// Input file path
@@ -136,8 +153,8 @@ namespace MSFileInfoScanner.Options
                        "Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold.\n" +
                        "Useful for validating instrument files where the sample is iTRAQ or TMT labeled " +
                        "and it is important to detect the reporter ions in the MS/MS spectra. " +
-                       "\n  - select the default iTRAQ m/z (" + MSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ_STRING + ") using /MS2MzMin:iTRAQ" +
-                       "\n  - select the default TMT m/z (" + MSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT_STRING + ") using /MS2MzMin:TMT" +
+                       "\n  - select the default iTRAQ m/z (" + MINIMUM_MZ_THRESHOLD_ITRAQ_STRING + ") using /MS2MzMin:iTRAQ" +
+                       "\n  - select the default TMT m/z (" + MINIMUM_MZ_THRESHOLD_TMT_STRING + ") using /MS2MzMin:TMT" +
                        "\n  - specify a m/z value using /MS2MzMin:110")]
         public string MS2MzMinString { get; set; }
 
@@ -160,7 +177,7 @@ namespace MSFileInfoScanner.Options
             HelpText = "If supplied, update (or create) a tab-delimited text file with overview stats for the dataset.\n" +
                        "If /DI is used (or CreateDatasetInfoFile=True), will include detailed scan counts; otherwise, will just have the dataset name, " +
                        "acquisition date, and (if available) sample name and comment.\n" +
-                       "By default, the file is named " + DatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME + "; " +
+                       "By default, the file is named " + DEFAULT_DATASET_STATS_FILENAME + "; " +
                        "to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt")]
         public string DatasetStatsTextFileName { get; set; }
 
@@ -305,12 +322,18 @@ namespace MSFileInfoScanner.Options
             ComputeFileHashes = false;
             ZipFileCheckAllData = true;
 
-            MaximumTextFileLinesToCheck = FileIntegrityChecker.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK;
+            MaximumTextFileLinesToCheck = DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK;
 
             PostResultsToDMS = false;
             PlotWithPython = false;
         }
 
+        /// <summary>
+        /// Validate the options
+        /// </summary>
+        /// <returns>True if all options are valid</returns>
+        /// <remarks>This method is called from Program.cs</remarks>
+        // ReSharper disable once UnusedMember.Global
         public bool Validate()
         {
             if (string.IsNullOrWhiteSpace(InputDataFilePath))
@@ -323,11 +346,11 @@ namespace MSFileInfoScanner.Options
             {
                 if (MS2MzMinString.StartsWith("iTRAQ", StringComparison.OrdinalIgnoreCase))
                 {
-                    MS2MzMin = MSFileInfoScanner.MINIMUM_MZ_THRESHOLD_ITRAQ;
+                    MS2MzMin = MINIMUM_MZ_THRESHOLD_ITRAQ;
                 }
                 else if (MS2MzMinString.StartsWith("TMT", StringComparison.OrdinalIgnoreCase))
                 {
-                    MS2MzMin = MSFileInfoScanner.MINIMUM_MZ_THRESHOLD_TMT;
+                    MS2MzMin = MINIMUM_MZ_THRESHOLD_TMT;
                 }
                 else
                 {

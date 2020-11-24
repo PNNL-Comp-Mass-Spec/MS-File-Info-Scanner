@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScanner.Options;
+using MSFileInfoScannerInterfaces;
 using PRISM;
 using SpectraTypeClassifier;
 using ThermoFisher.CommonCore.Data.Business;
@@ -372,7 +372,7 @@ namespace MSFileInfoScanner.Readers
             {
                 // File open failed
                 OnErrorEvent("Call to .OpenRawFile failed for: " + rawFile.FullName);
-                ErrorCode = MSFileInfoScanner.MSFileScannerErrorCodes.ThermoRawFileReaderError;
+                ErrorCode = iMSFileInfoScanner.MSFileScannerErrorCodes.ThermoRawFileReaderError;
                 readError = true;
 
                 if (!string.Equals(MSFileInfoScanner.GetAppDirectoryPath().Substring(0, 2), rawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
@@ -400,7 +400,7 @@ namespace MSFileInfoScanner.Readers
                                 {
                                     // File open failed
                                     OnErrorEvent("Call to .OpenRawFile failed for: " + rawFile.FullName);
-                                    ErrorCode = MSFileInfoScanner.MSFileScannerErrorCodes.ThermoRawFileReaderError;
+                                    ErrorCode = iMSFileInfoScanner.MSFileScannerErrorCodes.ThermoRawFileReaderError;
                                     readError = true;
                                 }
                                 else

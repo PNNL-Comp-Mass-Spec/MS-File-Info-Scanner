@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using MSFileInfoScanner.Options;
+using MSFileInfoScannerInterfaces;
 using PRISM;
 
 namespace MSFileInfoScanner
@@ -145,7 +145,7 @@ namespace MSFileInfoScanner
 
                     System.Threading.Thread.Sleep(1500);
                 }
-                else if (scanner.ErrorCode == MSFileInfoScanner.MSFileScannerErrorCodes.MS2MzMinValidationWarning)
+                else if (scanner.ErrorCode == iMSFileInfoScanner.MSFileScannerErrorCodes.MS2MzMinValidationWarning)
                 {
                     ConsoleMsgUtils.ShowWarning("MS2MzMin validation warning: " + scanner.MS2MzMinValidationMessage);
                 }

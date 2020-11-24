@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScanner.Options;
+using MSFileInfoScannerInterfaces;
 
 namespace MSFileInfoScanner.Readers
 {

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScanner.Options;
 using MSFileInfoScanner.Plotting;
+using MSFileInfoScannerInterfaces;
 using PRISM;
 using ThermoRawFileReader;
 

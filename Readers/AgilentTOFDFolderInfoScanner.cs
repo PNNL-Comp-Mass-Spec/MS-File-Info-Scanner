@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScanner.Options;
+using MSFileInfoScannerInterfaces;
 using PRISM;
 
 namespace MSFileInfoScanner.Readers

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MSFileInfoScanner.Options;
+using MSFileInfoScannerInterfaces;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScanner.MassLynxData;
-using MSFileInfoScanner.Options;
+using MSFileInfoScannerInterfaces;
 
 namespace MSFileInfoScanner.Readers
 {

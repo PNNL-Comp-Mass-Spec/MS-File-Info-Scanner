@@ -5,8 +5,8 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScanner.Options;
 using MSFileInfoScanner.Plotting;
+using MSFileInfoScannerInterfaces;
 using PRISM;
 using ThermoFisher.CommonCore.Data.Business;
 using ThermoRawFileReader;
@@ -91,7 +91,7 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Processing error code
         /// </summary>
-        public MSFileInfoScanner.MSFileScannerErrorCodes ErrorCode { get; protected set; }
+        public iMSFileInfoScanner.MSFileScannerErrorCodes ErrorCode { get; protected set; }
 
         /// <summary>
         /// When true, do not include the Scan Type table in the QC Plot HTML file
@@ -319,7 +319,7 @@ namespace MSFileInfoScanner.Readers
             MS2MzMinValidationWarning = false;
             MS2MzMinValidationMessage = string.Empty;
 
-            ErrorCode = MSFileInfoScanner.MSFileScannerErrorCodes.NoError;
+            ErrorCode = iMSFileInfoScanner.MSFileScannerErrorCodes.NoError;
 
             HideEmptyHTMLSections = false;
         }
@@ -1310,7 +1310,7 @@ namespace MSFileInfoScanner.Readers
         // ReSharper disable once UnusedMember.Global
         public bool UpdateDatasetStatsTextFile(string inputFileName, string outputDirectoryPath)
         {
-            return UpdateDatasetStatsTextFile(inputFileName, outputDirectoryPath, DatasetStatsSummarizer.DEFAULT_DATASET_STATS_FILENAME);
+            return UpdateDatasetStatsTextFile(inputFileName, outputDirectoryPath, InfoScannerOptions.DEFAULT_DATASET_STATS_FILENAME);
         }
 
         /// <summary>

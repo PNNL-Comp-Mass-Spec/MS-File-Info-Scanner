@@ -4,8 +4,8 @@ using System.IO;
 using System.Threading;
 using System.Xml;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScanner.Options;
 using MSFileInfoScanner.Readers;
+using MSFileInfoScannerInterfaces;
 using PRISM;
 
 namespace MSFileInfoScanner
@@ -36,8 +36,6 @@ namespace MSFileInfoScanner
         }
 
         #region "Constants and Enums"
-
-        public const int DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK = 500;
 
         public const int DEFAULT_MAXIMUM_XML_ELEMENT_NODES_TO_CHECK = 500;
         public const string FILE_EXTENSION_TXT = ".TXT";
@@ -2011,7 +2009,7 @@ namespace MSFileInfoScanner
 
         private void InitializeLocalVariables()
         {
-            mMaximumTextFileLinesToCheck = DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK;
+            mMaximumTextFileLinesToCheck = InfoScannerOptions.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK;
             mMaximumXMLElementNodesToCheck = DEFAULT_MAXIMUM_XML_ELEMENT_NODES_TO_CHECK;
 
             ZipFileCheckAllData = true;

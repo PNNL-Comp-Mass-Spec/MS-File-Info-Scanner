@@ -5,9 +5,9 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using MSFileInfoScanner.DatasetStats;
-using MSFileInfoScanner.Options;
 using MSFileInfoScanner.Plotting;
 using MSFileInfoScanner.Readers;
+using MSFileInfoScannerInterfaces;
 using PRISM;
 using PRISM.FileProcessor;
 using PRISMDatabaseUtils;
@@ -37,7 +37,7 @@ namespace MSFileInfoScanner
     /// Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
     /// </para>
     /// </remarks>
-    public sealed class MSFileInfoScanner : EventNotifier
+    public sealed class MSFileInfoScanner : iMSFileInfoScanner
     {
         // Ignore Spelling: OxyPlot, yyyy-MM-dd, hh:mm:ss tt, centroiding, utf, idx, xtr, Shimadzu
 

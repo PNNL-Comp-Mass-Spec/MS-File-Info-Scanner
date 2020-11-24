@@ -1,6 +1,5 @@
 ﻿
-// ReSharper disable UnusedMember.Global
-namespace MSFileInfoScanner.Options
+namespace MSFileInfoScannerInterfaces
 {
     /// <summary>
     /// Options class for the LCMSDataPlotter
