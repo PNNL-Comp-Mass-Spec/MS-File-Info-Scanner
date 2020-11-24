@@ -5,7 +5,7 @@ using MSFileInfoScanner.Options;
 
 namespace MSFileInfoScanner.Readers
 {
-    class GenericFileInfoScanner : MSFileInfoProcessorBaseClass
+    internal class GenericFileInfoScanner : MSFileInfoProcessorBaseClass
     {
         /// <summary>
         /// Constructor

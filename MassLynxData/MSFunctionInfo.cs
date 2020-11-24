@@ -1,7 +1,7 @@
 ﻿
 namespace MSFileInfoScanner.MassLynxData
 {
-    class MSFunctionInfo
+    internal class MSFunctionInfo
     {
         #region "Properties"
 
@@ -99,7 +99,6 @@ namespace MSFileInfoScanner.MassLynxData
         /// MS/MS segment or channel count
         /// </summary>
         public short MSMSSegmentOrChannelCount {get; set; }
-
 
         /// <summary>
         /// Function set mass (aka parent ion mass)

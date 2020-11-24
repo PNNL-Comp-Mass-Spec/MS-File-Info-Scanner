@@ -4,7 +4,7 @@ namespace MSFileInfoScanner.MassLynxData
     /// <summary>
     /// The RawScanIndexRecord data read from the file is stored in this class
     /// </summary>
-    class ScanIndexRecord
+    internal class ScanIndexRecord
     {
         #region "Properties"
 

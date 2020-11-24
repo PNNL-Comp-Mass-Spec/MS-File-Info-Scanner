@@ -1,7 +1,7 @@
 ﻿
 namespace MSFileInfoScanner.MassLynxData
 {
-    class RawScanIndexRecordCompressedScan
+    internal class RawScanIndexRecordCompressedScan
     {
         #region "Properties"
 

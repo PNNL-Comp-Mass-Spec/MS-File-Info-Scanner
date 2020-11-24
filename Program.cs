@@ -23,7 +23,7 @@ namespace MSFileInfoScanner
     /// Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
     /// </para>
     /// </remarks>
-    static class modMain
+    public static class Program
     {
         // Ignore Spelling: OxyPlot, Conf, nnn
 

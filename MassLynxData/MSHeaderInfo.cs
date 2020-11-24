@@ -1,7 +1,7 @@
 ﻿
 namespace MSFileInfoScanner.MassLynxData
 {
-    class MSHeaderInfo
+    internal class MSHeaderInfo
     {
         #region "Properties"
 

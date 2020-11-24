@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MSFileInfoScanner.Plotting
 {
-    class AxisInfo
+    internal class AxisInfo
     {
         // Ignore Spelling: Autoscale, Gridline
 

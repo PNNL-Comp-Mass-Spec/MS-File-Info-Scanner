@@ -4,7 +4,7 @@ namespace MSFileInfoScanner.MassLynxData
     /// <summary>
     /// Used when reading the _functns.inf file
     /// </summary>
-    class RawFunctionDescriptorRecord
+    internal class RawFunctionDescriptorRecord
     {
         /// <summary>
         /// Total record size, in bytes
