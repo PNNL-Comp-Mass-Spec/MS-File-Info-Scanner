@@ -100,20 +100,6 @@ namespace MSFileInfoScanner
 
         private const int MAX_FILE_READ_ACCESS_ATTEMPTS = 2;
 
-        /// <summary>
-        /// Default m/z threshold for iTRAQ labeled samples
-        /// </summary>
-        /// <remarks>All MS/MS spectra should have a scan range that starts below this value</remarks>
-        public const int MINIMUM_MZ_THRESHOLD_ITRAQ = 113;
-        public const string MINIMUM_MZ_THRESHOLD_ITRAQ_STRING = "113";
-
-        /// <summary>
-        /// Default m/z threshold for TMT labeled samples
-        /// </summary>
-        /// <remarks>All MS/MS spectra should have a scan range that starts below this value</remarks>
-        public const int MINIMUM_MZ_THRESHOLD_TMT = 126;
-        public const string MINIMUM_MZ_THRESHOLD_TMT_STRING = "126";
-
         private const bool SKIP_FILES_IN_ERROR = true;
 
         #endregion
@@ -126,56 +112,6 @@ namespace MSFileInfoScanner
             ErrorMsg = 1,
             Warning = 2,
             Debug = 3
-        }
-
-        /// <summary>
-        /// MSFileInfoScanner error codes
-        /// </summary>
-        public enum MSFileScannerErrorCodes
-        {
-            NoError = 0,
-            InvalidInputFilePath = 1,
-            InvalidOutputDirectoryPath = 2,
-            ParameterFileNotFound = 3,
-            FilePathError = 4,
-
-            ParameterFileReadError = 5,
-            UnknownFileExtension = 6,
-            InputFileAccessError = 7,
-            InputFileReadError = 8,
-            OutputFileWriteError = 9,
-            FileIntegrityCheckError = 10,
-
-            DatabasePostingError = 11,
-            MS2MzMinValidationError = 12,
-            MS2MzMinValidationWarning = 13,
-
-            ThermoRawFileReaderError = 14,
-            DatasetHasNoSpectra = 15,
-
-            UnspecifiedError = -1
-        }
-
-        /// <summary>
-        /// Processing state constants
-        /// </summary>
-        public enum MSFileProcessingStateConstants
-        {
-            NotProcessed = 0,
-            SkippedSinceFoundInCache = 1,
-            FailedProcessing = 2,
-            ProcessedSuccessfully = 3
-        }
-
-        /// <summary>
-        /// Data file type constants
-        /// </summary>
-        public enum DataFileTypeConstants
-        {
-            MSFileInfo = 0,
-            DirectoryIntegrityInfo = 1,
-            FileIntegrityDetails = 2,
-            FileIntegrityErrors = 3
         }
 
         #endregion
