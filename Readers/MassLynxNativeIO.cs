@@ -859,21 +859,6 @@ namespace MSFileInfoScanner.Readers
             return validDataFolder;
         }
 
-        // ReSharper disable once UnusedMember.Local
-        private bool ConstructValidDataFilePath(string desiredDataFilePath, out string dataFilePath)
-        {
-            // Make sure the dataFilePath contains ".raw"
-            if (desiredDataFilePath.ToLower().IndexOf(".raw", StringComparison.Ordinal) < 0)
-            {
-                SetErrorCode(ErrorCodeConstants.InvalidDataFolderPath);
-                dataFilePath = string.Empty;
-                return false;
-            }
-
-            dataFilePath = desiredDataFilePath;
-            return true;
-        }
-
         private int CIntSafe(string valueText)
         {
             if (int.TryParse(valueText, out var value))
