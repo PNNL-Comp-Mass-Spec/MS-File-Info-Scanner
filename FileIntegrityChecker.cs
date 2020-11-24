@@ -1882,7 +1882,7 @@ namespace MSFileInfoScanner
         /// If requiredItemNames contains currentItemName, returns the number of items in requiredItemNames that are true
         /// If not found, returns 0
         /// </returns>
-        private int FindItemNameInList(string currentItemName, Dictionary<string, bool> requiredItemNames)
+        private int FindItemNameInList(string currentItemName, IDictionary<string, bool> requiredItemNames)
         {
             var matchFound = false;
 
