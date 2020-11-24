@@ -4,16 +4,18 @@ using System.Linq;
 
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// This class can be used to select the top N data points in a list, sorting descending
+    /// It does not require a full sort of the data, which allows for faster filtering of the data
+    /// </summary>
+    /// <remarks>
+    /// To use, first call AddDataPoint() for each source data point, specifying the value to sort on and a data point index
+    /// When done, call FilterData()
+    /// FilterData() will determine which data points to retain
+    /// For the remaining points, their data values will be changed to mSkipDataPointFlag (defaults to -1)
+    /// </remarks>
     public class FilterDataArrayMaxCount
     {
-        // This class can be used to select the top N data points in a list, sorting descending
-        // It does not require a full sort of the data, which allows for faster filtering of the data
-        //
-        // To use, first call AddDataPoint() for each source data point, specifying the value to sort on and a data point index
-        // When done, call FilterData()
-        //  This routine will determine which data points to retain
-        //  For the remaining points, their data values will be changed to mSkipDataPointFlag (defaults to -1)
-
         private const float DEFAULT_SKIP_DATA_POINT_FLAG = -1;
 
         // 4 steps in Sub FilterDataByMaxDataCountToLoad
