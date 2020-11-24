@@ -8,8 +8,6 @@ namespace MSFileInfoScannerInterfaces
     // ReSharper disable once InconsistentNaming
     public abstract class iMSFileInfoScanner : EventNotifier
     {
-        #region "Enums"
-
         /// <summary>
         /// MSFileInfoScanner error codes
         /// </summary>
@@ -59,10 +57,6 @@ namespace MSFileInfoScannerInterfaces
             FileIntegrityDetails = 2,
             FileIntegrityErrors = 3
         }
-
-        #endregion
-
-        #region "Properties"
 
         public virtual bool AbortProcessing { get; set; }
 
@@ -206,11 +200,6 @@ namespace MSFileInfoScannerInterfaces
         public virtual bool UseCacheFiles { get; set; }
 
         public virtual bool ZipFileCheckAllData { get; set; }
-
-        #endregion
-
-        #region "Methods"
-
         public abstract string[] GetKnownDirectoryExtensions();
 
         public abstract string[] GetKnownFileExtensions();
@@ -312,8 +301,5 @@ namespace MSFileInfoScannerInterfaces
         public abstract bool SaveCachedResults(bool clearCachedData);
 
         public abstract bool SaveParameterFileSettings(string parameterFilePath);
-
-        #endregion
-
     }
 }
