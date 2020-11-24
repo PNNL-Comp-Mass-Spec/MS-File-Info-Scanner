@@ -44,6 +44,10 @@
     <Reference Include="Ionic.Zip">
       <HintPath>Lib\Ionic.Zip.dll</HintPath>
     </Reference>
+    <Reference Include="MSFileInfoScannerInterfaces">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\MSFileInfoScannerInterfaces.dll</HintPath>
+    </Reference>
     <Reference Include="NetCDFReader">
       <HintPath>Lib\NetCDFReader.dll</HintPath>
     </Reference>
@@ -109,8 +113,6 @@
     <Compile Include="MassLynxData\RawScanIndexRecord.cs" />
     <Compile Include="MassLynxData\RawScanIndexRecordCompressedScan.cs" />
     <Compile Include="MassLynxData\ScanIndexRecord.cs" />
-    <Compile Include="Options\InfoScannerOptions.cs" />
-    <Compile Include="Options\LCMSDataPlotterOptions.cs" />
     <Compile Include="Plotting\AxisInfo.cs" />
     <Compile Include="Plotting\LCMSDataPlotter.cs" />
     <Compile Include="Plotting\OxyplotUtilities.cs" />
