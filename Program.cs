@@ -27,7 +27,7 @@ namespace MSFileInfoScanner
     {
         // Ignore Spelling: OxyPlot, Conf, nnn
 
-        public const string PROGRAM_DATE = "October 19, 2020";
+        public const string PROGRAM_DATE = "November 23, 2020";
 
         private static DateTime mLastProgressTime;
 
@@ -94,7 +94,6 @@ namespace MSFileInfoScanner
                 scanner.WarningEvent += MSFileScanner_WarningEvent;
                 scanner.StatusEvent += MSFileScanner_MessageEvent;
                 scanner.ProgressUpdate += MSFileScanner_ProgressUpdate;
-
 
                 if (!string.IsNullOrEmpty(options.ParameterFilePath))
                 {

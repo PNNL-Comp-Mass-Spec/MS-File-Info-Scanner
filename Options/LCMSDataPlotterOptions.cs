@@ -172,7 +172,6 @@ namespace MSFileInfoScanner.Options
             };
 
             return newOptions;
-
         }
 
         /// <summary>

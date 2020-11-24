@@ -127,9 +127,7 @@ namespace MSFileInfoScanner.Plotting
 
                 foreach (var axis in Plot.Axes)
                 {
-                    var newAxis = axis as LinearColorAxis;
-
-                    if (newAxis == null)
+                    if (!(axis is LinearColorAxis newAxis))
                     {
                         continue;
                     }
@@ -343,39 +341,27 @@ namespace MSFileInfoScanner.Plotting
 
         public static Color GetColorByCharge(int charge)
         {
-            Color seriesColor;
             switch (charge)
             {
                 case 1:
-                    seriesColor = Colors.MediumBlue;
-                    break;
+                    return Colors.MediumBlue;
                 case 2:
-                    seriesColor = Colors.Red;
-                    break;
+                    return Colors.Red;
                 case 3:
-                    seriesColor = Colors.Green;
-                    break;
+                    return Colors.Green;
                 case 4:
-                    seriesColor = Colors.Magenta;
-                    break;
+                    return Colors.Magenta;
                 case 5:
-                    seriesColor = Colors.SaddleBrown;
-                    break;
+                    return Colors.SaddleBrown;
                 case 6:
-                    seriesColor = Colors.Indigo;
-                    break;
+                    return Colors.Indigo;
                 case 7:
-                    seriesColor = Colors.LimeGreen;
-                    break;
+                    return Colors.LimeGreen;
                 case 8:
-                    seriesColor = Colors.CornflowerBlue;
-                    break;
+                    return Colors.CornflowerBlue;
                 default:
-                    seriesColor = Colors.Gray;
-                    break;
+                    return Colors.Gray;
             }
-
-            return seriesColor;
         }
 
         // ReSharper disable once UnusedMember.Local

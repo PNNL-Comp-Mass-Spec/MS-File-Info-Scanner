@@ -195,7 +195,6 @@ namespace MSFileInfoScanner.MassLynxData
         public float UnpackIntensity(short packedBasePeakIntensity, int packedBasePeakInfo, short acquisitionDataType)
         {
             // See note for Acquisition Data Types 9 to 12 below
-            float unpackedIntensity;
 
             switch (acquisitionDataType)
             {
@@ -207,15 +206,14 @@ namespace MSFileInfoScanner.MassLynxData
                     //  (9=High accuracy calibrated data, 11=Enhanced uncalibrated data, and 12=Enhanced calibrated data)
                     // Note: Only use this function to unpack intensities for data in the .IDX file, not for data in the .DAT file
                     //       See the NativeIOGetSpectrum function for the method of unpacking intensities in .DAT files
-                    unpackedIntensity = UnpackBasePeakIntensity(packedBasePeakIntensity, packedBasePeakInfo);
+
                     //Debug.Assert unpackedIntensity = PackedBasePeakIntensity * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 3)
-                    break;
+                    return UnpackBasePeakIntensity(packedBasePeakIntensity, packedBasePeakInfo);
 
                 case 0:
                     // Compressed data
-                    unpackedIntensity = UnpackBasePeakIntensityCompressed(packedBasePeakInfo);
                     //Debug.Assert unpackedIntensity = ExtractFromBitsInt32(PackedBasePeakInfo, 3, 10) * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 2)
-                    break;
+                    return UnpackBasePeakIntensityCompressed(packedBasePeakInfo);
 
                 case 1:
                 case 2:
@@ -225,20 +223,16 @@ namespace MSFileInfoScanner.MassLynxData
                 case 6:
                 case 7:
                     // Standard data and Uncalibrated data
-                    unpackedIntensity = UnpackBasePeakIntensityStandard(packedBasePeakIntensity);
                     //Debug.Assert unpackedIntensity = ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 3, 15) * 4 ^ ExtractFromBitsInt32(CInt(PackedBasePeakIntensity), 0, 2)
-                    break;
+                    return UnpackBasePeakIntensityStandard(packedBasePeakIntensity);
 
                 case 8:
                     // High intensity calibrated data
-                    unpackedIntensity = UnpackBasePeakIntensity(packedBasePeakIntensity, packedBasePeakInfo);
-                    break;
+                    return UnpackBasePeakIntensity(packedBasePeakIntensity, packedBasePeakInfo);
 
                 default:
-                    unpackedIntensity = 0;
-                    break;
+                    return 0;
             }
-            return unpackedIntensity;
         }
 
         private float UnpackBasePeakIntensity(short packedBasePeakIntensity, int packedBasePeakInfo)
@@ -265,7 +259,6 @@ namespace MSFileInfoScanner.MassLynxData
         public double UnpackMass(int packedBasePeakInfo, short acquisitionDataType, bool processingFunctionIndexFile)
         {
             // See note for Acquisition Data Types 9 to 12 below
-            double unpackedMass;
 
             switch (acquisitionDataType)
             {
@@ -304,8 +297,7 @@ namespace MSFileInfoScanner.MassLynxData
                     }
 
                     // Note that we divide by 2^23 to convert the mass mantissa to fractional form
-                    unpackedMass = massMantissa / 8388608f * Math.Pow(2, massExponent);      // 8388608 = 2^23
-                    break;
+                    return massMantissa / 8388608f * Math.Pow(2, massExponent);      // 8388608 = 2^23
 
                 case 0:
                     // Compressed data
@@ -314,15 +306,14 @@ namespace MSFileInfoScanner.MassLynxData
                     // It would be more straightforward to use packedBasePeakInfo And CreateMask(11, 31) but VB won't let us
                     //  And a Currency value with a Long; this gives an OverFlow error
                     // We must divide the MassMantissa by 128 to get the mass
-                    unpackedMass = (int)(NumberConversion.Int32ToUnsigned(packedBasePeakInfo) / 2048f) / 128f;      // 2048 = 2^11
+
                     // Debug.Assert(unpackedMass == ExtractFromBitsInt32(packedBasePeakInfo, 11, 31) / 128f);
-                    break;
+                    return (int)(NumberConversion.Int32ToUnsigned(packedBasePeakInfo) / 2048f) / 128f;      // 2048 = 2^11
 
                 case 1:
                     // Standard data
                     // We must divide the MassMantissa by 1024 to get the mass
-                    unpackedMass = (short)(packedBasePeakInfo & maskBPStandardDataMass) / 1024f;
-                    break;
+                    return (short)(packedBasePeakInfo & maskBPStandardDataMass) / 1024f;
 
                 case 2:
                 case 3:
@@ -332,23 +323,20 @@ namespace MSFileInfoScanner.MassLynxData
                 case 7:
                     // Uncalibrated data
                     // This type of data doesn't have a base peak mass
-                    unpackedMass = 0;
-                    break;
+                    return 0;
 
                 case 8:
                     // High intensity calibrated data
                     // Compute the MassMantissa value by converting the Packed value to an Unsigned Int32 (and storing in a long),
                     //  then right shifting 4 bits by dividing by 2^4
                     // We must divide the MassMantissa by 128 to get the mass
-                    unpackedMass = (int)(NumberConversion.Int32ToUnsigned(packedBasePeakInfo) / 16f) / 128f;        // 16 = 2^4
+
                     //Debug.Assert(unpackedMass == ExtractFromBitsInt32(packedBasePeakInfo, 4, 31) / 128f);
-                    break;
+                    return (int)(NumberConversion.Int32ToUnsigned(packedBasePeakInfo) / 16f) / 128f;        // 16 = 2^4
 
                 default:
-                    unpackedMass = 0;
-                    break;
+                    return 0;
             }
-            return unpackedMass;
         }
     }
 }

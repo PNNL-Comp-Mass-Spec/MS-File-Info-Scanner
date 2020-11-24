@@ -77,7 +77,7 @@ namespace MSFileInfoScanner.Plotting
         public static void UpdateAxisFormatCodeIfSmallValues(Axis currentAxis, List<double> dataPoints, bool integerData)
 #pragma warning restore CS3001
         {
-            if (!dataPoints.Any())
+            if (dataPoints.Count == 0)
                 return;
 
             var axisInfo = new AxisInfo(currentAxis.MajorStep, currentAxis.MinorGridlineThickness, currentAxis.Title);

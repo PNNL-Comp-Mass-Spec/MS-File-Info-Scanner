@@ -26,14 +26,9 @@ namespace MSFileInfoScanner.DatasetStats
 
         public bool HasData()
         {
-            if (!string.IsNullOrWhiteSpace(SampleName) ||
-                !string.IsNullOrWhiteSpace(Comment1) ||
-                !string.IsNullOrWhiteSpace(Comment2))
-            {
-                return true;
-            }
-
-            return false;
+            return !string.IsNullOrWhiteSpace(SampleName) ||
+                   !string.IsNullOrWhiteSpace(Comment1) ||
+                   !string.IsNullOrWhiteSpace(Comment2);
         }
 
         public override string ToString()
