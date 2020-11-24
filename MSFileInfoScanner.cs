@@ -152,9 +152,9 @@ namespace MSFileInfoScanner
 
         #region "Processing Options and Interface Functions"
 
-        public bool AbortProcessing { get; set; }
+        public override bool AbortProcessing { get; set; }
 
-        public string AcquisitionTimeFilename
+        public override string AcquisitionTimeFilename
         {
             get => GetDataFileFilename(DataFileTypeConstants.MSFileInfo);
             set => SetDataFileFilename(value, DataFileTypeConstants.MSFileInfo);
@@ -163,7 +163,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Returns the dataset info, formatted as XML
         /// </summary>
-        public string DatasetInfoXML { get; private set; }
+        public override string DatasetInfoXML { get; protected set; }
 
         public string GetDataFileFilename(DataFileTypeConstants dataFileType)
         {
@@ -226,17 +226,17 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Processing error code
         /// </summary>
-        public MSFileScannerErrorCodes ErrorCode { get; private set; }
+        public override MSFileScannerErrorCodes ErrorCode { get; protected set; }
 
         /// <summary>
         /// MS2MzMin validation error or warning Message
         /// </summary>
-        public string MS2MzMinValidationMessage { get; private set; }
+        public override string MS2MzMinValidationMessage { get; protected set; }
 
         /// <summary>
         /// Processing options
         /// </summary>
-        public InfoScannerOptions Options { get; }
+        public override InfoScannerOptions Options { get; protected set; }
 
         #endregion
 
@@ -362,7 +362,7 @@ namespace MSFileInfoScanner
             return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
 
-        public string[] GetKnownDirectoryExtensions()
+        public override string[] GetKnownDirectoryExtensions()
         {
             return GetKnownDirectoryExtensionsList().ToArray();
         }
@@ -378,7 +378,7 @@ namespace MSFileInfoScanner
             return extensionsToParse;
         }
 
-        public string[] GetKnownFileExtensions()
+        public override string[] GetKnownFileExtensions()
         {
             return GetKnownFileExtensionsList().ToArray();
         }
@@ -402,7 +402,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Get the error message, or an empty string if no error
         /// </summary>
-        public string GetErrorMessage()
+        public override string GetErrorMessage()
         {
             switch (ErrorCode)
             {
@@ -607,7 +607,7 @@ namespace MSFileInfoScanner
         /// Read settings from an XML-based parameter file
         /// </summary>
         /// <param name="parameterFilePath"></param>
-        public bool LoadParameterFileSettings(string parameterFilePath)
+        public override bool LoadParameterFileSettings(string parameterFilePath)
         {
             var settingsFile = new XmlSettingsFileAccessor();
 
@@ -789,7 +789,7 @@ namespace MSFileInfoScanner
         /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
         /// </summary>
         /// <returns>True if success; false if failure</returns>
-        public bool PostDatasetInfoToDB()
+        public override bool PostDatasetInfoToDB()
         {
             return PostDatasetInfoToDB(DatasetInfoXML, Options.DatabaseConnectionString, Options.DSInfoStoredProcedure);
         }
@@ -799,7 +799,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="datasetInfoXML">Database info XML</param>
         /// <returns>True if success; false if failure</returns>
-        public bool PostDatasetInfoToDB(string datasetInfoXML)
+        public override bool PostDatasetInfoToDB(string datasetInfoXML)
         {
             return PostDatasetInfoToDB(datasetInfoXML, Options.DatabaseConnectionString, Options.DSInfoStoredProcedure);
         }
@@ -810,7 +810,7 @@ namespace MSFileInfoScanner
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
-        public bool PostDatasetInfoToDB(string connectionString, string storedProcedureName)
+        public override bool PostDatasetInfoToDB(string connectionString, string storedProcedureName)
         {
             return PostDatasetInfoToDB(DatasetInfoXML, connectionString, storedProcedureName);
         }
@@ -822,7 +822,7 @@ namespace MSFileInfoScanner
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
-        public bool PostDatasetInfoToDB(string datasetInfoXML, string connectionString, string storedProcedureName)
+        public override bool PostDatasetInfoToDB(string datasetInfoXML, string connectionString, string storedProcedureName)
         {
             const int MAX_RETRY_COUNT = 3;
             const int SEC_BETWEEN_RETRIES = 20;
@@ -909,7 +909,7 @@ namespace MSFileInfoScanner
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
-        public bool PostDatasetInfoUseDatasetID(int datasetID, string connectionString, string storedProcedureName)
+        public override bool PostDatasetInfoUseDatasetID(int datasetID, string connectionString, string storedProcedureName)
         {
             return PostDatasetInfoUseDatasetID(datasetID, DatasetInfoXML, connectionString, storedProcedureName);
         }
@@ -923,7 +923,7 @@ namespace MSFileInfoScanner
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
-        public bool PostDatasetInfoUseDatasetID(int datasetID, string datasetInfoXML, string connectionString, string storedProcedureName)
+        public override bool PostDatasetInfoUseDatasetID(int datasetID, string datasetInfoXML, string connectionString, string storedProcedureName)
         {
             const int MAX_RETRY_COUNT = 3;
             const int SEC_BETWEEN_RETRIES = 20;
@@ -1153,7 +1153,7 @@ namespace MSFileInfoScanner
         /// <param name="inputFileOrDirectoryPath"></param>
         /// <param name="outputDirectoryPath"></param>
         /// <returns>True if success, False if an error</returns>
-        public bool ProcessMSFileOrDirectory(string inputFileOrDirectoryPath, string outputDirectoryPath)
+        public override bool ProcessMSFileOrDirectory(string inputFileOrDirectoryPath, string outputDirectoryPath)
         {
             return ProcessMSFileOrDirectory(inputFileOrDirectoryPath, outputDirectoryPath, true, out _);
         }
@@ -1166,7 +1166,7 @@ namespace MSFileInfoScanner
         /// <param name="resetErrorCode"></param>
         /// <param name="msFileProcessingState"></param>
         /// <returns>True if success, False if an error</returns>
-        public bool ProcessMSFileOrDirectory(
+        public override bool ProcessMSFileOrDirectory(
             string inputFileOrDirectoryPath,
             string outputDirectoryPath,
             bool resetErrorCode,
@@ -1503,7 +1503,7 @@ namespace MSFileInfoScanner
         /// <param name="outputDirectoryPath">Directory to write any results files to</param>
         /// <param name="resetErrorCode"></param>
         /// <returns>True if success, False if an error</returns>
-        public bool ProcessMSFileOrDirectoryWildcard(string inputFileOrDirectoryPath, string outputDirectoryPath, bool resetErrorCode)
+        public override bool ProcessMSFileOrDirectoryWildcard(string inputFileOrDirectoryPath, string outputDirectoryPath, bool resetErrorCode)
         {
             var processedFileList = new List<string>();
 
@@ -1691,7 +1691,7 @@ namespace MSFileInfoScanner
         /// <param name="outputDirectoryPath">Directory to write any results files to</param>
         /// <param name="maxLevelsToRecurse">Maximum depth to recurse; Set to 0 to process all directories</param>
         /// <returns>True if success, False if an error</returns>
-        public bool ProcessMSFilesAndRecurseDirectories(string inputFilePathOrDirectory, string outputDirectoryPath, int maxLevelsToRecurse)
+        public override bool ProcessMSFilesAndRecurseDirectories(string inputFilePathOrDirectory, string outputDirectoryPath, int maxLevelsToRecurse)
         {
             bool success;
 
@@ -2140,12 +2140,12 @@ namespace MSFileInfoScanner
             return success;
         }
 
-        public bool SaveCachedResults()
+        public override bool SaveCachedResults()
         {
             return SaveCachedResults(true);
         }
 
-        public bool SaveCachedResults(bool clearCachedData)
+        public override bool SaveCachedResults(bool clearCachedData)
         {
             if (Options.UseCacheFiles)
             {
@@ -2155,7 +2155,7 @@ namespace MSFileInfoScanner
             return true;
         }
 
-        public bool SaveParameterFileSettings(string parameterFilePath)
+        public override bool SaveParameterFileSettings(string parameterFilePath)
         {
             var settingsFile = new XmlSettingsFileAccessor();
 
