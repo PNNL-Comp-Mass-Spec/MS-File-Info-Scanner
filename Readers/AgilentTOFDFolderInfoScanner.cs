@@ -36,6 +36,7 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         /// <param name="options"></param>
         /// <param name="lcms2DPlotOptions"></param>
+        // ReSharper disable once IdentifierTypo
         public AgilentTOFDFolderInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
             base(options, lcms2DPlotOptions)
         { }
