@@ -69,7 +69,7 @@ namespace MSFileInfoScanner
             mLogFilePath = string.Empty;
             mLogDirectoryPath = string.Empty;
 
-            mLCMS2DPlotOptions = new LCMSDataPlotterOptions(Options);
+            LCMS2DPlotOptions = new LCMSDataPlotterOptions(Options);
 
             mFileIntegrityDetailsFilePath = Path.Combine(GetAppDirectoryPath(), DefaultDataFileName(DataFileTypeConstants.FileIntegrityDetails));
             mFileIntegrityErrorsFilePath = Path.Combine(GetAppDirectoryPath(), DefaultDataFileName(DataFileTypeConstants.FileIntegrityErrors));
@@ -121,8 +121,6 @@ namespace MSFileInfoScanner
         private string mFileIntegrityDetailsFilePath;
 
         private string mFileIntegrityErrorsFilePath;
-
-        private readonly LCMSDataPlotterOptions mLCMS2DPlotOptions;
 
         private string mLogFilePath;
 
@@ -227,6 +225,11 @@ namespace MSFileInfoScanner
         /// Processing error code
         /// </summary>
         public override MSFileScannerErrorCodes ErrorCode { get; protected set; }
+
+        /// <summary>
+        /// 2D Plotting options
+        /// </summary>
+        public override LCMSDataPlotterOptions LCMS2DPlotOptions { get; protected set; }
 
         /// <summary>
         /// MS2MzMin validation error or warning Message
@@ -671,13 +674,13 @@ namespace MSFileInfoScanner
                         Options.MS2MzMin = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MS2MzMin", Options.MS2MzMin);
                         Options.DisableInstrumentHash = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DisableInstrumentHash", Options.DisableInstrumentHash);
 
-                        mLCMS2DPlotOptions.MZResolution = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMZResolution", mLCMS2DPlotOptions.MZResolution);
-                        mLCMS2DPlotOptions.MinPointsPerSpectrum = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinPointsPerSpectrum", mLCMS2DPlotOptions.MinPointsPerSpectrum);
+                        LCMS2DPlotOptions.MZResolution = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMZResolution", LCMS2DPlotOptions.MZResolution);
+                        LCMS2DPlotOptions.MinPointsPerSpectrum = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinPointsPerSpectrum", LCMS2DPlotOptions.MinPointsPerSpectrum);
 
-                        mLCMS2DPlotOptions.MaxPointsToPlot = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMaxPointsToPlot", mLCMS2DPlotOptions.MaxPointsToPlot);
-                        mLCMS2DPlotOptions.MinIntensity = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinIntensity", mLCMS2DPlotOptions.MinIntensity);
+                        LCMS2DPlotOptions.MaxPointsToPlot = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMaxPointsToPlot", LCMS2DPlotOptions.MaxPointsToPlot);
+                        LCMS2DPlotOptions.MinIntensity = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinIntensity", LCMS2DPlotOptions.MinIntensity);
 
-                        mLCMS2DPlotOptions.LCMS2DOverviewPlotDivisor = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DOverviewPlotDivisor", mLCMS2DPlotOptions.LCMS2DOverviewPlotDivisor);
+                        LCMS2DPlotOptions.LCMS2DOverviewPlotDivisor = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DOverviewPlotDivisor", LCMS2DPlotOptions.LCMS2DOverviewPlotDivisor);
 
                         Options.ScanStart = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanStart", Options.ScanStart);
                         Options.ScanEnd = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanEnd", Options.ScanEnd);
@@ -1009,7 +1012,7 @@ namespace MSFileInfoScanner
 
             if (Options.PlotWithPython)
             {
-                mLCMS2DPlotOptions.PlotWithPython = true;
+                LCMS2DPlotOptions.PlotWithPython = true;
 
                 if (Options.SaveTICAndBPIPlots || Options.SaveLCMS2DPlots)
                 {
@@ -1036,7 +1039,9 @@ namespace MSFileInfoScanner
             }
 
             if (Options.ShowDebugInfo)
-                mLCMS2DPlotOptions.DeleteTempFiles = false;
+            {
+                LCMS2DPlotOptions.DeleteTempFiles = false;
+            }
 
             var retryCount = 0;
             bool success;
@@ -1253,7 +1258,7 @@ namespace MSFileInfoScanner
                         if (fileOrDirectoryInfo.Name == BrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME)
                         {
                             // Bruker 1 directory
-                            mMSInfoScanner = new BrukerOneFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                            mMSInfoScanner = new BrukerOneFolderInfoScanner(Options, LCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
                         else
@@ -1277,21 +1282,21 @@ namespace MSFileInfoScanner
                                         Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 ||
                                         Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME).Length > 0)
                                     {
-                                        mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                                        mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     }
                                     else if (Directory.GetFiles(inputFileOrDirectoryPath, AgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 ||
                                       Directory.GetFiles(inputFileOrDirectoryPath, AgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 ||
                                       Directory.GetFiles(inputFileOrDirectoryPath, AgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0)
                                     {
-                                        mMSInfoScanner = new AgilentGCDFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                                        mMSInfoScanner = new AgilentGCDFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     }
                                     else if (Directory.GetDirectories(inputFileOrDirectoryPath, AgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Length > 0)
                                     {
-                                        mMSInfoScanner = new AgilentTOFDFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                                        mMSInfoScanner = new AgilentTOFDFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     }
                                     else
                                     {
-                                        mMSInfoScanner = new AgilentIonTrapDFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                                        mMSInfoScanner = new AgilentIonTrapDFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     }
 
                                     knownMSDataType = true;
@@ -1299,7 +1304,7 @@ namespace MSFileInfoScanner
 
                                 case WatersRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION:
                                     // Micromass .Raw directory
-                                    mMSInfoScanner = new WatersRawFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                                    mMSInfoScanner = new WatersRawFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
@@ -1308,7 +1313,7 @@ namespace MSFileInfoScanner
                                     // See if the directory contains one or more 0_R*.zip files
                                     if (Directory.GetFiles(inputFileOrDirectoryPath, ZippedImagingFilesScanner.ZIPPED_IMAGING_FILE_SEARCH_SPEC).Length > 0)
                                     {
-                                        mMSInfoScanner = new ZippedImagingFilesScanner(Options, mLCMS2DPlotOptions);
+                                        mMSInfoScanner = new ZippedImagingFilesScanner(Options, LCMS2DPlotOptions);
                                         knownMSDataType = true;
                                     }
                                     break;
@@ -1319,29 +1324,29 @@ namespace MSFileInfoScanner
                     {
                         if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
-                            mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                            mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
                         else if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_TDF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
-                            mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                            mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
                         else if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
-                            mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                            mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
                         else if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
-                            mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                            mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
                         else if (string.Equals(fileOrDirectoryInfo.Extension, ".qgd", StringComparison.OrdinalIgnoreCase))
                         {
                             // Shimadzu GC file
                             // Use the generic scanner to read the file size, modification date, and compute the SHA-1 hash
-                            mMSInfoScanner = new GenericFileInfoScanner(Options, mLCMS2DPlotOptions);
+                            mMSInfoScanner = new GenericFileInfoScanner(Options, LCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
                         else if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME, StringComparison.OrdinalIgnoreCase))
@@ -1353,7 +1358,7 @@ namespace MSFileInfoScanner
                                 var pathCheck = Path.Combine(parentDirectory, BrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME);
                                 if (File.Exists(pathCheck))
                                 {
-                                    mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                                    mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     knownMSDataType = true;
                                 }
                             }
@@ -1366,32 +1371,32 @@ namespace MSFileInfoScanner
                             {
                                 case ThermoRawFileInfoScanner.THERMO_RAW_FILE_EXTENSION:
                                     // Thermo .raw file
-                                    mMSInfoScanner = new ThermoRawFileInfoScanner(Options, mLCMS2DPlotOptions);
+                                    mMSInfoScanner = new ThermoRawFileInfoScanner(Options, LCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
                                 case AgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION:
-                                    mMSInfoScanner = new AgilentTOFOrQStarWiffFileInfoScanner(Options, mLCMS2DPlotOptions);
+                                    mMSInfoScanner = new AgilentTOFOrQStarWiffFileInfoScanner(Options, LCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
                                 case BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_EXTENSION:
-                                    mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                                    mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
                                 case BrukerXmassFolderInfoScanner.BRUKER_MCF_FILE_EXTENSION:
-                                    mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                                    mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
                                 case BrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_EXTENSION:
-                                    mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                                    mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
                                 case UIMFInfoScanner.UIMF_FILE_EXTENSION:
-                                    mMSInfoScanner = new UIMFInfoScanner(Options, mLCMS2DPlotOptions);
+                                    mMSInfoScanner = new UIMFInfoScanner(Options, LCMS2DPlotOptions);
                                     knownMSDataType = true;
                                     break;
 
@@ -1399,7 +1404,7 @@ namespace MSFileInfoScanner
 
                                     if (fileOrDirectoryInfo.FullName.EndsWith(DeconToolsIsosInfoScanner.DECONTOOLS_ISOS_FILE_SUFFIX, StringComparison.InvariantCultureIgnoreCase))
                                     {
-                                        mMSInfoScanner = new DeconToolsIsosInfoScanner(Options, mLCMS2DPlotOptions);
+                                        mMSInfoScanner = new DeconToolsIsosInfoScanner(Options, LCMS2DPlotOptions);
                                         knownMSDataType = true;
                                     }
                                     break;
@@ -1409,12 +1414,12 @@ namespace MSFileInfoScanner
                                     if (BrukerOneFolderInfoScanner.IsZippedSFolder(fileOrDirectoryInfo.Name))
                                     {
                                         // Bruker s001.zip file
-                                        mMSInfoScanner = new BrukerOneFolderInfoScanner(Options, mLCMS2DPlotOptions);
+                                        mMSInfoScanner = new BrukerOneFolderInfoScanner(Options, LCMS2DPlotOptions);
                                         knownMSDataType = true;
                                     }
                                     else if (ZippedImagingFilesScanner.IsZippedImagingFile(fileOrDirectoryInfo.Name))
                                     {
-                                        mMSInfoScanner = new ZippedImagingFilesScanner(Options, mLCMS2DPlotOptions);
+                                        mMSInfoScanner = new ZippedImagingFilesScanner(Options, LCMS2DPlotOptions);
                                         knownMSDataType = true;
                                     }
                                     break;
@@ -2287,8 +2292,8 @@ namespace MSFileInfoScanner
             Console.WriteLine("SaveLCMS2DPlots:    {0}", TrueFalseToEnabledDisabled(Options.SaveLCMS2DPlots));
             if (Options.SaveLCMS2DPlots)
             {
-                Console.WriteLine("   MaxPointsToPlot:     {0:N0}", mLCMS2DPlotOptions.MaxPointsToPlot);
-                Console.WriteLine("   OverviewPlotDivisor: {0}", mLCMS2DPlotOptions.LCMS2DOverviewPlotDivisor);
+                Console.WriteLine("   MaxPointsToPlot:     {0:N0}", LCMS2DPlotOptions.MaxPointsToPlot);
+                Console.WriteLine("   OverviewPlotDivisor: {0}", LCMS2DPlotOptions.LCMS2DOverviewPlotDivisor);
             }
             Console.WriteLine();
 
