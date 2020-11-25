@@ -70,6 +70,11 @@ namespace MSFileInfoScannerInterfaces
         public virtual MSFileScannerErrorCodes ErrorCode { get; protected set; }
 
         /// <summary>
+        /// 2D Plotting options
+        /// </summary>
+        public virtual LCMSDataPlotterOptions LCMS2DPlotOptions { get; protected set; }
+
+        /// <summary>
         /// MS2MzMin validation error or warning message
         /// </summary>
         public virtual string MS2MzMinValidationMessage { get; protected set; }
