@@ -1,16 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sections>
+	<!-----------------------------------------
+	-- Notice: 
+	-- 
+	-- This parameter file is obsolete 
+	-- for MSFileInfoScanner 2.0 or newer
+	-- (released December 2020)
+	--
+	-- See instead the Key=Value parameter files at
+	-- https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/tree/master/docs
+	-- including MSFileInfoScanner_ProcessingOptions_AllPlots.txt and
+	-- MSFileInfoScanner_ProcessingOptions_NoPlots.txt
+	------------------------------------------>
+	
   <section name="MSFileInfoScannerSettings">
+  
+    <!-- Connection string that specifies a username: "Data Source=gigasax;Initial Catalog=DMS5;User=DMSReader;Password=passwordHere" -->
     <item key="DSInfoConnectionString" value="Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;" />
     <item key="DSInfoDBPostingEnabled" value="False" />
     <item key="DSInfoStoredProcedure" value="UpdateDatasetFileInfoXML" />
 
-    <item key="LogMessagesToFile" value="False" />
     <item key="LogFilePath" value="" />
-
-    <item key="LogDirectoryPath" value="" />
-
+    <item key="LogDirectoryPath" value="." />
+    
+    <!-- When UseCacheFiles is True, then saves/loads data from/to the cache files (DatasetTimeFile.txt and FolderIntegrityInfo.txt) -->
+    <!-- If you simply want to create TIC and BPI files, and/or the _DatasetInfo.xml file for a single dataset, then set this to False -->    
     <item key="UseCacheFiles" value="False" />
+    
     <item key="ReprocessExistingFiles" value="False" />
     <item key="ReprocessIfCachedSizeIsZero" value="False" />
 
@@ -18,6 +34,8 @@
 
     <item key="SaveTICAndBPIPlots" value="True" />
     <item key="SaveLCMS2DPlots" value="True" />
+    <item key="UseDatasetNameForHtmlPlotsFile" value="False" />   
+    
     <item key="CheckCentroidingStatus" value="True" />
 
     <item key="MS2MzMin" value="0" />
