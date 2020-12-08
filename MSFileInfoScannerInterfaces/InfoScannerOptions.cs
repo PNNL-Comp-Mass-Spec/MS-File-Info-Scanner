@@ -20,6 +20,11 @@ namespace MSFileInfoScannerInterfaces
         public const int DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK = 500;
 
         /// <summary>
+        /// Default maximum number of XML nodes to examine in XML files
+        /// </summary>
+        public const int DEFAULT_MAXIMUM_XML_ELEMENT_NODES_TO_CHECK = 500;
+
+        /// <summary>
         /// Default m/z threshold for iTRAQ labeled samples
         /// </summary>
         /// <remarks>All MS/MS spectra should have a scan range that starts below this value</remarks>

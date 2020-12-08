@@ -27,8 +27,6 @@ namespace MSFileInfoScanner
     {
         // Ignore Spelling: OxyPlot, Conf, nnn
 
-        public const string PROGRAM_DATE = "November 24, 2020";
-
         private static DateTime mLastProgressTime;
 
         /// <summary>
@@ -163,7 +161,7 @@ namespace MSFileInfoScanner
 
         private static string GetAppVersion()
         {
-            return PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppVersion(PROGRAM_DATE);
+            return PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppVersion(MSFileInfoScanner.PROGRAM_DATE);
         }
 
         private static string CollapseList(IEnumerable<string> itemList)

@@ -41,6 +41,8 @@ namespace MSFileInfoScanner
     {
         // Ignore Spelling: OxyPlot, yyyy-MM-dd, hh:mm:ss tt, centroiding, utf, idx, xtr, Shimadzu
 
+        public const string PROGRAM_DATE = "December 7, 2020";
+
         /// <summary>
         /// Constructor
         /// </summary>

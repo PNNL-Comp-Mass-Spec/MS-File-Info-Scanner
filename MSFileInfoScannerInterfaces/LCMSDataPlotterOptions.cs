@@ -17,8 +17,6 @@ namespace MSFileInfoScannerInterfaces
 
         public const float DEFAULT_MZ_RESOLUTION = 0.4f;
 
-        public const float DEFAULT_MIN_INTENSITY = 0;
-
         private const string DEFAULT_MS1_PLOT_TITLE = "MS Spectra";
 
         private const string DEFAULT_MS2_PLOT_TITLE = "MS2 Spectra";

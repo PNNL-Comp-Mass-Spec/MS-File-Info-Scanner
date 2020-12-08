@@ -37,7 +37,6 @@ namespace MSFileInfoScanner
 
         #region "Constants and Enums"
 
-        public const int DEFAULT_MAXIMUM_XML_ELEMENT_NODES_TO_CHECK = 500;
         public const string FILE_EXTENSION_TXT = ".TXT";
         public const string FILE_EXTENSION_LOG = ".LOG";
         public const string FILE_EXTENSION_PARAMS = ".PARAMS";
@@ -2010,7 +2009,7 @@ namespace MSFileInfoScanner
         private void InitializeLocalVariables()
         {
             mMaximumTextFileLinesToCheck = InfoScannerOptions.DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK;
-            mMaximumXMLElementNodesToCheck = DEFAULT_MAXIMUM_XML_ELEMENT_NODES_TO_CHECK;
+            mMaximumXMLElementNodesToCheck = InfoScannerOptions.DEFAULT_MAXIMUM_XML_ELEMENT_NODES_TO_CHECK;
 
             ZipFileCheckAllData = true;
 
