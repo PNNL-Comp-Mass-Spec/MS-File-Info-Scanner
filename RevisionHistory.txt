@@ -1,5 +1,9 @@
 MS File Info Scanner Change Log
 
+Version 2.0.7646; December 7, 2020
+	- Replace XML-based parameter files with Key=Value parameter files
+	- Consolidate processing options in new classes in MSFileInfoScannerInterfaces.dll
+
 Version 1.6.7363; February 28, 2020
 	- Add support for Bruker analysis.tdf files
 	- Report progress while reading data with ProteoWizard and while saving plots
