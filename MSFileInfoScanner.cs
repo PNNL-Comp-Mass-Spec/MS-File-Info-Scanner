@@ -2273,7 +2273,7 @@ namespace MSFileInfoScanner
             if (Options.SaveLCMS2DPlots)
             {
                 Console.WriteLine("   MaxPointsToPlot:     {0:N0}", LCMS2DPlotOptions.MaxPointsToPlot);
-                Console.WriteLine("   OverviewPlotDivisor: {0}", LCMS2DPlotOptions.LCMS2DOverviewPlotDivisor);
+                Console.WriteLine("   OverviewPlotDivisor: {0}", LCMS2DPlotOptions.OverviewPlotDivisor);
             }
             Console.WriteLine();
 
