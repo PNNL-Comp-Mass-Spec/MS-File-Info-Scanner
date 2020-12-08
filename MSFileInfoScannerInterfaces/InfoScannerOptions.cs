@@ -1,15 +1,22 @@
 ﻿using System;
 using PRISM;
+
 // ReSharper disable UnusedMember.Global
 
 namespace MSFileInfoScannerInterfaces
 {
     public class InfoScannerOptions
     {
-        // Ignore Spelling: ArgExistsProperty, centroiding, csv, OxyPlot, Html
+        // Ignore Spelling: ArgExistsProperty, centroiding, csv, OxyPlot, Html, conf, deisotoped
 
+        /// <summary>
+        /// Default dataset stats text file name
+        /// </summary>
         public const string DEFAULT_DATASET_STATS_FILENAME = "MSFileInfo_DatasetStats.txt";
 
+        /// <summary>
+        /// Default maximum number of lines to check in text files
+        /// </summary>
         public const int DEFAULT_MAXIMUM_TEXT_FILE_LINES_TO_CHECK = 500;
 
         /// <summary>
@@ -277,6 +284,9 @@ namespace MSFileInfoScannerInterfaces
             HelpText = "If supplied, create plots with Python instead of OxyPlot")]
         public bool PlotWithPython { get; set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public InfoScannerOptions()
         {
             InputDataFilePath = string.Empty;
@@ -286,7 +296,7 @@ namespace MSFileInfoScannerInterfaces
 
             RecurseDirectories = false;
 
-            // If maxLevelsToRecurse is <=0, we recurse infinitely
+            // If maxLevelsToRecurse is <= 0, we recurse infinitely
             MaxLevelsToRecurse = 0;
             IgnoreErrorsWhenRecursing = false;
 

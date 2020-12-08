@@ -515,7 +515,7 @@ namespace MSFileInfoScanner.Readers
 
                         if (successOverall && mLCMS2DPlot.Options.PlottingDeisotopedData)
                         {
-                            // Create two more plots 2D plots, but this with a smaller maximum m/z
+                            // Create two more plots 2D plots, but this time with a smaller maximum m/z
                             mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = LCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
                             mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = LCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
 
@@ -559,7 +559,7 @@ namespace MSFileInfoScanner.Readers
 
                 if (Options.UpdateDatasetStatsTextFile)
                 {
-                    // Add a new row to the MSFileInfo_DatasetStats.txt file
+                    // Append a new row to the MSFileInfo_DatasetStats.txt file
                     var success = UpdateDatasetStatsTextFile(inputFileName, outputDirectory.FullName, Options.DatasetStatsTextFileName);
                     if (!success)
                     {
@@ -1302,7 +1302,7 @@ namespace MSFileInfoScanner.Readers
         }
 
         /// <summary>
-        /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
+        /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and this.DatasetFileInfo)
         /// </summary>
         /// <param name="inputFileName">Input file name</param>
         /// <param name="outputDirectoryPath">Output directory path</param>
@@ -1314,7 +1314,8 @@ namespace MSFileInfoScanner.Readers
         }
 
         /// <summary>
-        /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
+        /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and this.DatasetFileInfo)
+        /// The dataset stats summarizer does not check for duplicate entries; it simply appends a new line
         /// </summary>
         /// <param name="inputFileName">Input file name</param>
         /// <param name="outputDirectoryPath">Output directory path</param>

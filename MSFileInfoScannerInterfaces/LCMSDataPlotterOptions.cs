@@ -7,7 +7,7 @@ namespace MSFileInfoScannerInterfaces
     /// </summary>
     public class LCMSDataPlotterOptions
     {
-        // Ignore Spelling: deisotoped
+        // Ignore Spelling: centroiding, deisotoped
 
         public const int DEFAULT_MAX_POINTS_TO_PLOT = 200000;
 
@@ -39,13 +39,26 @@ namespace MSFileInfoScannerInterfaces
 
         private string mMS2PlotTitle;
 
-        // The following is only used when PlottingDeisotopedData is true
+        /// <summary>
+        /// Maximum monoisotopic mass for the deisotoped plot
+        /// </summary>
+        /// <remarks>
+        /// This is only used when PlottingDeisotopedData is true,
+        /// which will be the case if the source data is a DeconTools _isos.csv file
+        /// </remarks>
         private double mMaxMonoMass;
 
         #region "Properties"
 
+        /// <summary>
+        /// When true, delete temporary files
+        /// </summary>
         public bool DeleteTempFiles { get; set; }
 
+        /// <summary>
+        /// The divisor to use when creating the overview 2D LC/MS plots
+        /// If 0, do not create overview plots
+        /// </summary>
         public int LCMS2DOverviewPlotDivisor { get; set; }
 
         /// <summary>
@@ -96,7 +109,7 @@ namespace MSFileInfoScannerInterfaces
         }
 
         /// <summary>
-        /// m/z resolution
+        /// m/z resolution to use when centroiding spectra
         /// </summary>
         public float MZResolution {
             get => mMZResolution;
@@ -108,7 +121,7 @@ namespace MSFileInfoScannerInterfaces
         }
 
         /// <summary>
-        /// Minimum intensity
+        /// Minimum intensity of data added to LC/MS 2D plots
         /// </summary>
         public float MinIntensity {
             get => mMinIntensity;
@@ -120,9 +133,14 @@ namespace MSFileInfoScannerInterfaces
         }
 
         /// <summary>
-        /// Maximum monoisotopic mass for the deisotoped plot
+        /// Maximum monoisotopic mass for deisotoped LC/MS plots
         /// </summary>
-        public double MaxMonoMassForDeisotopedPlot {
+        /// <remarks>
+        /// This is only used when PlottingDeisotopedData is true,
+        /// which will be the case if the source data is a DeconTools _isos.csv file
+        /// </remarks>
+        public double MaxMonoMassForDeisotopedPlot
+        {
             get => mMaxMonoMass;
             set {
                 if (value < 100)
@@ -132,7 +150,7 @@ namespace MSFileInfoScannerInterfaces
         }
 
         /// <summary>
-        /// Set to true when plotting deisotoped data
+        /// This will be set to true when we're plotting deisotoped data (from a DeconTools _isos.csv file)
         /// </summary>
         public bool PlottingDeisotopedData { get; set; }
 

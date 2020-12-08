@@ -536,7 +536,7 @@ namespace MSFileInfoScanner.DatasetStats
 
         /// <summary>
         /// Creates XML summarizing the data stored in this class (in mDatasetScanStats, this.DatasetFileInfo, and this.SampleInfo)
-        /// Auto-determines the dataset name using Me.DatasetFileInfo.DatasetName
+        /// Auto-determines the dataset name using this.DatasetFileInfo.DatasetName
         /// </summary>
         /// <returns>XML (as string)</returns>
         public string CreateDatasetInfoXML()
@@ -1199,7 +1199,7 @@ namespace MSFileInfoScanner.DatasetStats
         }
 
         /// <summary>
-        /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and Me.DatasetFileInfo)
+        /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and this.DatasetFileInfo)
         /// </summary>
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="datasetInfoFilePath">File path to write the XML to</param>
@@ -1211,6 +1211,7 @@ namespace MSFileInfoScanner.DatasetStats
 
         /// <summary>
         /// Updates a tab-delimited text file, adding a new line summarizing the data in scanStats and datasetInfo
+        /// This method does not check for duplicate entries; it simply appends a new line
         /// </summary>
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="datasetStatsFilePath">Tab-delimited file to create/update</param>

@@ -122,6 +122,13 @@ namespace MSFileInfoScanner
 
         private string mFileIntegrityErrorsFilePath;
 
+        /// <summary>
+        /// Log file path
+        /// </summary>
+        /// <remarks>
+        /// This will be defined using Options.LogFilePath
+        /// If blank, the file will be auto-named based on the current date
+        /// </remarks>
         private string mLogFilePath;
 
         private StreamWriter mLogFile;
@@ -129,7 +136,14 @@ namespace MSFileInfoScanner
         // This variable is updated in ProcessMSFileOrDirectory
         private string mOutputDirectoryPath;
 
-        // If blank, mOutputDirectoryPath will be used; if mOutputDirectoryPath is also blank, the log is created in the same directory as the executing assembly
+        /// <summary>
+        /// Log directory path
+        /// </summary>
+        /// <remarks>
+        /// This will be defined using Options.LogDirectoryPath
+        /// If blank, mOutputDirectoryPath will be used
+        /// If mOutputDirectoryPath is also blank, the log file is created in the same directory as the executing assembly
+        /// </remarks>
         private string mLogDirectoryPath;
 
         private readonly FileIntegrityChecker mFileIntegrityChecker;
@@ -2176,7 +2190,7 @@ namespace MSFileInfoScanner
                 if (settingsFile.LoadSettings(parameterFilePath, true))
                 {
                     // General settings
-                    // settingsFile.SetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ConnectionString", Me.DatabaseConnectionString)
+                    // settingsFile.SetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ConnectionString", this.DatabaseConnectionString)
 
                     settingsFile.SaveSettings();
                 }
