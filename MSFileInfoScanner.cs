@@ -537,17 +537,20 @@ namespace MSFileInfoScanner
             {
                 try
                 {
-                    if (string.IsNullOrEmpty(mLogFilePath))
+                    if (string.IsNullOrEmpty(Options.LogFilePath))
                     {
                         // Auto-name the log file
                         mLogFilePath = Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location);
                         mLogFilePath += "_log_" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt";
                     }
+                    else
+                    {
+                        mLogFilePath = Options.LogFilePath;
+                    }
 
                     try
                     {
-                        if (mLogDirectoryPath == null)
-                            mLogDirectoryPath = string.Empty;
+                        mLogDirectoryPath = string.IsNullOrEmpty(Options.LogDirectoryPath) ? string.Empty : Options.LogDirectoryPath;
 
                         if (mLogDirectoryPath.Length == 0)
                         {
