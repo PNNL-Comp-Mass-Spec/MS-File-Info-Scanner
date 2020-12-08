@@ -5,6 +5,12 @@ The MS File Info Scanner can be used to scan a series of MS data files
 number of spectra, and the total size of the data, saving the values 
 in the file DatasetTimeFile.txt
 
+The program can also generate plots of the data, for QC purposes.  Plots include:
+* BPI: Base peak intensity vs. scan number (i.e. time)
+* TIC: Total ion intensity vs. scan number
+* 2D LC/MS plots showing intensity as a function of m/z and scan number
+* Analog device plots, e.g. LC pump pressure vs. scan number
+
 Supported file types are:
 * Thermo .raw files 
 * Agilent Ion Trap (.d directories)
@@ -35,7 +41,7 @@ Syntax:
 ```
 MSFileInfoScanner.exe
  /I:InputFileNameOrDirectoryPath [/O:OutputDirectoryPath]
- [/P:XMLParameterFilePath] [/S[:MaxLevel]] 
+ [/P:ParameterFilePath] [/S[:MaxLevel]]
  [/IE] [/L:LogFilePath]
  [/LC[:MaxPointsToPlot]] [/TIC] [/LCGrad]
  [/DI] [/SS] [/QS] [/CC]
@@ -44,7 +50,7 @@ MSFileInfoScanner.exe
  [/ScanStart:0] [/ScanEnd:0] [/Debug]
  [/C] [/M:nnn] [/H] [/QZ]
  [/CF] [/R] [/Z]
- [/PostToDMS] [/PythonPlot]
+ [/PythonPlot]
  [/Conf:KeyValueParamFilePath] [/CreateParamFile]
 ```
 
@@ -54,10 +60,12 @@ Use `/I` to specify the name of a file or directory to scan
 The output directory path is optional
 * If omitted, the output files will be created in the program directory
 
-The parameter file switch `/P` is optional
-* If provided, it should point to a valid XML parameter file
-  * Example parameter file: [MSFileInfoScanner_ProcessingOptions.xml](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions.xml)
-* Most of the options can alternatively be defined using a Key=Value parameter file, as described below for the `/Conf` argument
+Use `/P` or `/Conf` to define a key/value parameter file with settings to load
+* Example Key=Value parameter files
+  * [MSFileInfoScanner_ProcessingOptions_NoPlots.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_NoPlots.txt)
+  * [MSFileInfoScanner_ProcessingOptions_TICandBPI.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_TICandBPI.txt)
+  * [MSFileInfoScanner_ProcessingOptions_AllPlots.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_AllPlots.txt)
+  * [MSFileInfoScanner_ProcessingOptions_AllPlots_ValidateTMT.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_AllPlots_ValidateTMT.txt)
 
 Use `/S` to process all valid files in the input directory and subdirectories
 * Include a number after /S (like `/S:2`) to limit the level of subdirectories to examine
@@ -162,13 +170,6 @@ The processing options can be specified in a parameter file using `/ParamFile:Op
 Use `/CreateParamFile` to create an example key/value parameter file
 * By default, the example parameter file content is shown at the console
 * To create a file named Options.conf, use `/CreateParamFile:Options.conf`
-
-Use `/Conf` to define a key/value parameter file with settings to load
-* Example Key=Value parameter files
-  * [MSFileInfoScanner_ProcessingOptions_NoPlots.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_NoPlots.txt)
-  * [MSFileInfoScanner_ProcessingOptions_TICandBPI.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_TICandBPI.txt)
-  * [MSFileInfoScanner_ProcessingOptions_AllPlots.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_AllPlots.txt)
-  * [MSFileInfoScanner_ProcessingOptions_AllPlots_ValidateTMT.txt](https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/blob/master/docs/MSFileInfoScanner_ProcessingOptions_AllPlots_ValidateTMT.txt)
 
 Known file extensions: .RAW, .WIFF, .BAF, .MCF, .MCF_IDX, .UIMF, .CSV\
 Known directory extensions: .D, .RAW
