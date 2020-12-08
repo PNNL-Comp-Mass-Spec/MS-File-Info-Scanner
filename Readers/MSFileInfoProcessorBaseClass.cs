@@ -343,14 +343,14 @@ namespace MSFileInfoScanner.Readers
             mLCMS2DPlotOverview.Reset();
         }
 
-        private bool CreateOverview2DPlots(string datasetName, string outputDirectoryPath, int lcms2DOverviewPlotDivisor)
+        private bool CreateOverview2DPlots(string datasetName, string outputDirectoryPath, int overviewPlotDivisor)
         {
-            return CreateOverview2DPlots(datasetName, outputDirectoryPath, lcms2DOverviewPlotDivisor, string.Empty);
+            return CreateOverview2DPlots(datasetName, outputDirectoryPath, overviewPlotDivisor, string.Empty);
         }
 
-        private bool CreateOverview2DPlots(string datasetName, string outputDirectoryPath, int lcms2DOverviewPlotDivisor, string scanModeSuffixAddon)
+        private bool CreateOverview2DPlots(string datasetName, string outputDirectoryPath, int overviewPlotDivisor, string scanModeSuffixAddon)
         {
-            if (lcms2DOverviewPlotDivisor <= 1)
+            if (overviewPlotDivisor <= 1)
             {
                 // Nothing to do; just return True
                 return true;
@@ -362,7 +362,7 @@ namespace MSFileInfoScanner.Readers
 
             // Set MaxPointsToPlot in mLCMS2DPlotOverview to be lcms2DOverviewPlotDivisor times smaller
             // than the MaxPointsToPlot value in mLCMS2DPlot
-            mLCMS2DPlotOverview.Options.MaxPointsToPlot = (int)Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / (double)lcms2DOverviewPlotDivisor, 0);
+            mLCMS2DPlotOverview.Options.MaxPointsToPlot = (int)Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / (double)overviewPlotDivisor, 0);
 
             // Copy the data from mLCMS2DPlot to mLCMS2DPlotOverview
             // mLCMS2DPlotOverview will auto-filter the data to track, at most, mLCMS2DPlotOverview.Options.MaxPointsToPlot points
