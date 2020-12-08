@@ -119,8 +119,9 @@ namespace MSFileInfoScanner
             set
             {
                 if (value < 0)
-                    value = 0;
-                mMaximumTextFileLinesToCheck = value;
+                    mMaximumTextFileLinesToCheck = 0;
+                else
+                    mMaximumTextFileLinesToCheck = value;
             }
         }
 
@@ -130,8 +131,9 @@ namespace MSFileInfoScanner
             set
             {
                 if (value < 0)
-                    value = 0;
-                mMaximumXMLElementNodesToCheck = value;
+                    mMaximumXMLElementNodesToCheck = 0;
+                else
+                    mMaximumXMLElementNodesToCheck = value;
             }
         }
 

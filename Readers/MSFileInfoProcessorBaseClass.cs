@@ -1033,8 +1033,8 @@ namespace MSFileInfoScanner.Readers
 
                 // Instantiate the ProteoWizard Data Parser class
                 var pWizParser = new ProteoWizardDataParser(pWiz, mDatasetStatsSummarizer, mTICAndBPIPlot,
-                                                               mLCMS2DPlot, Options.SaveLCMS2DPlots, Options.SaveTICAndBPIPlots,
-                                                               Options.CheckCentroidingStatus)
+                                                            mLCMS2DPlot, Options.SaveLCMS2DPlots, Options.SaveTICAndBPIPlots,
+                                                            Options.CheckCentroidingStatus)
                 {
                     HighResMS1 = highResMS1,
                     HighResMS2 = highResMS2

@@ -63,71 +63,90 @@ namespace MSFileInfoScannerInterfaces
         /// <summary>
         /// Maximum number of points to plot
         /// </summary>
-        public int MaxPointsToPlot {
+        public int MaxPointsToPlot
+        {
             get => mMaxPointsToPlot;
-            set {
+            set
+            {
                 if (value < 10)
-                    value = 10;
-                mMaxPointsToPlot = value;
+                    mMaxPointsToPlot = 10;
+                else
+                    mMaxPointsToPlot = value;
             }
         }
 
         /// <summary>
         /// Minimum points per spectrum
         /// </summary>
-        public int MinPointsPerSpectrum {
+        public int MinPointsPerSpectrum
+        {
             get => mMinPointsPerSpectrum;
-            set {
+            set
+            {
                 if (value < 0)
-                    value = 0;
-                mMinPointsPerSpectrum = value;
+                    mMinPointsPerSpectrum = 0;
+                else
+                    mMinPointsPerSpectrum = value;
             }
         }
 
-        public string MS1PlotTitle {
+        /// <summary>
+        /// MS1 plot title
+        /// </summary>
+        public string MS1PlotTitle
+        {
             get => mMS1PlotTitle;
-            set {
-                if (string.IsNullOrEmpty(value)) {
-                    value = DEFAULT_MS1_PLOT_TITLE;
-                }
-                mMS1PlotTitle = value;
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    mMS1PlotTitle = DEFAULT_MS1_PLOT_TITLE;
+                else
+                    mMS1PlotTitle = value;
             }
         }
 
         /// <summary>
         /// MS2 plot title
         /// </summary>
-        public string MS2PlotTitle {
+        public string MS2PlotTitle
+        {
             get => mMS2PlotTitle;
-            set {
-                if (string.IsNullOrEmpty(value)) {
-                    value = DEFAULT_MS2_PLOT_TITLE;
-                }
-                mMS2PlotTitle = value;
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    mMS2PlotTitle = DEFAULT_MS2_PLOT_TITLE;
+                else
+                    mMS2PlotTitle = value;
             }
         }
 
         /// <summary>
         /// m/z resolution to use when centroiding spectra
         /// </summary>
-        public float MZResolution {
+        public float MZResolution
+        {
             get => mMZResolution;
-            set {
+            set
+            {
                 if (value < 0)
-                    value = 0;
-                mMZResolution = value;
+                    mMZResolution = 0;
+                else
+                    mMZResolution = value;
             }
         }
 
         /// <summary>
         /// Minimum intensity of data added to LC/MS 2D plots
         /// </summary>
-        public float MinIntensity {
+        public float MinIntensity
+        {
             get => mMinIntensity;
-            set {
+            set
+            {
                 if (value < 0)
-                    value = 0;
-                mMinIntensity = value;
+                    mMinIntensity = 0;
+                else
+                    mMinIntensity = value;
             }
         }
 
@@ -141,10 +160,12 @@ namespace MSFileInfoScannerInterfaces
         public double MaxMonoMassForDeisotopedPlot
         {
             get => mMaxMonoMass;
-            set {
+            set
+            {
                 if (value < 100)
-                    value = 100;
-                mMaxMonoMass = value;
+                    mMaxMonoMass = 100;
+                else
+                    mMaxMonoMass = value;
             }
         }
 
@@ -194,7 +215,7 @@ namespace MSFileInfoScannerInterfaces
         /// <summary>
         /// Constructor
         /// </summary>
-        public LCMSDataPlotterOptions() : this (new InfoScannerOptions())
+        public LCMSDataPlotterOptions() : this(new InfoScannerOptions())
         {
         }
 
