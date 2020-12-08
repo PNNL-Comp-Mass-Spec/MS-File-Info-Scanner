@@ -9,9 +9,9 @@
     <ScanCountMS>161</ScanCountMS>
     <ScanCountMSn>0</ScanCountMSn>
     <Elution_Time_Max>0.00</Elution_Time_Max>
-    <AcqTimeMinutes>0.00</AcqTimeMinutes>
+    <AcqTimeMinutes>62.68</AcqTimeMinutes>
     <StartTime>2014-12-02 05:05:12 PM</StartTime>
-    <EndTime>2014-12-02 05:05:12 PM</EndTime>
+    <EndTime>2014-12-02 06:07:52 PM</EndTime>
     <FileSizeBytes>225117184</FileSizeBytes>
     <InstrumentFiles>
       <InstrumentFile Hash="e86a687a3e07712c78ab6391f4bcee7ee2cd7ba6" HashType="SHA1" Size="225117184">EXP-Solv_DBM_100pM_pos_2Dec14_Columbia_DI.uimf</InstrumentFile>
