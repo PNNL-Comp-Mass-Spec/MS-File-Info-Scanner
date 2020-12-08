@@ -469,7 +469,7 @@ namespace MSFileInfoScanner.Readers
                     // Determine the number of times we'll be calling Save2DPlots or CreateOverview2DPlots
                     var lcMSPlotStepsTotal = 1;
 
-                    if (mLCMS2DPlot.Options.LCMS2DOverviewPlotDivisor > 0)
+                    if (mLCMS2DPlot.Options.OverviewPlotDivisor > 0)
                     {
                         lcMSPlotStepsTotal++;
                     }
@@ -477,7 +477,7 @@ namespace MSFileInfoScanner.Readers
                     if (mLCMS2DPlot.Options.PlottingDeisotopedData)
                     {
                         lcMSPlotStepsTotal++;
-                        if (mLCMS2DPlot.Options.LCMS2DOverviewPlotDivisor > 0)
+                        if (mLCMS2DPlot.Options.OverviewPlotDivisor > 0)
                         {
                             lcMSPlotStepsTotal++;
                         }
@@ -495,11 +495,11 @@ namespace MSFileInfoScanner.Readers
                     }
                     else
                     {
-                        if (mLCMS2DPlot.Options.LCMS2DOverviewPlotDivisor > 0)
+                        if (mLCMS2DPlot.Options.OverviewPlotDivisor > 0)
                         {
                             // Also save the Overview 2D Plots
                             // Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-                            var success4 = CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DPlot.Options.LCMS2DOverviewPlotDivisor);
+                            var success4 = CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DPlot.Options.OverviewPlotDivisor);
                             lcMSPlotStepsComplete++;
                             ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
 
@@ -523,9 +523,9 @@ namespace MSFileInfoScanner.Readers
                             lcMSPlotStepsComplete++;
                             ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
 
-                            if (mLCMS2DPlot.Options.LCMS2DOverviewPlotDivisor > 0)
+                            if (mLCMS2DPlot.Options.OverviewPlotDivisor > 0)
                             {
-                                CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DPlot.Options.LCMS2DOverviewPlotDivisor, "_zoom");
+                                CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DPlot.Options.OverviewPlotDivisor, "_zoom");
                                 lcMSPlotStepsComplete++;
                                 ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
                             }

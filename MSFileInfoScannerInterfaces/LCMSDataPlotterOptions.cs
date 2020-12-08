@@ -55,9 +55,10 @@ namespace MSFileInfoScannerInterfaces
 
         /// <summary>
         /// The divisor to use when creating the overview 2D LC/MS plots
-        /// If 0, do not create overview plots
+        /// The max points to plot value (MaxPointsToPlot) is divided by the overview plot divisor to compute the number of points to include on the overview plot
         /// </summary>
-        public int LCMS2DOverviewPlotDivisor { get; set; }
+        /// <remarks>If 0, do not create overview plots</remarks>
+        public int OverviewPlotDivisor { get; set; }
 
         /// <summary>
         /// Maximum number of points to plot
@@ -174,7 +175,7 @@ namespace MSFileInfoScannerInterfaces
             var newOptions = new LCMSDataPlotterOptions
             {
                 DeleteTempFiles = DeleteTempFiles,
-                LCMS2DOverviewPlotDivisor = LCMS2DOverviewPlotDivisor,
+                OverviewPlotDivisor = OverviewPlotDivisor,
                 MaxPointsToPlot = MaxPointsToPlot,
                 MinPointsPerSpectrum = MinPointsPerSpectrum,
                 MZResolution = MZResolution,
@@ -205,18 +206,18 @@ namespace MSFileInfoScannerInterfaces
         {
             DeleteTempFiles = true;
 
-            LCMS2DOverviewPlotDivisor = options.LCMS2DOverviewPlotDivisor;
+            OverviewPlotDivisor = options.LCMSOverviewPlotDivisor;
 
-            mMaxPointsToPlot = options.LCMS2DMaxPointsToPlot;
-            mMinPointsPerSpectrum = DEFAULT_MIN_POINTS_PER_SPECTRUM;
+            mMaxPointsToPlot = options.LCMSPlotMaxPointsToPlot;
+            mMinPointsPerSpectrum = options.LCMSPlotMinPointsPerSpectrum;
 
-            mMZResolution = DEFAULT_MZ_RESOLUTION;
-            mMinIntensity = DEFAULT_MIN_INTENSITY;
+            mMZResolution = options.LCMSPlotMzResolution;
+            mMinIntensity = options.LCMSPlotMinIntensity;
 
             mMS1PlotTitle = DEFAULT_MS1_PLOT_TITLE;
             mMS2PlotTitle = DEFAULT_MS2_PLOT_TITLE;
 
-            mMaxMonoMass = DEFAULT_MAX_MONO_MASS_FOR_DEISOTOPED_PLOT;
+            mMaxMonoMass = options.LCMSPlotMaxMonoMass;
 
             PlottingDeisotopedData = false;
             PlotWithPython = false;
