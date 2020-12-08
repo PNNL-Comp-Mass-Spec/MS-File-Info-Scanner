@@ -623,21 +623,13 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Read settings from an XML-based parameter file
+        /// Read settings from a Key=Value parameter file
         /// </summary>
         /// <param name="parameterFilePath"></param>
         public override bool LoadParameterFileSettings(string parameterFilePath)
         {
-            var settingsFile = new XmlSettingsFileAccessor();
-
             try
             {
-                if (string.IsNullOrEmpty(parameterFilePath))
-                {
-                    // No parameter file specified; nothing to load
-                    return true;
-                }
-
                 if (!File.Exists(parameterFilePath))
                 {
                     // See if parameterFilePath points to a file in the same directory as the application
@@ -650,88 +642,60 @@ namespace MSFileInfoScanner
                     }
                 }
 
-                // Pass False to .LoadSettings() here to turn off case sensitive matching
-                if (settingsFile.LoadSettings(parameterFilePath, false))
+                var cachedInputFilePath = Options.InputDataFilePath;
+                var cachedOutputDirectoryPath = Options.OutputDirectoryPath;
+
+                var appVersion = ProcessFilesOrDirectoriesBase.GetAppVersion(PROGRAM_DATE);
+
+                var args = new List<string>
                 {
-                    if (!settingsFile.SectionPresent(XML_SECTION_MSFILESCANNER_SETTINGS))
-                    {
-                        // MS File Scanner section not found; that's OK
-                        ReportWarning("Parameter file " + parameterFilePath + " does not have section \"" + XML_SECTION_MSFILESCANNER_SETTINGS + "\"");
-                    }
-                    else
-                    {
-                        Options.DatabaseConnectionString = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoConnectionString", Options.DatabaseConnectionString);
-                        Options.PostResultsToDMS = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoDBPostingEnabled", Options.PostResultsToDMS);
-                        Options.DSInfoStoredProcedure = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DSInfoStoredProcedure", Options.DSInfoStoredProcedure);
+                    "-ParamFile",
+                    parameterFilePath
+                };
 
-                        // Obsolete: Options.LogMessagesToFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogMessagesToFile", Options.LogMessagesToFile);
-                        // If LogFilePath is defined, logging is enabled
-                        Options.LogFilePath = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogFilePath", Options.LogFilePath);
+                var parser = new CommandLineParser<InfoScannerOptions>(Options, appVersion);
+                var result = parser.ParseArgs(args.ToArray());
 
-                        var legacyLogDir = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogFolderPath", string.Empty);
-                        if (!string.IsNullOrEmpty(legacyLogDir))
-                        {
-                            Options.LogDirectoryPath = legacyLogDir;
-                            OnWarningEvent("Update the parameter file to switch from LogFolderPath to LogDirectoryPath");
-                        }
+                // Note that result.ParsedResults and Options point to the same instance of InfoScannerOptions
 
-                        Options.LogDirectoryPath = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LogDirectoryPath", Options.LogDirectoryPath);
-
-                        Options.UseCacheFiles = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UseCacheFiles", Options.UseCacheFiles);
-                        Options.ReprocessExistingFiles = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessExistingFiles", Options.ReprocessExistingFiles);
-                        Options.ReprocessIfCachedSizeIsZero = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ReprocessIfCachedSizeIsZero", Options.ReprocessIfCachedSizeIsZero);
-
-                        Options.CopyFileLocalOnReadError = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CopyFileLocalOnReadError", Options.CopyFileLocalOnReadError);
-
-                        Options.SaveTICAndBPIPlots = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveTICAndBPIPlots", Options.SaveTICAndBPIPlots);
-                        Options.SaveLCMS2DPlots = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "SaveLCMS2DPlots", Options.SaveLCMS2DPlots);
-                        Options.CheckCentroidingStatus = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckCentroidingStatus", Options.CheckCentroidingStatus);
-
-                        Options.MS2MzMin = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MS2MzMin", Options.MS2MzMin);
-                        Options.DisableInstrumentHash = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DisableInstrumentHash", Options.DisableInstrumentHash);
-
-                        LCMS2DPlotOptions.MZResolution = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMZResolution", LCMS2DPlotOptions.MZResolution);
-                        LCMS2DPlotOptions.MinPointsPerSpectrum = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinPointsPerSpectrum", LCMS2DPlotOptions.MinPointsPerSpectrum);
-
-                        LCMS2DPlotOptions.MaxPointsToPlot = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMaxPointsToPlot", LCMS2DPlotOptions.MaxPointsToPlot);
-                        LCMS2DPlotOptions.MinIntensity = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DPlotMinIntensity", LCMS2DPlotOptions.MinIntensity);
-
-                        LCMS2DPlotOptions.LCMS2DOverviewPlotDivisor = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "LCMS2DOverviewPlotDivisor", LCMS2DPlotOptions.LCMS2DOverviewPlotDivisor);
-
-                        Options.ScanStart = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanStart", Options.ScanStart);
-                        Options.ScanEnd = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ScanEnd", Options.ScanEnd);
-
-                        Options.ComputeOverallQualityScores = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeOverallQualityScores", Options.ComputeOverallQualityScores);
-                        Options.CreateDatasetInfoFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateDatasetInfoFile", Options.CreateDatasetInfoFile);
-                        Options.CreateScanStatsFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CreateScanStatsFile", Options.CreateScanStatsFile);
-
-                        Options.UpdateDatasetStatsTextFile = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "UpdateDatasetStatsTextFile", Options.UpdateDatasetStatsTextFile);
-                        Options.DatasetStatsTextFileName = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "DatasetStatsTextFileName", Options.DatasetStatsTextFileName);
-
-                        Options.CheckFileIntegrity = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "CheckFileIntegrity", Options.CheckFileIntegrity);
-                        Options.ReprocessExistingFiles = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "RecheckFileIntegrityForExistingDirectories", Options.ReprocessExistingFiles);
-
-                        Options.MaximumTextFileLinesToCheck = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MaximumTextFileLinesToCheck", Options.MaximumTextFileLinesToCheck);
-                        Options.MaximumXMLElementNodesToCheck = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "MaximumXMLElementNodesToCheck", Options.MaximumXMLElementNodesToCheck);
-                        Options.ComputeFileHashes = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ComputeFileHashes", Options.ComputeFileHashes);
-                        Options.ZipFileCheckAllData = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "ZipFileCheckAllData", Options.ZipFileCheckAllData);
-
-                        Options.IgnoreErrorsWhenRecursing = settingsFile.GetParam(XML_SECTION_MSFILESCANNER_SETTINGS, "IgnoreErrorsWhenRecursing", Options.IgnoreErrorsWhenRecursing);
-                    }
-                }
-                else
+                if (!result.Success)
                 {
-                    ReportError("Error calling settingsFile.LoadSettings for " + parameterFilePath);
+                    ReportWarning(string.Format(
+                        "Error loading options from parameter file {0} using the CommandLineParser class",
+                        parameterFilePath));
+
+                    if (result.ParseErrors.Count == 0)
+                    {
+                        ReportWarning("Unspecified error");
+                         return false;
+                    }
+
+                    foreach (var item in result.ParseErrors)
+                    {
+                        ReportWarning(item.Message);
+                    }
+
                     return false;
                 }
+
+                if (string.IsNullOrWhiteSpace(Options.InputDataFilePath) && !string.IsNullOrWhiteSpace(cachedInputFilePath))
+                {
+                    Options.InputDataFilePath = cachedInputFilePath;
+                }
+
+                if (string.IsNullOrWhiteSpace(Options.OutputDirectoryPath) && !string.IsNullOrWhiteSpace(cachedOutputDirectoryPath))
+                {
+                    Options.OutputDirectoryPath = cachedOutputDirectoryPath;
+                }
+
+                Options.ParameterFilePath = parameterFilePath;
+                return true;
             }
             catch (Exception ex)
             {
                 HandleException("Error in LoadParameterFileSettings", ex);
                 return false;
             }
-
-            return true;
         }
 
         private void OpenFileIntegrityDetailsFile()

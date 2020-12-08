@@ -58,7 +58,7 @@ namespace MSFileInfoScanner
 
             cmdLineParser.UsageExamples.Add("Program syntax:" + Environment.NewLine + Path.GetFileName(exePath) + "\n" +
                                             " /I:InputFileNameOrDirectoryPath [/O:OutputDirectoryPath]\n" +
-                                            " [/P:XMLParameterFilePath] [/S[:MaxLevel]] " +
+                                            " [/P:ParameterFilePath] [/S[:MaxLevel]]\n" +
                                             " [/IE] [/L:LogFilePath]\n" +
                                             " [/LC[:MaxPointsToPlot]] [/TIC] [/LCGrad]\n" +
                                             " [/DI] [/SS] [/QS] [/CC]\n" +
@@ -67,10 +67,13 @@ namespace MSFileInfoScanner
                                             " [/ScanStart:0] [/ScanEnd:0] [/Debug]\n" +
                                             " [/C] [/M:nnn] [/H] [/QZ]\n" +
                                             " [/CF] [/R] [/Z]\n" +
-                                            " [/PostToDMS] [/PythonPlot]\n" +
+                                            " [/PythonPlot]\n" +
                                             " [/Conf:KeyValueParamFilePath] [/CreateParamFile]");
 
+            // The default argument name for parameter files is /ParamFile or -ParamFile
+            // Also allow /Conf or /P
             cmdLineParser.AddParamFileKey("Conf");
+            cmdLineParser.AddParamFileKey("P");
 
             var result = cmdLineParser.ParseArgs(args);
             var options = result.ParsedResults;
@@ -85,6 +88,10 @@ namespace MSFileInfoScanner
 
             try
             {
+                if (InvalidParameterFile(cmdLineParser.ParameterFilePath))
+                    return -1;
+
+
                 var scanner = new MSFileInfoScanner(options);
 
                 scanner.DebugEvent += MSFileScanner_DebugEvent;
@@ -157,6 +164,46 @@ namespace MSFileInfoScanner
                 ShowErrorMessage("Error occurred in modMain->Main", ex);
                 return -1;
             }
+        }
+
+        private static bool InvalidParameterFile(string parameterFilePath)
+        {
+
+            if (string.IsNullOrWhiteSpace(parameterFilePath))
+                return false;
+
+            // Assure that the user did not provide an old-style XML-based parameter file
+            var paramFile = new FileInfo(parameterFilePath);
+            if (!paramFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            using (var paramFileReader = new StreamReader(new FileStream(paramFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            {
+                var linesRead = 0;
+                while (!paramFileReader.EndOfStream && linesRead < 5)
+                {
+                    var dataLine = paramFileReader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    linesRead++;
+
+                    var trimmedLine = dataLine.Trim();
+                    if (trimmedLine.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase) ||
+                        trimmedLine.StartsWith("<sections", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ConsoleMsgUtils.ShowWarning(
+                            "MSFileInfoScanner v2.x uses Key=Value parameter files\n" +
+                            "{0} is an XML file\n" +
+                            "For example parameter files, see {1}",
+                            paramFile.Name, "https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/tree/master/docs");
+                        ConsoleMsgUtils.ShowWarning("Aborting");
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private static string GetAppVersion()
