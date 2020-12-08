@@ -91,7 +91,6 @@ namespace MSFileInfoScanner
                 if (InvalidParameterFile(cmdLineParser.ParameterFilePath))
                     return -1;
 
-
                 var scanner = new MSFileInfoScanner(options);
 
                 scanner.DebugEvent += MSFileScanner_DebugEvent;
@@ -168,7 +167,6 @@ namespace MSFileInfoScanner
 
         private static bool InvalidParameterFile(string parameterFilePath)
         {
-
             if (string.IsNullOrWhiteSpace(parameterFilePath))
                 return false;
 
