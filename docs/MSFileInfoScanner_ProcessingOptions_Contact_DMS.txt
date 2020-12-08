@@ -33,7 +33,7 @@ LogDirectoryPath=
 
 # Create 2D LC/MS plots (this process could take several minutes for each dataset), using the top N points
 # To plot the top 20000 points, use /LC:20000 or define the value in a configuration file specified with /Conf
-LCMSPlotMaxPointsToPlot=200000
+# LCMSPlotMaxPointsToPlot=200000
 
 # Minimum intensity to require for each mass spectrum data point when adding data to LC/MS 2D plots
 # LCMSPlotMinIntensity=0
@@ -82,7 +82,7 @@ CheckCentroidingStatus=True
 #   - select the default iTRAQ m/z (113) using /MS2MzMin:iTRAQ
 #   - select the default TMT m/z (126) using /MS2MzMin:TMT
 #   - specify a m/z value using /MS2MzMin:110
-MS2MzMin=TMT
+MS2MzMin=
 
 # If supplied, disables creating a SHA-1 hash for the primary instrument data file(s)
 # DisableInstrumentHash=False
@@ -131,6 +131,16 @@ MS2MzMin=TMT
 
 # If supplied, reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes
 # ReprocessIfCachedSizeIsZero=False
+
+# If supplied, store the dataset info in the DMS database
+# To customize the server name and/or stored procedure to use for posting, use an XML parameter file with settings DSInfoConnectionString, DSInfoDBPostingEnabled, and DSInfoStoredProcedure
+PostResultsToDMS=True
+
+# Connection string for storing dataset info in DMS
+# DatabaseConnectionString=Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;
+
+# Procedure to call to store dataset info in DMS
+# DSInfoStoredProcedure=UpdateDatasetFileInfoXML
 
 # If supplied, create plots with Python script MSFileInfoScanner_Plotter.py instead of OxyPlot
 PythonPlot=True

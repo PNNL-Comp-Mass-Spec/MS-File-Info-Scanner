@@ -1,108 +1,139 @@
-# Required: The name of a file or directory to scan; the path can contain the wildcard character *
-InputDataFilePath=
+# Required: The name of a file or directory to process; the path can contain the wildcard character *
+# Either define this at the command line using /I or in a parameter file
+InputFilePath=
 
-# Output directory name.  If omitted, the output files will be created in the program directory.
-OutputDirectory=
+# Output directory name
+# If omitted, the output files will be created in the program directory
+OutputDirectoryPath=
 
-# XML parameter file path. If supplied, it should point to a valid XML parameter file.
-# Most options can alternatively be set using a Key=Value parameter file, which can be seen with /CreateParamFile
-ParameterFile=
+# If supplied, process all valid files in the input directory and subdirectories
+# Include a number after /S (like /S:2) to limit the level of subdirectories to examine (0 means to recurse infinitely)
+# The equivalent notation in a parameter file is MaxLevelsToRecurse=2
+# MaxLevelsToRecurse=0
 
-# If supplied, process all valid files in the input directory and subdirectories.
-# Include a number after /S (like /S:2) to limit the level of subdirectories to examine (0 means to recurse infinitely).
-MaxLevelsToRecurse=0
+# Ignore errors when recursing
+# IgnoreErrorsWhenRecursing=False
 
-# Ignore errors when recursing.
-IgnoreErrorsWhenRecursing=False
+# File path for logging messages
+LogFilePath=
 
-# File path for logging messages.
-LogFile=
+# Directory to create log files
+LogDirectoryPath=
 
-# Create 2D LCMS plots (this process could take several minutes for each dataset), using the top N points.
-# To plot the top 20000 points, use /LC:20000.
-# To disable creating 2D plots, comment out (or delete) the following line
-#LCMS2DMaxPointsToPlot=200000
+# Set to true to log messages to a file
+# If LogFilePath is empty, the log file name will be auto-defined using the current date
+# If LogFilePath has a filename, LogMessagesToFile will be auto-set to true
+# LogMessagesToFile=False
 
-# The divisor to use when creating the overview 2D LCMS plots.
-# Use /LCDiv:0 to disable creation of the overview plots.
-LCMSPlotDivisor=10
+# m/z resolution when centroiding data for LC/MS 2D plots
+# LCMSPlotMzResolution=0.4
 
-# Use /TIC:False to disable saving TIC and BPI plots; also disables any device specific plots
+# Minimum points per spectrum for inclusion on LC/MS 2D plots
+# LCMSPlotMinPointsPerSpectrum=2
+
+# Create 2D LC/MS plots (this process could take several minutes for each dataset), using the top N points
+# To plot the top 20000 points, use /LC:20000 or define the value in a configuration file specified with /Conf
+# LCMSPlotMaxPointsToPlot=200000
+
+# Minimum intensity to require for each mass spectrum data point when adding data to LC/MS 2D plots
+# LCMSPlotMinIntensity=0
+
+# Maximum monoisotopic mass for the y-axis of deisotoped LC/MS plots
+# This is only used when the input data is a DeconTools _isos.csv file
+# LCMSPlotMaxMonoMass=12000
+
+# The divisor to use when creating the overview 2D LC/MS plots
+# The max points to plot value (LCMSPlotMaxPointsToPlot) is divided by the overview plot divisor to compute the number of points to include on the overview plot
+# Use /LCDiv:0 to disable creation of the overview plots (or comment out the LCMSOverviewPlotDivisor line in a parameter file)
+# LCMSOverviewPlotDivisor=10
+
+# By default, the MS File Info Scanner creates TIC and BPI plots
+# Use /TIC:False to disable saving TIC and BPI plots (or use SaveTICAndBPIPlots=False in a parameter file)
+# When this is false, device specific plots will also be disabled
 SaveTICAndBPIPlots=True
 
-# Save a series of 2D LC plots, each using a different color scheme.
-# The default color scheme is OxyPalettes.Jet
-CreateGradientPlots=False
+# The HTML file for viewing plots is named index.html by default;
+# set this to True to name the file based on the input file name
+# This is auto-set to true if the input file spec has a wildcard
+# UseDatasetNameForHtmlPlotsFile=False
 
-# Define the dataset's DatasetID value (where # is an integer); only appropriate if processing a single dataset
-DatasetID=0
+# Define the dataset's DatasetID value (where # is an integer);
+# this is only appropriate if processing a single dataset
+# DatasetID=0
 
-# If supplied, create a dataset info XML file for each dataset.
+# If supplied, create a dataset info XML file for each dataset
 CreateDatasetInfoFile=True
 
-# If supplied, create a _ScanStats.txt  file for each dataset.
+# If supplied, create a _ScanStats.txt  file for each dataset
 CreateScanStatsFile=True
 
-# If supplied, compute an overall quality score for the data in each datasets.
+# If supplied, compute an overall quality score for the data in each datasets
 ComputeQualityScores=True
 
 # If supplied, check spectral data for whether it is centroided or profile
 CheckCentroidingStatus=True
 
-# If supplied, specifies a minimum m/z value that all MS/MS spectra should have.
-# Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold.
-# Useful for validating instrument files where the sample is iTRAQ or TMT labeled and it is important to detect the reporter ions in the MS/MS spectra. 
+# When true, if an error is encountered while reading the file, copy it to the local drive and try again
+# CopyFileLocalOnReadError=False
+
+# If supplied, specifies a minimum m/z value that all MS/MS spectra should have
+# Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold
+# Useful for validating instrument files where the sample is iTRAQ or TMT labeled and it is important to detect the reporter ions in the MS/MS spectra
 #   - select the default iTRAQ m/z (113) using /MS2MzMin:iTRAQ
 #   - select the default TMT m/z (126) using /MS2MzMin:TMT
 #   - specify a m/z value using /MS2MzMin:110
 MS2MzMin=
 
-# If supplied, disables creating a SHA-1 hash for the primary instrument data file(s).
-DisableInstrumentHash=False
+# If supplied, disables creating a SHA-1 hash for the primary instrument data file(s)
+# DisableInstrumentHash=False
 
-# If supplied, update (or create) a tab-delimited text file with overview stats for the dataset.
-# If /DI is used, will include detailed scan counts; otherwise, will just have the dataset name, acquisition date, and (if available) sample name and comment.
+# If supplied, update (or create) a tab-delimited text file with overview stats for the dataset
+# If /DI is used (or CreateDatasetInfoFile=True), will include detailed scan counts; otherwise, will just have the dataset name, acquisition date, and (if available) sample name and comment
 # By default, the file is named MSFileInfo_DatasetStats.txt; to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt
 # DatasetStatsTextFileName=
 
-# Use to limit the scan range to process; useful for files where the first few scans are corrupt.
+# Use to limit the scan range to process; this is useful for files where the first few scans are corrupt
 # For example, to start processing at scan 10, use /ScanStart:10
-ScanStart=0
+# The equivalent notation in a parameter file is ScanStart=10
+# ScanStart=0
 
-# Use to limit the scan range to process; useful for files where the first few scans are corrupt.
-# For example, to start processing at scan 10, use /ScanStart:10
-ScanEnd=0
+# Use to limit the scan range to process; this is useful for processing just part of a file for speed purposes
+# For example, to end processing at scan 1000, use /ScanEnd:1000
+# ScanEnd=0
 
-# If supplied, display debug information at the console, including showing the scan number prior to reading each scan's data.
-# Also, when /Debug is enabled, temporary files for creating plots with Python will not be deleted.
-ShowDebugInfo=False
+# If supplied, display debug information at the console, including showing the scan number prior to reading each scan's data
+# Also, when /Debug is enabled, temporary files for creating plots with Python will not be deleted
+# ShowDebugInfo=False
 
-# Use to perform an integrity check on all known file types; this process will open known file types and verify that they contain the expected data.
-# This option is only used if you specify an Input Directory and use a wildcard; you will typically also want to use /S when using /C.
-CheckFileIntegrity=False
+# Use to perform an integrity check on all known file types; this process will open known file types and verify that they contain the expected data
+# This option is only used if you specify an Input Directory and use a wildcard; you will typically also want to use /S when using /C
+# CheckFileIntegrity=False
 
-# Use to define the maximum number of lines to process when checking text or csv files.
-MaximumTextFileLinesToCheck=500
+# Maximum number of lines to process when checking text or csv files
+# MaximumTextFileLinesToCheck=500
 
-# If supplied, compute SHA-1 file hashes when verifying file integrity.
-ComputeFileHashes=False
+# Maximum number of XML nodes to examine when checking XML files
+# MaximumXMLElementNodesToCheck=500
 
-# If supplied, run a quick zip-file validation test when verifying file integrity (the test does not check all data in the .Zip file).
-ZipFileCheckAllData=True
+# If supplied, compute SHA-1 file hashes when verifying file integrity
+# ComputeFileHashes=False
 
-# If supplied, save/load information from the acquisition time file (cache file).
-# This option is auto-enabled if you use /C.
-UseCacheFiles=False
+# If supplied, run a quick zip-file validation test when verifying file integrity
+# (the test does not check all data in the .Zip file)
+# ZipFileCheckAllData=True
 
-# If supplied, reprocess files that are already defined in the acquisition time file.
-ReprocessExistingFiles=False
+# If supplied, save/load information from the acquisition time file (cache file)
+# This option is auto-enabled if you use /C
+# UseCacheFiles=False
 
-# If supplied, reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes.
-ReprocessIfCachedSizeIsZero=False
+# If supplied, reprocess files that are already defined in the acquisition time file
+# ReprocessExistingFiles=False
 
-# If supplied, store the dataset info in the DMS database.
-# To customize the server name and/or stored procedure to use for posting, use an XML parameter file with settings DSInfoConnectionString, DSInfoDBPostingEnabled, and DSInfoStoredProcedure
-PostResultsToDMS=False
+# If supplied, reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes
+# ReprocessIfCachedSizeIsZero=False
 
-# If supplied, create plots with Python instead of OxyPlot
+# If supplied, create plots with Python script MSFileInfoScanner_Plotter.py instead of OxyPlot
 PythonPlot=True
+
+# Secondary arguments are shown above with their default value, but commented out using #
+# Enable and customize them by removing # from the start of the Key=Value line
