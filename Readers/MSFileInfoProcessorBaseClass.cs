@@ -1327,6 +1327,11 @@ namespace MSFileInfoScanner.Readers
 
             try
             {
+                if (string.IsNullOrWhiteSpace(datasetStatsFilename))
+                {
+                    datasetStatsFilename = InfoScannerOptions.DEFAULT_DATASET_STATS_FILENAME;
+                }
+
                 var datasetName = GetDatasetNameViaPath(inputFileName);
 
                 var datasetStatsFilePath = Path.Combine(outputDirectoryPath, datasetStatsFilename);
