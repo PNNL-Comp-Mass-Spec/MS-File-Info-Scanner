@@ -72,6 +72,8 @@ Use `/S` to process all valid files in the input directory and subdirectories
 * Use `/IE` to ignore errors when recursing
 
 Use `/L` to specify the file path for logging messages
+* For example, `/L:InfoScannerLog.txt`
+* Alternatively, define `LogMessagesToFile=True` in a key/value parameter file and optionally define the log file name using `LogFilePath=FilePath.txt`
 
 Use `/LC` to create 2D LCMS plots (this process could take several minutes for each dataset)
 * By default, plots the top 200000 points
