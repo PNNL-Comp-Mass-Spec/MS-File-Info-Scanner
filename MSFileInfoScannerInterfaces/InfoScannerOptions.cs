@@ -135,7 +135,7 @@ namespace MSFileInfoScannerInterfaces
         public float LCMSPlotMzResolution { get; set; } = LCMSDataPlotterOptions.DEFAULT_MZ_RESOLUTION;
 
         /// <summary>
-        /// Minimum points per spectrum
+        /// Minimum points per spectrum for inclusion on LC/MS 2D plots
         /// </summary>
         /// <remarks>
         /// This value cannot be updated via the Options class after MSFileInfoScanner is instantiated
@@ -161,7 +161,7 @@ namespace MSFileInfoScannerInterfaces
         public int LCMSPlotMaxPointsToPlot { get; set; } = LCMSDataPlotterOptions.DEFAULT_MAX_POINTS_TO_PLOT;
 
         /// <summary>
-        /// Minimum intensity of data added to LC/MS 2D plots
+        /// Minimum intensity to require for each mass spectrum data point when adding data to LC/MS 2D plots
         /// </summary>
         /// <remarks>
         /// This value cannot be updated via the Options class after MSFileInfoScanner is instantiated

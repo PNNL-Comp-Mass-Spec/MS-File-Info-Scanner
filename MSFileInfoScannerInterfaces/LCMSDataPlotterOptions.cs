@@ -76,7 +76,7 @@ namespace MSFileInfoScannerInterfaces
         }
 
         /// <summary>
-        /// Minimum points per spectrum
+        /// Minimum points per spectrum for inclusion on LC/MS 2D plots
         /// </summary>
         public int MinPointsPerSpectrum
         {
@@ -136,7 +136,7 @@ namespace MSFileInfoScannerInterfaces
         }
 
         /// <summary>
-        /// Minimum intensity of data added to LC/MS 2D plots
+        /// Minimum intensity to require for each mass spectrum data point when adding data to LC/MS 2D plots
         /// </summary>
         public float MinIntensity
         {

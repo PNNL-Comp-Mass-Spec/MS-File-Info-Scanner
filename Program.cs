@@ -160,7 +160,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                ShowErrorMessage("Error occurred in modMain->Main", ex);
+                ShowErrorMessage("Error occurred in Program->Main", ex);
                 return -1;
             }
         }
