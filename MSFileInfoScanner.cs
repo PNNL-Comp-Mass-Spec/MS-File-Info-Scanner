@@ -41,7 +41,7 @@ namespace MSFileInfoScanner
     {
         // Ignore Spelling: OxyPlot, yyyy-MM-dd, hh:mm:ss tt, centroiding, utf, idx, xtr, Shimadzu
 
-        public const string PROGRAM_DATE = "December 7, 2020";
+        public const string PROGRAM_DATE = "December 31, 2020";
 
         /// <summary>
         /// Constructor
@@ -123,6 +123,8 @@ namespace MSFileInfoScanner
         private string mFileIntegrityDetailsFilePath;
 
         private string mFileIntegrityErrorsFilePath;
+
+        private string mLastNotifiedLogFilePath = string.Empty;
 
         /// <summary>
         /// Log file path
@@ -581,6 +583,32 @@ namespace MSFileInfoScanner
                     }
 
                     var openingExistingFile = File.Exists(mLogFilePath);
+
+                    if (!mLastNotifiedLogFilePath.Equals(mLogFilePath))
+                    {
+                        string logFilePathToShow;
+                        if (Options.ShowDebugInfo)
+                        {
+                            var logFileInfo = new FileInfo(mLogFilePath);
+                            logFilePathToShow = logFileInfo.FullName;
+                        }
+                        else
+                        {
+                            logFilePathToShow = mLogFilePath;
+                        }
+
+                        if (openingExistingFile)
+                        {
+                            OnStatusEvent("Appending to log file " + logFilePathToShow);
+                        }
+                        else
+                        {
+                            OnStatusEvent("Creating log file " + logFilePathToShow);
+                        }
+
+                        Console.WriteLine();
+                        mLastNotifiedLogFilePath = mLogFilePath;
+                    }
 
                     mLogFile = new StreamWriter(new FileStream(mLogFilePath, FileMode.Append, FileAccess.Write, FileShare.Read))
                     {
