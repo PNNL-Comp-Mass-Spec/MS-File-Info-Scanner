@@ -25,6 +25,7 @@ rem clsDeconToolsIsosInfoScanner.cs
 rem clsFinniganRawFileInfoScanner.cs
 ..\bin\MSFileInfoScanner.exe TestData\Thermo\LCA_FS_PE_pool_13_Orbi_21Nov13_Tiger_13-07-36.raw             /python /SS /DI /2D /CC /O:TestData_Results2\Thermo\ThermoLCA
 ..\bin\MSFileInfoScanner.exe TestData\Thermo\Mini_proteome_CytochromeC02-LCQ-1_22Oct04_Earth_0904-7.RAW    /python /SS /DI /2D /CC /O:TestData_Results2\Thermo\ThermoLCQ
+..\bin\MSFileInfoScanner.exe \\proto-3\QEHFX02\2020_1\QC_Mam_19_01_rep04_21Feb20_Remus_WBEH-20-02-05\QC_Mam_19_01_rep04_21Feb20_Remus_WBEH-20-02-05.raw     /python /SS /DI /2D /CC /O:TestData_Results2\Thermo\ThermoQEHFX
 ..\bin\MSFileInfoScanner.exe TestData\Thermo\QC_04_1_04Nov04_Pegasus_0804-4_LT-only.RAW                    /python /SS /DI /2D /CC /O:TestData_Results2\Thermo\ThermoLTQFT_LTOnly
 ..\bin\MSFileInfoScanner.exe TestData\Thermo\Sdata_Exp5NQ_PRISM_F21_03Apr17_Smeagol.raw                    /python /SS /DI /2D /CC /O:TestData_Results2\Thermo\ThermoMRM
 ..\bin\MSFileInfoScanner.exe TestData\Thermo\Angiotensin_AllScans.raw                                      /python /ss /di /2D /CC /o:TestData_Results2\Thermo\Angiotensin_AllScans
@@ -35,7 +36,8 @@ rem clsFinniganRawFileInfoScanner.cs
 ..\bin\MSFileInfoScanner.exe \\proto-3\QExactP04\2018_2\EPICON_year1_iTRAQ21_11_prot_QE_Bane_13Apr18_18-03-01\EPICON_year1_iTRAQ21_11_prot_QE_Bane_13Apr18_18-03-01.raw           /python /ms2mzmin:113 /SS /DI /2D /CC /O:TestData_Results2\Thermo\ThermoITraqGood
 ..\bin\MSFileInfoScanner.exe \\proto-11\Lumos02\2018_2\15CPTAC_UCEC_P_PNNL_20180503_B4S3_f11_REP-17-12-06\15CPTAC_UCEC_P_PNNL_20180503_B4S3_f11_REP-17-12-06.raw                  /python /ms2mzmin:126 /SS /DI /2D /CC /O:TestData_Results2\Thermo\ThermoTMT
 
-rem Future: QC_Shew_18_02_Excerpt.mzML
+rem Future:
+rem ..\bin\MSFileInfoScanner.exe TestData\Thermo\QC_Shew_18_02_Excerpt.mzML                                    /python /SS /DI /2D /CC /O:TestData_Results2\Thermo\ThermoQExactive_mzML
 
 rem clsMicromassRawFolderInfoScanner.cs
 ..\bin\MSFileInfoScanner.exe TestData\Waters_QTOF\FL_050903_QC_05_2_MMQTOF_c4_r11\FL_050903_QC_05_2_MMQTOF_c4_r11.raw     /python /SS /DI /2D /CC /O:TestData_Results2\Waters_QTOF
