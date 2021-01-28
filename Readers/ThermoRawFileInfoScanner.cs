@@ -493,7 +493,13 @@ namespace MSFileInfoScanner.Readers
             AddThermoDevices(xcaliburAccessor, datasetFileInfo, deviceFilterList, new SortedSet<Device>());
 
             // Now add any non-mass spec devices
-            AddThermoDevices(xcaliburAccessor, datasetFileInfo, new SortedSet<Device>(), deviceFilterList);
+            var deviceSkipList = new SortedSet<Device> {
+                Device.MS,
+                Device.MSAnalog,
+                Device.None             // Skip devices of type "None"; for example, see dataset 20200122_rmi049_SPZ_01_FAIMS_m40_CD
+            };
+
+            AddThermoDevices(xcaliburAccessor, datasetFileInfo, new SortedSet<Device>(), deviceSkipList);
 
             if (Options.SaveTICAndBPIPlots && datasetFileInfo.DeviceList.Count > 0)
             {
