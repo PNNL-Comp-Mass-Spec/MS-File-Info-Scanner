@@ -316,7 +316,7 @@ namespace MSFileInfoScannerInterfaces
             Min = 0)]
         public int ScanStart { get; set; }
 
-        [Option("ScanEnd", "End",
+        [Option("ScanEnd", "End", "ScanStop", "Stop",
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "Use to limit the scan range to process; this is useful for processing just part of a file for speed purposes\n" +
                        "For example, to end processing at scan 1000, use /ScanEnd:1000",
