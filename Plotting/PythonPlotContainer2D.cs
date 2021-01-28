@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using OxyPlot;
 
 namespace MSFileInfoScanner.Plotting
@@ -46,7 +47,7 @@ namespace MSFileInfoScanner.Plotting
 
             try
             {
-                using (var writer = new StreamWriter(new FileStream(exportFile.FullName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)))
+                using (var writer = new StreamWriter(new FileStream(exportFile.FullName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite), Encoding.UTF8))
                 {
                     // Plot options: set of square brackets with semicolon separated key/value pairs
                     writer.WriteLine("[" + GetPlotOptions() + "]");
