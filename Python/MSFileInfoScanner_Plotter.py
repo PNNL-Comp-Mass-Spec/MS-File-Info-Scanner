@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import matplotlib.colors as mpColors
 import os
+import sys
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -19,46 +20,59 @@ from pprint import pprint
 # Website: http:#omics.pnl.gov/ or http:#www.sysbio.org/resources/staff/ or http:#panomics.pnnl.gov/
 # -------------------------------------------------------------------------------
 
+# When this script is invoked from C#, if text sent to print() has unicode characters, an error occurs
+# For example, for the micron symbol, we see:
+#   UnicodeEncodeError: 'charmap' codec can't encode character '\u03bc' in position 45: character maps to <undefined>
+
+# To fix this, we can either force the stdout and stderr encoding to utf-8, like this:
+#   import codecs
+#   if sys.stdout.encoding != 'UTF-8':
+#     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+#   if sys.stderr.encoding != 'UTF-8':
+#     sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
+# Or we can use the uprint function shown below
+
 # Update the default font
 plt.rcParams['font.family'] = ['Arial', 'FreeSans', 'DejaVu Sans']
                                
 def process_file(dataFilePath):
     dataFile = Path(dataFilePath)
     if not dataFile.is_file():
-        print('\nError, file not found: ' + dataFilePath)
+        uprint('\nError, file not found: ' + dataFilePath)
         return
 
-    print('Input: ', dataFile)
+    uprint('Input: ', dataFile)
     data, plotLabels, columnOptions = read_file(dataFile)
 
     outputFilePath = str(dataFile.with_suffix('.png'))
 
     if len(data.columns) == 2:
         # 2D Plot
-        print('Output:', outputFilePath)
+        uprint('Output:', outputFilePath)
         print()
-        print('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '"')
-        print("  {:,}".format(len(data.index)) + ' data points')
+        uprint('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '"')
+        uprint("  {:,}".format(len(data.index)) + ' data points')
         print()
         plot_lc_intensity(outputFilePath, data.columns, data[data.columns[0]], data[data.columns[1]], plotLabels['Title'], plotLabels['BottomRight'])
         return
 
     if len(data.columns) == 3:
         # 3D Plot
-        print('Output:', outputFilePath)
+        uprint('Output:', outputFilePath)
         print()
-        print('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '" vs. "' + data.columns[2] + '"')
-        print("  {:,}".format(len(data.index)) + ' data points')
+        uprint('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '" vs. "' + data.columns[2] + '"')
+        uprint("  {:,}".format(len(data.index)) + ' data points')
         print()
         plot_lc_mz(outputFilePath, data.columns, data[data.columns[0]], data[data.columns[1]], data[data.columns[2]], plotLabels['Title'], plotLabels['BottomRight'], plotLabels['BottomLeft'])
         return
 
     if len(data.columns) == 4:
         # 3D Plot, with a custom color for each data point
-        print('Output:', outputFilePath)
+        uprint('Output:', outputFilePath)
         print()
-        print('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '" vs. "' + data.columns[2] + '" coloring by ' + data.columns[3])
-        print("  {:,}".format(len(data.index)) + ' data points')
+        uprint('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '" vs. "' + data.columns[2] + '" coloring by ' + data.columns[3])
+        uprint("  {:,}".format(len(data.index)) + ' data points')
         print()
         plot_lc_mz_by_charge(outputFilePath, data.columns, data[data.columns[0]], data[data.columns[1]], data[data.columns[2]], data[data.columns[3]], plotLabels['Title'], plotLabels['BottomRight'], plotLabels['BottomLeft'])
         return
@@ -71,7 +85,7 @@ def parse_metadata(plotOption):
 
 def read_file(fpath):
     data = pd.read_csv(fpath, sep='\t', skiprows=2, header=0)
-    with open(fpath, 'r') as f:
+    with open(fpath, 'r', encoding="utf-8") as f:
         # The first line has the plot title and axis labels
         plotLabelData = f.readline().split('[')[1].split(']')[0]
         plotLabels = parse_metadata(plotLabelData)
@@ -334,7 +348,15 @@ def plot_lc_mz_by_charge(outputFilePath, columnNames, lc_scan_num, mz, intensiti
     plt.savefig(outputFilePath)
     print('3D plot (colored by charge) created')
 
-import sys
+def uprint(*objects, sep=' ', end='\n', file=sys.stdout):
+    enc = file.encoding
+    
+    if enc.lower() == 'utf-8':
+        print(*objects, sep=sep, end=end, file=file)
+    else:
+        f = lambda obj: str(obj).encode(enc, errors='backslashreplace').decode(enc)
+        print(*map(f, objects), sep=sep, end=end, file=file)
+
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
