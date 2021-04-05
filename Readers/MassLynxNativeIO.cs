@@ -518,18 +518,6 @@ namespace MSFileInfoScanner.Readers
             return true;
         }
 
-        private RawFunctionDescriptorRecord GetNewNativeFunctionInfo()
-        {
-            var nativeFunctionInfo = new RawFunctionDescriptorRecord
-            {
-                SegmentScanTimes = new int[32],
-                SegmentStartMasses = new int[32],
-                SegmentEndMasses = new int[32]
-            };
-
-            return nativeFunctionInfo;
-        }
-
         /// <summary>
         /// Return true if the function has MS/MS data
         /// </summary>
@@ -915,64 +903,64 @@ namespace MSFileInfoScanner.Readers
                 var functionsFilePath = Path.Combine(dataDirPath, "_functns.inf");
                 var functionsFile = new FileInfo(functionsFilePath);
 
-                int functionCount;
-
                 if (!functionsFile.Exists)
                 {
                     return false;
                 }
 
-                var nativeFunctionInfo = GetNewNativeFunctionInfo();
+                using var reader = new BinaryReader(new FileStream(functionsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read));
 
-                using (var reader = new BinaryReader(new FileStream(functionsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                var functionCount = (int)(functionsFile.Length / RawFunctionDescriptorRecord.NATIVE_FUNCTION_INFO_SIZE_BYTES);
+
+                if (msFunctionInfo.FunctionNumber < 1 || msFunctionInfo.FunctionNumber > functionCount)
                 {
-                    functionCount = (int)(functionsFile.Length / RawFunctionDescriptorRecord.NATIVE_FUNCTION_INFO_SIZE_BYTES);
+                    return false;
+                }
 
-                    if (msFunctionInfo.FunctionNumber < 1 || msFunctionInfo.FunctionNumber > functionCount)
-                    {
-                        return false;
-                    }
+                // Since we're using Binary Access, we need to specify the Byte Offset to start reading at
+                // The first byte is 1, and that is where Function 1 can be found
+                // Function 2 can be found NATIVE_FUNCTION_INFO_SIZE_BYTES+1 bytes into the file
 
-                    // Since we're using Binary Access, we need to specify the Byte Offset to start reading at
-                    // The first byte is 1, and that is where Function 1 can be found
-                    // Function 2 can be found NATIVE_FUNCTION_INFO_SIZE_BYTES+1 bytes into the file
+                reader.BaseStream.Seek((msFunctionInfo.FunctionNumber - 1) * RawFunctionDescriptorRecord.NATIVE_FUNCTION_INFO_SIZE_BYTES, SeekOrigin.Begin);
 
-                    reader.BaseStream.Seek((msFunctionInfo.FunctionNumber - 1) * RawFunctionDescriptorRecord.NATIVE_FUNCTION_INFO_SIZE_BYTES,
-                                             SeekOrigin.Begin);
-
-                    nativeFunctionInfo.PackedFunctionInfo = reader.ReadInt16();
-                    nativeFunctionInfo.CycleTime = reader.ReadSingle();
-                    nativeFunctionInfo.InterScanDelay = reader.ReadSingle();
-                    nativeFunctionInfo.StartRT = reader.ReadSingle();
-                    nativeFunctionInfo.EndRT = reader.ReadSingle();
-                    nativeFunctionInfo.ScanCount = reader.ReadInt32();
+                var nativeFunctionInfo = new RawFunctionDescriptorRecord
+                {
+                    SegmentScanTimes = new int[32],
+                    SegmentStartMasses = new int[32],
+                    SegmentEndMasses = new int[32],
+                    PackedFunctionInfo = reader.ReadInt16(),
+                    CycleTime = reader.ReadSingle(),
+                    InterScanDelay = reader.ReadSingle(),
+                    StartRT = reader.ReadSingle(),
+                    EndRT = reader.ReadSingle(),
+                    ScanCount = reader.ReadInt32(),
 
                     // Packed MS/MS Info:
                     //   bits 0-7: collision energy
                     //   bits 8-15: segment/channel count
-                    nativeFunctionInfo.PackedMSMSInfo = reader.ReadInt16();
+                    PackedMSMSInfo = reader.ReadInt16(),
 
-                    // The following are more MS/MS parameters
-                    nativeFunctionInfo.FunctionSetMass = reader.ReadSingle();
-                    nativeFunctionInfo.InterSegmentChannelTime = reader.ReadSingle();
+                    // Additional MS/MS parameters
+                    FunctionSetMass = reader.ReadSingle(),
+                    InterSegmentChannelTime = reader.ReadSingle()
+                };
 
-                    // Up to 32 segment scans can be conducted for a MS/MS run
-                    // The following three arrays store the segment times, start, and end masses
-                    for (var index = 0; index <= 31; index++)
-                    {
-                        nativeFunctionInfo.SegmentScanTimes[index] = reader.ReadInt32();
-                    }
-                    for (var index = 0; index <= 31; index++)
-                    {
-                        nativeFunctionInfo.SegmentStartMasses[index] = reader.ReadInt32();
-                    }
-                    for (var index = 0; index <= 31; index++)
-                    {
-                        nativeFunctionInfo.SegmentEndMasses[index] = reader.ReadInt32();
-                    }
-                } // end using
+                // Up to 32 segment scans can be conducted for a MS/MS run
+                // The following three arrays store the segment times, start, and end masses
+                for (var index = 0; index <= 31; index++)
+                {
+                    nativeFunctionInfo.SegmentScanTimes[index] = reader.ReadInt32();
+                }
 
-                var success = true;
+                for (var index = 0; index <= 31; index++)
+                {
+                    nativeFunctionInfo.SegmentStartMasses[index] = reader.ReadInt32();
+                }
+
+                for (var index = 0; index <= 31; index++)
+                {
+                    nativeFunctionInfo.SegmentEndMasses[index] = reader.ReadInt32();
+                }
 
                 if (nativeFunctionInfo.PackedFunctionInfo == 0 &&
                     Math.Abs(nativeFunctionInfo.CycleTime) < float.Epsilon &&
@@ -982,109 +970,111 @@ namespace MSFileInfoScanner.Readers
                     if (File.Exists(Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(functionCount + 1) + ".dat")))
                     {
                         // Nope, file does not exist, function is invalid
-                        success = false;
+                        return false;
                     }
                 }
 
-                if (success)
-                {
-                    // Copy data from nativeFunctionInfo to msFunctionInfo
-                    msFunctionInfo.FunctionTypeID = mRawDataUtils.GetFunctionType(nativeFunctionInfo.PackedFunctionInfo);
+                StoreFunctionInfo(dataDirPath, nativeFunctionInfo, msFunctionInfo);
 
-                    msFunctionInfo.FunctionType = 0;
-                    switch (msFunctionInfo.FunctionTypeID)
-                    {
-                        case 0:
-                            msFunctionInfo.FunctionTypeText = "MS";
-                            break;
-                        case 1:
-                            msFunctionInfo.FunctionTypeText = "SIR";
-                            break;
-                        case 2:
-                            msFunctionInfo.FunctionTypeText = "DLY";
-                            break;
-                        case 3:
-                            msFunctionInfo.FunctionTypeText = "CAT";
-                            break;
-                        case 4:
-                            msFunctionInfo.FunctionTypeText = "OFF";
-                            break;
-                        case 5:
-                            msFunctionInfo.FunctionTypeText = "PAR";
-                            break;
-                        case 6:
-                            msFunctionInfo.FunctionTypeText = "DAU";
-                            msFunctionInfo.FunctionType = 1;
-                            break;
-                        case 7:
-                            msFunctionInfo.FunctionTypeText = "NL";
-                            break;
-                        case 8:
-                            msFunctionInfo.FunctionTypeText = "NG";
-                            break;
-                        case 9:
-                            msFunctionInfo.FunctionTypeText = "MRM";
-                            break;
-                        case 10:
-                            msFunctionInfo.FunctionTypeText = "Q1F";
-                            break;
-                        case 11:
-                            msFunctionInfo.FunctionTypeText = "MS2";
-                            msFunctionInfo.FunctionType = 1;
-                            break;
-                        case 12:
-                            msFunctionInfo.FunctionTypeText = "DAD";
-                            break;
-                        case 13:
-                            msFunctionInfo.FunctionTypeText = "TOF";
-                            break;
-                        case 14:
-                            msFunctionInfo.FunctionTypeText = "PSD";
-                            break;
-                        case 16:
-                            msFunctionInfo.FunctionTypeText = "TOF MS/MS";
-                            msFunctionInfo.FunctionType = 1;
-                            break;
-                        case 17:
-                            msFunctionInfo.FunctionTypeText = "TOF MS";
-                            break;
-                        case 18:
-                            msFunctionInfo.FunctionTypeText = "TOF MS";
-                            break;
-                        default:
-                            msFunctionInfo.FunctionTypeText = "MS Unknown";
-                            break;
-                    }
-
-                    msFunctionInfo.IonMode = mRawDataUtils.GetIonMode(nativeFunctionInfo.PackedFunctionInfo);
-                    msFunctionInfo.AcquisitionDataType = mRawDataUtils.GetAcquisitionDataType(nativeFunctionInfo.PackedFunctionInfo);
-
-                    msFunctionInfo.CycleTime = nativeFunctionInfo.CycleTime;
-                    msFunctionInfo.InterScanDelay = nativeFunctionInfo.InterScanDelay;
-                    msFunctionInfo.StartRT = nativeFunctionInfo.StartRT;
-                    msFunctionInfo.EndRT = nativeFunctionInfo.EndRT;
-
-                    msFunctionInfo.MsMsCollisionEnergy = mRawDataUtils.GetMsMsCollisionEnergy(nativeFunctionInfo.PackedMSMSInfo);
-                    msFunctionInfo.MSMSSegmentOrChannelCount = mRawDataUtils.GetMSMSSegmentOrChannelCount(nativeFunctionInfo.PackedMSMSInfo);
-
-                    msFunctionInfo.FunctionSetMass = nativeFunctionInfo.FunctionSetMass;
-                    msFunctionInfo.InterSegmentChannelTime = nativeFunctionInfo.InterSegmentChannelTime;
-
-                    // Since nativeFunctionInfo.ScanCount is always 0, we need to use NativeIOGetScanCount instead
-                    var scanCount = NativeIOGetScanCount(dataDirPath, msFunctionInfo);
-                    if (msFunctionInfo.ScanCount != scanCount)
-                    {
-                        // This is unexpected
-                        Debug.WriteLine("Scan count values do not agree in NativeIOGetFunctionInfo");
-                    }
-                }
-
-                return success;
+                return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOGetFunctionInfo:" + ex.Message);
                 return false;
+            }
+        }
+
+        private void StoreFunctionInfo(string dataDirPath, RawFunctionDescriptorRecord nativeFunctionInfo, MSFunctionInfo msFunctionInfo)
+        {
+            // Copy data from nativeFunctionInfo to msFunctionInfo
+            msFunctionInfo.FunctionTypeID = mRawDataUtils.GetFunctionType(nativeFunctionInfo.PackedFunctionInfo);
+
+            msFunctionInfo.FunctionType = 0;
+            switch (msFunctionInfo.FunctionTypeID)
+            {
+                case 0:
+                    msFunctionInfo.FunctionTypeText = "MS";
+                    break;
+                case 1:
+                    msFunctionInfo.FunctionTypeText = "SIR";
+                    break;
+                case 2:
+                    msFunctionInfo.FunctionTypeText = "DLY";
+                    break;
+                case 3:
+                    msFunctionInfo.FunctionTypeText = "CAT";
+                    break;
+                case 4:
+                    msFunctionInfo.FunctionTypeText = "OFF";
+                    break;
+                case 5:
+                    msFunctionInfo.FunctionTypeText = "PAR";
+                    break;
+                case 6:
+                    msFunctionInfo.FunctionTypeText = "DAU";
+                    msFunctionInfo.FunctionType = 1;
+                    break;
+                case 7:
+                    msFunctionInfo.FunctionTypeText = "NL";
+                    break;
+                case 8:
+                    msFunctionInfo.FunctionTypeText = "NG";
+                    break;
+                case 9:
+                    msFunctionInfo.FunctionTypeText = "MRM";
+                    break;
+                case 10:
+                    msFunctionInfo.FunctionTypeText = "Q1F";
+                    break;
+                case 11:
+                    msFunctionInfo.FunctionTypeText = "MS2";
+                    msFunctionInfo.FunctionType = 1;
+                    break;
+                case 12:
+                    msFunctionInfo.FunctionTypeText = "DAD";
+                    break;
+                case 13:
+                    msFunctionInfo.FunctionTypeText = "TOF";
+                    break;
+                case 14:
+                    msFunctionInfo.FunctionTypeText = "PSD";
+                    break;
+                case 16:
+                    msFunctionInfo.FunctionTypeText = "TOF MS/MS";
+                    msFunctionInfo.FunctionType = 1;
+                    break;
+                case 17:
+                    msFunctionInfo.FunctionTypeText = "TOF MS";
+                    break;
+                case 18:
+                    msFunctionInfo.FunctionTypeText = "TOF MS";
+                    break;
+                default:
+                    msFunctionInfo.FunctionTypeText = "MS Unknown";
+                    break;
+            }
+
+            msFunctionInfo.IonMode = mRawDataUtils.GetIonMode(nativeFunctionInfo.PackedFunctionInfo);
+            msFunctionInfo.AcquisitionDataType = mRawDataUtils.GetAcquisitionDataType(nativeFunctionInfo.PackedFunctionInfo);
+
+            msFunctionInfo.CycleTime = nativeFunctionInfo.CycleTime;
+            msFunctionInfo.InterScanDelay = nativeFunctionInfo.InterScanDelay;
+            msFunctionInfo.StartRT = nativeFunctionInfo.StartRT;
+            msFunctionInfo.EndRT = nativeFunctionInfo.EndRT;
+
+            msFunctionInfo.MsMsCollisionEnergy = mRawDataUtils.GetMsMsCollisionEnergy(nativeFunctionInfo.PackedMSMSInfo);
+            msFunctionInfo.MSMSSegmentOrChannelCount = mRawDataUtils.GetMSMSSegmentOrChannelCount(nativeFunctionInfo.PackedMSMSInfo);
+
+            msFunctionInfo.FunctionSetMass = nativeFunctionInfo.FunctionSetMass;
+            msFunctionInfo.InterSegmentChannelTime = nativeFunctionInfo.InterSegmentChannelTime;
+
+            // Since nativeFunctionInfo.ScanCount is always 0, we need to use NativeIOGetScanCount instead
+            var scanCount = NativeIOGetScanCount(dataDirPath, msFunctionInfo);
+            if (msFunctionInfo.ScanCount != scanCount)
+            {
+                // This is unexpected
+                Debug.WriteLine("Scan count values do not agree in NativeIOGetFunctionInfo");
             }
         }
 
@@ -1172,104 +1162,114 @@ namespace MSFileInfoScanner.Readers
 
                 var numberOfScansInFunction = (int)(indexFile.Length / RawScanIndexRecord.RAW_SCAN_INDEX_RECORD_SIZE);
 
-                using (var reader = new BinaryReader(new FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using var reader = new BinaryReader(new FileStream(indexFilePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                // The ScanCount stored in the function index file is always 0 rather than the correct number of scans
+                // Thus, we can determine the number of scans in the function by dividing the size of the file (in bytes)
+                //  by the size of each RawScanIndexRecord
+
+                if (scanNumber < 1)
+                    scanNumber = 1;
+
+                if (numberOfScansInFunction > 0 && scanNumber <= numberOfScansInFunction)
                 {
-                    // The ScanCount stored in the function index file is always 0 rather than the correct number of scans
-                    // Thus, we can determine the number of scans in the function by dividing the size of the file (in bytes)
-                    //  by the size of each RawScanIndexRecord
+                    // Just read the record for this scan
 
-                    if (scanNumber < 1)
-                        scanNumber = 1;
+                    // Jump to the appropriate file offset based on scanNumber
+                    reader.BaseStream.Seek((scanNumber - 1) * RawScanIndexRecord.RAW_SCAN_INDEX_RECORD_SIZE, SeekOrigin.Begin);
 
-                    if (numberOfScansInFunction > 0 && scanNumber <= numberOfScansInFunction)
+                    if (msFunctionInfo.AcquisitionDataType == 0)
                     {
-                        // Just read the record for this scan
+                        // File saved with Acquisition Data Type 0
 
-                        // Jump to the appropriate file offset based on scanNumber
-                        reader.BaseStream.Seek((scanNumber - 1) * RawScanIndexRecord.RAW_SCAN_INDEX_RECORD_SIZE, SeekOrigin.Begin);
+                        nativeScanIndexRecordCompressedScan.StartScanOffset = reader.ReadInt32();
+                        nativeScanIndexRecordCompressedScan.PackedScanInfo = reader.ReadInt32();
+                        nativeScanIndexRecordCompressedScan.TicValue = reader.ReadSingle();
+                        nativeScanIndexRecordCompressedScan.ScanTime = reader.ReadSingle();
+                        nativeScanIndexRecordCompressedScan.PackedBasePeakInfo = reader.ReadInt32();
+                        nativeScanIndexRecordCompressedScan.Spare = reader.ReadInt16();
 
-                        if (msFunctionInfo.AcquisitionDataType == 0)
-                        {
-                            // File saved with Acquisition Data Type 0
+                        // Copy from nativeScanIndexRecordCompressedScan to nativeScanIndexRecord
+                        nativeScanIndexRecord.StartScanOffset = nativeScanIndexRecordCompressedScan.StartScanOffset;
+                        nativeScanIndexRecord.PackedScanInfo = nativeScanIndexRecordCompressedScan.PackedScanInfo;
 
-                            nativeScanIndexRecordCompressedScan.StartScanOffset = reader.ReadInt32();
-                            nativeScanIndexRecordCompressedScan.PackedScanInfo = reader.ReadInt32();
-                            nativeScanIndexRecordCompressedScan.TicValue = reader.ReadSingle();
-                            nativeScanIndexRecordCompressedScan.ScanTime = reader.ReadSingle();
-                            nativeScanIndexRecordCompressedScan.PackedBasePeakInfo = reader.ReadInt32();
-                            nativeScanIndexRecordCompressedScan.Spare = reader.ReadInt16();
+                        nativeScanIndexRecord.TicValue = nativeScanIndexRecordCompressedScan.TicValue;
+                        nativeScanIndexRecord.ScanTime = nativeScanIndexRecordCompressedScan.ScanTime;
 
-                            // Copy from nativeScanIndexRecordCompressedScan to nativeScanIndexRecord
-                            nativeScanIndexRecord.StartScanOffset = nativeScanIndexRecordCompressedScan.StartScanOffset;
-                            nativeScanIndexRecord.PackedScanInfo = nativeScanIndexRecordCompressedScan.PackedScanInfo;
+                        // Unused
+                        nativeScanIndexRecord.PackedBasePeakIntensity = 0;
 
-                            nativeScanIndexRecord.TicValue = nativeScanIndexRecordCompressedScan.TicValue;
-                            nativeScanIndexRecord.ScanTime = nativeScanIndexRecordCompressedScan.ScanTime;
-
-                            // Unused
-                            nativeScanIndexRecord.PackedBasePeakIntensity = 0;
-
-                            nativeScanIndexRecord.PackedBasePeakInfo = nativeScanIndexRecordCompressedScan.PackedBasePeakInfo;
-                        }
-                        else
-                        {
-                            // File saved with Acquisition Data Type other than 0
-                            nativeScanIndexRecord.StartScanOffset = reader.ReadInt32();
-                            nativeScanIndexRecord.PackedScanInfo = reader.ReadInt32();
-                            nativeScanIndexRecord.TicValue = reader.ReadSingle();
-                            nativeScanIndexRecord.ScanTime = reader.ReadSingle();
-                            nativeScanIndexRecord.PackedBasePeakIntensity = reader.ReadInt16();
-                            nativeScanIndexRecord.PackedBasePeakInfo = reader.ReadInt32();
-                        }
-
-                        success = true;
+                        nativeScanIndexRecord.PackedBasePeakInfo = nativeScanIndexRecordCompressedScan.PackedBasePeakInfo;
                     }
+                    else
+                    {
+                        // File saved with Acquisition Data Type other than 0
+                        nativeScanIndexRecord.StartScanOffset = reader.ReadInt32();
+                        nativeScanIndexRecord.PackedScanInfo = reader.ReadInt32();
+                        nativeScanIndexRecord.TicValue = reader.ReadSingle();
+                        nativeScanIndexRecord.ScanTime = reader.ReadSingle();
+                        nativeScanIndexRecord.PackedBasePeakIntensity = reader.ReadInt16();
+                        nativeScanIndexRecord.PackedBasePeakInfo = reader.ReadInt32();
+                    }
+
+                    success = true;
                 }
 
-                if (success)
+                if (!success)
                 {
-                    scanIndexRecord.StartScanOffset = nativeScanIndexRecord.StartScanOffset;
-
-                    scanIndexRecord.NumSpectralPeaks = mRawDataUtils.GetNumSpectraPeaks(nativeScanIndexRecord.PackedScanInfo);
-
-                    if (!scanOffsetAndPeakCountOnly)
-                    {
-                        // 4194304 = 2^22
-                        scanIndexRecord.SegmentNumber = mRawDataUtils.GetSegmentNumber(nativeScanIndexRecord.PackedScanInfo);
-
-                        scanIndexRecord.UseFollowingContinuum = mRawDataUtils.GetUseFollowingContinuum(nativeScanIndexRecord.PackedScanInfo);
-                        scanIndexRecord.ContinuumDataOverride = mRawDataUtils.GetContinuumDataOverride(nativeScanIndexRecord.PackedScanInfo);
-                        scanIndexRecord.ScanContainsMolecularMasses = mRawDataUtils.GetContainsMolecularMasses(nativeScanIndexRecord.PackedScanInfo);
-                        scanIndexRecord.ScanContainsCalibratedMasses = mRawDataUtils.GetContainsCalibratedMasses(nativeScanIndexRecord.PackedScanInfo);
-                        if (nativeScanIndexRecord.PackedScanInfo != Math.Abs(nativeScanIndexRecord.PackedScanInfo))
-                        {
-                            scanIndexRecord.ScanOverload = true;
-                        }
-
-                        scanIndexRecord.TicValue = nativeScanIndexRecord.TicValue;
-                        scanIndexRecord.ScanTime = nativeScanIndexRecord.ScanTime;
-
-                        scanIndexRecord.BasePeakIntensity = (int)mRawDataUtils.UnpackIntensity(nativeScanIndexRecord.PackedBasePeakIntensity, nativeScanIndexRecord.PackedBasePeakInfo, msFunctionInfo.AcquisitionDataType);
-
-                        scanIndexRecord.BasePeakMass = (float)mRawDataUtils.UnpackMass(nativeScanIndexRecord.PackedBasePeakInfo, msFunctionInfo.AcquisitionDataType, true);
-
-                        // ToDo: May need to calibrate the base peak mass
-                        // scanIndexRecord.BasePeakMass = scanIndexRecord.BasePeakMass;
-
-                        // ToDo: Figure out if this can be read from the FunctionIndex file
-                        scanIndexRecord.LoMass = 0;
-                        scanIndexRecord.HiMass = 0;
-
-                        // This will get populated later
-                        scanIndexRecord.SetMass = 0;
-                    }
+                    return false;
                 }
-                return success;
+
+                StoreScanInfo(nativeScanIndexRecord, scanIndexRecord, msFunctionInfo, scanOffsetAndPeakCountOnly);
+
+                return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOGetScanInfo:" + ex.Message);
                 return false;
+            }
+        }
+
+        private void StoreScanInfo(RawScanIndexRecord nativeScanIndexRecord, ScanIndexRecord scanIndexRecord, MSFunctionInfo msFunctionInfo,
+                                   bool scanOffsetAndPeakCountOnly)
+        {
+            scanIndexRecord.StartScanOffset = nativeScanIndexRecord.StartScanOffset;
+
+            scanIndexRecord.NumSpectralPeaks = mRawDataUtils.GetNumSpectraPeaks(nativeScanIndexRecord.PackedScanInfo);
+
+            if (!scanOffsetAndPeakCountOnly)
+            {
+                // 4194304 = 2^22
+                scanIndexRecord.SegmentNumber = mRawDataUtils.GetSegmentNumber(nativeScanIndexRecord.PackedScanInfo);
+
+                scanIndexRecord.UseFollowingContinuum = mRawDataUtils.GetUseFollowingContinuum(nativeScanIndexRecord.PackedScanInfo);
+                scanIndexRecord.ContinuumDataOverride = mRawDataUtils.GetContinuumDataOverride(nativeScanIndexRecord.PackedScanInfo);
+                scanIndexRecord.ScanContainsMolecularMasses = mRawDataUtils.GetContainsMolecularMasses(nativeScanIndexRecord.PackedScanInfo);
+                scanIndexRecord.ScanContainsCalibratedMasses = mRawDataUtils.GetContainsCalibratedMasses(nativeScanIndexRecord.PackedScanInfo);
+                if (nativeScanIndexRecord.PackedScanInfo != Math.Abs(nativeScanIndexRecord.PackedScanInfo))
+                {
+                    scanIndexRecord.ScanOverload = true;
+                }
+
+                scanIndexRecord.TicValue = nativeScanIndexRecord.TicValue;
+                scanIndexRecord.ScanTime = nativeScanIndexRecord.ScanTime;
+
+                scanIndexRecord.BasePeakIntensity = (int)mRawDataUtils.UnpackIntensity(nativeScanIndexRecord.PackedBasePeakIntensity,
+                    nativeScanIndexRecord.PackedBasePeakInfo, msFunctionInfo.AcquisitionDataType);
+
+                scanIndexRecord.BasePeakMass =
+                    (float)mRawDataUtils.UnpackMass(nativeScanIndexRecord.PackedBasePeakInfo, msFunctionInfo.AcquisitionDataType, true);
+
+                // ToDo: May need to calibrate the base peak mass
+                // scanIndexRecord.BasePeakMass = scanIndexRecord.BasePeakMass;
+
+                // ToDo: Figure out if this can be read from the FunctionIndex file
+                scanIndexRecord.LoMass = 0;
+                scanIndexRecord.HiMass = 0;
+
+                // This will get populated later
+                scanIndexRecord.SetMass = 0;
             }
         }
 
