@@ -240,7 +240,7 @@ namespace MSFileInfoScanner.Readers
             var lastScan = 0;
             var lastScanParseErrors = 0;
 
-            Console.WriteLine("  Reading the _isos.csv file");
+            Console.WriteLine("  Reading the _isos.csv file; caching data with fit < {0:N2}", maxFit);
 
             using var reader = new StreamReader(new FileStream(isosFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
