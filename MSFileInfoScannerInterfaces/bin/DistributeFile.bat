@@ -7,9 +7,9 @@ xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\CodeTest
 xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\CodeTest\bin\Release\" /Y /D
 
 xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\" /Y /D
-xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\AM_Shared\bin\Debug\" /Y /D
-xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\AM_Shared\bin\Mono\" /Y /D
-xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\AM_Shared\bin\Release\" /Y /D
+xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Shared\bin\Debug\" /Y /D
+xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Shared\bin\Mono\" /Y /D
+xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Shared\bin\Release\" /Y /D
 xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\bin\" /Y /D
 xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\bin\Release\" /Y /D
 xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AnalysisManagerTest\bin\Debug\" /Y /D
