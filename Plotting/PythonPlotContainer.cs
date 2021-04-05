@@ -27,6 +27,11 @@ namespace MSFileInfoScanner.Plotting
         /// </summary>
         public static string PythonPath { get; private set; }
 
+        /// <summary>
+        /// Path to MSFileInfoScanner_Plotter.py
+        /// </summary>
+        private string ScriptPath { get; set; } = string.Empty;
+
         public override int SeriesCount => mSeriesCount;
 
         public AxisInfo XAxisInfo { get; }
@@ -60,6 +65,58 @@ namespace MSFileInfoScanner.Plotting
 
             XAxisInfo = new AxisInfo(xAxisTitle);
             YAxisInfo = new AxisInfo(yAxisTitle);
+        }
+
+        /// <summary>
+        /// Find the plotting script file
+        /// </summary>
+        /// <returns>True if the script is found, otherwise false</returns>
+        private bool FindPlottingScript()
+        {
+            const string PYTHON_PLOT_SCRIPT_NAME = "MSFileInfoScanner_Plotter.py";
+
+            var exeDirectoryPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            if (exeDirectoryPath == null)
+            {
+                OnErrorEvent("Unable to determine the path to the directory with the MSFileInfoScanner executable or DLL");
+                return false;
+            }
+
+            var exeDirectory = new DirectoryInfo(exeDirectoryPath);
+
+            var directoriesToCheck = new List<string> {
+                exeDirectory.FullName
+            };
+
+            var directoryInDMSPrograms = Path.Combine(exeDirectory.Root.FullName, @"DMS_Programs\MSFileInfoScanner");
+            directoriesToCheck.Add(directoryInDMSPrograms);
+
+            if (!directoryInDMSPrograms.StartsWith(@"C:\"))
+            {
+                directoriesToCheck.Add(@"C:\DMS_Programs\MSFileInfoScanner");
+            }
+
+            FileInfo pythonScriptFile = null;
+
+            foreach (var directoryPath in directoriesToCheck)
+            {
+                var candidateFile = new FileInfo(Path.Combine(directoryPath, PYTHON_PLOT_SCRIPT_NAME));
+                if (!candidateFile.Exists)
+                    continue;
+
+                pythonScriptFile = candidateFile;
+                break;
+            }
+
+            if (pythonScriptFile == null)
+            {
+                // Script not found in the directory with the executing assembly or in the other standard locations
+                OnErrorEvent("Python plotting script not found: " + Path.Combine(directoriesToCheck[0], PYTHON_PLOT_SCRIPT_NAME));
+                return false;
+            }
+
+            ScriptPath = pythonScriptFile.FullName;
+            return true;
         }
 
         /// <summary>
@@ -135,21 +192,12 @@ namespace MSFileInfoScanner.Plotting
                 return false;
             }
 
-            var exeDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            if (exeDirectory == null)
+            if (string.IsNullOrEmpty(ScriptPath) && !FindPlottingScript())
             {
-                OnErrorEvent("Unable to determine the path to the directory with the MSFileInfoScanner executable");
                 return false;
             }
 
-            var pythonScriptFile = new FileInfo(Path.Combine(exeDirectory, "MSFileInfoScanner_Plotter.py"));
-            if (!pythonScriptFile.Exists)
-            {
-                OnErrorEvent("Python plotting script not found: " + pythonScriptFile.FullName);
-                return false;
-            }
-
-            var args = PathUtils.PossiblyQuotePath(pythonScriptFile.FullName) + " " + PathUtils.PossiblyQuotePath(exportFile.FullName);
+            var args = PathUtils.PossiblyQuotePath(ScriptPath) + " " + PathUtils.PossiblyQuotePath(exportFile.FullName);
 
             OnDebugEvent(string.Format("{0} {1}", PythonPath, args));
 
