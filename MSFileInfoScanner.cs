@@ -183,19 +183,14 @@ namespace MSFileInfoScanner
 
         public string GetDataFileFilename(DataFileTypeConstants dataFileType)
         {
-            switch (dataFileType)
+            return dataFileType switch
             {
-                case DataFileTypeConstants.MSFileInfo:
-                    return mMSFileInfoDataCache.AcquisitionTimeFilePath;
-                case DataFileTypeConstants.DirectoryIntegrityInfo:
-                    return mMSFileInfoDataCache.DirectoryIntegrityInfoFilePath;
-                case DataFileTypeConstants.FileIntegrityDetails:
-                    return mFileIntegrityDetailsFilePath;
-                case DataFileTypeConstants.FileIntegrityErrors:
-                    return mFileIntegrityErrorsFilePath;
-                default:
-                    return string.Empty;
-            }
+                DataFileTypeConstants.MSFileInfo => mMSFileInfoDataCache.AcquisitionTimeFilePath,
+                DataFileTypeConstants.DirectoryIntegrityInfo => mMSFileInfoDataCache.DirectoryIntegrityInfoFilePath,
+                DataFileTypeConstants.FileIntegrityDetails => mFileIntegrityDetailsFilePath,
+                DataFileTypeConstants.FileIntegrityErrors => mFileIntegrityErrorsFilePath,
+                _ => string.Empty
+            };
         }
 
         public void SetDataFileFilename(string filePath, DataFileTypeConstants dataFileType)
@@ -224,19 +219,14 @@ namespace MSFileInfoScanner
 
         public static string DefaultDataFileName(DataFileTypeConstants dataFileType)
         {
-            switch (dataFileType)
+            return dataFileType switch
             {
-                case DataFileTypeConstants.MSFileInfo:
-                    return DEFAULT_ACQUISITION_TIME_FILENAME_TXT;
-                case DataFileTypeConstants.DirectoryIntegrityInfo:
-                    return DEFAULT_DIRECTORY_INTEGRITY_INFO_FILENAME_TXT;
-                case DataFileTypeConstants.FileIntegrityDetails:
-                    return DEFAULT_FILE_INTEGRITY_DETAILS_FILENAME_TXT;
-                case DataFileTypeConstants.FileIntegrityErrors:
-                    return DEFAULT_FILE_INTEGRITY_ERRORS_FILENAME_TXT;
-                default:
-                    return "UnknownFileType.txt";
-            }
+                DataFileTypeConstants.MSFileInfo => DEFAULT_ACQUISITION_TIME_FILENAME_TXT,
+                DataFileTypeConstants.DirectoryIntegrityInfo => DEFAULT_DIRECTORY_INTEGRITY_INFO_FILENAME_TXT,
+                DataFileTypeConstants.FileIntegrityDetails => DEFAULT_FILE_INTEGRITY_DETAILS_FILENAME_TXT,
+                DataFileTypeConstants.FileIntegrityErrors => DEFAULT_FILE_INTEGRITY_ERRORS_FILENAME_TXT,
+                _ => "UnknownFileType.txt"
+            };
         }
 
         /// <summary>
@@ -627,30 +617,19 @@ namespace MSFileInfoScanner
                 }
             }
 
-            if (mLogFile != null)
-            {
-                string messageTypeName;
-                switch (messageType)
-                {
-                    case MessageTypeConstants.Debug:
-                        messageTypeName = "Debug";
-                        break;
-                    case MessageTypeConstants.Normal:
-                        messageTypeName = "Normal";
-                        break;
-                    case MessageTypeConstants.ErrorMsg:
-                        messageTypeName = "Error";
-                        break;
-                    case MessageTypeConstants.Warning:
-                        messageTypeName = "Warning";
-                        break;
-                    default:
-                        messageTypeName = "Unknown";
-                        break;
-                }
+            if (mLogFile == null)
+                return;
 
-                mLogFile.WriteLine(DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") + '\t' + messageTypeName + '\t' + message);
-            }
+            var messageTypeName = messageType switch
+            {
+                MessageTypeConstants.Debug => "Debug",
+                MessageTypeConstants.Normal => "Normal",
+                MessageTypeConstants.ErrorMsg => "Error",
+                MessageTypeConstants.Warning => "Warning",
+                _ => "Unknown"
+            };
+
+            mLogFile.WriteLine(DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") + '\t' + messageTypeName + '\t' + message);
         }
 
         /// <summary>

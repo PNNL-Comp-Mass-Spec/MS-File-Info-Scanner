@@ -200,26 +200,14 @@ namespace MSFileInfoScanner.DatasetStats
                 var storedScanCount = scanCountsByScanTypeKey[scanTypeEntry.Key];
                 var percentOfTotal = storedScanCount / (double)totalStoredScanCount;
 
-                double updatedScanCount;
-
-                switch (basicScanType)
+                var updatedScanCount = basicScanType switch
                 {
-                    case "HMS":
-                        updatedScanCount = ScanCountHMS * percentOfTotal;
-                        break;
-                    case "HMSn":
-                        updatedScanCount = ScanCountHMSn * percentOfTotal;
-                        break;
-                    case "MS":
-                        updatedScanCount = ScanCountMS * percentOfTotal;
-                        break;
-                    case "MSn":
-                        updatedScanCount = ScanCountMSn * percentOfTotal;
-                        break;
-                    default:
-                        updatedScanCount = -1;
-                        break;
-                }
+                    "HMS" => ScanCountHMS * percentOfTotal,
+                    "HMSn" => ScanCountHMSn * percentOfTotal,
+                    "MS" => ScanCountMS * percentOfTotal,
+                    "MSn" => ScanCountMSn * percentOfTotal,
+                    _ => -1
+                };
 
                 if (updatedScanCount < 0)
                     continue;
