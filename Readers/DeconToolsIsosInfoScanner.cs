@@ -242,73 +242,67 @@ namespace MSFileInfoScanner.Readers
 
             Console.WriteLine("  Reading the _isos.csv file");
 
-            using (var reader = new StreamReader(new FileStream(isosFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            using var reader = new StreamReader(new FileStream(isosFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+            while (!reader.EndOfStream)
             {
-                while (!reader.EndOfStream)
+                rowNumber++;
+                var dataLine = reader.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(dataLine))
+                    continue;
+
+                var dataColumns = dataLine.Split(',').ToList();
+
+                if (rowNumber == 1)
                 {
-                    rowNumber++;
-                    var dataLine = reader.ReadLine();
+                    // Parse the header row
+                    ParseColumnHeaders(columnMapping, dataColumns, "_isos.csv");
 
-                    if (string.IsNullOrWhiteSpace(dataLine))
-                        continue;
+                    colIndexScanOrFrameNum = GetScanOrFrameColIndex(dataColumns, "_isos.csv");
 
-                    var dataColumns = dataLine.Split(',').ToList();
+                    continue;
+                }
 
-                    if (rowNumber == 1)
+                var parseError = false;
+                var currentScan = 0;
+
+                try
+                {
+                    var isosItem = new IsosDataType();
+                    int.TryParse(dataColumns[colIndexScanOrFrameNum], out isosItem.Scan);
+                    currentScan = isosItem.Scan;
+
+                    byte.TryParse(dataColumns[columnMapping["charge"]], out isosItem.Charge);
+                    double.TryParse(dataColumns[columnMapping["abundance"]], out isosItem.Abundance);
+                    double.TryParse(dataColumns[columnMapping["mz"]], out isosItem.MZ);
+                    float.TryParse(dataColumns[columnMapping["fit"]], out isosItem.Fit);
+                    double.TryParse(dataColumns[columnMapping["monoisotopic_mw"]], out isosItem.MonoMass);
+
+                    if (isosItem.Fit <= maxFit)
                     {
-                        // Parse the header row
-                        ParseColumnHeaders(columnMapping, dataColumns, "_isos.csv");
+                        isosData.Add(isosItem);
+                    }
+                }
+                catch (Exception)
+                {
+                    parseError = true;
+                }
 
-                        colIndexScanOrFrameNum = GetScanOrFrameColIndex(dataColumns, "_isos.csv");
-
-                        continue;
+                if (currentScan > lastScan)
+                {
+                    if (lastScanParseErrors > 0)
+                    {
+                        OnWarningEvent("Warning: Skipped " + lastScanParseErrors + " data points in scan " + lastScan + " due to data conversion errors");
                     }
 
-                    var parseError = false;
-                    var currentScan = 0;
+                    lastScan = currentScan;
+                    lastScanParseErrors = 0;
+                }
 
-                    try
-                    {
-                        var isosItem = new IsosDataType();
-                        int.TryParse(dataColumns[colIndexScanOrFrameNum], out isosItem.Scan);
-                        currentScan = isosItem.Scan;
-
-                        byte.TryParse(dataColumns[columnMapping["charge"]], out isosItem.Charge);
-                        double.TryParse(dataColumns[columnMapping["abundance"]], out isosItem.Abundance);
-                        double.TryParse(dataColumns[columnMapping["mz"]], out isosItem.MZ);
-                        float.TryParse(dataColumns[columnMapping["fit"]], out isosItem.Fit);
-                        double.TryParse(dataColumns[columnMapping["monoisotopic_mw"]], out isosItem.MonoMass);
-
-                        if (isosItem.Charge > 1)
-                        {
-                            //Console.WriteLine("Found it")
-                        }
-
-                        if (isosItem.Fit <= maxFit)
-                        {
-                            isosData.Add(isosItem);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        parseError = true;
-                    }
-
-                    if (currentScan > lastScan)
-                    {
-                        if (lastScanParseErrors > 0)
-                        {
-                            OnWarningEvent("Warning: Skipped " + lastScanParseErrors + " data points in scan " + lastScan + " due to data conversion errors");
-                        }
-
-                        lastScan = currentScan;
-                        lastScanParseErrors = 0;
-                    }
-
-                    if (parseError)
-                    {
-                        lastScanParseErrors++;
-                    }
+                if (parseError)
+                {
+                    lastScanParseErrors++;
                 }
             }
 
@@ -351,107 +345,106 @@ namespace MSFileInfoScanner.Readers
 
             Console.WriteLine("  Reading the _scans.csv file");
 
-            using (var reader = new StreamReader(new FileStream(scansFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            using var reader = new StreamReader(new FileStream(scansFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+            while (!reader.EndOfStream)
             {
-                while (!reader.EndOfStream)
+                rowNumber++;
+                var dataLine = reader.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(dataLine))
+                    continue;
+
+                var dataColumns = dataLine.Split(',').ToList();
+
+                if (rowNumber == 1)
                 {
-                    rowNumber++;
-                    var dataLine = reader.ReadLine();
+                    // Parse the header row
+                    ParseColumnHeaders(columnMapping, dataColumns, "_scans.csv");
 
-                    if (string.IsNullOrWhiteSpace(dataLine))
-                        continue;
+                    colIndexScanOrFrameNum = GetScanOrFrameColIndex(dataColumns, "_scans.csv");
 
-                    var dataColumns = dataLine.Split(',').ToList();
-
-                    if (rowNumber == 1)
+                    colIndexScanOrFrameTime = dataColumns.IndexOf("frame_time");
+                    if (colIndexScanOrFrameTime < 0)
                     {
-                        // Parse the header row
-                        ParseColumnHeaders(columnMapping, dataColumns, "_scans.csv");
-
-                        colIndexScanOrFrameNum = GetScanOrFrameColIndex(dataColumns, "_scans.csv");
-
-                        colIndexScanOrFrameTime = dataColumns.IndexOf("frame_time");
-                        if (colIndexScanOrFrameTime < 0)
-                        {
-                            colIndexScanOrFrameTime = dataColumns.IndexOf("scan_time");
-                        }
-
-                        // The info column will have data of the form "FTMS + p NSI Full ms [400.00-2000.00]" for Thermo datasets
-                        // For .mzXML files, this fill will simply have an integer (and thus isn't useful)
-                        // It may not be present in older _scans.csv files and is thus optional
-                        colIndexScanInfo = dataColumns.IndexOf("info");
-
-                        continue;
+                        colIndexScanOrFrameTime = dataColumns.IndexOf("scan_time");
                     }
 
-                    try
+                    // The info column will have data of the form "FTMS + p NSI Full ms [400.00-2000.00]" for Thermo datasets
+                    // For .mzXML files, this fill will simply have an integer (and thus isn't useful)
+                    // It may not be present in older _scans.csv files and is thus optional
+                    colIndexScanInfo = dataColumns.IndexOf("info");
+
+                    continue;
+                }
+
+                try
+                {
+                    var scanData = new ScansDataType();
+
+                    int.TryParse(dataColumns[colIndexScanOrFrameNum], out scanData.Scan);
+                    float.TryParse(dataColumns[colIndexScanOrFrameTime], out scanData.ElutionTime);
+                    int.TryParse(dataColumns[columnMapping["type"]], out scanData.MSLevel);
+                    double.TryParse(dataColumns[columnMapping["bpi"]], out scanData.BasePeakIntensity);
+                    double.TryParse(dataColumns[columnMapping["bpi_mz"]], out scanData.BasePeakMZ);
+                    double.TryParse(dataColumns[columnMapping["tic"]], out scanData.TotalIonCurrent);
+                    int.TryParse(dataColumns[columnMapping["num_peaks"]], out scanData.NumPeaks);
+                    int.TryParse(dataColumns[columnMapping["num_deisotoped"]], out scanData.NumDeisotoped);
+
+                    if (colIndexScanInfo > 0)
                     {
-                        var scanData = new ScansDataType();
+                        var infoText = dataColumns[colIndexScanInfo];
 
-                        int.TryParse(dataColumns[colIndexScanOrFrameNum], out scanData.Scan);
-                        float.TryParse(dataColumns[colIndexScanOrFrameTime], out scanData.ElutionTime);
-                        int.TryParse(dataColumns[columnMapping["type"]], out scanData.MSLevel);
-                        double.TryParse(dataColumns[columnMapping["bpi"]], out scanData.BasePeakIntensity);
-                        double.TryParse(dataColumns[columnMapping["bpi_mz"]], out scanData.BasePeakMZ);
-                        double.TryParse(dataColumns[columnMapping["tic"]], out scanData.TotalIonCurrent);
-                        int.TryParse(dataColumns[columnMapping["num_peaks"]], out scanData.NumPeaks);
-                        int.TryParse(dataColumns[columnMapping["num_deisotoped"]], out scanData.NumDeisotoped);
-
-                        if (colIndexScanInfo > 0)
+                        // Only store infoText in .FilterText if infoText is not simply an integer
+                        if (!int.TryParse(infoText, out _))
                         {
-                            var infoText = dataColumns[colIndexScanInfo];
-
-                            // Only store infoText in .FilterText if infoText is not simply an integer
-                            if (!int.TryParse(infoText, out _))
-                            {
-                                scanData.FilterText = infoText;
-                            }
+                            scanData.FilterText = infoText;
                         }
-
-                        scanList.Add(scanData);
-
-                        if (Options.SaveTICAndBPIPlots)
-                        {
-                            mTICAndBPIPlot.AddData(scanData.Scan, scanData.MSLevel, scanData.ElutionTime, scanData.BasePeakIntensity, scanData.TotalIonCurrent);
-                        }
-
-                        string scanTypeName;
-                        if (string.IsNullOrWhiteSpace(scanData.FilterText))
-                        {
-                            scanData.FilterText = scanData.MSLevel > 1 ? "HMSn" : "HMS";
-                            scanTypeName = scanData.FilterText;
-                        }
-                        else
-                        {
-                            scanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanData.FilterText);
-                        }
-
-                        var scanStatsEntry = new ScanStatsEntry
-                        {
-                            ScanNumber = scanData.Scan,
-                            ScanType = scanData.MSLevel,
-                            ScanTypeName = scanTypeName,
-                            ScanFilterText = XRawFileIO.MakeGenericThermoScanFilter(scanData.FilterText),
-                            ElutionTime = scanData.ElutionTime.ToString("0.0###"),
-                            TotalIonIntensity = StringUtilities.ValueToString(scanData.TotalIonCurrent, 5),
-                            BasePeakIntensity = StringUtilities.ValueToString(scanData.BasePeakIntensity, 5),
-                            BasePeakMZ = scanData.BasePeakMZ.ToString("0.0###"),
-                            BasePeakSignalToNoiseRatio = "0",
-                            IonCount = scanData.NumDeisotoped,
-                            IonCountRaw = scanData.NumPeaks,
-                            ExtendedScanInfo =
-                            {
-                                CollisionMode = string.Empty,
-                                ScanFilterText = scanData.FilterText
-                            }
-                        };
-
-                        mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
                     }
-                    catch (Exception ex)
+
+                    scanList.Add(scanData);
+
+                    if (Options.SaveTICAndBPIPlots)
                     {
-                        OnWarningEvent("Warning: Ignoring scan " + dataColumns[columnMapping["scan_num"]] + " since data conversion error: " + ex.Message);
+                        mTICAndBPIPlot.AddData(scanData.Scan, scanData.MSLevel, scanData.ElutionTime, scanData.BasePeakIntensity, scanData.TotalIonCurrent);
                     }
+
+                    string scanTypeName;
+                    if (string.IsNullOrWhiteSpace(scanData.FilterText))
+                    {
+                        scanData.FilterText = scanData.MSLevel > 1 ? "HMSn" : "HMS";
+                        scanTypeName = scanData.FilterText;
+                    }
+                    else
+                    {
+                        scanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanData.FilterText);
+                    }
+
+                    var scanStatsEntry = new ScanStatsEntry
+                    {
+                        ScanNumber = scanData.Scan,
+                        ScanType = scanData.MSLevel,
+                        ScanTypeName = scanTypeName,
+                        ScanFilterText = XRawFileIO.MakeGenericThermoScanFilter(scanData.FilterText),
+                        ElutionTime = scanData.ElutionTime.ToString("0.0###"),
+                        TotalIonIntensity = StringUtilities.ValueToString(scanData.TotalIonCurrent, 5),
+                        BasePeakIntensity = StringUtilities.ValueToString(scanData.BasePeakIntensity, 5),
+                        BasePeakMZ = scanData.BasePeakMZ.ToString("0.0###"),
+                        BasePeakSignalToNoiseRatio = "0",
+                        IonCount = scanData.NumDeisotoped,
+                        IonCountRaw = scanData.NumPeaks,
+                        ExtendedScanInfo =
+                        {
+                            CollisionMode = string.Empty,
+                            ScanFilterText = scanData.FilterText
+                        }
+                    };
+
+                    mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
+                }
+                catch (Exception ex)
+                {
+                    OnWarningEvent("Warning: Ignoring scan " + dataColumns[columnMapping["scan_num"]] + " since data conversion error: " + ex.Message);
                 }
             }
 

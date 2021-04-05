@@ -520,10 +520,9 @@ namespace MSFileInfoScanner.DatasetStats
 
                 // If CreateDatasetInfoXML() used a StringBuilder to cache the XML data, then we would have to use Encoding.Unicode
                 // However, CreateDatasetInfoXML() now uses a MemoryStream, so we're able to use UTF8
-                using (var writer = new StreamWriter(new FileStream(datasetInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read), Encoding.UTF8))
-                {
-                    writer.WriteLine(CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, sampleInfo));
-                }
+                using var writer = new StreamWriter(new FileStream(datasetInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read), Encoding.UTF8);
+
+                writer.WriteLine(CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, sampleInfo));
 
                 return true;
             }
@@ -904,125 +903,124 @@ namespace MSFileInfoScanner.DatasetStats
                 var scanStatsExFilePath = Path.Combine(scanStatsFile.DirectoryName, Path.GetFileNameWithoutExtension(scanStatsFile.Name) + "Ex.txt");
 
                 // Open the output files
-                using (var scanStatsWriter = new StreamWriter(new FileStream(scanStatsFile.FullName, FileMode.Create, FileAccess.Write, FileShare.Read)))
-                using (var scanStatsExWriter = new StreamWriter(new FileStream(scanStatsExFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                using var scanStatsWriter = new StreamWriter(new FileStream(scanStatsFile.FullName, FileMode.Create, FileAccess.Write, FileShare.Read));
+                using var scanStatsExWriter = new StreamWriter(new FileStream(scanStatsExFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                var includeDriftTime = false;
+
+                foreach (var scanStatsEntry in scanStats)
                 {
-                    var includeDriftTime = false;
+                    if (!double.TryParse(scanStatsEntry.DriftTimeMsec, out var driftTimeMsec) || driftTimeMsec < float.Epsilon) continue;
+                    includeDriftTime = true;
+                    break;
+                }
 
-                    foreach (var scanStatsEntry in scanStats)
-                    {
-                        if (!double.TryParse(scanStatsEntry.DriftTimeMsec, out var driftTimeMsec) || driftTimeMsec < float.Epsilon) continue;
-                        includeDriftTime = true;
-                        break;
-                    }
+                // Write the headers
+                var headerNames = new List<string>
+                {
+                    "Dataset",
+                    "ScanNumber",
+                    "ScanTime",
+                    "ScanType",
+                    "TotalIonIntensity",
+                    "BasePeakIntensity",
+                    "BasePeakMZ",
+                    "BasePeakSignalToNoiseRatio",
+                    "IonCount",
+                    "IonCountRaw",
+                    "ScanTypeName"
+                };
 
-                    // Write the headers
-                    var headerNames = new List<string>
-                    {
-                        "Dataset",
-                        "ScanNumber",
-                        "ScanTime",
-                        "ScanType",
-                        "TotalIonIntensity",
-                        "BasePeakIntensity",
-                        "BasePeakMZ",
-                        "BasePeakSignalToNoiseRatio",
-                        "IonCount",
-                        "IonCountRaw",
-                        "ScanTypeName"
-                    };
+                if (includeDriftTime)
+                {
+                    headerNames.Add("DriftTime");
+                }
 
+                scanStatsWriter.WriteLine(string.Join("\t", headerNames));
+
+                var headerNamesEx = new List<string>
+                {
+                    "Dataset",
+                    "ScanNumber",
+                    ScanStatsEntry.SCAN_STATS_COL_ION_INJECTION_TIME,
+                    ScanStatsEntry.SCAN_STATS_COL_SCAN_SEGMENT,
+                    ScanStatsEntry.SCAN_STATS_COL_SCAN_EVENT,
+                    ScanStatsEntry.SCAN_STATS_COL_CHARGE_STATE,
+                    ScanStatsEntry.SCAN_STATS_COL_MONOISOTOPIC_MZ,
+                    ScanStatsEntry.SCAN_STATS_COL_COLLISION_MODE,
+                    ScanStatsEntry.SCAN_STATS_COL_SCAN_FILTER_TEXT
+                };
+
+                scanStatsExWriter.WriteLine(string.Join("\t", headerNamesEx));
+
+                var dataValues = new List<string>();
+
+                foreach (var scanStatsEntry in scanStats)
+                {
+                    dataValues.Clear();
+
+                    // Dataset ID
+                    dataValues.Add(datasetID.ToString());
+
+                    // Scan number
+                    dataValues.Add(scanStatsEntry.ScanNumber.ToString());
+
+                    // Scan time (minutes)
+                    dataValues.Add(scanStatsEntry.ElutionTime);
+
+                    // Scan type (1 for MS, 2 for MS2, etc.)
+                    dataValues.Add(scanStatsEntry.ScanType.ToString());
+
+                    // Total ion intensity
+                    dataValues.Add(scanStatsEntry.TotalIonIntensity);
+
+                    // Base peak ion intensity
+                    dataValues.Add(scanStatsEntry.BasePeakIntensity);
+
+                    // Base peak ion m/z
+                    dataValues.Add(scanStatsEntry.BasePeakMZ);
+
+                    // Base peak signal to noise ratio
+                    dataValues.Add(scanStatsEntry.BasePeakSignalToNoiseRatio);
+
+                    // Number of peaks (aka ions) in the spectrum
+                    dataValues.Add(scanStatsEntry.IonCount.ToString());
+
+                    // Number of peaks (aka ions) in the spectrum prior to any filtering
+                    dataValues.Add(scanStatsEntry.IonCountRaw.ToString());
+
+                    // Scan type name
+                    dataValues.Add(scanStatsEntry.ScanTypeName);
+
+                    // Drift time (optional)
                     if (includeDriftTime)
                     {
-                        headerNames.Add("DriftTime");
+                        dataValues.Add(scanStatsEntry.DriftTimeMsec);
                     }
 
-                    scanStatsWriter.WriteLine(string.Join("\t", headerNames));
+                    scanStatsWriter.WriteLine(string.Join("\t", dataValues));
 
-                    var headerNamesEx = new List<string>
-                    {
-                        "Dataset",
-                        "ScanNumber",
-                        ScanStatsEntry.SCAN_STATS_COL_ION_INJECTION_TIME,
-                        ScanStatsEntry.SCAN_STATS_COL_SCAN_SEGMENT,
-                        ScanStatsEntry.SCAN_STATS_COL_SCAN_EVENT,
-                        ScanStatsEntry.SCAN_STATS_COL_CHARGE_STATE,
-                        ScanStatsEntry.SCAN_STATS_COL_MONOISOTOPIC_MZ,
-                        ScanStatsEntry.SCAN_STATS_COL_COLLISION_MODE,
-                        ScanStatsEntry.SCAN_STATS_COL_SCAN_FILTER_TEXT
-                    };
+                    // Write the next entry to scanStatsExWriter
+                    // Note that this file format is compatible with that created by MASIC
+                    // However, only a limited number of columns are written out, since StoreExtendedScanInfo only stores a certain set of parameters
 
-                    scanStatsExWriter.WriteLine(string.Join("\t", headerNamesEx));
+                    dataValues.Clear();
 
-                    var dataValues = new List<string>();
+                    // Dataset number
+                    dataValues.Add(datasetID.ToString());
 
-                    foreach (var scanStatsEntry in scanStats)
-                    {
-                        dataValues.Clear();
+                    // Scan number
+                    dataValues.Add(scanStatsEntry.ScanNumber.ToString());
 
-                        // Dataset ID
-                        dataValues.Add(datasetID.ToString());
+                    dataValues.Add(scanStatsEntry.ExtendedScanInfo.IonInjectionTime);
+                    dataValues.Add(scanStatsEntry.ExtendedScanInfo.ScanSegment);
+                    dataValues.Add(scanStatsEntry.ExtendedScanInfo.ScanEvent);
+                    dataValues.Add(scanStatsEntry.ExtendedScanInfo.ChargeState);
+                    dataValues.Add(scanStatsEntry.ExtendedScanInfo.MonoisotopicMZ);
+                    dataValues.Add(scanStatsEntry.ExtendedScanInfo.CollisionMode);
+                    dataValues.Add(scanStatsEntry.ExtendedScanInfo.ScanFilterText);
 
-                        // Scan number
-                        dataValues.Add(scanStatsEntry.ScanNumber.ToString());
-
-                        // Scan time (minutes)
-                        dataValues.Add(scanStatsEntry.ElutionTime);
-
-                        // Scan type (1 for MS, 2 for MS2, etc.)
-                        dataValues.Add(scanStatsEntry.ScanType.ToString());
-
-                        // Total ion intensity
-                        dataValues.Add(scanStatsEntry.TotalIonIntensity);
-
-                        // Base peak ion intensity
-                        dataValues.Add(scanStatsEntry.BasePeakIntensity);
-
-                        // Base peak ion m/z
-                        dataValues.Add(scanStatsEntry.BasePeakMZ);
-
-                        // Base peak signal to noise ratio
-                        dataValues.Add(scanStatsEntry.BasePeakSignalToNoiseRatio);
-
-                        // Number of peaks (aka ions) in the spectrum
-                        dataValues.Add(scanStatsEntry.IonCount.ToString());
-
-                        // Number of peaks (aka ions) in the spectrum prior to any filtering
-                        dataValues.Add(scanStatsEntry.IonCountRaw.ToString());
-
-                        // Scan type name
-                        dataValues.Add(scanStatsEntry.ScanTypeName);
-
-                        // Drift time (optional)
-                        if (includeDriftTime)
-                        {
-                            dataValues.Add(scanStatsEntry.DriftTimeMsec);
-                        }
-
-                        scanStatsWriter.WriteLine(string.Join("\t", dataValues));
-
-                        // Write the next entry to scanStatsExWriter
-                        // Note that this file format is compatible with that created by MASIC
-                        // However, only a limited number of columns are written out, since StoreExtendedScanInfo only stores a certain set of parameters
-
-                        dataValues.Clear();
-
-                        // Dataset number
-                        dataValues.Add(datasetID.ToString());
-
-                        // Scan number
-                        dataValues.Add(scanStatsEntry.ScanNumber.ToString());
-
-                        dataValues.Add(scanStatsEntry.ExtendedScanInfo.IonInjectionTime);
-                        dataValues.Add(scanStatsEntry.ExtendedScanInfo.ScanSegment);
-                        dataValues.Add(scanStatsEntry.ExtendedScanInfo.ScanEvent);
-                        dataValues.Add(scanStatsEntry.ExtendedScanInfo.ChargeState);
-                        dataValues.Add(scanStatsEntry.ExtendedScanInfo.MonoisotopicMZ);
-                        dataValues.Add(scanStatsEntry.ExtendedScanInfo.CollisionMode);
-                        dataValues.Add(scanStatsEntry.ExtendedScanInfo.ScanFilterText);
-
-                        scanStatsExWriter.WriteLine(string.Join("\t", dataValues));
-                    }
+                    scanStatsExWriter.WriteLine(string.Join("\t", dataValues));
                 }
 
                 return true;
@@ -1262,48 +1260,47 @@ namespace MSFileInfoScanner.DatasetStats
                 OnDebugEvent("Updating " + datasetStatsFilePath);
 
                 // Create or open the output file
-                using (var writer = new StreamWriter(new FileStream(datasetStatsFilePath, FileMode.Append, FileAccess.Write, FileShare.Read)))
+                using var writer = new StreamWriter(new FileStream(datasetStatsFilePath, FileMode.Append, FileAccess.Write, FileShare.Read));
+
+                if (writeHeaders)
                 {
-                    if (writeHeaders)
+                    // Write the header line
+                    var headerNames = new List<string>
                     {
-                        // Write the header line
-                        var headerNames = new List<string>
-                        {
-                            "Dataset",
-                            "ScanCount",
-                            "ScanCountMS",
-                            "ScanCountMSn",
-                            "Elution_Time_Max",
-                            "AcqTimeMinutes",
-                            "StartTime",
-                            "EndTime",
-                            "FileSizeBytes",
-                            "SampleName",
-                            "Comment1",
-                            "Comment2"
-                        };
-
-                        writer.WriteLine(string.Join("\t", headerNames));
-                    }
-
-                    var dataValues = new List<string>
-                    {
-                        datasetName,
-                        (summaryStats.MSStats.ScanCount + summaryStats.MSnStats.ScanCount).ToString(),
-                        summaryStats.MSStats.ScanCount.ToString(),
-                        summaryStats.MSnStats.ScanCount.ToString(),
-                        summaryStats.ElutionTimeMax.ToString("0.00"),
-                        datasetInfo.AcqTimeEnd.Subtract(datasetInfo.AcqTimeStart).TotalMinutes.ToString("0.00"),
-                        datasetInfo.AcqTimeStart.ToString(DATE_TIME_FORMAT_STRING),
-                        datasetInfo.AcqTimeEnd.ToString(DATE_TIME_FORMAT_STRING),
-                        datasetInfo.FileSizeBytes.ToString(),
-                        FixNull(sampleInfo.SampleName),
-                        FixNull(sampleInfo.Comment1),
-                        FixNull(sampleInfo.Comment2)
+                        "Dataset",
+                        "ScanCount",
+                        "ScanCountMS",
+                        "ScanCountMSn",
+                        "Elution_Time_Max",
+                        "AcqTimeMinutes",
+                        "StartTime",
+                        "EndTime",
+                        "FileSizeBytes",
+                        "SampleName",
+                        "Comment1",
+                        "Comment2"
                     };
 
-                    writer.WriteLine(string.Join("\t", dataValues));
+                    writer.WriteLine(string.Join("\t", headerNames));
                 }
+
+                var dataValues = new List<string>
+                {
+                    datasetName,
+                    (summaryStats.MSStats.ScanCount + summaryStats.MSnStats.ScanCount).ToString(),
+                    summaryStats.MSStats.ScanCount.ToString(),
+                    summaryStats.MSnStats.ScanCount.ToString(),
+                    summaryStats.ElutionTimeMax.ToString("0.00"),
+                    datasetInfo.AcqTimeEnd.Subtract(datasetInfo.AcqTimeStart).TotalMinutes.ToString("0.00"),
+                    datasetInfo.AcqTimeStart.ToString(DATE_TIME_FORMAT_STRING),
+                    datasetInfo.AcqTimeEnd.ToString(DATE_TIME_FORMAT_STRING),
+                    datasetInfo.FileSizeBytes.ToString(),
+                    FixNull(sampleInfo.SampleName),
+                    FixNull(sampleInfo.Comment1),
+                    FixNull(sampleInfo.Comment2)
+                };
+
+                writer.WriteLine(string.Join("\t", dataValues));
 
                 return true;
             }

@@ -345,50 +345,49 @@ namespace MSFileInfoScanner
             if (File.Exists(mDirectoryIntegrityInfoFilePath))
             {
                 // Read the entries from mDirectoryIntegrityInfoFilePath, populating mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE)
-                using (var reader = new StreamReader(mDirectoryIntegrityInfoFilePath))
+                using var reader = new StreamReader(mDirectoryIntegrityInfoFilePath);
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var dataLine = reader.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    var splitLine = dataLine.Split(sepChars);
+
+                    if (splitLine.Length < 5)
+                        continue;
+
+                    var directoryPath = splitLine[(int)DirectoryIntegrityInfoFileColumns.DirectoryPath];
+
+                    if (!IsNumber(splitLine[(int)DirectoryIntegrityInfoFileColumns.DirectoryID]))
+                        continue;
+
+                    if (CachedDirectoryIntegrityInfoContainsDirectory(directoryPath, out _))
+                        continue;
+
+                    try
                     {
-                        var dataLine = reader.ReadLine();
+                        var newRow = mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].NewRow();
 
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
+                        var directoryID = Convert.ToInt32(splitLine[(int)DirectoryIntegrityInfoFileColumns.DirectoryID]);
 
-                        var splitLine = dataLine.Split(sepChars);
-
-                        if (splitLine.Length < 5)
-                            continue;
-
-                        var directoryPath = splitLine[(int)DirectoryIntegrityInfoFileColumns.DirectoryPath];
-
-                        if (!IsNumber(splitLine[(int)DirectoryIntegrityInfoFileColumns.DirectoryID]))
-                            continue;
-
-                        if (CachedDirectoryIntegrityInfoContainsDirectory(directoryPath, out _))
-                            continue;
-
-                        try
+                        var directoryStats = new FileIntegrityChecker.DirectoryStatsType
                         {
-                            var newRow = mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].NewRow();
+                            DirectoryPath = directoryPath,
+                            FileCount = Convert.ToInt32(splitLine[(int)DirectoryIntegrityInfoFileColumns.FileCount]),
+                            FileCountFailIntegrity = Convert.ToInt32(splitLine[(int)DirectoryIntegrityInfoFileColumns.FileCountFailedIntegrity])
+                        };
 
-                            var directoryID = Convert.ToInt32(splitLine[(int)DirectoryIntegrityInfoFileColumns.DirectoryID]);
+                        var infoLastModified = ParseDate(splitLine[(int)DirectoryIntegrityInfoFileColumns.InfoLastModified]);
 
-                            var directoryStats = new FileIntegrityChecker.DirectoryStatsType
-                            {
-                                DirectoryPath = directoryPath,
-                                FileCount = Convert.ToInt32(splitLine[(int)DirectoryIntegrityInfoFileColumns.FileCount]),
-                                FileCountFailIntegrity = Convert.ToInt32(splitLine[(int)DirectoryIntegrityInfoFileColumns.FileCountFailedIntegrity])
-                            };
-
-                            var infoLastModified = ParseDate(splitLine[(int)DirectoryIntegrityInfoFileColumns.InfoLastModified]);
-
-                            PopulateDirectoryIntegrityInfoDataRow(directoryID, directoryStats, newRow, infoLastModified);
-                            mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].Rows.Add(newRow);
-                        }
-                        catch (Exception)
-                        {
-                            // Do not add this entry
-                        }
+                        PopulateDirectoryIntegrityInfoDataRow(directoryID, directoryStats, newRow, infoLastModified);
+                        mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].Rows.Add(newRow);
+                    }
+                    catch (Exception)
+                    {
+                        // Do not add this entry
                     }
                 }
             }
@@ -410,62 +409,61 @@ namespace MSFileInfoScanner
             if (File.Exists(mAcquisitionTimeFilePath))
             {
                 // Read the entries from mAcquisitionTimeFilePath, populating mMSFileInfoDataset.Tables(MS_FILE_INFO_DATA_TABLE)
-                using (var reader = new StreamReader(mAcquisitionTimeFilePath))
+                using var reader = new StreamReader(mAcquisitionTimeFilePath);
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var dataLine = reader.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    var splitLine = dataLine.Split(sepChars);
+
+                    if (splitLine.Length < 8)
                     {
-                        var dataLine = reader.ReadLine();
+                        continue;
+                    }
 
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
+                    var datasetName = splitLine[(int)MSFileInfoResultsFileColumns.DatasetName];
 
-                        var splitLine = dataLine.Split(sepChars);
+                    if (!IsNumber(splitLine[(int)MSFileInfoResultsFileColumns.DatasetID]))
+                    {
+                        continue;
+                    }
 
-                        if (splitLine.Length < 8)
+                    if (CachedMSInfoContainsDataset(datasetName))
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        var newRow = mMSFileInfoDataset.Tables[MS_FILE_INFO_DATA_TABLE].NewRow();
+
+                        var datasetId = Convert.ToInt32(splitLine[(int)MSFileInfoResultsFileColumns.DatasetID]);
+                        var datasetFileInfo = new DatasetFileInfo(datasetId, datasetName)
                         {
-                            continue;
+                            FileExtension = string.Copy(splitLine[(int)MSFileInfoResultsFileColumns.FileExtension]),
+                            AcqTimeStart = ParseDate(splitLine[(int)MSFileInfoResultsFileColumns.AcqTimeStart]),
+                            AcqTimeEnd = ParseDate(splitLine[(int)MSFileInfoResultsFileColumns.AcqTimeEnd]),
+                            ScanCount = Convert.ToInt32(splitLine[(int)MSFileInfoResultsFileColumns.ScanCount]),
+                            FileSizeBytes = Convert.ToInt64(splitLine[(int)MSFileInfoResultsFileColumns.FileSizeBytes])
+                        };
+
+                        var infoLastModified = ParseDate(splitLine[(int)MSFileInfoResultsFileColumns.InfoLastModified]);
+
+                        if (splitLine.Length >= 9)
+                        {
+                            datasetFileInfo.FileSystemModificationTime = ParseDate(splitLine[(int)MSFileInfoResultsFileColumns.FileModificationDate]);
                         }
 
-                        var datasetName = splitLine[(int)MSFileInfoResultsFileColumns.DatasetName];
-
-                        if (!IsNumber(splitLine[(int)MSFileInfoResultsFileColumns.DatasetID]))
-                        {
-                            continue;
-                        }
-
-                        if (CachedMSInfoContainsDataset(datasetName))
-                        {
-                            continue;
-                        }
-
-                        try
-                        {
-                            var newRow = mMSFileInfoDataset.Tables[MS_FILE_INFO_DATA_TABLE].NewRow();
-
-                            var datasetId = Convert.ToInt32(splitLine[(int)MSFileInfoResultsFileColumns.DatasetID]);
-                            var datasetFileInfo = new DatasetFileInfo(datasetId, datasetName)
-                            {
-                                FileExtension = string.Copy(splitLine[(int)MSFileInfoResultsFileColumns.FileExtension]),
-                                AcqTimeStart = ParseDate(splitLine[(int)MSFileInfoResultsFileColumns.AcqTimeStart]),
-                                AcqTimeEnd = ParseDate(splitLine[(int)MSFileInfoResultsFileColumns.AcqTimeEnd]),
-                                ScanCount = Convert.ToInt32(splitLine[(int)MSFileInfoResultsFileColumns.ScanCount]),
-                                FileSizeBytes = Convert.ToInt64(splitLine[(int)MSFileInfoResultsFileColumns.FileSizeBytes])
-                            };
-
-                            var infoLastModified = ParseDate(splitLine[(int)MSFileInfoResultsFileColumns.InfoLastModified]);
-
-                            if (splitLine.Length >= 9)
-                            {
-                                datasetFileInfo.FileSystemModificationTime = ParseDate(splitLine[(int)MSFileInfoResultsFileColumns.FileModificationDate]);
-                            }
-
-                            PopulateMSInfoDataRow(datasetFileInfo, newRow, infoLastModified);
-                            mMSFileInfoDataset.Tables[MS_FILE_INFO_DATA_TABLE].Rows.Add(newRow);
-                        }
-                        catch (Exception)
-                        {
-                            // Do not add this entry
-                        }
+                        PopulateMSInfoDataRow(datasetFileInfo, newRow, infoLastModified);
+                        mMSFileInfoDataset.Tables[MS_FILE_INFO_DATA_TABLE].Rows.Add(newRow);
+                    }
+                    catch (Exception)
+                    {
+                        // Do not add this entry
                     }
                 }
             }

@@ -312,50 +312,49 @@ namespace MSFileInfoScanner.Readers
                     return;
                 }
 
-                using (var reader = new StreamReader(new FileStream(autoMSFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using var reader = new StreamReader(new FileStream(autoMSFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var dataLine = reader.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    var splitLine = dataLine.Split('\t');
+
+                    if (splitLine.Length < 2)
                     {
-                        var dataLine = reader.ReadLine();
-
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
-
-                        var splitLine = dataLine.Split('\t');
-
-                        if (splitLine.Length < 2)
-                        {
-                            continue;
-                        }
-
-                        if (!int.TryParse(splitLine[0], out var scanNumber))
-                        {
-                            continue;
-                        }
-
-                        // First column contains a number
-                        // See if the second column is a known scan type
-
-                        var msLevel = 0;
-
-                        string scanTypeName;
-                        switch (splitLine[1])
-                        {
-                            case "MS":
-                                scanTypeName = "HMS";
-                                msLevel = 1;
-                                break;
-                            case "MSMS":
-                                scanTypeName = "HMSn";
-                                msLevel = 2;
-                                break;
-                            default:
-                                scanTypeName = string.Empty;
-                                break;
-                        }
-
-                        mDatasetStatsSummarizer.UpdateDatasetScanType(scanNumber, msLevel, scanTypeName);
+                        continue;
                     }
+
+                    if (!int.TryParse(splitLine[0], out var scanNumber))
+                    {
+                        continue;
+                    }
+
+                    // First column contains a number
+                    // See if the second column is a known scan type
+
+                    var msLevel = 0;
+
+                    string scanTypeName;
+                    switch (splitLine[1])
+                    {
+                        case "MS":
+                            scanTypeName = "HMS";
+                            msLevel = 1;
+                            break;
+                        case "MSMS":
+                            scanTypeName = "HMSn";
+                            msLevel = 2;
+                            break;
+                        default:
+                            scanTypeName = string.Empty;
+                            break;
+                    }
+
+                    mDatasetStatsSummarizer.UpdateDatasetScanType(scanNumber, msLevel, scanTypeName);
                 }
             }
             catch (Exception ex)
@@ -537,19 +536,18 @@ namespace MSFileInfoScanner.Readers
                         CommandText = "SELECT metadataId, permanentName, displayName FROM MetadataId"
                     };
 
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            var metadataId = ReadDbInt(reader, "metadataId");
-                            var metadataName = ReadDbString(reader, "permanentName");
-                            // var metadataDescription = ReadDbString(reader, "displayName");
+                    using var reader = cmd.ExecuteReader();
 
-                            if (metadataId > 0)
-                            {
-                                metadataNameToID.Add(metadataName, metadataId);
-                                // metadataNameToDescription.Add(metadataName, metadataDescription);
-                            }
+                    while (reader.Read())
+                    {
+                        var metadataId = ReadDbInt(reader, "metadataId");
+                        var metadataName = ReadDbString(reader, "permanentName");
+                        // var metadataDescription = ReadDbString(reader, "displayName");
+
+                        if (metadataId > 0)
+                        {
+                            metadataNameToID.Add(metadataName, metadataId);
+                            // metadataNameToDescription.Add(metadataName, metadataDescription);
                         }
                     }
                 }
@@ -696,99 +694,98 @@ namespace MSFileInfoScanner.Readers
                 double maxRunTimeMinutes = 0;
                 var validFile = false;
 
-                using (var reader = new XmlTextReader(new FileStream(scanXMLFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using var reader = new XmlTextReader(new FileStream(scanXMLFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                var skipRead = false;
+                var inScanNode = false;
+
+                var scanNumber = 0;
+                float elutionTime = 0;
+                double tic = 0;
+                double bpi = 0;
+                var msLevel = 0;
+
+                while (!reader.EOF)
                 {
-                    var skipRead = false;
-                    var inScanNode = false;
-
-                    var scanNumber = 0;
-                    float elutionTime = 0;
-                    double tic = 0;
-                    double bpi = 0;
-                    var msLevel = 0;
-
-                    while (!reader.EOF)
+                    if (skipRead)
                     {
-                        if (skipRead)
-                        {
-                            skipRead = false;
-                        }
-                        else
-                        {
-                            reader.Read();
-                        }
+                        skipRead = false;
+                    }
+                    else
+                    {
+                        reader.Read();
+                    }
 
-                        switch (reader.NodeType)
-                        {
-                            case XmlNodeType.Element:
-                                if (inScanNode)
+                    switch (reader.NodeType)
+                    {
+                        case XmlNodeType.Element:
+                            if (inScanNode)
+                            {
+                                switch (reader.Name)
                                 {
-                                    switch (reader.Name)
-                                    {
-                                        case "count":
-                                            scanNumber = reader.ReadElementContentAsInt();
-                                            skipRead = true;
-                                            break;
+                                    case "count":
+                                        scanNumber = reader.ReadElementContentAsInt();
+                                        skipRead = true;
+                                        break;
 
-                                        case "minutes":
-                                            elutionTime = reader.ReadElementContentAsFloat();
-                                            skipRead = true;
-                                            break;
+                                    case "minutes":
+                                        elutionTime = reader.ReadElementContentAsFloat();
+                                        skipRead = true;
+                                        break;
 
-                                        case "tic":
-                                            tic = reader.ReadElementContentAsFloat();
-                                            skipRead = true;
-                                            break;
+                                    case "tic":
+                                        tic = reader.ReadElementContentAsFloat();
+                                        skipRead = true;
+                                        break;
 
-                                        // ReSharper disable once StringLiteralTypo
-                                        case "maxpeak":
-                                            bpi = reader.ReadElementContentAsFloat();
-                                            skipRead = true;
-                                            break;
+                                    // ReSharper disable once StringLiteralTypo
+                                    case "maxpeak":
+                                        bpi = reader.ReadElementContentAsFloat();
+                                        skipRead = true;
+                                        break;
 
-                                        default:
-                                            // Ignore it
-                                            break;
-                                    }
+                                    default:
+                                        // Ignore it
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                if (reader.Name == "scanlist")
+                                {
+                                    validFile = true;
+                                }
+                                else if (reader.Name == "scan")
+                                {
+                                    inScanNode = true;
+                                    scanNumber = 0;
+                                    elutionTime = 0;
+                                    tic = 0;
+                                    bpi = 0;
+                                    msLevel = 1;
+
+                                    scanCount++;
+                                }
+                            }
+                            break;
+
+                        case XmlNodeType.EndElement:
+                            if (reader.Name == "scan")
+                            {
+                                inScanNode = false;
+
+                                if (scanElutionTimeMap.ContainsKey(scanNumber))
+                                {
+                                    OnWarningEvent(string.Format("Skipping duplicate scan number: {0}", scanNumber));
+                                    duplicateScanCount++;
                                 }
                                 else
                                 {
-                                    if (reader.Name == "scanlist")
-                                    {
-                                        validFile = true;
-                                    }
-                                    else if (reader.Name == "scan")
-                                    {
-                                        inScanNode = true;
-                                        scanNumber = 0;
-                                        elutionTime = 0;
-                                        tic = 0;
-                                        bpi = 0;
-                                        msLevel = 1;
-
-                                        scanCount++;
-                                    }
+                                    scanElutionTimeMap.Add(scanNumber, elutionTime);
+                                    AddDatasetScan(scanNumber, msLevel, elutionTime, bpi, tic, "HMS", ref maxRunTimeMinutes);
                                 }
-                                break;
-
-                            case XmlNodeType.EndElement:
-                                if (reader.Name == "scan")
-                                {
-                                    inScanNode = false;
-
-                                    if (scanElutionTimeMap.ContainsKey(scanNumber))
-                                    {
-                                        OnWarningEvent(string.Format("Skipping duplicate scan number: {0}", scanNumber));
-                                        duplicateScanCount++;
-                                    }
-                                    else
-                                    {
-                                        scanElutionTimeMap.Add(scanNumber, elutionTime);
-                                        AddDatasetScan(scanNumber, msLevel, elutionTime, bpi, tic, "HMS", ref maxRunTimeMinutes);
-                                    }
-                                }
-                                break;
-                        }
+                            }
+                            break;
                     }
                 }
 
@@ -1262,39 +1259,38 @@ namespace MSFileInfoScanner.Readers
                 return;
             }
 
-            if (metadataNameToID.TryGetValue(fieldName, out var metadataId))
+            if (!metadataNameToID.TryGetValue(fieldName, out var metadataId))
+                return;
+
+            cmd.CommandText = "SELECT GuidA, MetaDataId, Value FROM " + tableName + " WHERE MetaDataId = " + metadataId;
+
+            using var drReader = cmd.ExecuteReader();
+
+            while (drReader.Read())
             {
-                cmd.CommandText = "SELECT GuidA, MetaDataId, Value FROM " + tableName + " WHERE MetaDataId = " + metadataId;
+                var scanGuid = ReadDbString(drReader, "GuidA");
+                var metaDataValue = ReadDbString(drReader, "Value");
 
-                using (var drReader = cmd.ExecuteReader())
+                bool newEntry;
+                if (scanData.TryGetValue(scanGuid, out var scanInfo))
                 {
-                    while (drReader.Read())
-                    {
-                        var scanGuid = ReadDbString(drReader, "GuidA");
-                        var metaDataValue = ReadDbString(drReader, "Value");
+                    newEntry = false;
+                }
+                else
+                {
+                    scanInfo = new MCFScanInfoType();
+                    newEntry = true;
+                }
 
-                        bool newEntry;
-                        if (scanData.TryGetValue(scanGuid, out var scanInfo))
-                        {
-                            newEntry = false;
-                        }
-                        else
-                        {
-                            scanInfo = new MCFScanInfoType();
-                            newEntry = true;
-                        }
+                UpdateScanInfo(mcfMetadataField, metaDataValue, ref scanInfo);
 
-                        UpdateScanInfo(mcfMetadataField, metaDataValue, ref scanInfo);
-
-                        if (newEntry)
-                        {
-                            scanData.Add(scanGuid, scanInfo);
-                        }
-                        else
-                        {
-                            scanData[scanGuid] = scanInfo;
-                        }
-                    }
+                if (newEntry)
+                {
+                    scanData.Add(scanGuid, scanInfo);
+                }
+                else
+                {
+                    scanData[scanGuid] = scanInfo;
                 }
             }
         }

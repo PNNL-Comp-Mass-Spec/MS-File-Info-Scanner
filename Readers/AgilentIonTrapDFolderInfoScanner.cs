@@ -92,53 +92,52 @@ namespace MSFileInfoScanner.Readers
                 bool endDateFound;
                 DateTime methodDate;
 
-                using (var reader = new StreamReader(Path.Combine(directoryPath, AGILENT_RUN_LOG_FILE)))
+                using var reader = new StreamReader(Path.Combine(directoryPath, AGILENT_RUN_LOG_FILE));
+
+                processedFirstMethodLine = false;
+                endDateFound = false;
+                while (!reader.EndOfStream)
                 {
-                    processedFirstMethodLine = false;
-                    endDateFound = false;
-                    while (!reader.EndOfStream)
+                    var dataLine = reader.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    if (!dataLine.StartsWith(RUN_LOG_FILE_METHOD_LINE_START))
+                        continue;
+
+                    mostRecentMethodLine = string.Copy(dataLine);
+
+                    // Method line found
+                    // See if the line contains a key phrase
+                    var charIndex = dataLine.IndexOf(RUN_LOG_FILE_INSTRUMENT_RUNNING, StringComparison.Ordinal);
+                    if (charIndex > 0)
                     {
-                        var dataLine = reader.ReadLine();
-
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
-
-                        if (!dataLine.StartsWith(RUN_LOG_FILE_METHOD_LINE_START))
-                            continue;
-
-                        mostRecentMethodLine = string.Copy(dataLine);
-
-                        // Method line found
-                        // See if the line contains a key phrase
-                        var charIndex = dataLine.IndexOf(RUN_LOG_FILE_INSTRUMENT_RUNNING, StringComparison.Ordinal);
+                        if (ExtractMethodLineDate(dataLine, out methodDate))
+                        {
+                            datasetFileInfo.AcqTimeStart = methodDate;
+                        }
+                        processedFirstMethodLine = true;
+                    }
+                    else
+                    {
+                        charIndex = dataLine.IndexOf(RUN_LOG_INSTRUMENT_RUN_COMPLETED, StringComparison.Ordinal);
                         if (charIndex > 0)
                         {
                             if (ExtractMethodLineDate(dataLine, out methodDate))
                             {
-                                datasetFileInfo.AcqTimeStart = methodDate;
-                            }
-                            processedFirstMethodLine = true;
-                        }
-                        else
-                        {
-                            charIndex = dataLine.IndexOf(RUN_LOG_INSTRUMENT_RUN_COMPLETED, StringComparison.Ordinal);
-                            if (charIndex > 0)
-                            {
-                                if (ExtractMethodLineDate(dataLine, out methodDate))
-                                {
-                                    datasetFileInfo.AcqTimeEnd = methodDate;
-                                    endDateFound = true;
-                                }
+                                datasetFileInfo.AcqTimeEnd = methodDate;
+                                endDateFound = true;
                             }
                         }
+                    }
 
-                        // If this is the first method line, then parse out the date and store in .AcqTimeStart
-                        if (!processedFirstMethodLine)
+                    // If this is the first method line, then parse out the date and store in .AcqTimeStart
+                    if (!processedFirstMethodLine)
+                    {
+                        if (ExtractMethodLineDate(dataLine, out methodDate))
                         {
-                            if (ExtractMethodLineDate(dataLine, out methodDate))
-                            {
-                                datasetFileInfo.AcqTimeStart = methodDate;
-                            }
+                            datasetFileInfo.AcqTimeStart = methodDate;
                         }
                     }
                 }

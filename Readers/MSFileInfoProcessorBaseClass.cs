@@ -515,7 +515,7 @@ namespace MSFileInfoScanner.Readers
 
                         if (successOverall && mLCMS2DPlot.Options.PlottingDeisotopedData)
                         {
-                            // Create two more plots 2D plots, but this time with a smaller maximum m/z
+                            // Create two more 2D plots, but this time with a smaller maximum mass
                             mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = LCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
                             mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = LCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
 
@@ -606,35 +606,34 @@ namespace MSFileInfoScanner.Readers
 
                 OnDebugEvent("Creating file " + htmlFilePath);
 
-                using (var writer = new StreamWriter(new FileStream(htmlFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
-                {
-                    // Add HTML headers and <table>
-                    AppendHTMLHeader(writer, datasetName);
+                using var writer = new StreamWriter(new FileStream(htmlFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
-                    // First add the plots with the top 50,000 points
-                    AppendLCMS2DPlots(writer, mLCMS2DPlotOverview);
+                // Add HTML headers and <table>
+                AppendHTMLHeader(writer, datasetName);
 
-                    // Now add the plots with the top 500,000 points
-                    AppendLCMS2DPlots(writer, mLCMS2DPlot);
+                // First add the plots with the top 50,000 points
+                AppendLCMS2DPlots(writer, mLCMS2DPlotOverview);
 
-                    // Add the BPI plots
-                    AppendBPIPlots(writer);
+                // Now add the plots with the top 500,000 points
+                AppendLCMS2DPlots(writer, mLCMS2DPlot);
 
-                    // Add instrument-specific plots, if defined
-                    AppendAdditionalPlots(writer);
+                // Add the BPI plots
+                AppendBPIPlots(writer);
 
-                    // Add the TIC
-                    AppendTICAndSummaryStats(writer, summaryStats);
+                // Add instrument-specific plots, if defined
+                AppendAdditionalPlots(writer);
 
-                    // Append dataset info
-                    AppendDatasetInfo(writer, datasetName, outputDirectoryPath);
+                // Add the TIC
+                AppendTICAndSummaryStats(writer, summaryStats);
 
-                    // Append device info
-                    AppendDeviceInfo(writer);
+                // Append dataset info
+                AppendDatasetInfo(writer, datasetName, outputDirectoryPath);
 
-                    // Add </table> and HTML footers
-                    AppendHTMLFooter(writer);
-                }
+                // Append device info
+                AppendDeviceInfo(writer);
+
+                // Add </table> and HTML footers
+                AppendHTMLFooter(writer);
 
                 return true;
             }

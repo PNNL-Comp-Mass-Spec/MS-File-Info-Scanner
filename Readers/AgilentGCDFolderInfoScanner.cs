@@ -120,47 +120,46 @@ namespace MSFileInfoScanner.Readers
                 // ACQ_METHOD_FILE_POST_RUN_LINE = "(Post Run)";
                 // runTimeTextLabels.Add(ACQ_METHOD_FILE_POST_RUN_LINE, New clsLineMatchSearchInfo(False))
 
-                using (var reader = new StreamReader(filePath))
+                using var reader = new StreamReader(filePath);
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var dataLine = reader.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    foreach (var key in runTimeTextLabels.Keys)
                     {
-                        var dataLine = reader.ReadLine();
-
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
-
-                        foreach (var key in runTimeTextLabels.Keys)
+                        if (runTimeTextLabels[key].Matched)
                         {
-                            if (runTimeTextLabels[key].Matched)
-                            {
-                                continue;
-                            }
-
-                            bool matchSuccess;
-                            if (runTimeTextLabels[key].MatchLineStart)
-                            {
-                                matchSuccess = dataLine.StartsWith(key);
-                            }
-                            else
-                            {
-                                matchSuccess = dataLine.Contains(key);
-                            }
-
-                            if (!matchSuccess)
-                            {
-                                continue;
-                            }
-
-                            if (!ExtractRunTime(dataLine, out var runTime))
-                            {
-                                continue;
-                            }
-
-                            runTimeTextLabels[key].Matched = true;
-                            totalRuntime += runTime;
-                            runTimeFound = true;
-                            break;
+                            continue;
                         }
+
+                        bool matchSuccess;
+                        if (runTimeTextLabels[key].MatchLineStart)
+                        {
+                            matchSuccess = dataLine.StartsWith(key);
+                        }
+                        else
+                        {
+                            matchSuccess = dataLine.Contains(key);
+                        }
+
+                        if (!matchSuccess)
+                        {
+                            continue;
+                        }
+
+                        if (!ExtractRunTime(dataLine, out var runTime))
+                        {
+                            continue;
+                        }
+
+                        runTimeTextLabels[key].Matched = true;
+                        totalRuntime += runTime;
+                        runTimeFound = true;
+                        break;
                     }
                 }
 
@@ -197,30 +196,29 @@ namespace MSFileInfoScanner.Readers
                     return false;
                 }
 
-                using (var reader = new StreamReader(filePath))
+                using var reader = new StreamReader(filePath);
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var dataLine = reader.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    // ReSharper disable once StringLiteralTypo
+                    if (!dataLine.StartsWith("gc.runlength", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    // Runtime is the value after the equals sign
+                    var splitLine = dataLine.Split('=');
+                    if (splitLine.Length <= 1)
                     {
-                        var dataLine = reader.ReadLine();
+                        continue;
+                    }
 
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
-
-                        // ReSharper disable once StringLiteralTypo
-                        if (!dataLine.StartsWith("gc.runlength", StringComparison.OrdinalIgnoreCase))
-                            continue;
-
-                        // Runtime is the value after the equals sign
-                        var splitLine = dataLine.Split('=');
-                        if (splitLine.Length <= 1)
-                        {
-                            continue;
-                        }
-
-                        if (double.TryParse(splitLine[1], out totalRuntime))
-                        {
-                            success = true;
-                        }
+                    if (double.TryParse(splitLine[1], out totalRuntime))
+                    {
+                        success = true;
                     }
                 }
             }
@@ -247,81 +245,80 @@ namespace MSFileInfoScanner.Readers
 
             try
             {
-                using (var reader = new ChemstationMSFileReader.clsChemstationDataMSFileReader(datafilePath))
+                using var reader = new ChemstationMSFileReader.clsChemstationDataMSFileReader(datafilePath);
+
+                datasetFileInfo.AcqTimeStart = reader.Header.AcqDate;
+                datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(reader.Header.RetentionTimeMinutesEnd);
+
+                datasetFileInfo.ScanCount = reader.Header.SpectraCount;
+
+                for (var spectrumIndex = 0; spectrumIndex <= datasetFileInfo.ScanCount - 1; spectrumIndex++)
                 {
-                    datasetFileInfo.AcqTimeStart = reader.Header.AcqDate;
-                    datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(reader.Header.RetentionTimeMinutesEnd);
+                    currentIndex = spectrumIndex;
 
-                    datasetFileInfo.ScanCount = reader.Header.SpectraCount;
+                    ChemstationMSFileReader.clsSpectralRecord spectrum = null;
+                    List<float> mzList = null;
+                    List<int> intensityList = null;
+                    const int msLevel = 1;
 
-                    for (var spectrumIndex = 0; spectrumIndex <= datasetFileInfo.ScanCount - 1; spectrumIndex++)
+                    bool validSpectrum;
+                    try
                     {
-                        currentIndex = spectrumIndex;
+                        reader.GetSpectrum(spectrumIndex, ref spectrum);
+                        mzList = spectrum.Mzs;
+                        intensityList = spectrum.Intensities;
+                        validSpectrum = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        OnWarningEvent("Exception obtaining data from the MS file for spectrum index " + currentIndex + ": " + ex.Message);
+                        validSpectrum = false;
+                    }
 
-                        ChemstationMSFileReader.clsSpectralRecord spectrum = null;
-                        List<float> mzList = null;
-                        List<int> intensityList = null;
-                        const int msLevel = 1;
+                    if (validSpectrum)
+                    {
+                        var scanStatsEntry = new ScanStatsEntry
+                        {
+                            ScanNumber = spectrumIndex + 1,
+                            ScanType = msLevel,
+                            ScanTypeName = "GC-MS",
+                            ScanFilterText = string.Empty,
+                            ElutionTime = spectrum.RetentionTimeMinutes.ToString("0.0###"),
+                            TotalIonIntensity = StringUtilities.ValueToString(spectrum.TIC, 1),
+                            BasePeakIntensity = StringUtilities.ValueToString(spectrum.BasePeakAbundance, 1),
+                            BasePeakMZ = spectrum.BasePeakMZ.ToString("0.0###"),
+                            BasePeakSignalToNoiseRatio = "0",
+                            IonCount = mzList.Count
+                        };
 
-                        bool validSpectrum;
-                        try
-                        {
-                            reader.GetSpectrum(spectrumIndex, ref spectrum);
-                            mzList = spectrum.Mzs;
-                            intensityList = spectrum.Intensities;
-                            validSpectrum = true;
-                        }
-                        catch (Exception ex)
-                        {
-                            OnWarningEvent("Exception obtaining data from the MS file for spectrum index " + currentIndex + ": " + ex.Message);
-                            validSpectrum = false;
-                        }
+                        scanStatsEntry.IonCountRaw = scanStatsEntry.IonCount;
 
-                        if (validSpectrum)
+                        mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
+
+                        if (Options.SaveTICAndBPIPlots)
                         {
-                            var scanStatsEntry = new ScanStatsEntry
+                            mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevel, spectrum.RetentionTimeMinutes, spectrum.BasePeakAbundance, spectrum.TIC);
+
+                            if (mzList.Count > 0)
                             {
-                                ScanNumber = spectrumIndex + 1,
-                                ScanType = msLevel,
-                                ScanTypeName = "GC-MS",
-                                ScanFilterText = string.Empty,
-                                ElutionTime = spectrum.RetentionTimeMinutes.ToString("0.0###"),
-                                TotalIonIntensity = StringUtilities.ValueToString(spectrum.TIC, 1),
-                                BasePeakIntensity = StringUtilities.ValueToString(spectrum.BasePeakAbundance, 1),
-                                BasePeakMZ = spectrum.BasePeakMZ.ToString("0.0###"),
-                                BasePeakSignalToNoiseRatio = "0",
-                                IonCount = mzList.Count
-                            };
+                                var ionsMZ = new double[mzList.Count];
+                                var ionsIntensity = new double[mzList.Count];
 
-                            scanStatsEntry.IonCountRaw = scanStatsEntry.IonCount;
-
-                            mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
-
-                            if (Options.SaveTICAndBPIPlots)
-                            {
-                                mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevel, spectrum.RetentionTimeMinutes, spectrum.BasePeakAbundance, spectrum.TIC);
-
-                                if (mzList.Count > 0)
+                                for (var index = 0; index <= mzList.Count - 1; index++)
                                 {
-                                    var ionsMZ = new double[mzList.Count];
-                                    var ionsIntensity = new double[mzList.Count];
-
-                                    for (var index = 0; index <= mzList.Count - 1; index++)
-                                    {
-                                        ionsMZ[index] = mzList[index];
-                                        ionsIntensity[index] = intensityList[index];
-                                    }
-
-                                    mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevel, spectrum.RetentionTimeMinutes, ionsMZ.Length, ionsMZ, ionsIntensity);
+                                    ionsMZ[index] = mzList[index];
+                                    ionsIntensity[index] = intensityList[index];
                                 }
-                            }
 
-                            if (Options.CheckCentroidingStatus)
-                            {
-                                var mzDoubles = new List<double>(mzList.Count);
-                                mzDoubles.AddRange(mzList.Select(ion => (double)ion));
-                                mDatasetStatsSummarizer.ClassifySpectrum(mzDoubles, msLevel, "Scan " + scanStatsEntry.ScanNumber);
+                                mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevel, spectrum.RetentionTimeMinutes, ionsMZ.Length, ionsMZ, ionsIntensity);
                             }
+                        }
+
+                        if (Options.CheckCentroidingStatus)
+                        {
+                            var mzDoubles = new List<double>(mzList.Count);
+                            mzDoubles.AddRange(mzList.Select(ion => (double)ion));
+                            mDatasetStatsSummarizer.ClassifySpectrum(mzDoubles, msLevel, "Scan " + scanStatsEntry.ScanNumber);
                         }
                     }
                 }

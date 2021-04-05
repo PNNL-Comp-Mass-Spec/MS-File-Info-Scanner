@@ -121,28 +121,27 @@ namespace MSFileInfoScanner.Readers
             {
                 // Try to open the acqu file
                 success = false;
-                using (var reader = new StreamReader(Path.Combine(directoryPath, BRUKER_ACQU_FILE)))
+                using var reader = new StreamReader(Path.Combine(directoryPath, BRUKER_ACQU_FILE));
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
-                    {
-                        var dataLine = reader.ReadLine();
+                    var dataLine = reader.ReadLine();
 
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
 
-                        if (!dataLine.StartsWith(BRUKER_ACQU_FILE_ACQ_LINE_START))
-                            continue;
+                    if (!dataLine.StartsWith(BRUKER_ACQU_FILE_ACQ_LINE_START))
+                        continue;
 
-                        // Date line found
-                        // It is of the form: ##$AQ_DATE= <Sat Aug 20 07:56:55 2005>
-                        dataLine = dataLine.Substring(BRUKER_ACQU_FILE_ACQ_LINE_START.Length).Trim();
-                        dataLine = dataLine.TrimEnd(BRUKER_ACQU_FILE_ACQ_LINE_END);
+                    // Date line found
+                    // It is of the form: ##$AQ_DATE= <Sat Aug 20 07:56:55 2005>
+                    dataLine = dataLine.Substring(BRUKER_ACQU_FILE_ACQ_LINE_START.Length).Trim();
+                    dataLine = dataLine.TrimEnd(BRUKER_ACQU_FILE_ACQ_LINE_END);
 
-                        success = ParseBrukerDateFromArray(dataLine, out var acqDate);
-                        if (success)
-                            datasetFileInfo.AcqTimeEnd = acqDate;
-                        break;
-                    }
+                    success = ParseBrukerDateFromArray(dataLine, out var acqDate);
+                    if (success)
+                        datasetFileInfo.AcqTimeEnd = acqDate;
+                    break;
                 }
             }
             catch (Exception)
@@ -163,20 +162,20 @@ namespace MSFileInfoScanner.Readers
                 // Try to open the Lock file
                 // The date line is the first (and only) line in the file
                 success = false;
-                using (var reader = new StreamReader(Path.Combine(directoryPath, BRUKER_LOCK_FILE)))
-                {
-                    if (!reader.EndOfStream)
-                    {
-                        var dataLine = reader.ReadLine();
-                        if (dataLine != null)
-                        {
-                            // Date line found
-                            // It is of the form: wd37119 2208 WD37119\9TOperator Sat Aug 20 06:10:31 2005
 
-                            success = ParseBrukerDateFromArray(dataLine, out var acqDate);
-                            if (success)
-                                datasetFileInfo.AcqTimeStart = acqDate;
-                        }
+                using var reader = new StreamReader(Path.Combine(directoryPath, BRUKER_LOCK_FILE));
+
+                if (!reader.EndOfStream)
+                {
+                    var dataLine = reader.ReadLine();
+                    if (dataLine != null)
+                    {
+                        // Date line found
+                        // It is of the form: wd37119 2208 WD37119\9TOperator Sat Aug 20 06:10:31 2005
+
+                        success = ParseBrukerDateFromArray(dataLine, out var acqDate);
+                        if (success)
+                            datasetFileInfo.AcqTimeStart = acqDate;
                     }
                 }
             }

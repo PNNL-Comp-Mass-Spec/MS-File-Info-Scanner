@@ -47,50 +47,49 @@ namespace MSFileInfoScanner.Plotting
 
             try
             {
-                using (var writer = new StreamWriter(new FileStream(exportFile.FullName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)))
+                using var writer = new StreamWriter(new FileStream(exportFile.FullName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite));
+
+                // Plot options: set of square brackets with semicolon separated key/value pairs
+                writer.WriteLine("[" + GetPlotOptions() + "]");
+
+                // Column options: semicolon separated key/value pairs for each column, with options for each column separated by a tab
+                // Note: these options aren't actually used by the Python plotting library
+
+                // Example XAxis options: Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=1
+                // Example YAxis options: Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=1
+                // Example ZAxis options: Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=1;MarkerSize=0.6;ColorScaleMinIntensity=400.3625;ColorScaleMaxIntensity=9152594
+
+                var additionalZAxisOptions = new List<string> {
+                    "MarkerSize=" + MarkerSize
+                };
+
+                if (ColorScaleMinIntensity > 0 || ColorScaleMaxIntensity > 0)
                 {
-                    // Plot options: set of square brackets with semicolon separated key/value pairs
-                    writer.WriteLine("[" + GetPlotOptions() + "]");
+                    additionalZAxisOptions.Add("ColorScaleMinIntensity=" + ColorScaleMinIntensity);
+                    additionalZAxisOptions.Add("ColorScaleMaxIntensity=" + ColorScaleMaxIntensity);
+                }
+                writer.WriteLine(XAxisInfo.GetOptions() + "\t" + YAxisInfo.GetOptions() + "\t" + ZAxisInfo.GetOptions(additionalZAxisOptions));
 
-                    // Column options: semicolon separated key/value pairs for each column, with options for each column separated by a tab
-                    // Note: these options aren't actually used by the Python plotting library
+                var charges = PointsByCharge.Keys.ToList();
+                charges.Sort();
 
-                    // Example XAxis options: Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=1
-                    // Example YAxis options: Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=1
-                    // Example ZAxis options: Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=1;MarkerSize=0.6;ColorScaleMinIntensity=400.3625;ColorScaleMaxIntensity=9152594
+                var includeCharge = charges.Count > 1;
 
-                    var additionalZAxisOptions = new List<string> {
-                        "MarkerSize=" + MarkerSize
-                    };
+                // Column names
+                if (includeCharge)
+                    writer.WriteLine(XAxisInfo.Title + "\t" + YAxisInfo.Title + "\t" + ZAxisInfo.Title + "\t" + "Charge");
+                else
+                    writer.WriteLine(XAxisInfo.Title + "\t" + YAxisInfo.Title + "\t" + ZAxisInfo.Title);
 
-                    if (ColorScaleMinIntensity > 0 || ColorScaleMaxIntensity > 0)
+                // Data, by charge state
+                foreach (var charge in charges)
+                {
+                    foreach (var dataPoint in PointsByCharge[charge])
                     {
-                        additionalZAxisOptions.Add("ColorScaleMinIntensity=" + ColorScaleMinIntensity);
-                        additionalZAxisOptions.Add("ColorScaleMaxIntensity=" + ColorScaleMaxIntensity);
-                    }
-                    writer.WriteLine(XAxisInfo.GetOptions() + "\t" + YAxisInfo.GetOptions() + "\t" + ZAxisInfo.GetOptions(additionalZAxisOptions));
-
-                    var charges = PointsByCharge.Keys.ToList();
-                    charges.Sort();
-
-                    var includeCharge = charges.Count > 1;
-
-                    // Column names
-                    if (includeCharge)
-                        writer.WriteLine(XAxisInfo.Title + "\t" + YAxisInfo.Title + "\t" + ZAxisInfo.Title + "\t" + "Charge");
-                    else
-                        writer.WriteLine(XAxisInfo.Title + "\t" + YAxisInfo.Title + "\t" + ZAxisInfo.Title);
-
-                    // Data, by charge state
-                    foreach (var charge in charges)
-                    {
-                        foreach (var dataPoint in PointsByCharge[charge])
-                        {
-                            if (includeCharge)
-                                writer.WriteLine(dataPoint.X + "\t" + dataPoint.Y + "\t" + dataPoint.Value + "\t" + charge);
-                            else
-                                writer.WriteLine(dataPoint.X + "\t" + dataPoint.Y + "\t" + dataPoint.Value);
-                        }
+                        if (includeCharge)
+                            writer.WriteLine(dataPoint.X + "\t" + dataPoint.Y + "\t" + dataPoint.Value + "\t" + charge);
+                        else
+                            writer.WriteLine(dataPoint.X + "\t" + dataPoint.Y + "\t" + dataPoint.Value);
                     }
                 }
             }

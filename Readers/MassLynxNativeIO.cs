@@ -1334,56 +1334,55 @@ namespace MSFileInfoScanner.Readers
                     return false;
                 }
 
-                using (var reader = new StreamReader(headerFilePath))
+                using var reader = new StreamReader(headerFilePath);
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var dataLine = reader.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    // All valid lines start with $$
+                    if (!dataLine.StartsWith("$$"))
+                        continue;
+
+                    // Remove the first three characters (we actually remove the first 2 then Trim, since the third character is supposed to be a space)
+
+                    dataLine = dataLine.Substring(2).Trim();
+                    var colonIndex = dataLine.IndexOf(':');
+                    var keyValue = dataLine.Substring(colonIndex + 1).Trim();
+
+                    int functionNumber;
+                    if (dataLine.ToUpper().StartsWith(CAL_FUNCTION_NAME))
                     {
-                        var dataLine = reader.ReadLine();
-
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
-
-                        // All valid lines start with $$
-                        if (!dataLine.StartsWith("$$"))
-                            continue;
-
-                        // Remove the first three characters (we actually remove the first 2 then Trim, since the third character is supposed to be a space)
-
-                        dataLine = dataLine.Substring(2).Trim();
-                        var colonIndex = dataLine.IndexOf(':');
-                        var keyValue = dataLine.Substring(colonIndex + 1).Trim();
-
-                        int functionNumber;
-                        if (dataLine.ToUpper().StartsWith(CAL_FUNCTION_NAME))
+                        // Calibration equation for one of the functions
+                        functionNumber = CIntSafe(dataLine.Substring(CAL_FUNCTION_NAME.Length, colonIndex - CAL_FUNCTION_NAME.Length));
+                        if (functionNumber >= 1 && functionNumber <= thisMSData.FunctionCount)
                         {
-                            // Calibration equation for one of the functions
-                            functionNumber = CIntSafe(dataLine.Substring(CAL_FUNCTION_NAME.Length, colonIndex - CAL_FUNCTION_NAME.Length));
-                            if (functionNumber >= 1 && functionNumber <= thisMSData.FunctionCount)
-                            {
-                                NativeIOParseCalibrationCoefficients(
-                                    keyValue,
-                                    out var calibrationCoefficientCount,
-                                    thisMSData.FunctionInfo[functionNumber].CalibrationCoefficients,
-                                    out var calibrationTypeID);
+                            NativeIOParseCalibrationCoefficients(
+                                keyValue,
+                                out var calibrationCoefficientCount,
+                                thisMSData.FunctionInfo[functionNumber].CalibrationCoefficients,
+                                out var calibrationTypeID);
 
-                                thisMSData.FunctionInfo[functionNumber].CalibrationCoefficientCount = calibrationCoefficientCount;
-                                thisMSData.FunctionInfo[functionNumber].CalTypeID = calibrationTypeID;
-                            }
-                            else
-                            {
-                                // Calibration equation for non-existent function
-                                // This shouldn't happen
-                            }
+                            thisMSData.FunctionInfo[functionNumber].CalibrationCoefficientCount = calibrationCoefficientCount;
+                            thisMSData.FunctionInfo[functionNumber].CalTypeID = calibrationTypeID;
                         }
-                        else if (dataLine.ToUpper().StartsWith(CAL_STD_DEV_FUNCTION_NAME))
+                        else
                         {
-                            functionNumber = CIntSafe(dataLine.Substring(CAL_STD_DEV_FUNCTION_NAME.Length, colonIndex - CAL_STD_DEV_FUNCTION_NAME.Length));
-                            if (functionNumber >= 1 && functionNumber <= thisMSData.FunctionCount)
+                            // Calibration equation for non-existent function
+                            // This shouldn't happen
+                        }
+                    }
+                    else if (dataLine.ToUpper().StartsWith(CAL_STD_DEV_FUNCTION_NAME))
+                    {
+                        functionNumber = CIntSafe(dataLine.Substring(CAL_STD_DEV_FUNCTION_NAME.Length, colonIndex - CAL_STD_DEV_FUNCTION_NAME.Length));
+                        if (functionNumber >= 1 && functionNumber <= thisMSData.FunctionCount)
+                        {
+                            if (double.TryParse(keyValue, out var calStdDev))
                             {
-                                if (double.TryParse(keyValue, out var calStdDev))
-                                {
-                                    thisMSData.FunctionInfo[functionNumber].CalStDev = calStdDev;
-                                }
+                                thisMSData.FunctionInfo[functionNumber].CalStDev = calStdDev;
                             }
                         }
                     }
@@ -1418,108 +1417,107 @@ namespace MSFileInfoScanner.Readers
                     return false;
                 }
 
-                using (var reader = new StreamReader(headerFilePath))
+                using var reader = new StreamReader(headerFilePath);
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var dataLine = reader.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    // All valid lines start with $$
+                    if (!dataLine.StartsWith("$$"))
+                        continue;
+
+                    // Remove the first three characters (we actually remove the first 2 then Trim, since the third character is supposed to be a space)
+                    dataLine = dataLine.Substring(2).Trim();
+                    var colonIndex = dataLine.IndexOf(':');
+                    var keyName = dataLine.Substring(0, colonIndex).ToUpper();
+                    var keyValue = dataLine.Substring(colonIndex + 1).Trim();
+
+                    switch (keyName)
                     {
-                        var dataLine = reader.ReadLine();
+                        case "VERSION":
+                            if (short.TryParse(keyValue, out var versionMajor))
+                            {
+                                headerInfo.VersionMajor = versionMajor;
+                                headerInfo.VersionMinor = (int)(Convert.ToSingle(keyValue) - headerInfo.VersionMajor);
+                            }
+                            break;
+                        case "ACQUIRED NAME":
+                            headerInfo.AcquName = keyValue;
+                            break;
+                        case "ACQUIRED DATE":
+                            headerInfo.AcquDate = keyValue;
+                            break;
+                        case "ACQUIRED TIME":
+                            headerInfo.AcquTime = keyValue;
+                            break;
+                        case "JOB CODE":
+                            headerInfo.JobCode = keyValue;
+                            break;
+                        case "TASK CODE":
+                            headerInfo.TaskCode = keyValue;
+                            break;
+                        case "USER NAME":
+                            headerInfo.UserName = keyValue;
+                            break;
+                        case "INSTRUMENT":
+                            headerInfo.Instrument = keyValue;
+                            break;
+                        case "CONDITIONS":
+                            headerInfo.Conditions = keyValue;
+                            break;
+                        case "LABORATORY NAME":
+                            headerInfo.LabName = keyValue;
+                            break;
+                        case "SAMPLE DESCRIPTION":
+                            headerInfo.SampleDesc = keyValue;
+                            break;
+                        case "SOLVENT DELAY":
+                            headerInfo.SolventDelay = CFloatSafe(keyValue);
+                            break;
+                        case "SUBMITTER":
+                            headerInfo.Submitter = keyValue;
+                            break;
+                        // ReSharper disable once StringLiteralTypo
+                        case "SAMPLEID":
+                            headerInfo.SampleID = keyValue;
+                            break;
+                        case "BOTTLE NUMBER":
+                            headerInfo.BottleNumber = keyValue;
+                            break;
+                        case "PLATE DESC":
+                            headerInfo.PlateDesc = keyValue;
+                            break;
+                        case "MUX STREAM":
+                            headerInfo.MuxStream = CIntSafe(keyValue);
+                            break;
+                        case "CAL MS1 STATIC":
+                            NativeIOParseCalibrationCoefficients(
+                                keyValue,
+                                out var ms1CalibrationCoefficientCount,
+                                headerInfo.CalMS1StaticCoefficients,
+                                out var ms1CalibrationType);
 
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
+                            headerInfo.CalMS1StaticCoefficientCount = ms1CalibrationCoefficientCount;
+                            headerInfo.CalMS1StaticTypeID = ms1CalibrationType;
+                            break;
 
-                        // All valid lines start with $$
-                        if (!dataLine.StartsWith("$$"))
-                            continue;
+                        case "CAL MS2 STATIC":
+                            NativeIOParseCalibrationCoefficients(
+                                keyValue,
+                                out var ms2CalibrationCoefficientCount,
+                                headerInfo.CalMS2StaticCoefficients,
+                                out var ms2CalibrationType);
+                            headerInfo.CalMS2StaticCoefficientCount = ms2CalibrationCoefficientCount;
+                            headerInfo.CalMS2StaticTypeID = ms2CalibrationType;
+                            break;
 
-                        // Remove the first three characters (we actually remove the first 2 then Trim, since the third character is supposed to be a space)
-                        dataLine = dataLine.Substring(2).Trim();
-                        var colonIndex = dataLine.IndexOf(':');
-                        var keyName = dataLine.Substring(0, colonIndex).ToUpper();
-                        var keyValue = dataLine.Substring(colonIndex + 1).Trim();
-
-                        switch (keyName)
-                        {
-                            case "VERSION":
-                                if (short.TryParse(keyValue, out var versionMajor))
-                                {
-                                    headerInfo.VersionMajor = versionMajor;
-                                    headerInfo.VersionMinor = (int)(Convert.ToSingle(keyValue) - headerInfo.VersionMajor);
-                                }
-                                break;
-                            case "ACQUIRED NAME":
-                                headerInfo.AcquName = keyValue;
-                                break;
-                            case "ACQUIRED DATE":
-                                headerInfo.AcquDate = keyValue;
-                                break;
-                            case "ACQUIRED TIME":
-                                headerInfo.AcquTime = keyValue;
-                                break;
-                            case "JOB CODE":
-                                headerInfo.JobCode = keyValue;
-                                break;
-                            case "TASK CODE":
-                                headerInfo.TaskCode = keyValue;
-                                break;
-                            case "USER NAME":
-                                headerInfo.UserName = keyValue;
-                                break;
-                            case "INSTRUMENT":
-                                headerInfo.Instrument = keyValue;
-                                break;
-                            case "CONDITIONS":
-                                headerInfo.Conditions = keyValue;
-                                break;
-                            case "LABORATORY NAME":
-                                headerInfo.LabName = keyValue;
-                                break;
-                            case "SAMPLE DESCRIPTION":
-                                headerInfo.SampleDesc = keyValue;
-                                break;
-                            case "SOLVENT DELAY":
-                                headerInfo.SolventDelay = CFloatSafe(keyValue);
-                                break;
-                            case "SUBMITTER":
-                                headerInfo.Submitter = keyValue;
-                                break;
-                            // ReSharper disable once StringLiteralTypo
-                            case "SAMPLEID":
-                                headerInfo.SampleID = keyValue;
-                                break;
-                            case "BOTTLE NUMBER":
-                                headerInfo.BottleNumber = keyValue;
-                                break;
-                            case "PLATE DESC":
-                                headerInfo.PlateDesc = keyValue;
-                                break;
-                            case "MUX STREAM":
-                                headerInfo.MuxStream = CIntSafe(keyValue);
-                                break;
-                            case "CAL MS1 STATIC":
-                                NativeIOParseCalibrationCoefficients(
-                                    keyValue,
-                                    out var ms1CalibrationCoefficientCount,
-                                    headerInfo.CalMS1StaticCoefficients,
-                                    out var ms1CalibrationType);
-
-                                headerInfo.CalMS1StaticCoefficientCount = ms1CalibrationCoefficientCount;
-                                headerInfo.CalMS1StaticTypeID = ms1CalibrationType;
-                                break;
-
-                            case "CAL MS2 STATIC":
-                                NativeIOParseCalibrationCoefficients(
-                                    keyValue,
-                                    out var ms2CalibrationCoefficientCount,
-                                    headerInfo.CalMS2StaticCoefficients,
-                                    out var ms2CalibrationType);
-                                headerInfo.CalMS2StaticCoefficientCount = ms2CalibrationCoefficientCount;
-                                headerInfo.CalMS2StaticTypeID = ms2CalibrationType;
-                                break;
-
-                            default:
-                                // Ignore it
-                                break;
-                        }
+                        default:
+                            // Ignore it
+                            break;
                     }
                 }
 

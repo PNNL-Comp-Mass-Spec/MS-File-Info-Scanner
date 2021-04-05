@@ -1948,44 +1948,43 @@ namespace MSFileInfoScanner
                 var comparisonType = caseSensitiveElementNames ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
                 // Open the file
-                using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                // Read each line and examine it
+                while (!reader.EndOfStream && linesRead < maximumTextFileLinesToCheck)
                 {
-                    // Read each line and examine it
-                    while (!reader.EndOfStream && linesRead < maximumTextFileLinesToCheck)
+                    var dataLine = reader.ReadLine();
+                    linesRead++;
+
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    dataLine = dataLine.Trim().ToLower();
+
+                    for (var index = 0; index < elementFound.Length; index++)
                     {
-                        var dataLine = reader.ReadLine();
-                        linesRead++;
-
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
-
-                        dataLine = dataLine.Trim().ToLower();
-
-                        for (var index = 0; index < elementFound.Length; index++)
+                        if (elementFound[index])
                         {
-                            if (elementFound[index])
-                            {
-                                continue;
-                            }
-
-                            if (dataLine.IndexOf(elementsToMatch[index], comparisonType) < 0)
-                            {
-                                continue;
-                            }
-
-                            elementFound[index] = true;
-                            elementMatchCount++;
-
-                            if (elementMatchCount == elementFound.Length)
-                            {
-                                allElementsFound = true;
-                            }
-                            break;
+                            continue;
                         }
 
-                        if (allElementsFound)
-                            break;
+                        if (dataLine.IndexOf(elementsToMatch[index], comparisonType) < 0)
+                        {
+                            continue;
+                        }
+
+                        elementFound[index] = true;
+                        elementMatchCount++;
+
+                        if (elementMatchCount == elementFound.Length)
+                        {
+                            allElementsFound = true;
+                        }
+                        break;
                     }
+
+                    if (allElementsFound)
+                        break;
                 }
             }
             catch (Exception ex)
@@ -2054,14 +2053,13 @@ namespace MSFileInfoScanner
 
             var md5Hasher = new System.Security.Cryptography.MD5CryptoServiceProvider();
 
-            using (var reader = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                // Hash contents of this stream
-                var arrHash = md5Hasher.ComputeHash(reader);
+            using var reader = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
-                // Return the hash, formatted as a string
-                return ByteArrayToString(arrHash);
-            }
+            // Hash contents of this stream
+            var arrHash = md5Hasher.ComputeHash(reader);
+
+            // Return the hash, formatted as a string
+            return ByteArrayToString(arrHash);
         }
 
         public string Sha1CalcFile(string path)
@@ -2070,14 +2068,13 @@ namespace MSFileInfoScanner
 
             var sha1Hasher = new System.Security.Cryptography.SHA1CryptoServiceProvider();
 
-            using (var reader = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                // Hash contents of this stream
-                var arrHash = sha1Hasher.ComputeHash(reader);
+            using var reader = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
-                // Return the hash, formatted as a string
-                return ByteArrayToString(arrHash);
-            }
+            // Hash contents of this stream
+            var arrHash = sha1Hasher.ComputeHash(reader);
+
+            // Return the hash, formatted as a string
+            return ByteArrayToString(arrHash);
         }
 
         /// <summary>

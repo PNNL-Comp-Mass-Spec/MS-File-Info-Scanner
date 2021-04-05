@@ -69,46 +69,45 @@ namespace MSFileInfoScanner.Readers
                 // Open the Contents.xml file
                 var filePath = Path.Combine(directoryPath, AGILENT_XML_CONTENTS_FILE);
 
-                using (var reader = new System.Xml.XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using var reader = new System.Xml.XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                while (!reader.EOF)
                 {
-                    while (!reader.EOF)
+                    reader.Read();
+
+                    switch (reader.NodeType)
                     {
-                        reader.Read();
+                        case System.Xml.XmlNodeType.Element:
 
-                        switch (reader.NodeType)
-                        {
-                            case System.Xml.XmlNodeType.Element:
-
-                                if (reader.Name == "AcquiredTime")
+                            if (reader.Name == "AcquiredTime")
+                            {
+                                try
                                 {
-                                    try
+                                    var acquisitionStartTime = reader.ReadElementContentAsDateTime();
+
+                                    // Convert from Universal time to Local time
+                                    var acquisitionTime = acquisitionStartTime.ToLocalTime();
+
+                                    // ReSharper disable CommentTypo
+
+                                    // There have been some cases where the acquisition start time is several years before the file modification time,
+                                    // for example XG_A83CapiHSSWash1.d where the time in the Contents.xml file is 3/20/2005 while the file modification time is 2010
+                                    // Thus, we use a sanity check of a maximum run time of 24 hours
+
+                                    // ReSharper restore CommentTypo
+
+                                    if (datasetFileInfo.AcqTimeEnd.Subtract(acquisitionTime).TotalDays < 1)
                                     {
-                                        var acquisitionStartTime = reader.ReadElementContentAsDateTime();
-
-                                        // Convert from Universal time to Local time
-                                        var acquisitionTime = acquisitionStartTime.ToLocalTime();
-
-                                        // ReSharper disable CommentTypo
-
-                                        // There have been some cases where the acquisition start time is several years before the file modification time,
-                                        // for example XG_A83CapiHSSWash1.d where the time in the Contents.xml file is 3/20/2005 while the file modification time is 2010
-                                        // Thus, we use a sanity check of a maximum run time of 24 hours
-
-                                        // ReSharper restore CommentTypo
-
-                                        if (datasetFileInfo.AcqTimeEnd.Subtract(acquisitionTime).TotalDays < 1)
-                                        {
-                                            datasetFileInfo.AcqTimeStart = acquisitionStartTime.ToLocalTime();
-                                            success = true;
-                                        }
-                                    }
-                                    catch (Exception)
-                                    {
-                                        // Ignore errors here
+                                        datasetFileInfo.AcqTimeStart = acquisitionStartTime.ToLocalTime();
+                                        success = true;
                                     }
                                 }
-                                break;
-                        }
+                                catch (Exception)
+                                {
+                                    // Ignore errors here
+                                }
+                            }
+                            break;
                     }
                 }
             }
@@ -144,54 +143,53 @@ namespace MSFileInfoScanner.Readers
                 // Open the Contents.xml file
                 var filePath = Path.Combine(directoryPath, AGILENT_TIME_SEGMENT_FILE);
 
-                using (var reader = new System.Xml.XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using var reader = new System.Xml.XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                while (!reader.EOF)
                 {
-                    while (!reader.EOF)
+                    reader.Read();
+
+                    switch (reader.NodeType)
                     {
-                        reader.Read();
+                        case System.Xml.XmlNodeType.Element:
+                            switch (reader.Name)
+                            {
+                                case "TimeSegment":
+                                    startTime = 0;
+                                    endTime = 0;
+                                    break;
 
-                        switch (reader.NodeType)
-                        {
-                            case System.Xml.XmlNodeType.Element:
-                                switch (reader.Name)
+                                case "StartTime":
+                                    startTime = reader.ReadElementContentAsDouble();
+                                    break;
+
+                                case "EndTime":
+                                    endTime = reader.ReadElementContentAsDouble();
+                                    break;
+
+                                case "NumOfScans":
+                                    datasetFileInfo.ScanCount += reader.ReadElementContentAsInt();
+                                    success = true;
+                                    break;
+
+                                default:
+                                    // Ignore it
+                                    break;
+                            }
+                            break;
+
+                        case System.Xml.XmlNodeType.EndElement:
+                            if (reader.Name == "TimeSegment")
+                            {
+                                // Store the AcqTime for this time segment
+
+                                if (endTime > startTime)
                                 {
-                                    case "TimeSegment":
-                                        startTime = 0;
-                                        endTime = 0;
-                                        break;
-
-                                    case "StartTime":
-                                        startTime = reader.ReadElementContentAsDouble();
-                                        break;
-
-                                    case "EndTime":
-                                        endTime = reader.ReadElementContentAsDouble();
-                                        break;
-
-                                    case "NumOfScans":
-                                        datasetFileInfo.ScanCount += reader.ReadElementContentAsInt();
-                                        success = true;
-                                        break;
-
-                                    default:
-                                        // Ignore it
-                                        break;
+                                    success = true;
+                                    totalAcqTimeMinutes += endTime - startTime;
                                 }
-                                break;
-
-                            case System.Xml.XmlNodeType.EndElement:
-                                if (reader.Name == "TimeSegment")
-                                {
-                                    // Store the AcqTime for this time segment
-
-                                    if (endTime > startTime)
-                                    {
-                                        success = true;
-                                        totalAcqTimeMinutes += endTime - startTime;
-                                    }
-                                }
-                                break;
-                        }
+                            }
+                            break;
                     }
                 }
             }
