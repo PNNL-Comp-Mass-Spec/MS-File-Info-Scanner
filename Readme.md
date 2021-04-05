@@ -203,7 +203,7 @@ Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
 
 ## License
 
-MS File Info Scanner is licensed under the 2-Clause BSD License; you may not use this file 
+MS File Info Scanner is licensed under the 2-Clause BSD License; you may not use this program 
 except in compliance with the License. You may obtain a copy of the License at 
 https://opensource.org/licenses/BSD-2-Clause
 
