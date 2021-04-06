@@ -45,6 +45,13 @@ def process_file(dataFilePath):
     uprint('Input: ', dataFile)
     data, plotLabels, columnOptions = read_file(dataFile)
 
+    maxChargeToPlot = 6
+
+    if len(columnOptions) >= 4:
+        chargeOptions = columnOptions[3]
+        if 'MaxChargeToPlot' in chargeOptions:
+            maxChargeToPlot = int(chargeOptions['MaxChargeToPlot'])
+
     outputFilePath = str(dataFile.with_suffix('.png'))
 
     if len(data.columns) == 2:
@@ -68,13 +75,14 @@ def process_file(dataFilePath):
         return
 
     if len(data.columns) == 4:
-        # 3D Plot, with a custom color for each data point
+        # 3D Plot, with a custom color for each data point (indicating charge state)
         uprint('Output:', outputFilePath)
         print()
         uprint('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '" vs. "' + data.columns[2] + '" coloring by ' + data.columns[3])
         uprint("  {:,}".format(len(data.index)) + ' data points')
+        uprint("  MaxChargeToPlot: " + str(maxChargeToPlot))
         print()
-        plot_lc_mz_by_charge(outputFilePath, data.columns, data[data.columns[0]], data[data.columns[1]], data[data.columns[2]], data[data.columns[3]], plotLabels['Title'], plotLabels['BottomRight'], plotLabels['BottomLeft'])
+        plot_lc_mz_by_charge(outputFilePath, data.columns, data[data.columns[0]], data[data.columns[1]], data[data.columns[2]], data[data.columns[3]], plotLabels['Title'], plotLabels['BottomRight'], plotLabels['BottomLeft'], maxChargeToPlot)
         return
 
     print('Unsupported number of columns: ' + str(len(data.columns)))
@@ -92,10 +100,25 @@ def read_file(fpath):
 
         # The second line has column options
         # These are semicolon separated key/value pairs for each column, with options for each column separated by a tab
-        # At present, the code does not use these column options
+        # At present, the only option used is MaxChargeToPlot for the Charge column
         columnOptionData = f.readline().split('\t')
         columnOptions = [parse_metadata(colOption) for colOption in columnOptionData]
 
+        # Uncomment to see options
+        #
+        # columnNumber = 0
+        # 
+        # for option in columnOptions:
+        #     columnNumber += 1
+        #     
+        #     print()
+        #     uprint("Column " + str(columnNumber) + " Options:")
+        #     
+        #     for item in option.keys():
+        #         print(item + ": " + option[item])
+        #         
+        # print()
+        
         return data, plotLabels, columnOptions
 
 def set_title_and_labels(ax, plt, baseFontSize, title, xDataMin, xDataMax, xAxisLabel, yAxisLabel, yAxisFormatString, r_label, l_label):
@@ -151,6 +174,10 @@ def set_title_and_labels(ax, plt, baseFontSize, title, xDataMin, xDataMax, xAxis
         if ymin < 0:
             ymin = 0
 
+    # Uncomment to see y-axis range
+    # uprint("ymin = {:,}".format(ymin))
+    # uprint("ymax = {:,}".format(ymax))
+        
     plt.ylim(ymin = ymin, ymax = ymax)
 
     # Set the X axis maximum to the max X value (in other words, we don't want any padding)
@@ -210,7 +237,7 @@ def plot_lc_intensity(outputFilePath, columnNames, lc_scan_num, intensities, tit
     # Uncomment to view the plot with an interactive GUI
     #plt.show()
 
-def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label, chargeData):
+def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label, chargeData, maxChargeToPlot):
     fig = plt.figure(figsize=(8.5333,5.8333), dpi=120)
     ax = fig.add_subplot(111, facecolor='whitesmoke')
 
@@ -242,13 +269,17 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
     # print('NormMax: ' + "{:10.2f}".format(normMax))
 
     if chargeData:
+        # Define colors for charges
         # matplotlib color chart: https://stackoverflow.com/a/37232760
-
+        
         colors = ['blue','red','green','hotpink','peru','darkviolet']
-
+        colorForAdditionalCharges = 'indigo'
+        
+        dataCountOnPlot = 0
         maxChargeWithData = 1
-
-        for chargeIndex in range(6):
+        
+        # Plot charges 1+ through maxChargeToPlot
+        for chargeIndex in range(maxChargeToPlot):
             charge = chargeIndex + 1
 
             indicesToUse = (zData == charge)
@@ -262,6 +293,7 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
             if pointsToPlot < 1:
                 continue
 
+            dataCountOnPlot += pointsToPlot
             maxChargeWithData = charge
 
             if pointsToPlot < 10:
@@ -276,8 +308,19 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
 
             # print("{:10,d}".format(pointsToPlot) + " points, alpha " + format(alpha, ".2f"))
 
-            sc = ax.scatter(xData[indicesToUse], yData[indicesToUse], s=1, color=colors[chargeIndex], alpha=alpha, label=seriesName)
+            if chargeIndex < 6:
+                color = colors[chargeIndex]
+            else:
+                color = colorForAdditionalCharges
+                
+            sc = ax.scatter(xData[indicesToUse], yData[indicesToUse], s=1, color=color, alpha=alpha, label=seriesName)
 
+        if dataCountOnPlot < len(zData):
+            # Not all of the data was plotted because maxChargeToPlot is lower than some of the zData values
+            # Update l_label with the actual number of data points plotted
+            # For example: 42,354 / 51,839 points plotted            
+            l_label = "  {:,} / {:,} points plotted".format(dataCountOnPlot, len(zData))
+        
         # Option 1: Create a legend using the actual symbols and sizes used by the data points
         #           This doesn't work with the small data point sizes that we're using
         # ax.legend()
@@ -305,6 +348,12 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
             # Option 2
             plt.figtext(legendStartX + 0.016, legendStartY - colorRow/20.0, legendLabel, color=plotColor, fontsize=baseFontSize+2)
 
+        if maxChargeWithData > 6:
+            colorRow += 1
+            legendLabel = ">6"
+            legendPatch = mpatches.Patch(color=colorForAdditionalCharges, label=legendLabel)
+            plt.figtext(legendStartX + 0.016, legendStartY - colorRow/20.0, legendLabel, color=colorForAdditionalCharges, fontsize=baseFontSize+2)
+            
         # Option 3: Create a legend with custom patches
         # plt.legend(handles=legendItems, shadow = True, bbox_to_anchor=[0.99, 0.85], loc='center right', facecolor='white')
 
@@ -338,12 +387,12 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
     return plt
 
 def plot_lc_mz(outputFilePath, columnNames, lc_scan_num, mz, intensities, title, r_label, l_label):
-    plt = generate_heat_map(columnNames, lc_scan_num, mz, intensities, title, r_label, l_label, False)
+    plt = generate_heat_map(columnNames, lc_scan_num, mz, intensities, title, r_label, l_label, False, 6)
     plt.savefig(outputFilePath)
     print('3D plot created')
 
-def plot_lc_mz_by_charge(outputFilePath, columnNames, lc_scan_num, mz, intensities, charge, title, r_label, l_label):
-    plt = generate_heat_map(columnNames, lc_scan_num, mz, charge, title, r_label, l_label, True)
+def plot_lc_mz_by_charge(outputFilePath, columnNames, lc_scan_num, mz, intensities, charge, title, r_label, l_label, maxChargeToPlot):
+    plt = generate_heat_map(columnNames, lc_scan_num, mz, charge, title, r_label, l_label, True, maxChargeToPlot)
 
     plt.savefig(outputFilePath)
     print('3D plot (colored by charge) created')
