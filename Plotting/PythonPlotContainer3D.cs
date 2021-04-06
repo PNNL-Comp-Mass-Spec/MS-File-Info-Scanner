@@ -13,14 +13,45 @@ namespace MSFileInfoScanner.Plotting
     {
         // Ignore Spelling: autoscale, gridline, png
 
+        /// <summary>
+        /// Keys are charge states, values are a list of data points for each charge state
+        /// </summary>
         public Dictionary<int, List<ScatterPoint>> PointsByCharge { get; }
 
+        /// <summary>
+        /// Minimum intensity when mapping intensity to color
+        /// </summary>
         public float ColorScaleMinIntensity { get; set; }
+
+        /// <summary>
+        /// Maximum intensity when mapping intensity to color
+        /// </summary>
         public float ColorScaleMaxIntensity { get; set; }
+
+        /// <summary>
+        /// Marker size
+        /// </summary>
         public double MarkerSize { get; set; }
 
+        /// <summary>
+        /// Maximum charge state to display on the plot
+        /// </summary>
+        public int MaxChargeToPlot { get; set; } = 6;
+
+        /// <summary>
+        /// Intensity options
+        /// </summary>
         public AxisInfo ZAxisInfo { get; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="plotTitle"></param>
+        /// <param name="xAxisTitle"></param>
+        /// <param name="yAxisTitle"></param>
+        /// <param name="zAxisTitle"></param>
+        /// <param name="writeDebug"></param>
+        /// <param name="dataSource"></param>
         public PythonPlotContainer3D(
             string plotTitle = "Undefined", string xAxisTitle = "X", string yAxisTitle = "Y", string zAxisTitle = "Z",
             bool writeDebug = false, string dataSource = "") : base(plotTitle, xAxisTitle, yAxisTitle, writeDebug, dataSource)
@@ -58,6 +89,7 @@ namespace MSFileInfoScanner.Plotting
                 // Example XAxis options: Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=1
                 // Example YAxis options: Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=1
                 // Example ZAxis options: Autoscale=true;StringFormat=#,##0;MinorGridlineThickness=1;MarkerSize=0.6;ColorScaleMinIntensity=400.3625;ColorScaleMaxIntensity=9152594
+                // Example Charge options: MaxChargeToPlot=6
 
                 var additionalZAxisOptions = new List<string> {
                     "MarkerSize=" + MarkerSize
@@ -68,18 +100,36 @@ namespace MSFileInfoScanner.Plotting
                     additionalZAxisOptions.Add("ColorScaleMinIntensity=" + ColorScaleMinIntensity);
                     additionalZAxisOptions.Add("ColorScaleMaxIntensity=" + ColorScaleMaxIntensity);
                 }
-                writer.WriteLine(XAxisInfo.GetOptions() + "\t" + YAxisInfo.GetOptions() + "\t" + ZAxisInfo.GetOptions(additionalZAxisOptions));
 
                 var charges = PointsByCharge.Keys.ToList();
                 charges.Sort();
 
                 var includeCharge = charges.Count > 1;
 
+                var columnData = new List<string> {
+                    XAxisInfo.GetOptions(),
+                    YAxisInfo.GetOptions(),
+                    ZAxisInfo.GetOptions(additionalZAxisOptions)};
+
+                if (includeCharge && MaxChargeToPlot > 0)
+                {
+                    columnData.Add(string.Format("MaxChargeToPlot={0}", MaxChargeToPlot));
+                }
+
+                writer.WriteLine(string.Join("\t", columnData));
+
                 // Column names
+                columnData.Clear();
+                columnData.Add(XAxisInfo.Title);
+                columnData.Add(YAxisInfo.Title);
+                columnData.Add(ZAxisInfo.Title);
+
                 if (includeCharge)
-                    writer.WriteLine(XAxisInfo.Title + "\t" + YAxisInfo.Title + "\t" + ZAxisInfo.Title + "\t" + "Charge");
-                else
-                    writer.WriteLine(XAxisInfo.Title + "\t" + YAxisInfo.Title + "\t" + ZAxisInfo.Title);
+                {
+                    columnData.Add("Charge");
+                }
+
+                writer.WriteLine(string.Join("\t", columnData));
 
                 // Data, by charge state
                 foreach (var charge in charges)

@@ -1568,7 +1568,8 @@ namespace MSFileInfoScanner.Plotting
 
             var plotContainer = new PythonPlotContainer3D(plotTitle, "LC Scan Number", yAxisLabel, "Intensity")
             {
-                DeleteTempFiles = Options.DeleteTempFiles
+                DeleteTempFiles = Options.DeleteTempFiles,
+                MaxChargeToPlot = Options.MaxChargeToPlot
             };
 
             if (Options.PlottingDeisotopedData)
