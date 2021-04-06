@@ -354,13 +354,13 @@ namespace MSFileInfoScanner.Plotting
                 case 5:
                     return Colors.SaddleBrown;
                 case 6:
-                    return Colors.Indigo;
+                    return Colors.DarkViolet;
                 case 7:
                     return Colors.LimeGreen;
                 case 8:
                     return Colors.CornflowerBlue;
                 default:
-                    return Colors.Gray;
+                    return Colors.Indigo;
             }
         }
 
