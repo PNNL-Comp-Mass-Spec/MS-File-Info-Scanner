@@ -9,6 +9,8 @@ namespace MSFileInfoScannerInterfaces
     {
         // Ignore Spelling: centroiding, deisotoped
 
+        public const int DEFAULT_MAX_CHARGE_STATE = 12;
+
         public const int DEFAULT_MAX_POINTS_TO_PLOT = 200000;
 
         public const int DEFAULT_MIN_POINTS_PER_SPECTRUM = 2;
@@ -59,6 +61,11 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         /// <remarks>If 0, do not create overview plots</remarks>
         public int OverviewPlotDivisor { get; set; }
+
+        /// <summary>
+        /// Maximum charge state to display when plotting deisotoped data (from a DeconTools _isos.csv file)
+        /// </summary>
+        public int MaxChargeToPlot { get; set; }
 
         /// <summary>
         /// Maximum number of points to plot
@@ -197,6 +204,7 @@ namespace MSFileInfoScannerInterfaces
             {
                 DeleteTempFiles = DeleteTempFiles,
                 OverviewPlotDivisor = OverviewPlotDivisor,
+                MaxChargeToPlot = MaxChargeToPlot,
                 MaxPointsToPlot = MaxPointsToPlot,
                 MinPointsPerSpectrum = MinPointsPerSpectrum,
                 MZResolution = MZResolution,
@@ -228,6 +236,8 @@ namespace MSFileInfoScannerInterfaces
             DeleteTempFiles = true;
 
             OverviewPlotDivisor = options.LCMSOverviewPlotDivisor;
+
+            MaxChargeToPlot = options.LCMSPlotMaxChargeState;
 
             mMaxPointsToPlot = options.LCMSPlotMaxPointsToPlot;
             mMinPointsPerSpectrum = options.LCMSPlotMinPointsPerSpectrum;

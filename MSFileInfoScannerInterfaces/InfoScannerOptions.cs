@@ -147,6 +147,18 @@ namespace MSFileInfoScannerInterfaces
         public int LCMSPlotMinPointsPerSpectrum { get; set; } = LCMSDataPlotterOptions.DEFAULT_MIN_POINTS_PER_SPECTRUM;
 
         /// <summary>
+        /// Maximum charge state to display when plotting deisotoped data (from a DeconTools _isos.csv file)
+        /// </summary>
+        /// <remarks>
+        /// This value cannot be updated via the Options class after MSFileInfoScanner is instantiated
+        /// Use MSFileInfoProcessorBaseClass.LCMS2DPlotOptions instead
+        /// </remarks>
+        [Option("MaxChargeToPlot", "MaxCharge",
+            HelpShowsDefault = true, SecondaryArg = true,
+            HelpText = "Maximum charge state to display when plotting deisotoped data (from a DeconTools _isos.csv file)")]
+        public int LCMSPlotMaxChargeState { get; set; } = LCMSDataPlotterOptions.DEFAULT_MAX_CHARGE_STATE;
+
+        /// <summary>
         /// Maximum points to plot on each LC/MS 2D plot
         /// </summary>
         /// <remarks>
