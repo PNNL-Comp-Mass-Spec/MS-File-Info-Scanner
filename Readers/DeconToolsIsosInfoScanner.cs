@@ -16,7 +16,7 @@ namespace MSFileInfoScanner.Readers
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2013</remarks>
     public class DeconToolsIsosInfoScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: isos, mw, deisotoped
+        // Ignore Spelling: Da, isos, mw, deisotoped
 
         /// <summary>
         /// Constructor
@@ -43,6 +43,11 @@ namespace MSFileInfoScanner.Readers
             public double MZ;
             public float Fit;
             public double MonoMass;
+
+            public override string ToString()
+            {
+                return string.Format("{0:N3} m/z, {1}+, {2:N3} Da", MZ, Charge, MonoMass);
+            }
         }
 
         private struct ScansDataType
@@ -58,6 +63,11 @@ namespace MSFileInfoScanner.Readers
             public int NumPeaks;
             public int NumDeisotoped;
             public string FilterText;
+
+            public override string ToString()
+            {
+                return string.Format("Scan {0} at {1:N2} minutes: {2} peaks, {3} deisotoped", Scan, ElutionTime, NumPeaks, NumDeisotoped);
+            }
         }
 
         public float MaxFit { get; set; }
