@@ -250,7 +250,7 @@ namespace MSFileInfoScannerInterfaces
         public bool CreateDatasetInfoFile { get; set; }
 
         [Option("CreateScanStatsFile", "SS", HelpShowsDefault = false,
-            HelpText = "If supplied, create a _ScanStats.txt  file for each dataset")]
+            HelpText = "If supplied, create files _ScanStats.txt and _ScanStatsEx.txt for each dataset")]
         public bool CreateScanStatsFile { get; set; }
 
         [Option("ComputeQualityScores", "QS",

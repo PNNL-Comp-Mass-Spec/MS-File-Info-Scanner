@@ -41,7 +41,7 @@ namespace MSFileInfoScanner
     {
         // Ignore Spelling: Bruker, centroiding, idx, Micromass, OxyPlot, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
 
-        public const string PROGRAM_DATE = "April 5, 2021";
+        public const string PROGRAM_DATE = "April 29, 2021";
 
         /// <summary>
         /// Constructor
@@ -2290,7 +2290,7 @@ namespace MSFileInfoScanner
             Console.WriteLine("CheckCentroidingStatus:         {0}", TrueFalseToEnabledDisabled(Options.CheckCentroidingStatus));
             Console.WriteLine("Compute Overall Quality Scores: {0}", TrueFalseToEnabledDisabled(Options.ComputeOverallQualityScores));
             Console.WriteLine("Create dataset info XML file:   {0}", TrueFalseToEnabledDisabled(Options.CreateDatasetInfoFile));
-            Console.WriteLine("Create scan stats file:         {0}", TrueFalseToEnabledDisabled(Options.CreateScanStatsFile));
+            Console.WriteLine("Create scan stats files:        {0}", TrueFalseToEnabledDisabled(Options.CreateScanStatsFile));
             Console.WriteLine("MS2MzMin:                       {0:N0}", Options.MS2MzMin);
             Console.WriteLine("SHA-1 hashing:                  {0}", TrueFalseToEnabledDisabled(!Options.DisableInstrumentHash));
             if (Options.ScanStart > 0 || Options.ScanEnd > 0)
