@@ -7,7 +7,7 @@ namespace MSFileInfoScannerInterfaces
 {
     public class InfoScannerOptions
     {
-        // Ignore Spelling: ArgExistsProperty, centroiding, csv, OxyPlot, Html, conf, deisotoped
+        // Ignore Spelling: ArgExistsProperty, centroided, centroiding, conf, csv, deisotoped, Html, OxyPlot, 
 
         /// <summary>
         /// Default dataset stats text file name

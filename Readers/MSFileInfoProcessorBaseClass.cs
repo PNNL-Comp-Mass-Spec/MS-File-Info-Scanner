@@ -19,7 +19,7 @@ namespace MSFileInfoScanner.Readers
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2007</remarks>
     public abstract class MSFileInfoProcessorBaseClass : EventNotifier
     {
-        // Ignore Spelling: Abu, html, href, AcqTime
+        // Ignore Spelling: AcqTime, Abu, Addnl, href, html
 
         public const int PROGRESS_SPECTRA_LOADED = 90;
         public const int PROGRESS_SAVED_TIC_AND_BPI_PLOT = 92;

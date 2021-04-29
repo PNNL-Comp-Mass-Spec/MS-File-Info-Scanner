@@ -18,9 +18,10 @@ namespace MSFileInfoScanner
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: frag, Cn, Xc, Filt, dta, fht, Scannum, PeakScanStart, StatMomentsDataCountUsed, Hyperscore, lcq
-        // Ignore Spelling: extract_msn, ver, amu, Acetyl, Oxy, IodoAcet, Xcorr, Const, Tid, Prot, acqu, acqus, ftms
-        // Ignore Spelling: sptype, mw, mostabundant_mw, fwhm, deisotoped, bioml, taxon, Wiff
+        // Ignore Spelling: Acetyl, acqu, acqus, amu, bioml, Cn, Const, deisotoped, dta, extract_msn
+        // Ignore Spelling: fht, Filt, frag, ftms, fwhm, Hyperscore, IodoAcet, lcq, mostabundant_mw, mw
+        // Ignore Spelling: Orbitrap, Oxy, PeakScanStart, Prot, Proteomics, Scannum, SEQUEST, sptype, StatMomentsDataCountUsed
+        // Ignore Spelling: taxon, Tid, ver, Wiff, Xc, Xcorr,
 
         // ReSharper restore CommentTypo
 

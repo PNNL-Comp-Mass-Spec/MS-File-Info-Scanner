@@ -23,7 +23,7 @@ namespace MSFileInfoScanner.DatasetStats
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)</remarks>
     public class DatasetStatsSummarizer : EventNotifier
     {
-        // Ignore Spelling: yyyy-MM-dd hh:mm:ss tt, utf, AcqTime
+        // Ignore Spelling: AcqTime, centroided, utf, yyyy-MM-dd hh:mm:ss tt
 
         #region "Constants and Enums"
 

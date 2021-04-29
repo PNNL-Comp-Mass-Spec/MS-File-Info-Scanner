@@ -25,7 +25,7 @@ namespace MSFileInfoScanner
     /// </remarks>
     public static class Program
     {
-        // Ignore Spelling: OxyPlot, Conf, nnn
+        // Ignore Spelling: Bruker, Conf, nnn, OxyPlot
 
         private static DateTime mLastProgressTime;
 

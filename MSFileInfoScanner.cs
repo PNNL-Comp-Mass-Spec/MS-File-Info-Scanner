@@ -39,7 +39,7 @@ namespace MSFileInfoScanner
     /// </remarks>
     public sealed class MSFileInfoScanner : iMSFileInfoScanner
     {
-        // Ignore Spelling: OxyPlot, yyyy-MM-dd, hh:mm:ss tt, centroiding, utf, idx, xtr, Shimadzu
+        // Ignore Spelling: Bruker, centroiding, idx, Micromass, OxyPlot, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
 
         public const string PROGRAM_DATE = "April 5, 2021";
 
