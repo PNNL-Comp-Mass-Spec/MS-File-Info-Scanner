@@ -8,6 +8,14 @@ python-3.8.5.exe /passive InstallAllUsers=1 DefaultAllUsersTargetDir=C:\Python38
 After that finishes, install these packages:
 C:\Python38\Scripts\pip install numpy matplotlib pandas
 
+The GUI installer prompts you to "Disable the path length limit"
+* This is a good thing to do, since it will allow long paths to be accessed by both Python and other programs
+
+Steps to manually disable the path length limit (in case Python was installed via the command line)
+* Start RegEdit (you may need to do this from an administrative level command prompt)
+* Navigate to HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem
+* Change DWORD LongPathsEnabled from 0 to 1
+** If LongPathsEnabled does not exist, right click in the whitespace below the Name column and choose New, "DWORD (32-bit) Value"
 
 == Linux (Ubuntu) ==
 
