@@ -17,7 +17,7 @@ namespace MSFileInfoScanner.Readers
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
     public class ThermoRawFileInfoScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: xcalibur
+        // Ignore Spelling: centroided, xcalibur
 
         // Note: The extension must be in all caps
         public const string THERMO_RAW_FILE_EXTENSION = ".RAW";
