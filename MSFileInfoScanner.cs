@@ -41,7 +41,7 @@ namespace MSFileInfoScanner
     {
         // Ignore Spelling: Bruker, centroiding, idx, Micromass, OxyPlot, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
 
-        public const string PROGRAM_DATE = "April 29, 2021";
+        public const string PROGRAM_DATE = "August 14, 2021";
 
         /// <summary>
         /// Constructor
@@ -781,41 +781,45 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
         /// </summary>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>True if success; false if failure</returns>
-        public override bool PostDatasetInfoToDB()
+        public override bool PostDatasetInfoToDB(string datasetName)
         {
-            return PostDatasetInfoToDB(DatasetInfoXML, Options.DatabaseConnectionString, Options.DSInfoStoredProcedure);
+            return PostDatasetInfoToDB(datasetName, DatasetInfoXML, Options.DatabaseConnectionString, Options.DSInfoStoredProcedure);
         }
 
         /// <summary>
         /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
         /// </summary>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="datasetInfoXML">Database info XML</param>
         /// <returns>True if success; false if failure</returns>
-        public override bool PostDatasetInfoToDB(string datasetInfoXML)
+        public override bool PostDatasetInfoToDB(string datasetName, string datasetInfoXML)
         {
-            return PostDatasetInfoToDB(datasetInfoXML, Options.DatabaseConnectionString, Options.DSInfoStoredProcedure);
+            return PostDatasetInfoToDB(datasetName, datasetInfoXML, Options.DatabaseConnectionString, Options.DSInfoStoredProcedure);
         }
 
         /// <summary>
         /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
         /// </summary>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
-        public override bool PostDatasetInfoToDB(string connectionString, string storedProcedureName)
+        public override bool PostDatasetInfoToDB(string datasetName, string connectionString, string storedProcedureName)
         {
-            return PostDatasetInfoToDB(DatasetInfoXML, connectionString, storedProcedureName);
+            return PostDatasetInfoToDB(datasetName, DatasetInfoXML, connectionString, storedProcedureName);
         }
 
         /// <summary>
         /// Post the dataset info in datasetInfoXML to the database, using the specified connection string and stored procedure
         /// </summary>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="datasetInfoXML">Database info XML</param>
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
-        public override bool PostDatasetInfoToDB(string datasetInfoXML, string connectionString, string storedProcedureName)
+        public override bool PostDatasetInfoToDB(string datasetName, string datasetInfoXML, string connectionString, string storedProcedureName)
         {
             const int MAX_RETRY_COUNT = 3;
             const int SEC_BETWEEN_RETRIES = 20;
@@ -856,7 +860,11 @@ namespace MSFileInfoScanner
                     storedProcedureName = "UpdateDatasetFileInfoXML";
                 }
 
-                var dbTools = DbToolsFactory.GetDBTools(connectionString);
+                var applicationName = "MSFileInfoScanner_" + datasetName;
+
+                var connectionStringToUse = DbToolsFactory.AddApplicationNameToConnectionString(connectionString, applicationName);
+
+                var dbTools = DbToolsFactory.GetDBTools(connectionStringToUse);
                 RegisterEvents(dbTools);
 
                 var cmd = dbTools.CreateCommand(storedProcedureName, CommandType.StoredProcedure);
@@ -961,7 +969,11 @@ namespace MSFileInfoScanner
                     storedProcedureName = "CacheDatasetInfoXML";
                 }
 
-                var dbTools = DbToolsFactory.GetDBTools(connectionString);
+                var applicationName = "MSFileInfoScanner_DatasetID_" + datasetID;
+
+                var connectionStringToUse = DbToolsFactory.AddApplicationNameToConnectionString(connectionString, applicationName);
+
+                var dbTools = DbToolsFactory.GetDBTools(connectionStringToUse);
                 RegisterEvents(dbTools);
 
                 var cmd = dbTools.CreateCommand(storedProcedureName, CommandType.StoredProcedure);
@@ -1097,7 +1109,7 @@ namespace MSFileInfoScanner
 
                 if (Options.PostResultsToDMS)
                 {
-                    var dbSuccess = PostDatasetInfoToDB(DatasetInfoXML);
+                    var dbSuccess = PostDatasetInfoToDB(datasetFileInfo.DatasetName, DatasetInfoXML);
                     if (!dbSuccess)
                     {
                         SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);

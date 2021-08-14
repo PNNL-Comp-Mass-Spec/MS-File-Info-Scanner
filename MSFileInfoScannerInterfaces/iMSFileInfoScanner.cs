@@ -95,32 +95,36 @@ namespace MSFileInfoScannerInterfaces
         /// <summary>
         /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
         /// </summary>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>True if success; false if failure</returns>
-        public abstract bool PostDatasetInfoToDB();
+        public abstract bool PostDatasetInfoToDB(string datasetName);
 
         /// <summary>
         /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
         /// </summary>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="datasetInfoXML">Database info XML</param>
         /// <returns>True if success; false if failure</returns>
-        public abstract bool PostDatasetInfoToDB(string datasetInfoXML);
+        public abstract bool PostDatasetInfoToDB(string datasetName, string datasetInfoXML);
 
         /// <summary>
         /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
         /// </summary>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
-        public abstract bool PostDatasetInfoToDB(string connectionString, string storedProcedureName);
+        public abstract bool PostDatasetInfoToDB(string datasetName, string connectionString, string storedProcedureName);
 
         /// <summary>
         /// Post the dataset info in strDatasetInfoXML to the database, using the specified connection string and stored procedure
         /// </summary>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="dsInfoXML">Database info XML</param>
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
-        public abstract bool PostDatasetInfoToDB(string dsInfoXML, string connectionString, string storedProcedureName);
+        public abstract bool PostDatasetInfoToDB(string datasetName, string dsInfoXML, string connectionString, string storedProcedureName);
 
         /// <summary>
         /// Post the dataset info in strDatasetInfoXML to the database, using the specified connection string and stored procedure
