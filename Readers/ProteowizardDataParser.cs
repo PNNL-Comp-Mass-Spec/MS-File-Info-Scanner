@@ -441,6 +441,9 @@ namespace MSFileInfoScanner.Readers
                         OnStatusEvent("Obtaining chromatograms (this could take as long as 60 seconds)");
                     }
 
+                    // Prior to 2021, values in scanTimes were in minutes for Thermo .raw files, but in seconds for Bruker .d directories
+                    // Starting in September 2021, values should be in minutes for both instrument types due to an update to ProteoWizardWrapper
+
                     mPWiz.GetChromatogram(chromatogramIndex, out var chromatogramID, out var scanTimes, out var intensities);
 
                     if (chromatogramID == null)
@@ -565,8 +568,8 @@ namespace MSFileInfoScanner.Readers
 
                 mCancellationToken = new CancellationTokenSource();
 
-                var scanTimes = new double[0];
-                var msLevels = new byte[0];
+                var scanTimes = Array.Empty<double>();
+                var msLevels = Array.Empty<byte>();
 
                 mGetScanTimesStartTime = DateTime.UtcNow;
                 mGetScanTimesMaxWaitTimeSeconds = 90;
@@ -652,17 +655,18 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Read the spectra from the data file
         /// </summary>
-        /// <param name="scanTimes">Array of scan times</param>
+        /// <param name="scanTimes">Array of scan times (in seconds)</param>
         /// <param name="msLevels">List of msLevels</param>
         /// <param name="parserInfo">ProteoWizard parser tracking variables</param>
         private void StoreMSSpectraInfoForScans(
-            double[] scanTimes,
+            IReadOnlyList<double> scanTimes,
             IList<byte> msLevels,
             ProteoWizardParserInfo parserInfo)
         {
-            var spectrumCount = scanTimes.Length;
+            var spectrumCount = scanTimes.Count;
 
             parserInfo.ResetCounts();
+            var minuteBasedScanTimes = new List<double>();
 
             // The scan times returned by .GetScanTimesAndMsLevels() are the acquisition time in seconds from the start of the analysis
             // Convert these to minutes
@@ -671,8 +675,7 @@ namespace MSFileInfoScanner.Readers
                 if (scanIndex >= parserInfo.MinScanIndexWithoutScanTimes)
                     break;
 
-                var scanTimeMinutes = scanTimes[scanIndex] / 60.0;
-                scanTimes[scanIndex] = scanTimeMinutes;
+                minuteBasedScanTimes.Add(scanTimes[scanIndex] / 60.0);
             }
 
             Console.WriteLine();
@@ -684,7 +687,7 @@ namespace MSFileInfoScanner.Readers
             {
                 var scanNumber = scanIndex + 1;
 
-                StoreSingleSpectrum(scanTimes, msLevels, parserInfo, scanIndex);
+                StoreSingleSpectrum(minuteBasedScanTimes[scanIndex], msLevels, parserInfo, scanIndex);
 
                 if (DateTime.UtcNow.Subtract(lastStatusProgressTime).TotalMinutes > 5)
                 {
@@ -723,7 +726,7 @@ namespace MSFileInfoScanner.Readers
         }
 
         private void StoreSingleSpectrum(
-            double[] scanTimes,
+            double scanTimeMinutes,
             IList<byte> msLevels,
             ProteoWizardParserInfo parserInfo,
             int scanIndex)
@@ -741,9 +744,9 @@ namespace MSFileInfoScanner.Readers
                 if (scanIndex >= parserInfo.MinScanIndexWithoutScanTimes)
                 {
                     // msDataSpectrum.RetentionTime is already in minutes
-                    scanTimes[scanIndex] = msDataSpectrum.RetentionTime ?? 0;
+                    scanTimeMinutes = msDataSpectrum.RetentionTime ?? 0;
 
-                    if (msDataSpectrum.Level >= byte.MinValue && msDataSpectrum.Level <= byte.MaxValue)
+                    if (msDataSpectrum.Level is >= byte.MinValue and <= byte.MaxValue)
                     {
                         msLevels[scanIndex] = (byte)msDataSpectrum.Level;
                     }
@@ -789,12 +792,12 @@ namespace MSFileInfoScanner.Readers
 
                 scanStatsEntry.DriftTimeMsec = driftTimeMsec.ToString("0.0###");
 
-                scanStatsEntry.ElutionTime = scanTimes[scanIndex].ToString("0.0###");
+                scanStatsEntry.ElutionTime = scanTimeMinutes.ToString("0.0###");
 
                 // Bump up runtimeMinutes if necessary
-                if (scanTimes[scanIndex] > parserInfo.RuntimeMinutes)
+                if (scanTimeMinutes > parserInfo.RuntimeMinutes)
                 {
-                    parserInfo.RuntimeMinutes = scanTimes[scanIndex];
+                    parserInfo.RuntimeMinutes = scanTimeMinutes;
                 }
 
                 var spectrum = mPWiz.GetSpectrumObject(scanIndex);
@@ -894,13 +897,13 @@ namespace MSFileInfoScanner.Readers
                 if (mSaveTICAndBPIPlots && !parserInfo.TicStored &&
                     (parserInfo.MaxScansForTicAndBpi < 0 || parserInfo.TicAndBpiScansStored < parserInfo.MaxScansForTicAndBpi))
                 {
-                    mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimes[scanIndex], bpi, tic);
+                    mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimeMinutes, bpi, tic);
                     parserInfo.TicAndBpiScansStored++;
                 }
 
                 if (mSaveLCMS2DPlots && addScan)
                 {
-                    mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimes[scanIndex], msDataSpectrum.Mzs.Length,
+                    mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevels[scanIndex], (float)scanTimeMinutes, msDataSpectrum.Mzs.Length,
                         msDataSpectrum.Mzs, msDataSpectrum.Intensities);
                 }
 
