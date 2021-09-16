@@ -1143,20 +1143,9 @@ namespace MSFileInfoScanner.Readers
                         mTICAndBPIPlot.AddData(scanNumber, msLevel, elutionTime, basePeakIntensity, totalIonCurrent);
                     }
 
-                    if (mzList.Length > 0)
+                    if (mzList.Length > 0 && Options.SaveLCMS2DPlots)
                     {
-                        if (Options.SaveLCMS2DPlots)
-                        {
-                            var massIntensityPairs = new double[2, mzList.Length + 1];
-
-                            for (var i = 0; i <= mzList.Length - 1; i++)
-                            {
-                                massIntensityPairs[0, i] = mzList[i];
-                                massIntensityPairs[1, i] = intensityList[i];
-                            }
-
-                            mLCMS2DPlot.AddScan2D(scanNumber, msLevel, elutionTime, mzList.Length, massIntensityPairs);
-                        }
+                        mLCMS2DPlot.AddScan2D(scanNumber, msLevel, elutionTime, mzList, intensityList);
                     }
 
                     scansProcessed++;

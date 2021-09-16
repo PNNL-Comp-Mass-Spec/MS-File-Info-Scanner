@@ -125,6 +125,19 @@ namespace MSFileInfoScanner.Plotting
             mRecentFiles.Add(outputFileInfo);
         }
 
+        public bool AddScan2D(int scanNumber, int msLevel, float scanTimeMinutes, float[] mzList, float[] intensityList)
+        {
+            var massIntensityPairs = new double[2, mzList.Length + 1];
+
+            for (var i = 0; i <= mzList.Length; i++)
+            {
+                massIntensityPairs[0, i] = mzList[i];
+                massIntensityPairs[1, i] = intensityList[i];
+            }
+
+            return AddScan2D(scanNumber, msLevel, scanTimeMinutes, mzList.Length, massIntensityPairs);
+        }
+
         public bool AddScan2D(int scanNumber, int msLevel, float scanTimeMinutes, int ionCount, double[,] massIntensityPairs)
         {
             try
