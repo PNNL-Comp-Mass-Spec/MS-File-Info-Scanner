@@ -25,8 +25,8 @@ namespace MSFileInfoScanner.Readers
         public const int PROGRESS_SAVED_TIC_AND_BPI_PLOT = 92;
         public const int PROGRESS_SAVED_2D_PLOTS = 99;
 
-        protected const int MAX_SCANS_TO_TRACK_IN_DETAIL = 750000;
-        protected const int MAX_SCANS_FOR_TIC_AND_BPI = 1000000;
+        public const int MAX_SCANS_TO_TRACK_IN_DETAIL = 750000;
+        public const int MAX_SCANS_FOR_TIC_AND_BPI = 1000000;
 
         /// <summary>
         /// Constructor
