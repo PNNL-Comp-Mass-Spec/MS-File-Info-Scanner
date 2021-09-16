@@ -41,7 +41,7 @@ namespace MSFileInfoScanner
     {
         // Ignore Spelling: Bruker, centroiding, idx, Micromass, OxyPlot, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
 
-        public const string PROGRAM_DATE = "August 14, 2021";
+        public const string PROGRAM_DATE = "September 15, 2021";
 
         /// <summary>
         /// Constructor
@@ -1397,6 +1397,11 @@ namespace MSFileInfoScanner
                                     knownMSDataType = true;
                                     break;
 
+                                case MzMLFileInfoScanner.MZML_FILE_EXTENSION:
+                                    mMSInfoScanner = new MzMLFileInfoScanner(Options, LCMS2DPlotOptions);
+                                    knownMSDataType = true;
+                                    break;
+
                                 case UIMFInfoScanner.UIMF_FILE_EXTENSION:
                                     mMSInfoScanner = new UIMFInfoScanner(Options, LCMS2DPlotOptions);
                                     knownMSDataType = true;
@@ -1516,6 +1521,7 @@ namespace MSFileInfoScanner
 
             AbortProcessing = false;
             var success = true;
+
             try
             {
                 // Possibly reset the error code

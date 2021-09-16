@@ -136,6 +136,7 @@
     <Compile Include="Readers\GenericFileInfoScanner.cs" />
     <Compile Include="Readers\MassLynxNativeIO.cs" />
     <Compile Include="Readers\MSFileInfoProcessorBaseClass.cs" />
+    <Compile Include="Readers\MzMLFileInfoScanner.cs" />
     <Compile Include="Readers\ProteowizardDataParser.cs" />
     <Compile Include="Readers\ProteowizardParserInfo.cs" />
     <Compile Include="Readers\ProteowizardScanner.cs" />
