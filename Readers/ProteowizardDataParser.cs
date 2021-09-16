@@ -446,8 +446,7 @@ namespace MSFileInfoScanner.Readers
 
                     mPWiz.GetChromatogram(chromatogramIndex, out var chromatogramID, out var scanTimes, out var intensities);
 
-                    if (chromatogramID == null)
-                        chromatogramID = string.Empty;
+                    chromatogramID ??= string.Empty;
 
                     var cvParams = mPWiz.GetChromatogramCVParams(chromatogramIndex);
 
