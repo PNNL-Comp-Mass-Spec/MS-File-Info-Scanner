@@ -27,12 +27,11 @@ namespace MSFileInfoScanner.Readers
         {
             try
             {
-
-                var pWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(datasetFile.FullName);
+                var msFileReader = new pwiz.ProteowizardWrapper.MSDataFileReader(datasetFile.FullName);
 
                 try
                 {
-                    var runStartTime = Convert.ToDateTime(pWiz.RunStartTime);
+                    var runStartTime = Convert.ToDateTime(msFileReader.RunStartTime);
 
                     // Update AcqTimeEnd if possible
                     // Found out by trial and error that we need to use .ToUniversalTime() to adjust the time reported by ProteoWizard
@@ -50,7 +49,7 @@ namespace MSFileInfoScanner.Readers
                 // Instantiate the ProteoWizard Data Parser class
                 // Assumes spectra are high res MS1 and MS2
                 var pWizParser = new ProteoWizardDataParser(
-                    pWiz,
+                    msFileReader,
                     mDatasetStatsSummarizer,
                     mTICAndBPIPlot,
                     mLCMS2DPlot,
@@ -70,19 +69,19 @@ namespace MSFileInfoScanner.Readers
                 var srmDataCached = false;
                 double runtimeMinutes = 0;
 
-                if (pWiz.ChromatogramCount > 0)
+                if (msFileReader.ChromatogramCount > 0)
                 {
                     // Process the chromatograms
                     pWizParser.StoreChromatogramInfo(datasetFileInfo, out ticStored, out srmDataCached, out runtimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
 
-                    datasetFileInfo.ScanCount = pWiz.ChromatogramCount;
+                    datasetFileInfo.ScanCount = msFileReader.ChromatogramCount;
                 }
 
-                if (pWiz.SpectrumCount > 0 && !srmDataCached)
+                if (msFileReader.SpectrumCount > 0 && !srmDataCached)
                 {
                     // Process the spectral data (though only if we did not process SRM data)
-                    var skipExistingScans = (pWiz.ChromatogramCount > 0);
+                    var skipExistingScans = (msFileReader.ChromatogramCount > 0);
                     pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes,
                                                   skipExistingScans,
                                                   skipScansWithNoIons: true,
@@ -91,10 +90,12 @@ namespace MSFileInfoScanner.Readers
 
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
 
-                    datasetFileInfo.ScanCount = pWiz.SpectrumCount;
+                    datasetFileInfo.ScanCount = msFileReader.SpectrumCount;
                 }
 
-                pWiz.Dispose();
+                }
+
+                msFileReader.Dispose();
                 ProgRunner.GarbageCollectNow();
 
                 return true;
