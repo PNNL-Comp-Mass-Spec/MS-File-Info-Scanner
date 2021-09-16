@@ -95,7 +95,7 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         /// <param name="datasetFile"></param>
         /// <param name="datasetFileInfo"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         public bool ProcessWithProteoWizard(FileInfo datasetFile, DatasetFileInfo datasetFileInfo)
         {
             try

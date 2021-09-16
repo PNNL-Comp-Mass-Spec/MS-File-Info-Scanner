@@ -231,6 +231,21 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
+        /// <summary>
+        /// Process an SRM
+        /// </summary>
+        /// <remarks>
+        /// Uses ticScanTimes and ticScanNumbers to determine the closest scan number for each SRM value's scan time
+        /// </remarks>
+        /// <param name="chromatogramID"></param>
+        /// <param name="scanTimes">SRM scan times, in seconds</param>
+        /// <param name="intensities">SRM intensities</param>
+        /// <param name="ticScanTimes">TIC scan times, in seconds</param>
+        /// <param name="ticScanNumbers">TIC scan numbers</param>
+        /// <param name="runtimeMinutes"></param>
+        /// <param name="parent2DData"></param>
+        /// <param name="product2DData"></param>
+        /// <param name="scanTime2DData"></param>
         private void ProcessSRM(
             string chromatogramID,
             float[] scanTimes,
@@ -313,6 +328,15 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
+        /// <summary>
+        /// Process the TIC values, populating ticScanTimes and ticScanNumbers, assuring that their sorted
+        /// </summary>
+        /// <param name="scanTimes">Start time of each scan, in minutes</param>
+        /// <param name="intensities">TIC values for each scan</param>
+        /// <param name="ticScanTimes">Start time of each scan, in minutes (populated by this method)</param>
+        /// <param name="ticScanNumbers">Scan numbers (populated by this method)</param>
+        /// <param name="runtimeMinutes">Input/output: total runtime, in minutes</param>
+        /// <param name="storeInTICAndBPIPlot"></param>
         private void ProcessTIC(
             IReadOnlyList<float> scanTimes,
             IReadOnlyList<float> intensities,
