@@ -591,7 +591,7 @@ namespace MSFileInfoScanner.Readers
                 var scanCount = 0;
                 double maxRunTimeMinutes = 0;
 
-                for (var index = 0; index <= scanDataSorted.Length - 1; index++)
+                for (var index = 0; index < scanDataSorted.Length; index++)
                 {
                     scanCount++;
                     var scanNumber = scanCount;
@@ -1157,7 +1157,7 @@ namespace MSFileInfoScanner.Readers
 
                 var scansProcessed = 0;
 
-                for (var scanNumber = 0; scanNumber <= scanCount - 1; scanNumber++)
+                for (var scanNumber = 0; scanNumber < scanCount; scanNumber++)
                 {
                     float[] mzList;
                     float[] intensityList;

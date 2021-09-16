@@ -148,7 +148,7 @@ namespace MSFileInfoScanner
                 var histogramBinCounts = new int[binCount];
                 var histogramBinStartIntensity = new double[binCount];
 
-                for (var index = 0; index <= binCount - 1; index++)
+                for (var index = 0; index < binCount; index++)
                 {
                     histogramBinStartIntensity[index] = index * binSize;
                 }
@@ -243,7 +243,7 @@ namespace MSFileInfoScanner
                     if (!useFullDataSort)
                     {
                         var dataCountImplicitlyIncluded = 0;
-                        for (var index = 0; index <= dataPointCount - 1; index++)
+                        for (var index = 0; index < dataPointCount; index++)
                         {
                             if (mDataValues[index].Item1 < binToSortAbundanceMinimum)
                             {
@@ -287,7 +287,7 @@ namespace MSFileInfoScanner
                         // binToSortDataIndices should also currently be sorted ascending on "valid data point index" so the following Do Loop within a For Loop should sync things up
 
                         var originalDataArrayIndex = 0;
-                        for (var index = 0; index <= binnedDataCount - 1; index++)
+                        for (var index = 0; index < binnedDataCount; index++)
                         {
                             while (binnedData[index].Item2 > mDataValues[originalDataArrayIndex].Item2)
                             {
@@ -358,7 +358,7 @@ namespace MSFileInfoScanner
                 UpdateProgress(2.333f / subtaskStepCount * 100.0f);
 
                 // Change the abundance values to mSkipDataPointFlag for data up to index dataCount-maximumDataCountInArraysToLoad-1
-                for (var index = 0; index <= dataCount - maximumDataCountInArraysToLoad - 1; index++)
+                for (var index = 0; index < dataCount - maximumDataCountInArraysToLoad; index++)
                 {
                     dataValuesAndIndices[index] = GetSkippedDataPoint(dataValuesAndIndices[index]);
                 }

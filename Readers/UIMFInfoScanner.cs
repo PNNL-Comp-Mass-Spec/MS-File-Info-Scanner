@@ -70,7 +70,7 @@ namespace MSFileInfoScanner.Readers
                 // Call .GetStartAndEndScans to get the start and end Frames
                 GetStartAndEndScans(globalParams.NumFrames, out var frameStart, out var frameEnd);
 
-                for (var masterFrameNumIndex = 0; masterFrameNumIndex <= masterFrameNumList.Count - 1; masterFrameNumIndex++)
+                for (var masterFrameNumIndex = 0; masterFrameNumIndex < masterFrameNumList.Count; masterFrameNumIndex++)
                 {
                     var frameNumber = masterFrameNumList[masterFrameNumIndex];
                     if (!masterFrameList.TryGetValue(frameNumber, out var frameType))
@@ -127,7 +127,7 @@ namespace MSFileInfoScanner.Readers
                     }
 
                     var targetIndex = 0;
-                    for (var ionIndex = 0; ionIndex <= ionCount - 1; ionIndex++)
+                    for (var ionIndex = 0; ionIndex < ionCount; ionIndex++)
                     {
                         if (mzList[ionIndex] > 0)
                         {
@@ -149,7 +149,7 @@ namespace MSFileInfoScanner.Readers
                         // For now, this just computes the average intensity for each scan and then computes and overall average intensity value
 
                         double intensitySum = 0;
-                        for (var ionIndex = 0; ionIndex <= ionCount - 1; ionIndex++)
+                        for (var ionIndex = 0; ionIndex < ionCount; ionIndex++)
                         {
                             intensitySum += intensityList[ionIndex];
                         }
@@ -293,7 +293,7 @@ namespace MSFileInfoScanner.Readers
             double frameStartTimePrevious = -1;
             double frameStartTimeCurrent = 0;
 
-            for (var masterFrameNumIndex = 0; masterFrameNumIndex <= masterFrameNumList.Count - 1; masterFrameNumIndex++)
+            for (var masterFrameNumIndex = 0; masterFrameNumIndex < masterFrameNumList.Count; masterFrameNumIndex++)
             {
                 var frameNumber = masterFrameNumList[masterFrameNumIndex];
 
@@ -481,7 +481,7 @@ namespace MSFileInfoScanner.Readers
                                 }
 
                                 var targetIndex = 0;
-                                for (var ionIndex = 0; ionIndex <= ionCount - 1; ionIndex++)
+                                for (var ionIndex = 0; ionIndex < ionCount; ionIndex++)
                                 {
                                     if (mzList[ionIndex] > 0)
                                     {
@@ -792,7 +792,7 @@ namespace MSFileInfoScanner.Readers
                             var startTimes = new List<double>();
                             double endTimeAddon = 0;
 
-                            for (var index = 0; index <= masterFrameNumList.Length - 1; index++)
+                            for (var index = 0; index < masterFrameNumList.Length; index++)
                             {
                                 frameParams = uimfReader.GetFrameParams(masterFrameNumList[index]);
                                 startTimes.Add(frameParams.GetValueDouble(FrameParamKeyType.StartTimeMinutes));
@@ -824,7 +824,7 @@ namespace MSFileInfoScanner.Readers
                             // Now check for the StartTime changing to a smaller number from one frame to the next
                             // This could happen if the StartTime changed from 1439 to 0 as the system clock hits midnight
                             // Or if the StartTime changes from 59.9 to 0 as the system clock hits the top of a new hour
-                            for (var index = 1; index <= startTimes.Count - 1; index++)
+                            for (var index = 1; index < startTimes.Count; index++)
                             {
                                 if (startTimes[index] < startTimes[index - 1])
                                 {

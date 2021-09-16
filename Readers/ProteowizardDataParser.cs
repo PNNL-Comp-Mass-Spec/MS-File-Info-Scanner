@@ -247,7 +247,7 @@ namespace MSFileInfoScanner.Readers
             var productMZFound = ExtractQ3MZ(chromatogramID, out var productMZ);
             var spectrumCount = scanTimes.Length;
 
-            for (var index = 0; index <= spectrumCount - 1; index++)
+            for (var index = 0; index < spectrumCount; index++)
             {
                 // Find the ScanNumber in the TIC nearest to scanTimes[index]
                 var indexMatch = FindNearestInList(ticScanTimes, scanTimes[index]);
@@ -321,7 +321,7 @@ namespace MSFileInfoScanner.Readers
             ref double runtimeMinutes,
             bool storeInTICAndBPIPlot)
         {
-            for (var scanIndex = 0; scanIndex <= scanTimes.Count - 1; scanIndex++)
+            for (var scanIndex = 0; scanIndex < scanTimes.Count; scanIndex++)
             {
                 ticScanTimes.Add(scanTimes[scanIndex]);
 
@@ -343,7 +343,7 @@ namespace MSFileInfoScanner.Readers
 
             // Make sure ticScanTimes is sorted
             var needToSort = false;
-            for (var index = 1; index <= ticScanTimes.Count - 1; index++)
+            for (var index = 1; index < ticScanTimes.Count; index++)
             {
                 if (ticScanTimes[index] < ticScanTimes[index - 1])
                 {
@@ -365,7 +365,7 @@ namespace MSFileInfoScanner.Readers
                 ticScanTimes.Clear();
                 ticScanNumbers.Clear();
 
-                for (var index = 0; index <= ticScanTimesArray.Length - 1; index++)
+                for (var index = 0; index < ticScanTimesArray.Length; index++)
                 {
                     ticScanTimes.Add(ticScanTimesArray[index]);
                     ticScanNumbers.Add(ticScanNumbersArray[index]);
@@ -408,7 +408,7 @@ namespace MSFileInfoScanner.Readers
             ticStored = false;
             srmDataCached = false;
 
-            for (var chromatogramIndex = 0; chromatogramIndex <= mPWiz.ChromatogramCount - 1; chromatogramIndex++)
+            for (var chromatogramIndex = 0; chromatogramIndex < mPWiz.ChromatogramCount; chromatogramIndex++)
             {
                 try
                 {
@@ -567,7 +567,7 @@ namespace MSFileInfoScanner.Readers
                         // mCancellationToken.Cancel was called in MonitorScanTimeLoadingProgress
 
                         // Determine the scan index where GetScanTimesAndMsLevels exited the for loop
-                        for (var scanIndex = 0; scanIndex <= scanTimes.Length - 1; scanIndex++)
+                        for (var scanIndex = 0; scanIndex < scanTimes.Length; scanIndex++)
                         {
                             if (msLevels[scanIndex] > 0) continue;
 
@@ -642,7 +642,7 @@ namespace MSFileInfoScanner.Readers
 
             // The scan times returned by .GetScanTimesAndMsLevels() are the acquisition time in seconds from the start of the analysis
             // Convert these to minutes
-            for (var scanIndex = 0; scanIndex <= spectrumCount - 1; scanIndex++)
+            for (var scanIndex = 0; scanIndex < spectrumCount; scanIndex++)
             {
                 if (scanIndex >= parserInfo.MinScanIndexWithoutScanTimes)
                     break;
@@ -656,7 +656,7 @@ namespace MSFileInfoScanner.Readers
             var lastDebugProgressTime = DateTime.UtcNow;
             var lastStatusProgressTime = DateTime.UtcNow;
 
-            for (var scanIndex = 0; scanIndex <= spectrumCount - 1; scanIndex++)
+            for (var scanIndex = 0; scanIndex < spectrumCount; scanIndex++)
             {
                 var scanNumber = scanIndex + 1;
 
@@ -829,7 +829,7 @@ namespace MSFileInfoScanner.Readers
                     bpi = 0;
                     double basePeakMZ = 0;
 
-                    for (var index = 0; index <= mzList.Length - 1; index++)
+                    for (var index = 0; index < mzList.Length; index++)
                     {
                         tic += intensities[index];
                         if (intensities[index] > bpi)

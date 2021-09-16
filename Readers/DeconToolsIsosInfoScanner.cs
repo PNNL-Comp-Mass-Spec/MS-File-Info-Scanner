@@ -178,7 +178,7 @@ namespace MSFileInfoScanner.Readers
 
             var maxMonoMass = mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot;
 
-            for (var index = 0; index <= isosData.Count - 1; index++)
+            for (var index = 0; index < isosData.Count; index++)
             {
                 if (isosData[index].Scan > currentScanNumber || index == isosData.Count - 1)
                 {
@@ -197,7 +197,7 @@ namespace MSFileInfoScanner.Readers
                             double tic = 0;
                             double bpi = 0;
 
-                            for (var dataIndex = 0; dataIndex <= ionList.Count - 1; dataIndex++)
+                            for (var dataIndex = 0; dataIndex < ionList.Count; dataIndex++)
                             {
                                 tic += ionList[dataIndex].Intensity;
                                 if (ionList[dataIndex].Intensity > bpi)

@@ -272,7 +272,7 @@ namespace MSFileInfoScanner.Readers
 
                                 var mzList = new List<double>(mzCount);
 
-                                for (var i = 0; i <= mzCount - 1; i++)
+                                for (var i = 0; i < mzCount; i++)
                                 {
                                     mzList.Add(massIntensityPairs[0, i]);
                                 }

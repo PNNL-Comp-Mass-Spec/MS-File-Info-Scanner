@@ -366,7 +366,7 @@ namespace MSFileInfoScanner.Readers
 
             // Copy the data from mLCMS2DPlot to mLCMS2DPlotOverview
             // mLCMS2DPlotOverview will auto-filter the data to track, at most, mLCMS2DPlotOverview.Options.MaxPointsToPlot points
-            for (var index = 0; index <= mLCMS2DPlot.ScanCountCached - 1; index++)
+            for (var index = 0; index < mLCMS2DPlot.ScanCountCached; index++)
             {
                 var scan = mLCMS2DPlot.GetCachedScanByIndex(index);
 

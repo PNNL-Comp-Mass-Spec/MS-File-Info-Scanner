@@ -153,7 +153,7 @@ namespace MSFileInfoScanner
 
             var hexBuilder = new System.Text.StringBuilder(arrInput.Length);
 
-            for (var i = 0; i <= arrInput.Length - 1; i++)
+            for (var i = 0; i < arrInput.Length; i++)
             {
                 hexBuilder.Append(arrInput[i].ToString("X2"));
             }

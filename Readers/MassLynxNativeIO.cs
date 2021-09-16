@@ -1283,7 +1283,7 @@ namespace MSFileInfoScanner.Readers
             calibrationCoefficientCount = 0;
             calibrationTypeID = 0;
 
-            for (var calIndex = 0; calIndex <= calibrationParameters.Length - 1; calIndex++)
+            for (var calIndex = 0; calIndex < calibrationParameters.Length; calIndex++)
             {
                 if (double.TryParse(calibrationParameters[calIndex], out var paramValue))
                 {

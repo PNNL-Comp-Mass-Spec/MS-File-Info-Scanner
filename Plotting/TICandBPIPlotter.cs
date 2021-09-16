@@ -192,7 +192,7 @@ namespace MSFileInfoScanner.Plotting
         /// <remarks>The list of recent files gets cleared each time you call SaveTICAndBPIPlotFiles() or Reset()</remarks>
         public string GetRecentFileInfo(OutputFileTypes fileType)
         {
-            for (var index = 0; index <= mRecentFiles.Count - 1; index++)
+            for (var index = 0; index < mRecentFiles.Count; index++)
             {
                 if (mRecentFiles[index].FileType == fileType)
                 {
@@ -212,7 +212,7 @@ namespace MSFileInfoScanner.Plotting
         /// <remarks>The list of recent files gets cleared each time you call SaveTICAndBPIPlotFiles() or Reset()</remarks>
         public bool GetRecentFileInfo(OutputFileTypes fileType, out string fileName, out string filePath)
         {
-            for (var index = 0; index <= mRecentFiles.Count - 1; index++)
+            for (var index = 0; index < mRecentFiles.Count; index++)
             {
                 if (mRecentFiles[index].FileType == fileType)
                 {
@@ -560,7 +560,7 @@ namespace MSFileInfoScanner.Plotting
             // Now check the first few values
             indexNonZeroValue = -1;
             zeroPointCount = 0;
-            for (var index = 0; index <= chromatogramInfo.ScanCount - 1; index++)
+            for (var index = 0; index < chromatogramInfo.ScanCount; index++)
             {
                 if (Math.Abs(chromatogramInfo.GetDataPoint(index).Intensity) < float.Epsilon)
                 {
@@ -672,7 +672,7 @@ namespace MSFileInfoScanner.Plotting
         {
             var msLevelDefined = false;
 
-            for (var index = 0; index <= chromatogramInfo.ScanCount - 1; index++)
+            for (var index = 0; index < chromatogramInfo.ScanCount; index++)
             {
                 if (chromatogramInfo.GetDataPoint(index).MSLevel > 0)
                 {
@@ -684,7 +684,7 @@ namespace MSFileInfoScanner.Plotting
             if (!msLevelDefined)
             {
                 // Set the MSLevel to 1 for all scans
-                for (var index = 0; index <= chromatogramInfo.ScanCount - 1; index++)
+                for (var index = 0; index < chromatogramInfo.ScanCount; index++)
                 {
                     chromatogramInfo.GetDataPoint(index).MSLevel = 1;
                 }

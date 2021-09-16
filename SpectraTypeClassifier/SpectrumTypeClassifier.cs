@@ -413,7 +413,7 @@ namespace SpectraTypeClassifier
             if (!assumeSorted)
             {
                 // Check whether sorting is required
-                for (var i = 1; i <= mzValues.Count - 1; i++)
+                for (var i = 1; i < mzValues.Count; i++)
                 {
                     if (mzValues[i] < mzValues[i - 1])
                     {
@@ -425,7 +425,7 @@ namespace SpectraTypeClassifier
 
             var ppmDiffs = new List<double>(mzValues.Count);
 
-            for (var i = 1; i <= mzValues.Count - 1; i++)
+            for (var i = 1; i < mzValues.Count; i++)
             {
                 var mz = mzValues[i];
                 var previousMz = mzValues[i - 1];
@@ -472,7 +472,7 @@ namespace SpectraTypeClassifier
             }
 
             // Possibly sort mzValues
-            for (var i = 1; i <= ionCount - 1; i++)
+            for (var i = 1; i < ionCount; i++)
             {
                 if (mzValues[i] < mzValues[i - 1])
                 {
@@ -484,7 +484,7 @@ namespace SpectraTypeClassifier
 
             var ppmDiffs = new List<double>(ionCount);
 
-            for (var i = 1; i <= ionCount - 1; i++)
+            for (var i = 1; i < ionCount; i++)
             {
                 var mz = mzValues[i];
                 var previousMz = mzValues[i - 1];

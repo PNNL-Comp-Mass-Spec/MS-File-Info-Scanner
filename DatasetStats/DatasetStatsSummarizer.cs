@@ -1169,7 +1169,7 @@ namespace MSFileInfoScanner.DatasetStats
             var matchFound = false;
 
             // Look for scanNumber in mDatasetScanStats
-            for (var index = 0; index <= mDatasetScanStats.Count - 1; index++)
+            for (var index = 0; index < mDatasetScanStats.Count; index++)
             {
                 if (mDatasetScanStats[index].ScanNumber != scanNumber) continue;
 

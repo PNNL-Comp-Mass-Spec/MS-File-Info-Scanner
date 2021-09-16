@@ -252,7 +252,7 @@ namespace MSFileInfoScanner.Readers
 
                 datasetFileInfo.ScanCount = reader.Header.SpectraCount;
 
-                for (var spectrumIndex = 0; spectrumIndex <= datasetFileInfo.ScanCount - 1; spectrumIndex++)
+                for (var spectrumIndex = 0; spectrumIndex < datasetFileInfo.ScanCount; spectrumIndex++)
                 {
                     currentIndex = spectrumIndex;
 
@@ -304,7 +304,7 @@ namespace MSFileInfoScanner.Readers
                                 var ionsMZ = new double[mzList.Count];
                                 var ionsIntensity = new double[mzList.Count];
 
-                                for (var index = 0; index <= mzList.Count - 1; index++)
+                                for (var index = 0; index < mzList.Count; index++)
                                 {
                                     ionsMZ[index] = mzList[index];
                                     ionsIntensity[index] = intensityList[index];
