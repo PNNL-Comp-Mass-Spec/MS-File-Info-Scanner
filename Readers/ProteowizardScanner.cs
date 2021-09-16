@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScannerInterfaces;
 using PRISM;
+using pwiz.ProteowizardWrapper;
 
 namespace MSFileInfoScanner.Readers
 {
@@ -15,6 +18,76 @@ namespace MSFileInfoScanner.Readers
         /// <param name="lcms2DPlotOptions"></param>
         protected ProteoWizardScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) : base(options, lcms2DPlotOptions)
         {
+        }
+
+        /// <summary>
+        /// This function is used to determine one or more overall quality scores
+        /// </summary>
+        /// <param name="msFileReader"></param>
+        /// <param name="datasetFileInfo"></param>
+        private void ComputeQualityScores(
+            MSDataFileReader msFileReader,
+            DatasetFileInfo datasetFileInfo)
+        {
+            float overallScore;
+
+            double overallAvgIntensitySum = 0;
+            var overallAvgCount = 0;
+
+            if (mLCMS2DPlot.ScanCountCached > 0)
+            {
+                // Obtain the overall average intensity value using the data cached in mLCMS2DPlot
+                // This avoids having to reload all of the data using msFileReader
+                const int msLevelFilter = 1;
+                overallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(msLevelFilter);
+            }
+            else
+            {
+                var scanCount = msFileReader.SpectrumCount;
+                GetStartAndEndScans(scanCount, out var scanStart, out var scanEnd);
+
+                var scanNumberToIndexMap = msFileReader.GetScanToIndexMapping();
+
+                for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
+                {
+                    if (!scanNumberToIndexMap.TryGetValue(scanNumber, out var scanIndex))
+                    {
+                        continue;
+                    }
+
+                    var spectrum = msFileReader.GetSpectrum(scanIndex, true);
+
+                    if (spectrum == null)
+                    {
+                        continue;
+                    }
+
+                    if (spectrum.Intensities.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    // Keep track of the quality scores and then store one or more overall quality scores in datasetFileInfo.OverallQualityScore
+                    // For now, this just computes the average intensity for each scan and then computes and overall average intensity value
+
+                    var intensitySum = spectrum.Intensities.Sum();
+
+                    overallAvgIntensitySum += intensitySum / spectrum.Intensities.Length;
+
+                    overallAvgCount++;
+                }
+
+                if (overallAvgCount > 0)
+                {
+                    overallScore = (float)(overallAvgIntensitySum / overallAvgCount);
+                }
+                else
+                {
+                    overallScore = 0;
+                }
+            }
+
+            datasetFileInfo.OverallQualityScore = overallScore;
         }
 
         /// <summary>
@@ -91,6 +164,12 @@ namespace MSFileInfoScanner.Readers
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
 
                     datasetFileInfo.ScanCount = msFileReader.SpectrumCount;
+                }
+
+                if (Options.ComputeOverallQualityScores)
+                {
+                    // Note that this call will also create the TICs and BPIs
+                    ComputeQualityScores(msFileReader, datasetFileInfo);
                 }
 
                 }
