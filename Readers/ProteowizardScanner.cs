@@ -172,6 +172,11 @@ namespace MSFileInfoScanner.Readers
                     ComputeQualityScores(msFileReader, datasetFileInfo);
                 }
 
+                if (Options.MS2MzMin > 0 && datasetFileInfo.ScanCount > 0)
+                {
+                    // Verify that all of the MS2 spectra have m/z values below the required minimum
+                    // Useful for validating that reporter ions can be detected
+                    ValidateMS2MzMin();
                 }
 
                 msFileReader.Dispose();
