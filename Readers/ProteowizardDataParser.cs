@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -7,6 +8,8 @@ using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScanner.Plotting;
 using PRISM;
 using pwiz.ProteowizardWrapper;
+using pwiz.ProteowizardWrapper.Common.Chemistry;
+using ThermoRawFileReader;
 
 namespace MSFileInfoScanner.Readers
 {
@@ -757,29 +760,75 @@ namespace MSFileInfoScanner.Readers
                     ScanType = msDataSpectrum.Level
                 };
 
-                if (msLevels[scanIndex] > 1)
+                if (int.TryParse(msDataSpectrum.Id, out var actualScanNumber))
                 {
-                    if (HighResMS2)
+                    scanStatsEntry.ScanNumber = actualScanNumber;
+                }
+
+                var validMetadata = mPWiz.GetScanMetadata(
+                    spectrumIndex,
+                    out var scanStartTime,
+                    out var ionInjectionTime,
+                    out var scanFilterText,
+                    out var lowMass,
+                    out var highMass);
+
+                string genericScanFilter;
+                bool isHighRes;
+
+                if (validMetadata)
+                {
+                    genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanFilterText);
+                    scanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanFilterText);
+
+                    if (msLevels[spectrumIndex] > 1)
                     {
-                        scanStatsEntry.ScanTypeName = "HMSn";
+                        isHighRes = scanStatsEntry.ScanTypeName.IndexOf("HMSn", StringComparison.OrdinalIgnoreCase) >= 0;
+                    }
+                    else
+                    {
+                        isHighRes = scanStatsEntry.ScanTypeName.IndexOf("HMS", StringComparison.OrdinalIgnoreCase) >= 0;
+                    }
+
+                    scanStatsEntry.MzMin = lowMass;
+                    scanStatsEntry.MzMax = highMass;
+                    scanStatsEntry.ExtendedScanInfo.IonInjectionTime = ionInjectionTime.ToString(CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    genericScanFilter = string.Empty;
+
+                    if (msLevels[spectrumIndex] > 1)
+                    {
+                        isHighRes = HighResMS2;
+                        scanStatsEntry.ScanTypeName = HighResMS2 ? "HMSn" : "MSn";
+                    }
+                    else
+                    {
+                        isHighRes = HighResMS1;
+                        scanStatsEntry.ScanTypeName = HighResMS1 ? "HMS" : "MS";
+                    }
+                }
+
+                if (msLevels[spectrumIndex] > 1)
+                {
+                    if (isHighRes)
+                    {
                         parserInfo.ScanCountHMSn++;
                     }
                     else
                     {
-                        scanStatsEntry.ScanTypeName = "MSn";
                         parserInfo.ScanCountMSn++;
                     }
                 }
                 else
                 {
-                    if (HighResMS1)
+                    if (isHighRes)
                     {
-                        scanStatsEntry.ScanTypeName = "HMS";
                         parserInfo.ScanCountHMS++;
                     }
                     else
                     {
-                        scanStatsEntry.ScanTypeName = "MS";
                         parserInfo.ScanCountMS++;
                     }
                 }
@@ -787,7 +836,7 @@ namespace MSFileInfoScanner.Readers
                 var ionMobility = msDataSpectrum.IonMobility.Mobility ?? 0;
                 var ionMobilityUnits = msDataSpectrum.IonMobility.Units;
 
-                scanStatsEntry.ScanFilterText = driftTimeMsec > 0 ? "IMS" : string.Empty;
+                scanStatsEntry.ScanFilterText = ionMobility > 0 ? "IMS" : genericScanFilter;
                 scanStatsEntry.ExtendedScanInfo.ScanFilterText = scanStatsEntry.ScanFilterText;
 
                 scanStatsEntry.DriftTimeMsec = ionMobilityUnits switch
