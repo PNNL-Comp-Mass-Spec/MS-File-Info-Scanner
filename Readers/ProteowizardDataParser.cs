@@ -784,12 +784,19 @@ namespace MSFileInfoScanner.Readers
                     }
                 }
 
-                var driftTimeMsec = msDataSpectrum.DriftTimeMsec ?? 0;
+                var ionMobility = msDataSpectrum.IonMobility.Mobility ?? 0;
+                var ionMobilityUnits = msDataSpectrum.IonMobility.Units;
 
                 scanStatsEntry.ScanFilterText = driftTimeMsec > 0 ? "IMS" : string.Empty;
                 scanStatsEntry.ExtendedScanInfo.ScanFilterText = scanStatsEntry.ScanFilterText;
 
-                scanStatsEntry.DriftTimeMsec = driftTimeMsec.ToString("0.0###");
+                scanStatsEntry.DriftTimeMsec = ionMobilityUnits switch
+                {
+                    eIonMobilityUnits.drift_time_msec => ionMobility.ToString("0.0###"),
+                    eIonMobilityUnits.none => string.Empty,
+                    eIonMobilityUnits.unknown => string.Empty,
+                    _ => msDataSpectrum.IonMobility.ToString()
+                };
 
                 scanStatsEntry.ElutionTime = scanTimeMinutes.ToString("0.0###");
 
