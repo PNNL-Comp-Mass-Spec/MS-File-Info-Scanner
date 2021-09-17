@@ -100,6 +100,17 @@ namespace MSFileInfoScanner.Readers
         {
             try
             {
+                if (Options.SaveTICAndBPIPlots)
+                {
+                    // Initialize the TIC and BPI arrays
+                    InitializeTICAndBPI();
+                }
+
+                if (Options.SaveLCMS2DPlots)
+                {
+                    InitializeLCMS2DPlot();
+                }
+
                 var msFileReader = new pwiz.ProteowizardWrapper.MSDataFileReader(datasetFile.FullName);
 
                 try
