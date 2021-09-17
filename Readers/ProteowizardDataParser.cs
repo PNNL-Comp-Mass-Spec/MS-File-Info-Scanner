@@ -44,6 +44,8 @@ namespace MSFileInfoScanner.Readers
         private DateTime mLastScanLoadingStatusProgressTime;
         private bool mReportedTotalSpectraToExamine;
 
+        private int mScanTimeMismatchCount;
+
         private bool mWarnedAccessViolationException;
 
         public bool HighResMS1 { get; set; }
@@ -793,6 +795,19 @@ namespace MSFileInfoScanner.Readers
                     scanStatsEntry.MzMin = lowMass;
                     scanStatsEntry.MzMax = highMass;
                     scanStatsEntry.ExtendedScanInfo.IonInjectionTime = ionInjectionTime.ToString(CultureInfo.InvariantCulture);
+
+                    if (Math.Abs(scanStartTime - scanTimeMinutes) > 0.01)
+                    {
+                        mScanTimeMismatchCount++;
+
+                        if (mScanTimeMismatchCount <= 10)
+                        {
+                            OnWarningEvent(string.Format(
+                                "For scan {0}, the scanStartTime reported by GetScanMetadata does not agree with " +
+                                "the scanTimes array; {1:F4} vs. {2:F4}",
+                                scanNumber, scanStartTime, scanTimeMinutes));
+                        }
+                    }
                 }
                 else
                 {
