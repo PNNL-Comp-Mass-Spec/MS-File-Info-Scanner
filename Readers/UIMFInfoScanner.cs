@@ -70,14 +70,13 @@ namespace MSFileInfoScanner.Readers
                 // Call .GetStartAndEndScans to get the start and end Frames
                 GetStartAndEndScans(globalParams.NumFrames, out var frameStart, out var frameEnd);
 
-                for (var masterFrameNumIndex = 0; masterFrameNumIndex < masterFrameNumList.Count; masterFrameNumIndex++)
+                foreach (var frameNumber in masterFrameNumList)
                 {
-                    var frameNumber = masterFrameNumList[masterFrameNumIndex];
                     if (!masterFrameList.TryGetValue(frameNumber, out var frameType))
                     {
                         OnWarningEvent(string.Format(
-                                           "FrameType {0} not found in dictionary masterFrameList; ignoring frame {1} in ComputeQualityScores",
-                                           frameType, frameNumber));
+                            "FrameType {0} not found in dictionary masterFrameList; ignoring frame {1} in ComputeQualityScores",
+                            frameType, frameNumber));
 
                         continue;
                     }
@@ -796,9 +795,9 @@ namespace MSFileInfoScanner.Readers
                             var startTimes = new List<double>();
                             double endTimeAddon = 0;
 
-                            for (var index = 0; index < masterFrameNumList.Length; index++)
+                            foreach (var frameNumber in masterFrameNumList)
                             {
-                                frameParams = uimfReader.GetFrameParams(masterFrameNumList[index]);
+                                frameParams = uimfReader.GetFrameParams(frameNumber);
                                 startTimes.Add(frameParams.GetValueDouble(FrameParamKeyType.StartTimeMinutes));
                             }
 
