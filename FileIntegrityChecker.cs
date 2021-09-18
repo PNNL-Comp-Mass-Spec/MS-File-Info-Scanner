@@ -917,34 +917,31 @@ namespace MSFileInfoScanner
             try
             {
                 // Open the file
-                using (
-                    var reader =
-                        new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                // Read each line in the file and look for the expected parameter lines
+                while (!reader.EndOfStream && linesRead < MAX_LINES_TO_READ)
                 {
-                    // Read each line in the file and look for the expected parameter lines
-                    while (!reader.EndOfStream && linesRead < MAX_LINES_TO_READ)
+                    var dataLine = reader.ReadLine();
+                    linesRead++;
+
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    if (dataLine.StartsWith(MASS_TOLERANCE_LINE))
                     {
-                        var dataLine = reader.ReadLine();
-                        linesRead++;
+                        massToleranceFound = true;
+                    }
 
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
+                    if (dataLine.StartsWith(FRAGMENT_TOLERANCE_LINE))
+                    {
+                        fragmentToleranceFound = true;
+                    }
 
-                        if (dataLine.StartsWith(MASS_TOLERANCE_LINE))
-                        {
-                            massToleranceFound = true;
-                        }
-
-                        if (dataLine.StartsWith(FRAGMENT_TOLERANCE_LINE))
-                        {
-                            fragmentToleranceFound = true;
-                        }
-
-                        if (massToleranceFound && fragmentToleranceFound)
-                        {
-                            fileIsValid = true;
-                            break;
-                        }
+                    if (massToleranceFound && fragmentToleranceFound)
+                    {
+                        fileIsValid = true;
+                        break;
                     }
                 }
             }
@@ -976,43 +973,40 @@ namespace MSFileInfoScanner
             try
             {
                 // Open the file
-                using (
-                    var reader =
-                        new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                using var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                // Confirm that the first two lines look like:
+                //  ICR-2LS Data File (GA Anderson & JE Bruce); output from MASIC by Matthew E Monroe
+                //  Version 2.4.2974.38283; February 22, 2008
+
+                while (!reader.EndOfStream && linesRead < 2)
                 {
-                    // Confirm that the first two lines look like:
-                    //  ICR-2LS Data File (GA Anderson & JE Bruce); output from MASIC by Matthew E Monroe
-                    //  Version 2.4.2974.38283; February 22, 2008
+                    var dataLine = reader.ReadLine();
+                    linesRead++;
 
-                    while (!reader.EndOfStream && linesRead < 2)
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    if (linesRead == 1)
                     {
-                        var dataLine = reader.ReadLine();
-                        linesRead++;
-
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
-
-                        if (linesRead == 1)
+                        if (!dataLine.ToUpper().StartsWith(ICR2LS_LINE_START))
                         {
-                            if (!dataLine.ToUpper().StartsWith(ICR2LS_LINE_START))
-                            {
-                                fileIsValid = false;
-                                break;
-                            }
-                        }
-                        else if (linesRead == 2)
-                        {
-                            if (!dataLine.ToUpper().StartsWith(VERSION_LINE_START))
-                            {
-                                fileIsValid = false;
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            // This code shouldn't be reached
+                            fileIsValid = false;
                             break;
                         }
+                    }
+                    else if (linesRead == 2)
+                    {
+                        if (!dataLine.ToUpper().StartsWith(VERSION_LINE_START))
+                        {
+                            fileIsValid = false;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        // This code shouldn't be reached
+                        break;
                     }
                 }
             }

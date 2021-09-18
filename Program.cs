@@ -175,29 +175,28 @@ namespace MSFileInfoScanner
             if (!paramFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            using (var paramFileReader = new StreamReader(new FileStream(paramFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            using var paramFileReader = new StreamReader(new FileStream(paramFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+            var linesRead = 0;
+            while (!paramFileReader.EndOfStream && linesRead < 5)
             {
-                var linesRead = 0;
-                while (!paramFileReader.EndOfStream && linesRead < 5)
+                var dataLine = paramFileReader.ReadLine();
+                if (string.IsNullOrWhiteSpace(dataLine))
+                    continue;
+
+                linesRead++;
+
+                var trimmedLine = dataLine.Trim();
+                if (trimmedLine.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase) ||
+                    trimmedLine.StartsWith("<sections", StringComparison.OrdinalIgnoreCase))
                 {
-                    var dataLine = paramFileReader.ReadLine();
-                    if (string.IsNullOrWhiteSpace(dataLine))
-                        continue;
-
-                    linesRead++;
-
-                    var trimmedLine = dataLine.Trim();
-                    if (trimmedLine.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase) ||
-                        trimmedLine.StartsWith("<sections", StringComparison.OrdinalIgnoreCase))
-                    {
-                        ConsoleMsgUtils.ShowWarning(
-                            "MSFileInfoScanner v2.x uses Key=Value parameter files\n" +
-                            "{0} is an XML file\n" +
-                            "For example parameter files, see {1}",
-                            paramFile.Name, "https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/tree/master/docs");
-                        ConsoleMsgUtils.ShowWarning("Aborting");
-                        return true;
-                    }
+                    ConsoleMsgUtils.ShowWarning(
+                        "MSFileInfoScanner v2.x uses Key=Value parameter files\n" +
+                        "{0} is an XML file\n" +
+                        "For example parameter files, see {1}",
+                        paramFile.Name, "https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/tree/master/docs");
+                    ConsoleMsgUtils.ShowWarning("Aborting");
+                    return true;
                 }
             }
 
