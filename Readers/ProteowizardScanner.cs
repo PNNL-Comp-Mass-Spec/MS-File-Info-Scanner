@@ -11,6 +11,11 @@ namespace MSFileInfoScanner.Readers
     public abstract class ProteoWizardScanner : MSFileInfoProcessorBaseClass
     {
         /// <summary>
+        /// Class MzMLFileInfoScanner sets this to true
+        /// </summary>
+        public bool InputFileIsMzML { get; set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="options"></param>
@@ -102,26 +107,26 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Load data using the ProteoWizardWrapper
         /// </summary>
-        /// <param name="datasetFile"></param>
+        /// <param name="datasetFileOrDirectory"></param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if successful, false if an error</returns>
-        public bool ProcessWithProteoWizard(FileInfo datasetFile, DatasetFileInfo datasetFileInfo)
+        public bool ProcessWithProteoWizard(FileSystemInfo datasetFileOrDirectory, DatasetFileInfo datasetFileInfo)
         {
             try
             {
-
-                var msFileReader = new pwiz.ProteowizardWrapper.MSDataFileReader(datasetFile.FullName);
+                var msDataFileReader = new pwiz.ProteowizardWrapper.MSDataFileReader(datasetFileOrDirectory.FullName);
 
                 try
                 {
-                    var runStartTime = Convert.ToDateTime(msFileReader.RunStartTime);
+                    var runStartTime = GetRunStartTime(msDataFileReader);
 
-                    // Update AcqTimeEnd if possible
-                    // Found out by trial and error that we need to use .ToUniversalTime() to adjust the time reported by ProteoWizard
-                    runStartTime = runStartTime.ToUniversalTime();
-                    if (runStartTime < datasetFileInfo.AcqTimeEnd && datasetFileInfo.AcqTimeEnd.Subtract(runStartTime).TotalDays < 1)
+                    // Possibly update AcqTimeStart
+                    // In particular, if reading a .mzML file, AcqTimeStart and AcqTimeEnd will initially be set to the modification time of the .mzML file
+
+                    if (runStartTime < datasetFileInfo.AcqTimeEnd && datasetFileInfo.AcqTimeEnd.Subtract(runStartTime).TotalDays < 1 ||
+                        InputFileIsMzML)
                     {
-                        datasetFileInfo.AcqTimeStart = runStartTime;
+                        UpdateAcqStartAndEndTimes(datasetFileInfo, msDataFileReader, runStartTime);
                     }
                 }
                 catch (Exception)

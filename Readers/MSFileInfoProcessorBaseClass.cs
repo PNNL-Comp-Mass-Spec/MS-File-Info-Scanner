@@ -8,6 +8,7 @@ using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScanner.Plotting;
 using MSFileInfoScannerInterfaces;
 using PRISM;
+using pwiz.ProteowizardWrapper;
 using ThermoFisher.CommonCore.Data.Business;
 using ThermoRawFileReader;
 
@@ -19,7 +20,7 @@ namespace MSFileInfoScanner.Readers
     /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2007</remarks>
     public abstract class MSFileInfoProcessorBaseClass : EventNotifier
     {
-        // Ignore Spelling: AcqTime, Abu, Addnl, href, html
+        // Ignore Spelling: AcqTime, Abu, Addnl, Bruker, href, html
 
         public const int PROGRESS_SPECTRA_LOADED = 90;
         public const int PROGRESS_SAVED_TIC_AND_BPI_PLOT = 92;
@@ -972,6 +973,21 @@ namespace MSFileInfoScanner.Readers
             return html;
         }
 
+        [CLSCompliant(false)]
+        protected DateTime GetRunStartTime(MSDataFileReader msDataFileReader)
+        {
+            var runStartTime = Convert.ToDateTime(msDataFileReader.RunStartTime);
+
+            // On Bruker instruments, RunStartTime is not the actual time of day that the data was acquired
+            // Possibly update the time, based on the instrument model
+
+            var instrumentConfig = msDataFileReader.GetInstrumentConfigInfoList();
+
+            var convertToLocalTime = instrumentConfig.Any(item => item.Model.StartsWith("Bruker"));
+
+            return convertToLocalTime ? runStartTime.ToUniversalTime() : runStartTime;
+        }
+
         /// <summary>
         /// Converts an integer to engineering notation
         /// For example, 50000 will be returned as 50K
@@ -1008,11 +1024,9 @@ namespace MSFileInfoScanner.Readers
 
                 try
                 {
-                    var runStartTime = Convert.ToDateTime(pWiz.RunStartTime);
+                    var runStartTime = GetRunStartTime(msDataFileReader);
 
-                    // Update AcqTimeEnd if possible
-                    // Found out by trial and error that we need to use .ToUniversalTime() to adjust the time reported by ProteoWizard
-                    runStartTime = runStartTime.ToUniversalTime();
+                    // Possibly update AcqTimeStart
                     if (runStartTime < datasetFileInfo.AcqTimeEnd)
                     {
                         if (datasetFileInfo.AcqTimeEnd.Subtract(runStartTime).TotalDays < 1)
@@ -1020,7 +1034,7 @@ namespace MSFileInfoScanner.Readers
                             if (datasetFileInfo.AcqTimeStart == DateTime.MinValue ||
                                 Math.Abs(datasetFileInfo.AcqTimeStart.Subtract(runStartTime).TotalSeconds) > 0)
                             {
-                                datasetFileInfo.AcqTimeStart = runStartTime;
+                                UpdateAcqStartAndEndTimes(datasetFileInfo, msDataFileReader, runStartTime);
                             }
                         }
                     }
@@ -1131,6 +1145,26 @@ namespace MSFileInfoScanner.Readers
             }
 
             OnDebugEvent(fileInfo.ToString());
+        }
+
+        [CLSCompliant(false)]
+        protected void UpdateAcqStartAndEndTimes(DatasetFileInfo datasetFileInfo, MSDataFileReader msDataFileReader, DateTime runStartTime)
+        {
+            datasetFileInfo.AcqTimeStart = runStartTime;
+
+            try
+            {
+                var lastSpectrumIndex = msDataFileReader.SpectrumCount - 1;
+                var validMetadata = msDataFileReader.GetScanMetadata(lastSpectrumIndex, out var scanStartTime, out _, out _, out _, out _);
+                if (validMetadata)
+                {
+                    datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(scanStartTime);
+                }
+            }
+            catch (Exception ex)
+            {
+                OnWarningEvent("Error determining the elution time of the final spectrum in the file: " + ex.Message);
+            }
         }
 
         /// <summary>

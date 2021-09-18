@@ -229,7 +229,9 @@ namespace MSFileInfoScanner.Readers
             {
                 var acqTimeStartAlt = datasetFileInfo.AcqTimeEnd.AddMinutes(-runtimeMinutes);
 
-                if (acqTimeStartAlt < datasetFileInfo.AcqTimeStart && datasetFileInfo.AcqTimeStart.Subtract(acqTimeStartAlt).TotalDays < 1)
+                if (acqTimeStartAlt < datasetFileInfo.AcqTimeStart &&
+                    datasetFileInfo.AcqTimeStart.Subtract(acqTimeStartAlt).TotalSeconds > 10 &&
+                    datasetFileInfo.AcqTimeStart.Subtract(acqTimeStartAlt).TotalDays < 1)
                 {
                     datasetFileInfo.AcqTimeStart = acqTimeStartAlt;
                 }

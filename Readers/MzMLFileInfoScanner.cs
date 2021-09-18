@@ -20,7 +20,8 @@ namespace MSFileInfoScanner.Readers
         /// Parameterless constructor
         /// </summary>
         public MzMLFileInfoScanner() : this(new InfoScannerOptions(), new LCMSDataPlotterOptions())
-        { }
+        {
+        }
 
         /// <summary>
         /// Constructor
@@ -65,6 +66,8 @@ namespace MSFileInfoScanner.Readers
                 OnErrorEvent(".mzML file not found: " + dataFilePath);
                 return false;
             }
+
+            InputFileIsMzML = true;
 
             // Future, optional: Determine the DatasetID
             // Unfortunately, this is not present in metadata.txt
