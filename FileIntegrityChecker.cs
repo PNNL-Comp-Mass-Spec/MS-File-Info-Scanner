@@ -1491,56 +1491,55 @@ namespace MSFileInfoScanner
                     // Initialize the stream reader and the XML Text Reader
                     using (var reader = new StreamReader(filePath))
                     {
-                        using (var xmlReader = new XmlTextReader(reader))
+                        // Read each of the nodes and examine them
+                        using var xmlReader = new XmlTextReader(reader);
+
+                        while (xmlReader.Read())
                         {
-                            // Read each of the nodes and examine them
+                            XMLTextReaderSkipWhitespace(xmlReader);
+                            if (xmlReader.ReadState != ReadState.Interactive)
+                                break;
 
-                            while (xmlReader.Read())
+                            if (xmlReader.NodeType != XmlNodeType.Element)
                             {
-                                XMLTextReaderSkipWhitespace(xmlReader);
-                                if (xmlReader.ReadState != ReadState.Interactive)
-                                    break;
+                                continue;
+                            }
 
-                                if (xmlReader.NodeType != XmlNodeType.Element)
+                            // Note: If needed, read the element's value using XMLTextReaderGetInnerText(xmlReader)
+
+                            if (needToCheckElementNames)
+                            {
+                                var totalMatchesInList = FindItemNameInList(xmlReader.Name, requiredElements);
+                                if (totalMatchesInList == requiredElements.Count)
+                                    needToCheckElementNames = false;
+                            }
+
+                            if (needToCheckAttributeNames && xmlReader.HasAttributes)
+                            {
+                                while (xmlReader.MoveToNextAttribute())
                                 {
-                                    continue;
-                                }
-
-                                // Note: If needed, read the element's value using XMLTextReaderGetInnerText(xmlReader)
-
-                                if (needToCheckElementNames)
-                                {
-                                    var totalMatchesInList = FindItemNameInList(xmlReader.Name, requiredElements);
-                                    if (totalMatchesInList == requiredElements.Count)
-                                        needToCheckElementNames = false;
-                                }
-
-                                if (needToCheckAttributeNames && xmlReader.HasAttributes)
-                                {
-                                    while (xmlReader.MoveToNextAttribute())
+                                    var totalMatchesInList = FindItemNameInList(xmlReader.Name, requiredAttributes);
+                                    if (totalMatchesInList == requiredAttributes.Count)
                                     {
-                                        var totalMatchesInList = FindItemNameInList(xmlReader.Name, requiredAttributes);
-                                        if (totalMatchesInList == requiredAttributes.Count)
-                                        {
-                                            needToCheckAttributeNames = false;
-                                            break;
-                                        }
+                                        needToCheckAttributeNames = false;
+                                        break;
                                     }
                                 }
+                            }
 
-                                elementsRead++;
-                                if (maximumXMLElementNodesToCheck > 0 && elementsRead >= MaximumXMLElementNodesToCheck)
-                                {
-                                    break;
-                                }
+                            elementsRead++;
+                            if (elementsRead >= MaximumXMLElementNodesToCheck)
+                            {
+                                break;
+                            }
 
-                                if (!needToCheckElementNames && !needToCheckAttributeNames && elementsRead > minimumElementCount)
-                                {
-                                    // All conditions have been met; no need to continue reading the file
-                                    break;
-                                }
+                            if (!needToCheckElementNames && !needToCheckAttributeNames && elementsRead > minimumElementCount)
+                            {
+                                // All conditions have been met; no need to continue reading the file
+                                break;
                             }
                         }
+
                         // xmlReader
                     }
                     // reader
