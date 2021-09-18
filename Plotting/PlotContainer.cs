@@ -127,7 +127,7 @@ namespace MSFileInfoScanner.Plotting
 
                 foreach (var axis in Plot.Axes)
                 {
-                    if (!(axis is LinearColorAxis newAxis))
+                    if (axis is not LinearColorAxis newAxis)
                     {
                         continue;
                     }
