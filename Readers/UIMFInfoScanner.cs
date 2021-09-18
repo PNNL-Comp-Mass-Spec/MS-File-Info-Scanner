@@ -129,35 +129,39 @@ namespace MSFileInfoScanner.Readers
                     var targetIndex = 0;
                     for (var ionIndex = 0; ionIndex < ionCount; ionIndex++)
                     {
-                        if (mzList[ionIndex] > 0)
+                        if (mzList[ionIndex] <= 0)
                         {
-                            if (targetIndex != ionIndex)
-                            {
-                                mzList[targetIndex] = mzList[ionIndex];
-                                intensityList[targetIndex] = intensityList[ionIndex];
-                            }
-                            targetIndex++;
+                            continue;
                         }
+
+                        if (targetIndex != ionIndex)
+                        {
+                            mzList[targetIndex] = mzList[ionIndex];
+                            intensityList[targetIndex] = intensityList[ionIndex];
+                        }
+                        targetIndex++;
                     }
 
                     ionCount = targetIndex;
 
-                    if (ionCount > 0)
+                    if (ionCount <= 0)
                     {
-                        // ToDo: Analyze ionMZ and ionIntensity to compute a quality scores
-                        // Keep track of the quality scores and then store one or more overall quality scores in datasetFileInfo.OverallQualityScore
-                        // For now, this just computes the average intensity for each scan and then computes and overall average intensity value
-
-                        double intensitySum = 0;
-                        for (var ionIndex = 0; ionIndex < ionCount; ionIndex++)
-                        {
-                            intensitySum += intensityList[ionIndex];
-                        }
-
-                        overallAvgIntensitySum += intensitySum / ionCount;
-
-                        overallAvgCount++;
+                        continue;
                     }
+
+                    // ToDo: Analyze ionMZ and ionIntensity to compute a quality scores
+                    // Keep track of the quality scores and then store one or more overall quality scores in datasetFileInfo.OverallQualityScore
+                    // For now, this just computes the average intensity for each scan and then computes and overall average intensity value
+
+                    double intensitySum = 0;
+                    for (var ionIndex = 0; ionIndex < ionCount; ionIndex++)
+                    {
+                        intensitySum += intensityList[ionIndex];
+                    }
+
+                    overallAvgIntensitySum += intensitySum / ionCount;
+
+                    overallAvgCount++;
                 }
 
                 if (overallAvgCount > 0)
