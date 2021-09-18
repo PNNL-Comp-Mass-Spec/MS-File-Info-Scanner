@@ -11,7 +11,7 @@ namespace SpectraTypeClassifier
     [CLSCompliant(true)]
     public class SpectrumTypeClassifier : EventNotifier
     {
-        // Ignore Spelling: ppmDiffs, PpmDiffThreshold
+        // Ignore Spelling: centroided, ppmDiffs, PpmDiffThreshold
 
         #region "Constants and Enums"
 

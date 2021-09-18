@@ -29,7 +29,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     internal class MassLynxNativeIO
     {
-        // Ignore Spelling: Acqu, func, CLng
+        // Ignore Spelling: Acqu, CLng, func, Micromass
 
         //-------------------------------
         //-- Start Native IO Headers

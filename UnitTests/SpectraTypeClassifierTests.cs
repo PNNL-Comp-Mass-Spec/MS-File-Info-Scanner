@@ -10,6 +10,8 @@ namespace MSFileInfoScannerUnitTests
     [TestFixture]
     public class SpectraTypeClassifierTests
     {
+        // Ignore Spelling: centroided
+
         [Test]
         public void TestStats()
         {

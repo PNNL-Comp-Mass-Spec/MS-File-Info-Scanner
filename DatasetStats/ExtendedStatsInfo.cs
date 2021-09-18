@@ -3,6 +3,8 @@ namespace MSFileInfoScanner.DatasetStats
 {
     public class ExtendedStatsInfo
     {
+        // Ignore Spelling: Orbitrap
+
         /// <summary>
         /// Ion injection time
         /// </summary>
