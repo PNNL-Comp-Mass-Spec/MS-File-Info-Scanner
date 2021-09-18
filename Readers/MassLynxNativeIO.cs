@@ -806,10 +806,7 @@ namespace MSFileInfoScanner.Readers
 
             massLynxDataDirectoryPath = massLynxDataDirectoryPath.Trim();
 
-            if (mMSData.UserSuppliedDataDirPath == null)
-            {
-                mMSData.UserSuppliedDataDirPath = string.Empty;
-            }
+            mMSData.UserSuppliedDataDirPath ??= string.Empty;
 
             if (mMSData.FunctionCount == 0 || !string.Equals(mMSData.UserSuppliedDataDirPath, massLynxDataDirectoryPath, StringComparison.OrdinalIgnoreCase))
             {

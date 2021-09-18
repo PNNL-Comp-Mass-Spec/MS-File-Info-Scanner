@@ -1720,10 +1720,8 @@ namespace MSFileInfoScanner.Plotting
                 // If they do, change the level to 1
                 ValidateMSLevel();
 
-                if (fileNameSuffixAddon == null)
-                    fileNameSuffixAddon = string.Empty;
-                if (scanModeSuffixAddon == null)
-                    scanModeSuffixAddon = string.Empty;
+                fileNameSuffixAddon ??= string.Empty;
+                scanModeSuffixAddon ??= string.Empty;
 
                 var ms1Plot = InitializePlot(datasetName + " - " + Options.MS1PlotTitle, 1, false);
                 RegisterEvents(ms1Plot);

@@ -401,8 +401,7 @@ namespace MSFileInfoScanner.Readers
                 successOverall = true;
                 var createQCPlotHTMLFile = false;
 
-                if (outputDirectoryPath == null)
-                    outputDirectoryPath = string.Empty;
+                outputDirectoryPath ??= string.Empty;
 
                 DirectoryInfo outputDirectory;
                 if (outputDirectoryPath.Length > 0)
@@ -876,8 +875,7 @@ namespace MSFileInfoScanner.Readers
 
         private void GenerateQCScanTypeSummaryHTML(TextWriter writer, DatasetSummaryStats datasetSummaryStats, string indent)
         {
-            if (indent == null)
-                indent = string.Empty;
+            indent ??= string.Empty;
 
             writer.WriteLine(indent + @"<table class=""DataTable"">");
             writer.WriteLine(indent + @"  <tr><th class=""DataHead"">Scan Type</th><th class=""DataHead"">Scan Count</th><th class=""DataHead"">Scan Filter Text</th></tr>");

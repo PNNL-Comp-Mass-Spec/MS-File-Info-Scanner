@@ -60,8 +60,7 @@ namespace MSFileInfoScanner.Plotting
             DeleteTempFiles = true;
 
             PlotTitle = plotTitle;
-            if (PythonPath == null)
-                PythonPath = string.Empty;
+            PythonPath ??= string.Empty;
 
             XAxisInfo = new AxisInfo(xAxisTitle);
             YAxisInfo = new AxisInfo(yAxisTitle);
