@@ -781,16 +781,21 @@ namespace MSFileInfoScanner.Readers
 
                 if (validMetadata)
                 {
-                    genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanFilterText);
-                    scanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanFilterText);
-
-                    if (msLevels[spectrumIndex] > 1)
+                    if (string.IsNullOrWhiteSpace(scanFilterText))
                     {
-                        isHighRes = scanStatsEntry.ScanTypeName.IndexOf("HMSn", StringComparison.OrdinalIgnoreCase) >= 0;
+                        genericScanFilter = string.Empty;
+                        scanStatsEntry.ScanTypeName = string.Empty;
+
+                        isHighRes = msLevels[spectrumIndex] > 1 ? HighResMS2 : HighResMS1;
                     }
                     else
                     {
-                        isHighRes = scanStatsEntry.ScanTypeName.IndexOf("HMS", StringComparison.OrdinalIgnoreCase) >= 0;
+                        genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanFilterText);
+                        scanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanFilterText);
+
+                        isHighRes = msLevels[spectrumIndex] > 1
+                            ? scanStatsEntry.ScanTypeName.IndexOf("HMSn", StringComparison.OrdinalIgnoreCase) >= 0
+                            : scanStatsEntry.ScanTypeName.IndexOf("HMS", StringComparison.OrdinalIgnoreCase) >= 0;
                     }
 
                     scanStatsEntry.MzMin = lowMass;
@@ -813,15 +818,18 @@ namespace MSFileInfoScanner.Readers
                 else
                 {
                     genericScanFilter = string.Empty;
+                    scanStatsEntry.ScanTypeName = string.Empty;
+                    isHighRes = msLevels[spectrumIndex] > 1 ? HighResMS2 : HighResMS1;
+                }
 
+                if (string.IsNullOrWhiteSpace(scanStatsEntry.ScanTypeName))
+                {
                     if (msLevels[spectrumIndex] > 1)
                     {
-                        isHighRes = HighResMS2;
                         scanStatsEntry.ScanTypeName = HighResMS2 ? "HMSn" : "MSn";
                     }
                     else
                     {
-                        isHighRes = HighResMS1;
                         scanStatsEntry.ScanTypeName = HighResMS1 ? "HMS" : "MS";
                     }
                 }
