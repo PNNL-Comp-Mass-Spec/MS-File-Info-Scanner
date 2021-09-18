@@ -17,6 +17,16 @@ namespace MSFileInfoScanner.Readers
         /// <param name="lcms2DPlotOptions"></param>
         protected ProteoWizardScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) : base(options, lcms2DPlotOptions)
         {
+            if (options.SaveTICAndBPIPlots)
+            {
+                // Initialize the TIC and BPI arrays
+                InitializeTICAndBPI();
+            }
+
+            if (options.SaveLCMS2DPlots)
+            {
+                InitializeLCMS2DPlot();
+            }
         }
 
         /// <summary>
@@ -99,16 +109,6 @@ namespace MSFileInfoScanner.Readers
         {
             try
             {
-                if (Options.SaveTICAndBPIPlots)
-                {
-                    // Initialize the TIC and BPI arrays
-                    InitializeTICAndBPI();
-                }
-
-                if (Options.SaveLCMS2DPlots)
-                {
-                    InitializeLCMS2DPlot();
-                }
 
                 var msFileReader = new pwiz.ProteowizardWrapper.MSDataFileReader(datasetFile.FullName);
 

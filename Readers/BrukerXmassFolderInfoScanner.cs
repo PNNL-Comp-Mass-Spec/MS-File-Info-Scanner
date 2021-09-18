@@ -438,17 +438,6 @@ namespace MSFileInfoScanner.Readers
                 var metadataNameToID = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
                 var scanData = new Dictionary<string, MCFScanInfoType>();
 
-                if (Options.SaveTICAndBPIPlots)
-                {
-                    // Initialize the TIC and BPI arrays
-                    InitializeTICAndBPI();
-                }
-
-                if (Options.SaveLCMS2DPlots)
-                {
-                    InitializeLCMS2DPlot();
-                }
-
                 var metadataFilePath = Path.Combine(datasetDirectory.FullName, BRUKER_SQLITE_INDEX_FILE_NAME);
                 var metadataFile = new FileInfo(metadataFilePath);
 
@@ -611,12 +600,6 @@ namespace MSFileInfoScanner.Readers
 
             try
             {
-                if (Options.SaveTICAndBPIPlots)
-                {
-                    // Initialize the TIC and BPI arrays
-                    InitializeTICAndBPI();
-                }
-
                 var scanXMLFilePath = Path.Combine(datasetDirectory.FullName, BRUKER_SCANINFO_XML_FILE);
                 var scanXMLFile = new FileInfo(scanXMLFilePath);
 
