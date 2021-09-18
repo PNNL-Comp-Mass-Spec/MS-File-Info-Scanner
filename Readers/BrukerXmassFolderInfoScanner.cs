@@ -373,7 +373,7 @@ namespace MSFileInfoScanner.Readers
         private bool ParseBAFFile(FileSystemInfo datasetFileOrDirectory, DatasetFileInfo datasetFileInfo, out bool bafFileChecked)
         {
             // Override dataFilePath here, if needed
-            var manualOverride = false;
+            const bool manualOverride = false;
 
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (manualOverride)

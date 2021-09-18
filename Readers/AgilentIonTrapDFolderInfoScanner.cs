@@ -88,14 +88,13 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 // Try to open the Run.Log file
-                bool processedFirstMethodLine;
-                bool endDateFound;
                 DateTime methodDate;
 
                 using var reader = new StreamReader(Path.Combine(directoryPath, AGILENT_RUN_LOG_FILE));
 
-                processedFirstMethodLine = false;
-                endDateFound = false;
+                var processedFirstMethodLine = false;
+                var endDateFound = false;
+
                 while (!reader.EndOfStream)
                 {
                     var dataLine = reader.ReadLine();

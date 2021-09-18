@@ -44,7 +44,7 @@ namespace MSFileInfoScanner.Readers
             DataReader uimfReader,
             DatasetFileInfo datasetFileInfo,
             IReadOnlyDictionary<int, UIMFData.FrameType>masterFrameList,
-            IReadOnlyList<int> masterFrameNumList)
+            IEnumerable<int> masterFrameNumList)
         {
             float overallScore;
 
