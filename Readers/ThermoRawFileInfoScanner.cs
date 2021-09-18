@@ -440,7 +440,7 @@ namespace MSFileInfoScanner.Readers
                         {
                             // Look up the end scan time then compute .AcqTimeEnd
                             var scanEnd = xcaliburAccessor.FileInfo.ScanEnd;
-                            xcaliburAccessor.GetScanInfo(scanEnd, out clsScanInfo scanInfo);
+                            xcaliburAccessor.GetScanInfo(scanEnd, out var scanInfo);
 
                             datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(scanInfo.RetentionTime);
                         }
