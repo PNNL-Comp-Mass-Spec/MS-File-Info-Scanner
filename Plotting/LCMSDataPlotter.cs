@@ -488,14 +488,14 @@ namespace MSFileInfoScanner.Plotting
 
             var dataToAverage = new List<double>();
 
-            for (var scanIndex = 0; scanIndex < mScans.Count; scanIndex++)
+            foreach (var scan in mScans)
             {
-                if (msLevelFilter != 0 && mScans[scanIndex].MSLevel != msLevelFilter)
+                if (msLevelFilter != 0 && scan.MSLevel != msLevelFilter)
                     continue;
 
-                for (var ionIndex = 0; ionIndex < mScans[scanIndex].IonCount; ionIndex++)
+                for (var ionIndex = 0; ionIndex < scan.IonCount; ionIndex++)
                 {
-                    dataToAverage.Add(mScans[scanIndex].IonsIntensity[ionIndex]);
+                    dataToAverage.Add(scan.IonsIntensity[ionIndex]);
                 }
             }
 
