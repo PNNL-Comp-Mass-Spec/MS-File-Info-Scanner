@@ -160,9 +160,7 @@ namespace MSFileInfoScanner.Plotting
                         if (Math.Abs(massIntensityPairs[1, index]) < double.Epsilon && Math.Abs(massIntensityPairs[1, index - 1]) < double.Epsilon)
                         {
                             // Swap the m/z values
-                            var swapVal = massIntensityPairs[0, index];
-                            massIntensityPairs[0, index] = massIntensityPairs[0, index - 1];
-                            massIntensityPairs[0, index - 1] = swapVal;
+                            (massIntensityPairs[0, index], massIntensityPairs[0, index - 1]) = (massIntensityPairs[0, index - 1], massIntensityPairs[0, index]);
                         }
                         else
                         {
@@ -302,9 +300,7 @@ namespace MSFileInfoScanner.Plotting
                     if (Math.Abs(ionList[index].Intensity) < double.Epsilon && Math.Abs(ionList[index - 1].Intensity) < double.Epsilon)
                     {
                         // Swap the m/z values
-                        var swapVal = ionList[index];
-                        ionList[index] = ionList[index - 1];
-                        ionList[index - 1] = swapVal;
+                        (ionList[index], ionList[index - 1]) = (ionList[index - 1], ionList[index]);
                     }
                     else
                     {
