@@ -31,7 +31,7 @@ namespace MSFileInfoScanner.Readers
 
         private const string PEK_FILE_FILENAME_LINE = "Filename:";
 
-        private readonly DateTime MINIMUM_ACCEPTABLE_ACQ_START_TIME = new DateTime(1975, 1, 1);
+        private readonly DateTime MINIMUM_ACCEPTABLE_ACQ_START_TIME = new(1975, 1, 1);
 
         /// <summary>
         /// Constructor

@@ -266,10 +266,10 @@ namespace MSFileInfoScanner.Readers
 
                     var additionalFilesToHash = new List<FileInfo>
                     {
-                        new FileInfo(Path.Combine(acqDataDirectory.FullName, AGILENT_MS_PEAK_FILE)),
-                        new FileInfo(Path.Combine(acqDataDirectory.FullName, AGILENT_MS_PEAK_PERIODIC_ACTUALS_FILE)),
-                        new FileInfo(Path.Combine(acqDataDirectory.FullName, AGILENT_MS_PROFILE_FILE)),
-                        new FileInfo(Path.Combine(acqDataDirectory.FullName, AGILENT_XML_CONTENTS_FILE))
+                        new(Path.Combine(acqDataDirectory.FullName, AGILENT_MS_PEAK_FILE)),
+                        new(Path.Combine(acqDataDirectory.FullName, AGILENT_MS_PEAK_PERIODIC_ACTUALS_FILE)),
+                        new(Path.Combine(acqDataDirectory.FullName, AGILENT_MS_PROFILE_FILE)),
+                        new(Path.Combine(acqDataDirectory.FullName, AGILENT_XML_CONTENTS_FILE))
                     };
 
                     foreach (var addnlFile in additionalFilesToHash)

@@ -18,7 +18,7 @@ namespace MSFileInfoScanner.Readers
         // Note: The extension must be in all caps
         public const string MICROMASS_RAW_FOLDER_EXTENSION = ".RAW";
 
-        private readonly DateTime MINIMUM_ACCEPTABLE_ACQ_START_TIME = new DateTime(1975, 1, 1);
+        private readonly DateTime MINIMUM_ACCEPTABLE_ACQ_START_TIME = new(1975, 1, 1);
 
         /// <summary>
         /// Constructor
