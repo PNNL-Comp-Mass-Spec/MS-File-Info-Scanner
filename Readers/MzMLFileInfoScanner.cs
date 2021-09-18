@@ -1,13 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScannerInterfaces;
-using PRISM;
-using pwiz.ProteowizardWrapper;
-using SpectraTypeClassifier;
-using ThermoRawFileReader;
 
 namespace MSFileInfoScanner.Readers
 {

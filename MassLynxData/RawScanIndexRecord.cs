@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MSFileInfoScanner.MassLynxData
+﻿namespace MSFileInfoScanner.MassLynxData
 {
     /// <summary>
     /// Used when reading the _func001.idx file
