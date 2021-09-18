@@ -366,11 +366,11 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Read data from the analysis.baf or analysis.tdf file using ProteoWizard
         /// </summary>
-        /// <param name="bafFileInfo"></param>
+        /// <param name="datasetFileOrDirectory"></param>
         /// <param name="datasetFileInfo"></param>
         /// <param name="bafFileChecked">Output: true if the file exists and we tried to open it (will still be true if the file is corrupt)</param>
         /// <returns>True if success, false if an error</returns>
-        private bool ParseBAFFile(FileInfo bafFileInfo, DatasetFileInfo datasetFileInfo, out bool bafFileChecked)
+        private bool ParseBAFFile(FileSystemInfo datasetFileOrDirectory, DatasetFileInfo datasetFileInfo, out bool bafFileChecked)
         {
             // Override dataFilePath here, if needed
             var manualOverride = false;
@@ -380,15 +380,16 @@ namespace MSFileInfoScanner.Readers
             {
                 // ReSharper disable once StringLiteralTypo
                 const string newDataFilePath = @"c:\temp\analysis.baf";
-                bafFileInfo = new FileInfo(newDataFilePath);
+                datasetFileOrDirectory = new FileInfo(newDataFilePath);
             }
 
             mLCMS2DPlot.Options.UseObservedMinScan = false;
-            bafFileChecked = bafFileInfo.Exists;
+            bafFileChecked = datasetFileOrDirectory.Exists;
 
             try
             {
-                if (bafFileInfo.Length > 1024 * 1024 * 1024)
+                // ReSharper disable once MergeIntoPattern
+                if (datasetFileOrDirectory is FileInfo bafFileInfo && bafFileInfo.Length > 1024 * 1024 * 1024)
                 {
                     OnWarningEvent(string.Format("{0} file is over 1 GB; ProteoWizard typically cannot handle .baf files this large", bafFileInfo.Name));
 
@@ -412,7 +413,7 @@ namespace MSFileInfoScanner.Readers
 
                 // ReSharper restore CommentTypo
 
-                return ProcessWithProteoWizard(bafFileInfo, datasetFileInfo);
+                return ProcessWithProteoWizard(datasetFileOrDirectory, datasetFileInfo);
             }
             catch (Exception ex)
             {
@@ -424,7 +425,7 @@ namespace MSFileInfoScanner.Readers
                 {
                     // Most likely a corrupt analysis.baf file
                     // Most likely a corrupt analysis.tdf file
-                    OnWarningEvent(string.Format("Most likely a corrupt {0} file", bafFileInfo.Name));
+                    OnWarningEvent(string.Format("Most likely a corrupt {0} file", datasetFileOrDirectory.Name));
                 }
 
                 return false;
@@ -947,7 +948,12 @@ namespace MSFileInfoScanner.Readers
                         if (!serOrFidParsed && !bafFileChecked)
                         {
                             // Look for an analysis.baf or analysis.tdf file
-                            ParseBAFFile(primaryInstrumentFile, datasetFileInfo, out _);
+                            var successWithPrimaryFile = ParseBAFFile(primaryInstrumentFile, datasetFileInfo, out _);
+
+                            if (!successWithPrimaryFile)
+                            {
+                                ParseBAFFile(primaryInstrumentFile.Directory, datasetFileInfo, out _);
+                            }
                         }
                     }
                 }
