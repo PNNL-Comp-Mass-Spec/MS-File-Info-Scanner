@@ -210,19 +210,12 @@ namespace MSFileInfoScanner.Plotting
             var target = new RenderTargetBitmap(width, height, DPI, DPI, PixelFormats.Default);
             target.Render(drawVisual);
 
-            BitmapEncoder encoder;
-
-            switch (fileFormat)
+            BitmapEncoder encoder = fileFormat switch
             {
-                case ImageFileFormat.PNG:
-                    encoder = new PngBitmapEncoder();
-                    break;
-                case ImageFileFormat.JPG:
-                    encoder = new JpegBitmapEncoder();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(fileFormat.ToString(), "Unrecognized value: " + fileFormat);
-            }
+                ImageFileFormat.PNG => new PngBitmapEncoder(),
+                ImageFileFormat.JPG => new JpegBitmapEncoder(),
+                _ => throw new ArgumentOutOfRangeException(fileFormat.ToString(), "Unrecognized value: " + fileFormat)
+            };
 
             // ReSharper disable once UnusedVariable
             var bitMap = BitmapFrame.Create(target);
@@ -341,27 +334,18 @@ namespace MSFileInfoScanner.Plotting
 
         public static Color GetColorByCharge(int charge)
         {
-            switch (charge)
+            return charge switch
             {
-                case 1:
-                    return Colors.MediumBlue;
-                case 2:
-                    return Colors.Red;
-                case 3:
-                    return Colors.Green;
-                case 4:
-                    return Colors.Magenta;
-                case 5:
-                    return Colors.SaddleBrown;
-                case 6:
-                    return Colors.DarkViolet;
-                case 7:
-                    return Colors.LimeGreen;
-                case 8:
-                    return Colors.CornflowerBlue;
-                default:
-                    return Colors.Indigo;
-            }
+                1 => Colors.MediumBlue,
+                2 => Colors.Red,
+                3 => Colors.Green,
+                4 => Colors.Magenta,
+                5 => Colors.SaddleBrown,
+                6 => Colors.DarkViolet,
+                7 => Colors.LimeGreen,
+                8 => Colors.CornflowerBlue,
+                _ => Colors.Indigo
+            };
         }
 
         // ReSharper disable once UnusedMember.Local

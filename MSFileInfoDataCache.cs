@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using MSFileInfoScanner.DatasetStats;
@@ -193,26 +194,51 @@ namespace MSFileInfoScanner
 
         public string ConstructHeaderLine(iMSFileInfoScanner.DataFileTypeConstants dataFileType)
         {
-            switch (dataFileType)
+            var columnNames = dataFileType switch
             {
-                case iMSFileInfoScanner.DataFileTypeConstants.MSFileInfo:
+                iMSFileInfoScanner.DataFileTypeConstants.MSFileInfo => new List<string>
+                {
                     // Note: The order of the output should match MSFileInfoResultsFileColumns
-                    return COL_NAME_DATASET_ID + '\t' + COL_NAME_DATASET_NAME + '\t' + COL_NAME_FILE_EXTENSION + '\t' + COL_NAME_ACQ_TIME_START + '\t' + COL_NAME_ACQ_TIME_END + '\t' + COL_NAME_SCAN_COUNT + '\t' + COL_NAME_FILE_SIZE_BYTES + '\t' + COL_NAME_INFO_LAST_MODIFIED + '\t' + COL_NAME_FILE_MODIFICATION_DATE;
-
-                case iMSFileInfoScanner.DataFileTypeConstants.DirectoryIntegrityInfo:
+                    COL_NAME_DATASET_ID,
+                    COL_NAME_DATASET_NAME,
+                    COL_NAME_FILE_EXTENSION,
+                    COL_NAME_ACQ_TIME_START,
+                    COL_NAME_ACQ_TIME_END,
+                    COL_NAME_SCAN_COUNT,
+                    COL_NAME_FILE_SIZE_BYTES,
+                    COL_NAME_INFO_LAST_MODIFIED,
+                    COL_NAME_FILE_MODIFICATION_DATE
+                },
+                iMSFileInfoScanner.DataFileTypeConstants.DirectoryIntegrityInfo => new List<string>
+                {
                     // Note: The order of the output should match DirectoryIntegrityInfoFileColumns
-                    return COL_NAME_FOLDER_ID + '\t' + COL_NAME_FOLDER_PATH + '\t' + COL_NAME_FILE_COUNT + '\t' + COL_NAME_COUNT_FAIL_INTEGRITY + '\t' + COL_NAME_INFO_LAST_MODIFIED;
-
-                case iMSFileInfoScanner.DataFileTypeConstants.FileIntegrityDetails:
+                    COL_NAME_FOLDER_ID,
+                    COL_NAME_FOLDER_PATH,
+                    COL_NAME_FILE_COUNT,
+                    COL_NAME_COUNT_FAIL_INTEGRITY,
+                    COL_NAME_INFO_LAST_MODIFIED
+                },
+                iMSFileInfoScanner.DataFileTypeConstants.FileIntegrityDetails => new List<string>
+                {
                     // Note: The order of the output should match FileIntegrityDetailsFileColumns
-                    return COL_NAME_FOLDER_ID + '\t' + COL_NAME_FILE_NAME + '\t' + COL_NAME_FILE_SIZE_BYTES + '\t' + COL_NAME_FILE_MODIFICATION_DATE + '\t' + COL_NAME_FAILED_INTEGRITY_CHECK + '\t' + COL_NAME_SHA1_HASH + '\t' + COL_NAME_INFO_LAST_MODIFIED;
+                    COL_NAME_FOLDER_ID,
+                    COL_NAME_FILE_NAME,
+                    COL_NAME_FILE_SIZE_BYTES,
+                    COL_NAME_FILE_MODIFICATION_DATE,
+                    COL_NAME_FAILED_INTEGRITY_CHECK,
+                    COL_NAME_SHA1_HASH,
+                    COL_NAME_INFO_LAST_MODIFIED
+                },
+                iMSFileInfoScanner.DataFileTypeConstants.FileIntegrityErrors => new List<string>
+                {
+                    "File_Path",
+                    "Error_Message",
+                    COL_NAME_INFO_LAST_MODIFIED
+                },
+                _ => new List<string> { "Unknown_File_Type" }
+            };
 
-                case iMSFileInfoScanner.DataFileTypeConstants.FileIntegrityErrors:
-                    return "File_Path" + '\t' + "Error_Message" + '\t' + COL_NAME_INFO_LAST_MODIFIED;
-
-                default:
-                    return "Unknown_File_Type";
-            }
+            return string.Join("\t", columnNames);
         }
 
         private bool DatasetTableContainsPrimaryKeyValue(

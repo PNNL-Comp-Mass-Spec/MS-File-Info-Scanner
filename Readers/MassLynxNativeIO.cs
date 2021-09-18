@@ -104,19 +104,14 @@ namespace MSFileInfoScanner.Readers
 
         public string GetErrorMessage()
         {
-            switch (mErrorCode)
+            return mErrorCode switch
             {
-                case ErrorCodeConstants.NoError:
-                    return string.Empty;
-                case ErrorCodeConstants.InvalidDataFolderPath:
-                    return "Invalid data directory path";
-                case ErrorCodeConstants.DataFolderHeaderReadError:
-                    return "The data directory header read error";
-                case ErrorCodeConstants.DataFolderReadError:
-                    return "Data directory read error";
-                default:
-                    return "Unknown error";
-            }
+                ErrorCodeConstants.NoError => string.Empty,
+                ErrorCodeConstants.InvalidDataFolderPath => "Invalid data directory path",
+                ErrorCodeConstants.DataFolderHeaderReadError => "The data directory header read error",
+                ErrorCodeConstants.DataFolderReadError => "Data directory read error",
+                _ => "Unknown error"
+            };
         }
 
         /// <summary>
