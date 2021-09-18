@@ -22,10 +22,10 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// This function is used to determine one or more overall quality scores
         /// </summary>
-        /// <param name="msFileReader"></param>
+        /// <param name="msDataFileReader"></param>
         /// <param name="datasetFileInfo"></param>
         private void ComputeQualityScores(
-            MSDataFileReader msFileReader,
+            MSDataFileReader msDataFileReader,
             DatasetFileInfo datasetFileInfo)
         {
             float overallScore;
@@ -36,16 +36,16 @@ namespace MSFileInfoScanner.Readers
             if (mLCMS2DPlot.ScanCountCached > 0)
             {
                 // Obtain the overall average intensity value using the data cached in mLCMS2DPlot
-                // This avoids having to reload all of the data using msFileReader
+                // This avoids having to reload all of the data using msDataFileReader
                 const int msLevelFilter = 1;
                 overallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(msLevelFilter);
             }
             else
             {
-                var scanCount = msFileReader.SpectrumCount;
+                var scanCount = msDataFileReader.SpectrumCount;
                 GetStartAndEndScans(scanCount, out var scanStart, out var scanEnd);
 
-                var scanNumberToIndexMap = msFileReader.GetScanToIndexMapping();
+                var scanNumberToIndexMap = msDataFileReader.GetScanToIndexMapping();
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
@@ -54,7 +54,7 @@ namespace MSFileInfoScanner.Readers
                         continue;
                     }
 
-                    var spectrum = msFileReader.GetSpectrum(scanIndex, true);
+                    var spectrum = msDataFileReader.GetSpectrum(scanIndex, true);
 
                     if (spectrum == null)
                     {
@@ -133,7 +133,7 @@ namespace MSFileInfoScanner.Readers
                 // For Thermo .raw files, uses the FilterText value to determine if spectra are high res or low res MS1 and MS2
                 // For other instrument types, assumes spectra are high res MS1 and MS2
                 var pWizParser = new ProteoWizardDataParser(
-                    msFileReader,
+                    msDataFileReader,
                     mDatasetStatsSummarizer,
                     mTICAndBPIPlot,
                     mLCMS2DPlot,
@@ -153,19 +153,19 @@ namespace MSFileInfoScanner.Readers
                 var srmDataCached = false;
                 double runtimeMinutes = 0;
 
-                if (msFileReader.ChromatogramCount > 0)
+                if (msDataFileReader.ChromatogramCount > 0)
                 {
                     // Process the chromatograms
                     pWizParser.StoreChromatogramInfo(datasetFileInfo, out ticStored, out srmDataCached, out runtimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
 
-                    datasetFileInfo.ScanCount = msFileReader.ChromatogramCount;
+                    datasetFileInfo.ScanCount = msDataFileReader.ChromatogramCount;
                 }
 
-                if (msFileReader.SpectrumCount > 0 && !srmDataCached)
+                if (msDataFileReader.SpectrumCount > 0 && !srmDataCached)
                 {
                     // Process the spectral data (though only if we did not process SRM data)
-                    var skipExistingScans = (msFileReader.ChromatogramCount > 0);
+                    var skipExistingScans = (msDataFileReader.ChromatogramCount > 0);
                     pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes,
                                                   skipExistingScans,
                                                   skipScansWithNoIons: true,
@@ -174,13 +174,13 @@ namespace MSFileInfoScanner.Readers
 
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
 
-                    datasetFileInfo.ScanCount = msFileReader.SpectrumCount;
+                    datasetFileInfo.ScanCount = msDataFileReader.SpectrumCount;
                 }
 
                 if (Options.ComputeOverallQualityScores)
                 {
                     // Note that this call will also create the TICs and BPIs
-                    ComputeQualityScores(msFileReader, datasetFileInfo);
+                    ComputeQualityScores(msDataFileReader, datasetFileInfo);
                 }
 
                 if (Options.MS2MzMin > 0 && datasetFileInfo.ScanCount > 0)
@@ -190,7 +190,7 @@ namespace MSFileInfoScanner.Readers
                     ValidateMS2MzMin();
                 }
 
-                msFileReader.Dispose();
+                msDataFileReader.Dispose();
                 ProgRunner.GarbageCollectNow();
 
                 return true;

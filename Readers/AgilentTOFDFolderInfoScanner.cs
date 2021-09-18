@@ -352,11 +352,11 @@ namespace MSFileInfoScanner.Readers
             {
                 // Open the data directory using the ProteoWizardWrapper
 
-                var pWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(dataDirectoryPath);
+                var msDataFileReader = new pwiz.ProteowizardWrapper.MSDataFileReader(dataDirectoryPath);
 
                 try
                 {
-                    var runStartTime = Convert.ToDateTime(pWiz.RunStartTime);
+                    var runStartTime = Convert.ToDateTime(msDataFileReader.RunStartTime);
 
                     // Update AcqTimeEnd if possible
                     if (runStartTime < datasetFileInfo.AcqTimeEnd)
@@ -377,7 +377,7 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 // Instantiate the ProteoWizard Data Parser class
-                var pWizParser = new ProteoWizardDataParser(pWiz, mDatasetStatsSummarizer, mTICAndBPIPlot,
+                var pWizParser = new ProteoWizardDataParser(msDataFileReader, mDatasetStatsSummarizer, mTICAndBPIPlot,
                                                             mLCMS2DPlot, Options.SaveLCMS2DPlots, Options.SaveTICAndBPIPlots,
                                                             Options.CheckCentroidingStatus)
                 {
@@ -390,17 +390,17 @@ namespace MSFileInfoScanner.Readers
                 var ticStored = false;
                 double runtimeMinutes = 0;
 
-                if (pWiz.ChromatogramCount > 0)
+                if (msDataFileReader.ChromatogramCount > 0)
                 {
                     // Process the chromatograms
                     pWizParser.StoreChromatogramInfo(datasetFileInfo, out ticStored, out _, out runtimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }
 
-                if (pWiz.SpectrumCount > 0)
+                if (msDataFileReader.SpectrumCount > 0)
                 {
                     // Process the spectral data
-                    var skipExistingScans = (pWiz.ChromatogramCount > 0);
+                    var skipExistingScans = (msDataFileReader.ChromatogramCount > 0);
 
                     pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes,
                                                   skipExistingScans,
@@ -411,7 +411,7 @@ namespace MSFileInfoScanner.Readers
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }
 
-                pWiz.Dispose();
+                msDataFileReader.Dispose();
                 ProgRunner.GarbageCollectNow();
             }
             catch (Exception ex)

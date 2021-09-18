@@ -1004,7 +1004,7 @@ namespace MSFileInfoScanner.Readers
             {
                 // Open the instrument data using the ProteoWizardWrapper
 
-                var pWiz = new pwiz.ProteowizardWrapper.MSDataFileReader(datasetFileOrDirectory.FullName);
+                var msDataFileReader = new pwiz.ProteowizardWrapper.MSDataFileReader(datasetFileOrDirectory.FullName);
 
                 try
                 {
@@ -1031,7 +1031,7 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 // Instantiate the ProteoWizard Data Parser class
-                var pWizParser = new ProteoWizardDataParser(pWiz, mDatasetStatsSummarizer, mTICAndBPIPlot,
+                var pWizParser = new ProteoWizardDataParser(msDataFileReader, mDatasetStatsSummarizer, mTICAndBPIPlot,
                                                             mLCMS2DPlot, Options.SaveLCMS2DPlots, Options.SaveTICAndBPIPlots,
                                                             Options.CheckCentroidingStatus)
                 {
@@ -1046,17 +1046,17 @@ namespace MSFileInfoScanner.Readers
                 double runtimeMinutes = 0;
 
                 // Note that SRM .Wiff files will only have chromatograms, and no spectra
-                if (pWiz.ChromatogramCount > 0)
+                if (msDataFileReader.ChromatogramCount > 0)
                 {
                     // Process the chromatograms
                     pWizParser.StoreChromatogramInfo(datasetFileInfo, out ticStored, out srmDataCached, out runtimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }
 
-                if (pWiz.SpectrumCount > 0 && !srmDataCached)
+                if (msDataFileReader.SpectrumCount > 0 && !srmDataCached)
                 {
                     // Process the spectral data (though only if we did not process SRM data)
-                    var skipExistingScans = (pWiz.ChromatogramCount > 0);
+                    var skipExistingScans = (msDataFileReader.ChromatogramCount > 0);
                     pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes,
                                                   skipExistingScans, skipScansWithNoIons,
                                                   maxScansToTrackInDetail: MAX_SCANS_TO_TRACK_IN_DETAIL,
@@ -1065,7 +1065,7 @@ namespace MSFileInfoScanner.Readers
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }
 
-                pWiz.Dispose();
+                msDataFileReader.Dispose();
                 ProgRunner.GarbageCollectNow();
             }
             catch (AccessViolationException)

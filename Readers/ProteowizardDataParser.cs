@@ -21,7 +21,7 @@ namespace MSFileInfoScanner.Readers
         private const int PROGRESS_START = 0;
         private const int PROGRESS_SCAN_TIMES_LOADED = 10;
 
-        private readonly MSDataFileReader mPWiz;
+        private readonly MSDataFileReader mMSDataFileReader;
 
         private readonly DatasetStatsSummarizer mDatasetStatsSummarizer;
         private readonly TICandBPIPlotter mTICAndBPIPlot;
@@ -55,7 +55,7 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="pWiz"></param>
+        /// <param name="msDataFileReader"></param>
         /// <param name="datasetStatsSummarizer"></param>
         /// <param name="ticAndBPIPlot"></param>
         /// <param name="lcms2DPlot"></param>
@@ -63,7 +63,7 @@ namespace MSFileInfoScanner.Readers
         /// <param name="saveTICAndBPI"></param>
         /// <param name="checkCentroidingStatus"></param>
         public ProteoWizardDataParser(
-            MSDataFileReader pWiz,
+            MSDataFileReader msDataFileReader,
             DatasetStatsSummarizer datasetStatsSummarizer,
             TICandBPIPlotter ticAndBPIPlot,
             LCMSDataPlotter lcms2DPlot,
@@ -71,7 +71,7 @@ namespace MSFileInfoScanner.Readers
             bool saveTICAndBPI,
             bool checkCentroidingStatus)
         {
-            mPWiz = pWiz;
+            mMSDataFileReader = msDataFileReader;
             mDatasetStatsSummarizer = datasetStatsSummarizer;
             mTICAndBPIPlot = ticAndBPIPlot;
             mLCMS2DPlot = lcms2DPlot;
@@ -159,7 +159,7 @@ namespace MSFileInfoScanner.Readers
             return indexMatch;
         }
 
-        private int GetSpectrumCountWithRetry(MSDataFileReader pWiz, int maxAttempts = 3)
+        private int GetSpectrumCountWithRetry(MSDataFileReader msDataFileReader, int maxAttempts = 3)
         {
             var attemptCount = 0;
             while (attemptCount < maxAttempts)
@@ -167,7 +167,7 @@ namespace MSFileInfoScanner.Readers
                 try
                 {
                     attemptCount++;
-                    var spectrumCount = pWiz.SpectrumCount;
+                    var spectrumCount = msDataFileReader.SpectrumCount;
 
                     return spectrumCount;
                 }
@@ -186,8 +186,8 @@ namespace MSFileInfoScanner.Readers
             if (DateTime.UtcNow.Subtract(mLastScanLoadingDebugProgressTime).TotalSeconds < 30)
                 return;
 
-            // If the call to mPWiz.GetScanTimesAndMsLevels() takes too long,
-            // abort the process and instead get the ScanTimes and MSLevels via mPWiz.GetSpectrum()
+            // If the call to mMSDataFileReader.GetScanTimesAndMsLevels() takes too long,
+            // abort the process and instead get the ScanTimes and MSLevels via mMSDataFileReader.GetSpectrum()
             if (mGetScanTimesMaxWaitTimeSeconds > 0 &&
                 DateTime.UtcNow.Subtract(mGetScanTimesStartTime).TotalSeconds >= mGetScanTimesMaxWaitTimeSeconds)
             {
@@ -437,7 +437,7 @@ namespace MSFileInfoScanner.Readers
             ticStored = false;
             srmDataCached = false;
 
-            for (var chromatogramIndex = 0; chromatogramIndex < mPWiz.ChromatogramCount; chromatogramIndex++)
+            for (var chromatogramIndex = 0; chromatogramIndex < mMSDataFileReader.ChromatogramCount; chromatogramIndex++)
             {
                 try
                 {
@@ -449,17 +449,17 @@ namespace MSFileInfoScanner.Readers
                     // Prior to 2021, values in scanTimes were in minutes for Thermo .raw files, but in seconds for Bruker .d directories
                     // Starting in September 2021, values should be in minutes for both instrument types due to an update to ProteoWizardWrapper
 
-                    mPWiz.GetChromatogram(chromatogramIndex, out var chromatogramID, out var scanTimes, out var intensities);
+                    mMSDataFileReader.GetChromatogram(chromatogramIndex, out var chromatogramID, out var scanTimes, out var intensities);
 
                     chromatogramID ??= string.Empty;
 
-                    var cvParams = mPWiz.GetChromatogramCVParams(chromatogramIndex);
+                    var cvParams = mMSDataFileReader.GetChromatogramCVParams(chromatogramIndex);
 
                     if (MSDataFileReader.TryGetCVParam(cvParams, pwiz.CLI.cv.CVID.MS_TIC_chromatogram, out _))
                     {
                         // This chromatogram is the TIC
 
-                        var spectrumCount = GetSpectrumCountWithRetry(mPWiz);
+                        var spectrumCount = GetSpectrumCountWithRetry(mMSDataFileReader);
 
                         var storeInTICAndBPIPlot = (mSaveTICAndBPIPlots && spectrumCount == 0);
 
@@ -588,7 +588,7 @@ namespace MSFileInfoScanner.Readers
 
                     try
                     {
-                        mPWiz.GetScanTimesAndMsLevels(mCancellationToken.Token,
+                        mMSDataFileReader.GetScanTimesAndMsLevels(mCancellationToken.Token,
                             out scanTimes, out msLevels, MonitorScanTimeLoadingProgress, useAlternateMethod);
 
                         break;
@@ -617,7 +617,7 @@ namespace MSFileInfoScanner.Readers
                     }
                     catch (Exception ex)
                     {
-                        const string baseMessage = "Exception calling mPWiz.GetScanTimesAndMsLevels";
+                        const string baseMessage = "Exception calling mMSDataFileReader.GetScanTimesAndMsLevels";
                         var alternateMethodFlag = useAlternateMethod ? " (useAlternateMethod = true)" : string.Empty;
 
                         OnWarningEvent(string.Format("{0}{1}: {2}", baseMessage, alternateMethodFlag, ex.Message));
@@ -743,7 +743,7 @@ namespace MSFileInfoScanner.Readers
                 var computeBPI = true;
 
                 // Obtain the raw mass spectrum
-                var msDataSpectrum = mPWiz.GetSpectrum(spectrumIndex);
+                var msDataSpectrum = mMSDataFileReader.GetSpectrum(spectrumIndex);
 
                 if (spectrumIndex >= parserInfo.MinScanIndexWithoutScanTimes)
                 {
@@ -767,7 +767,7 @@ namespace MSFileInfoScanner.Readers
                     scanStatsEntry.ScanNumber = actualScanNumber;
                 }
 
-                var validMetadata = mPWiz.GetScanMetadata(
+                var validMetadata = mMSDataFileReader.GetScanMetadata(
                     spectrumIndex,
                     out var scanStartTime,
                     out var ionInjectionTime,
@@ -776,6 +776,7 @@ namespace MSFileInfoScanner.Readers
                     out var highMass);
 
                 string genericScanFilter;
+
                 bool isHighRes;
 
                 if (validMetadata)
@@ -870,7 +871,7 @@ namespace MSFileInfoScanner.Readers
                     parserInfo.RuntimeMinutes = scanTimeMinutes;
                 }
 
-                var spectrum = mPWiz.GetSpectrumObject(spectrumIndex);
+                var spectrum = mMSDataFileReader.GetSpectrumObject(spectrumIndex);
 
                 if (MSDataFileReader.TryGetCVParamDouble(spectrum.cvParams, pwiz.CLI.cv.CVID.MS_total_ion_current, out var tic))
                 {
