@@ -17,13 +17,6 @@ namespace MSFileInfoScanner.Readers
         public const string MZML_FILE_EXTENSION = ".MZML";
 
         /// <summary>
-        /// Parameterless constructor
-        /// </summary>
-        public MzMLFileInfoScanner() : this(new InfoScannerOptions(), new LCMSDataPlotterOptions())
-        {
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         public MzMLFileInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
