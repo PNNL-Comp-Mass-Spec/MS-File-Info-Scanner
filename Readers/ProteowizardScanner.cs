@@ -109,8 +109,12 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         /// <param name="datasetFileOrDirectory"></param>
         /// <param name="datasetFileInfo"></param>
+        /// <param name="warnOnCompressorIdError"></param>
         /// <returns>True if successful, false if an error</returns>
-        public bool ProcessWithProteoWizard(FileSystemInfo datasetFileOrDirectory, DatasetFileInfo datasetFileInfo)
+        public bool ProcessWithProteoWizard(
+            FileSystemInfo datasetFileOrDirectory,
+            DatasetFileInfo datasetFileInfo,
+            bool warnOnCompressorIdError=false)
         {
             try
             {
@@ -202,7 +206,15 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error in ProteoWizardScanner.ProcessFile", ex);
+                if (ex.Message.StartsWith("unknown compressor id") && warnOnCompressorIdError)
+                {
+                    OnWarningEvent("Error in ProteoWizardScanner.ProcessFile: " + ex.Message);
+                }
+                else
+                {
+                    OnErrorEvent("Error in ProteoWizardScanner.ProcessFile", ex);
+                }
+
                 return false;
             }
         }

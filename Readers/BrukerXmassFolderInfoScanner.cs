@@ -413,7 +413,7 @@ namespace MSFileInfoScanner.Readers
 
                 // ReSharper restore CommentTypo
 
-                return ProcessWithProteoWizard(datasetFileOrDirectory, datasetFileInfo);
+                return ProcessWithProteoWizard(datasetFileOrDirectory, datasetFileInfo, true);
             }
             catch (Exception ex)
             {
@@ -423,8 +423,7 @@ namespace MSFileInfoScanner.Readers
                 // Error using ProteoWizard reader: unknown compressor id: 6bb2e64a-27a0-4575-a66a-4e312c8b9ad7
                 if (ex.Message.IndexOf("6bb2e64a-27a0-4575-a66a-4e312c8b9ad7", StringComparison.OrdinalIgnoreCase) > 0)
                 {
-                    // Most likely a corrupt analysis.baf file
-                    // Most likely a corrupt analysis.tdf file
+                    // Most likely a corrupt analysis.baf file or a corrupt analysis.tdf file
                     OnWarningEvent(string.Format("Most likely a corrupt {0} file", datasetFileOrDirectory.Name));
                 }
 
