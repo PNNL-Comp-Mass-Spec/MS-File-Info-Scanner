@@ -147,15 +147,15 @@ namespace MSFileInfoScanner
 
         #endregion
 
-        private string ByteArrayToString(byte[] arrInput)
+        private string ByteArrayToString(IReadOnlyCollection<byte> arrInput)
         {
             // Converts a byte array into a hex string
 
-            var hexBuilder = new System.Text.StringBuilder(arrInput.Length);
+            var hexBuilder = new System.Text.StringBuilder(arrInput.Count);
 
-            for (var i = 0; i < arrInput.Length; i++)
+            foreach (var value in arrInput)
             {
-                hexBuilder.Append(arrInput[i].ToString("X2"));
+                hexBuilder.Append(value.ToString("X2"));
             }
 
             return hexBuilder.ToString().ToLower();
