@@ -129,7 +129,7 @@ namespace MSFileInfoScanner.Plotting
         {
             var massIntensityPairs = new double[2, mzList.Length + 1];
 
-            for (var i = 0; i <= mzList.Length; i++)
+            for (var i = 0; i < mzList.Length; i++)
             {
                 massIntensityPairs[0, i] = mzList[i];
                 massIntensityPairs[1, i] = intensityList[i];
