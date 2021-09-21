@@ -81,7 +81,7 @@ namespace MSFileInfoScanner.Plotting
                 return false;
             }
 
-            var exeDirectory = new DirectoryInfo(exeDirectoryPath);
+            var exeDirectory = MSFileInfoScanner.GetDirectoryInfo(exeDirectoryPath);
 
             var directoriesToCheck = new List<string> {
                 exeDirectory.FullName
@@ -99,7 +99,7 @@ namespace MSFileInfoScanner.Plotting
 
             foreach (var directoryPath in directoriesToCheck)
             {
-                var candidateFile = new FileInfo(Path.Combine(directoryPath, PYTHON_PLOT_SCRIPT_NAME));
+                var candidateFile = MSFileInfoScanner.GetFileInfo(Path.Combine(directoryPath, PYTHON_PLOT_SCRIPT_NAME));
                 if (!candidateFile.Exists)
                     continue;
 
@@ -293,7 +293,7 @@ namespace MSFileInfoScanner.Plotting
             try
             {
                 // Confirm that the PNG file was created, then rename it
-                var pngFile = new FileInfo(Path.Combine(workDir.FullName, Path.GetFileNameWithoutExtension(exportFile.Name) + ".png"));
+                var pngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(workDir.FullName, Path.GetFileNameWithoutExtension(exportFile.Name) + ".png"));
                 if (!pngFile.Exists)
                 {
                     OnErrorEvent("Plot file not found: " + pngFile.FullName);
@@ -303,7 +303,7 @@ namespace MSFileInfoScanner.Plotting
                 var baseFileName = Path.GetFileNameWithoutExtension(exportFile.Name);
                 newFileName = baseFileName.Substring(0, baseFileName.Length - TMP_FILE_SUFFIX.Length) + ".png";
 
-                var finalPngFile = new FileInfo(Path.Combine(workDir.FullName, newFileName));
+                var finalPngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(workDir.FullName, newFileName));
                 if (finalPngFile.Exists)
                     finalPngFile.Delete();
 

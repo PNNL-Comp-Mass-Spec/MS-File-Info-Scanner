@@ -60,7 +60,7 @@ namespace MSFileInfoScanner.Readers
             // dataFilePath = dataFilePath;
 
             // Obtain the full path to the file
-            var datasetFile = new FileInfo(dataFilePath);
+            var datasetFile = MSFileInfoScanner.GetFileInfo(dataFilePath);
 
             datasetFileInfo.FileSystemCreationTime = datasetFile.CreationTime;
             datasetFileInfo.FileSystemModificationTime = datasetFile.LastWriteTime;

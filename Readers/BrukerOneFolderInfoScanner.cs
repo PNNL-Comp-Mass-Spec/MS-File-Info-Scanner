@@ -49,7 +49,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 // The dataset name for a Bruker 1 folder or zipped S folder is the name of the parent directory
-                var datasetDirectory = new DirectoryInfo(dataFilePath);
+                var datasetDirectory = MSFileInfoScanner.GetDirectoryInfo(dataFilePath);
                 if (datasetDirectory.Parent != null)
                     datasetName = datasetDirectory.Parent.Name;
             }
@@ -394,7 +394,7 @@ namespace MSFileInfoScanner.Readers
             {
                 // Determine whether dataFilePath points to a file or a directory
                 // See if dataFilePath points to a valid file
-                var brukerDatasetFile = new FileInfo(dataFilePath);
+                var brukerDatasetFile = MSFileInfoScanner.GetFileInfo(dataFilePath);
 
                 if (brukerDatasetFile.Exists)
                 {
@@ -433,7 +433,7 @@ namespace MSFileInfoScanner.Readers
                     // Assuming it's a "1" directory
                     parsingBrukerOneFolder = true;
 
-                    zippedSFilesDirectoryInfo = new DirectoryInfo(dataFilePath);
+                    zippedSFilesDirectoryInfo = MSFileInfoScanner.GetDirectoryInfo(dataFilePath);
                     if (zippedSFilesDirectoryInfo.Exists)
                     {
                         // Determine the dataset name by looking up the name of the parent directory of dataFilePath
@@ -450,7 +450,7 @@ namespace MSFileInfoScanner.Readers
 
                     foreach (var fileToFind in filesToFind)
                     {
-                        var instrumentDataFile = new FileInfo(Path.Combine(dataFilePath, fileToFind));
+                        var instrumentDataFile = MSFileInfoScanner.GetFileInfo(Path.Combine(dataFilePath, fileToFind));
                         if (!instrumentDataFile.Exists)
                             continue;
 

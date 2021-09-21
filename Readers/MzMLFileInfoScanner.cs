@@ -52,7 +52,7 @@ namespace MSFileInfoScanner.Readers
             ResetResults();
 
             // Obtain the full path to the file
-            var dataFile = new FileInfo(dataFilePath);
+            var dataFile = MSFileInfoScanner.GetFileInfo(dataFilePath);
 
             if (!dataFile.Exists)
             {

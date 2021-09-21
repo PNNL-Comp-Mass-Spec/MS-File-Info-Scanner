@@ -1037,7 +1037,7 @@ namespace MSFileInfoScanner
             var zipFileCheckAllData = ZipFileCheckAllData;
 
             // Either run a fast check, or entirely skip this .Zip file if it's too large
-            var fileInfo = new FileInfo(filePath);
+            var fileInfo = MSFileInfoScanner.GetFileInfo(filePath);
             var fileSizeMB = fileInfo.Length / 1024.0 / 1024.0;
 
             if (zipFileCheckAllData && mZipFileLargeSizeThresholdMB > 0)
@@ -1287,7 +1287,7 @@ namespace MSFileInfoScanner
 
             bool xmlIsValid;
 
-            var file = new FileInfo(filePath);
+            var file = MSFileInfoScanner.GetFileInfo(filePath);
 
             var fileName = file.Name;
             if (file.Directory == null)
@@ -1621,7 +1621,7 @@ namespace MSFileInfoScanner
                     useIgnoreList = true;
                 }
 
-                var directoryInfo = new DirectoryInfo(directoryPath);
+                var directoryInfo = MSFileInfoScanner.GetDirectoryInfo(directoryPath);
 
                 directoryStats = GetNewDirectoryStats(directoryInfo.FullName);
 

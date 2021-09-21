@@ -350,7 +350,7 @@ namespace MSFileInfoScanner.Readers
 
             try
             {
-                var agilentDFolder = new DirectoryInfo(dataFilePath);
+                var agilentDFolder = MSFileInfoScanner.GetDirectoryInfo(dataFilePath);
                 var msDataFilePath = Path.Combine(agilentDFolder.FullName, AGILENT_MS_DATA_FILE);
 
                 datasetFileInfo.FileSystemCreationTime = agilentDFolder.CreationTime;
@@ -367,7 +367,7 @@ namespace MSFileInfoScanner.Readers
                 // Look for the MS file
                 // Use its modification time to get an initial estimate for the acquisition end time
                 // Assign the .MS file's size to .FileSizeBytes
-                var msDatafile = new FileInfo(msDataFilePath);
+                var msDatafile = MSFileInfoScanner.GetFileInfo(msDataFilePath);
                 if (msDatafile.Exists)
                 {
                     datasetFileInfo.FileSizeBytes = msDatafile.Length;
@@ -404,10 +404,10 @@ namespace MSFileInfoScanner.Readers
                     // MS file not found (or problems parsing); use acqmeth.txt and/or GC.ini
 
                     // The timestamp of the acqmeth.txt file or GC.ini file is more accurate than the GC.ini file, so we'll use that
-                    var methodFile = new FileInfo(Path.Combine(agilentDFolder.FullName, AGILENT_ACQ_METHOD_FILE));
+                    var methodFile = MSFileInfoScanner.GetFileInfo(Path.Combine(agilentDFolder.FullName, AGILENT_ACQ_METHOD_FILE));
                     if (!methodFile.Exists)
                     {
-                        methodFile = new FileInfo(Path.Combine(agilentDFolder.FullName, AGILENT_GC_INI_FILE));
+                        methodFile = MSFileInfoScanner.GetFileInfo(Path.Combine(agilentDFolder.FullName, AGILENT_GC_INI_FILE));
                     }
 
                     if (methodFile.Exists)

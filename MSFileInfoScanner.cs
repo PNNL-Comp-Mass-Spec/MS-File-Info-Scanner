@@ -304,7 +304,8 @@ namespace MSFileInfoScanner
                     OpenFileIntegrityDetailsFile();
                 }
 
-                var datasetDirectory = new DirectoryInfo(directoryPath);
+                var datasetDirectory = GetDirectoryInfo(directoryPath);
+
                 var fileCount = datasetDirectory.GetFiles().Length;
 
                 if (fileCount <= 0)
@@ -371,6 +372,30 @@ namespace MSFileInfoScanner
         {
             // Could use Application.StartupPath, but .GetExecutingAssembly is better
             return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        }
+
+        /// <summary>
+        /// Obtain a DirectoryInfo object for the given path
+        /// </summary>
+        /// <remarks>If the path length is over 210 and not on Linux, converts the path to a Win32 long path</remarks>
+        /// <param name="directoryPath"></param>
+        public static DirectoryInfo GetDirectoryInfo(string directoryPath)
+        {
+            return directoryPath.Length >= NativeIOFileTools.FILE_PATH_LENGTH_THRESHOLD - 50 && !SystemInfo.IsLinux
+                ? new DirectoryInfo(NativeIOFileTools.GetWin32LongPath(directoryPath))
+                : new DirectoryInfo(directoryPath);
+        }
+
+        /// <summary>
+        /// Obtain a FileInfo object for the given path
+        /// </summary>
+        /// <remarks>If the path length is over 260 and not on Linux, converts the path to a Win32 long path</remarks>
+        /// <param name="filePath"></param>
+        public static FileInfo GetFileInfo(string filePath)
+        {
+            return filePath.Length >= NativeIOFileTools.FILE_PATH_LENGTH_THRESHOLD && !SystemInfo.IsLinux
+                ? new FileInfo(NativeIOFileTools.GetWin32LongPath(filePath))
+                : new FileInfo(filePath);
         }
 
         public override string[] GetKnownDirectoryExtensions()
@@ -481,7 +506,7 @@ namespace MSFileInfoScanner
             isDirectory = false;
 
             // See if fileOrDirectoryPath points to a valid file
-            var datasetFile = new FileInfo(fileOrDirectoryPath);
+            var datasetFile = GetFileInfo(fileOrDirectoryPath);
 
             if (datasetFile.Exists)
             {
@@ -490,7 +515,7 @@ namespace MSFileInfoScanner
             }
 
             // See if fileOrDirectoryPath points to a directory
-            var datasetDirectory = new DirectoryInfo(fileOrDirectoryPath);
+            var datasetDirectory = GetDirectoryInfo(fileOrDirectoryPath);
             if (datasetDirectory.Exists)
             {
                 fileOrDirectoryInfo = datasetDirectory;
@@ -498,7 +523,7 @@ namespace MSFileInfoScanner
                 return true;
             }
 
-            fileOrDirectoryInfo = new FileInfo(fileOrDirectoryPath);
+            fileOrDirectoryInfo = GetFileInfo(fileOrDirectoryPath);
             return false;
         }
 
@@ -579,7 +604,7 @@ namespace MSFileInfoScanner
                         string logFilePathToShow;
                         if (Options.ShowDebugInfo)
                         {
-                            var logFileInfo = new FileInfo(mLogFilePath);
+                            var logFileInfo = GetFileInfo(mLogFilePath);
                             logFilePathToShow = logFileInfo.FullName;
                         }
                         else
@@ -1540,7 +1565,7 @@ namespace MSFileInfoScanner
                     // Copy the path into cleanPath and replace any * or ? characters with _
                     var cleanPath = inputFileOrDirectoryPath.Replace("*", "_").Replace("?", "_");
 
-                    var datasetFile = new FileInfo(cleanPath);
+                    var datasetFile = GetFileInfo(cleanPath);
                     string inputDirectoryPath;
 
                     if (datasetFile.Directory?.Exists == true)
@@ -1556,7 +1581,7 @@ namespace MSFileInfoScanner
                     if (string.IsNullOrEmpty(inputDirectoryPath))
                         inputDirectoryPath = ".";
 
-                    var datasetDirectory = new DirectoryInfo(inputDirectoryPath);
+                    var datasetDirectory = GetDirectoryInfo(inputDirectoryPath);
 
                     // Remove any directory information from inputFileOrDirectoryPath
                     inputFileOrDirectoryPath = Path.GetFileName(inputFileOrDirectoryPath);
@@ -1653,14 +1678,14 @@ namespace MSFileInfoScanner
                     {
                         string directoryPath;
 
-                        var candidateDirectory = new DirectoryInfo(inputFileOrDirectoryPath);
+                        var candidateDirectory = GetDirectoryInfo(inputFileOrDirectoryPath);
                         if (candidateDirectory.Exists)
                         {
                             directoryPath = candidateDirectory.FullName;
                         }
                         else
                         {
-                            var dataFile = new FileInfo(inputFileOrDirectoryPath);
+                            var dataFile = GetFileInfo(inputFileOrDirectoryPath);
                             directoryPath = dataFile.Directory?.FullName;
                         }
 
@@ -1719,7 +1744,7 @@ namespace MSFileInfoScanner
                     // Copy the path into cleanPath and replace any * or ? characters with _
                     var cleanPath = inputFilePathOrDirectory.Replace("*", "_").Replace("?", "_");
 
-                    var datasetFile = new FileInfo(cleanPath);
+                    var datasetFile = GetFileInfo(cleanPath);
                     if (Path.IsPathRooted(cleanPath))
                     {
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
@@ -1750,7 +1775,7 @@ namespace MSFileInfoScanner
                     if (string.IsNullOrEmpty(inputFilePathOrDirectory))
                         inputFilePathOrDirectory = ".";
 
-                    var datasetDirectory = new DirectoryInfo(inputFilePathOrDirectory);
+                    var datasetDirectory = GetDirectoryInfo(inputFilePathOrDirectory);
                     if (datasetDirectory.Exists)
                     {
                         inputDirectoryPath = datasetDirectory.FullName;
@@ -1837,7 +1862,7 @@ namespace MSFileInfoScanner
             {
                 try
                 {
-                    inputDirectory = new DirectoryInfo(inputDirectoryPath);
+                    inputDirectory = GetDirectoryInfo(inputDirectoryPath);
                     break;
                 }
                 catch (Exception ex)

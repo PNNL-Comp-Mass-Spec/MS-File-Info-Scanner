@@ -217,8 +217,8 @@ namespace MSFileInfoScanner.Readers
 
             try
             {
-                var rootDirectory = new DirectoryInfo(dataFilePath);
-                var acqDataDirectory = new DirectoryInfo(Path.Combine(rootDirectory.FullName, AGILENT_ACQDATA_FOLDER_NAME));
+                var rootDirectory = MSFileInfoScanner.GetDirectoryInfo(dataFilePath);
+                var acqDataDirectory = MSFileInfoScanner.GetDirectoryInfo(Path.Combine(rootDirectory.FullName, AGILENT_ACQDATA_FOLDER_NAME));
 
                 datasetFileInfo.FileSystemCreationTime = acqDataDirectory.CreationTime;
                 datasetFileInfo.FileSystemModificationTime = acqDataDirectory.LastWriteTime;
@@ -242,7 +242,7 @@ namespace MSFileInfoScanner.Readers
 
                     // Look for the MSScan.bin file
                     // Use its modification time to get an initial estimate for the acquisition end time
-                    var msScanFile = new FileInfo(Path.Combine(acqDataDirectory.FullName, AGILENT_MS_SCAN_FILE));
+                    var msScanFile = MSFileInfoScanner.GetFileInfo(Path.Combine(acqDataDirectory.FullName, AGILENT_MS_SCAN_FILE));
 
                     bool primaryFileAdded;
 

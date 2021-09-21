@@ -494,7 +494,7 @@ namespace MSFileInfoScanner.Readers
         {
             ResetResults();
 
-            var isosFile = new FileInfo(dataFilePath);
+            var isosFile = MSFileInfoScanner.GetFileInfo(dataFilePath);
 
             if (!isosFile.Exists)
             {

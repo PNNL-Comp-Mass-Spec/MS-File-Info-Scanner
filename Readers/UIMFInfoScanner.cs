@@ -558,7 +558,7 @@ namespace MSFileInfoScanner.Readers
             var masterFrameNumList = new int[1];
 
             // Obtain the full path to the file
-            var uimfFile = new FileInfo(dataFilePath);
+            var uimfFile = MSFileInfoScanner.GetFileInfo(dataFilePath);
 
             if (!uimfFile.Exists)
             {
@@ -859,7 +859,7 @@ namespace MSFileInfoScanner.Readers
                                 if (match.Success && uimfFile.DirectoryName != null)
                                 {
                                     var baseName = match.Groups["BaseName"].Value;
-                                    var parentFile = new FileInfo(Path.Combine(uimfFile.DirectoryName, baseName + UIMF_FILE_EXTENSION));
+                                    var parentFile = MSFileInfoScanner.GetFileInfo(Path.Combine(uimfFile.DirectoryName, baseName + UIMF_FILE_EXTENSION));
                                     if (parentFile.Exists && parentFile.LastWriteTime < uimfFile.LastWriteTime)
                                     {
                                         OnWarningEvent("Using LastWriteTime from the parent .UIMF file: " +

@@ -881,7 +881,7 @@ namespace MSFileInfoScanner.DatasetStats
                 ErrorMessage = string.Empty;
 
                 // Define the path to the extended scan stats file
-                var scanStatsFile = new FileInfo(scanStatsFilePath);
+                var scanStatsFile = MSFileInfoScanner.GetFileInfo(scanStatsFilePath);
                 if (scanStatsFile.DirectoryName == null)
                 {
                     ReportError("Unable to determine the parent directory for " + scanStatsFilePath);

@@ -74,7 +74,7 @@ namespace MSFileInfoScanner.Plotting
             if (pngFile == null)
                 throw new ArgumentNullException(nameof(pngFile), "PNG file instance cannot be blank");
 
-            var exportFile = new FileInfo(Path.ChangeExtension(pngFile.FullName, null) + TMP_FILE_SUFFIX + ".txt");
+            var exportFile = MSFileInfoScanner.GetFileInfo(Path.ChangeExtension(pngFile.FullName, null) + TMP_FILE_SUFFIX + ".txt");
 
             try
             {

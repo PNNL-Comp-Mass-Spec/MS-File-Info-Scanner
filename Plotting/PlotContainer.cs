@@ -82,7 +82,7 @@ namespace MSFileInfoScanner.Plotting
             bool success;
             if (!string.Equals(pngFile.Extension, ".png", StringComparison.OrdinalIgnoreCase))
             {
-                success = SaveToFileLoop(new FileInfo(pngFile.FullName + ".png"), ImageFileFormat.PNG, width, height, resolution);
+                success = SaveToFileLoop(MSFileInfoScanner.GetFileInfo(pngFile.FullName + ".png"), ImageFileFormat.PNG, width, height, resolution);
             }
             else
             {
@@ -101,7 +101,7 @@ namespace MSFileInfoScanner.Plotting
             bool success;
             if (!string.Equals(jpgFile.Extension, ".jpg", StringComparison.OrdinalIgnoreCase))
             {
-                success = SaveToFileLoop(new FileInfo(jpgFile.FullName + ".jpg"), ImageFileFormat.JPG, width, height, resolution);
+                success = SaveToFileLoop(MSFileInfoScanner.GetFileInfo(jpgFile.FullName + ".jpg"), ImageFileFormat.JPG, width, height, resolution);
             }
             else
             {
@@ -141,11 +141,11 @@ namespace MSFileInfoScanner.Plotting
 
                     if (imageFile.DirectoryName != null)
                     {
-                        newFileInfo = new FileInfo(Path.Combine(imageFile.DirectoryName, newFileName));
+                        newFileInfo = MSFileInfoScanner.GetFileInfo(Path.Combine(imageFile.DirectoryName, newFileName));
                     }
                     else
                     {
-                        newFileInfo = new FileInfo(newFileName);
+                        newFileInfo = MSFileInfoScanner.GetFileInfo(newFileName);
                     }
 
                     var success = SaveToFile(newFileInfo, fileFormat, width, height, resolution);

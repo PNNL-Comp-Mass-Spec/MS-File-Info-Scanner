@@ -44,7 +44,7 @@ namespace MSFileInfoScanner.Readers
             ResetResults();
 
             // Obtain the full path to the file
-            var instrumentDataFile = new FileInfo(dataFilePath);
+            var instrumentDataFile = MSFileInfoScanner.GetFileInfo(dataFilePath);
 
             if (!instrumentDataFile.Exists)
             {

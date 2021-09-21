@@ -618,7 +618,7 @@ namespace MSFileInfoScanner.Readers
 
             try
             {
-                var massLynxFile = new FileInfo(massLynxDataDirectoryPath);
+                var massLynxFile = MSFileInfoScanner.GetFileInfo(massLynxDataDirectoryPath);
                 string cleanMassLynxDataFolderPath;
 
                 if (massLynxFile.Exists)
@@ -865,7 +865,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 var functionsFilePath = Path.Combine(dataDirPath, "_functns.inf");
-                var functionsFile = new FileInfo(functionsFilePath);
+                var functionsFile = MSFileInfoScanner.GetFileInfo(functionsFilePath);
 
                 functionCount = 0;
 
@@ -893,7 +893,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 var functionsFilePath = Path.Combine(dataDirPath, "_functns.inf");
-                var functionsFile = new FileInfo(functionsFilePath);
+                var functionsFile = MSFileInfoScanner.GetFileInfo(functionsFilePath);
 
                 if (!functionsFile.Exists)
                 {
@@ -1085,7 +1085,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 var indexFilePath = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(msFunctionInfo.FunctionNumber) + ".idx");
-                var indexFile = new FileInfo(indexFilePath);
+                var indexFile = MSFileInfoScanner.GetFileInfo(indexFilePath);
 
                 var numberOfScansInFunction = 0;
                 if (indexFile.Exists)
@@ -1145,7 +1145,7 @@ namespace MSFileInfoScanner.Readers
                 var indexFilePath = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(msFunctionInfo.FunctionNumber) + ".idx");
                 // indexFilePath  = Path.Combine(dataDirPath, "_func" + GetFunctionNumberZeroPadded(msFunctionInfo.FunctionNumber) + ".sts");
 
-                var indexFile = new FileInfo(indexFilePath);
+                var indexFile = MSFileInfoScanner.GetFileInfo(indexFilePath);
 
                 if (!indexFile.Exists)
                 {
@@ -1319,7 +1319,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 var headerFilePath = Path.Combine(thisMSData.CurrentDataDirPath, "_HEADER.TXT");
-                var headerFile = new FileInfo(headerFilePath);
+                var headerFile = MSFileInfoScanner.GetFileInfo(headerFilePath);
 
                 if (!headerFile.Exists)
                 {
@@ -1402,7 +1402,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 var headerFilePath = Path.Combine(dataDirPath, "_HEADER.TXT");
-                var headerFile = new FileInfo(headerFilePath);
+                var headerFile = MSFileInfoScanner.GetFileInfo(headerFilePath);
 
                 if (!headerFile.Exists)
                 {

@@ -1749,7 +1749,7 @@ namespace MSFileInfoScanner.Plotting
                 if (ms1Plot.SeriesCount > 0)
                 {
                     var pngFilename = datasetName + "_" + fileNameSuffixAddon + "LCMS" + scanModeSuffixAddon + ".png";
-                    var pngFile = new FileInfo(Path.Combine(outputDirectory, pngFilename));
+                    var pngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(outputDirectory, pngFilename));
                     successMS1 = ms1Plot.SaveToPNG(pngFile, 1024, 700, 96);
                     AddRecentFile(pngFile.FullName, OutputFileTypes.LCMS);
                 }
@@ -1759,7 +1759,7 @@ namespace MSFileInfoScanner.Plotting
 
                 if (ms2Plot.SeriesCount > 0)
                 {
-                    var pngFile = new FileInfo(Path.Combine(outputDirectory, datasetName + "_" + fileNameSuffixAddon + "LCMS_MSn" + scanModeSuffixAddon + ".png"));
+                    var pngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(outputDirectory, datasetName + "_" + fileNameSuffixAddon + "LCMS_MSn" + scanModeSuffixAddon + ".png"));
                     successMS2 = ms2Plot.SaveToPNG(pngFile, 1024, 700, 96);
                     AddRecentFile(pngFile.FullName, OutputFileTypes.LCMSMSn);
                 }

@@ -634,7 +634,7 @@ namespace MSFileInfoScanner.Plotting
 
                 if (bpiPlotMS1.SeriesCount > 0)
                 {
-                    var pngFile = new FileInfo(Path.Combine(outputDirectory, datasetName + "_" + BPIPlotAbbrev + "_MS.png"));
+                    var pngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(outputDirectory, datasetName + "_" + BPIPlotAbbrev + "_MS.png"));
                     successMS1 = bpiPlotMS1.SaveToPNG(pngFile, 1024, 600, 96);
                     AddRecentFile(pngFile.FullName, OutputFileTypes.BPIMS);
                 }
@@ -644,7 +644,7 @@ namespace MSFileInfoScanner.Plotting
 
                 if (bpiPlotMS2.SeriesCount > 0)
                 {
-                    var pngFile = new FileInfo(Path.Combine(outputDirectory, datasetName + "_" + BPIPlotAbbrev + "_MSn.png"));
+                    var pngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(outputDirectory, datasetName + "_" + BPIPlotAbbrev + "_MSn.png"));
                     successMS2 = bpiPlotMS2.SaveToPNG(pngFile, 1024, 600, 96);
                     AddRecentFile(pngFile.FullName, OutputFileTypes.BPIMSn);
                 }
@@ -654,7 +654,7 @@ namespace MSFileInfoScanner.Plotting
 
                 if (ticPlot.SeriesCount > 0)
                 {
-                    var pngFile = new FileInfo(Path.Combine(outputDirectory, datasetName + "_" + TICPlotAbbrev + ".png"));
+                    var pngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(outputDirectory, datasetName + "_" + TICPlotAbbrev + ".png"));
                     successTIC = ticPlot.SaveToPNG(pngFile, 1024, 600, 96);
                     AddRecentFile(pngFile.FullName, OutputFileTypes.TIC);
                 }

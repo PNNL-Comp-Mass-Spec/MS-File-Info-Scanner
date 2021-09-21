@@ -171,7 +171,7 @@ namespace MSFileInfoScanner
                 return false;
 
             // Assure that the user did not provide an old-style XML-based parameter file
-            var paramFile = new FileInfo(parameterFilePath);
+            var paramFile = MSFileInfoScanner.GetFileInfo(parameterFilePath);
             if (!paramFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
                 return false;
 

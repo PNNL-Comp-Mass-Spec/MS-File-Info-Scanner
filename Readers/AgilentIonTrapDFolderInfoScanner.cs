@@ -214,7 +214,7 @@ namespace MSFileInfoScanner.Readers
 
             try
             {
-                var datasetDirectory = new DirectoryInfo(dataFilePath);
+                var datasetDirectory = MSFileInfoScanner.GetDirectoryInfo(dataFilePath);
 
                 datasetFileInfo.FileSystemCreationTime = datasetDirectory.CreationTime;
                 datasetFileInfo.FileSystemModificationTime = datasetDirectory.LastWriteTime;
@@ -229,7 +229,7 @@ namespace MSFileInfoScanner.Readers
                 // Look for the Analysis.yep file
                 // Use its modification time to get an initial estimate for the acquisition time
                 // Assign the .Yep file's size to .FileSizeBytes
-                var yepFile = new FileInfo(Path.Combine(datasetDirectory.FullName, AGILENT_YEP_FILE));
+                var yepFile = MSFileInfoScanner.GetFileInfo(Path.Combine(datasetDirectory.FullName, AGILENT_YEP_FILE));
                 if (yepFile.Exists)
                 {
                     datasetFileInfo.FileSizeBytes = yepFile.Length;
@@ -250,7 +250,8 @@ namespace MSFileInfoScanner.Readers
                 else
                 {
                     // Analysis.yep not found; look for Run.log
-                    var runLog = new FileInfo(Path.Combine(datasetDirectory.FullName, AGILENT_RUN_LOG_FILE));
+                    var runLog = MSFileInfoScanner.GetFileInfo(Path.Combine(datasetDirectory.FullName, AGILENT_RUN_LOG_FILE));
+
                     if (runLog.Exists)
                     {
                         datasetFileInfo.AcqTimeStart = runLog.LastWriteTime;

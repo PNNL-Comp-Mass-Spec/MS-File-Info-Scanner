@@ -318,7 +318,7 @@ namespace MSFileInfoScanner.Readers
             var dataFilePathLocal = string.Empty;
 
             // Obtain the full path to the file
-            var rawFile = new FileInfo(dataFilePath);
+            var rawFile = MSFileInfoScanner.GetFileInfo(dataFilePath);
 
             if (!rawFile.Exists)
             {
@@ -394,7 +394,7 @@ namespace MSFileInfoScanner.Readers
                                 deleteLocalFile = true;
 
                                 // Update rawFile then try to re-open
-                                rawFile = new FileInfo(dataFilePath);
+                                rawFile = MSFileInfoScanner.GetFileInfo(dataFilePath);
 
                                 if (!xcaliburAccessor.OpenRawFile(rawFile.FullName))
                                 {

@@ -124,7 +124,7 @@ namespace MSFileInfoScanner.Readers
         private DirectoryInfo GetDatasetDirectory(string dataFilePath)
         {
             // First see if dataFilePath points to a valid file
-            var datasetFile = new FileInfo(dataFilePath);
+            var datasetFile = MSFileInfoScanner.GetFileInfo(dataFilePath);
 
             if (datasetFile.Exists)
             {
@@ -133,7 +133,7 @@ namespace MSFileInfoScanner.Readers
             }
 
             // Assume this is the path to the dataset directory
-            return new DirectoryInfo(dataFilePath);
+            return MSFileInfoScanner.GetDirectoryInfo(dataFilePath);
         }
 
         public override string GetDatasetNameViaPath(string dataFilePath)
@@ -167,7 +167,7 @@ namespace MSFileInfoScanner.Readers
                 return false;
             }
 
-            var imagingFile = new FileInfo(imagingFilePath);
+            var imagingFile = MSFileInfoScanner.GetFileInfo(imagingFilePath);
 
             return imagingFile.Name.StartsWith(ZIPPED_IMAGING_FILE_NAME_PREFIX, StringComparison.OrdinalIgnoreCase) &&
                    string.Equals(imagingFile.Extension, ".zip", StringComparison.OrdinalIgnoreCase);

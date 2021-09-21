@@ -72,7 +72,7 @@ namespace MSFileInfoScanner.Plotting
                 logFileName = dataSource + ".txt";
             }
 
-            var logFile = new FileInfo(Path.Combine(logDirectory, logFileName));
+            var logFile = MSFileInfoScanner.GetFileInfo(Path.Combine(logDirectory, logFileName));
             var addBlankLink = logFile.Exists;
 
             mLogWriter = new StreamWriter(new FileStream(logFile.FullName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))

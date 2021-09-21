@@ -69,7 +69,7 @@ namespace MSFileInfoScanner.Readers
 
             try
             {
-                var datasetDirectory = new DirectoryInfo(dataFilePath);
+                var datasetDirectory = MSFileInfoScanner.GetDirectoryInfo(dataFilePath);
                 datasetFileInfo.FileSystemCreationTime = datasetDirectory.CreationTime;
                 datasetFileInfo.FileSystemModificationTime = datasetDirectory.LastWriteTime;
 

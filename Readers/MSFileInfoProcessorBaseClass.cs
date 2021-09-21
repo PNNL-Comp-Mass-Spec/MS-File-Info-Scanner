@@ -407,7 +407,7 @@ namespace MSFileInfoScanner.Readers
                 if (outputDirectoryPath.Length > 0)
                 {
                     // Make sure the output directory exists
-                    outputDirectory = new DirectoryInfo(outputDirectoryPath);
+                    outputDirectory = MSFileInfoScanner.GetDirectoryInfo(outputDirectoryPath);
 
                     if (!outputDirectory.Exists)
                     {
