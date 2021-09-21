@@ -129,14 +129,12 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 // Look for the method directory (directory name should end in .m)
-                var subDirectories = datasetDirectory.GetDirectories("*.m").ToList();
 
-                if (subDirectories.Count == 0)
-                {
-                    // Match not found
-                    // Look for any XMass directories
-                    subDirectories = datasetDirectory.GetDirectories("XMass*").ToList();
-                }
+                var methodDirectories = PathUtils.FindDirectoriesWildcard(datasetDirectory, "*.m");
+
+                var subDirectories = methodDirectories.Count > 0
+                    ? methodDirectories
+                    : PathUtils.FindDirectoriesWildcard(datasetDirectory, "XMass*");
 
                 if (subDirectories.Count > 0)
                 {
@@ -148,12 +146,13 @@ namespace MSFileInfoScanner.Readers
 
                     foreach (var subdirectory in subDirectories)
                     {
-                        foreach (var methodFile in subdirectory.GetFiles("apexAcquisition.method"))
+                        foreach (var methodFile in PathUtils.FindFilesWildcard(subdirectory, "apexAcquisition.method"))
                         {
                             datasetFileInfo.AcqTimeStart = methodFile.LastWriteTime;
                             success = true;
                             break;
                         }
+
                         if (success)
                             break;
                     }
@@ -163,12 +162,13 @@ namespace MSFileInfoScanner.Readers
                         // apexAcquisition.method not found; try submethods.xml instead
                         foreach (var subdirectory in subDirectories)
                         {
-                            foreach (var methodFile in subdirectory.GetFiles("submethods.xml"))
+                            foreach (var methodFile in PathUtils.FindFilesWildcard(subdirectory, "submethods.xml"))
                             {
                                 datasetFileInfo.AcqTimeStart = methodFile.LastWriteTime;
                                 success = true;
                                 break;
                             }
+
                             if (success)
                                 break;
                         }
@@ -178,7 +178,7 @@ namespace MSFileInfoScanner.Readers
                 // Also look for the .hdx file
                 // Its file modification time typically also matches the run start time
 
-                foreach (var hdxFile in datasetDirectory.GetFiles("*.hdx"))
+                foreach (var hdxFile in PathUtils.FindFilesWildcard(datasetDirectory, "*.hdx"))
                 {
                     if (!success || hdxFile.LastWriteTime < datasetFileInfo.AcqTimeStart)
                     {
@@ -198,9 +198,9 @@ namespace MSFileInfoScanner.Readers
 
         private FileInfo FindBrukerSettingsFile(DirectoryInfo dotDFolder)
         {
-            var dotMethodFiles = dotDFolder.GetFiles("*.method", SearchOption.AllDirectories);
+            var dotMethodFiles = PathUtils.FindFilesWildcard(dotDFolder, "*.method", true);
 
-            if (dotMethodFiles.Length == 0)
+            if (dotMethodFiles.Count == 0)
             {
                 return null;
             }
@@ -223,14 +223,14 @@ namespace MSFileInfoScanner.Readers
 
         private FileInfo FindBrukerAcqusFile(DirectoryInfo dotDFolder)
         {
-            var acqusFiles = dotDFolder.GetFiles("acqus", SearchOption.AllDirectories);
+            var acqusFiles = PathUtils.FindFilesWildcard(dotDFolder, "acqus", true);
 
-            if (acqusFiles.Length == 0)
+            if (acqusFiles.Count == 0)
             {
                 return null;
             }
 
-            if (acqusFiles.Length == 1)
+            if (acqusFiles.Count == 1)
             {
                 return acqusFiles.First();
             }
@@ -305,7 +305,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 var autoMSFilePath = Path.Combine(datasetDirectory.FullName, BRUKER_AUTOMS_FILE);
-                var autoMSFile = new FileInfo(autoMSFilePath);
+                var autoMSFile = MSFileInfoScanner.GetFileInfo(autoMSFilePath);
 
                 if (!autoMSFile.Exists)
                 {
@@ -380,7 +380,7 @@ namespace MSFileInfoScanner.Readers
             {
                 // ReSharper disable once StringLiteralTypo
                 const string newDataFilePath = @"c:\temp\analysis.baf";
-                datasetFileOrDirectory = new FileInfo(newDataFilePath);
+                datasetFileOrDirectory = MSFileInfoScanner.GetFileInfo(newDataFilePath);
             }
 
             mLCMS2DPlot.Options.UseObservedMinScan = false;
@@ -439,7 +439,7 @@ namespace MSFileInfoScanner.Readers
                 var scanData = new Dictionary<string, MCFScanInfoType>();
 
                 var metadataFilePath = Path.Combine(datasetDirectory.FullName, BRUKER_SQLITE_INDEX_FILE_NAME);
-                var metadataFile = new FileInfo(metadataFilePath);
+                var metadataFile = MSFileInfoScanner.GetFileInfo(metadataFilePath);
 
                 if (!metadataFile.Exists)
                 {
@@ -476,7 +476,7 @@ namespace MSFileInfoScanner.Readers
                     }
                 }
 
-                var mcfIndexFiles = datasetDirectory.GetFiles("*_1.mcf_idx").ToList();
+                var mcfIndexFiles = PathUtils.FindFilesWildcard(datasetDirectory, "*_1.mcf_idx");
 
                 if (mcfIndexFiles.Count == 0)
                 {
@@ -601,7 +601,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 var scanXMLFilePath = Path.Combine(datasetDirectory.FullName, BRUKER_SCANINFO_XML_FILE);
-                var scanXMLFile = new FileInfo(scanXMLFilePath);
+                var scanXMLFile = MSFileInfoScanner.GetFileInfo(scanXMLFilePath);
 
                 if (!scanXMLFile.Exists)
                 {
@@ -746,7 +746,7 @@ namespace MSFileInfoScanner.Readers
         private DirectoryInfo GetDatasetFolder(string dataFilePath)
         {
             // First see if dataFilePath points to a valid file
-            var datasetFile = new FileInfo(dataFilePath);
+            var datasetFile = MSFileInfoScanner.GetFileInfo(dataFilePath);
 
             if (datasetFile.Exists)
             {
@@ -755,7 +755,7 @@ namespace MSFileInfoScanner.Readers
             }
 
             // Assume this is the path to the dataset directory
-            return new DirectoryInfo(dataFilePath);
+            return MSFileInfoScanner.GetDirectoryInfo(dataFilePath);
         }
 
         public override string GetDatasetNameViaPath(string dataFilePath)
@@ -833,7 +833,7 @@ namespace MSFileInfoScanner.Readers
 
                 foreach (var instrumentDataFile in instrumentDataFiles)
                 {
-                    var candidateFiles = datasetDirectory.GetFiles(instrumentDataFile).ToList();
+                    var candidateFiles = PathUtils.FindFilesWildcard(datasetDirectory, instrumentDataFile);
                     if (candidateFiles.Count == 0)
                         continue;
 
@@ -848,7 +848,7 @@ namespace MSFileInfoScanner.Readers
                 if (matchedFiles.Count == 0)
                 {
                     // .baf files not found; look for any .mcf files
-                    var mcfFiles = datasetDirectory.GetFiles("*" + BRUKER_MCF_FILE_EXTENSION).ToList();
+                    var mcfFiles = PathUtils.FindFilesWildcard(datasetDirectory, "*" + BRUKER_MCF_FILE_EXTENSION);
 
                     if (mcfFiles.Count > 0)
                     {
@@ -1011,11 +1011,11 @@ namespace MSFileInfoScanner.Readers
         {
             try
             {
-                var serOrFidFile = new FileInfo(Path.Combine(dotDFolder.FullName, "ser"));
+                var serOrFidFile = MSFileInfoScanner.GetFileInfo(Path.Combine(dotDFolder.FullName, "ser"));
 
                 if (!serOrFidFile.Exists)
                 {
-                    serOrFidFile = new FileInfo(Path.Combine(dotDFolder.FullName, "fid"));
+                    serOrFidFile = MSFileInfoScanner.GetFileInfo(Path.Combine(dotDFolder.FullName, "fid"));
                     if (!serOrFidFile.Exists)
                         return false;
                 }

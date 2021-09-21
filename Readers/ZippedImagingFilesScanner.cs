@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScannerInterfaces;
+using PRISM;
 
 namespace MSFileInfoScanner.Readers
 {
@@ -203,7 +204,7 @@ namespace MSFileInfoScanner.Readers
                 // Look for the 0_R*.zip files
                 // If we cannot find any zip files, return false
 
-                var zipFiles = datasetDirectory.GetFiles(ZIPPED_IMAGING_FILE_SEARCH_SPEC).ToList();
+                var zipFiles = PathUtils.FindFilesWildcard(datasetDirectory, ZIPPED_IMAGING_FILE_SEARCH_SPEC);
                 if (zipFiles.Count == 0)
                 {
                     // 0_R*.zip files not found

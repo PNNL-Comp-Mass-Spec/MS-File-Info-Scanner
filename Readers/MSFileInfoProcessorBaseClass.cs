@@ -1282,7 +1282,7 @@ namespace MSFileInfoScanner.Readers
                 mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = datasetDirectory.Extension;
 
                 mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = 0;
-                foreach (var outputFile in datasetDirectory.GetFiles("*", SearchOption.AllDirectories))
+                foreach (var outputFile in PathUtils.FindFilesWildcard(datasetDirectory, "*", true))
                 {
                     mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes += outputFile.Length;
                 }

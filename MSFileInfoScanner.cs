@@ -1300,24 +1300,26 @@ namespace MSFileInfoScanner
                                 case AgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION:
                                     // Agilent .D directory or Bruker .D directory
 
-                                    if (Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_TDF_FILE_NAME).Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_SER_FILE_NAME).Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_FID_FILE_NAME).Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_idx").Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_xtr").Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Length > 0 ||
-                                        Directory.GetFiles(inputFileOrDirectoryPath, BrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME).Length > 0)
+                                    var datasetDirectory = GetDirectoryInfo(inputFileOrDirectoryPath);
+
+                                    if (PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Count > 0 ||
+                                        PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_TDF_FILE_NAME).Count > 0 ||
+                                        PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_SER_FILE_NAME).Count > 0 ||
+                                        PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_FID_FILE_NAME).Count > 0 ||
+                                        PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_idx").Count > 0 ||
+                                        PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_xtr").Count > 0 ||
+                                        PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME).Count > 0 ||
+                                        PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME).Count > 0)
                                     {
                                         mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     }
-                                    else if (Directory.GetFiles(inputFileOrDirectoryPath, AgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Length > 0 ||
-                                      Directory.GetFiles(inputFileOrDirectoryPath, AgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Length > 0 ||
-                                      Directory.GetFiles(inputFileOrDirectoryPath, AgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Length > 0)
+                                    else if (PathUtils.FindFilesWildcard(datasetDirectory, AgilentGCDFolderInfoScanner.AGILENT_MS_DATA_FILE).Count > 0 ||
+                                             PathUtils.FindFilesWildcard(datasetDirectory, AgilentGCDFolderInfoScanner.AGILENT_ACQ_METHOD_FILE).Count > 0 ||
+                                             PathUtils.FindFilesWildcard(datasetDirectory, AgilentGCDFolderInfoScanner.AGILENT_GC_INI_FILE).Count > 0)
                                     {
                                         mMSInfoScanner = new AgilentGCDFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     }
-                                    else if (Directory.GetDirectories(inputFileOrDirectoryPath, AgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Length > 0)
+                                    else if (PathUtils.FindDirectoriesWildcard(datasetDirectory, AgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Count > 0)
                                     {
                                         mMSInfoScanner = new AgilentTOFDFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     }
@@ -1338,7 +1340,7 @@ namespace MSFileInfoScanner
                                 default:
                                     // Unknown directory extension (or no extension)
                                     // See if the directory contains one or more 0_R*.zip files
-                                    if (Directory.GetFiles(inputFileOrDirectoryPath, ZippedImagingFilesScanner.ZIPPED_IMAGING_FILE_SEARCH_SPEC).Length > 0)
+                                    if (PathUtils.FindFilesWildcard(GetDirectoryInfo(inputFileOrDirectoryPath), ZippedImagingFilesScanner.ZIPPED_IMAGING_FILE_SEARCH_SPEC).Count > 0)
                                     {
                                         mMSInfoScanner = new ZippedImagingFilesScanner(Options, LCMS2DPlotOptions);
                                         knownMSDataType = true;
@@ -1584,14 +1586,14 @@ namespace MSFileInfoScanner
                     var datasetDirectory = GetDirectoryInfo(inputDirectoryPath);
 
                     // Remove any directory information from inputFileOrDirectoryPath
-                    inputFileOrDirectoryPath = Path.GetFileName(inputFileOrDirectoryPath);
+                    var fileOrDirectoryMatchSpec = Path.GetFileName(inputFileOrDirectoryPath);
 
                     var matchCount = 0;
 
                     // Force this to true to avoid squashing newly-created index.html files
                     Options.UseDatasetNameForHtmlPlotsFile = true;
 
-                    foreach (var fileItem in datasetDirectory.GetFiles(inputFileOrDirectoryPath))
+                    foreach (var fileItem in PathUtils.FindFilesWildcard(datasetDirectory, fileOrDirectoryMatchSpec))
                     {
                         success = ProcessMSFileOrDirectory(fileItem.FullName, outputDirectoryPath, resetErrorCode, out msFileProcessingState);
 
@@ -1618,7 +1620,7 @@ namespace MSFileInfoScanner
                     if (AbortProcessing)
                         return false;
 
-                    foreach (var directoryItem in datasetDirectory.GetDirectories(inputFileOrDirectoryPath))
+                    foreach (var directoryItem in PathUtils.FindDirectoriesWildcard(datasetDirectory, fileOrDirectoryMatchSpec))
                     {
                         success = ProcessMSFileOrDirectory(directoryItem.FullName, outputDirectoryPath, resetErrorCode, out msFileProcessingState);
 
@@ -1653,7 +1655,7 @@ namespace MSFileInfoScanner
                     {
                         if (ErrorCode == MSFileScannerErrorCodes.NoError)
                         {
-                            ReportWarning("No match was found for the input file path:" + inputFileOrDirectoryPath);
+                            ReportWarning("No match was found for the input file path:" + fileOrDirectoryMatchSpec);
                         }
                     }
                     else
@@ -1909,7 +1911,7 @@ namespace MSFileInfoScanner
                 success = true;
                 var processedZippedSFolder = false;
 
-                foreach (var fileItem in inputDirectory.GetFiles(fileNameMatch))
+                foreach (var fileItem in PathUtils.FindFilesWildcard(inputDirectory, fileNameMatch))
                 {
                     retryCount = 0;
                     while (true)
@@ -1945,7 +1947,7 @@ namespace MSFileInfoScanner
                                 if (BrukerOneFolderInfoScanner.IsZippedSFolder(fileItem.Name))
                                 {
                                     // Only process this file if there is not a subdirectory named "1" present"
-                                    if (inputDirectory.GetDirectories(BrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME).Length < 1)
+                                    if (PathUtils.FindDirectoriesWildcard(inputDirectory, BrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME).Count == 0)
                                     {
                                         fileProcessed = true;
                                         processedZippedSFolder = true;
@@ -2026,7 +2028,7 @@ namespace MSFileInfoScanner
                 var subdirectoriesProcessed = 0;
                 var subdirectoryNamesProcessed = new SortedSet<string>();
 
-                foreach (var subdirectory in inputDirectory.GetDirectories(fileNameMatch))
+                foreach (var subdirectory in PathUtils.FindDirectoriesWildcard(inputDirectory, fileNameMatch))
                 {
                     retryCount = 0;
                     while (true)
@@ -2115,7 +2117,7 @@ namespace MSFileInfoScanner
                     // Call this function for each of the subdirectories of inputDirectory
                     // However, do not step into directories listed in subdirectoryNamesProcessed
 
-                    foreach (var subdirectory in inputDirectory.GetDirectories())
+                    foreach (var subdirectory in PathUtils.FindDirectoriesWildcard(inputDirectory, "*"))
                     {
                         retryCount = 0;
                         while (true)
@@ -2379,7 +2381,7 @@ namespace MSFileInfoScanner
 
             try
             {
-                var datasetFile = new FileInfo(filePath);
+                var datasetFile = GetFileInfo(filePath);
 
                 if (!datasetFile.Exists)
                 {

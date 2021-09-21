@@ -235,7 +235,7 @@ namespace MSFileInfoScanner.Readers
                 if (acqDataDirectory.Exists)
                 {
                     // Sum up the sizes of all of the files in the AcqData directory
-                    foreach (var file in acqDataDirectory.GetFiles("*", SearchOption.AllDirectories))
+                    foreach (var file in PathUtils.FindFilesWildcard(acqDataDirectory, "*", true))
                     {
                         datasetFileInfo.FileSizeBytes += file.Length;
                     }

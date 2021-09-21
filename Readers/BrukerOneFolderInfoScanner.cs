@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScannerInterfaces;
+using PRISM;
 
 namespace MSFileInfoScanner.Readers
 {
@@ -205,7 +206,7 @@ namespace MSFileInfoScanner.Readers
 
             try
             {
-                foreach (var zippedSFile in zippedSFilesDirectoryInfo.GetFiles("s*.zip"))
+                foreach (var zippedSFile in PathUtils.FindFilesWildcard(zippedSFilesDirectoryInfo, "s*.zip"))
                 {
                     // Get the info on each zip file
 
@@ -246,7 +247,7 @@ namespace MSFileInfoScanner.Readers
             var fileListCount = 0;
             var success = false;
 
-            foreach (var pekFile in icrDirectory.GetFiles("*.pek"))
+            foreach (var pekFile in PathUtils.FindFilesWildcard(icrDirectory, "*.pek"))
             {
                 try
                 {
@@ -298,7 +299,7 @@ namespace MSFileInfoScanner.Readers
 
             ticModificationDate = DateTime.MinValue;
 
-            foreach (var ticFile in ticDirectoryInfo.GetFiles("*.tic"))
+            foreach (var ticFile in PathUtils.FindFilesWildcard(ticDirectoryInfo, "*.tic"))
             {
                 try
                 {
@@ -534,7 +535,7 @@ namespace MSFileInfoScanner.Readers
                         // Look for the TIC* directory to obtain the scan count from a .Tic file
                         // If the Scan Count in the TIC is larger than the scan count from ParseBrukerZippedSFolders,
                         //  then we'll use that instead
-                        foreach (var subDirectory in zippedSFilesDirectoryInfo.GetDirectories("TIC*"))
+                        foreach (var subDirectory in PathUtils.FindDirectoriesWildcard(zippedSFilesDirectoryInfo, "TIC*"))
                         {
                             success = ParseTICDirectory(subDirectory, datasetFileInfo, out ticModificationDate);
 
@@ -566,7 +567,7 @@ namespace MSFileInfoScanner.Readers
                     {
                         // .Tic file not found in zippedSFilesDirectoryInfo
                         // Look for an ICR* directory to obtain the scan count from a .Pek file
-                        foreach (var subDirectory in zippedSFilesDirectoryInfo.GetDirectories("ICR*"))
+                        foreach (var subDirectory in PathUtils.FindDirectoriesWildcard(zippedSFilesDirectoryInfo, "ICR*"))
                         {
                             success = ParseICRDirectory(subDirectory, datasetFileInfo);
 
