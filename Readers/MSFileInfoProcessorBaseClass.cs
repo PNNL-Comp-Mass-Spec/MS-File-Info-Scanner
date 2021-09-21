@@ -149,7 +149,7 @@ namespace MSFileInfoScanner.Readers
         /// <param name="instrumentDirectory"></param>
         protected void AddLargestInstrumentFile(DirectoryInfo instrumentDirectory)
         {
-            var filesBySize = (from item in instrumentDirectory.GetFiles("*") orderby item.Length select item).ToList();
+            var filesBySize = (from item in instrumentDirectory.GetFiles() orderby item.Length select item).ToList();
 
             if (filesBySize.Count > 0)
             {
