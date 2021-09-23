@@ -196,7 +196,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         public LCMSDataPlotterOptions Clone()
         {
-            var newOptions = new LCMSDataPlotterOptions
+            return new LCMSDataPlotterOptions
             {
                 DeleteTempFiles = DeleteTempFiles,
                 OverviewPlotDivisor = OverviewPlotDivisor,
@@ -212,8 +212,6 @@ namespace MSFileInfoScannerInterfaces
                 UseObservedMinScan = UseObservedMinScan,
                 MaxMonoMassForDeisotopedPlot = MaxMonoMassForDeisotopedPlot
             };
-
-            return newOptions;
         }
 
         /// <summary>
