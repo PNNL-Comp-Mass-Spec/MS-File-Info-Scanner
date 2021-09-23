@@ -1080,24 +1080,27 @@ namespace MSFileInfoScanner.Readers
 
                 var scansProcessed = 0;
 
-                for (var scanNumber = 0; scanNumber < scanCount; scanNumber++)
+                for (var scanIndex = 0; scanIndex < scanCount; scanIndex++)
                 {
                     float[] mzList;
                     float[] intensityList;
 
+                    var scanNumber = scanIndex + 1;
+
                     try
                     {
-                        serReader.GetMassSpectrum(scanNumber, out mzList, out intensityList);
+                        serReader.GetMassSpectrum(scanIndex, out mzList, out intensityList);
                     }
                     catch (Exception ex)
                     {
-                        if (scanNumber >= scanCount - 1)
+                        if (scanIndex >= scanCount - 1)
                         {
-                            if (scanNumber == 0)
+                            if (scanIndex == 0)
                             {
                                 // Silently ignore this
                                 continue;
                             }
+
                             // Treat this as a warning
                             OnWarningEvent("Unable to retrieve scan " + scanNumber + " using the BrukerDataReader: " + ex.Message);
                         }
