@@ -13,8 +13,6 @@ namespace SpectraTypeClassifier
     {
         // Ignore Spelling: centroided, ppmDiffs, PpmDiffThreshold
 
-        #region "Constants and Enums"
-
         /// <summary>
         /// Default spacing between adjacent data points for deciding that data is thresholded (default is 50 ppm)
         /// </summary>
@@ -37,10 +35,6 @@ namespace SpectraTypeClassifier
             Centroid = 2
         }
 
-        #endregion
-
-        #region "Class Wide Variables"
-
         private string mErrorMessage;
 
         /// <summary>
@@ -61,19 +55,11 @@ namespace SpectraTypeClassifier
         /// <remarks>Tracks the number of spectra at each MSLevel (1 for MS1, 2 for MS2, etc.)</remarks>
         private readonly Dictionary<int, int> mTotalSpectra;
 
-        #endregion
-
-        #region "Events"
-
         public event ReadingSpectraEventHandler ReadingSpectra;
         public delegate void ReadingSpectraEventHandler(int spectraProcessed);
 
         public event ProcessingCompleteEventHandler ProcessingComplete;
         public delegate void ProcessingCompleteEventHandler(int spectraProcessed);
-
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// Number of centroided spectra
@@ -177,8 +163,6 @@ namespace SpectraTypeClassifier
         /// Number of MSn spectra analyzed
         /// </summary>
         public int TotalMSnSpectra => mTotalSpectra.Where(item => item.Key > 1).Sum(item => item.Value);
-
-        #endregion
 
         /// <summary>
         /// Constructor
