@@ -84,9 +84,10 @@ namespace MSFileInfoScanner.Readers
             double bpi,
             double tic,
             string scanTypeName,
-            ref double maxRunTimeMinutes)
+            ref double maxRunTimeMinutes,
+            bool ticAndBpiPlotDataAlreadyDefined = false)
         {
-            if (Options.SaveTICAndBPIPlots && scanNumber > 0)
+            if (Options.SaveTICAndBPIPlots && scanNumber > 0 && !ticAndBpiPlotDataAlreadyDefined)
             {
                 mTICAndBPIPlot.AddData(scanNumber, msLevel, elutionTime, bpi, tic);
             }
@@ -1037,7 +1038,8 @@ namespace MSFileInfoScanner.Readers
                     settingsFile = acqusFile;
                 }
 
-                var needToSaveTICAndBPI = Options.SaveTICAndBPIPlots && mTICAndBPIPlot.CountBPI + mTICAndBPIPlot.CountTIC == 0;
+                var ticAndBpiPlotDataAlreadyDefined = mTICAndBPIPlot.CountBPI + mTICAndBPIPlot.CountTIC > 0;
+
                 var lastProgressTime = DateTime.UtcNow;
 
                 // Note that this starts at 2 seconds, but is extended after each progress message is shown (maxing out at 30 seconds)
@@ -1079,6 +1081,7 @@ namespace MSFileInfoScanner.Readers
                 // BrukerDataReader.DataReader treats scan 0 as the first scan
 
                 var scansProcessed = 0;
+                double maxRunTimeMinutes = 0;
 
                 for (var scanIndex = 0; scanIndex < scanCount; scanIndex++)
                 {
@@ -1117,22 +1120,24 @@ namespace MSFileInfoScanner.Readers
                     const int msLevel = 1;
                     if (!scanElutionTimeMap.TryGetValue(scanNumber, out var elutionTime))
                     {
+                        // We're assigning an arbitrary elution time here, assuming one scan per second
                         elutionTime = scanNumber / 60f;
                     }
 
-                    if (needToSaveTICAndBPI)
+                    double basePeakIntensity = 0;
+                    double totalIonCurrent = 0;
+
+                    if (intensityList.Length > 0)
                     {
-                        double basePeakIntensity = 0;
-                        double totalIonCurrent = 0;
-
-                        if (intensityList.Length > 0)
-                        {
-                            basePeakIntensity = intensityList.Max();
-                            totalIonCurrent = intensityList.Sum();
-                        }
-
-                        mTICAndBPIPlot.AddData(scanNumber, msLevel, elutionTime, basePeakIntensity, totalIonCurrent);
+                        basePeakIntensity = intensityList.Max();
+                        totalIonCurrent = intensityList.Sum();
                     }
+
+                    AddDatasetScan(
+                        scanNumber, msLevel, elutionTime,
+                        basePeakIntensity, totalIonCurrent,
+                        "HMS", ref maxRunTimeMinutes,
+                        ticAndBpiPlotDataAlreadyDefined);
 
                     if (mzList.Length > 0 && Options.SaveLCMS2DPlots)
                     {
