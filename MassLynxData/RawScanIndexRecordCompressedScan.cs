@@ -3,8 +3,6 @@ namespace MSFileInfoScanner.MassLynxData
 {
     internal class RawScanIndexRecordCompressedScan
     {
-        #region "Properties"
-
         /// <summary>
         /// Start Scan Offset
         /// </summary>
@@ -57,8 +55,5 @@ namespace MSFileInfoScanner.MassLynxData
         /// </summary>
         /// <remarks>2 bytes</remarks>
         public short Spare { get; set; }
-
-        #endregion
-
     }
 }

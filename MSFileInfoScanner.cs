@@ -84,8 +84,6 @@ namespace MSFileInfoScanner
             mLastCheckForAbortProcessingFile = oneHourAgo;
         }
 
-        #region "Constants"
-
         public const string DEFAULT_ACQUISITION_TIME_FILENAME_TXT = "DatasetTimeFile.txt";
 
         public const string DEFAULT_DIRECTORY_INTEGRITY_INFO_FILENAME_TXT = "DirectoryIntegrityInfo.txt";
@@ -104,10 +102,6 @@ namespace MSFileInfoScanner
 
         private const bool SKIP_FILES_IN_ERROR = true;
 
-        #endregion
-
-        #region "Enums"
-
         private enum MessageTypeConstants
         {
             Normal = 0,
@@ -115,10 +109,6 @@ namespace MSFileInfoScanner
             Warning = 2,
             Debug = 3
         }
-
-        #endregion
-
-        #region "Class wide variables"
 
         private string mFileIntegrityDetailsFilePath;
 
@@ -163,10 +153,6 @@ namespace MSFileInfoScanner
         private DateTime mLastWriteTimeFileIntegrityDetails;
         private DateTime mLastWriteTimeFileIntegrityFailure;
         private DateTime mLastCheckForAbortProcessingFile;
-
-        #endregion
-
-        #region "Processing Options and Interface Functions"
 
         public override bool AbortProcessing { get; set; }
 
@@ -248,8 +234,6 @@ namespace MSFileInfoScanner
         /// Processing options
         /// </summary>
         public override InfoScannerOptions Options { get; protected set; }
-
-        #endregion
 
         private void AutoSaveCachedResults()
         {

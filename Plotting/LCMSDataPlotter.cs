@@ -20,8 +20,6 @@ namespace MSFileInfoScanner.Plotting
     {
         // Ignore Spelling: centroided, deisotoped, Orbitrap, OxyPlot
 
-        #region "Constants, Enums, Structures"
-
         // Absolute maximum number of ions that will be tracked for a mass spectrum
         private const int MAX_ALLOWABLE_ION_COUNT = 50000;
 
@@ -59,10 +57,6 @@ namespace MSFileInfoScanner.Plotting
             }
         }
 
-        #endregion
-
-        #region "Member variables"
-
         // Keeps track of the total number of data points cached in mScans
         private int mPointCountCached;
 
@@ -78,15 +72,9 @@ namespace MSFileInfoScanner.Plotting
 
         private DateTime mLastGCTime;
 
-        #endregion
-
-        #region "Properties"
-
         public LCMSDataPlotterOptions Options { get; set; }
 
         public int ScanCountCached => mScans.Count;
-
-        #endregion
 
         /// <summary>
         /// Constructor
@@ -984,8 +972,6 @@ namespace MSFileInfoScanner.Plotting
             }
         }
 
-        #region "Plotting Functions"
-
         private void AddOxyPlotSeriesMonoMassVsScan(IList<List<ScatterPoint>> pointsByCharge, PlotModel myPlot)
         {
             var markerSize = GetMarkerSize(mScans.Count, pointsByCharge);
@@ -1772,8 +1758,6 @@ namespace MSFileInfoScanner.Plotting
                 return false;
             }
         }
-
-        #endregion
 
         /// <summary>
         /// This class tracks the m/z and intensity values for a given scan

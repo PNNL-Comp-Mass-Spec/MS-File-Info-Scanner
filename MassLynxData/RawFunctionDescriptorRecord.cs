@@ -11,8 +11,6 @@ namespace MSFileInfoScanner.MassLynxData
         /// </summary>
         public const int NATIVE_FUNCTION_INFO_SIZE_BYTES = 416;
 
-        #region "Properties"
-
         /// <summary>
         /// Packed function info
         ///   bits 0-4: Function type (typically 2=Dly)
@@ -101,8 +99,5 @@ namespace MSFileInfoScanner.MassLynxData
         /// Ranges from 0 to 31 giving a 128 byte array
         /// </remarks>
         public int[] SegmentEndMasses { get; set; }
-
-        #endregion
-
     }
 }

@@ -12,8 +12,6 @@ namespace MSFileInfoScanner
     {
         // Ignore Spelling: AcqTime, yyyy-MM-dd, HH:mm:ss
 
-        #region "Constants and Enums"
-
         private const string MS_FILE_INFO_DATA_TABLE = "MSFileInfoTable";
         public const string COL_NAME_DATASET_ID = "DatasetID";
         public const string COL_NAME_DATASET_NAME = "DatasetName";
@@ -69,8 +67,6 @@ namespace MSFileInfoScanner
             InfoLastModified = 6
         }
 
-        #endregion
-
         private enum CachedResultsStateConstants
         {
             NotInitialized = 0,
@@ -78,7 +74,6 @@ namespace MSFileInfoScanner
             Modified = 2
         }
 
-        #region "Class wide variables"
         private string mAcquisitionTimeFilePath;
 
         private string mDirectoryIntegrityInfoFilePath;
@@ -94,10 +89,6 @@ namespace MSFileInfoScanner
 
         private int mMaximumDirectoryIntegrityInfoDirectoryID;
 
-        #endregion
-
-        #region "Properties"
-
         public string AcquisitionTimeFilePath
         {
             get => mAcquisitionTimeFilePath;
@@ -109,8 +100,6 @@ namespace MSFileInfoScanner
             get => mDirectoryIntegrityInfoFilePath;
             set => mDirectoryIntegrityInfoFilePath = value;
         }
-
-        #endregion
 
         private DateTime AssureMinimumDate(DateTime date, DateTime minimumDate)
         {

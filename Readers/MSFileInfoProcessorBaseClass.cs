@@ -56,17 +56,11 @@ namespace MSFileInfoScanner.Readers
             InitializeLocalVariables();
         }
 
-        #region "Constants"
-
         /// <summary>
         /// Used for checking if over 10% of the spectra failed MS2MzMin validation
         /// </summary>
         // ReSharper disable once IdentifierTypo
         public const int MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED = 10;
-
-        #endregion
-
-        #region "Member variables"
 
         /// <summary>
         /// This variable tracks TIC and BPI data (vs. scan)
@@ -84,10 +78,6 @@ namespace MSFileInfoScanner.Readers
         private readonly LCMSDataPlotter mLCMS2DPlotOverview;
 
         protected readonly DatasetStatsSummarizer mDatasetStatsSummarizer;
-
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// Processing error code
@@ -126,8 +116,6 @@ namespace MSFileInfoScanner.Readers
         /// Processing Options
         /// </summary>
         public InfoScannerOptions Options { get; }
-
-        #endregion
 
         /// <summary>
         /// Add a new TICAndBPIPlotter instance to mInstrumentSpecificPlots

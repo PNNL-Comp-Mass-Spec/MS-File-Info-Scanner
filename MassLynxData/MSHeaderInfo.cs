@@ -3,8 +3,6 @@ namespace MSFileInfoScanner.MassLynxData
 {
     internal class MSHeaderInfo
     {
-        #region "Properties"
-
         /// <summary>
         /// Acquisition date
         /// </summary>
@@ -135,8 +133,6 @@ namespace MSFileInfoScanner.MassLynxData
         /// 0 = normal, 1 = Root mass
         /// </remarks>
         public short CalMS2StaticTypeID {get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

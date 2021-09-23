@@ -36,8 +36,6 @@ namespace MSFileInfoScanner
             MaximumXMLElementNodesToCheck = options.MaximumXMLElementNodesToCheck;
         }
 
-        #region "Constants and Enums"
-
         public const string FILE_EXTENSION_TXT = ".TXT";
         public const string FILE_EXTENSION_LOG = ".LOG";
         public const string FILE_EXTENSION_PARAMS = ".PARAMS";
@@ -51,10 +49,6 @@ namespace MSFileInfoScanner
         public const string THERMO_RAW_FILE_EXTENSION = ".RAW";
 
         public const string AGILENT_TOF_OR_QTRAP_FILE_EXTENSION = ".WIFF";
-
-        #endregion
-
-        #region "Structures"
 
         public struct DirectoryStatsType
         {
@@ -90,10 +84,6 @@ namespace MSFileInfoScanner
             public string FailureMessage;
         }
 
-        #endregion
-
-        #region "Class wide variables"
-
         private int mMaximumTextFileLinesToCheck;
 
         private int mMaximumXMLElementNodesToCheck;
@@ -104,10 +94,6 @@ namespace MSFileInfoScanner
 
         public event FileIntegrityFailureEventHandler FileIntegrityFailure;
         public delegate void FileIntegrityFailureEventHandler(string filePath, string message);
-
-        #endregion
-
-        #region "Processing Options and Interface Functions"
 
         /// <summary>
         /// When True, then computes an MD5 hash on every file
@@ -144,8 +130,6 @@ namespace MSFileInfoScanner
         /// When True, then performs an exhaustive CRC check of each Zip file; otherwise, performs a quick test
         /// </summary>
         public bool ZipFileCheckAllData { get; set; }
-
-        #endregion
 
         private string ByteArrayToString(IReadOnlyCollection<byte> arrInput)
         {

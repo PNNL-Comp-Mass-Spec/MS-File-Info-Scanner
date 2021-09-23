@@ -29,8 +29,6 @@ namespace MSFileInfoScanner
         public event ProgressChangedEventHandler ProgressChanged;
         public delegate void ProgressChangedEventHandler(float progress);
 
-        #region "Properties"
-
         public int MaximumDataCountToLoad { get; set; }
 
         public float Progress { get; private set; }
@@ -40,8 +38,6 @@ namespace MSFileInfoScanner
         public bool TotalIntensityPercentageFilterEnabled { get; set; }
 
         public float TotalIntensityPercentageFilter { get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

@@ -3,8 +3,6 @@ namespace MSFileInfoScanner.MassLynxData
 {
     internal class MassLynxScanStats
     {
-        #region "Properties"
-
         /// <summary>
         /// Number of peaks in this scan
         /// </summary>
@@ -55,8 +53,5 @@ namespace MSFileInfoScanner.MassLynxData
         /// Elution time (retention time)
         /// </summary>
         public float RetentionTime { get; set; }
-
-        #endregion
-
     }
 }

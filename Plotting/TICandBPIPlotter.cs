@@ -14,8 +14,6 @@ namespace MSFileInfoScanner.Plotting
     {
         // Ignore Spelling: OxyPlot
 
-        #region "Constants, Enums, Structures"
-
         // ReSharper disable InconsistentNaming
         // ReSharper disable IdentifierTypo
 
@@ -36,10 +34,6 @@ namespace MSFileInfoScanner.Plotting
             public string FilePath;
         }
 
-        #endregion
-
-        #region "Member variables"
-
         /// <summary>
         /// Data stored in mTIC will get plotted for all scans, both MS and MS/MS
         /// </summary>
@@ -54,10 +48,6 @@ namespace MSFileInfoScanner.Plotting
 
         private readonly string mDataSource;
         private readonly bool mWriteDebug;
-
-        #endregion
-
-        #region "Properties"
 
         public bool BPIAutoMinMaxY { get; set; }
 
@@ -109,8 +99,6 @@ namespace MSFileInfoScanner.Plotting
         public bool TICYAxisExponentialNotation { get; set; } = true;
 
         // ReSharper restore IdentifierTypo
-
-        #endregion
 
         /// <summary>
         /// Constructor

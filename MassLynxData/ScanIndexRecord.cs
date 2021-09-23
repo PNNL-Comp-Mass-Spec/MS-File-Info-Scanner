@@ -6,8 +6,6 @@ namespace MSFileInfoScanner.MassLynxData
     /// </summary>
     internal class ScanIndexRecord
     {
-        #region "Properties"
-
         /// <summary>
         /// Start scan offset, in bytes
         /// </summary>
@@ -47,8 +45,5 @@ namespace MSFileInfoScanner.MassLynxData
         public float HiMass { get; set; }
 
         public float SetMass { get; set; }
-
-        #endregion
-
     }
 }

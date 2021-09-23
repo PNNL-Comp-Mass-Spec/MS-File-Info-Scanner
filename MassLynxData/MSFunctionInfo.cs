@@ -3,8 +3,6 @@ namespace MSFileInfoScanner.MassLynxData
 {
     internal class MSFunctionInfo
     {
-        #region "Properties"
-
         /// <summary>
         /// The function number that this data corresponds to
         /// </summary>
@@ -135,8 +133,6 @@ namespace MSFileInfoScanner.MassLynxData
         /// Calibration standard deviation
         /// </summary>
         public double CalStDev {get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

@@ -25,16 +25,10 @@ namespace MSFileInfoScanner.DatasetStats
     {
         // Ignore Spelling: AcqTime, centroided, utf, yyyy-MM-dd hh:mm:ss tt
 
-        #region "Constants and Enums"
-
         public const string SCAN_TYPE_STATS_SEP_CHAR = "::###::";
         public const string DATASET_INFO_FILE_SUFFIX = "_DatasetInfo.xml";
 
         public const string DATE_TIME_FORMAT_STRING = "yyyy-MM-dd hh:mm:ss tt";
-
-        #endregion
-
-        #region "Class wide variables"
 
         private readonly SortedSet<int> mDatasetScanNumbers;
 
@@ -51,10 +45,6 @@ namespace MSFileInfoScanner.DatasetStats
         private int ScanCountMS;
         private int ScanCountMSn;
         private double ElutionTimeMax;
-
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// When false, do not create the scan stats files if no data was loaded
@@ -81,8 +71,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// Sample info
         /// </summary>
         public SampleInfo SampleInfo { get; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

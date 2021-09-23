@@ -48,8 +48,6 @@ namespace MSFileInfoScannerInterfaces
         /// </remarks>
         private double mMaxMonoMass;
 
-        #region "Properties"
-
         /// <summary>
         /// When true, delete temporary files
         /// </summary>
@@ -192,8 +190,6 @@ namespace MSFileInfoScannerInterfaces
         /// True if we should use the observed minimum scan
         /// </summary>
         public bool UseObservedMinScan { get; set; }
-
-        #endregion
 
         /// <summary>
         /// Clone the options

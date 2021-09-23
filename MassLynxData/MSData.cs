@@ -3,8 +3,6 @@ namespace MSFileInfoScanner.MassLynxData
 {
     internal class MSData
     {
-        #region "Properties"
-
         public string UserSuppliedDataDirPath { get; set; }
 
         // The currently loaded data file path
@@ -16,8 +14,6 @@ namespace MSFileInfoScanner.MassLynxData
 
         // 1-based array (to stay consistent with Micromass VB example conventions)
         public MSFunctionInfo[] FunctionInfo { get; private set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor
