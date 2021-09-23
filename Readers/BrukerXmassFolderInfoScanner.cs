@@ -451,11 +451,11 @@ namespace MSFileInfoScanner.Readers
                 var connectionString = "Data Source = " + metadataFile.FullName + "; Version=3; DateTimeFormat=Ticks;";
 
                 // Open the Storage.mcf_idx file to lookup the metadata name to ID mapping
-                using (var cnDB = new SQLiteConnection(connectionString, true))
+                using (var connection = new SQLiteConnection(connectionString, true))
                 {
-                    cnDB.Open();
+                    connection.Open();
 
-                    var cmd = new SQLiteCommand(cnDB)
+                    var cmd = new SQLiteCommand(connection)
                     {
                         CommandText = "SELECT metadataId, permanentName, displayName FROM MetadataId"
                     };
@@ -488,17 +488,17 @@ namespace MSFileInfoScanner.Readers
                 connectionString = "Data Source = " + mcfIndexFiles.First().FullName + "; Version=3; DateTimeFormat=Ticks;";
 
                 // Open the .mcf file to read the scan info
-                using (var cnDB = new SQLiteConnection(connectionString, true))
+                using (var connection = new SQLiteConnection(connectionString, true))
                 {
-                    cnDB.Open();
+                    connection.Open();
 
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.AcqTime);
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.ScanMode);
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.MSLevel);
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.RT);
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.BPI);
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.TIC);
-                    ReadAndStoreMcfIndexData(cnDB, metadataNameToID, scanData, McfMetadataFields.SpotNumber);
+                    ReadAndStoreMcfIndexData(connection, metadataNameToID, scanData, McfMetadataFields.AcqTime);
+                    ReadAndStoreMcfIndexData(connection, metadataNameToID, scanData, McfMetadataFields.ScanMode);
+                    ReadAndStoreMcfIndexData(connection, metadataNameToID, scanData, McfMetadataFields.MSLevel);
+                    ReadAndStoreMcfIndexData(connection, metadataNameToID, scanData, McfMetadataFields.RT);
+                    ReadAndStoreMcfIndexData(connection, metadataNameToID, scanData, McfMetadataFields.BPI);
+                    ReadAndStoreMcfIndexData(connection, metadataNameToID, scanData, McfMetadataFields.TIC);
+                    ReadAndStoreMcfIndexData(connection, metadataNameToID, scanData, McfMetadataFields.SpotNumber);
                 }
 
                 // Parse each entry in scanData
@@ -1159,12 +1159,12 @@ namespace MSFileInfoScanner.Readers
         }
 
         private void ReadAndStoreMcfIndexData(
-            SQLiteConnection cnDB,
+            SQLiteConnection connection,
             IReadOnlyDictionary<string, int> metadataNameToID,
             IDictionary<string, MCFScanInfoType> scanData,
             McfMetadataFields mcfMetadataField)
         {
-            var cmd = new SQLiteCommand(cnDB);
+            var cmd = new SQLiteCommand(connection);
 
             if (!GetMetaDataFieldAndTable(mcfMetadataField, out var fieldName, out var tableName))
             {
