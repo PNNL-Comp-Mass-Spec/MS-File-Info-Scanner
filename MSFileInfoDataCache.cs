@@ -13,6 +13,7 @@ namespace MSFileInfoScanner
         // Ignore Spelling: AcqTime, yyyy-MM-dd, HH:mm:ss
 
         private const string MS_FILE_INFO_DATA_TABLE = "MSFileInfoTable";
+
         public const string COL_NAME_DATASET_ID = "DatasetID";
         public const string COL_NAME_DATASET_NAME = "DatasetName";
         public const string COL_NAME_FILE_EXTENSION = "FileExtension";
@@ -23,7 +24,6 @@ namespace MSFileInfoScanner
         public const string COL_NAME_INFO_LAST_MODIFIED = "InfoLastModified";
 
         public const string COL_NAME_FILE_MODIFICATION_DATE = "FileModificationDate";
-        private const string DIRECTORY_INTEGRITY_INFO_DATA_TABLE = "DirectoryIntegrityInfoTable";
         public const string COL_NAME_FOLDER_ID = "FolderID";
         public const string COL_NAME_FOLDER_PATH = "FolderPath";
         public const string COL_NAME_FILE_COUNT = "FileCount";
@@ -33,6 +33,8 @@ namespace MSFileInfoScanner
         public const string COL_NAME_FAILED_INTEGRITY_CHECK = "FailedIntegrityCheck";
 
         public const string COL_NAME_SHA1_HASH = "Sha1Hash";
+
+        private const string DIRECTORY_INTEGRITY_INFO_DATA_TABLE = "DirectoryIntegrityInfoTable";
 
         public enum MSFileInfoResultsFileColumns
         {
