@@ -1019,7 +1019,7 @@ namespace MSFileInfoScanner.Readers
             IReadOnlyDictionary<int, Dictionary<double, double>> parent2DData,
             IReadOnlyDictionary<int, Dictionary<double, double>> product2DData)
         {
-            // This variable keeps track of the length of the largest Dictionary(Of Double, Double) var in dct2DData
+            // Tracks the size of the largest Dictionary<double, double> in parent2DData or product2DData
             var max2DDataCount = 1;
 
             var scanNumMin2D = int.MaxValue;

@@ -12,7 +12,12 @@ namespace MSFileInfoScanner.MassLynxData
 
         public int FunctionCount { get; private set; }
 
-        // 1-based array (to stay consistent with Micromass VB example conventions)
+        /// <summary>
+        /// Function Info
+        /// </summary>
+        /// <remarks>
+        /// This is a 1-based array (to stay consistent with MassLynx VB example conventions)
+        /// </remarks>
         public MSFunctionInfo[] FunctionInfo { get; private set; }
 
         /// <summary>

@@ -57,7 +57,9 @@ namespace MSFileInfoScanner.Plotting
             }
         }
 
-        // Keeps track of the total number of data points cached in mScans
+        /// <summary>
+        /// Tracks the total number of data points cached in mScans
+        /// </summary>
         private int mPointCountCached;
 
         private int mPointCountCachedAfterLastTrim;
