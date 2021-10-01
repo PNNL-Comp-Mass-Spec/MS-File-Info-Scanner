@@ -77,7 +77,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public DatasetStatsSummarizer()
         {
-            FileDate = "September 9, 2019";
+            FileDate = "September 23, 2021";
 
             ErrorMessage = string.Empty;
 
