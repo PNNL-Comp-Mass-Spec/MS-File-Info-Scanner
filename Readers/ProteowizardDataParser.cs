@@ -470,7 +470,10 @@ namespace MSFileInfoScanner.Readers
                         ticStored = storeInTICAndBPIPlot;
 
                         // This is FrameCount for Bruker timsTOF datasets
-                        datasetFileInfo.ScanCount = scanTimes.Length;
+                        if (datasetFileInfo.ScanCount == 0)
+                        {
+                            datasetFileInfo.ScanCount = scanTimes.Length;
+                        }
                     }
 
                     if (MSDataFileReader.TryGetCVParam(cvParams, pwiz.CLI.cv.CVID.MS_selected_reaction_monitoring_chromatogram, out _))
