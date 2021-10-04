@@ -34,14 +34,14 @@ namespace MSFileInfoScanner
     /// </para>
     /// <para>
     /// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
-    /// Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
+    /// Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics
     /// </para>
     /// </remarks>
     public sealed class MSFileInfoScanner : iMSFileInfoScanner
     {
         // Ignore Spelling: Bruker, centroiding, idx, Micromass, OxyPlot, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
 
-        public const string PROGRAM_DATE = "October 1, 2021";
+        public const string PROGRAM_DATE = "October 4, 2021";
 
         /// <summary>
         /// Constructor

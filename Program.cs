@@ -20,7 +20,7 @@ namespace MSFileInfoScanner
     /// </para>
     /// <para>
     /// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
-    /// Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
+    /// Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics
     /// </para>
     /// </remarks>
     public static class Program
@@ -54,7 +54,8 @@ namespace MSFileInfoScanner
                                         "Known file extensions: " + CollapseList(scannerInfo.GetKnownFileExtensionsList()) + Environment.NewLine +
                                         "Known directory extensions: " + CollapseList(scannerInfo.GetKnownDirectoryExtensionsList());
             cmdLineParser.ContactInfo = "Program written by Matthew Monroe for PNNL (Richland, WA) in 2005" + Environment.NewLine +
-                                        "E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov" + Environment.NewLine + "Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/";
+                                        "E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov" + Environment.NewLine +
+                                        "Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics";
 
             cmdLineParser.UsageExamples.Add("Program syntax:" + Environment.NewLine + Path.GetFileName(exePath) + "\n" +
                                             " /I:InputFileNameOrDirectoryPath [/O:OutputDirectoryPath]\n" +

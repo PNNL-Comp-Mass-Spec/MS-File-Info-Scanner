@@ -17,7 +17,7 @@ from pprint import pprint
 # Program started in 2017
 #
 # E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
-# Website: http:#omics.pnl.gov/ or http:#www.sysbio.org/resources/staff/ or http:#panomics.pnnl.gov/
+# Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics
 # -------------------------------------------------------------------------------
 
 # When this script is invoked from C#, if text sent to print() has unicode characters, an error occurs
