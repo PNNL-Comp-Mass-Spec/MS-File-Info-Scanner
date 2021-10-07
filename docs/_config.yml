@@ -1,0 +1,4 @@
+# Jekyll configuration
+name: MS-File-Info-Scanner
+description: The MS File Info Scanner can be used to scan a series of MS data files (or data folders) and extract the acquisition start and end times, number of spectra, and the total size of the data.
+url: https://pnnl-comp-mass-spec.github.io/MS-File-Info-Scanner/
