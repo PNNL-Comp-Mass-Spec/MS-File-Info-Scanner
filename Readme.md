@@ -182,6 +182,7 @@ On Windows, MS File Info Scanner looks for `python.exe` in directories that star
 * C:\Program Files
 * C:\Program Files (x86)
 * C:\Users\Username\AppData\Local\Programs
+* C:\Users\Username\AppData\Local\Programs\Python
 * C:\ProgramData\Anaconda3
 * C:\
 
