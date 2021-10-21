@@ -61,6 +61,8 @@ namespace MSFileInfoScanner.Plotting
 
         public string BPIXAxisLabel { get; set; } = "LC Scan Number";
 
+        public bool BPIXAxisIsTimeMinutes { get; set; } = false;
+
         public string BPIYAxisLabel { get; set; } = "Intensity";
 
         public bool BPIYAxisExponentialNotation { get; set; } = true;
@@ -93,6 +95,8 @@ namespace MSFileInfoScanner.Plotting
         // ReSharper disable IdentifierTypo
 
         public string TICXAxisLabel { get; set; } = "LC Scan Number";
+
+        public bool TICXAxisIsTimeMinutes { get; set; } = false;
 
         public string TICYAxisLabel { get; set; } = "Intensity";
 
@@ -223,14 +227,15 @@ namespace MSFileInfoScanner.Plotting
             string xAxisLabel,
             string yAxisLabel,
             bool autoMinMaxY,
-            bool yAxisExponentialNotation)
+            bool yAxisExponentialNotation,
+            bool xAxisIsTimeMinutes)
         {
             if (PlotWithPython)
             {
-                return InitializePythonPlot(chromatogramData, plotTitle, msLevelFilter, xAxisLabel, yAxisLabel, autoMinMaxY, yAxisExponentialNotation);
+                return InitializePythonPlot(chromatogramData, plotTitle, msLevelFilter, xAxisLabel, yAxisLabel, autoMinMaxY, yAxisExponentialNotation, xAxisIsTimeMinutes);
             }
 
-            return InitializeOxyPlot(chromatogramData, plotTitle, msLevelFilter, xAxisLabel, yAxisLabel, autoMinMaxY, yAxisExponentialNotation);
+            return InitializeOxyPlot(chromatogramData, plotTitle, msLevelFilter, xAxisLabel, yAxisLabel, autoMinMaxY, yAxisExponentialNotation, xAxisIsTimeMinutes);
         }
 
         /// <summary>
@@ -243,6 +248,7 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="yAxisLabel"></param>
         /// <param name="autoMinMaxY"></param>
         /// <param name="yAxisExponentialNotation"></param>
+        /// <param name="xAxisIsTimeMinutes">If true, <see cref="ChromatogramDataPoint.TimeMinutes"/> is used for the x axis instead of <see cref="ChromatogramDataPoint.ScanNum"/></param>
         /// <returns>OxyPlot PlotContainer</returns>
         private PlotContainer InitializeOxyPlot(
             ChromatogramInfo chromatogramData,
@@ -251,12 +257,17 @@ namespace MSFileInfoScanner.Plotting
             string xAxisLabel,
             string yAxisLabel,
             bool autoMinMaxY,
-            bool yAxisExponentialNotation)
+            bool yAxisExponentialNotation,
+            bool xAxisIsTimeMinutes)
         {
-            var minScan = int.MaxValue;
-            var maxScan = 0;
+            double minScan = int.MaxValue;
+            double maxScan = 0;
             double scanTimeMax = 0;
             double maxIntensity = 0;
+
+            Func<ChromatogramDataPoint, double> xAxisValueAccessor = point => point.ScanNum;
+            if (xAxisIsTimeMinutes)
+                xAxisValueAccessor = point => point.TimeMinutes;
 
             // Instantiate the list to track the data points
             var points = new List<DataPoint>();
@@ -269,21 +280,21 @@ namespace MSFileInfoScanner.Plotting
                     continue;
                 }
 
-                points.Add(new DataPoint(dataPoint.ScanNum, dataPoint.Intensity));
+                points.Add(new DataPoint(xAxisValueAccessor(dataPoint), dataPoint.Intensity));
 
                 if (dataPoint.TimeMinutes > scanTimeMax)
                 {
                     scanTimeMax = dataPoint.TimeMinutes;
                 }
 
-                if (dataPoint.ScanNum < minScan)
+                if (xAxisValueAccessor(dataPoint) < minScan)
                 {
-                    minScan = dataPoint.ScanNum;
+                    minScan = xAxisValueAccessor(dataPoint);
                 }
 
-                if (dataPoint.ScanNum > maxScan)
+                if (xAxisValueAccessor(dataPoint) > maxScan)
                 {
-                    maxScan = dataPoint.ScanNum;
+                    maxScan = xAxisValueAccessor(dataPoint);
                 }
 
                 if (dataPoint.Intensity > maxIntensity)
@@ -415,6 +426,7 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="yAxisLabel"></param>
         /// <param name="autoMinMaxY"></param>
         /// <param name="yAxisExponentialNotation"></param>
+        /// <param name="xAxisIsTimeMinutes">If true, <see cref="ChromatogramDataPoint.TimeMinutes"/> is used for the x axis instead of <see cref="ChromatogramDataPoint.ScanNum"/></param>
         /// <returns>Python PlotContainer</returns>
         private PythonPlotContainer InitializePythonPlot(
             ChromatogramInfo chromatogramData,
@@ -423,13 +435,18 @@ namespace MSFileInfoScanner.Plotting
             string xAxisLabel,
             string yAxisLabel,
             bool autoMinMaxY,
-            bool yAxisExponentialNotation)
+            bool yAxisExponentialNotation,
+            bool xAxisIsTimeMinutes)
         {
             double scanTimeMax = 0;
             double maxIntensity = 0;
 
             // Instantiate the list to track the data points
             var points = new List<DataPoint>();
+
+            Func<ChromatogramDataPoint, double> xAxisValueAccessor = point => point.ScanNum;
+            if (xAxisIsTimeMinutes)
+                xAxisValueAccessor = point => point.TimeMinutes;
 
             foreach (var dataPoint in chromatogramData.Scans)
             {
@@ -439,7 +456,7 @@ namespace MSFileInfoScanner.Plotting
                     continue;
                 }
 
-                points.Add(new DataPoint(dataPoint.ScanNum, dataPoint.Intensity));
+                points.Add(new DataPoint(xAxisValueAccessor(dataPoint), dataPoint.Intensity));
 
                 if (dataPoint.TimeMinutes > scanTimeMax)
                 {
@@ -613,7 +630,7 @@ namespace MSFileInfoScanner.Plotting
                     RemoveZeroesAtFrontAndBack(mTIC);
                 }
 
-                var bpiPlotMS1 = InitializePlot(mBPI, datasetName + " - " + BPIPlotAbbrev + " - MS Spectra", 1, BPIXAxisLabel, BPIYAxisLabel, BPIAutoMinMaxY, BPIYAxisExponentialNotation);
+                var bpiPlotMS1 = InitializePlot(mBPI, datasetName + " - " + BPIPlotAbbrev + " - MS Spectra", 1, BPIXAxisLabel, BPIYAxisLabel, BPIAutoMinMaxY, BPIYAxisExponentialNotation, BPIXAxisIsTimeMinutes);
                 RegisterEvents(bpiPlotMS1);
 
                 var successMS1 = true;
@@ -627,7 +644,7 @@ namespace MSFileInfoScanner.Plotting
                     AddRecentFile(pngFile.FullName, OutputFileTypes.BPIMS);
                 }
 
-                var bpiPlotMS2 = InitializePlot(mBPI, datasetName + " - " + BPIPlotAbbrev + " - MS2 Spectra", 2, BPIXAxisLabel, BPIYAxisLabel, BPIAutoMinMaxY, BPIYAxisExponentialNotation);
+                var bpiPlotMS2 = InitializePlot(mBPI, datasetName + " - " + BPIPlotAbbrev + " - MS2 Spectra", 2, BPIXAxisLabel, BPIYAxisLabel, BPIAutoMinMaxY, BPIYAxisExponentialNotation, BPIXAxisIsTimeMinutes);
                 RegisterEvents(bpiPlotMS2);
 
                 if (bpiPlotMS2.SeriesCount > 0)
@@ -637,7 +654,7 @@ namespace MSFileInfoScanner.Plotting
                     AddRecentFile(pngFile.FullName, OutputFileTypes.BPIMSn);
                 }
 
-                var ticPlot = InitializePlot(mTIC, datasetName + " - " + TICPlotAbbrev + " - All Spectra", 0, TICXAxisLabel, TICYAxisLabel, TICAutoMinMaxY, TICYAxisExponentialNotation);
+                var ticPlot = InitializePlot(mTIC, datasetName + " - " + TICPlotAbbrev + " - All Spectra", 0, TICXAxisLabel, TICYAxisLabel, TICAutoMinMaxY, TICYAxisExponentialNotation, TICXAxisIsTimeMinutes);
                 RegisterEvents(ticPlot);
 
                 if (ticPlot.SeriesCount > 0)
