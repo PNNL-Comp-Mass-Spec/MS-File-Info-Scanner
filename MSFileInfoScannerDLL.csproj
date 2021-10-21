@@ -1,5 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <BaseOutputPath>bin\DLL\</BaseOutputPath>
+    <BaseIntermediateOutputPath>obj\DLL\</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>obj\DLL\</MSBuildProjectExtensionsPath>
+  </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -32,8 +37,18 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\DLL\Release\MSFileInfoScanner.XML</DocumentationFile>
+    <NoWarn>1591, 0162</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BaseCommon, Version=8.0.8208.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\BaseCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="BaseDataAccess, Version=8.0.8208.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\BaseDataAccess.dll</HintPath>
+    </Reference>
     <Reference Include="BrukerDataReader">
       <HintPath>Lib\BrukerDataReader.dll</HintPath>
     </Reference>
@@ -42,6 +57,10 @@
     </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>Lib\Ionic.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="MassSpecDataReader, Version=8.0.8208.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\MassSpecDataReader.dll</HintPath>
     </Reference>
     <Reference Include="MSFileInfoScannerInterfaces">
       <SpecificVersion>False</SpecificVersion>
@@ -57,7 +76,7 @@
     <Reference Include="pwiz_bindings_cli">
       <HintPath>Lib\pwiz_bindings_cli.dll</HintPath>
     </Reference>
-    <Reference Include="SpectraTypeClassifier, Version=1.1.5983.19346, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="SpectraTypeClassifier, Version=1.1.5988.17918, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\SpectraTypeClassifier.dll</HintPath>
     </Reference>
@@ -126,6 +145,7 @@
     <Compile Include="Readers\AgilentIonTrapDFolderInfoScanner.cs" />
     <Compile Include="Readers\AgilentOrQStarWiffFileInfoScanner.cs" />
     <Compile Include="Readers\AgilentTOFDFolderInfoScanner.cs" />
+    <Compile Include="Readers\AgilentMassHunterDFolderInfoScanner.cs" />
     <Compile Include="Readers\BrukerOneFolderInfoScanner.cs" />
     <Compile Include="Readers\BrukerXmassFolderInfoScanner.cs" />
     <Compile Include="Readers\DeconToolsIsosInfoScanner.cs" />

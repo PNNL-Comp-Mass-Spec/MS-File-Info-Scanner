@@ -37,6 +37,14 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BaseCommon, Version=8.0.8208.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\BaseCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="BaseDataAccess, Version=8.0.8208.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\BaseDataAccess.dll</HintPath>
+    </Reference>
     <Reference Include="BrukerDataReader">
       <HintPath>Lib\BrukerDataReader.dll</HintPath>
     </Reference>
@@ -45,6 +53,10 @@
     </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>Lib\Ionic.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="MassSpecDataReader, Version=8.0.8208.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\MassSpecDataReader.dll</HintPath>
     </Reference>
     <Reference Include="MSFileInfoScannerInterfaces">
       <SpecificVersion>False</SpecificVersion>
@@ -130,6 +142,7 @@
     <Compile Include="Readers\AgilentIonTrapDFolderInfoScanner.cs" />
     <Compile Include="Readers\AgilentOrQStarWiffFileInfoScanner.cs" />
     <Compile Include="Readers\AgilentTOFDFolderInfoScanner.cs" />
+    <Compile Include="Readers\AgilentMassHunterDFolderInfoScanner.cs" />
     <Compile Include="Readers\BrukerOneFolderInfoScanner.cs" />
     <Compile Include="Readers\BrukerXmassFolderInfoScanner.cs" />
     <Compile Include="Readers\DeconToolsIsosInfoScanner.cs" />

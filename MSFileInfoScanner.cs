@@ -41,7 +41,7 @@ namespace MSFileInfoScanner
     {
         // Ignore Spelling: Bruker, centroiding, idx, Micromass, OxyPlot, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
 
-        public const string PROGRAM_DATE = "October 4, 2021";
+        public const string PROGRAM_DATE = "October 21, 2021";
 
         /// <summary>
         /// Constructor
@@ -1303,9 +1303,15 @@ namespace MSFileInfoScanner
                                     {
                                         mMSInfoScanner = new AgilentGCDFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     }
-                                    else if (PathUtils.FindDirectoriesWildcard(datasetDirectory, AgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Count > 0)
+                                    //else if (PathUtils.FindDirectoriesWildcard(datasetDirectory, AgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Count > 0)
+                                    //{
+                                    //    // Uses ProteoWizard to read the file
+                                    //    mMSInfoScanner = new AgilentTOFDFolderInfoScanner(Options, LCMS2DPlotOptions);
+                                    //}
+                                    else if (PathUtils.FindDirectoriesWildcard(datasetDirectory, AgilentMassHunterDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Count > 0)
                                     {
-                                        mMSInfoScanner = new AgilentTOFDFolderInfoScanner(Options, LCMS2DPlotOptions);
+                                        // Uses Agilent's MassSpecDataReader to read the file
+                                        mMSInfoScanner = new AgilentMassHunterDFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     }
                                     else
                                     {
