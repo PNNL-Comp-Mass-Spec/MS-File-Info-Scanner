@@ -471,6 +471,8 @@ namespace MSFileInfoScanner.Readers
                 var scanCount = massSpecDataReader.MSScanFileInformation.TotalScansPresent;
                 var scanStats = new ScanStatsEntry[scanCount];
                 var scanMapper = new double[scanCount];
+                var hasMS1 = false;
+                var hasMSn = false;
                 for (var i = 0; i < scanCount; i++)
                 {
                     // NOTE: This does not extract any drift scans for IM-QTOF files.
@@ -485,14 +487,24 @@ namespace MSFileInfoScanner.Readers
                         scanNumber = i + 1;
                     }
 
+                    // TODO: Midac allows access to the frame-level "SpectrumDetails.FragmentationClass == FragmentationClass.HighEnergy"
+                    // Here, just check for a collision energy above '0'
+                    // TODO: How to properly handle this for HiLo QTOF data?
+                    var msLevel = scan.MSLevel == MSLevel.MSMS || scan.CollisionEnergy > 0 ? 2 : 1;
+
+                    if (msLevel == 1)
+                    {
+                        hasMS1 = true;
+                    }
+                    else
+                    {
+                        hasMSn = true;
+                    }
+
                     var scanStatsEntry = new ScanStatsEntry()
                     {
                         ScanNumber = scanNumber,
-                        //ScanType = scan.MSLevel == MSLevel.MSMS ? 2 : 1,
-                        // TODO: Midac allows access to the frame-level "SpectrumDetails.FragmentationClass == FragmentationClass.HighEnergy"
-                        // Here, just check for a collision energy above '0'
-                        // TODO: How to properly handle this for HiLo QTOF data?
-                        ScanType = scan.MSLevel == MSLevel.MSMS || scan.CollisionEnergy > 0 ? 2 : 1,
+                        ScanType = msLevel,
                     };
 
                     if (scanStatsEntry.ScanType > 1)
@@ -558,9 +570,13 @@ namespace MSFileInfoScanner.Readers
                     scanStats[i] = scanStatsEntry;
                 }
 
+                // Assumption: if we have both MS1 and MSn data, then we shouldn't sum "cycles" (frame or scan sets) in the chromatograms
+                // This may not be 100% correct, but it helps with data output
+                var chromatogramSumCycles = !(hasMS1 && hasMSn);
+
                 GetDeviceInfo(massSpecDataReader);
 
-                ReadChromatograms(massSpecDataReader, scanMapper, scanStats);
+                ReadChromatograms(massSpecDataReader, scanMapper, scanStats, chromatogramSumCycles);
 
                 ReadSpectra(massSpecDataReader, scanStats);
 
@@ -719,22 +735,27 @@ namespace MSFileInfoScanner.Readers
             public int OrdinalNumber { get; set; }
         }
 
-        private void ReadChromatograms(IMsdrDataReader massSpecDataReader, double[] scanMapper, ScanStatsEntry[] scanStats)
+        private void ReadChromatograms(IMsdrDataReader massSpecDataReader, double[] scanMapper, ScanStatsEntry[] scanStats, bool sumCycles)
         {
             if (Options.SaveTICAndBPIPlots && massSpecDataReader.FileInformation.IsMSDataPresent())
             {
-                //if (!times.SequenceEqual(bpTime))
-                //{
-                //    throw new Exception("TIC/BPI array times out-of-sync!");
-                //}
+                IBDAChromFilter filter = new BDAChromFilter();
+
+                // Cycle Summing: produces a much cleaner and meaningful BPC/TIC in QQQ data, but bad results in IM-QTOF alternating/HiLo data.
+                filter.DoCycleSum = sumCycles;
 
                 // Process the chromatograms
                 // NOTE: The TIC and BPC times are not full matches, so better to process them separately
-                var ticData = massSpecDataReader.GetTIC();
+                // Convenience method always sums cycles; don't use it
+                //var ticData = massSpecDataReader.GetTIC();
+                filter.ChromatogramType = ChromType.TotalIon;
+                var ticData = massSpecDataReader.GetChromatogram(filter)[0];
                 AddChromatogram(ticData, scanMapper, scanStats);
 
-                // TODO: IMS Data: Is the Base Peak Chromatogram based on the centroided data? May be safer to manually produce it...
-                var bpcData = massSpecDataReader.GetBPC();
+                // Convenience method always sums cycles; don't use it
+                //var bpcData = massSpecDataReader.GetBPC();
+                filter.ChromatogramType = ChromType.BasePeak;
+                var bpcData = massSpecDataReader.GetChromatogram(filter)[0];
                 AddChromatogram(bpcData, scanMapper, scanStats);
 
                 /* NOTE: The following code may extract other chromatogram types; the primary ones seen are MRM and EIC. This does not work for instrument curves (pump pressure).
