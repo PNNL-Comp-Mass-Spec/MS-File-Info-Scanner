@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
+using MSFileInfoScanner.Plotting;
 using MSFileInfoScannerInterfaces;
 using PRISM;
 using SpectraTypeClassifier;
@@ -274,6 +275,12 @@ namespace MSFileInfoScanner.Readers
 
                                 for (var i = 0; i < mzCount; i++)
                                 {
+                                    if (massIntensityPairs[0, i] < LCMSDataPlotter.TINY_MZ_THRESHOLD ||
+                                        massIntensityPairs[0, i] >= LCMSDataPlotter.HUGE_MZ_THRESHOLD)
+                                    {
+                                        // The m/z value is too small or too large, indicating a corrupt scan; skip this m/z value
+                                        continue;
+                                    }
                                     mzList.Add(massIntensityPairs[0, i]);
                                 }
 

@@ -20,7 +20,20 @@ namespace MSFileInfoScanner.Plotting
     {
         // Ignore Spelling: centroided, deisotoped, Orbitrap, OxyPlot
 
-        // Absolute maximum number of ions that will be tracked for a mass spectrum
+        /// <summary>
+        /// Data points with m/z values smaller than this value are ignored
+        /// </summary>
+        /// <remarks>Data points with negative m/z values are also ignored</remarks>
+        public const double TINY_MZ_THRESHOLD = 0.1;
+
+        /// <summary>
+        /// Data points with m/z values larger than this value are ignored
+        /// </summary>
+        public const int HUGE_MZ_THRESHOLD = 100000;
+
+        /// <summary>
+        /// Absolute maximum number of ions that will be tracked for a mass spectrum
+        /// </summary>
         private const int MAX_ALLOWABLE_ION_COUNT = 50000;
 
         public enum OutputFileTypes
@@ -68,7 +81,10 @@ namespace MSFileInfoScanner.Plotting
 
         private readonly List<OutputFileInfoType> mRecentFiles;
 
+        private int mInvalidMzWarnCount;
+
         private int mSortingWarnCount;
+
         private int mSpectraFoundExceedingMaxIonCount;
         private int mMaxIonCountReported;
 
@@ -94,7 +110,10 @@ namespace MSFileInfoScanner.Plotting
         {
             Options = options;
             mRecentFiles = new List<OutputFileInfoType>();
+
+            mInvalidMzWarnCount = 0;
             mSortingWarnCount = 0;
+
             mSpectraFoundExceedingMaxIonCount = 0;
             mMaxIonCountReported = 0;
 
@@ -138,11 +157,68 @@ namespace MSFileInfoScanner.Plotting
                     return false;
                 }
 
+                // Check for unreasonably large m/z values (indicating a corrupt scan)
+                // See, for example scan ? in BLI_CSF_2C09_2020031.raw
+
+                var mzFilterRequired = false;
+                for (var index = 0; index < ionCount; index++)
+                {
+                    if (massIntensityPairs[0, index] >= TINY_MZ_THRESHOLD && massIntensityPairs[0, index] < HUGE_MZ_THRESHOLD)
+                    {
+                        continue;
+                    }
+
+                    mInvalidMzWarnCount++;
+                    if (mInvalidMzWarnCount <= 10)
+                    {
+                        // Example messages
+                        // Scan 26486 has a tiny m/z value of 3.00E-003; this typically indicates a corrupt scan
+                        // Scan 26486 has a huge m/z value of 7.99E+027; this typically indicates a corrupt scan
+
+                        OnWarningEvent("  Scan {0} has a {1} m/z value of {2:E2}; this typically indicates a corrupt scan",
+                            scanNumber,
+                            0.003 <= TINY_MZ_THRESHOLD ? "tiny" : "huge",
+                            0.003);
+
+                        OnWarningEvent("  Scan {0} has a {1} m/z value of {2:E2}; this typically indicates a corrupt scan",
+                            scanNumber,
+                            massIntensityPairs[0, index] <= TINY_MZ_THRESHOLD ? "tiny" : "huge",
+                            massIntensityPairs[0, index]);
+                    }
+
+                    mzFilterRequired = true;
+                    break;
+                }
+
+                if (mzFilterRequired)
+                {
+                    // Copy data in place, skipping items with a huge m/z value
+
+                    var targetIndex = 0;
+
+                    for (var index = 0; index < ionCount; index++)
+                    {
+                        if (massIntensityPairs[0, index] < TINY_MZ_THRESHOLD || massIntensityPairs[0, index] >= HUGE_MZ_THRESHOLD)
+                        {
+                            continue;
+                        }
+
+                        massIntensityPairs[0, targetIndex] = massIntensityPairs[0, index];
+                        massIntensityPairs[1, targetIndex] = massIntensityPairs[1, index];
+
+                        targetIndex++;
+                    }
+
+                    // Update ionCount
+                    ionCount = targetIndex;
+                }
+
                 // Make sure the data is sorted by m/z
                 for (var index = 1; index < ionCount; index++)
                 {
                     // Note that massIntensityPairs[0, index) is m/z
                     //       and massIntensityPairs[1, index) is intensity
+
                     if (massIntensityPairs[0, index] < massIntensityPairs[0, index - 1])
                     {
                         // May need to sort the data
@@ -158,11 +234,11 @@ namespace MSFileInfoScanner.Plotting
                             mSortingWarnCount++;
                             if (mSortingWarnCount <= 10)
                             {
-                                Console.WriteLine("  Sorting m/z data (this typically shouldn't be required for Thermo data, though can occur for high res Orbitrap data)");
+                                OnWarningEvent("  Sorting m/z data for scan {0} (this typically shouldn't be required for Thermo data, though can occur for high res Orbitrap data)", scanNumber);
                             }
                             else if (mSortingWarnCount % 100 == 0)
                             {
-                                Console.WriteLine("  Sorting m/z data (i = " + mSortingWarnCount + ")");
+                                OnWarningEvent("  Sorting m/z data (i = " + mSortingWarnCount + ")");
                             }
 
                             // We can't easily sort a 2D array in .NET
@@ -237,6 +313,9 @@ namespace MSFileInfoScanner.Plotting
 
                 for (var index = ionCount - MAX_ALLOWABLE_ION_COUNT; index < ionCount; index++)
                 {
+                    if (ionsMZ[index] < TINY_MZ_THRESHOLD || ionsMZ[index] >= HUGE_MZ_THRESHOLD)
+                        continue;
+
                     var ion = new MSIonType
                     {
                         MZ = ionsMZ[index],
@@ -254,6 +333,9 @@ namespace MSFileInfoScanner.Plotting
 
                 for (var index = 0; index < ionCount; index++)
                 {
+                    if (ionsMZ[index] < TINY_MZ_THRESHOLD || ionsMZ[index] >= HUGE_MZ_THRESHOLD)
+                        continue;
+
                     var ion = new MSIonType
                     {
                         MZ = ionsMZ[index],
@@ -277,20 +359,53 @@ namespace MSFileInfoScanner.Plotting
                     return false;
                 }
 
-                // Make sure the data is sorted by m/z
-                for (var index = 1; index < ionList.Count; index++)
+                // Check for huge m/z values
+                var mzFilterRequired = false;
+
+                for (var index = 0; index < ionList.Count; index++)
                 {
-                    if (!(ionList[index].MZ < ionList[index - 1].MZ))
+                    if (ionList[index].MZ is >= TINY_MZ_THRESHOLD and < HUGE_MZ_THRESHOLD)
+                    {
+                        continue;
+                    }
+
+                    mzFilterRequired = true;
+                    break;
+                }
+
+                List<MSIonType> ionListToUse;
+
+                if (!mzFilterRequired)
+                {
+                    ionListToUse = ionList;
+                }
+                else
+                {
+                    ionListToUse = new List<MSIonType>();
+
+                    for (var index = 0; index < ionList.Count; index++)
+                    {
+                        if (ionList[index].MZ is >= TINY_MZ_THRESHOLD and < HUGE_MZ_THRESHOLD)
+                        {
+                            ionListToUse.Add(ionList[index]);
+                        }
+                    }
+                }
+
+                // Make sure the data is sorted by m/z
+                for (var index = 1; index < ionListToUse.Count; index++)
+                {
+                    if (!(ionListToUse[index].MZ < ionListToUse[index - 1].MZ))
                     {
                         continue;
                     }
 
                     // May need to sort the data
-                    // However, if the intensity of both data points is zero, then we can simply swap the data
-                    if (Math.Abs(ionList[index].Intensity) < double.Epsilon && Math.Abs(ionList[index - 1].Intensity) < double.Epsilon)
+                    // However, if the intensity of both data points is zero, we can simply swap the data
+                    if (Math.Abs(ionListToUse[index].Intensity) < double.Epsilon && Math.Abs(ionListToUse[index - 1].Intensity) < double.Epsilon)
                     {
                         // Swap the m/z values
-                        (ionList[index], ionList[index - 1]) = (ionList[index - 1], ionList[index]);
+                        (ionListToUse[index], ionListToUse[index - 1]) = (ionListToUse[index - 1], ionListToUse[index]);
                     }
                     else
                     {
@@ -304,37 +419,42 @@ namespace MSFileInfoScanner.Plotting
                         {
                             Console.WriteLine("  Sorting m/z data (i = " + mSortingWarnCount + ")");
                         }
-                        ionList.Sort(new MSIonTypeComparer());
+                        ionListToUse.Sort(new MSIonTypeComparer());
                         break;
                     }
                 }
 
-                var ionsMZFiltered = new double[ionList.Count];
-                var ionsIntensityFiltered = new float[ionList.Count];
-                var charge = new byte[ionList.Count];
+                var ionsMZFiltered = new double[ionListToUse.Count];
+                var ionsIntensityFiltered = new float[ionListToUse.Count];
+                var charge = new byte[ionListToUse.Count];
 
                 // Populate ionsMZFiltered and ionsIntensityFiltered, skipping any data points with an intensity value of 0 or less than mMinIntensity
 
                 var ionCountNew = 0;
-                for (var index = 0; index < ionList.Count; index++)
+                for (var index = 0; index < ionListToUse.Count; index++)
                 {
-                    if (ionList[index].Intensity > 0 && ionList[index].Intensity >= Options.MinIntensity)
+                    if (ionListToUse[index].Intensity <= 0 || ionListToUse[index].Intensity < Options.MinIntensity)
                     {
-                        ionsMZFiltered[ionCountNew] = ionList[index].MZ;
-
-                        if (ionList[index].Intensity > float.MaxValue)
-                        {
-                            ionsIntensityFiltered[ionCountNew] = float.MaxValue;
-                        }
-                        else
-                        {
-                            ionsIntensityFiltered[ionCountNew] = (float)ionList[index].Intensity;
-                        }
-
-                        charge[ionCountNew] = ionList[index].Charge;
-
-                        ionCountNew++;
+                        continue;
                     }
+
+                    if (ionListToUse[index].MZ is < TINY_MZ_THRESHOLD or >= HUGE_MZ_THRESHOLD)
+                        continue;
+
+                    ionsMZFiltered[ionCountNew] = ionListToUse[index].MZ;
+
+                    if (ionListToUse[index].Intensity > float.MaxValue)
+                    {
+                        ionsIntensityFiltered[ionCountNew] = float.MaxValue;
+                    }
+                    else
+                    {
+                        ionsIntensityFiltered[ionCountNew] = (float)ionListToUse[index].Intensity;
+                    }
+
+                    charge[ionCountNew] = ionListToUse[index].Charge;
+
+                    ionCountNew++;
                 }
 
                 AddScanCheckData(scanNumber, msLevel, scanTimeMinutes, ionCountNew, ionsMZFiltered, ionsIntensityFiltered, charge);
