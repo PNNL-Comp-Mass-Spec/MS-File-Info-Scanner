@@ -398,10 +398,7 @@ namespace MSFileInfoScanner.Readers
                 }
             }
 
-            if (pressurePlot == null)
-            {
-                pressurePlot = new TICandBPIPlotter();
-            }
+            pressurePlot ??= new TICandBPIPlotter();
 
             if (Options.SaveLCMS2DPlots)
             {
