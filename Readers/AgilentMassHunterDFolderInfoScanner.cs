@@ -79,7 +79,7 @@ namespace MSFileInfoScanner.Readers
                 // Open the Contents.xml file
                 var filePath = Path.Combine(directoryPath, AGILENT_XML_CONTENTS_FILE);
 
-                using var reader = new System.Xml.XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                using var reader = new XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
 
                 while (!reader.EOF)
                 {
@@ -87,7 +87,7 @@ namespace MSFileInfoScanner.Readers
 
                     switch (reader.NodeType)
                     {
-                        case System.Xml.XmlNodeType.Element:
+                        case XmlNodeType.Element:
 
                             if (reader.Name == "AcquiredTime")
                             {
@@ -153,7 +153,7 @@ namespace MSFileInfoScanner.Readers
                 // Open the Contents.xml file
                 var filePath = Path.Combine(directoryPath, AGILENT_TIME_SEGMENT_FILE);
 
-                using var reader = new System.Xml.XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                using var reader = new XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
 
                 while (!reader.EOF)
                 {
@@ -161,7 +161,7 @@ namespace MSFileInfoScanner.Readers
 
                     switch (reader.NodeType)
                     {
-                        case System.Xml.XmlNodeType.Element:
+                        case XmlNodeType.Element:
                             switch (reader.Name)
                             {
                                 case "TimeSegment":
@@ -188,7 +188,7 @@ namespace MSFileInfoScanner.Readers
                             }
                             break;
 
-                        case System.Xml.XmlNodeType.EndElement:
+                        case XmlNodeType.EndElement:
                             if (reader.Name == "TimeSegment")
                             {
                                 // Store the AcqTime for this time segment
