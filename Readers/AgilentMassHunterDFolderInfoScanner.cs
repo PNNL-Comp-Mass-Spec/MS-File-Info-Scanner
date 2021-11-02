@@ -20,7 +20,7 @@ namespace MSFileInfoScanner.Readers
     // ReSharper disable once IdentifierTypo
     public class AgilentMassHunterDFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: AcqData, AcqTime
+        // Ignore Spelling: AcqData, AcqTime, Midac, ns, μs
 
         // Note: The extension must be in all caps
         public const string AGILENT_DATA_FOLDER_D_EXTENSION = ".D";
@@ -598,7 +598,7 @@ namespace MSFileInfoScanner.Readers
                                     --scanIndex;
                             }
 
-                            // Square plot: Actuals only reports values when they change, make a boxy plot
+                            // Square plot: Actually only reports values when they change, make a box plot
                             if (lastScanIndex >= 0 && scanIndex - 1 > lastScanIndex)
                             {
                                 var previousScanNumber = scanStats[scanIndex - 1].ScanNumber;
