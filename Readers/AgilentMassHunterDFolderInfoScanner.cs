@@ -744,7 +744,7 @@ namespace MSFileInfoScanner.Readers
             public int OrdinalNumber { get; set; }
         }
 
-        private void ReadChromatograms(IMsdrDataReader massSpecDataReader, double[] scanMapper, ScanStatsEntry[] scanStats, bool sumCycles)
+        private void ReadChromatograms(IMsdrDataReader massSpecDataReader, double[] scanMapper, IReadOnlyList<ScanStatsEntry> scanStats, bool sumCycles)
         {
             if (Options.SaveTICAndBPIPlots && massSpecDataReader.FileInformation.IsMSDataPresent())
             {
@@ -973,7 +973,7 @@ namespace MSFileInfoScanner.Readers
             return dataValueType.ToString();
         }
 
-        private void AddChromatogram(IBDAChromData chromatogram, double[] scanMapper, ScanStatsEntry[] scanStats)
+        private void AddChromatogram(IBDAChromData chromatogram, double[] scanMapper, IReadOnlyList<ScanStatsEntry> scanStats)
         {
             if (chromatogram.ChromatogramType == ChromType.TotalIon)
             {
@@ -985,7 +985,7 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
-        private void AddChromatogram(Action<int, int, float, double> addMethod, IBDAChromData chromatogram, double[] scanMapper, ScanStatsEntry[] scanStats)
+        private void AddChromatogram(Action<int, int, float, double> addMethod, IBDAChromData chromatogram, double[] scanMapper, IReadOnlyList<ScanStatsEntry> scanStats)
         {
             if (addMethod == null)
             {
@@ -1013,7 +1013,7 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
-        private void ReadSpectra(IMsdrDataReader massSpecDataReader, ScanStatsEntry[] scanStats)
+        private void ReadSpectra(IMsdrDataReader massSpecDataReader, IReadOnlyList<ScanStatsEntry> scanStats)
         {
             var lastProgressTime = DateTime.UtcNow;
 
