@@ -182,6 +182,7 @@ namespace MSFileInfoScanner.Readers
                                     success = true;
                                     break;
 
+                                // ReSharper disable once RedundantEmptySwitchSection
                                 default:
                                     // Ignore it
                                     break;
@@ -435,6 +436,7 @@ namespace MSFileInfoScanner.Readers
                 var driftTimeMsec = -1.0;
                 if (mIsImsData)
                 {
+                    // ReSharper disable once CommentTypo
                     // The only way to get this is with MIDAC, or else parsing IMSFrameMeth.xml.
                     // For IMS files, we only store one entry per frame
                     // Use the median drift time as the representative drift time
@@ -557,6 +559,7 @@ namespace MSFileInfoScanner.Readers
 
                     if (mIsImsData && driftTimeMsec > 0)
                     {
+                        // ReSharper disable once CommentTypo
                         // The only way to get this is with MIDAC, or else parsing IMSFrameMeth.xml.
                         // For IMS files, we only store one entry per frame
                         // Use the median drift time as the representative drift time
@@ -661,6 +664,8 @@ namespace MSFileInfoScanner.Readers
                 //Console.WriteLine(format, device.ItemArray);
                 foreach (var column in columns)
                 {
+                    // ReSharper disable StringLiteralTypo
+
                     var value = deviceData[column];
                     switch (column.ColumnName.ToLower())
                     {
@@ -706,6 +711,8 @@ namespace MSFileInfoScanner.Readers
                             deviceInfo.FirmwareVersion = value?.ToString() ?? "";
                             break;
                     }
+
+                    // ReSharper restore StringLiteralTypo
                 }
 
                 deviceInfo.SoftwareVersion = deviceInfo.AgilentDeviceType.ToString();
@@ -723,12 +730,17 @@ namespace MSFileInfoScanner.Readers
 
             public DeviceType AgilentDeviceType { get; set; } = Agilent.MassSpectrometry.DataAnalysis.DeviceType.Unknown;
 
+            // ReSharper disable UnusedAutoPropertyAccessor.Local
+
             public string DisplayName { get; set; }
 
             public StoredDataType StoredDataTypes { get; set; }
 
             public string DriverVersion { get; set; }
             public string FirmwareVersion { get; set; }
+
+            // ReSharper restore UnusedAutoPropertyAccessor.Local
+
             public int OrdinalNumber { get; set; }
         }
 
@@ -851,6 +863,7 @@ namespace MSFileInfoScanner.Readers
 
                     foreach (var signal in signals)
                     {
+                        // ReSharper disable once IdentifierTypo
                         var chromData = lcDataReader.GetSignal(signal);
 
                         var description = chromData.SignalDescription;
@@ -918,6 +931,7 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
+        // ReSharper disable once RedundantNameQualifier
         private string GetUnitLabel(Agilent.MassSpectrometry.DataAnalysis.DataUnit dataUnit)
         {
             switch (dataUnit)
@@ -939,6 +953,7 @@ namespace MSFileInfoScanner.Readers
             return dataUnit.ToString();
         }
 
+        // ReSharper disable once RedundantNameQualifier
         private string GetLabel(Agilent.MassSpectrometry.DataAnalysis.DataValueType dataValueType)
         {
             switch (dataValueType)
