@@ -410,7 +410,7 @@ namespace MSFileInfoScanner.Readers
             {
                 // Open the data directory using the ProteoWizardWrapper
 
-                var massSpecDataReader = (IMsdrDataReader) new MassSpecDataReader();
+                var massSpecDataReader = (IMsdrDataReader)new MassSpecDataReader();
                 var open = massSpecDataReader.OpenDataFile(dataDirectoryPath);
                 // TODO: Check value of "open"!
 
@@ -611,7 +611,7 @@ namespace MSFileInfoScanner.Readers
 
                             var scanNumber = scanStats[scanIndex].ScanNumber;
                             var msLevel = scanStats[scanIndex].ScanType;
-                            pressurePlot.AddDataTICOnly(scanNumber, msLevel, (float) xArray[i], yArray[i]);
+                            pressurePlot.AddDataTICOnly(scanNumber, msLevel, (float)xArray[i], yArray[i]);
                             lastScanIndex = scanIndex;
                             lastValue = yArray[i];
                         }
@@ -795,7 +795,7 @@ namespace MSFileInfoScanner.Readers
             if (Options.SaveTICAndBPIPlots /* && massSpecDataReader.FileInformation.IsNonMSDataPresent()*/)
             {
                 // Read instrument curves
-                var lcDataReader = (INonmsDataReader) massSpecDataReader;
+                var lcDataReader = (INonmsDataReader)massSpecDataReader;
                 var devices = lcDataReader.GetNonmsDevices();
 
                 if (devices == null || devices.Length == 0)
@@ -1046,6 +1046,12 @@ namespace MSFileInfoScanner.Readers
                             Intensity = yArray[j]
                         });
                     }
+                }
+
+                if (data.Count == 0)
+                {
+                    OnWarningEvent("Scan ID {0} has no data; skipping scan index {1}", scan.ScanID, i);
+                    continue;
                 }
 
                 // TODO: These need to be set, but it looks like we must read the spectrum to get them.
