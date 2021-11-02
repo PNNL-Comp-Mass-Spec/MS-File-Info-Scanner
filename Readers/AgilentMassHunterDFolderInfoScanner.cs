@@ -448,8 +448,8 @@ namespace MSFileInfoScanner.Readers
                         var manager = new XmlNamespaceManager(document.NameTable);
                         var query = "FrameMethods/FrameMethod/FrameDtPeriod";
                         var query2 = "FrameMethods/FrameMethod/MaxMsPerFrame";
-                        var dtPeriodString = document.SelectNodes(query, manager)[0].InnerText;
-                        var maxMsString = document.SelectNodes(query2, manager)[0].InnerText;
+                        var dtPeriodString = document.SelectNodes(query, manager)?[0].InnerText;
+                        var maxMsString = document.SelectNodes(query2, manager)?[0].InnerText;
 
                         if (double.TryParse(dtPeriodString, out var dtPeriod) &&
                             double.TryParse(maxMsString, out var maxMs))
