@@ -735,7 +735,7 @@ namespace MSFileInfoScanner.Plotting
                 int ionCountNew;
                 if (msSpectrum.IonCount > maxIonCountToRetain)
                 {
-                    var filterDataArray = new FilterDataArrayMaxCount()
+                    var filterDataArray = new FilterDataArrayMaxCount
                     {
                         MaximumDataCountToLoad = maxIonCountToRetain,
                         TotalIntensityPercentageFilterEnabled = false

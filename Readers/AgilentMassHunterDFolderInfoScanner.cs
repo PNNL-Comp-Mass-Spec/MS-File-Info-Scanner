@@ -501,7 +501,7 @@ namespace MSFileInfoScanner.Readers
                         hasMSn = true;
                     }
 
-                    var scanStatsEntry = new ScanStatsEntry()
+                    var scanStatsEntry = new ScanStatsEntry
                     {
                         ScanNumber = scanNumber,
                         ScanType = msLevel,
@@ -795,7 +795,8 @@ namespace MSFileInfoScanner.Readers
                     return;
                 }
 
-                var deviceFilterList = new List<Agilent.MassSpectrometry.DataAnalysis.DeviceType>()
+                // ReSharper disable once RedundantNameQualifier
+                var deviceFilterList = new List<Agilent.MassSpectrometry.DataAnalysis.DeviceType>
                 {
                     DeviceType.IsocraticPump,
                     DeviceType.BinaryPump,
@@ -809,7 +810,7 @@ namespace MSFileInfoScanner.Readers
                     DeviceType.CompactLC1220GradPump,
                 };
 
-                var signalFilterList = new List<string>()
+                var signalFilterList = new List<string>
                 {
                     "Pressure",
                     "Flow",
@@ -1027,7 +1028,7 @@ namespace MSFileInfoScanner.Readers
                 {
                     if (yArray[j] > 0)
                     {
-                        data.Add(new LCMSDataPlotter.MSIonType()
+                        data.Add(new LCMSDataPlotter.MSIonType
                         {
                             MZ = xArray[j],
                             Intensity = yArray[j]

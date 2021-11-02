@@ -1696,7 +1696,7 @@ namespace MSFileInfoScanner
                             }
                         }
 
-                        var newFile = new FileStatsType()
+                        var newFile = new FileStatsType
                         {
                             FileName = dataFile.FullName,
                             ModificationDate = dataFile.LastWriteTime,
