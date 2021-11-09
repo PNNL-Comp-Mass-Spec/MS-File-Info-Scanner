@@ -1229,7 +1229,7 @@ namespace MSFileInfoScanner
 
             if (string.IsNullOrWhiteSpace(fileNameLower))
             {
-                OnWarningEvent("Could not extract the filename from path sent to CheckCSVFile: " + filePath);
+                OnWarningEvent("Could not extract the filename from path sent to CheckCSVFile: {0}", filePath);
                 return false;
             }
 
@@ -2009,14 +2009,7 @@ namespace MSFileInfoScanner
             if (string.IsNullOrEmpty(source))
                 source = "Unknown_Source";
 
-            if (ex == null)
-            {
-                OnErrorEvent(source + ": " + messageWithoutCRLF);
-            }
-            else
-            {
-                OnErrorEvent(source + ": " + messageWithoutCRLF, ex);
-            }
+            OnErrorEvent(string.Format("{0}: {1}", source, messageWithoutCRLF), ex);
         }
 
         private void LogFileIntegrityError(string filePath, string errorMessage)

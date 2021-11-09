@@ -238,7 +238,7 @@ namespace MSFileInfoScanner.Plotting
                             }
                             else if (mSortingWarnCount % 100 == 0)
                             {
-                                OnWarningEvent("  Sorting m/z data (i = " + mSortingWarnCount + ")");
+                                OnWarningEvent("  Sorting m/z data (i = {0})", mSortingWarnCount);
                             }
 
                             // We can't easily sort a 2D array in .NET
@@ -294,7 +294,7 @@ namespace MSFileInfoScanner.Plotting
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error in LCMSDataPlotter.AddScan2D: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error in LCMSDataPlotter.AddScan2D: {0}", ex.Message), ex);
                 return false;
             }
 
@@ -461,7 +461,7 @@ namespace MSFileInfoScanner.Plotting
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error in LCMSDataPlotter.AddScan: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error in LCMSDataPlotter.AddScan: {0}", ex.Message), ex);
                 return false;
             }
 
@@ -562,7 +562,7 @@ namespace MSFileInfoScanner.Plotting
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error in LCMSDataPlotter.AddScanSkipFilters: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error in LCMSDataPlotter.AddScanSkipFilters: {0}", ex.Message), ex);
                 success = false;
             }
 
@@ -717,7 +717,7 @@ namespace MSFileInfoScanner.Plotting
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error in LCMSDataPlotter.CentroidMSData: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error in LCMSDataPlotter.CentroidMSData: {0}", ex.Message), ex);
             }
         }
 
@@ -1876,7 +1876,7 @@ namespace MSFileInfoScanner.Plotting
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error in LCMSDataPlotter.Save2DPlots: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error in LCMSDataPlotter.Save2DPlots: {0}", ex.Message), ex);
                 return false;
             }
         }

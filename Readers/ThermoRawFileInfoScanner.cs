@@ -140,7 +140,7 @@ namespace MSFileInfoScanner.Readers
             {
                 if (mIsProfileM.IsMatch(scanInfo.FilterText))
                 {
-                    OnWarningEvent("Warning: Scan " + scanNumber + " appears to be profile mode data, yet XRawFileIO reported it to be centroid");
+                    OnWarningEvent("Warning: Scan {0} appears to be profile mode data, yet XRawFileIO reported it to be centroid", scanNumber);
                 }
 
                 return SpectrumTypeClassifier.CentroidStatusConstants.Centroid;
@@ -148,7 +148,7 @@ namespace MSFileInfoScanner.Readers
 
             if (mIsCentroid.IsMatch(scanInfo.FilterText))
             {
-                OnWarningEvent("Warning: Scan " + scanNumber + " appears to be centroided data, yet XRawFileIO reported it to be profile");
+                OnWarningEvent("Warning: Scan {0} appears to be centroided data, yet XRawFileIO reported it to be profile", scanNumber);
             }
 
             return SpectrumTypeClassifier.CentroidStatusConstants.Profile;
@@ -247,7 +247,7 @@ namespace MSFileInfoScanner.Readers
                 }
                 catch (Exception ex)
                 {
-                    OnErrorEvent("Error loading header info for scan " + scanNumber + ": " + ex.Message);
+                    OnErrorEvent("Error loading header info for scan {0}: {1}", scanNumber, ex.Message);
                     continue;
                 }
 
@@ -293,7 +293,7 @@ namespace MSFileInfoScanner.Readers
                 }
                 catch (Exception ex)
                 {
-                    OnErrorEvent("Error loading m/z and intensity values for scan " + scanNumber + ": " + ex.Message);
+                    OnErrorEvent("Error loading m/z and intensity values for scan {0}: {1}", scanNumber, ex.Message);
                 }
 
                 scansProcessed++;
@@ -329,7 +329,7 @@ namespace MSFileInfoScanner.Readers
 
             if (!rawFile.Exists)
             {
-                OnErrorEvent(".Raw file not found: " + dataFilePath);
+                OnErrorEvent(".Raw file not found: {0}", dataFilePath);
                 return false;
             }
 
@@ -378,7 +378,7 @@ namespace MSFileInfoScanner.Readers
             if (!xcaliburAccessor.OpenRawFile(rawFile.FullName))
             {
                 // File open failed
-                OnErrorEvent("Call to .OpenRawFile failed for: " + rawFile.FullName);
+                OnErrorEvent("Call to .OpenRawFile failed for: {0}", rawFile.FullName);
                 ErrorCode = iMSFileInfoScanner.MSFileScannerErrorCodes.ThermoRawFileReaderError;
                 readError = true;
 
@@ -394,7 +394,8 @@ namespace MSFileInfoScanner.Readers
 
                             if (!string.Equals(dataFilePathLocal, dataFilePath, StringComparison.InvariantCultureIgnoreCase))
                             {
-                                OnDebugEvent("Copying file " + Path.GetFileName(dataFilePath) + " to the working directory");
+                                OnDebugEvent("Copying file {0} to the working directory", Path.GetFileName(dataFilePath));
+
                                 File.Copy(dataFilePath, dataFilePathLocal, true);
 
                                 dataFilePath = string.Copy(dataFilePathLocal);
@@ -406,7 +407,7 @@ namespace MSFileInfoScanner.Readers
                                 if (!xcaliburAccessor.OpenRawFile(rawFile.FullName))
                                 {
                                     // File open failed
-                                    OnErrorEvent("Call to .OpenRawFile failed for: " + rawFile.FullName);
+                                    OnErrorEvent("Call to .OpenRawFile failed for: {0}", rawFile.FullName);
                                     ErrorCode = iMSFileInfoScanner.MSFileScannerErrorCodes.ThermoRawFileReaderError;
                                     readError = true;
                                 }
@@ -598,7 +599,7 @@ namespace MSFileInfoScanner.Readers
                 catch (Exception)
                 {
                     // Deletion failed
-                    OnErrorEvent("Deletion failed for: " + Path.GetFileName(dataFilePathLocal));
+                    OnErrorEvent("Deletion failed for: {0}", Path.GetFileName(dataFilePathLocal));
                 }
             }
 

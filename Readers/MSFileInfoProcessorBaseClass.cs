@@ -193,12 +193,12 @@ namespace MSFileInfoScanner.Readers
 
                 if (!success)
                 {
-                    OnErrorEvent("Error calling DatasetStatsSummarizer.CreateDatasetInfoFile: " + mDatasetStatsSummarizer.ErrorMessage);
+                    OnErrorEvent("Error calling DatasetStatsSummarizer.CreateDatasetInfoFile: {0}", mDatasetStatsSummarizer.ErrorMessage);
                 }
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error creating dataset info file: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error creating dataset info file: {0}", ex.Message), ex);
                 success = false;
             }
 
@@ -229,12 +229,12 @@ namespace MSFileInfoScanner.Readers
 
                 if (!success)
                 {
-                    OnErrorEvent("Error calling DatasetStatsSummarizer.CreateScanStatsFile: " + mDatasetStatsSummarizer.ErrorMessage);
+                    OnErrorEvent("Error calling DatasetStatsSummarizer.CreateScanStatsFile: {0}", mDatasetStatsSummarizer.ErrorMessage);
                 }
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error creating dataset ScanStats file: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error creating dataset ScanStats file: {0}", ex.Message), ex);
                 success = false;
             }
 
@@ -407,7 +407,7 @@ namespace MSFileInfoScanner.Readers
                     outputDirectory = new DirectoryInfo(".");
                 }
 
-                OnDebugEvent("Output directory path: " + outputDirectory.FullName);
+                OnDebugEvent("Output directory path: {0}", outputDirectory.FullName);
 
                 UpdatePlotWithPython();
 
@@ -566,7 +566,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error creating output files: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error creating output files: {0}", ex.Message), ex);
                 successOverall = false;
             }
 
@@ -592,7 +592,7 @@ namespace MSFileInfoScanner.Readers
 
                 var htmlFilePath = Path.Combine(outputDirectoryPath, htmlFileName);
 
-                OnDebugEvent("Creating file " + htmlFilePath);
+                OnDebugEvent("Creating file {0}", htmlFilePath);
 
                 using var writer = new StreamWriter(new FileStream(htmlFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
@@ -627,7 +627,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error creating QC plot HTML file: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error creating QC plot HTML file: {0}", ex.Message), ex);
                 return false;
             }
         }
@@ -1071,8 +1071,10 @@ namespace MSFileInfoScanner.Readers
             catch (AccessViolationException)
             {
                 // Attempted to read or write protected memory. This is often an indication that other memory is corrupt.
-                OnWarningEvent("Error reading instrument data with ProteoWizard: Attempted to read or write protected memory. " +
-                               "The instrument data file is likely corrupt.");
+                OnWarningEvent(
+                    "Error reading instrument data with ProteoWizard: Attempted to read or write protected memory. " +
+                    "The instrument data file is likely corrupt.");
+
                 mDatasetStatsSummarizer.CreateEmptyScanStatsFiles = false;
             }
             catch (Exception ex)
@@ -1149,7 +1151,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnWarningEvent("Error determining the elution time of the final spectrum in the file: " + ex.Message);
+                OnWarningEvent("Error determining the elution time of the final spectrum in the file: {0}", ex.Message);
             }
         }
 
@@ -1359,7 +1361,7 @@ namespace MSFileInfoScanner.Readers
 
                 if (!success)
                 {
-                    OnErrorEvent("Error calling datasetStatsSummarizer.UpdateDatasetStatsTextFile: " + mDatasetStatsSummarizer.ErrorMessage);
+                    OnErrorEvent("Error calling datasetStatsSummarizer.UpdateDatasetStatsTextFile: {0}", mDatasetStatsSummarizer.ErrorMessage);
                 }
             }
             catch (Exception ex)

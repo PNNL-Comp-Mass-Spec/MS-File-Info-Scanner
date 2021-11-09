@@ -199,7 +199,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error obtaining TIC and BPI for overall dataset: " + ex.Message);
+                OnErrorEvent("Error obtaining TIC and BPI for overall dataset: {0}", ex.Message);
                 ticByFrame = new SortedDictionary<int, double>();
                 bpiByFrame = new SortedDictionary<int, double>();
             }
@@ -513,13 +513,13 @@ namespace MSFileInfoScanner.Readers
                         }
                         catch (Exception ex)
                         {
-                            OnWarningEvent("Error loading m/z and intensity values for frame " + frameNumber + ": " + ex.Message);
+                            OnWarningEvent("Error loading m/z and intensity values for frame {0}: {1}", frameNumber, ex.Message);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    OnWarningEvent("Error loading header info for frame " + frameNumber + ": " + ex.Message);
+                    OnWarningEvent("Error loading header info for frame {0}: {1}", frameNumber, ex.Message);
                 }
 
                 frameStartTimePrevious = frameStartTimeCurrent;
@@ -593,7 +593,7 @@ namespace MSFileInfoScanner.Readers
             catch (Exception ex)
             {
                 // File open failed
-                OnErrorEvent("Call to .OpenUIMF failed for " + uimfFile.Name + ": " + ex.Message, ex);
+                OnErrorEvent(string.Format("Call to .OpenUIMF failed for {0}: {1}", uimfFile.Name, ex.Message), ex);
                 readError = true;
             }
 
@@ -664,8 +664,10 @@ namespace MSFileInfoScanner.Readers
                         if (!DateTime.TryParse(reportedDateStartedText, out var reportedDateStarted))
                         {
                             // Invalid date; log a message
-                            OnWarningEvent(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + reportedDateStartedText + "; " +
-                                "will use the time the datafile was last modified");
+                            OnWarningEvent(
+                                ".UIMF file has an invalid DateStarted value in table Global_Parameters: {0}; " +
+                                "will use the time the datafile was last modified", reportedDateStartedText);
+
                             inaccurateStartTime = true;
                         }
                         else
@@ -685,8 +687,10 @@ namespace MSFileInfoScanner.Readers
                             else if (reportedDateStarted.Year < 2000 || reportedDateStarted.Year > DateTime.Now.Year + 1)
                             {
                                 // Invalid date; log a message
-                                OnWarningEvent(".UIMF file has an invalid DateStarted value in table Global_Parameters: " + reportedDateStartedText + "; " +
-                                    "will use the time the datafile was last modified");
+                                OnWarningEvent(
+                                    ".UIMF file has an invalid DateStarted value in table Global_Parameters: {0}; " +
+                                    "will use the time the datafile was last modified", reportedDateStartedText);
+
                                 inaccurateStartTime = true;
                             }
                             else
@@ -705,7 +709,7 @@ namespace MSFileInfoScanner.Readers
                     }
                     catch (Exception ex2)
                     {
-                        OnWarningEvent("Exception extracting the DateStarted date from table Global_Parameters in the .UIMF file: " + ex2.Message);
+                        OnWarningEvent("Exception extracting the DateStarted date from table Global_Parameters in the .UIMF file: {0}", ex2.Message);
                     }
 
                     // NumFrames is the total number of frames in the file (for all frame types)
@@ -858,8 +862,10 @@ namespace MSFileInfoScanner.Readers
                                     var parentFile = MSFileInfoScanner.GetFileInfo(Path.Combine(uimfFile.DirectoryName, baseName + UIMF_FILE_EXTENSION));
                                     if (parentFile.Exists && parentFile.LastWriteTime < uimfFile.LastWriteTime)
                                     {
-                                        OnWarningEvent("Using LastWriteTime from the parent .UIMF file: " +
-                                                       PathUtils.CompactPathString(parentFile.FullName, 120));
+                                        OnWarningEvent(
+                                            "Using LastWriteTime from the parent .UIMF file: {0}",
+                                            PathUtils.CompactPathString(parentFile.FullName, 120));
+
                                         fileModificationTime = parentFile.LastWriteTime;
                                     }
                                     else
@@ -882,6 +888,7 @@ namespace MSFileInfoScanner.Readers
                                             "None of the frames has a StartTime defined; " +
                                             "computing acquisition length using DateStarted from the Global_Params table " +
                                             "along with the file modification time");
+
                                         datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(apparentRuntimeMinutes);
                                     }
                                 }
@@ -897,7 +904,7 @@ namespace MSFileInfoScanner.Readers
                     {
                         if (runTimeMinutes > 24000)
                         {
-                            OnWarningEvent("Invalid runtime computed using the StartTime value from the first and last frames: " + runTimeMinutes);
+                            OnWarningEvent("Invalid runtime computed using the StartTime value from the first and last frames: {0}", runTimeMinutes);
                         }
                         else
                         {
@@ -914,7 +921,7 @@ namespace MSFileInfoScanner.Readers
                 }
                 catch (Exception ex)
                 {
-                    OnWarningEvent("Exception extracting acquisition time information: " + ex.Message);
+                    OnWarningEvent("Exception extracting acquisition time information: {0}", ex.Message);
                 }
 
                 if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFile || Options.SaveLCMS2DPlots)

@@ -168,7 +168,7 @@ namespace MSFileInfoScanner.Plotting
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error creating 3D plot with Python using " + exportFile.Name, ex);
+                OnErrorEvent(string.Format("Error creating 3D plot with Python using {0}", exportFile.Name), ex);
                 return false;
             }
         }

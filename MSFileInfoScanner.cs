@@ -598,11 +598,11 @@ namespace MSFileInfoScanner
 
                         if (openingExistingFile)
                         {
-                            OnStatusEvent("Appending to log file " + logFilePathToShow);
+                            OnStatusEvent("Appending to log file {0}", logFilePathToShow);
                         }
                         else
                         {
-                            OnStatusEvent("Creating log file " + logFilePathToShow);
+                            OnStatusEvent("Creating log file {0}", logFilePathToShow);
                         }
 
                         Console.WriteLine();
@@ -1045,8 +1045,9 @@ namespace MSFileInfoScanner
             }
             else if (SystemInfo.IsLinux)
             {
-                OnWarningEvent("Plotting with OxyPlot is not supported on Linux; " +
-                               "you should set PlotWithPython=True in the parameter file or use -PythonPlot at the command line");
+                OnWarningEvent(
+                    "Plotting with OxyPlot is not supported on Linux; " +
+                    "you should set PlotWithPython=True in the parameter file or use -PythonPlot at the command line");
             }
 
             if (Options.ShowDebugInfo)
@@ -1142,11 +1143,13 @@ namespace MSFileInfoScanner
                 {
                     if (scanner is GenericFileInfoScanner)
                     {
-                        OnWarningEvent("Spectra data and acquisition details were not loaded since the file was processed with the generic scanner: " + inputFileOrDirectoryPath);
+                        OnWarningEvent(
+                            "Spectra data and acquisition details were not loaded since the file was processed with the generic scanner: {0}",
+                            inputFileOrDirectoryPath);
                     }
                     else
                     {
-                        OnWarningEvent("Dataset has no spectra: " + inputFileOrDirectoryPath);
+                        OnWarningEvent("Dataset has no spectra: {0}", inputFileOrDirectoryPath);
                         SetErrorCode(MSFileScannerErrorCodes.DatasetHasNoSpectra);
                     }
                 }

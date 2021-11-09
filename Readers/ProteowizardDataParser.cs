@@ -491,15 +491,17 @@ namespace MSFileInfoScanner.Readers
                     // Attempted to read or write protected memory. This is often an indication that other memory is corrupt.
                     if (!mWarnedAccessViolationException)
                     {
-                        OnWarningEvent("Error loading chromatogram data with ProteoWizard: Attempted to read or write protected memory. " +
-                                       "The instrument data file is likely corrupt.");
+                        OnWarningEvent(
+                            "Error loading chromatogram data with ProteoWizard: Attempted to read or write protected memory. " +
+                            "The instrument data file is likely corrupt.");
+
                         mWarnedAccessViolationException = true;
                     }
                     mDatasetStatsSummarizer.CreateEmptyScanStatsFiles = false;
                 }
                 catch (Exception ex)
                 {
-                    OnErrorEvent("Error processing chromatogram " + chromatogramIndex + " with ProteoWizard: " + ex.Message, ex);
+                    OnErrorEvent(string.Format("Error processing chromatogram {0} with ProteoWizard: {1}", chromatogramIndex, ex.Message), ex);
                 }
             }
 
@@ -571,6 +573,7 @@ namespace MSFileInfoScanner.Readers
             {
                 Console.WriteLine();
                 OnStatusEvent("Obtaining scan times and MSLevels (this could take several minutes)");
+
                 mLastScanLoadingDebugProgressTime = DateTime.UtcNow;
                 mLastScanLoadingStatusProgressTime = DateTime.UtcNow;
                 mReportedTotalSpectraToExamine = false;
@@ -647,8 +650,10 @@ namespace MSFileInfoScanner.Readers
                 // Attempted to read or write protected memory. This is often an indication that other memory is corrupt.
                 if (!mWarnedAccessViolationException)
                 {
-                    OnWarningEvent("Error reading instrument data with ProteoWizard: Attempted to read or write protected memory. " +
-                                   "The instrument data file is likely corrupt.");
+                    OnWarningEvent(
+                        "Error reading instrument data with ProteoWizard: Attempted to read or write protected memory. " +
+                        "The instrument data file is likely corrupt.");
+
                     mWarnedAccessViolationException = true;
                 }
                 mDatasetStatsSummarizer.CreateEmptyScanStatsFiles = false;
@@ -656,7 +661,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error reading instrument data with ProteoWizard: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error reading instrument data with ProteoWizard: {0}", ex.Message), ex);
                 return false;
             }
         }
@@ -689,6 +694,7 @@ namespace MSFileInfoScanner.Readers
 
             Console.WriteLine();
             OnStatusEvent("Reading spectra");
+
             var lastDebugProgressTime = DateTime.UtcNow;
             var lastStatusProgressTime = DateTime.UtcNow;
 

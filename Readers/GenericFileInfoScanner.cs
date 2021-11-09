@@ -48,7 +48,7 @@ namespace MSFileInfoScanner.Readers
 
             if (!instrumentDataFile.Exists)
             {
-                OnErrorEvent("Instrument file not found: " + dataFilePath);
+                OnErrorEvent("Instrument file not found: {0}", dataFilePath);
                 return false;
             }
 

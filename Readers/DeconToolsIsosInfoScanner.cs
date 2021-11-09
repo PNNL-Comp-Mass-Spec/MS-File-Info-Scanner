@@ -130,7 +130,7 @@ namespace MSFileInfoScanner.Readers
 
             if (isosData.Count == 0)
             {
-                OnErrorEvent("No data found in the _isos.csv file: " + isosFile.FullName);
+                OnErrorEvent("No data found in the _isos.csv file: {0}", isosFile.FullName);
                 return;
             }
 
@@ -303,7 +303,7 @@ namespace MSFileInfoScanner.Readers
                 {
                     if (lastScanParseErrors > 0)
                     {
-                        OnWarningEvent("Warning: Skipped " + lastScanParseErrors + " data points in scan " + lastScan + " due to data conversion errors");
+                        OnWarningEvent("Warning: Skipped {0} data points in scan {1} due to data conversion errors", lastScanParseErrors, lastScan);
                     }
 
                     lastScan = currentScan;
@@ -454,7 +454,7 @@ namespace MSFileInfoScanner.Readers
                 }
                 catch (Exception ex)
                 {
-                    OnWarningEvent("Warning: Ignoring scan " + dataColumns[columnMapping["scan_num"]] + " since data conversion error: " + ex.Message);
+                    OnWarningEvent("Warning: Ignoring scan {0} since data conversion error: {1}", dataColumns[columnMapping["scan_num"]], ex.Message);
                 }
             }
 
@@ -498,7 +498,7 @@ namespace MSFileInfoScanner.Readers
 
             if (!isosFile.Exists)
             {
-                OnErrorEvent("_isos.csv file not found: " + dataFilePath);
+                OnErrorEvent("_isos.csv file not found: {0}", dataFilePath);
                 return false;
             }
 

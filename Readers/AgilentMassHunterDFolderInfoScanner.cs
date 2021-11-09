@@ -124,7 +124,7 @@ namespace MSFileInfoScanner.Readers
             catch (Exception ex)
             {
                 // Exception reading file
-                OnErrorEvent("Exception reading " + AGILENT_XML_CONTENTS_FILE + ": " + ex.Message, ex);
+                OnErrorEvent(string.Format("Exception reading {0}: {1}", AGILENT_XML_CONTENTS_FILE, ex.Message), ex);
                 success = false;
             }
 
@@ -207,7 +207,7 @@ namespace MSFileInfoScanner.Readers
             catch (Exception ex)
             {
                 // Exception reading file
-                OnErrorEvent("Exception reading " + AGILENT_TIME_SEGMENT_FILE + ": " + ex.Message, ex);
+                OnErrorEvent(string.Format("Exception reading {0}: {1}", AGILENT_TIME_SEGMENT_FILE, ex.Message), ex);
                 success = false;
             }
 
@@ -357,7 +357,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Exception parsing Agilent TOF .D directory: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Exception parsing Agilent TOF .D directory: {0}", ex.Message), ex);
                 success = false;
             }
 
@@ -623,7 +623,8 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Exception reading the Binary Data in the Agilent TOF .D directory using Agilent MassSpecDataReader: " + ex.Message, ex);
+                OnErrorEvent(string.Format(
+                    "Exception reading the Binary Data in the Agilent TOF .D directory using Agilent MassSpecDataReader: {0}", ex.Message), ex);
             }
         }
 

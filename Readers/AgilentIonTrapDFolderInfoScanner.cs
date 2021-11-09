@@ -153,7 +153,7 @@ namespace MSFileInfoScanner.Readers
             catch (Exception ex)
             {
                 // Run.log file not found
-                OnWarningEvent("Error in ParseRunLogFile: " + ex.Message);
+                OnWarningEvent("Error in ParseRunLogFile: {0}", ex.Message);
             }
         }
 
@@ -192,7 +192,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnWarningEvent("Error in ParseAnalysisCDFFile: " + ex.Message);
+                OnWarningEvent("Error in ParseAnalysisCDFFile: {0}", ex.Message);
             }
             finally
             {

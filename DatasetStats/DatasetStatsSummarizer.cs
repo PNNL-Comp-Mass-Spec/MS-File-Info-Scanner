@@ -1229,7 +1229,7 @@ namespace MSFileInfoScanner.DatasetStats
                     writeHeaders = true;
                 }
 
-                OnDebugEvent("Updating " + datasetStatsFilePath);
+                OnDebugEvent("Updating {0}", datasetStatsFilePath);
 
                 // Create or open the output file
                 using var writer = new StreamWriter(new FileStream(datasetStatsFilePath, FileMode.Append, FileAccess.Write, FileShare.Read));

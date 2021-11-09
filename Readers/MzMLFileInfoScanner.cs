@@ -56,7 +56,7 @@ namespace MSFileInfoScanner.Readers
 
             if (!dataFile.Exists)
             {
-                OnErrorEvent(".mzML file not found: " + dataFilePath);
+                OnErrorEvent(".mzML file not found: {0}", dataFilePath);
                 return false;
             }
 

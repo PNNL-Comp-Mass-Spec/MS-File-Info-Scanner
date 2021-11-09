@@ -194,8 +194,12 @@ namespace MSFileInfoScanner
                     ConsoleMsgUtils.ShowWarning(
                         "MSFileInfoScanner v2.x uses Key=Value parameter files\n" +
                         "{0} is an XML file\n" +
-                        "For example parameter files, see {1}",
-                        paramFile.Name, "https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/tree/master/docs");
+                        "For example parameter files, see {1}, including\n  {2},\n  {3}, and\n  {4}",
+                        paramFile.Name,
+                        "https://github.com/PNNL-Comp-Mass-Spec/MS-File-Info-Scanner/tree/master/docs",
+                        "MSFileInfoScanner_ProcessingOptions_AllPlots.txt",
+                        "MSFileInfoScanner_ProcessingOptions_AllPlots_ValidateTMT.txt",
+                        "MSFileInfoScanner_ProcessingOptions_NoPlots.txt");
                     ConsoleMsgUtils.ShowWarning("Aborting");
                     return true;
                 }

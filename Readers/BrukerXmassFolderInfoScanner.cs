@@ -193,7 +193,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error finding XMass method directory: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error finding XMass method directory: {0}", ex.Message), ex);
             }
         }
 
@@ -360,7 +360,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error finding AutoMS.txt file: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error finding AutoMS.txt file: {0}", ex.Message), ex);
             }
         }
 
@@ -392,7 +392,7 @@ namespace MSFileInfoScanner.Readers
                 // ReSharper disable once MergeIntoPattern
                 if (datasetFileOrDirectory is FileInfo bafFileInfo && bafFileInfo.Length > 1024 * 1024 * 1024)
                 {
-                    OnWarningEvent(string.Format("{0} file is over 1 GB; ProteoWizard typically cannot handle .baf files this large", bafFileInfo.Name));
+                    OnWarningEvent("{0} file is over 1 GB; ProteoWizard typically cannot handle .baf files this large", bafFileInfo.Name);
 
                     // Look for a ser file
                     if (bafFileInfo.Directory != null && File.Exists(Path.Combine(bafFileInfo.Directory.FullName, "ser")))
@@ -418,14 +418,14 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error using ProteoWizard reader: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error using ProteoWizard reader: {0}", ex.Message), ex);
 
                 // Note that the following exception is thrown for a corrupt .D directory
                 // Error using ProteoWizard reader: unknown compressor id: 6bb2e64a-27a0-4575-a66a-4e312c8b9ad7
                 if (ex.Message.IndexOf("6bb2e64a-27a0-4575-a66a-4e312c8b9ad7", StringComparison.OrdinalIgnoreCase) > 0)
                 {
                     // Most likely a corrupt analysis.baf file or a corrupt analysis.tdf file
-                    OnWarningEvent(string.Format("Most likely a corrupt {0} file", datasetFileOrDirectory.Name));
+                    OnWarningEvent("Most likely a corrupt {0} file", datasetFileOrDirectory.Name);
                 }
 
                 return false;
@@ -445,7 +445,7 @@ namespace MSFileInfoScanner.Readers
                 if (!metadataFile.Exists)
                 {
                     // Storage.mcf_idx not found
-                    OnWarningEvent("Note: " + BRUKER_SQLITE_INDEX_FILE_NAME + " file does not exist");
+                    OnWarningEvent("Note: {0} file does not exist", BRUKER_SQLITE_INDEX_FILE_NAME);
                     return false;
                 }
 
@@ -482,7 +482,7 @@ namespace MSFileInfoScanner.Readers
                 if (mcfIndexFiles.Count == 0)
                 {
                     // Storage.mcf_idx not found
-                    OnWarningEvent("Note: " + BRUKER_SQLITE_INDEX_FILE_NAME + " file was found but _1.mcf_idx file does not exist");
+                    OnWarningEvent("Note: {0} file was found but _1.mcf_idx file does not exist", BRUKER_SQLITE_INDEX_FILE_NAME);
                     return false;
                 }
 
@@ -583,7 +583,7 @@ namespace MSFileInfoScanner.Readers
             catch (Exception ex)
             {
                 // Error parsing Storage.mcf_idx file
-                OnErrorEvent("Error parsing " + BRUKER_SQLITE_INDEX_FILE_NAME + " file: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Error parsing {0} file: {1}", BRUKER_SQLITE_INDEX_FILE_NAME, ex.Message), ex);
                 return false;
             }
 
@@ -695,7 +695,7 @@ namespace MSFileInfoScanner.Readers
 
                                 if (scanElutionTimeMap.ContainsKey(scanNumber))
                                 {
-                                    OnWarningEvent(string.Format("Skipping duplicate scan number: {0}", scanNumber));
+                                    OnWarningEvent("Skipping duplicate scan number: {0}", scanNumber);
                                     duplicateScanCount++;
                                 }
                                 else
@@ -736,8 +736,8 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                // Error parsing the Scan.xml file
-                OnErrorEvent("Error parsing " + BRUKER_SCANINFO_XML_FILE + " file: " + ex.Message, ex);
+                // Error parsing Scan.xml file
+                OnErrorEvent(string.Format("Error parsing {0} file: {1}", BRUKER_SCANINFO_XML_FILE, ex.Message), ex);
                 return false;
             }
 
@@ -802,7 +802,7 @@ namespace MSFileInfoScanner.Readers
                 // Validate that we have selected a valid directory
                 if (!datasetDirectory.Exists)
                 {
-                    OnErrorEvent("File/directory not found: " + dataFilePath);
+                    OnErrorEvent("File/directory not found: {0}", dataFilePath);
                     return false;
                 }
 
@@ -881,10 +881,12 @@ namespace MSFileInfoScanner.Readers
 
                 if (matchedFiles.Count == 0)
                 {
-                    OnErrorEvent(
-                        string.Join(" or ", instrumentDataFiles) + " or " +
-                        BRUKER_MCF_FILE_EXTENSION + " or " +
-                        BRUKER_SQLITE_INDEX_EXTENSION + " file not found in " + datasetDirectory.FullName);
+                    OnErrorEvent("{0} or {1} or {2} file not found in {3}",
+                        string.Join(" or ", instrumentDataFiles),
+                        BRUKER_MCF_FILE_EXTENSION,
+                        BRUKER_SQLITE_INDEX_EXTENSION,
+                        datasetDirectory.FullName);
+
                     return false;
                 }
 
@@ -998,7 +1000,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Exception processing BAF data: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Exception processing BAF data: {0}", ex.Message), ex);
                 PostProcessTasks();
                 return false;
             }
@@ -1103,12 +1105,12 @@ namespace MSFileInfoScanner.Readers
                             }
 
                             // Treat this as a warning
-                            OnWarningEvent("Unable to retrieve scan " + scanNumber + " using the BrukerDataReader: " + ex.Message);
+                            OnWarningEvent("Unable to retrieve scan {0} using the BrukerDataReader: {1}", scanNumber, ex.Message);
                         }
                         else
                         {
                             // Treat this as an error
-                            OnErrorEvent("Error retrieving scan " + scanNumber + " using the BrukerDataReader: " + ex.Message);
+                            OnErrorEvent("Error retrieving scan {0} using the BrukerDataReader: {1}", scanNumber, ex.Message);
                         }
 
                         // Ignore this scan
@@ -1159,7 +1161,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Exception processing Bruker ser or fid file: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Exception processing Bruker ser or fid file: {0}", ex.Message), ex);
                 return false;
             }
         }

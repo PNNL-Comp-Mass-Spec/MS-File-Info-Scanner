@@ -168,7 +168,7 @@ namespace MSFileInfoScanner.Readers
             catch (Exception ex)
             {
                 // Exception reading file
-                OnErrorEvent("Exception reading " + AGILENT_ACQ_METHOD_FILE + ": " + ex.Message, ex);
+                OnErrorEvent(string.Format("Exception reading {0}: {1}", AGILENT_ACQ_METHOD_FILE, ex.Message), ex);
                 success = false;
             }
 
@@ -225,7 +225,7 @@ namespace MSFileInfoScanner.Readers
             catch (Exception ex)
             {
                 // Exception reading file
-                OnErrorEvent("Exception reading " + AGILENT_GC_INI_FILE + ": " + ex.Message, ex);
+                OnErrorEvent(string.Format("Exception reading {0}: {1}", AGILENT_GC_INI_FILE, ex.Message), ex);
                 success = false;
             }
 
@@ -271,7 +271,7 @@ namespace MSFileInfoScanner.Readers
                     }
                     catch (Exception ex)
                     {
-                        OnWarningEvent("Exception obtaining data from the MS file for spectrum index " + currentIndex + ": " + ex.Message);
+                        OnWarningEvent("Exception obtaining data from the MS file for spectrum index {0}: {1}", currentIndex, ex.Message);
                         validSpectrum = false;
                     }
 
@@ -328,7 +328,7 @@ namespace MSFileInfoScanner.Readers
             catch (Exception ex)
             {
                 // Exception reading file
-                OnWarningEvent("Exception reading data from the MS file at spectrum index " + currentIndex + ": " + ex.Message);
+                OnWarningEvent("Exception reading data from the MS file at spectrum index {0}: {1}", currentIndex, ex.Message);
                 success = false;
             }
 
@@ -470,7 +470,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Exception parsing GC .D directory: " + ex.Message, ex);
+                OnErrorEvent(string.Format("Exception parsing GC .D directory: {0}", ex.Message), ex);
                 success = false;
             }
 

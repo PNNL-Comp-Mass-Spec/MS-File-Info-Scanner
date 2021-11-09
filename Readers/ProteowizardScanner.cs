@@ -208,7 +208,7 @@ namespace MSFileInfoScanner.Readers
             {
                 if (ex.Message.StartsWith("unknown compressor id") && warnOnCompressorIdError)
                 {
-                    OnWarningEvent("Error in ProteoWizardScanner.ProcessFile: " + ex.Message);
+                    OnWarningEvent("Error in ProteoWizardScanner.ProcessFile: {0}", ex.Message);
                 }
                 else
                 {

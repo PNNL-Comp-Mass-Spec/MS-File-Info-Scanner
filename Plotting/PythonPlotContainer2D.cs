@@ -94,7 +94,7 @@ namespace MSFileInfoScanner.Plotting
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error creating 2D plot with Python using " + exportFile.Name, ex);
+                OnErrorEvent(string.Format("Error creating 2D plot with Python using {0}", exportFile.Name), ex);
                 return false;
             }
         }

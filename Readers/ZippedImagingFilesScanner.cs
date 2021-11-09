@@ -118,7 +118,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error in DetermineAcqStartEndTime: " + ex.Message);
+                OnErrorEvent("Error in DetermineAcqStartEndTime: {0}", ex.Message);
             }
         }
 
@@ -193,7 +193,7 @@ namespace MSFileInfoScanner.Readers
                 // Validate that we have selected a valid directory
                 if (!datasetDirectory.Exists)
                 {
-                    OnErrorEvent("File/directory not found: " + dataFilePath);
+                    OnErrorEvent("File/directory not found: {0}", dataFilePath);
                     return false;
                 }
 
@@ -208,7 +208,7 @@ namespace MSFileInfoScanner.Readers
                 if (zipFiles.Count == 0)
                 {
                     // 0_R*.zip files not found
-                    OnErrorEvent(ZIPPED_IMAGING_FILE_SEARCH_SPEC + "files not found in " + datasetDirectory.FullName);
+                    OnErrorEvent("{0} files not found in {1}", ZIPPED_IMAGING_FILE_SEARCH_SPEC, datasetDirectory.FullName);
                     return false;
                 }
 
@@ -268,7 +268,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Exception processing Zipped Imaging Files: " + ex.Message);
+                OnErrorEvent("Exception processing Zipped Imaging Files: {0}", ex.Message);
                 return false;
             }
         }

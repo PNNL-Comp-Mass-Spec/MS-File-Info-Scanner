@@ -357,7 +357,7 @@ namespace MSFileInfoScanner
 
             MSFileInfoScanner.ValidateDataFilePath(ref mDirectoryIntegrityInfoFilePath, iMSFileInfoScanner.DataFileTypeConstants.DirectoryIntegrityInfo);
 
-            OnDebugEvent("Loading cached directory integrity info from: " + Path.GetFileName(mDirectoryIntegrityInfoFilePath));
+            OnDebugEvent("Loading cached directory integrity info from: {0}", Path.GetFileName(mDirectoryIntegrityInfoFilePath));
 
             if (File.Exists(mDirectoryIntegrityInfoFilePath))
             {
@@ -421,7 +421,7 @@ namespace MSFileInfoScanner
 
             MSFileInfoScanner.ValidateDataFilePath(ref mAcquisitionTimeFilePath, iMSFileInfoScanner.DataFileTypeConstants.MSFileInfo);
 
-            OnDebugEvent("Loading cached acquisition time file data from: " + Path.GetFileName(mAcquisitionTimeFilePath));
+            OnDebugEvent("Loading cached acquisition time file data from: {0}", Path.GetFileName(mAcquisitionTimeFilePath));
 
             if (File.Exists(mAcquisitionTimeFilePath))
             {
@@ -570,7 +570,7 @@ namespace MSFileInfoScanner
                 return false;
             }
 
-            OnDebugEvent("Saving cached directory integrity info to: " + Path.GetFileName(mDirectoryIntegrityInfoFilePath));
+            OnDebugEvent("Saving cached directory integrity info to: {0}", Path.GetFileName(mDirectoryIntegrityInfoFilePath));
 
             try
             {
@@ -615,7 +615,7 @@ namespace MSFileInfoScanner
             if (mMSFileInfoDataset?.Tables[MS_FILE_INFO_DATA_TABLE].Rows.Count > 0 &&
                 mMSFileInfoCachedResultsState == CachedResultsStateConstants.Modified)
             {
-                OnDebugEvent("Saving cached acquisition time file data to: " + Path.GetFileName(mAcquisitionTimeFilePath));
+                OnDebugEvent("Saving cached acquisition time file data to: {0}", Path.GetFileName(mAcquisitionTimeFilePath));
 
                 try
                 {

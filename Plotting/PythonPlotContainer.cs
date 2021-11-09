@@ -110,7 +110,7 @@ namespace MSFileInfoScanner.Plotting
             if (pythonScriptFile == null)
             {
                 // Script not found in the directory with the executing assembly or in the other standard locations
-                OnErrorEvent("Python plotting script not found: " + Path.Combine(directoriesToCheck[0], PYTHON_PLOT_SCRIPT_NAME));
+                OnErrorEvent("Python plotting script not found: {0}", Path.Combine(directoriesToCheck[0], PYTHON_PLOT_SCRIPT_NAME));
                 return false;
             }
 
@@ -257,13 +257,13 @@ namespace MSFileInfoScanner.Plotting
                 return success;
             }
 
-            OnErrorEvent("Python ExitCode = " + programRunner.ExitCode);
+            OnErrorEvent("Python ExitCode = {0}", programRunner.ExitCode);
             return false;
         }
 
         protected void NotifyPythonNotFound(string currentTask)
         {
-            OnErrorEvent(currentTask + "; Python not found");
+            OnErrorEvent("{0}; Python not found", currentTask);
 
             var debugMsg = "Paths searched:";
             foreach (var item in PythonPathsToCheck())
@@ -297,7 +297,7 @@ namespace MSFileInfoScanner.Plotting
                 var pngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(workDir.FullName, Path.GetFileNameWithoutExtension(exportFile.Name) + ".png"));
                 if (!pngFile.Exists)
                 {
-                    OnErrorEvent("Plot file not found: " + pngFile.FullName);
+                    OnErrorEvent("Plot file not found: {0}", pngFile.FullName);
                     return false;
                 }
 
