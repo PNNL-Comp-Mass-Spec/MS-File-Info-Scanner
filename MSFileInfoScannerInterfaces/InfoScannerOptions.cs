@@ -51,7 +51,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         /// <remarks>This path can contain wildcard characters, e.g. C:\*.raw</remarks>
         [Option("InputFilePath", "InputDataFilePath", "I",
-            ArgPosition = 1, Required = true, HelpShowsDefault = false,
+            ArgPosition = 1, Required = true, HelpShowsDefault = false, IsInputFilePath = true,
             HelpText = "The name of a file or directory to process; the path can contain the wildcard character *\n" +
                        "Either define this at the command line using /I or in a parameter file")]
         public string InputDataFilePath { get; set; }
