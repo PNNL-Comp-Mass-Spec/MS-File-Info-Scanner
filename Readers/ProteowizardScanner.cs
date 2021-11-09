@@ -118,7 +118,7 @@ namespace MSFileInfoScanner.Readers
         {
             try
             {
-                var msDataFileReader = new pwiz.ProteowizardWrapper.MSDataFileReader(datasetFileOrDirectory.FullName);
+                var msDataFileReader = new MSDataFileReader(datasetFileOrDirectory.FullName);
 
                 try
                 {

@@ -167,9 +167,7 @@ namespace MSFileInfoScanner.Readers
                 try
                 {
                     attemptCount++;
-                    var spectrumCount = msDataFileReader.SpectrumCount;
-
-                    return spectrumCount;
+                    return msDataFileReader.SpectrumCount;
                 }
                 catch (Exception ex)
                 {
