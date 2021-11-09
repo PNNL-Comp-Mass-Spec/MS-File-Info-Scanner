@@ -1068,9 +1068,7 @@ namespace MSFileInfoScanner.Readers
                         // See, for example, scan.xml for dataset 20190319_WK_SRFA_0pt1m_000002
 
                         var scanText = duplicateScanCount == 1 ? "scan" : "scans";
-                        OnDebugEvent(string.Format(
-                                         "{0}; the mismatch can be attributed to the {1} duplicate {2}",
-                                         mismatchMessage, duplicateScanCount, scanText));
+                        OnDebugEvent("{0}; the mismatch can be attributed to the {1} duplicate {2}", mismatchMessage, duplicateScanCount, scanText);
                     }
                     else
                     {

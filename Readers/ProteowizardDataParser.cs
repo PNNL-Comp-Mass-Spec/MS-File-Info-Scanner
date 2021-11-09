@@ -173,7 +173,7 @@ namespace MSFileInfoScanner.Readers
                 }
                 catch (Exception ex)
                 {
-                    OnDebugEvent(string.Format("Attempt {0} to retrieve .SpectrumCount failed: {1}", attemptCount, ex.Message));
+                    OnDebugEvent("Attempt {0} to retrieve .SpectrumCount failed: {1}", attemptCount, ex.Message);
                     Thread.Sleep(50 + attemptCount * 250);
                 }
             }
@@ -202,7 +202,7 @@ namespace MSFileInfoScanner.Readers
 
             if (!mReportedTotalSpectraToExamine)
             {
-                OnStatusEvent(string.Format(" ... {0:N0} total spectra to examine", totalScans));
+                OnStatusEvent(" ... {0:N0} total spectra to examine", totalScans);
                 mReportedTotalSpectraToExamine = true;
             }
 
@@ -210,7 +210,7 @@ namespace MSFileInfoScanner.Readers
 
             if (DateTime.UtcNow.Subtract(mLastScanLoadingStatusProgressTime).TotalMinutes > 5)
             {
-                OnStatusEvent(string.Format("Obtaining scan times and MSLevels, examined {0:N0} / {1:N0} spectra", scansLoaded, totalScans));
+                OnStatusEvent("Obtaining scan times and MSLevels, examined {0:N0} / {1:N0} spectra", scansLoaded, totalScans);
                 mLastScanLoadingStatusProgressTime = DateTime.UtcNow;
                 return;
             }
@@ -625,7 +625,7 @@ namespace MSFileInfoScanner.Readers
                         const string baseMessage = "Exception calling mMSDataFileReader.GetScanTimesAndMsLevels";
                         var alternateMethodFlag = useAlternateMethod ? " (useAlternateMethod = true)" : string.Empty;
 
-                        OnWarningEvent(string.Format("{0}{1}: {2}", baseMessage, alternateMethodFlag, ex.Message));
+                        OnWarningEvent("{0}{1}: {2}", baseMessage, alternateMethodFlag, ex.Message);
                         attemptNumber++;
 
                         if (attemptNumber > 2)
@@ -700,14 +700,15 @@ namespace MSFileInfoScanner.Readers
 
                 if (DateTime.UtcNow.Subtract(lastStatusProgressTime).TotalMinutes > 5)
                 {
-                    OnStatusEvent(string.Format("Reading spectra, loaded {0:N0} / {1:N0} spectra; " +
-                                                "{2:N0} HMS spectra; {3:N0} HMSn spectra; " +
-                                                "{4:N0} MS spectra; {5:N0} MSn spectra; " +
-                                                "max elution time is {6:F2} minutes",
+                    OnStatusEvent(
+                        "Reading spectra, loaded {0:N0} / {1:N0} spectra; " +
+                        "{2:N0} HMS spectra; {3:N0} HMSn spectra; " +
+                        "{4:N0} MS spectra; {5:N0} MSn spectra; " +
+                        "max elution time is {6:F2} minutes",
                         scanNumber, spectrumCount,
                         parserInfo.ScanCountHMS, parserInfo.ScanCountHMSn,
                         parserInfo.ScanCountMS, parserInfo.ScanCountMSn,
-                        parserInfo.RuntimeMinutes));
+                        parserInfo.RuntimeMinutes);
 
                     lastStatusProgressTime = DateTime.UtcNow;
                     lastDebugProgressTime = DateTime.UtcNow;
@@ -813,10 +814,9 @@ namespace MSFileInfoScanner.Readers
 
                         if (mScanTimeMismatchCount <= 10)
                         {
-                            OnWarningEvent(string.Format(
+                            OnWarningEvent(
                                 "For scan {0}, the scanStartTime reported by GetScanMetadata does not agree with " +
-                                "the scanTimes array; {1:F4} vs. {2:F4}",
-                                scanNumber, scanStartTime, scanTimeMinutes));
+                                "the scanTimes array; {1:F4} vs. {2:F4}", scanNumber, scanStartTime, scanTimeMinutes);
                         }
                     }
                 }
@@ -965,7 +965,7 @@ namespace MSFileInfoScanner.Readers
 
                         if (ShowPeriodicMessageNow(parserInfo.SkippedEmptyScans))
                         {
-                            OnDebugEvent(string.Format("Skipping scan {0:N0} since no ions; {1:N0} total skipped scans", scanNumber, parserInfo.SkippedEmptyScans));
+                            OnDebugEvent("Skipping scan {0:N0} since no ions; {1:N0} total skipped scans", scanNumber, parserInfo.SkippedEmptyScans);
                         }
                     }
                     else
@@ -1004,7 +1004,8 @@ namespace MSFileInfoScanner.Readers
 
                 if (ShowPeriodicMessageNow(parserInfo.ScanCountError))
                 {
-                    OnWarningEvent(string.Format("Error loading header info for scan {0}: {1}", scanNumber, ex.Message));
+                    OnWarningEvent("Error loading header info for scan {0}: {1}", scanNumber, ex.Message);
+
                     if (parserInfo.ScanCountSuccess > 0)
                     {
                         var statusMessage = string.Format("{0} / {1} scans loaded successfully",

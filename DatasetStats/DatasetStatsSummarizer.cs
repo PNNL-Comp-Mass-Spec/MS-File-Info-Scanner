@@ -143,10 +143,10 @@ namespace MSFileInfoScanner.DatasetStats
             // Adjust the scan counts in summaryStats.ScanTypeStats using the counts in
             // ScanCountMS, ScanCountHMS, ScanCountMSn, and ScanCountHMSn
 
-            OnWarningEvent(string.Format(
-                               "This dataset has a large number of missing spectra; detailed scan info was stored for {0:N0} of the {1:N0} total spectra. " +
-                               "Will now extrapolate the scan counts based on the stored data.",
-                               totalScansInSummaryStats, ScanCountMS + ScanCountHMS + ScanCountMSn + ScanCountHMSn));
+            OnWarningEvent(
+                "This dataset has a large number of missing spectra; detailed scan info was stored for {0:N0} of the {1:N0} total spectra. " +
+                "Will now extrapolate the scan counts based on the stored data.",
+                totalScansInSummaryStats, ScanCountMS + ScanCountHMS + ScanCountMSn + ScanCountHMSn);
 
             // Determine the total scans for each basic scan type
             var scanCountsByBasicScanType = new Dictionary<string, int>();
@@ -206,15 +206,11 @@ namespace MSFileInfoScanner.DatasetStats
 
                 if (string.IsNullOrWhiteSpace(scanTypeFilter))
                 {
-                    OnStatusEvent(string.Format(
-                                      "Adjusted the scan count for {0} from {1:N0} to {2:N0}",
-                                      scanType, storedScanCount, updatedScanCountInt));
+                    OnStatusEvent("Adjusted the scan count for {0} from {1:N0} to {2:N0}", scanType, storedScanCount, updatedScanCountInt);
                 }
                 else
                 {
-                    OnStatusEvent(string.Format(
-                                      "Adjusted the scan count for {0} ({1}) from {2:N0} to {3:N0}",
-                                      scanType, scanTypeFilter, storedScanCount, updatedScanCountInt));
+                    OnStatusEvent("Adjusted the scan count for {0} ({1}) from {2:N0} to {3:N0}", scanType, scanTypeFilter, storedScanCount, updatedScanCountInt);
                 }
             }
 

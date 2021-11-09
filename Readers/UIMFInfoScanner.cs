@@ -74,9 +74,7 @@ namespace MSFileInfoScanner.Readers
                 {
                     if (!masterFrameList.TryGetValue(frameNumber, out var frameType))
                     {
-                        OnWarningEvent(string.Format(
-                            "FrameType {0} not found in dictionary masterFrameList; ignoring frame {1} in ComputeQualityScores",
-                            frameType, frameNumber));
+                        OnWarningEvent("FrameType {0} not found in dictionary masterFrameList; ignoring frame {1} in ComputeQualityScores", frameType, frameNumber);
 
                         continue;
                     }
@@ -302,9 +300,7 @@ namespace MSFileInfoScanner.Readers
 
                 if (!masterFrameList.TryGetValue(frameNumber, out var frameType))
                 {
-                    OnWarningEvent(string.Format(
-                        "FrameType {0} not found in dictionary masterFrameList; ignoring frame {1} in LoadFrameDetails",
-                        frameType, frameNumber));
+                    OnWarningEvent("FrameType {0} not found in dictionary masterFrameList; ignoring frame {1} in LoadFrameDetails", frameType, frameNumber);
 
                     continue;
                 }

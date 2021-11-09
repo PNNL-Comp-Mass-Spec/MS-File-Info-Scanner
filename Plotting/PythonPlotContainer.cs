@@ -198,7 +198,7 @@ namespace MSFileInfoScanner.Plotting
 
             var args = PathUtils.PossiblyQuotePath(ScriptPath) + " " + PathUtils.PossiblyQuotePath(exportFile.FullName);
 
-            OnDebugEvent(string.Format("{0} {1}", PythonPath, args));
+            OnDebugEvent("{0} {1}", PythonPath, args);
 
             var programRunner = new ProgRunner
             {
@@ -233,7 +233,7 @@ namespace MSFileInfoScanner.Plotting
                     if (DateTime.UtcNow.Subtract(startTime).TotalSeconds < MAX_RUNTIME_SECONDS)
                         continue;
 
-                    OnErrorEvent(string.Format("Plot creation with Python has taken more than {0:F0} minutes; aborting", MAX_RUNTIME_SECONDS / 60.0));
+                    OnErrorEvent("Plot creation with Python has taken more than {0:F0} minutes; aborting", MAX_RUNTIME_SECONDS / 60.0);
                     programRunner.StopMonitoringProgram(kill: true);
 
                     runtimeExceeded = true;
