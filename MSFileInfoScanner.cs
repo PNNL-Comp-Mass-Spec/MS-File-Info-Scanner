@@ -2263,12 +2263,21 @@ namespace MSFileInfoScanner
             bool allowLogToFile = true,
             MessageTypeConstants messageType = MessageTypeConstants.Normal)
         {
-            if (messageType == MessageTypeConstants.Debug)
-                OnDebugEvent(message);
-            if (messageType == MessageTypeConstants.Warning)
-                OnWarningEvent(message);
-            else
-                OnStatusEvent(message);
+            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+            switch (messageType)
+            {
+                case MessageTypeConstants.Debug:
+                    OnDebugEvent(message);
+                    break;
+
+                case MessageTypeConstants.Warning:
+                    OnWarningEvent(message);
+                    break;
+
+                default:
+                    OnStatusEvent(message);
+                    break;
+            }
 
             if (allowLogToFile)
             {
