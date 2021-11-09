@@ -939,43 +939,30 @@ namespace MSFileInfoScanner.Readers
         // ReSharper disable once RedundantNameQualifier
         private string GetUnitLabel(Agilent.MassSpectrometry.DataAnalysis.DataUnit dataUnit)
         {
-            switch (dataUnit)
+            return dataUnit switch
             {
-                case DataUnit.Minutes:
-                    return "min";
-                case DataUnit.Seconds:
-                    return "sec";
-                case DataUnit.Milliseconds:
-                    return "ms";
-                case DataUnit.Microseconds:
-                    return "μs";
-                case DataUnit.Nanoseconds:
-                    return "ns";
-                case DataUnit.ResponseUnits:
-                    return "";
-            }
-
-            return dataUnit.ToString();
+                DataUnit.Minutes => "min",
+                DataUnit.Seconds => "sec",
+                DataUnit.Milliseconds => "ms",
+                DataUnit.Microseconds => "μs",
+                DataUnit.Nanoseconds => "ns",
+                DataUnit.ResponseUnits => "",
+                _ => dataUnit.ToString()
+            };
         }
 
         // ReSharper disable once RedundantNameQualifier
         private string GetLabel(Agilent.MassSpectrometry.DataAnalysis.DataValueType dataValueType)
         {
-            switch (dataValueType)
+            return dataValueType switch
             {
-                case DataValueType.AcqTime:
-                    return "Acquisition Time";
-                case DataValueType.ScanNumber:
-                    return "Scan Number";
-                case DataValueType.MassToCharge:
-                    return "m/z";
-                case DataValueType.IonAbundance:
-                    return "Abundance";
-                case DataValueType.Ordinate:
-                    return "";
-            }
-
-            return dataValueType.ToString();
+                DataValueType.AcqTime => "Acquisition Time",
+                DataValueType.ScanNumber => "Scan Number",
+                DataValueType.MassToCharge => "m/z",
+                DataValueType.IonAbundance => "Abundance",
+                DataValueType.Ordinate => "",
+                _ => dataValueType.ToString()
+            };
         }
 
         private void AddChromatogram(IBDAChromData chromatogram, double[] scanMapper, IReadOnlyList<ScanStatsEntry> scanStats)
