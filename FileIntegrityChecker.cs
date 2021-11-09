@@ -1235,9 +1235,13 @@ namespace MSFileInfoScanner
 
             if (fileNameLower.EndsWith("_isos.csv"))
             {
+                // ReSharper disable CommentTypo
+
                 // scan_num,charge,abundance,mz,fit,average_mw,monoisotopic_mw,mostabundant_mw,fwhm,signal_noise,mono_abundance,mono_plus2_abundance
                 headerRequired = "scan_num";
                 minimumCommaCount = 10;
+
+                // ReSharper restore CommentTypo
             }
             else if (fileNameLower.EndsWith("_scans.csv"))
             {
@@ -2017,11 +2021,15 @@ namespace MSFileInfoScanner
             FileIntegrityFailure?.Invoke(filePath, errorMessage);
         }
 
+        /// <summary>
+        /// Calculates the MD5 hash of a given file
+        /// Code from Tim Hastings, at http://www.nonhostile.com/page000017.asp
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        // ReSharper disable once UnusedMember.Global
         public string MD5CalcFile(string path)
         {
-            // Calculates the MD5 hash of a given file
-            // Code from Tim Hastings, at http://www.nonhostile.com/page000017.asp
-
             var md5Hasher = new System.Security.Cryptography.MD5CryptoServiceProvider();
 
             using var reader = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -2033,10 +2041,13 @@ namespace MSFileInfoScanner
             return ByteArrayToString(arrHash);
         }
 
+        /// <summary>
+        /// Calculates the SHA-1 hash of a given file
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public string Sha1CalcFile(string path)
         {
-            // Calculates the SHA-1 hash of a given file
-
             var sha1Hasher = new System.Security.Cryptography.SHA1CryptoServiceProvider();
 
             using var reader = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
