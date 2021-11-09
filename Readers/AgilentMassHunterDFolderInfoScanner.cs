@@ -384,7 +384,7 @@ namespace MSFileInfoScanner.Readers
                     AddInstrumentSpecificPlot("Drift tube Pressure");
 
                     // Track drift tube pressures using mTIC in pressurePlot
-                    pressurePlot = mInstrumentSpecificPlots.First();
+                    pressurePlot = mInstrumentSpecificPlots[0];
                     pressurePlot.DeviceType = Device.Analog;
 
                     pressurePlot.BPIXAxisLabel = "Frame number";
@@ -448,8 +448,10 @@ namespace MSFileInfoScanner.Readers
                         var document = new XmlDocument();
                         document.Load(Path.Combine(dataDirectoryPath, AGILENT_ACQDATA_FOLDER_NAME, AGILENT_IMS_FRAME_METHOD_FILE));
                         var manager = new XmlNamespaceManager(document.NameTable);
-                        var query = "FrameMethods/FrameMethod/FrameDtPeriod";
-                        var query2 = "FrameMethods/FrameMethod/MaxMsPerFrame";
+
+                        const string query = "FrameMethods/FrameMethod/FrameDtPeriod";
+                        const string query2 = "FrameMethods/FrameMethod/MaxMsPerFrame";
+
                         var dtPeriodString = document.SelectNodes(query, manager)?[0].InnerText;
                         var maxMsString = document.SelectNodes(query2, manager)?[0].InnerText;
 
@@ -638,8 +640,9 @@ namespace MSFileInfoScanner.Readers
             //var format = string.Join("\t", Enumerable.Range(0, columns.Count).Select(x => $"{{{x}}}"));
             //Console.WriteLine(format, columns.Select(x => (object) x.ColumnName).ToArray());
 
-            var dataTypeCol = columns.FirstOrDefault(x => x.ColumnName.Equals("StoredDataType", StringComparison.OrdinalIgnoreCase));
-            var deviceIdCol = columns.FirstOrDefault(x => x.ColumnName.Equals("DeviceID", StringComparison.OrdinalIgnoreCase));
+            var dataTypeCol = columns.Find(x => x.ColumnName.Equals("StoredDataType", StringComparison.OrdinalIgnoreCase));
+            var deviceIdCol = columns.Find(x => x.ColumnName.Equals("DeviceID", StringComparison.OrdinalIgnoreCase));
+
             if (dataTypeCol == null || deviceIdCol == null)
             {
                 // Necessary column missing?
@@ -650,6 +653,7 @@ namespace MSFileInfoScanner.Readers
             {
                 var storedDataType = (StoredDataType)deviceData[dataTypeCol]; // flags
                 var diDeviceType = Device.Other;
+
                 if (storedDataType.HasFlag(StoredDataType.MassSpectra))
                     diDeviceType = Device.MS;
                 else if (storedDataType.HasFlag(StoredDataType.Spectra))
