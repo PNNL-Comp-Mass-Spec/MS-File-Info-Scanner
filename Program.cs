@@ -39,25 +39,26 @@ namespace MSFileInfoScanner
         {
             var exeName = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name;
             var exePath = PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppPath();
-            var cmdLineParser = new CommandLineParser<InfoScannerOptions>(exeName, GetAppVersion());
+
+            var parser = new CommandLineParser<InfoScannerOptions>(exeName, GetAppVersion());
 
             var scannerInfo = new MSFileInfoScanner();
-            cmdLineParser.ProgramInfo = "This program will scan a series of MS data files (or data directories) and " +
-                                        "extract the acquisition start and end times, number of spectra, and the " +
-                                        "total size of the data, saving the values in the file " +
-                                        MSFileInfoScanner.DefaultAcquisitionTimeFilename + ". " +
-                                        "Supported file types are Thermo .RAW files, Agilent Ion Trap (.D directories), " +
-                                        "Agilent or QStar/QTrap .WIFF files, MassLynx .Raw directories, Bruker 1 directories, " +
-                                        "Bruker XMass analysis.baf files, .UIMF files (IMS), " +
-                                        "zipped Bruker imaging datasets (with 0_R*.zip files), and " +
-                                        "DeconTools _isos.csv files" + Environment.NewLine + Environment.NewLine +
-                                        "Known file extensions: " + CollapseList(scannerInfo.GetKnownFileExtensionsList()) + Environment.NewLine +
-                                        "Known directory extensions: " + CollapseList(scannerInfo.GetKnownDirectoryExtensionsList());
-            cmdLineParser.ContactInfo = "Program written by Matthew Monroe for PNNL (Richland, WA) in 2005" + Environment.NewLine +
-                                        "E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov" + Environment.NewLine +
-                                        "Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics";
+            parser.ProgramInfo = "This program will scan a series of MS data files (or data directories) and " +
+                                 "extract the acquisition start and end times, number of spectra, and the " +
+                                 "total size of the data, saving the values in the file " +
+                                 MSFileInfoScanner.DefaultAcquisitionTimeFilename + ". " +
+                                 "Supported file types are Thermo .RAW files, Agilent Ion Trap (.D directories), " +
+                                 "Agilent or QStar/QTrap .WIFF files, MassLynx .Raw directories, Bruker 1 directories, " +
+                                 "Bruker XMass analysis.baf files, .UIMF files (IMS), " +
+                                 "zipped Bruker imaging datasets (with 0_R*.zip files), and " +
+                                 "DeconTools _isos.csv files" + Environment.NewLine + Environment.NewLine +
+                                 "Known file extensions: " + CollapseList(scannerInfo.GetKnownFileExtensionsList()) + Environment.NewLine +
+                                 "Known directory extensions: " + CollapseList(scannerInfo.GetKnownDirectoryExtensionsList());
+            parser.ContactInfo = "Program written by Matthew Monroe for PNNL (Richland, WA)" + Environment.NewLine +
+                                 "E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov" + Environment.NewLine +
+                                 "Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics";
 
-            cmdLineParser.UsageExamples.Add("Program syntax:" + Environment.NewLine + Path.GetFileName(exePath) + "\n" +
+            parser.UsageExamples.Add("Program syntax:" + Environment.NewLine + Path.GetFileName(exePath) + "\n" +
                                             " /I:InputFileNameOrDirectoryPath [/O:OutputDirectoryPath]\n" +
                                             " [/P:ParameterFilePath] [/S[:MaxLevel]]\n" +
                                             " [/IE] [/L:LogFilePath]\n" +
@@ -73,13 +74,19 @@ namespace MSFileInfoScanner
 
             // The default argument name for parameter files is /ParamFile or -ParamFile
             // Also allow /Conf or /P
-            cmdLineParser.AddParamFileKey("Conf");
-            cmdLineParser.AddParamFileKey("P");
+            parser.AddParamFileKey("Conf");
+            parser.AddParamFileKey("P");
 
-            var result = cmdLineParser.ParseArgs(args);
+            var result = parser.ParseArgs(args);
             var options = result.ParsedResults;
+
             if (!result.Success || !options.Validate())
             {
+                if (parser.CreateParamFileProvided)
+                {
+                    return 0;
+                }
+
                 // Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
                 System.Threading.Thread.Sleep(750);
                 return -1;
@@ -89,7 +96,7 @@ namespace MSFileInfoScanner
 
             try
             {
-                if (InvalidParameterFile(cmdLineParser.ParameterFilePath))
+                if (InvalidParameterFile(parser.ParameterFilePath))
                     return -1;
 
                 var scanner = new MSFileInfoScanner(options);
