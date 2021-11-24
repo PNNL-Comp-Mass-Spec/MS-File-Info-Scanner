@@ -108,8 +108,10 @@ namespace MSFileInfoScannerInterfaces
 
         [Option("LogFilePath", "LogFile", "Log", "L",
             ArgExistsProperty = nameof(LogMessagesToFile), HelpShowsDefault = false,
-            HelpText = "Log messages to a file. Optionally provide a file path, " +
-                       "otherwise the log file name will be auto-defined using the current date")]
+            HelpText = "Log file path.\n" +
+                       "Use /L at the command line to log messages to a file whose name is auto-defined using the current date, " +
+                       "or use /L:LogFileName.txt to specify the name.\n" +
+                       "In a Key=Value parameter file, define a file name or path to enable logging to a file.")]
         public string LogFilePath { get; set; }
 
         [Option("LogDirectoryPath", "LogDirectory", "LogDir",
