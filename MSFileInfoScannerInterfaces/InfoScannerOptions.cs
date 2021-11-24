@@ -97,30 +97,25 @@ namespace MSFileInfoScannerInterfaces
             HelpText = "Ignore errors when recursing")]
         public bool IgnoreErrorsWhenRecursing { get; set; }
 
-        private string mLogFilePath;
-
-        [Option("LogFilePath", "LogFile", "L", HelpShowsDefault = false,
-            HelpText = "File path for logging messages")]
-        public string LogFilePath
-        {
-            get => mLogFilePath;
-            set
-            {
-                mLogFilePath = value;
-                LogMessagesToFile = !string.IsNullOrWhiteSpace(mLogFilePath);
-            }
-        }
-
-        [Option("LogDirectoryPath", HelpShowsDefault = false,
-            HelpText = "Directory to create log files")]
-        public string LogDirectoryPath { get; set; }
-
-        [Option("LogMessagesToFile",
-            HelpShowsDefault = false, SecondaryArg = true,
-            HelpText = "Set to true to log messages to a file\n" +
-                       "If LogFilePath is empty, the log file name will be auto-defined using the current date\n" +
-                       "If LogFilePath has a filename, LogMessagesToFile will be auto-set to true")]
+        /// <summary>
+        /// When true, create a log file
+        /// </summary>
+        /// <remarks>
+        /// This is auto-set to true if /L or /LogDir is used at the command line, or if
+        /// LogfilePath or LogDirectory have a name defined in a parameter file
+        /// </remarks>
         public bool LogMessagesToFile { get; set; }
+
+        [Option("LogFilePath", "LogFile", "Log", "L",
+            ArgExistsProperty = nameof(LogMessagesToFile), HelpShowsDefault = false,
+            HelpText = "Log messages to a file. Optionally provide a file path, " +
+                       "otherwise the log file name will be auto-defined using the current date")]
+        public string LogFilePath { get; set; }
+
+        [Option("LogDirectoryPath", "LogDirectory", "LogDir",
+            ArgExistsProperty = nameof(LogMessagesToFile), HelpShowsDefault = false,
+            HelpText = "The directory where the log file should be written")]
+        public string LogDirectoryPath { get; set; }
 
         /// <summary>
         /// m/z resolution when centroiding data for LC/MS 2D plots
@@ -458,7 +453,7 @@ namespace MSFileInfoScannerInterfaces
             InputDataFilePath = string.Empty;
             OutputDirectoryPath = string.Empty;
             ParameterFilePath = string.Empty;
-            mLogFilePath = string.Empty;
+            LogFilePath = string.Empty;
 
             RecurseDirectories = false;
 
