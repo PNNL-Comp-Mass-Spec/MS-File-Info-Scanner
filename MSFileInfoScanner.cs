@@ -536,9 +536,18 @@ namespace MSFileInfoScanner
 
             if (mLogFile == null && Options.LogMessagesToFile)
             {
+                if (Options.LogFilePath != null && Options.LogFilePath.Equals("False", StringComparison.OrdinalIgnoreCase))
+                {
+                    Options.LogMessagesToFile = false;
+                    Options.LogFilePath = string.Empty;
+                    return;
+                }
+
                 try
                 {
-                    if (string.IsNullOrEmpty(Options.LogFilePath))
+                    if (string.IsNullOrEmpty(Options.LogFilePath) ||
+                        Options.LogFilePath.Equals("True", StringComparison.OrdinalIgnoreCase) ||
+                        Options.LogFilePath.Equals("."))
                     {
                         // Auto-name the log file
                         mLogFilePath = Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location);
