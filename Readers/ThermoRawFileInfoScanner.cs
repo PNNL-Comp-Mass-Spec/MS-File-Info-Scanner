@@ -187,6 +187,7 @@ namespace MSFileInfoScanner.Readers
             }
 
             var lastProgressTime = DateTime.UtcNow;
+            var startTime = DateTime.UtcNow;
 
             // Note that this starts at 2 seconds, but is extended after each progress message is shown (maxing out at 30 seconds)
             var progressThresholdSeconds = 2;
@@ -306,7 +307,16 @@ namespace MSFileInfoScanner.Readers
                     progressThresholdSeconds += 2;
 
                 var percentComplete = scansProcessed / (float)totalScansToProcess * 100;
-                OnProgressUpdate(string.Format("Spectra processed: {0:N0}", scansProcessed), percentComplete);
+
+                var elapsedSeconds = DateTime.UtcNow.Subtract(startTime).Seconds;
+
+                int scansPerMinute;
+                if (elapsedSeconds > 2)
+                    scansPerMinute = (int)Math.Round(scansProcessed / (double)elapsedSeconds, 0);
+                else
+                    scansPerMinute = 0;
+
+                OnProgressUpdate(string.Format("Spectra processed: {0:N0} ({1:N0} scans/second)", scansProcessed, scansPerMinute), percentComplete);
             }
 
             Console.WriteLine();
