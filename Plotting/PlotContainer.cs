@@ -155,8 +155,7 @@ namespace MSFileInfoScanner.Plotting
 
                 if (!matchFound)
                 {
-                    var success = SaveToFile(imageFile, fileFormat, width, height, resolution);
-                    return success;
+                    return SaveToFile(imageFile, fileFormat, width, height, resolution);
                 }
             }
 
@@ -350,8 +349,7 @@ namespace MSFileInfoScanner.Plotting
         // ReSharper disable once UnusedMember.Local
         private double PointSizeToEm(int fontSizePoints)
         {
-            var fontSizeEm = fontSizePoints / 12;
-            return fontSizeEm;
+            return fontSizePoints / 12.0;
         }
 
         // ReSharper disable once UnusedMember.Local
