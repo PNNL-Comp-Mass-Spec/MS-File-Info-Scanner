@@ -171,7 +171,7 @@ namespace MSFileInfoScanner.Plotting
             Console.WriteLine("Saving " + Path.GetFileName(imageFile.FullName));
 
             // Note that this operation can be slow if there are over 100,000 data points
-            var plotBitmap = ExportToBitMap(Plot, width, height, OxyColors.White, resolution);
+            var plotBitmap = ExportToBitMap(Plot, width, height, resolution);
 
             var drawVisual = new DrawingVisual();
             using (var drawContext = drawVisual.RenderOpen())
@@ -319,13 +319,12 @@ namespace MSFileInfoScanner.Plotting
             drawContext.DrawText(newText, position);
         }
 
-        private BitmapSource ExportToBitMap(IPlotModel plot, int width, int height, OxyColor background, int resolution)
+        private BitmapSource ExportToBitMap(IPlotModel plot, int width, int height, int resolution)
         {
             var exporter = new PngExporter
             {
                 Width = width,
                 Height = height,
-                Background = background,
                 Resolution = resolution
             };
 
