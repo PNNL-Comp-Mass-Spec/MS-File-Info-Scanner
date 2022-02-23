@@ -14,12 +14,12 @@ namespace MSFileInfoScanner.MassLynxData
         public short ProcessNumber {get; set; }
 
         /// <summary>
-        /// Starting elution time
+        /// Starting elution time, in minutes
         /// </summary>
         public float StartRT {get; set; }
 
         /// <summary>
-        /// Ending elution time
+        /// Ending elution time, in minutes
         /// </summary>
         public float EndRT {get; set; }
 
