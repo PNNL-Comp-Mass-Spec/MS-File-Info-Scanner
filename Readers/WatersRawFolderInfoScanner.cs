@@ -186,7 +186,13 @@ namespace MSFileInfoScanner.Readers
                     if (nativeFileIO.GetFunctionInfo(datasetDirectory.FullName, 1, out MassLynxData.MSFunctionInfo functionInfo))
                     {
                         datasetFileInfo.ScanCount += functionInfo.ScanCount;
-                        if (functionInfo.EndRT > endRT)
+
+                        // ReSharper disable once CommentTypo
+                        // Synapt dataset 20191218_DV_Nglycan_P28_enzyme reports 1E+07 for functionInfo.EndRT (acquisition length)
+
+                        // Only update endRT if the acquisition length is less than 7 days
+
+                        if (functionInfo.EndRT > endRT && MinutesToTimeSpan(functionInfo.EndRT).TotalDays < 7)
                         {
                             endRT = functionInfo.EndRT;
                         }
