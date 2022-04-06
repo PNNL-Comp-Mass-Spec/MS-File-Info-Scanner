@@ -360,4 +360,3 @@ namespace MSFileInfoScanner.Plotting
         }
     }
 }
-

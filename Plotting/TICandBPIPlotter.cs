@@ -794,4 +794,3 @@ namespace MSFileInfoScanner.Plotting
         }
     }
 }
-

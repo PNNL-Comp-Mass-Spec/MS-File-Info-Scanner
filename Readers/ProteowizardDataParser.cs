@@ -1152,4 +1152,3 @@ namespace MSFileInfoScanner.Readers
         }
     }
 }
-
