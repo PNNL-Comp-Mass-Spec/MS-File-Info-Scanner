@@ -6,6 +6,8 @@ namespace MSFileInfoScanner.MassLynxData
     /// </summary>
     internal class RawFunctionDescriptorRecord
     {
+        // Ignore Spelling: Dly
+
         /// <summary>
         /// Total record size, in bytes
         /// </summary>

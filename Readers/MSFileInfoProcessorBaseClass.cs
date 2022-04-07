@@ -804,7 +804,7 @@ namespace MSFileInfoScanner.Readers
         {
             writer.WriteLine("    <tr>");
             writer.WriteLine("      <td>&nbsp;</td>");
-            writer.WriteLine("      <td align=\"center\">DMS <a href=\"http://dms2.pnl.gov/dataset/show/" + datasetName + "\">Dataset Detail Report</a></td>");
+            writer.WriteLine("      <td align=\"center\">DMS <a href=\"https://dms2.pnl.gov/dataset/show/" + datasetName + "\">Dataset Detail Report</a></td>");
 
             var datasetInfoFileName = datasetName + DatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
             if (Options.CreateDatasetInfoFile || File.Exists(Path.Combine(outputDirectoryPath, datasetInfoFileName)))
