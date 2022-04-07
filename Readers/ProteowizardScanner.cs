@@ -35,7 +35,7 @@ namespace MSFileInfoScanner.Readers
         }
 
         /// <summary>
-        /// This function is used to determine one or more overall quality scores
+        /// This method is used to determine one or more overall quality scores
         /// </summary>
         /// <param name="msDataFileReader"></param>
         /// <param name="datasetFileInfo"></param>

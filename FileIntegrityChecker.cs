@@ -775,8 +775,8 @@ namespace MSFileInfoScanner
         /// Counts the number of occurrences of a given character in dataLine
         /// </summary>
         /// <param name="dataLine">Line to check</param>
-        /// <param name="blankLineRead">Set to true if a blank line is read; however, if already true, and a non-blank line with an insufficient number of characters is read, then this function will return an error</param>
-        /// <param name="linesRead">Number of lines that have been read; when first calling this function for a new file, set this to 1 so that expectedCharCount will be initialized </param>
+        /// <param name="blankLineRead">Set to true if a blank line is read; however, if already true, and a non-blank line with an insufficient number of characters is read, this method will return an error</param>
+        /// <param name="linesRead">Number of lines that have been read; when first calling this method for a new file, set this to 1 so that expectedCharCount will be initialized </param>
         /// <param name="expectedCharCount">The number of occurrences of the given character in the previous line; used when requireEqualCharsPerLine is True</param>
         /// <param name="charToCount">The character to look for</param>
         /// <param name="charDescription">A description of the character (used to populate message when an error occurs)</param>
@@ -1004,7 +1004,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Opens the given zip file and uses Ionic Zip's .TestArchive function to validate that it is valid
+        /// Opens the given zip file and uses Ionic Zip's .TestArchive method to validate that it is valid
         /// </summary>
         /// <param name="filePath">File path to check</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
@@ -2023,7 +2023,7 @@ namespace MSFileInfoScanner
 
         /// <summary>
         /// Calculates the MD5 hash of a given file
-        /// Code from Tim Hastings, at http://www.nonhostile.com/page000017.asp
+        /// Code from Tim Hastings, http://www.nonhostile.com/page000017.asp (retired)
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>

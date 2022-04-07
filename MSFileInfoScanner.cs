@@ -1176,7 +1176,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Main processing function with input / output paths, error code reset flag, and processing state
+        /// Main processing method with input / output paths, error code reset flag, and processing state
         /// </summary>
         /// <param name="inputFileOrDirectoryPath"></param>
         /// <param name="outputDirectoryPath"></param>
@@ -1187,7 +1187,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Main processing function with input / output paths, error code reset flag, and processing state
+        /// Main processing method with input / output paths, error code reset flag, and processing state
         /// </summary>
         /// <param name="inputFileOrDirectoryPath"></param>
         /// <param name="outputDirectoryPath"></param>
@@ -1201,8 +1201,8 @@ namespace MSFileInfoScanner
             out MSFileProcessingStateConstants msFileProcessingState)
         {
             // Note: inputFileOrDirectoryPath must be a known MS data file or MS data directory
-            // See function ProcessMSFilesAndRecurseDirectories for more details
-            // This function returns True if it processed a file (or the dataset was processed previously)
+            // See method ProcessMSFilesAndRecurseDirectories for more details
+            // This method returns True if it processed a file (or the dataset was processed previously)
             // When SKIP_FILES_IN_ERROR = True, it also returns True if the file type was a known type but the processing failed
             // If the file type is unknown, or if an error occurs, it returns false
             // msFileProcessingState will be updated based on whether the file is processed, skipped, etc.
@@ -2116,7 +2116,7 @@ namespace MSFileInfoScanner
                 //  otherwise, compare recursionLevel to maxLevelsToRecurse
                 if (maxLevelsToRecurse <= 0 || recursionLevel <= maxLevelsToRecurse)
                 {
-                    // Call this function for each of the subdirectories of inputDirectory
+                    // Call this method for each of the subdirectories of inputDirectory
                     // However, do not step into directories listed in subdirectoryNamesProcessed
 
                     foreach (var subdirectory in PathUtils.FindDirectoriesWildcard(inputDirectory, "*"))

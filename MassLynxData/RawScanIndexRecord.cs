@@ -52,8 +52,8 @@
 
         // After unpacking, it is stored in .FunctionInfo().AcquisitionDataType
 
-        // The UnpackIntensity and UnpackMass functions
-        //  are used to unpack the values from PackedBasePeakIntensity and PackedBasePeakInfo
+        // The UnpackIntensity and UnpackMass methods
+        // are used to unpack the values from PackedBasePeakIntensity and PackedBasePeakInfo
 
         // For Acquisition Data Type ID 0 (Compressed scan)
         // use RawScanIndexRecordCompressedScan instead of RawScanIndexRecord

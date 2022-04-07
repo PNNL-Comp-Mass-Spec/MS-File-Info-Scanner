@@ -903,7 +903,7 @@ namespace MSFileInfoScanner.Readers
                 datasetFileInfo.FileSizeBytes = primaryInstrumentFile.Length;
 
                 // Find the apexAcquisition.method or submethods.xml file in the XMASS_Method.m subdirectory to determine .AcqTimeStart
-                // This function updates datasetFileInfo.AcqTimeEnd and datasetFileInfo.AcqTimeStart to have the same time
+                // This method updates datasetFileInfo.AcqTimeEnd and datasetFileInfo.AcqTimeStart to have the same time
                 DetermineAcqStartTime(datasetDirectory, datasetFileInfo);
 
                 // Update the acquisition end time using the write time of the .baf file

@@ -67,7 +67,7 @@ namespace MSFileInfoScanner.Readers
         }
 
         /// <summary>
-        /// This function is used to determine one or more overall quality scores
+        /// This method is used to determine one or more overall quality scores
         /// </summary>
         /// <param name="xcaliburAccessor"></param>
         /// <param name="datasetFileInfo"></param>
@@ -92,7 +92,7 @@ namespace MSFileInfoScanner.Readers
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
                 {
-                    // This function returns the number of points in massIntensityPairs()
+                    // This method returns the number of points in massIntensityPairs()
                     var returnCode = xcaliburAccessor.GetScanData2D(scanNumber, out var massIntensityPairs);
 
                     if (returnCode <= 0)

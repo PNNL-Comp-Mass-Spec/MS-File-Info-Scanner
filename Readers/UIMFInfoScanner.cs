@@ -34,7 +34,7 @@ namespace MSFileInfoScanner.Readers
         { }
 
         /// <summary>
-        /// This function is used to determine one or more overall quality scores
+        /// This method is used to determine one or more overall quality scores
         /// </summary>
         /// <param name="uimfReader"></param>
         /// <param name="datasetFileInfo"></param>
@@ -676,7 +676,7 @@ namespace MSFileInfoScanner.Readers
                             {
                                 // Some .UIMF files have DateStarted values represented by huge integers, e.g. 127805472000000000 or 129145004045937500; example: BATs_TS_01_c4_Eagle_10-02-06_0000
                                 // These numbers are the number of ticks since 1 January 1601 (where each tick is 100 ns)
-                                // This value is returned by function GetSystemTimeAsFileTime (see http://en.wikipedia.org/wiki/System_time)
+                                // This value is returned by method GetSystemTimeAsFileTime (see https://en.wikipedia.org/wiki/System_time)
 
                                 // When SQLite parses these numbers, it converts them to years around 0410
                                 // To get the correct year, simply add 1600

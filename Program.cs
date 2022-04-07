@@ -30,7 +30,7 @@ namespace MSFileInfoScanner
         private static DateTime mLastProgressTime;
 
         /// <summary>
-        /// Main function
+        /// Main method
         /// </summary>
         /// <returns>0 if no error, error code if an error</returns>
         /// <remarks>The STAThread attribute is required for OxyPlot functionality</remarks>

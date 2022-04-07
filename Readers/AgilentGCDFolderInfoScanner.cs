@@ -453,7 +453,7 @@ namespace MSFileInfoScanner.Readers
                         // Error parsing the acqmeth.txt file or GC.in file; do not abort
                     }
 
-                    // We set success to true, even if either of the above functions fail
+                    // We set success to true, even if either of the above methods fail
                     success = true;
                 }
 

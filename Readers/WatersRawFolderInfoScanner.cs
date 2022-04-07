@@ -151,7 +151,7 @@ namespace MSFileInfoScanner.Readers
             }
             else
             {
-                // Error getting the header info using clsMassLynxNativeIO
+                // Error getting the header info using MassLynxNativeIO
                 // Continue anyway since we've populated some of the values
             }
 

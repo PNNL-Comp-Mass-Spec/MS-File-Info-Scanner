@@ -11,15 +11,15 @@ namespace MSFileInfoScanner.Readers
     /// <summary>
     /// <para>
     /// This class can read data from MassLynx data files using native disk access,
-    ///  obviating the need to have MassLynx installed
+    /// obviating the need to have MassLynx installed
     /// </para>
     /// <para>
     /// Note that native file IO is significantly slower than utilizing the
-    ///  MassLynx API access functions (see clsMassLynxReader3 and clsMassLynxReader4)
+    /// MassLynx API access methods (see clsMassLynxReader3 and clsMassLynxReader4)
     /// </para>
     /// <para>
     /// VB6 version Last modified January 22, 2004
-    /// Updated to VB.NET September 17, 2005, though did not upgrade the extended function info functions or data point reading options
+    /// Updated to VB.NET September 17, 2005, though did not upgrade the extended function info methods or data point reading options
     /// Updated to C# in May 2016
     /// </para>
     /// </summary>
@@ -162,7 +162,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in clsMassLynxNativeIO.GetFileInfo:" + ex.Message);
+                Console.WriteLine("Error in MassLynxNativeIO.GetFileInfo:" + ex.Message);
                 success = false;
             }
 
@@ -191,7 +191,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in clsMassLynxNativeIO.GetFileInfo:" + ex.Message);
+                Console.WriteLine("Error in MassLynxNativeIO.GetFileInfo:" + ex.Message);
                 success = false;
             }
 
@@ -304,7 +304,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in clsMassLynxNativeIO.GetFunctionInfo:" + ex.Message);
+                Console.WriteLine("Error in MassLynxNativeIO.GetFunctionInfo:" + ex.Message);
                 success = false;
             }
 
@@ -341,7 +341,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in clsMassLynxNativeIO.GetFunctionInfo:" + ex.Message);
+                Console.WriteLine("Error in MassLynxNativeIO.GetFunctionInfo:" + ex.Message);
                 success = false;
             }
 
@@ -435,8 +435,11 @@ namespace MSFileInfoScanner.Readers
         }
 
         /// <summary>
-        /// Retrieves scan information
+        /// Retrieves scan information in the out variables
         /// </summary>
+        /// <remarks>
+        /// Note that if LoadMSScanHeader returns 0, indicating no data points, this method will still return True
+        /// </remarks>
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
         /// <param name="functionNumber"></param>
         /// <param name="scanNumber"></param>
@@ -451,6 +454,7 @@ namespace MSFileInfoScanner.Readers
         /// <param name="overload"></param>
         /// <param name="massStart"></param>
         /// <param name="massEnd"></param>
+        /// <returns>True if no error, False if an error</returns>
         public bool GetScanInfoEx(
             string massLynxDataDirectoryPath,
             int functionNumber,
@@ -467,13 +471,6 @@ namespace MSFileInfoScanner.Readers
             out float massStart,
             out float massEnd)
         {
-            // Returns scan information in the out variables
-            // Function returns True if no error, False if an error
-            // Note that if LoadMSScanHeader returns 0, indicating no data points, this function will still return True
-            //
-            // Note that ScanType = 0 means MS-only scan (survey scan)
-            // ScanType > 0 means ms/ms scan
-
             scanType = 0;
             basePeakMZ = 0;
             parentIonMZ = 0;
@@ -593,7 +590,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in clsMassLynxNativeIO.LoadMSFileHeader:" + ex.Message);
+                Console.WriteLine("Error in MassLynxNativeIO.LoadMSFileHeader:" + ex.Message);
 
                 if (!success)
                 {
@@ -716,7 +713,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in clsMassLynxNativeIO.LoadMSFunctionInfo:" + ex.Message);
+                Console.WriteLine("Error in MassLynxNativeIO.LoadMSFunctionInfo:" + ex.Message);
 
                 if (!fileValidated)
                 {
@@ -737,9 +734,13 @@ namespace MSFileInfoScanner.Readers
         /// <param name="functionNumber"></param>
         /// <param name="scanNumber"></param>
         /// <remarks>
-        /// The calling function must validate that functionNumber is valid
-        /// Since this function uses thisMSData.FunctionInfo, one must call NativeIOGetFunctionInfo
+        /// <para>
+        /// The calling method must validate that functionNumber is valid
+        /// </para>
+        /// <para>
+        /// Since this method uses thisMSData.FunctionInfo, one must call NativeIOGetFunctionInfo
         /// to populate .FunctionInfo before calling this function
+        /// </para>
         /// </remarks>
         private void LoadMSScanHeader(out MassLynxScanStats scanStatsSingleScan, MSData thisMSData, int functionNumber, int scanNumber)
         {
@@ -783,7 +784,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in clsMassLynxNativeIO.LoadMSScanHeader:" + ex.Message);
+                Console.WriteLine("Error in MassLynxNativeIO.LoadMSScanHeader:" + ex.Message);
             }
         }
 
@@ -876,7 +877,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOGetFunctionCount:" + ex.Message);
+                Console.WriteLine("Error in MassLynxNativeIO.NativeIOGetFunctionCount:" + ex.Message);
             }
 
             return functionCount;
@@ -939,17 +940,17 @@ namespace MSFileInfoScanner.Readers
 
                 // Up to 32 segment scans can be conducted for a MS/MS run
                 // The following three arrays store the segment times, start, and end masses
-                for (var index = 0; index <= 31; index++)
+                for (var index = 0; index < 32; index++)
                 {
                     nativeFunctionInfo.SegmentScanTimes[index] = reader.ReadInt32();
                 }
 
-                for (var index = 0; index <= 31; index++)
+                for (var index = 0; index < 32; index++)
                 {
                     nativeFunctionInfo.SegmentStartMasses[index] = reader.ReadInt32();
                 }
 
-                for (var index = 0; index <= 31; index++)
+                for (var index = 0; index < 32; index++)
                 {
                     nativeFunctionInfo.SegmentEndMasses[index] = reader.ReadInt32();
                 }
@@ -972,7 +973,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOGetFunctionInfo:" + ex.Message);
+                Console.WriteLine("Error in MassLynxNativeIO.NativeIOGetFunctionInfo:" + ex.Message);
                 return false;
             }
         }
@@ -1037,8 +1038,6 @@ namespace MSFileInfoScanner.Readers
                     msFunctionInfo.FunctionType = 1;
                     break;
                 case 17:
-                    msFunctionInfo.FunctionTypeText = "TOF MS";
-                    break;
                 case 18:
                     msFunctionInfo.FunctionTypeText = "TOF MS";
                     break;
@@ -1102,7 +1101,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOGetScanCount:" + ex.Message);
+                Console.WriteLine("Error in MassLynxNativeIO.NativeIOGetScanCount:" + ex.Message);
                 return 0;
             }
         }
@@ -1218,7 +1217,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOGetScanInfo:" + ex.Message);
+                Console.WriteLine("Error in MassLynxNativeIO.NativeIOGetScanInfo:" + ex.Message);
                 return false;
             }
         }
@@ -1384,7 +1383,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOReadCalInfoFromHeader:" + ex.Message);
+                Console.WriteLine("Error in MassLynxNativeIO.NativeIOReadCalInfoFromHeader:" + ex.Message);
                 return false;
             }
         }
@@ -1517,7 +1516,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in clsMassLynxNativeIO.NativeIOReadHeader:" + ex.Message);
+                Console.WriteLine("Error in MassLynxNativeIO.NativeIOReadHeader:" + ex.Message);
                 return false;
             }
         }

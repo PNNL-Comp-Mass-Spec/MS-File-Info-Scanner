@@ -204,8 +204,8 @@ namespace MSFileInfoScanner.MassLynxData
                 case 12:
                     // Includes type 9, 11, and 12; type 10 is officially unused
                     //  (9=High accuracy calibrated data, 11=Enhanced uncalibrated data, and 12=Enhanced calibrated data)
-                    // Note: Only use this function to unpack intensities for data in the .IDX file, not for data in the .DAT file
-                    //       See the NativeIOGetSpectrum function for the method of unpacking intensities in .DAT files
+                    // Note: Only use this method to unpack intensities for data in the .IDX file, not for data in the .DAT file
+                    //       See the NativeIOGetSpectrum method for details on unpacking intensities in .DAT files
 
                     //Debug.Assert unpackedIntensity = PackedBasePeakIntensity * 4 ^ ExtractFromBitsInt32(PackedBasePeakInfo, 0, 3)
                     return UnpackBasePeakIntensity(packedBasePeakIntensity, packedBasePeakInfo);
@@ -268,8 +268,8 @@ namespace MSFileInfoScanner.MassLynxData
                 case 12:
                     // Includes type 9, 11, and 12; type 10 is officially unused
                     //  (9=High accuracy calibrated data, 11=Enhanced uncalibrated data, and 12=Enhanced calibrated data)
-                    // Note: Only use this function to unpack masses for data in the .IDX file, not for data in the .DAT file
-                    //       See the NativeIOGetSpectrum function for the method of unpacking masses in .DAT files
+                    // Note: Only use this method to unpack masses for data in the .IDX file, not for data in the .DAT file
+                    //       See the NativeIOGetSpectrum method for details on unpacking masses in .DAT files
 
                     // Compute the MassMantissa value by converting the Packed value to an Unsigned Int32 (and storing in a long),
                     //  then right shifting 9 bits by dividing by 2^9

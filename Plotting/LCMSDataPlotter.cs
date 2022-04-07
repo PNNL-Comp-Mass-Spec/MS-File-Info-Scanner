@@ -585,9 +585,9 @@ namespace MSFileInfoScanner.Plotting
             {
                 // Need to step through the scans and reduce the number of points in memory
 
-                // Note that the number of data points remaining after calling this function may still be
-                //  more than Options.MaxPointsToPlot, depending on Options.MinPointsPerSpectrum
-                //  (see TrimCachedData for more details)
+                // Note that the number of data points remaining after calling this method may still be
+                // more than Options.MaxPointsToPlot, depending on Options.MinPointsPerSpectrum
+                // (see TrimCachedData for more details)
 
                 TrimCachedData(Options.MaxPointsToPlot, Options.MinPointsPerSpectrum);
             }
@@ -914,11 +914,15 @@ namespace MSFileInfoScanner.Plotting
         ///  <param name="targetDataPointCount">Target max number of data points (see remarks for caveat)</param>
         /// <param name="minPointsPerSpectrum"></param>
         /// <remarks>
-        /// Note that the number of data points remaining after calling this function may still be
-        ///  more than targetDataPointCount, depending on minPointsPerSpectrum .
-        /// For example, if minPointsPerSpectrum = 5 and we have 5000 scans, then there will be
-        ///  at least 5*5000 = 25000 data points in memory.  If targetDataPointCount = 10000, then
-        ///  there could be as many as 25000 + 10000 = 25000 points in memory
+        /// <para>
+        /// Note that the number of data points remaining after calling this method may still be
+        ///  more than targetDataPointCount, depending on minPointsPerSpectrum
+        /// </para>
+        /// <para>
+        /// For example, if minPointsPerSpectrum = 5 and we have 5000 scans, there will be
+        /// at least 5*5000 = 25000 data points in memory.  If targetDataPointCount = 10000, then
+        /// there could be as many as 25000 + 10000 = 25000 points in memory
+        /// </para>
         /// </remarks>
         private void TrimCachedData(int targetDataPointCount, int minPointsPerSpectrum)
         {
@@ -1195,9 +1199,9 @@ namespace MSFileInfoScanner.Plotting
             {
                 // Need to step through the scans and reduce the number of points in memory
 
-                // Note that the number of data points remaining after calling this function may still be
-                //  more than Options.MaxPointsToPlot, depending on Options.MinPointsPerSpectrum
-                //  (see TrimCachedData for more details)
+                // Note that the number of data points remaining after calling this method may still be
+                // more than Options.MaxPointsToPlot, depending on Options.MinPointsPerSpectrum
+                // (see TrimCachedData for more details)
 
                 TrimCachedData(Options.MaxPointsToPlot, Options.MinPointsPerSpectrum);
             }
