@@ -179,9 +179,9 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Returns the file name of the recently saved file of the given type
         /// </summary>
+        /// <remarks>The list of recent files gets cleared each time you call SaveTICAndBPIPlotFiles() or Reset()</remarks>
         /// <param name="fileType">File type to find</param>
         /// <returns>File name if found; empty string if this file type was not saved</returns>
-        /// <remarks>The list of recent files gets cleared each time you call SaveTICAndBPIPlotFiles() or Reset()</remarks>
         public string GetRecentFileInfo(OutputFileTypes fileType)
         {
             for (var index = 0; index < mRecentFiles.Count; index++)
@@ -197,11 +197,11 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Returns the file name and path of the recently saved file of the given type
         /// </summary>
+        /// <remarks>The list of recent files gets cleared each time you call SaveTICAndBPIPlotFiles() or Reset()</remarks>
         /// <param name="fileType">File type to find</param>
         /// <param name="fileName">File name (output)</param>
         /// <param name="filePath">File Path (output)</param>
         /// <returns>True if a match was found; otherwise returns false</returns>
-        /// <remarks>The list of recent files gets cleared each time you call SaveTICAndBPIPlotFiles() or Reset()</remarks>
         public bool GetRecentFileInfo(OutputFileTypes fileType, out string fileName, out string filePath)
         {
             for (var index = 0; index < mRecentFiles.Count; index++)

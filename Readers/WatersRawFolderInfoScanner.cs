@@ -10,7 +10,9 @@ namespace MSFileInfoScanner.Readers
     /// <summary>
     /// Class for reading data from Waters mass spectrometers (previously Micromass)
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
+    /// </remarks>
     public class WatersRawFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: Micromass, Synapt

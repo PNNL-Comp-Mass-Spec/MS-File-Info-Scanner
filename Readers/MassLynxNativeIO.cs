@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -729,10 +729,6 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Loads information on the given scan for the given function
         /// </summary>
-        /// <param name="scanStatsSingleScan"></param>
-        /// <param name="thisMSData"></param>
-        /// <param name="functionNumber"></param>
-        /// <param name="scanNumber"></param>
         /// <remarks>
         /// <para>
         /// The calling method must validate that functionNumber is valid
@@ -742,6 +738,10 @@ namespace MSFileInfoScanner.Readers
         /// to populate .FunctionInfo before calling this function
         /// </para>
         /// </remarks>
+        /// <param name="scanStatsSingleScan"></param>
+        /// <param name="thisMSData"></param>
+        /// <param name="functionNumber"></param>
+        /// <param name="scanNumber"></param>
         private void LoadMSScanHeader(out MassLynxScanStats scanStatsSingleScan, MSData thisMSData, int functionNumber, int scanNumber)
         {
             scanStatsSingleScan = new MassLynxScanStats();
@@ -1073,12 +1073,12 @@ namespace MSFileInfoScanner.Readers
         /// Returns the number of scans in the given function
         /// Also updates msFunctionInfo.ScanCount
         /// </summary>
-        /// <param name="dataDirPath"></param>
-        /// <param name="msFunctionInfo"></param>
-        /// <returns>Number of scans, or 0 if an error</returns>
         /// <remarks>
         /// msFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
         /// </remarks>
+        /// <param name="dataDirPath"></param>
+        /// <param name="msFunctionInfo"></param>
+        /// <returns>Number of scans, or 0 if an error</returns>
         private int NativeIOGetScanCount(string dataDirPath, MSFunctionInfo msFunctionInfo)
         {
             try
@@ -1109,15 +1109,15 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Retrieves information on the given scan for the given function
         /// </summary>
+        /// <remarks>
+        /// msFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
+        /// </remarks>
         /// <param name="dataDirPath"></param>
         /// <param name="msFunctionInfo"></param>
         /// <param name="scanNumber"></param>
         /// <param name="scanIndexRecord"></param>
         /// <param name="scanOffsetAndPeakCountOnly"></param>
         /// <returns>True if success, False if failure</returns>
-        /// <remarks>
-        /// msFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
-        /// </remarks>
         private bool NativeIOGetScanInfo(
             string dataDirPath,
             MSFunctionInfo msFunctionInfo,
@@ -1305,9 +1305,11 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Looks for the "$$ Cal Function" lines in the _HEADER.TXT file
         /// </summary>
+        /// <remarks>
+        /// Should only be called by LoadMSFunctionInfo and only after the functions have been determined
+        /// </remarks>
         /// <param name="thisMSData"></param>
         /// <returns>True if successful, False if not</returns>
-        /// <remarks>Should only be called by LoadMSFunctionInfo and only after the functions have been determined</remarks>
         private bool NativeIOReadCalInfoFromHeader(MSData thisMSData)
         {
             const string CAL_FUNCTION_NAME = "CAL FUNCTION";

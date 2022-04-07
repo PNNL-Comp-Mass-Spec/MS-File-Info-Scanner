@@ -10,7 +10,9 @@ namespace MSFileInfoScanner.Readers
     /// <summary>
     /// Agilent TOF .D folder Info Scanner; Uses ProteoWizard to read files
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
+    /// </remarks>
     // ReSharper disable once IdentifierTypo
     public class AgilentTOFDFolderInfoScanner : MSFileInfoProcessorBaseClass
     {

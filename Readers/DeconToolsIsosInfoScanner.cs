@@ -13,7 +13,9 @@ namespace MSFileInfoScanner.Readers
     /// <summary>
     /// DeconTools .isos info scanner
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2013</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2013
+    /// </remarks>
     public class DeconToolsIsosInfoScanner : MSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: Da, isos, mw, deisotoped
@@ -486,10 +488,10 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Process the DeconTools results
         /// </summary>
+        /// <remarks>Will also read the _scans.csv file if present (to determine ElutionTime and MSLevel</remarks>
         /// <param name="dataFilePath">Isos file path</param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
-        /// <remarks>Will also read the _scans.csv file if present (to determine ElutionTime and MSLevel</remarks>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
             ResetResults();

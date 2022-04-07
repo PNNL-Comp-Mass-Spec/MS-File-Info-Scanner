@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -334,13 +334,13 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Sort the data and mark data points beyond the first maximumDataCountInArraysToLoad points with mSkipDataPointFlag
         /// </summary>
-        /// <param name="dataValuesAndIndices"></param>
-        /// <param name="maximumDataCountInArraysToLoad"></param>
-        /// <param name="subtaskStepCount"></param>
         /// <remarks>
         /// This sub uses a full sort to filter the data
         /// This will be slow for large arrays and you should therefore use FilterDataByMaxDataCountToKeep if possible
         /// </remarks>
+        /// <param name="dataValuesAndIndices"></param>
+        /// <param name="maximumDataCountInArraysToLoad"></param>
+        /// <param name="subtaskStepCount"></param>
         private void SortAndMarkPointsToSkip(
             List<Tuple<float, int>> dataValuesAndIndices,
             int maximumDataCountInArraysToLoad, int subtaskStepCount)

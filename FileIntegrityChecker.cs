@@ -13,7 +13,9 @@ namespace MSFileInfoScanner
     /// <summary>
     /// Check the integrity of files in a given directory
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2008</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2008
+    /// </remarks>
     public class FileIntegrityChecker : EventNotifier
     {
         // ReSharper disable CommentTypo
@@ -1141,11 +1143,13 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Validate every entry in zipFilePath
         /// </summary>
+        /// <remarks>
+        /// Extracts each file in the zip file to a temporary file. Will return false if you run out of disk space
+        /// </remarks>
         /// <param name="zipFilePath">Path to the zip file to validate</param>
         /// <param name="checkAllData"></param>
         /// <param name="throwExceptionIfInvalid">If True, then throws exceptions, otherwise simply returns True or False</param>
         /// <returns>True if the file is Valid; false if an error</returns>
-        /// <remarks>Extracts each file in the zip file to a temporary file.  Will return false if you run out of disk space</remarks>
         private bool CheckZipFileIntegrity(string zipFilePath, bool checkAllData, bool throwExceptionIfInvalid)
         {
             var tempPath = string.Empty;
@@ -1580,7 +1584,6 @@ namespace MSFileInfoScanner
         /// <param name="fileStats">Details on each file checked; use folderStatsType.FileCount to determine the number of entries in fileStats </param>
         /// <param name="filesToIgnore">List of files to skip; can be file names or full file paths</param>
         /// <returns>Returns True if all files pass the integrity checks; otherwise, returns False</returns>
-        /// <remarks>Note that fileStats will never be shrunk in size; only increased as needed</remarks>
         public bool CheckIntegrityOfFilesInDirectory(
             string directoryPath,
             out DirectoryStatsType directoryStats,
@@ -1896,16 +1899,15 @@ namespace MSFileInfoScanner
         /// Opens the file using a text reader and looks for XML elements specified in elementsToMatch()
         /// This method intentionally uses a StreamReader and not an XmlTextReader
         /// </summary>
+        /// <remarks>
+        /// Requires that the element names to match are at the start of the line in the text file
+        /// </remarks>
         /// <param name="filePath">File to examine</param>
         /// <param name="elementsToMatch">Element names to match; item text must start with a less than sign followed by the element name</param>
         /// <param name="maximumTextFileLinesToCheck"></param>
         /// <param name="caseSensitiveElementNames">True if element names should be case sensitive</param>
         /// <returns>True if this file contains the required element text</returns>
-        /// <remarks>Requires that the element names to match are at the start of the line in the text file</remarks>
-        private bool XMLFileContainsElements(string filePath,
-                                             IReadOnlyList<string> elementsToMatch,
-                                             int maximumTextFileLinesToCheck = 50,
-                                             bool caseSensitiveElementNames = false)
+        private bool XMLFileContainsElements(string filePath, IReadOnlyList<string> elementsToMatch, int maximumTextFileLinesToCheck = 50, bool caseSensitiveElementNames = false)
         {
             var linesRead = 0;
 
@@ -2026,7 +2028,6 @@ namespace MSFileInfoScanner
         /// Code from Tim Hastings, http://www.nonhostile.com/page000017.asp (retired)
         /// </summary>
         /// <param name="path"></param>
-        /// <returns></returns>
         // ReSharper disable once UnusedMember.Global
         public string MD5CalcFile(string path)
         {
@@ -2045,7 +2046,6 @@ namespace MSFileInfoScanner
         /// Calculates the SHA-1 hash of a given file
         /// </summary>
         /// <param name="path"></param>
-        /// <returns></returns>
         public string Sha1CalcFile(string path)
         {
             var sha1Hasher = new System.Security.Cryptography.SHA1CryptoServiceProvider();

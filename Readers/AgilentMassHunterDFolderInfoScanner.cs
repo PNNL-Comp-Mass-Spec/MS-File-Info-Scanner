@@ -16,7 +16,9 @@ namespace MSFileInfoScanner.Readers
     /// <summary>
     /// Agilent MassHunter .D folder Info Scanner (MassHunter is used for TOF/QTOF/IM-QTOF/QQQ instruments, and always contain a "AcqData" folder)
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
+    /// </remarks>
     // ReSharper disable once IdentifierTypo
     public class AgilentMassHunterDFolderInfoScanner : MSFileInfoProcessorBaseClass
     {

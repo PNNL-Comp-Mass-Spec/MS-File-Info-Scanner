@@ -14,7 +14,9 @@ namespace MSFileInfoScanner.Readers
     /// <summary>
     /// Bruker XMass folder info scanner
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+    /// </remarks>
     public class BrukerXmassFolderInfoScanner : ProteoWizardScanner
     {
         // ReSharper disable CommentTypo

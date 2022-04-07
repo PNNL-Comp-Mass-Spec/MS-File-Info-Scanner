@@ -272,15 +272,15 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Examines ppmDiffs to determine if the data is centroided data
         /// </summary>
+        /// <remarks>
+        /// Increments class property TotalSpectra if ppmDiffs is not empty
+        /// Increments class property CentroidedSpectra if the data is centroided
+        /// </remarks>
         /// <param name="mzValues"></param>
         /// <param name="ppmDiffs"></param>
         /// <param name="msLevel">1 for MS1, 2 for MS2, etc.</param>
         /// <param name="centroidingStatus">Expected centroid mode</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
-        /// <remarks>
-        /// Increments class property TotalSpectra if ppmDiffs is not empty
-        /// Increments class property CentroidedSpectra if the data is centroided
-        /// </remarks>
         private void CheckPPMDiffs(
             ICollection<double> mzValues,
             IList<double> ppmDiffs,
@@ -347,13 +347,13 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Step through the MZ values in array mzValues and compute the ppm-based mass difference between adjacent points
         /// </summary>
-        /// <param name="mzValues"></param>
-        /// <param name="msLevel"></param>
-        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         /// <remarks>
         /// Increments class property TotalSpectra if mzValues is not empty
         /// Increments class property CentroidedSpectra if the data is centroided
         /// </remarks>
+        /// <param name="mzValues"></param>
+        /// <param name="msLevel"></param>
+        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void CheckSpectrum(List<double> mzValues, int msLevel, string spectrumTitle = "")
         {
             CheckSpectrum(mzValues, msLevel, false, CentroidStatusConstants.Unknown, spectrumTitle);
@@ -362,14 +362,14 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Step through the MZ values in array mzValues and compute the ppm-based mass difference between adjacent points
         /// </summary>
-        /// <param name="mzValues"></param>
-        /// <param name="msLevel"></param>
-        /// <param name="centroidingStatus"></param>
-        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         /// <remarks>
         /// Increments class property TotalSpectra if mzValues is not empty
         /// Increments class property CentroidedSpectra if the data is centroided
         /// </remarks>
+        /// <param name="mzValues"></param>
+        /// <param name="msLevel"></param>
+        /// <param name="centroidingStatus"></param>
+        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void CheckSpectrum(List<double> mzValues, int msLevel, CentroidStatusConstants centroidingStatus, string spectrumTitle = "")
         {
             CheckSpectrum(mzValues, msLevel, false, centroidingStatus, spectrumTitle);
@@ -378,15 +378,15 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Step through the MZ values in array mzValues and compute the ppm-based mass difference between adjacent points
         /// </summary>
+        /// <remarks>
+        /// Increments class property TotalSpectra if mzValues is not empty
+        /// Increments class property CentroidedSpectra if the data is centroided
+        /// </remarks>
         /// <param name="mzValues"></param>
         /// <param name="msLevel"></param>
         /// <param name="assumeSorted"></param>
         /// <param name="centroidingStatus"></param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
-        /// <remarks>
-        /// Increments class property TotalSpectra if mzValues is not empty
-        /// Increments class property CentroidedSpectra if the data is centroided
-        /// </remarks>
         public void CheckSpectrum(
             List<double> mzValues,
             int msLevel,
@@ -486,10 +486,10 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Computes the median of the ppm m/z difference values in ppmDiffs
         /// </summary>
+        /// <remarks>Returns false if ppmDiffs has fewer than 4 data points (thus indicating sparse spectra)</remarks>
         /// <param name="ppmDiffs">List of mass difference values between adjacent data points, converted to ppm</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         /// <returns>True if the median is at least as large as PpmDiffThreshold</returns>
-        /// <remarks>Returns false if ppmDiffs has fewer than 4 data points (thus indicating sparse spectra)</remarks>
         public bool IsDataCentroided(IList<double> ppmDiffs, string spectrumTitle = "")
         {
             if (ppmDiffs.Count < 4)

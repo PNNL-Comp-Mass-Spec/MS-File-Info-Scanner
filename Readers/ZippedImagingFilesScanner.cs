@@ -11,7 +11,9 @@ namespace MSFileInfoScanner.Readers
     /// <summary>
     /// Zipped imaging file scanner
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+    /// </remarks>
     public class ZippedImagingFilesScanner : MSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: AcqStartTime, AcqEndTime

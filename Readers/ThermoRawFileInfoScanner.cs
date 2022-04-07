@@ -15,7 +15,9 @@ namespace MSFileInfoScanner.Readers
     /// <summary>
     /// Thermo .raw file info scanner
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
+    /// </remarks>
     public class ThermoRawFileInfoScanner : MSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: centroided, xcalibur

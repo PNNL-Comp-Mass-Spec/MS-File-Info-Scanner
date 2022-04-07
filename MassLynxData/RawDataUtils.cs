@@ -46,9 +46,9 @@ namespace MSFileInfoScanner.MassLynxData
         /// <summary>
         /// Create a mask
         /// </summary>
+        /// <remarks>Returns a long value to allow for unsigned Int32 masks</remarks>
         /// <param name="startBit"></param>
         /// <param name="endBit"></param>
-        /// <remarks>Returns a long value to allow for unsigned Int32 masks</remarks>
         private long CreateMask(byte startBit, byte endBit)
         {
             long thisMask;

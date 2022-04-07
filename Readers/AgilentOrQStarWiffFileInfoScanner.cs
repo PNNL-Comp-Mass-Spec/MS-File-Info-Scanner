@@ -12,7 +12,9 @@ namespace MSFileInfoScanner.Readers
     /// (cannot read MS data or TIC values from Agilent .Wiff files)
     /// </para>
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
+    /// </remarks>
     public class AgilentTOFOrQStarWiffFileInfoScanner : MSFileInfoProcessorBaseClass
     {
         // Note: The extension must be in all caps

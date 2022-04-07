@@ -843,9 +843,9 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Returns the file name of the recently saved file of the given type
         /// </summary>
+        /// <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
         /// <param name="fileType">File type to find</param>
         /// <returns>File name if found; empty string if this file type was not saved</returns>
-        /// <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
         public string GetRecentFileInfo(OutputFileTypes fileType)
         {
             for (var index = 0; index < mRecentFiles.Count; index++)
@@ -861,11 +861,11 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Returns the file name and path of the recently saved file of the given type
         /// </summary>
+        /// <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
         /// <param name="fileType">File type to find</param>
         /// <param name="fileName">File name (output)</param>
         /// <param name="filePath">File Path (output)</param>
         /// <returns>True if a match was found; otherwise returns false</returns>
-        /// <remarks>The list of recent files gets cleared each time you call Save2DPlots() or Reset()</remarks>
         public bool GetRecentFileInfo(OutputFileTypes fileType, out string fileName, out string filePath)
         {
             for (var index = 0; index < mRecentFiles.Count; index++)
@@ -908,15 +908,13 @@ namespace MSFileInfoScanner.Plotting
             ClearRecentFileInfo();
         }
 
-        ///  <summary>
-        ///  Filters the data stored in mScans to nominally retain the top targetDataPointCount data points, sorted by descending intensity
-        ///  </summary>
-        ///  <param name="targetDataPointCount">Target max number of data points (see remarks for caveat)</param>
-        /// <param name="minPointsPerSpectrum"></param>
+        /// <summary>
+        /// Filters the data stored in mScans to nominally retain the top targetDataPointCount data points, sorted by descending intensity
+        /// </summary>
         /// <remarks>
         /// <para>
         /// Note that the number of data points remaining after calling this method may still be
-        ///  more than targetDataPointCount, depending on minPointsPerSpectrum
+        /// more than targetDataPointCount, depending on minPointsPerSpectrum
         /// </para>
         /// <para>
         /// For example, if minPointsPerSpectrum = 5 and we have 5000 scans, there will be
@@ -924,6 +922,8 @@ namespace MSFileInfoScanner.Plotting
         /// there could be as many as 25000 + 10000 = 25000 points in memory
         /// </para>
         /// </remarks>
+        /// <param name="targetDataPointCount">Target max number of data points (see remarks for caveat)</param>
+        /// <param name="minPointsPerSpectrum"></param>
         private void TrimCachedData(int targetDataPointCount, int minPointsPerSpectrum)
         {
             try

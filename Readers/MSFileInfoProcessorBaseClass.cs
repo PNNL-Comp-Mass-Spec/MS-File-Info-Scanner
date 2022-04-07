@@ -17,7 +17,9 @@ namespace MSFileInfoScanner.Readers
     /// <summary>
     /// Base class for MS file info scanners
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2007</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2007
+    /// </remarks>
     public abstract class MSFileInfoProcessorBaseClass : EventNotifier
     {
         // Ignore Spelling: AcqTime, Abu, Addnl, Bruker, href, html

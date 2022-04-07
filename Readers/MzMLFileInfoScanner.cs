@@ -8,7 +8,9 @@ namespace MSFileInfoScanner.Readers
     /// <summary>
     /// .mzML file info scanner
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2021</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2021
+    /// </remarks>
     public class MzMLFileInfoScanner : ProteoWizardScanner
     {
         // Ignore Spelling: centroided, xcalibur

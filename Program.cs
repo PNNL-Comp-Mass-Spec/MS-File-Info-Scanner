@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using MSFileInfoScannerInterfaces;
@@ -32,8 +32,8 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Main method
         /// </summary>
-        /// <returns>0 if no error, error code if an error</returns>
         /// <remarks>The STAThread attribute is required for OxyPlot functionality</remarks>
+        /// <returns>0 if no error, error code if an error</returns>
         [STAThread]
         public static int Main(string[] args)
         {

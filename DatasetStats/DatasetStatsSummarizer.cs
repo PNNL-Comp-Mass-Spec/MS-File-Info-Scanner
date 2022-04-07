@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -20,7 +20,9 @@ namespace MSFileInfoScanner.DatasetStats
     /// https://opensource.org/licenses/BSD-2-Clause
     /// </para>
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+    /// </remarks>
     public class DatasetStatsSummarizer : EventNotifier
     {
         // Ignore Spelling: AcqTime, centroided, utf, yyyy-MM-dd hh:mm:ss tt
@@ -260,13 +262,13 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Examine the m/z values in the spectrum to determine if the data is centroided
         /// </summary>
-        /// <param name="mzArray">MZ values</param>
-        /// <param name="msLevel"></param>
-        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         /// <remarks>
         /// Increments mSpectraTypeClassifier.TotalSpectra if data is found
         /// Increments mSpectraTypeClassifier.CentroidedSpectra if the data is centroided
         /// </remarks>
+        /// <param name="mzArray">MZ values</param>
+        /// <param name="msLevel"></param>
+        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void ClassifySpectrum(double[] mzArray, int msLevel, string spectrumTitle)
         {
             mSpectraTypeClassifier.CheckSpectrum(mzArray, msLevel, spectrumTitle);
@@ -275,14 +277,14 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Examine the m/z values in the spectrum to determine if the data is centroided
         /// </summary>
-        /// <param name="ionCount">Number of items in mzArray; if -1, then parses all data in mzArray</param>
-        /// <param name="mzArray">MZ values</param>
-        /// <param name="msLevel"></param>
-        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         /// <remarks>
         /// Increments mSpectraTypeClassifier.TotalSpectra if data is found
         /// Increments mSpectraTypeClassifier.CentroidedSpectra if the data is centroided
         /// </remarks>
+        /// <param name="ionCount">Number of items in mzArray; if -1, then parses all data in mzArray</param>
+        /// <param name="mzArray">MZ values</param>
+        /// <param name="msLevel"></param>
+        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void ClassifySpectrum(int ionCount, double[] mzArray, int msLevel, string spectrumTitle)
         {
             mSpectraTypeClassifier.CheckSpectrum(ionCount, mzArray, msLevel, SpectrumTypeClassifier.CentroidStatusConstants.Unknown, spectrumTitle);
@@ -291,15 +293,15 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Examine the m/z values in the spectrum to determine if the data is centroided
         /// </summary>
+        /// <remarks>
+        /// Increments mSpectraTypeClassifier.TotalSpectra if data is found
+        /// Increments mSpectraTypeClassifier.CentroidedSpectra if the data is centroided
+        /// </remarks>
         /// <param name="ionCount">Number of items in mzArray; if -1, then parses all data in mzArray</param>
         /// <param name="mzArray">MZ values</param>
         /// <param name="msLevel"></param>
         /// <param name="centroidingStatus"></param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
-        /// <remarks>
-        /// Increments mSpectraTypeClassifier.TotalSpectra if data is found
-        /// Increments mSpectraTypeClassifier.CentroidedSpectra if the data is centroided
-        /// </remarks>
         // ReSharper disable once UnusedMember.Global
         public void ClassifySpectrum(
             int ionCount,
@@ -1123,15 +1125,15 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Store scan counts, by scan type
         /// </summary>
+        /// <remarks>
+        /// Counts passed to this method are relevant when reading datasets with millions of spectra
+        /// and we limited the amount of detailed scan info stored in mDatasetScanStats
+        /// </remarks>
         /// <param name="scanCountHMS"></param>
         /// <param name="scanCountHMSn"></param>
         /// <param name="scanCountMS"></param>
         /// <param name="scanCountMSn"></param>
         /// <param name="elutionTimeMax"></param>
-        /// <remarks>
-        /// Counts passed to this method are relevant when reading datasets with millions of spectra
-        /// and we limited the amount of detailed scan info stored in mDatasetScanStats
-        /// </remarks>
         public void StoreScanTypeTotals(int scanCountHMS, int scanCountHMSn, int scanCountMS, int scanCountMSn, double elutionTimeMax)
         {
             ScanCountHMS = scanCountHMS;
@@ -1289,14 +1291,14 @@ namespace MSFileInfoScanner.DatasetStats
         /// Raise an error if at least 10% of the spectra have a minimum m/z higher than the threshold
         /// Log a warning if some spectra, but fewer than 10% of the total, have a minimum higher than the threshold
         /// </summary>
-        /// <param name="requiredMzMin">Minimum m/z threshold; the </param>
-        /// <param name="errorOrWarningMsg"></param>
-        /// <param name="maxPercentAllowedFailed"></param>
-        /// <returns>True if valid data, false if at least 10% of the spectra has a minimum m/z higher than the threshold</returns>
         /// <remarks>
         /// If a dataset has a mix of MS2 and MS3 spectra, and if all of the MS3 spectra meet the minimum m/z requirement, a warning is not raised
         /// Example dataset: UCLA_Dun_TMT_set2_03_QE_24May19_Rage_Rep-19-04-r01
         /// </remarks>
+        /// <param name="requiredMzMin">Minimum m/z threshold; the </param>
+        /// <param name="errorOrWarningMsg"></param>
+        /// <param name="maxPercentAllowedFailed"></param>
+        /// <returns>True if valid data, false if at least 10% of the spectra has a minimum m/z higher than the threshold</returns>
         public bool ValidateMS2MzMin(float requiredMzMin, out string errorOrWarningMsg, int maxPercentAllowedFailed)
         {
             // First examine MS2 spectra

@@ -15,7 +15,9 @@ namespace MSFileInfoScanner.Readers
     /// <summary>
     /// UIMF Info Scanner
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+    /// </remarks>
     public class UIMFInfoScanner : MSFileInfoProcessorBaseClass
     {
         // ReSharper disable once CommentTypo

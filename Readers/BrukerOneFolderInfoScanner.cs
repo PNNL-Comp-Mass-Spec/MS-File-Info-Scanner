@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,7 +12,9 @@ namespace MSFileInfoScanner.Readers
     /// <summary>
     /// Bruker one folder info scanner
     /// </summary>
-    /// <remarks>Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005</remarks>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2005
+    /// </remarks>
     public class BrukerOneFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: acqu, Bruker, fid, ser, yyyy-MMM-dd hh:mm:ss
@@ -375,10 +377,10 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Process a Bruker 1 directory or Bruker s001.zip file, specified by dataFilePath
         /// </summary>
+        /// <remarks>If a Bruker 1 directory, it must contain file acqu and typically contains file LOCK</remarks>
         /// <param name="dataFilePath">Bruker 1 directory path or Bruker s001.zip file</param>
         /// <param name="datasetFileInfo"></param>
         /// <returns>True if success, False if an error</returns>
-        /// <remarks>If a Bruker 1 directory, it must contain file acqu and typically contains file LOCK</remarks>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
             ResetResults();

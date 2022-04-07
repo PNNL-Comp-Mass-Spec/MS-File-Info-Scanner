@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -1720,15 +1720,21 @@ namespace MSFileInfoScanner
 
         /// <summary>
         /// Calls ProcessMSFileOrDirectory for all files in inputFilePathOrDirectory and below having a known extension
-        ///  Known extensions are:
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Known extensions are:
         ///   .Raw for Thermo files
         ///   .Wiff for Agilent TOF files and for Q-Star files
         ///   .Baf for Bruker XMASS directories (contains file analysis.baf, and hopefully files scan.xml and Log.txt)
+        /// </para>
+        /// <para>
         /// For each directory that does not have any files matching a known extension, will then look for special directory names:
         ///   Directories matching *.Raw for Micromass data
         ///   Directories matching *.D for Agilent Ion Trap data
         ///   A directory named 1 for Bruker FTICR-MS data
-        /// </summary>
+        /// </para>
+        /// </remarks>
         /// <param name="inputFilePathOrDirectory">Path to the input file or directory; can contain a wildcard (* or ?)</param>
         /// <param name="outputDirectoryPath">Directory to write any results files to</param>
         /// <param name="maxLevelsToRecurse">Maximum depth to recurse; Set to 0 to process all directories</param>
@@ -2241,9 +2247,9 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Raise event ErrorEvent and call LogMessage
         /// </summary>
+        /// <remarks>The calling thread needs to monitor this event and display it at the console</remarks>
         /// <param name="errorMessage"></param>
         /// <param name="ex"></param>
-        /// <remarks>The calling thread needs to monitor this event and display it at the console</remarks>
         private void ReportError(string errorMessage, Exception ex = null)
         {
             OnErrorEvent(errorMessage, ex);
