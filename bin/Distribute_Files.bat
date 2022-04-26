@@ -66,7 +66,7 @@ echo.
 echo Be sure you have built the DLL in Debug mode
 echo.
 
-pause
+if not "%1"=="NoPause" pause
 @echo on
 
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.dll"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
@@ -133,4 +133,4 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWra
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\ProteowizardWrapper.pdb"             \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y /d
 
 
-pause
+if not "%1"=="NoPause" pause

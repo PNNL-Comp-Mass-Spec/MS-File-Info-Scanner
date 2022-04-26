@@ -86,4 +86,4 @@ xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\MS_File_
 xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\" /Y /D
 xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\" /Y /D
 
-pause
+if not "%1"=="NoPause" pause
