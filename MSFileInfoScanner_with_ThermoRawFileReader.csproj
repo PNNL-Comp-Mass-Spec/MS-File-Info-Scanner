@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MSFileInfoScanner</RootNamespace>
     <AssemblyName>MSFileInfoScanner</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <LangVersion>latest</LangVersion>
@@ -72,8 +72,7 @@
     <Reference Include="pwiz_bindings_cli">
       <HintPath>Lib\pwiz_bindings_cli.dll</HintPath>
     </Reference>
-    <Reference Include="SpectraTypeClassifier, Version=1.1.5988.17918, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SpectraTypeClassifier">
       <HintPath>Lib\SpectraTypeClassifier.dll</HintPath>
     </Reference>
     <Reference Include="System" />
