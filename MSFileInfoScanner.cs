@@ -9,7 +9,6 @@ using MSFileInfoScanner.Plotting;
 using MSFileInfoScanner.Readers;
 using MSFileInfoScannerInterfaces;
 using PRISM;
-using PRISM.FileProcessor;
 using PRISMDatabaseUtils;
 
 // ReSharper disable UnusedMember.Global
@@ -349,7 +348,7 @@ namespace MSFileInfoScanner
                 appName = Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().GetName().Name);
             }
 
-            return ProcessFilesOrDirectoriesBase.GetAppDataDirectoryPath(appName);
+            return AppUtils.GetAppDataDirectoryPath(appName);
         }
 
         public static string GetAppDirectoryPath()
@@ -673,7 +672,7 @@ namespace MSFileInfoScanner
                 var cachedInputFilePath = Options.InputDataFilePath;
                 var cachedOutputDirectoryPath = Options.OutputDirectoryPath;
 
-                var appVersion = ProcessFilesOrDirectoriesBase.GetAppVersion(PROGRAM_DATE);
+                var appVersion = AppUtils.GetAppVersion(PROGRAM_DATE);
 
                 var args = new List<string>
                 {
