@@ -1029,7 +1029,7 @@ namespace MSFileInfoScanner.Plotting
                             {
                                 // Perform garbage collection every 60 seconds
                                 mLastGCTime = DateTime.UtcNow;
-                                ProgRunner.GarbageCollectNow();
+                                AppUtils.GarbageCollectNow();
                             }
                         }
                     }

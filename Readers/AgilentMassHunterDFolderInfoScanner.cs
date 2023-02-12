@@ -623,7 +623,7 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 massSpecDataReader.CloseDataFile();
-                ProgRunner.GarbageCollectNow();
+                AppUtils.GarbageCollectNow();
             }
             catch (Exception ex)
             {

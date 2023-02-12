@@ -38,7 +38,7 @@ namespace MSFileInfoScanner
         public static int Main(string[] args)
         {
             var exeName = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name;
-            var exePath = PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppPath();
+            var exePath = AppUtils.GetAppPath();
 
             var parser = new CommandLineParser<InfoScannerOptions>(exeName, GetAppVersion());
 
@@ -217,7 +217,7 @@ namespace MSFileInfoScanner
 
         private static string GetAppVersion()
         {
-            return PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppVersion(MSFileInfoScanner.PROGRAM_DATE);
+            return AppUtils.GetAppVersion(MSFileInfoScanner.PROGRAM_DATE);
         }
 
         private static string CollapseList(IEnumerable<string> itemList)

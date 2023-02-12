@@ -414,7 +414,7 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 msDataFileReader.Dispose();
-                ProgRunner.GarbageCollectNow();
+                AppUtils.GarbageCollectNow();
             }
             catch (Exception ex)
             {
