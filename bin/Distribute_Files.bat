@@ -13,6 +13,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\SpectraTypeClas
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner.exe"               \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\SpectraTypeClassifier.dll"           \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScannerInterfaces.*"       \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\*.dll"                               \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md"                               \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"        \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
@@ -30,6 +31,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoS
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.pdb"           C:\DMS_Programs\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\SpectraTypeClassifier.dll"       C:\DMS_Programs\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.*"   C:\DMS_Programs\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\*.dll"                           C:\DMS_Programs\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     C:\DMS_Programs\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md"                               C:\DMS_Programs\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"        C:\DMS_Programs\MSFileInfoScanner /y /d
@@ -46,6 +48,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScann
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner.pdb"               C:\DMS_Programs\MSFileInfoScannerExe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\SpectraTypeClassifier.dll"           C:\DMS_Programs\MSFileInfoScannerExe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScannerInterfaces.*"       C:\DMS_Programs\MSFileInfoScannerExe /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\*.dll"                               C:\DMS_Programs\MSFileInfoScannerExe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     C:\DMS_Programs\MSFileInfoScannerExe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md"                               C:\DMS_Programs\MSFileInfoScannerExe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"        C:\DMS_Programs\MSFileInfoScannerExe /y /d
@@ -73,6 +76,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoS
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.xml"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\SpectraTypeClassifier.dll"       \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.*"   \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\*.dll"                           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md"                               \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"        \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
@@ -91,13 +95,12 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\System.Secu
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\System.Security.Principal.Windows.dll"  \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\System.Threading.Channels.dll"          \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d 
 
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.dll" \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution /y /d
-
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.dll"           \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.pdb"           \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScanner.xml"           \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\SpectraTypeClassifier.dll"       \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\MSFileInfoScannerInterfaces.*"   \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\*.dll"                           \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md"                               \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"        \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
@@ -118,7 +121,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\DLL\System.Thre
 
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner.exe"               \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\SpectraTypeClassifier.dll"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScannerInterfaces.dll"     \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\*.dll"                               \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                     \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md"                               \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\bin\MSFileInfoScanner_Plotter.py"        \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner_Exe /y /d
