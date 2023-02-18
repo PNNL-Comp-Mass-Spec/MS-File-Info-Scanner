@@ -906,8 +906,7 @@ namespace MSFileInfoScanner
 
                 // Uncomment this to test calling PostDatasetInfoToDB with a DatasetID value
                 // Note that dataset Shew119-01_17july02_earth_0402-10_4-20 is DatasetID 6787
-                // PostDatasetInfoToDB(32, datasetInfoXML, "Data Source=gigasax;Initial Catalog=DMS_Capture_T3;Integrated Security=SSPI;", "CacheDatasetInfoXML")
-
+                // PostDatasetInfoToDB(32, datasetInfoXML, "Data Source=gigasax;Initial Catalog=DMS_Capture_T3;Integrated Security=SSPI;", "cache_dataset_info_xml")
             }
             catch (Exception ex)
             {
@@ -983,7 +982,7 @@ namespace MSFileInfoScanner
 
                 if (string.IsNullOrEmpty(storedProcedureName))
                 {
-                    storedProcedureName = "CacheDatasetInfoXML";
+                    storedProcedureName = "cache_dataset_info_xml";
                 }
 
                 var applicationName = "MSFileInfoScanner_DatasetID_" + datasetID;
