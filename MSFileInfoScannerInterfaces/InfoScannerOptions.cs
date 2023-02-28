@@ -441,7 +441,7 @@ namespace MSFileInfoScannerInterfaces
         [Option("DSInfoStoredProcedure",
             HelpShowsDefault = true, Hidden = true,
             HelpText = "Procedure to call to store dataset info in DMS")]
-        public string DSInfoStoredProcedure { get; set; } = "UpdateDatasetFileInfoXML";
+        public string DSInfoStoredProcedure { get; set; } = "update_dataset_file_info_xml";
 
         [Option("PythonPlot", "PlotWithPython", "Python", HelpShowsDefault = false,
             HelpText = "If supplied, create plots with Python script MSFileInfoScanner_Plotter.py instead of OxyPlot")]
