@@ -1129,10 +1129,17 @@ namespace MSFileInfoScanner.Readers
             else
                 fileInfo.AppendLine("Primary instrument files");
 
+            var maxLength = 0;
             foreach (var instrumentFile in mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles)
             {
-                fileInfo.AppendFormat("  {0}  {1,-30}  {2,12:N0} bytes",
-                    instrumentFile.Value.Hash, instrumentFile.Key, instrumentFile.Value.Length).AppendLine();
+                if (instrumentFile.Key.Length > maxLength)
+                    maxLength = instrumentFile.Key.Length;
+            }
+
+            foreach (var instrumentFile in mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles)
+            {
+                fileInfo.AppendFormat("  {0}  {1}  {2,14:N0} bytes",
+                    instrumentFile.Value.Hash, instrumentFile.Key.PadRight(maxLength), instrumentFile.Value.Length).AppendLine();
             }
 
             OnDebugEvent(fileInfo.ToString());
