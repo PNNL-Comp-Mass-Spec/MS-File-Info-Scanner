@@ -848,37 +848,27 @@ namespace MSFileInfoScanner.Readers
                     instrumentFilesToAdd.AddRange(candidateFiles);
                 }
 
-                if (matchedFiles.Count == 0)
+                // Also look for .mcf files, since they should be included in the list of files used to compute dataset size
+                var mcfFilesWithExtras = PathUtils.FindFilesWildcard(datasetDirectory, "*" + BRUKER_MCF_FILE_EXTENSION);
+
+                // The "*.MCF" sent to FindFilesWildcard matches both .mcf and .mcf_idx files
+                // Filter the list to only include the .mcf files
+                var mcfFiles = (from item in mcfFilesWithExtras
+                                where item.Extension.Equals(BRUKER_MCF_FILE_EXTENSION, StringComparison.OrdinalIgnoreCase)
+                                select item).ToList();
+
+                instrumentFilesToAdd.AddRange(mcfFiles);
+
+                if (matchedFiles.Count == 0 && mcfFiles.Count > 0)
                 {
-                    // .baf files not found; look for any .mcf files
-                    var mcfFiles = PathUtils.FindFilesWildcard(datasetDirectory, "*" + BRUKER_MCF_FILE_EXTENSION);
+                    // .baf files not found, but .mcf files were found
 
-                    if (mcfFiles.Count > 0)
-                    {
-                        // Find the largest .mcf file (not .mcf_idx file)
-                        FileInfo largestMCF = null;
+                    // Find the largest .mcf file (not .mcf_idx file)
+                    var largestMcf = (from item in mcfFiles
+                                      orderby item.Length descending
+                                      select item).First();
 
-                        foreach (var mcfFile in mcfFiles)
-                        {
-                            if (mcfFile.Extension.ToUpper() == BRUKER_MCF_FILE_EXTENSION)
-                            {
-                                if (largestMCF == null)
-                                {
-                                    largestMCF = mcfFile;
-                                }
-                                else if (mcfFile.Length > largestMCF.Length)
-                                {
-                                    largestMCF = mcfFile;
-                                }
-                            }
-                        }
-
-                        if (largestMCF != null)
-                        {
-                            matchedFiles.Add(largestMCF);
-                            instrumentFilesToAdd.Add(largestMCF);
-                        }
-                    }
+                    matchedFiles.Add(largestMcf);
                 }
 
                 if (matchedFiles.Count == 0)
