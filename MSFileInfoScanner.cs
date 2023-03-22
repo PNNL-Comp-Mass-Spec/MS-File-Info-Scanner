@@ -1525,14 +1525,10 @@ namespace MSFileInfoScanner
 
                     // Process the data file or directory
                     success = ProcessMSDataset(inputFileOrDirectoryPath, mMSInfoScanner, datasetName, outputDirectoryPath);
-                    if (success)
-                    {
-                        msFileProcessingState = MSFileProcessingStateConstants.ProcessedSuccessfully;
-                    }
-                    else
-                    {
-                        msFileProcessingState = MSFileProcessingStateConstants.FailedProcessing;
-                    }
+
+                    msFileProcessingState = success
+                        ? MSFileProcessingStateConstants.ProcessedSuccessfully
+                        : MSFileProcessingStateConstants.FailedProcessing;
                 }
             }
             catch (Exception ex)
