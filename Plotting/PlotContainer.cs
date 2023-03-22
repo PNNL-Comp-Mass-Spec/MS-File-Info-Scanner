@@ -223,10 +223,8 @@ namespace MSFileInfoScanner.Plotting
 
             encoder.Frames.Add(BitmapFrame.Create(target));
 
-            using (var outputStream = new FileStream(imageFile.FullName, FileMode.Create, FileAccess.Write))
-            {
-                encoder.Save(outputStream);
-            }
+            using var outputStream = new FileStream(imageFile.FullName, FileMode.Create, FileAccess.Write);
+            encoder.Save(outputStream);
 
             return true;
         }
