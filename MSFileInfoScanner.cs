@@ -1393,6 +1393,19 @@ namespace MSFileInfoScanner
                             }
                         }
 
+                        if (fileOrDirectoryInfo.Name.Equals(BrukerXmassFolderInfoScanner.BRUKER_SER_FILE_NAME, StringComparison.OrdinalIgnoreCase) &&
+                            fileOrDirectoryInfo is FileInfo serFile)
+                        {
+                            // Check for a ser file inside a .d directory
+
+                            if (serFile.Directory != null &&
+                                Path.GetExtension(serFile.Directory.Name).Equals(AgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION, StringComparison.OrdinalIgnoreCase))
+                            {
+                                mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
+                                knownMSDataType = true;
+                            }
+                        }
+
                         if (!knownMSDataType)
                         {
                             // Examine the extension on inputFileOrDirectoryPath
