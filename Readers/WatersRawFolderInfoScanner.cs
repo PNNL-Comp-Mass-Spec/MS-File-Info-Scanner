@@ -129,7 +129,7 @@ namespace MSFileInfoScanner.Readers
                     datasetFileInfo.AcqTimeEnd = item.LastWriteTime;
                 }
 
-                if (string.Equals(item.Name, "_header.txt", StringComparison.OrdinalIgnoreCase))
+                if (item.Name.Equals("_header.txt", StringComparison.OrdinalIgnoreCase))
                 {
                     // Assign the file's modification time to .AcqTimeStart and .AcqTimeEnd
                     // These will get updated below to more precise values

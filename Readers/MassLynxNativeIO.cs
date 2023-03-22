@@ -809,7 +809,7 @@ namespace MSFileInfoScanner.Readers
 
             mMSData.UserSuppliedDataDirPath ??= string.Empty;
 
-            if (mMSData.FunctionCount == 0 || !string.Equals(mMSData.UserSuppliedDataDirPath, massLynxDataDirectoryPath, StringComparison.OrdinalIgnoreCase))
+            if (mMSData.FunctionCount == 0 || !mMSData.UserSuppliedDataDirPath.Equals(massLynxDataDirectoryPath, StringComparison.OrdinalIgnoreCase))
             {
                 var numFunctions = LoadMSFunctionInfo(mMSData, massLynxDataDirectoryPath);
                 if (numFunctions > 0)

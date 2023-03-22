@@ -1351,34 +1351,34 @@ namespace MSFileInfoScanner
                     }
                     else
                     {
-                        if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+                        if (fileOrDirectoryInfo.Name.Equals(BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
                             mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
-                        else if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_TDF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+                        else if (fileOrDirectoryInfo.Name.Equals(BrukerXmassFolderInfoScanner.BRUKER_TDF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
                             mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
-                        else if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+                        else if (fileOrDirectoryInfo.Name.Equals(BrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
                             mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
-                        else if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+                        else if (fileOrDirectoryInfo.Name.Equals(BrukerXmassFolderInfoScanner.BRUKER_SQLITE_INDEX_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
                             mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
-                        else if (string.Equals(fileOrDirectoryInfo.Extension, ".qgd", StringComparison.OrdinalIgnoreCase))
+                        else if (fileOrDirectoryInfo.Extension.Equals(".qgd", StringComparison.OrdinalIgnoreCase))
                         {
                             // Shimadzu GC file
                             // Use the generic scanner to read the file size, modification date, and compute the SHA-1 hash
                             mMSInfoScanner = new GenericFileInfoScanner(Options, LCMS2DPlotOptions);
                             knownMSDataType = true;
                         }
-                        else if (string.Equals(fileOrDirectoryInfo.Name, BrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+                        else if (fileOrDirectoryInfo.Name.Equals(BrukerXmassFolderInfoScanner.BRUKER_ANALYSIS_YEP_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
                             // If the directory also contains file BRUKER_EXTENSION_BAF_FILE_NAME then this is a Bruker XMass directory
                             var parentDirectory = Path.GetDirectoryName(fileOrDirectoryInfo.FullName);

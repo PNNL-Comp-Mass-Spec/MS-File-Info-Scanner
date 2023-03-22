@@ -75,7 +75,7 @@ namespace MSFileInfoScanner.Readers
                             continue;
                         }
 
-                        if (!string.Equals(nameParts[nameParts.Length - 1], fileNameToFind, StringComparison.OrdinalIgnoreCase))
+                        if (!nameParts[nameParts.Length - 1].Equals(fileNameToFind, StringComparison.OrdinalIgnoreCase))
                             continue;
 
                         if (item.LastModified < datasetFileInfo.AcqTimeStart)
@@ -173,7 +173,7 @@ namespace MSFileInfoScanner.Readers
             var imagingFile = MSFileInfoScanner.GetFileInfo(imagingFilePath);
 
             return imagingFile.Name.StartsWith(ZIPPED_IMAGING_FILE_NAME_PREFIX, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(imagingFile.Extension, ".zip", StringComparison.OrdinalIgnoreCase);
+                   imagingFile.Extension.Equals(".zip", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
