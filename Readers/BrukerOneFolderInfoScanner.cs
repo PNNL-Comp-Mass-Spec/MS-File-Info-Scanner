@@ -418,17 +418,14 @@ namespace MSFileInfoScanner.Readers
                         // AddInstrumentFile will be called in ParseBrukerZippedSFolders
                         // Do not call it now
                     }
+                    else if (Options.DisableInstrumentHash)
+                    {
+                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(brukerDatasetFile);
+                    }
                     else
                     {
-                        if (Options.DisableInstrumentHash)
-                        {
-                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFileNoHash(brukerDatasetFile);
-                        }
-                        else
-                        {
-                            // Compute the SHA-1 hash of the bruker dataset file
-                            mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(brukerDatasetFile);
-                        }
+                        // Compute the SHA-1 hash of the bruker dataset file
+                        mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(brukerDatasetFile);
                     }
                 }
                 else
@@ -466,6 +463,7 @@ namespace MSFileInfoScanner.Readers
                             // Compute the SHA-1 hash of the fid or ser file
                             mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(instrumentDataFile);
                         }
+
                         instrumentFileAdded = true;
                     }
 
