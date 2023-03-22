@@ -232,6 +232,7 @@ namespace MSFileInfoScanner.Readers
                 // Use its modification time to get an initial estimate for the acquisition time
                 // Assign the .Yep file's size to .FileSizeBytes
                 var yepFile = MSFileInfoScanner.GetFileInfo(Path.Combine(datasetDirectory.FullName, AGILENT_YEP_FILE));
+
                 if (yepFile.Exists)
                 {
                     datasetFileInfo.FileSizeBytes = yepFile.Length;

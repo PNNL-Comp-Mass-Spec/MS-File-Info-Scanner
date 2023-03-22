@@ -6,9 +6,9 @@ namespace MSFileInfoScanner.DatasetStats
     {
         public double ElutionTimeMax { get; set; }
 
-        public SummaryStatDetails MSStats { get;}
+        public SummaryStatDetails MSStats { get; }
 
-        public SummaryStatDetails MSnStats { get;}
+        public SummaryStatDetails MSnStats { get; }
 
         /// <summary>
         /// Keeps track of each ScanType in the dataset, along with the number of scans of this type

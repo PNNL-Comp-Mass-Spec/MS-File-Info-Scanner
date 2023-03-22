@@ -1217,6 +1217,7 @@ namespace MSFileInfoScanner.Readers
                 {
                     mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(instrumentFile);
                 }
+
                 fileAdded = true;
 
                 return true;

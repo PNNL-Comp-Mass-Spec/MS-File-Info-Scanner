@@ -45,7 +45,7 @@ namespace MSFileInfoScanner.Readers
         private void ComputeQualityScores(
             DataReader uimfReader,
             DatasetFileInfo datasetFileInfo,
-            IReadOnlyDictionary<int, UIMFData.FrameType>masterFrameList,
+            IReadOnlyDictionary<int, UIMFData.FrameType> masterFrameList,
             IEnumerable<int> masterFrameNumList)
         {
             float overallScore;
@@ -446,7 +446,7 @@ namespace MSFileInfoScanner.Readers
 
                     mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
 
-                    if (Options.SaveLCMS2DPlots|| Options.CheckCentroidingStatus)
+                    if (Options.SaveLCMS2DPlots || Options.CheckCentroidingStatus)
                     {
                         try
                         {

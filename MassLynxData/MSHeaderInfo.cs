@@ -6,107 +6,107 @@ namespace MSFileInfoScanner.MassLynxData
         /// <summary>
         /// Acquisition date
         /// </summary>
-        public string AcquDate {get; set; }
+        public string AcquDate { get; set; }
 
         /// <summary>
         /// Acquisition name
         /// </summary>
-        public string AcquName {get; set; }
+        public string AcquName { get; set; }
 
         /// <summary>
         /// Acquisition time
         /// </summary>
-        public string AcquTime {get; set; }
+        public string AcquTime { get; set; }
 
         /// <summary>
         /// Job code
         /// </summary>
-        public string JobCode {get; set; }
+        public string JobCode { get; set; }
 
         /// <summary>
         /// Task code
         /// </summary>
-        public string TaskCode {get; set; }
+        public string TaskCode { get; set; }
 
         /// <summary>
         /// Username
         /// </summary>
-        public string UserName {get; set; }
+        public string UserName { get; set; }
 
         /// <summary>
         /// Instrument name
         /// </summary>
-        public string Instrument {get; set; }
+        public string Instrument { get; set; }
 
         /// <summary>
         /// Instrument type
         /// </summary>
-        public string InstrumentType {get; set; }
+        public string InstrumentType { get; set; }
 
         /// <summary>
         /// Conditions
         /// </summary>
-        public string Conditions {get; set; }
+        public string Conditions { get; set; }
 
         /// <summary>
         /// Lab name
         /// </summary>
-        public string LabName {get; set; }
+        public string LabName { get; set; }
 
         /// <summary>
         /// Sample description
         /// </summary>
-        public string SampleDesc {get; set; }
+        public string SampleDesc { get; set; }
 
         /// <summary>
         /// Solvent delay
         /// </summary>
-        public float SolventDelay {get; set; }
+        public float SolventDelay { get; set; }
 
         /// <summary>
         /// Submitter
         /// </summary>
-        public string Submitter {get; set; }
+        public string Submitter { get; set; }
 
         /// <summary>
         /// Sample ID
         /// </summary>
-        public string SampleID {get; set; }
+        public string SampleID { get; set; }
 
         /// <summary>
         /// Bottle number
         /// </summary>
-        public string BottleNumber {get; set; }
+        public string BottleNumber { get; set; }
 
         /// <summary>
         /// Plate description
         /// </summary>
-        public string PlateDesc {get; set; }
+        public string PlateDesc { get; set; }
 
         /// <summary>
         /// Multiplex stream
         /// </summary>
-        public int MuxStream {get; set; }
+        public int MuxStream { get; set; }
 
         /// <summary>
         /// Major version
         /// </summary>
-        public int VersionMajor {get; set; }
+        public int VersionMajor { get; set; }
 
         /// <summary>
         /// Minor version
         /// </summary>
-        public int VersionMinor {get; set; }
+        public int VersionMinor { get; set; }
 
         /// <summary>
         /// Static MS1 calibration coefficient count
         /// </summary>
-        public short CalMS1StaticCoefficientCount {get; set; }
+        public short CalMS1StaticCoefficientCount { get; set; }
 
         /// <summary>
         /// Static MS1 calibration coefficients
         /// </summary>
-        public double[] CalMS1StaticCoefficients {get; set; }
+        public double[] CalMS1StaticCoefficients { get; set; }
 
         /// <summary>
         /// Static MS1 calibration type
@@ -114,17 +114,17 @@ namespace MSFileInfoScanner.MassLynxData
         /// <remarks>
         /// 0 = normal, 1 = Root mass
         /// </remarks>
-        public short CalMS1StaticTypeID {get; set; }
+        public short CalMS1StaticTypeID { get; set; }
 
         /// <summary>
         /// Static MS2 calibration coefficient count
         /// </summary>
-        public short CalMS2StaticCoefficientCount {get; set; }
+        public short CalMS2StaticCoefficientCount { get; set; }
 
         /// <summary>
         /// Static MS2 calibration coefficients
         /// </summary>
-        public double[] CalMS2StaticCoefficients {get; set; }
+        public double[] CalMS2StaticCoefficients { get; set; }
 
         /// <summary>
         /// Static MS2 calibration type
@@ -132,7 +132,7 @@ namespace MSFileInfoScanner.MassLynxData
         /// <remarks>
         /// 0 = normal, 1 = Root mass
         /// </remarks>
-        public short CalMS2StaticTypeID {get; set; }
+        public short CalMS2StaticTypeID { get; set; }
 
         /// <summary>
         /// Constructor

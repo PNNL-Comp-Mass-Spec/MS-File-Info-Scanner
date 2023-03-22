@@ -307,6 +307,7 @@ namespace MSFileInfoScanner.Readers
                         {
                             mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(addnlFile);
                         }
+
                         primaryFileAdded = true;
                     }
 

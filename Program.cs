@@ -117,6 +117,7 @@ namespace MSFileInfoScanner
                 bool processingError;
 
                 int returnCode;
+
                 if (options.RecurseDirectories)
                 {
                     if (scanner.ProcessMSFilesAndRecurseDirectories(options.InputDataFilePath, options.OutputDirectoryPath, options.MaxLevelsToRecurse))
