@@ -154,7 +154,7 @@
       <Version>2.1.2</Version>
     </PackageReference>
     <PackageReference Include="PRISM-DatabaseUtils">
-      <Version>1.3.17</Version>
+      <Version>1.3.23</Version>
     </PackageReference>
     <PackageReference Include="PRISM-Library">
       <Version>2.8.7</Version>
@@ -163,10 +163,10 @@
       <Version>1.0.111</Version>
     </PackageReference>
     <PackageReference Include="ThermoRawFileReader">
-      <Version>4.1.42</Version>
+      <Version>4.1.62</Version>
     </PackageReference>
     <PackageReference Include="UIMFLibrary">
-      <Version>3.8.1</Version>
+      <Version>3.8.2</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
