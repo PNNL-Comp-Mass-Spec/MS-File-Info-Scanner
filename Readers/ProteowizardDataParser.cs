@@ -1122,7 +1122,8 @@ namespace MSFileInfoScanner.Readers
 
             // remove "sample=" and any text after it
 
-            var charIndex = chromatogramIdText.IndexOf("sample=", StringComparison.InvariantCultureIgnoreCase);
+            var charIndex = chromatogramIdText.IndexOf("sample=", StringComparison.OrdinalIgnoreCase);
+
             if (charIndex <= 0)
                 return chromatogramIdText;
 

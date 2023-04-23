@@ -653,49 +653,50 @@ namespace MSFileInfoScanner.Readers
                     var entryNameLCase = scanEvent.Key.ToLower().TrimEnd(cTrimChars);
 
                     if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_ION_INJECTION_TIME,
-                                      StringComparison.InvariantCultureIgnoreCase))
+                                      StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.IonInjectionTime = scanEvent.Value;
                         continue;
                     }
 
                     if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_SCAN_SEGMENT,
-                                      StringComparison.InvariantCultureIgnoreCase))
+                                      StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.ScanSegment = scanEvent.Value;
                         continue;
                     }
 
                     if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_SCAN_EVENT,
-                                      StringComparison.InvariantCultureIgnoreCase))
+                                      StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.ScanEvent = scanEvent.Value;
                         continue;
                     }
 
                     if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_CHARGE_STATE,
-                                      StringComparison.InvariantCultureIgnoreCase))
+                                      StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.ChargeState = scanEvent.Value;
                         continue;
                     }
 
                     if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_MONOISOTOPIC_MZ,
-                                      StringComparison.InvariantCultureIgnoreCase))
+                                      StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.MonoisotopicMZ = scanEvent.Value;
                         continue;
                     }
 
+
                     if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_COLLISION_MODE,
-                                      StringComparison.InvariantCultureIgnoreCase))
+                                      StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.CollisionMode = scanEvent.Value;
                         continue;
                     }
 
                     if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_SCAN_FILTER_TEXT,
-                                      StringComparison.InvariantCultureIgnoreCase))
+                                      StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.ScanFilterText = scanEvent.Value;
                         continue;

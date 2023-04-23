@@ -1461,7 +1461,7 @@ namespace MSFileInfoScanner
 
                                 case DeconToolsIsosInfoScanner.DECONTOOLS_CSV_FILE_EXTENSION:
 
-                                    if (fileOrDirectoryInfo.FullName.EndsWith(DeconToolsIsosInfoScanner.DECONTOOLS_ISOS_FILE_SUFFIX, StringComparison.InvariantCultureIgnoreCase))
+                                    if (fileOrDirectoryInfo.FullName.EndsWith(DeconToolsIsosInfoScanner.DECONTOOLS_ISOS_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase))
                                     {
                                         mMSInfoScanner = new DeconToolsIsosInfoScanner(Options, LCMS2DPlotOptions);
                                         knownMSDataType = true;
@@ -2298,7 +2298,8 @@ namespace MSFileInfoScanner
             OnErrorEvent(errorMessage, ex);
 
             string formattedError;
-            if (ex == null || errorMessage.EndsWith(ex.Message, StringComparison.InvariantCultureIgnoreCase))
+
+            if (ex == null || errorMessage.EndsWith(ex.Message, StringComparison.OrdinalIgnoreCase))
             {
                 formattedError = errorMessage;
             }

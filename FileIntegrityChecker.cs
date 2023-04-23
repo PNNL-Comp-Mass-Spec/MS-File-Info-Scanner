@@ -1610,7 +1610,7 @@ namespace MSFileInfoScanner
 
             try
             {
-                var filesToIgnoreSorted = new SortedSet<string>(StringComparer.InvariantCultureIgnoreCase);
+                var filesToIgnoreSorted = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
 
                 if (filesToIgnore?.Count > 0)
                 {
