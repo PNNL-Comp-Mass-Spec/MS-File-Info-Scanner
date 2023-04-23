@@ -100,6 +100,7 @@ namespace MSFileInfoScanner.Readers
         private bool ExtractQMZ(Regex reGetMZ, string chromatogramID, out double mz)
         {
             var reMatch = reGetMZ.Match(chromatogramID);
+
             if (reMatch.Success)
             {
                 if (double.TryParse(reMatch.Groups[1].Value, out mz))
@@ -115,6 +116,7 @@ namespace MSFileInfoScanner.Readers
         private int FindNearestInList(List<float> items, float valToFind)
         {
             var indexMatch = items.BinarySearch(valToFind);
+
             if (indexMatch >= 0)
             {
                 // Exact match found
@@ -123,6 +125,7 @@ namespace MSFileInfoScanner.Readers
             {
                 // Find the nearest match
                 indexMatch ^= -1;
+
                 if (indexMatch == items.Count)
                 {
                     indexMatch--;
@@ -162,6 +165,7 @@ namespace MSFileInfoScanner.Readers
         private int GetSpectrumCountWithRetry(MSDataFileReader msDataFileReader, int maxAttempts = 3)
         {
             var attemptCount = 0;
+
             while (attemptCount < maxAttempts)
             {
                 try
@@ -372,6 +376,7 @@ namespace MSFileInfoScanner.Readers
 
             // Make sure ticScanTimes is sorted
             var needToSort = false;
+
             for (var index = 1; index < ticScanTimes.Count; index++)
             {
                 if (ticScanTimes[index] < ticScanTimes[index - 1])
@@ -588,6 +593,7 @@ namespace MSFileInfoScanner.Readers
                 parserInfo.MinScanIndexWithoutScanTimes = int.MaxValue;
 
                 var attemptNumber = 1;
+
                 while (true)
                 {
                     var useAlternateMethod = (attemptNumber > 1);
@@ -637,6 +643,7 @@ namespace MSFileInfoScanner.Readers
                 StoreMSSpectraInfoForScans(scanTimes, msLevels, parserInfo);
 
                 var scanCountTotal = parserInfo.ScanCountSuccess + parserInfo.ScanCountError;
+
                 if (scanCountTotal == 0)
                     return false;
 
@@ -947,6 +954,7 @@ namespace MSFileInfoScanner.Readers
                     for (var index = 0; index < mzList.Length; index++)
                     {
                         tic += intensities[index];
+
                         if (intensities[index] > bpi)
                         {
                             bpi = intensities[index];

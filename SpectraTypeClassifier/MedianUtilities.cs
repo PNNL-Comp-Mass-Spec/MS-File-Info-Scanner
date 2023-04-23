@@ -50,6 +50,7 @@ namespace SpectraTypeClassifier
 
             var pivot = dataPoints[endIndex];
             var lastLow = startIndex - 1;
+
             for (var i = startIndex; i < endIndex; i++)
             {
                 if (dataPoints[i].CompareTo(pivot) <= 0)
@@ -94,6 +95,7 @@ namespace SpectraTypeClassifier
             while (true)
             {
                 var pivotIndex = Partition(dataPoints, startIndex, endIndex, oRandom);
+
                 if (pivotIndex == n)
                 {
                     return dataPoints[pivotIndex];

@@ -111,6 +111,7 @@ namespace SpectraTypeClassifier
             get
             {
                 var total = TotalSpectra;
+
                 if (total == 0)
                 {
                     return 0;
@@ -128,6 +129,7 @@ namespace SpectraTypeClassifier
             get
             {
                 var total = TotalMSnSpectra;
+
                 if (total == 0)
                 {
                     return 0;
@@ -302,6 +304,7 @@ namespace SpectraTypeClassifier
             }
 
             var empiricalCentroidStatus = CentroidStatusConstants.Profile;
+
             if (IsDataCentroided(ppmDiffs, spectrumTitle))
             {
                 empiricalCentroidStatus = CentroidStatusConstants.Centroid;
@@ -548,10 +551,12 @@ namespace SpectraTypeClassifier
             var maximumMz = sortedMZs.Last();
 
             var mzRange = (int)(Math.Ceiling(maximumMz) - Math.Floor(minimumMz));
+
             if (mzRange <= 0)
                 return false;
 
             var mzBinSize = (int)Math.Ceiling(mzRange / (double)regionCount);
+
             if (mzBinSize < 1)
                 mzBinSize = 1;
 
@@ -607,6 +612,7 @@ namespace SpectraTypeClassifier
             }
 
             var regionsWithData = centroidedRegions + profileModeRegions;
+
             if (regionsWithData <= 0)
             {
                 // Very sparse spectrum; treat as centroid

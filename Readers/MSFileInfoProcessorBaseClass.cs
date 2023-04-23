@@ -384,6 +384,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 var datasetName = GetDatasetNameViaPath(inputFileName);
+
                 if (string.IsNullOrWhiteSpace(datasetName))
                 {
                     OnWarningEvent("Dataset name returned by GetDatasetNameViaPath is an empty string");
@@ -395,6 +396,7 @@ namespace MSFileInfoScanner.Readers
                 outputDirectoryPath ??= string.Empty;
 
                 DirectoryInfo outputDirectory;
+
                 if (outputDirectoryPath.Length > 0)
                 {
                     // Make sure the output directory exists
@@ -435,6 +437,7 @@ namespace MSFileInfoScanner.Readers
                 {
                     // Write out the TIC and BPI plots
                     var success = mTICAndBPIPlot.SaveTICAndBPIPlotFiles(datasetName, outputDirectory.FullName);
+
                     if (!success)
                     {
                         successOverall = false;
@@ -444,6 +447,7 @@ namespace MSFileInfoScanner.Readers
                     {
                         // Write out any instrument-specific plots
                         var success2 = plotContainer.SaveTICAndBPIPlotFiles(datasetName, outputDirectory.FullName);
+
                         if (!success2)
                         {
                             successOverall = false;
@@ -468,6 +472,7 @@ namespace MSFileInfoScanner.Readers
                     if (mLCMS2DPlot.Options.PlottingDeisotopedData)
                     {
                         lcMSPlotStepsTotal++;
+
                         if (mLCMS2DPlot.Options.OverviewPlotDivisor > 0)
                         {
                             lcMSPlotStepsTotal++;
@@ -531,6 +536,7 @@ namespace MSFileInfoScanner.Readers
                 {
                     // Create the _DatasetInfo.xml file
                     var success = CreateDatasetInfoFile(inputFileName, outputDirectory.FullName);
+
                     if (!success)
                     {
                         successOverall = false;
@@ -542,6 +548,7 @@ namespace MSFileInfoScanner.Readers
                 {
                     // Create the _ScanStats.txt file
                     var success = CreateDatasetScanStatsFile(inputFileName, outputDirectory.FullName);
+
                     if (!success)
                     {
                         successOverall = false;
@@ -552,6 +559,7 @@ namespace MSFileInfoScanner.Readers
                 {
                     // Append a new row to the MSFileInfo_DatasetStats.txt file
                     var success = UpdateDatasetStatsTextFile(inputFileName, outputDirectory.FullName, Options.DatasetStatsTextFileName);
+
                     if (!success)
                     {
                         successOverall = false;
@@ -561,6 +569,7 @@ namespace MSFileInfoScanner.Readers
                 if (createQCPlotHTMLFile)
                 {
                     var success = CreateQCPlotHTMLFile(datasetName, outputDirectory.FullName);
+
                     if (!success)
                     {
                         successOverall = false;
@@ -581,6 +590,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 string htmlFileName;
+
                 if (Options.UseDatasetNameForHtmlPlotsFile && datasetName.Length > 0)
                 {
                     htmlFileName = datasetName + ".html";
@@ -679,6 +689,7 @@ namespace MSFileInfoScanner.Readers
             var file1 = lcmsPlotter.GetRecentFileInfo(LCMSDataPlotter.OutputFileTypes.LCMS);
 
             string file2;
+
             if (lcmsPlotter.Options.PlottingDeisotopedData)
             {
                 file2 = file1.Replace("_zoom.png", ".png");
@@ -810,6 +821,7 @@ namespace MSFileInfoScanner.Readers
             writer.WriteLine("      <td align=\"center\">DMS <a href=\"https://dms2.pnl.gov/dataset/show/" + datasetName + "\">Dataset Detail Report</a></td>");
 
             var datasetInfoFileName = datasetName + DatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
+
             if (Options.CreateDatasetInfoFile || File.Exists(Path.Combine(outputDirectoryPath, datasetInfoFileName)))
             {
                 writer.WriteLine("      <td align=\"center\"><a href=\"" + datasetInfoFileName + "\">Dataset Info XML file</a></td>");
@@ -877,9 +889,11 @@ namespace MSFileInfoScanner.Readers
                 var indexMatch = scanType.IndexOf(DatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR, StringComparison.Ordinal);
 
                 string scanFilterText;
+
                 if (indexMatch >= 0)
                 {
                     scanFilterText = scanType.Substring(indexMatch + DatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR.Length);
+
                     if (indexMatch > 0)
                     {
                         scanType = scanType.Substring(0, indexMatch);
@@ -1130,6 +1144,7 @@ namespace MSFileInfoScanner.Readers
                 fileInfo.AppendLine("Primary instrument files");
 
             var maxLength = 0;
+
             foreach (var instrumentFile in mDatasetStatsSummarizer.DatasetFileInfo.InstrumentFiles)
             {
                 if (instrumentFile.Key.Length > maxLength)
@@ -1154,6 +1169,7 @@ namespace MSFileInfoScanner.Readers
             {
                 var lastSpectrumIndex = msDataFileReader.SpectrumCount - 1;
                 var validMetadata = msDataFileReader.GetScanMetadata(lastSpectrumIndex, out var scanStartTime, out _, out _, out _, out _);
+
                 if (validMetadata)
                 {
                     datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(scanStartTime);
@@ -1240,6 +1256,7 @@ namespace MSFileInfoScanner.Readers
         protected bool UpdateDatasetFileStats(DirectoryInfo datasetDirectory, FileInfo primaryDataFile, int datasetID)
         {
             var primaryDataFiles = new List<FileInfo>();
+
             if (primaryDataFile != null)
             {
                 primaryDataFiles.Add(primaryDataFile);
@@ -1283,6 +1300,7 @@ namespace MSFileInfoScanner.Readers
                 mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = datasetDirectory.Extension;
 
                 mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = 0;
+
                 foreach (var outputFile in PathUtils.FindFilesWildcard(datasetDirectory, "*", true))
                 {
                     mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes += outputFile.Length;

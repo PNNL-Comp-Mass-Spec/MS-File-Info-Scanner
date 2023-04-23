@@ -367,6 +367,7 @@ namespace MSFileInfoScanner.Readers
                         if (datasetFileInfo.AcqTimeEnd.Subtract(runStartTime).TotalDays < 1)
                         {
                             datasetFileInfo.AcqTimeStart = runStartTime;
+
                             if (acquisitionLengthMinutes > 0)
                             {
                                 datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(acquisitionLengthMinutes);

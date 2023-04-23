@@ -117,6 +117,7 @@ namespace MSFileInfoScanner.Readers
             datasetFileInfo.FileSizeBytes = 0;
 
             var fileCount = 0;
+
             foreach (var item in datasetDirectory.GetFiles())
             {
                 datasetFileInfo.FileSizeBytes += item.Length;
@@ -183,6 +184,7 @@ namespace MSFileInfoScanner.Readers
                 // Sum up the scan count of all of the functions
                 // Additionally, find the largest EndRT value in all of the functions
                 float endRT = 0;
+
                 for (var functionNumber = 1; functionNumber <= functionCount; functionNumber++)
                 {
                     if (nativeFileIO.GetFunctionInfo(datasetDirectory.FullName, 1, out MassLynxData.MSFunctionInfo functionInfo))

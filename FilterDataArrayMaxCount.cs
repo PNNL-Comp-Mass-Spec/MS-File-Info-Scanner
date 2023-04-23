@@ -111,6 +111,7 @@ namespace MSFileInfoScanner
                 UpdateProgress(0);
 
                 var useFullDataSort = false;
+
                 if (mDataValues.Count == 0)
                 {
                     // No data loaded
@@ -136,6 +137,7 @@ namespace MSFileInfoScanner
 
                 // Now determine the histogram bin size
                 double binSize = maxAbundance / HISTOGRAM_BIN_COUNT;
+
                 if (binSize < 1)
                     binSize = 1;
 
@@ -152,9 +154,11 @@ namespace MSFileInfoScanner
                 // Parse mDataValues to populate histogramBinCounts
                 var dataPointIndex = 0;
                 var dataPointCount = mDataValues.Count;
+
                 foreach (var dataPoint in mDataValues)
                 {
                     int targetBin;
+
                     if (dataPoint.Item1 <= 0)
                     {
                         targetBin = 0;
@@ -194,9 +198,11 @@ namespace MSFileInfoScanner
                 // Now examine the frequencies in histogramBinCounts() to determine the minimum value to consider when sorting
                 var pointTotal = 0;
                 var binToSort = -1;
+
                 for (var index = binCount - 1; index >= 0; index += -1)
                 {
                     pointTotal += histogramBinCounts[index];
+
                     if (pointTotal >= MaximumDataCountToLoad)
                     {
                         binToSort = index;
@@ -213,6 +219,7 @@ namespace MSFileInfoScanner
 
                     var binToSortAbundanceMinimum = histogramBinStartIntensity[binToSort];
                     double binToSortAbundanceMaximum = maxAbundance + 1;
+
                     if (binToSort < binCount - 1)
                     {
                         binToSortAbundanceMaximum = histogramBinStartIntensity[binToSort + 1];
@@ -239,6 +246,7 @@ namespace MSFileInfoScanner
                     if (!useFullDataSort)
                     {
                         var dataCountImplicitlyIncluded = 0;
+
                         for (var index = 0; index < dataPointCount; index++)
                         {
                             if (mDataValues[index].Item1 < binToSortAbundanceMinimum)
@@ -283,6 +291,7 @@ namespace MSFileInfoScanner
                         // binToSortDataIndices should also currently be sorted ascending on "valid data point index" so the following Do Loop within a For Loop should sync things up
 
                         var originalDataArrayIndex = 0;
+
                         for (var index = 0; index < binnedDataCount; index++)
                         {
                             while (binnedData[index].Item2 > mDataValues[originalDataArrayIndex].Item2)

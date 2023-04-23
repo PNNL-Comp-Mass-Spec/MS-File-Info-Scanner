@@ -53,6 +53,7 @@ namespace MSFileInfoScanner.Readers
             {
                 // The dataset name for a Bruker 1 folder or zipped S folder is the name of the parent directory
                 var datasetDirectory = MSFileInfoScanner.GetDirectoryInfo(dataFilePath);
+
                 if (datasetDirectory.Parent != null)
                     datasetName = datasetDirectory.Parent.Name;
             }
@@ -142,6 +143,7 @@ namespace MSFileInfoScanner.Readers
                     dataLine = dataLine.TrimEnd(BRUKER_ACQU_FILE_ACQ_LINE_END);
 
                     success = ParseBrukerDateFromArray(dataLine, out var acqDate);
+
                     if (success)
                         datasetFileInfo.AcqTimeEnd = acqDate;
                     break;
@@ -171,12 +173,14 @@ namespace MSFileInfoScanner.Readers
                 if (!reader.EndOfStream)
                 {
                     var dataLine = reader.ReadLine();
+
                     if (dataLine != null)
                     {
                         // Date line found
                         // It is of the form: wd37119 2208 WD37119\9TOperator Sat Aug 20 06:10:31 2005
 
                         success = ParseBrukerDateFromArray(dataLine, out var acqDate);
+
                         if (success)
                             datasetFileInfo.AcqTimeStart = acqDate;
                     }
@@ -434,6 +438,7 @@ namespace MSFileInfoScanner.Readers
                     parsingBrukerOneFolder = true;
 
                     zippedSFilesDirectoryInfo = MSFileInfoScanner.GetDirectoryInfo(dataFilePath);
+
                     if (zippedSFilesDirectoryInfo.Exists)
                     {
                         // Determine the dataset name by looking up the name of the parent directory of dataFilePath
@@ -451,6 +456,7 @@ namespace MSFileInfoScanner.Readers
                     foreach (var fileToFind in filesToFind)
                     {
                         var instrumentDataFile = MSFileInfoScanner.GetFileInfo(Path.Combine(dataFilePath, fileToFind));
+
                         if (!instrumentDataFile.Exists)
                             continue;
 

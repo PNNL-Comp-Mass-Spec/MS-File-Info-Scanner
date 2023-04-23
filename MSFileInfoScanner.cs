@@ -297,6 +297,7 @@ namespace MSFileInfoScanner
                 }
 
                 var checkDirectory = true;
+
                 if (Options.UseCacheFiles && !forceRecheck)
                 {
                     if (mMSFileInfoDataCache.CachedDirectoryIntegrityInfoContainsDirectory(datasetDirectory.FullName, out directoryID, out var dataRow))
@@ -499,6 +500,7 @@ namespace MSFileInfoScanner
 
             // See if fileOrDirectoryPath points to a directory
             var datasetDirectory = GetDirectoryInfo(fileOrDirectoryPath);
+
             if (datasetDirectory.Exists)
             {
                 fileOrDirectoryInfo = datasetDirectory;
@@ -594,6 +596,7 @@ namespace MSFileInfoScanner
                     if (!mLastNotifiedLogFilePath.Equals(mLogFilePath))
                     {
                         string logFilePathToShow;
+
                         if (Options.ShowDebugInfo)
                         {
                             var logFileInfo = GetFileInfo(mLogFilePath);
@@ -661,6 +664,7 @@ namespace MSFileInfoScanner
                 {
                     // See if parameterFilePath points to a file in the same directory as the application
                     parameterFilePath = Path.Combine(GetAppDirectoryPath(), Path.GetFileName(parameterFilePath));
+
                     if (!File.Exists(parameterFilePath))
                     {
                         ReportError("Parameter file not found: " + parameterFilePath);
@@ -854,6 +858,7 @@ namespace MSFileInfoScanner
                 var startIndex = datasetInfoXML.IndexOf("?>", StringComparison.Ordinal);
 
                 string dsInfoXMLClean;
+
                 if (startIndex > 0)
                 {
                     dsInfoXMLClean = datasetInfoXML.Substring(startIndex + 2).Trim();
@@ -962,6 +967,7 @@ namespace MSFileInfoScanner
 
                 var startIndex = datasetInfoXML.IndexOf("?>", StringComparison.Ordinal);
                 string dsInfoXMLClean;
+
                 if (startIndex > 0)
                 {
                     dsInfoXMLClean = datasetInfoXML.Substring(startIndex + 2).Trim();
@@ -1025,6 +1031,7 @@ namespace MSFileInfoScanner
         private bool ProcessMSDataset(string inputFileOrDirectoryPath, MSFileInfoProcessorBaseClass scanner, string datasetName, string outputDirectoryPath)
         {
             var datasetFileInfo = new DatasetFileInfo();
+
             if (!string.IsNullOrWhiteSpace(datasetName))
                 datasetFileInfo.DatasetName = datasetName;
 
@@ -1039,6 +1046,7 @@ namespace MSFileInfoScanner
                     {
                         ReportError("Could not find the python executable");
                         var debugMsg = "Paths searched:";
+
                         foreach (var item in PythonPlotContainer.PythonPathsToCheck())
                         {
                             debugMsg += "\n  " + item;
@@ -1107,6 +1115,7 @@ namespace MSFileInfoScanner
             if (success)
             {
                 success = scanner.CreateOutputFiles(inputFileOrDirectoryPath, outputDirectoryPath);
+
                 if (!success)
                 {
                     SetErrorCode(MSFileScannerErrorCodes.OutputFileWriteError);
@@ -1127,6 +1136,7 @@ namespace MSFileInfoScanner
                 if (Options.PostResultsToDMS)
                 {
                     var dbSuccess = PostDatasetInfoToDB(datasetFileInfo.DatasetName, DatasetInfoXML);
+
                     if (!dbSuccess)
                     {
                         SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
@@ -1382,9 +1392,11 @@ namespace MSFileInfoScanner
                         {
                             // If the directory also contains file BRUKER_EXTENSION_BAF_FILE_NAME then this is a Bruker XMass directory
                             var parentDirectory = Path.GetDirectoryName(fileOrDirectoryInfo.FullName);
+
                             if (!string.IsNullOrEmpty(parentDirectory))
                             {
                                 var pathCheck = Path.Combine(parentDirectory, BrukerXmassFolderInfoScanner.BRUKER_EXTENSION_BAF_FILE_NAME);
+
                                 if (File.Exists(pathCheck))
                                 {
                                     mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
@@ -1568,6 +1580,7 @@ namespace MSFileInfoScanner
 
                 // See if inputFilePath contains a wildcard
                 MSFileProcessingStateConstants msFileProcessingState;
+
                 if (inputFileOrDirectoryPath != null &&
                     (inputFileOrDirectoryPath.IndexOf('*') >= 0 || inputFileOrDirectoryPath.IndexOf('?') >= 0))
                 {
@@ -1613,6 +1626,7 @@ namespace MSFileInfoScanner
                         }
 
                         CheckForAbortProcessingFile();
+
                         if (AbortProcessing)
                             break;
 
@@ -1639,6 +1653,7 @@ namespace MSFileInfoScanner
                         }
 
                         CheckForAbortProcessingFile();
+
                         if (AbortProcessing)
                             break;
 
@@ -1677,6 +1692,7 @@ namespace MSFileInfoScanner
                     // inputFileOrDirectoryPath does not have a * or ? wildcard
 
                     success = ProcessMSFileOrDirectory(inputFileOrDirectoryPath, outputDirectoryPath, resetErrorCode, out msFileProcessingState);
+
                     if (!success && ErrorCode == MSFileScannerErrorCodes.NoError)
                     {
                         SetErrorCode(MSFileScannerErrorCodes.UnspecifiedError);
@@ -1690,6 +1706,7 @@ namespace MSFileInfoScanner
                         string directoryPath;
 
                         var candidateDirectory = GetDirectoryInfo(inputFileOrDirectoryPath);
+
                         if (candidateDirectory.Exists)
                         {
                             directoryPath = candidateDirectory.FullName;
@@ -1755,6 +1772,7 @@ namespace MSFileInfoScanner
             try
             {
                 string inputDirectoryPath;
+
                 if (inputFilePathOrDirectory != null &&
                     (inputFilePathOrDirectory.IndexOf('*') >= 0 || inputFilePathOrDirectory.IndexOf('?') >= 0))
                 {
@@ -1762,6 +1780,7 @@ namespace MSFileInfoScanner
                     var cleanPath = inputFilePathOrDirectory.Replace("*", "_").Replace("?", "_");
 
                     var datasetFile = GetFileInfo(cleanPath);
+
                     if (Path.IsPathRooted(cleanPath))
                     {
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
@@ -1793,6 +1812,7 @@ namespace MSFileInfoScanner
                         inputFilePathOrDirectory = ".";
 
                     var datasetDirectory = GetDirectoryInfo(inputFilePathOrDirectory);
+
                     if (datasetDirectory.Exists)
                     {
                         inputDirectoryPath = datasetDirectory.FullName;
@@ -1875,6 +1895,7 @@ namespace MSFileInfoScanner
             var processedFileList = new List<string>();
 
             var retryCount = 0;
+
             while (true)
             {
                 try
@@ -1886,6 +1907,7 @@ namespace MSFileInfoScanner
                 {
                     // Input directory path error
                     HandleException("Error populating DirectoryInfo inputDirectory for " + inputDirectoryPath, ex);
+
                     if (!ex.Message.Contains("no longer available"))
                     {
                         return false;
@@ -1893,6 +1915,7 @@ namespace MSFileInfoScanner
                 }
 
                 retryCount++;
+
                 if (retryCount >= MAX_ACCESS_ATTEMPTS)
                 {
                     return false;
@@ -1929,11 +1952,13 @@ namespace MSFileInfoScanner
                 foreach (var fileItem in PathUtils.FindFilesWildcard(inputDirectory, fileNameMatch))
                 {
                     retryCount = 0;
+
                     while (true)
                     {
                         try
                         {
                             fileProcessed = false;
+
                             foreach (var fileExtension in fileExtensionsToParse)
                             {
                                 if (!processAllFileExtensions && fileItem.Extension.ToUpper() != fileExtension)
@@ -1983,6 +2008,7 @@ namespace MSFileInfoScanner
                         {
                             // Error parsing file
                             HandleException("Error in RecurseDirectoriesWork at For Each fileItem in " + inputDirectoryPath, ex);
+
                             if (!ex.Message.Contains("no longer available"))
                             {
                                 return false;
@@ -1993,6 +2019,7 @@ namespace MSFileInfoScanner
                             break;
 
                         retryCount++;
+
                         if (retryCount >= MAX_ACCESS_ATTEMPTS)
                         {
                             return false;
@@ -2016,6 +2043,7 @@ namespace MSFileInfoScanner
                     }
 
                     CheckForAbortProcessingFile();
+
                     if (AbortProcessing)
                         break;
                 }
@@ -2046,6 +2074,7 @@ namespace MSFileInfoScanner
                 foreach (var subdirectory in PathUtils.FindDirectoriesWildcard(inputDirectory, fileNameMatch))
                 {
                     retryCount = 0;
+
                     while (true)
                     {
                         try
@@ -2054,6 +2083,7 @@ namespace MSFileInfoScanner
                             if (subdirectory.Name == BrukerOneFolderInfoScanner.BRUKER_ONE_FOLDER_NAME)
                             {
                                 success = ProcessMSFileOrDirectory(subdirectory.FullName, outputDirectoryPath, true, out msFileProcessingState);
+
                                 if (!success)
                                 {
                                     fileProcessFailCount++;
@@ -2078,6 +2108,7 @@ namespace MSFileInfoScanner
                                     }
 
                                     success = ProcessMSFileOrDirectory(subdirectory.FullName, outputDirectoryPath, true, out msFileProcessingState);
+
                                     if (!success)
                                     {
                                         fileProcessFailCount++;
@@ -2102,6 +2133,7 @@ namespace MSFileInfoScanner
                         {
                             // Error parsing directory
                             HandleException("Error in RecurseDirectoriesWork at For Each subdirectory(A) in " + inputDirectoryPath, ex);
+
                             if (!ex.Message.Contains("no longer available"))
                             {
                                 return false;
@@ -2112,6 +2144,7 @@ namespace MSFileInfoScanner
                             break;
 
                         retryCount++;
+
                         if (retryCount >= MAX_ACCESS_ATTEMPTS)
                         {
                             return false;
@@ -2135,6 +2168,7 @@ namespace MSFileInfoScanner
                     foreach (var subdirectory in PathUtils.FindDirectoriesWildcard(inputDirectory, "*"))
                     {
                         retryCount = 0;
+
                         while (true)
                         {
                             try
@@ -2157,6 +2191,7 @@ namespace MSFileInfoScanner
                             {
                                 // Error parsing file
                                 HandleException("Error in RecurseDirectoriesWork at For Each subdirectory(B) in " + inputDirectoryPath, ex);
+
                                 if (!ex.Message.Contains("no longer available"))
                                 {
                                     return false;
@@ -2167,6 +2202,7 @@ namespace MSFileInfoScanner
                                 break;
 
                             retryCount++;
+
                             if (retryCount >= MAX_ACCESS_ATTEMPTS)
                             {
                                 return false;
@@ -2331,9 +2367,11 @@ namespace MSFileInfoScanner
         {
             Console.WriteLine("Processing options");
             Console.WriteLine();
+
             if (Options.UseCacheFiles)
             {
                 Console.WriteLine("CacheFiles are enabled");
+
                 if (Options.ReprocessExistingFiles)
                     Console.WriteLine("Will reprocess files that are already defined in the acquisition time file");
                 else if (Options.ReprocessIfCachedSizeIsZero)
@@ -2349,6 +2387,7 @@ namespace MSFileInfoScanner
 
             Console.WriteLine("SaveTICAndBPIPlots: {0}", TrueFalseToEnabledDisabled(Options.SaveTICAndBPIPlots));
             Console.WriteLine("SaveLCMS2DPlots:    {0}", TrueFalseToEnabledDisabled(Options.SaveLCMS2DPlots));
+
             if (Options.SaveLCMS2DPlots)
             {
                 Console.WriteLine("   MaxPointsToPlot:     {0:N0}", LCMS2DPlotOptions.MaxPointsToPlot);
@@ -2362,6 +2401,7 @@ namespace MSFileInfoScanner
             Console.WriteLine("Create scan stats files:        {0}", TrueFalseToEnabledDisabled(Options.CreateScanStatsFile));
             Console.WriteLine("MS2MzMin:                       {0:N0}", Options.MS2MzMin);
             Console.WriteLine("SHA-1 hashing:                  {0}", TrueFalseToEnabledDisabled(!Options.DisableInstrumentHash));
+
             if (Options.ScanStart > 0 || Options.ScanEnd > 0)
             {
                 Console.WriteLine("Start Scan:                     {0}", Options.ScanStart);
@@ -2369,6 +2409,7 @@ namespace MSFileInfoScanner
             }
 
             Console.WriteLine("Update dataset stats text file: {0}", TrueFalseToEnabledDisabled(Options.UpdateDatasetStatsTextFile));
+
             if (Options.UpdateDatasetStatsTextFile)
                 Console.WriteLine("   Dataset stats file name: {0}", Options.DatasetStatsTextFileName);
 

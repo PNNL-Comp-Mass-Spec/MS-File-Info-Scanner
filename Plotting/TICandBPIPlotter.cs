@@ -266,6 +266,7 @@ namespace MSFileInfoScanner.Plotting
             double maxIntensity = 0;
 
             Func<ChromatogramDataPoint, double> xAxisValueAccessor = point => point.ScanNum;
+
             if (xAxisIsTimeMinutes)
                 xAxisValueAccessor = point => point.TimeMinutes;
 
@@ -344,6 +345,7 @@ namespace MSFileInfoScanner.Plotting
             if (scanTimeMax > 0)
             {
                 string caption;
+
                 if (scanTimeMax < 2)
                 {
                     caption = Math.Round(scanTimeMax, 2).ToString("0.00") + " minutes";
@@ -445,6 +447,7 @@ namespace MSFileInfoScanner.Plotting
             var points = new List<DataPoint>();
 
             Func<ChromatogramDataPoint, double> xAxisValueAccessor = point => point.ScanNum;
+
             if (xAxisIsTimeMinutes)
                 xAxisValueAccessor = point => point.TimeMinutes;
 
@@ -502,6 +505,7 @@ namespace MSFileInfoScanner.Plotting
             if (scanTimeMax > 0)
             {
                 string caption;
+
                 if (scanTimeMax < 2)
                 {
                     caption = Math.Round(scanTimeMax, 2).ToString("0.00") + " minutes";
@@ -541,6 +545,7 @@ namespace MSFileInfoScanner.Plotting
 
             var indexNonZeroValue = -1;
             var zeroPointCount = 0;
+
             for (var index = chromatogramInfo.ScanCount - 1; index >= 0; index += -1)
             {
                 if (Math.Abs(chromatogramInfo.GetDataPoint(index).Intensity) < float.Epsilon)
@@ -553,6 +558,7 @@ namespace MSFileInfoScanner.Plotting
                     break;
                 }
                 pointsChecked++;
+
                 if (pointsChecked >= MAX_POINTS_TO_CHECK)
                     break;
             }
@@ -565,6 +571,7 @@ namespace MSFileInfoScanner.Plotting
             // Now check the first few values
             indexNonZeroValue = -1;
             zeroPointCount = 0;
+
             for (var index = 0; index < chromatogramInfo.ScanCount; index++)
             {
                 if (Math.Abs(chromatogramInfo.GetDataPoint(index).Intensity) < float.Epsilon)
@@ -577,6 +584,7 @@ namespace MSFileInfoScanner.Plotting
                     break;
                 }
                 pointsChecked++;
+
                 if (pointsChecked >= MAX_POINTS_TO_CHECK)
                     break;
             }

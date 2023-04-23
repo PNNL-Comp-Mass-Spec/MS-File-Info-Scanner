@@ -155,6 +155,7 @@ namespace MSFileInfoScanner
         private bool CheckTextFile(string filePath)
         {
             var fileName = Path.GetFileName(filePath);
+
             if (fileName == null)
             {
                 return false;
@@ -675,6 +676,7 @@ namespace MSFileInfoScanner
 
             if (maximumTextFileLinesToCheck < 1)
                 maximumTextFileLinesToCheck = 1;
+
             if (maximumTextFileLinesToCheck < minimumLineCount)
             {
                 maximumTextFileLinesToCheck = minimumLineCount;
@@ -697,6 +699,7 @@ namespace MSFileInfoScanner
                         linesRead++;
 
                         bool success;
+
                         if (charCountSkipsBlankLines && dataLine.Trim().Length == 0)
                         {
                             success = true;
@@ -1039,6 +1042,7 @@ namespace MSFileInfoScanner
                 var fileName = Path.GetFileName(filePath);
 
                 var fileNameLCase = fileName.ToLower();
+
                 if (fileNameLCase == "0.ser.zip")
                 {
                     // Do not run a full check on 0.ser.zip files
@@ -1058,6 +1062,7 @@ namespace MSFileInfoScanner
             mZipFileWorkParams.FilePath = filePath;
             mZipFileWorkParams.CheckAllData = zipFileCheckAllData;
             mZipFileWorkParams.ZipIsValid = false;
+
             if (mZipFileWorkParams.CheckAllData)
             {
                 mZipFileWorkParams.FailureMessage = "Zip file failed exhaustive CRC check";
@@ -1119,6 +1124,7 @@ namespace MSFileInfoScanner
                 if (!zipIsValid)
                 {
                     string message;
+
                     if (mZipFileWorkParams.CheckAllData)
                     {
                         message = "Zip file failed exhaustive CRC check";
@@ -1282,6 +1288,7 @@ namespace MSFileInfoScanner
             var file = MSFileInfoScanner.GetFileInfo(filePath);
 
             var fileName = file.Name;
+
             if (file.Directory == null)
             {
                 const string errorMessage = "Unable to determine the parent directory of the XML file";
@@ -1489,6 +1496,7 @@ namespace MSFileInfoScanner
                         while (xmlReader.Read())
                         {
                             XMLTextReaderSkipWhitespace(xmlReader);
+
                             if (xmlReader.ReadState != ReadState.Interactive)
                                 break;
 
@@ -1502,6 +1510,7 @@ namespace MSFileInfoScanner
                             if (needToCheckElementNames)
                             {
                                 var totalMatchesInList = FindItemNameInList(xmlReader.Name, requiredElements);
+
                                 if (totalMatchesInList == requiredElements.Count)
                                     needToCheckElementNames = false;
                             }
@@ -1511,6 +1520,7 @@ namespace MSFileInfoScanner
                                 while (xmlReader.MoveToNextAttribute())
                                 {
                                     var totalMatchesInList = FindItemNameInList(xmlReader.Name, requiredAttributes);
+
                                     if (totalMatchesInList == requiredAttributes.Count)
                                     {
                                         needToCheckAttributeNames = false;
@@ -1520,6 +1530,7 @@ namespace MSFileInfoScanner
                             }
 
                             elementsRead++;
+
                             if (elementsRead >= MaximumXMLElementNodesToCheck)
                             {
                                 break;
@@ -1719,6 +1730,7 @@ namespace MSFileInfoScanner
                         fileStats.Add(newFile);
 
                         directoryStats.FileCount++;
+
                         if (!passedIntegrityCheck)
                         {
                             directoryStats.FileCountFailIntegrity++;
@@ -1761,6 +1773,7 @@ namespace MSFileInfoScanner
             while (true)
             {
                 matchIndex = text.IndexOf(searchChar, matchIndex + 1);
+
                 if (matchIndex >= 0)
                 {
                     charCount++;
@@ -1886,6 +1899,7 @@ namespace MSFileInfoScanner
                 return 0;
 
             var nameMatchCount = 0;
+
             foreach (var requiredItem in requiredItemNames)
             {
                 if (requiredItem.Value)
@@ -2084,6 +2098,7 @@ namespace MSFileInfoScanner
             }
 
             var errorMessage = "File did not contain all of the expected " + itemDescription;
+
             foreach (var requiredItem in requiredItemNames)
             {
                 if (requiredItem.Value)

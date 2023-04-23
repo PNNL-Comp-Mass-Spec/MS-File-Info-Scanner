@@ -41,6 +41,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 var splitLine = dataLine.Trim().Split(' ');
+
                 if (splitLine.Length >= 2)
                 {
                     success = DateTime.TryParse(splitLine[splitLine.Length - 1] + " " + splitLine[splitLine.Length - 2], out methodDate);
@@ -112,6 +113,7 @@ namespace MSFileInfoScanner.Readers
                     // Method line found
                     // See if the line contains a key phrase
                     var charIndex = dataLine.IndexOf(RUN_LOG_FILE_INSTRUMENT_RUNNING, StringComparison.Ordinal);
+
                     if (charIndex > 0)
                     {
                         if (ExtractMethodLineDate(dataLine, out methodDate))
@@ -123,6 +125,7 @@ namespace MSFileInfoScanner.Readers
                     else
                     {
                         charIndex = dataLine.IndexOf(RUN_LOG_INSTRUMENT_RUN_COMPLETED, StringComparison.Ordinal);
+
                         if (charIndex > 0)
                         {
                             if (ExtractMethodLineDate(dataLine, out methodDate))
@@ -170,6 +173,7 @@ namespace MSFileInfoScanner.Readers
 
                 netCDFReader = new NetCDFReader.clsMSNetCdf();
                 var success = netCDFReader.OpenMSCdfFile(Path.Combine(directoryPath, AGILENT_ANALYSIS_CDF_FILE));
+
                 if (success)
                 {
                     var scanCount = netCDFReader.GetScanCount();
@@ -263,6 +267,7 @@ namespace MSFileInfoScanner.Readers
 
                         // Sum up the sizes of all of the files in this directory
                         datasetFileInfo.FileSizeBytes = 0;
+
                         foreach (var datasetFile in datasetDirectory.GetFiles())
                         {
                             datasetFileInfo.FileSizeBytes += datasetFile.Length;

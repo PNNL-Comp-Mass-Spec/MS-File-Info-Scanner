@@ -156,6 +156,7 @@ namespace MSFileInfoScanner.DatasetStats
             foreach (var scanTypeEntry in basicScanTypeByScanTypeKey)
             {
                 var basicScanType = scanTypeEntry.Value;
+
                 if (!(basicScanType.Equals("HMS", StringComparison.OrdinalIgnoreCase) ||
                       basicScanType.Equals("HMSn", StringComparison.OrdinalIgnoreCase) ||
                       basicScanType.Equals("MS", StringComparison.OrdinalIgnoreCase) ||
@@ -182,6 +183,7 @@ namespace MSFileInfoScanner.DatasetStats
                 GetScanTypeAndFilter(scanTypeEntry.Key, out var scanType, out _, out var scanTypeFilter);
 
                 var basicScanType = scanTypeEntry.Value;
+
                 if (!scanCountsByBasicScanType.TryGetValue(basicScanType, out var totalStoredScanCount))
                 {
                     continue;
@@ -389,6 +391,7 @@ namespace MSFileInfoScanner.DatasetStats
                     }
 
                     var scanTypeKey = statEntry.ScanTypeName + SCAN_TYPE_STATS_SEP_CHAR + statEntry.ScanFilterText;
+
                     if (summaryStats.ScanTypeStats.ContainsKey(scanTypeKey))
                     {
                         summaryStats.ScanTypeStats[scanTypeKey]++;
@@ -609,6 +612,7 @@ namespace MSFileInfoScanner.DatasetStats
                 {
                     // Parse the data in scanStats to compute the bulk values
                     var success = ComputeScanStatsSummary(scanStats, out summaryStats);
+
                     if (!success)
                     {
                         ReportError("ComputeScanStatsSummary returned false; unable to continue in CreateDatasetInfoXML");
@@ -653,6 +657,7 @@ namespace MSFileInfoScanner.DatasetStats
                 writer.WriteStartElement("DatasetInfo");
 
                 writer.WriteStartElement("Dataset");
+
                 if (datasetInfo.DatasetID > 0)
                 {
                     writer.WriteAttributeString("DatasetID", datasetInfo.DatasetID.ToString());
@@ -678,6 +683,7 @@ namespace MSFileInfoScanner.DatasetStats
                 writer.WriteStartElement("AcquisitionInfo");
 
                 var scanCountTotal = summaryStats.MSStats.ScanCount + summaryStats.MSnStats.ScanCount;
+
                 if (scanCountTotal == 0 && datasetInfo.ScanCount > 0)
                 {
                     scanCountTotal = datasetInfo.ScanCount;
@@ -868,6 +874,7 @@ namespace MSFileInfoScanner.DatasetStats
 
                 // Define the path to the extended scan stats file
                 var scanStatsFile = MSFileInfoScanner.GetFileInfo(scanStatsFilePath);
+
                 if (scanStatsFile.DirectoryName == null)
                 {
                     ReportError("Unable to determine the parent directory for " + scanStatsFilePath);
@@ -1070,6 +1077,7 @@ namespace MSFileInfoScanner.DatasetStats
             if (indexMatch >= 0)
             {
                 scanFilterText = scanTypeKey.Substring(indexMatch + SCAN_TYPE_STATS_SEP_CHAR.Length);
+
                 if (indexMatch > 0)
                 {
                     scanType = scanTypeKey.Substring(0, indexMatch);
@@ -1211,6 +1219,7 @@ namespace MSFileInfoScanner.DatasetStats
                 ErrorMessage = string.Empty;
 
                 DatasetSummaryStats summaryStats;
+
                 if (scanStats == mDatasetScanStats)
                 {
                     summaryStats = GetDatasetSummaryStats();
@@ -1219,6 +1228,7 @@ namespace MSFileInfoScanner.DatasetStats
                 {
                     // Parse the data in scanStats to compute the bulk values
                     var summarySuccess = ComputeScanStatsSummary(scanStats, out summaryStats);
+
                     if (!summarySuccess)
                     {
                         ReportError("ComputeScanStatsSummary returned false; unable to continue in UpdateDatasetStatsTextFile");
@@ -1375,10 +1385,12 @@ namespace MSFileInfoScanner.DatasetStats
                     continue;
 
                 scanCountForMSLevel++;
+
                 if (scan.IonCount == 0 && scan.IonCountRaw == 0)
                     continue;
 
                 scanCountWithData++;
+
                 if (scan.MzMin > requiredMzMin)
                 {
                     scanCountInvalid++;
@@ -1386,6 +1398,7 @@ namespace MSFileInfoScanner.DatasetStats
             }
 
             string spectraType;
+
             if (msLevel == 2)
                 spectraType = "MS2";
             else if (msLevel == 3)

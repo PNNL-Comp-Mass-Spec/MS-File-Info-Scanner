@@ -75,6 +75,7 @@ namespace MSFileInfoScanner.Plotting
             const string PYTHON_PLOT_SCRIPT_NAME = "MSFileInfoScanner_Plotter.py";
 
             var exeDirectoryPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
             if (exeDirectoryPath == null)
             {
                 OnErrorEvent("Unable to determine the path to the directory with the MSFileInfoScanner executable or DLL");
@@ -100,6 +101,7 @@ namespace MSFileInfoScanner.Plotting
             foreach (var directoryPath in directoriesToCheck)
             {
                 var candidateFile = MSFileInfoScanner.GetFileInfo(Path.Combine(directoryPath, PYTHON_PLOT_SCRIPT_NAME));
+
                 if (!candidateFile.Exists)
                     continue;
 
@@ -139,6 +141,7 @@ namespace MSFileInfoScanner.Plotting
             foreach (var directoryPath in pathsToCheck)
             {
                 var exePath = FindPythonExe(directoryPath);
+
                 if (string.IsNullOrWhiteSpace(exePath))
                     continue;
 
@@ -156,6 +159,7 @@ namespace MSFileInfoScanner.Plotting
         private static string FindPythonExe(string directoryPath)
         {
             var directory = new DirectoryInfo(directoryPath);
+
             if (!directory.Exists)
                 return string.Empty;
 
@@ -168,6 +172,7 @@ namespace MSFileInfoScanner.Plotting
             foreach (var subDirectory in subDirectories)
             {
                 var files = subDirectory.GetFiles("python.exe");
+
                 if (files.Length == 0)
                     continue;
 
@@ -266,6 +271,7 @@ namespace MSFileInfoScanner.Plotting
             OnErrorEvent("{0}; Python not found", currentTask);
 
             var debugMsg = "Paths searched:";
+
             foreach (var item in PythonPathsToCheck())
             {
                 debugMsg += "\n  " + item;
@@ -295,6 +301,7 @@ namespace MSFileInfoScanner.Plotting
             {
                 // Confirm that the PNG file was created, then rename it
                 var pngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(workDir.FullName, Path.GetFileNameWithoutExtension(exportFile.Name) + ".png"));
+
                 if (!pngFile.Exists)
                 {
                     OnErrorEvent("Plot file not found: {0}", pngFile.FullName);
@@ -305,6 +312,7 @@ namespace MSFileInfoScanner.Plotting
                 newFileName = baseFileName.Substring(0, baseFileName.Length - TMP_FILE_SUFFIX.Length) + ".png";
 
                 var finalPngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(workDir.FullName, newFileName));
+
                 if (finalPngFile.Exists)
                     finalPngFile.Delete();
 

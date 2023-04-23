@@ -207,6 +207,7 @@ namespace MSFileInfoScanner.Readers
                 // If we cannot find any zip files, return false
 
                 var zipFiles = PathUtils.FindFilesWildcard(datasetDirectory, ZIPPED_IMAGING_FILE_SEARCH_SPEC);
+
                 if (zipFiles.Count == 0)
                 {
                     // 0_R*.zip files not found

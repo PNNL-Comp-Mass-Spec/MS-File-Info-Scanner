@@ -126,6 +126,7 @@ namespace MSFileInfoScanner.Readers
                     }
 
                     var targetIndex = 0;
+
                     for (var ionIndex = 0; ionIndex < ionCount; ionIndex++)
                     {
                         if (mzList[ionIndex] <= 0)
@@ -153,6 +154,7 @@ namespace MSFileInfoScanner.Readers
                     // For now, this just computes the average intensity for each scan and then computes and overall average intensity value
 
                     double intensitySum = 0;
+
                     for (var ionIndex = 0; ionIndex < ionCount; ionIndex++)
                     {
                         intensitySum += intensityList[ionIndex];
@@ -335,6 +337,7 @@ namespace MSFileInfoScanner.Readers
                     var nonZeroPointsInFrame = uimfReader.GetCountPerFrame(frameNumber);
 
                     int msLevel;
+
                     if (frameParams.FrameType == UIMFData.FrameType.MS2)
                     {
                         msLevel = 2;
@@ -348,6 +351,7 @@ namespace MSFileInfoScanner.Readers
                     // This will be zero in older .UIMF files, or in files converted from Agilent .D directories
                     // In newer files, it is the number of minutes since 12:00 am
                     frameStartTimeCurrent = frameParams.GetValueDouble(FrameParamKeyType.StartTimeMinutes);
+
                     if (masterFrameNumIndex == 0 || frameStartTimeInitial < -0.9)
                     {
                         frameStartTimeInitial = frameStartTimeCurrent;
@@ -380,10 +384,13 @@ namespace MSFileInfoScanner.Readers
                         }
 
                         var pressure = frameParams.GetValueDouble(FrameParamKeyType.PressureBack);
+
                         if (Math.Abs(pressure) < float.Epsilon)
                             pressure = frameParams.GetValueDouble(FrameParamKeyType.RearIonFunnelPressure);
+
                         if (Math.Abs(pressure) < float.Epsilon)
                             pressure = frameParams.GetValueDouble(FrameParamKeyType.IonFunnelTrapPressure);
+
                         if (Math.Abs(pressure) < float.Epsilon)
                             pressure = frameParams.GetValueDouble(FrameParamKeyType.PressureFront);
 
@@ -482,6 +489,7 @@ namespace MSFileInfoScanner.Readers
                                 }
 
                                 var targetIndex = 0;
+
                                 for (var ionIndex = 0; ionIndex < ionCount; ionIndex++)
                                 {
                                     if (mzList[ionIndex] > 0)
@@ -530,6 +538,7 @@ namespace MSFileInfoScanner.Readers
                     continue;
 
                 lastProgressTime = DateTime.UtcNow;
+
                 if (progressThresholdSeconds < 30)
                     progressThresholdSeconds += 2;
 
@@ -716,6 +725,7 @@ namespace MSFileInfoScanner.Readers
 
                     // NumFrames is the total number of frames in the file (for all frame types)
                     datasetFileInfo.ScanCount = globalParams.NumFrames;
+
                     if (masterFrameNumList.Length > datasetFileInfo.ScanCount)
                     {
                         datasetFileInfo.ScanCount = masterFrameNumList.Length;
@@ -736,6 +746,7 @@ namespace MSFileInfoScanner.Readers
 
                         var frameIndex = masterFrameNumList.Length - 1;
                         double endTime = 0;
+
                         while (frameIndex >= 0)
                         {
                             frameParams = uimfReader.GetFrameParams(masterFrameNumList[frameIndex]);
@@ -808,10 +819,12 @@ namespace MSFileInfoScanner.Readers
                             // Check for this and remove them
 
                             var frameCountRemoved = 0;
+
                             while (Math.Abs(startTimes[startTimes.Count - 1]) < float.Epsilon)
                             {
                                 startTimes.RemoveAt(startTimes.Count - 1);
                                 frameCountRemoved++;
+
                                 if (startTimes.Count == 0)
                                     break;
                             }
@@ -858,10 +871,12 @@ namespace MSFileInfoScanner.Readers
                                 var match = dcompMatcher.Match(uimfFile.Name);
 
                                 DateTime fileModificationTime;
+
                                 if (match.Success && uimfFile.DirectoryName != null)
                                 {
                                     var baseName = match.Groups["BaseName"].Value;
                                     var parentFile = MSFileInfoScanner.GetFileInfo(Path.Combine(uimfFile.DirectoryName, baseName + UIMF_FILE_EXTENSION));
+
                                     if (parentFile.Exists && parentFile.LastWriteTime < uimfFile.LastWriteTime)
                                     {
                                         OnWarningEvent(
@@ -883,6 +898,7 @@ namespace MSFileInfoScanner.Readers
                                 if (globalParamsHasValidDateStarted && fileModificationTime > datasetFileInfo.AcqTimeStart)
                                 {
                                     var apparentRuntimeMinutes = fileModificationTime.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes;
+
                                     if (apparentRuntimeMinutes / 60.0 < 6)
                                     {
                                         // Run time is less than 6 hours; update AcqTimeEnd

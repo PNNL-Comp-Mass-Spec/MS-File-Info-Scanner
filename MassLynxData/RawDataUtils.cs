@@ -60,6 +60,7 @@ namespace MSFileInfoScanner.MassLynxData
             else
             {
                 thisMask = 0;
+
                 for (var bitIndex = startBit; bitIndex <= endBit; bitIndex++)
                 {
                     thisMask += (long)Math.Pow(2, bitIndex);

@@ -353,6 +353,7 @@ namespace MSFileInfoScannerInterfaces
             set
             {
                 mCheckFileIntegrity = value;
+
                 if (mCheckFileIntegrity)
                 {
                     // Make sure Cache Files are enabled

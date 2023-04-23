@@ -103,6 +103,7 @@ namespace MSFileInfoScanner.Readers
             {
                 // Open the acquisition method file
                 var filePath = Path.Combine(directoryPath, AGILENT_ACQ_METHOD_FILE);
+
                 if (!File.Exists(filePath))
                 {
                     return false;
@@ -139,6 +140,7 @@ namespace MSFileInfoScanner.Readers
                         }
 
                         bool matchSuccess;
+
                         if (runTimeTextLabels[key].MatchLineStart)
                         {
                             matchSuccess = dataLine.StartsWith(key);
@@ -193,6 +195,7 @@ namespace MSFileInfoScanner.Readers
             {
                 // Open the GC.ini file
                 var filePath = Path.Combine(directoryPath, AGILENT_GC_INI_FILE);
+
                 if (!File.Exists(filePath))
                 {
                     return false;
@@ -213,6 +216,7 @@ namespace MSFileInfoScanner.Readers
 
                     // Runtime is the value after the equals sign
                     var splitLine = dataLine.Split('=');
+
                     if (splitLine.Length <= 1)
                     {
                         continue;
@@ -370,6 +374,7 @@ namespace MSFileInfoScanner.Readers
                 // Use its modification time to get an initial estimate for the acquisition end time
                 // Assign the .MS file's size to .FileSizeBytes
                 var msDatafile = MSFileInfoScanner.GetFileInfo(msDataFilePath);
+
                 if (msDatafile.Exists)
                 {
                     datasetFileInfo.FileSizeBytes = msDatafile.Length;
@@ -407,6 +412,7 @@ namespace MSFileInfoScanner.Readers
 
                     // The timestamp of the acqmeth.txt file or GC.ini file is more accurate than the GC.ini file, so we'll use that
                     var methodFile = MSFileInfoScanner.GetFileInfo(Path.Combine(agilentDFolder.FullName, AGILENT_ACQ_METHOD_FILE));
+
                     if (!methodFile.Exists)
                     {
                         methodFile = MSFileInfoScanner.GetFileInfo(Path.Combine(agilentDFolder.FullName, AGILENT_GC_INI_FILE));

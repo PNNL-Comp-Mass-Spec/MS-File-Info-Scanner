@@ -111,6 +111,7 @@ namespace MSFileInfoScanner.Readers
                     // For now, this just computes the average intensity for each scan and then computes and overall average intensity value
 
                     double intensitySum = 0;
+
                     for (var ionIndex = 0; ionIndex <= massIntensityPairs.GetUpperBound(1); ionIndex++)
                     {
                         intensitySum += massIntensityPairs[1, ionIndex];
@@ -305,6 +306,7 @@ namespace MSFileInfoScanner.Readers
                     continue;
 
                 lastProgressTime = DateTime.UtcNow;
+
                 if (progressThresholdSeconds < 30)
                     progressThresholdSeconds += 2;
 
@@ -313,6 +315,7 @@ namespace MSFileInfoScanner.Readers
                 var elapsedSeconds = DateTime.UtcNow.Subtract(startTime).Seconds;
 
                 int scansPerMinute;
+
                 if (elapsedSeconds > 2)
                     scansPerMinute = (int)Math.Round(scansProcessed / (double)elapsedSeconds, 0);
                 else
@@ -549,6 +552,7 @@ namespace MSFileInfoScanner.Readers
                     devicePlot.RemoveZeroesFromEnds = false;
 
                     float acqLengthMinutes;
+
                     if (datasetFileInfo.AcqTimeEnd > datasetFileInfo.AcqTimeStart)
                         acqLengthMinutes = (float)datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalMinutes;
                     else
@@ -560,6 +564,7 @@ namespace MSFileInfoScanner.Readers
                     {
                         var scanNumber = dataPoint.Key;
                         float scanTimeMinutes;
+
                         if (acqLengthMinutes > 0)
                             scanTimeMinutes = scanNumber / (float)dataCount * acqLengthMinutes;
                         else

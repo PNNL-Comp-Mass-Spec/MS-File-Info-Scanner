@@ -100,6 +100,7 @@ namespace MSFileInfoScanner.Readers
         private int GetScanOrFrameColIndex(IList<string> data, string fileDescription)
         {
             var colIndexScanOrFrameNum = data.IndexOf("frame_num");
+
             if (colIndexScanOrFrameNum < 0)
             {
                 colIndexScanOrFrameNum = data.IndexOf("scan_num");
@@ -137,6 +138,7 @@ namespace MSFileInfoScanner.Readers
             }
 
             var scansFilePath = GetDatasetNameViaPath(isosFile.Name) + DECONTOOLS_SCANS_FILE_SUFFIX;
+
             if (isosFile.Directory != null)
             {
                 scansFilePath = Path.Combine(isosFile.Directory.FullName, scansFilePath);
@@ -202,6 +204,7 @@ namespace MSFileInfoScanner.Readers
                             for (var dataIndex = 0; dataIndex < ionList.Count; dataIndex++)
                             {
                                 tic += ionList[dataIndex].Intensity;
+
                                 if (ionList[dataIndex].Intensity > bpi)
                                 {
                                     bpi = ionList[dataIndex].Intensity;
@@ -377,6 +380,7 @@ namespace MSFileInfoScanner.Readers
                     colIndexScanOrFrameNum = GetScanOrFrameColIndex(dataColumns, "_scans.csv");
 
                     colIndexScanOrFrameTime = dataColumns.IndexOf("frame_time");
+
                     if (colIndexScanOrFrameTime < 0)
                     {
                         colIndexScanOrFrameTime = dataColumns.IndexOf("scan_time");
@@ -422,6 +426,7 @@ namespace MSFileInfoScanner.Readers
                     }
 
                     string scanTypeName;
+
                     if (string.IsNullOrWhiteSpace(scanData.FilterText))
                     {
                         scanData.FilterText = scanData.MSLevel > 1 ? "HMSn" : "HMS";
@@ -474,6 +479,7 @@ namespace MSFileInfoScanner.Readers
             foreach (var columnName in columnMapping.Keys.ToList())
             {
                 var colIndex = dataColumns.IndexOf(columnName);
+
                 if (colIndex >= 0)
                 {
                     columnMapping[columnName] = colIndex;

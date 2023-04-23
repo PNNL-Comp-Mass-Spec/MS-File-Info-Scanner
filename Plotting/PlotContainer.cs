@@ -151,6 +151,7 @@ namespace MSFileInfoScanner.Plotting
                     }
 
                     var success = SaveToFile(newFileInfo, fileFormat, width, height, resolution);
+
                     if (success)
                         successOverall = true;
                 }

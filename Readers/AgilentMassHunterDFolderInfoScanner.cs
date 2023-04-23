@@ -425,6 +425,7 @@ namespace MSFileInfoScanner.Readers
                     if (runStartTime < datasetFileInfo.AcqTimeEnd && datasetFileInfo.AcqTimeEnd.Subtract(runStartTime).TotalDays < 1)
                     {
                         datasetFileInfo.AcqTimeStart = runStartTime;
+
                         if (acquisitionLengthMinutes > 0)
                         {
                             datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(acquisitionLengthMinutes);
@@ -437,6 +438,7 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 var driftTimeMsec = -1.0;
+
                 if (mIsImsData)
                 {
                     // ReSharper disable once CommentTypo
@@ -477,6 +479,7 @@ namespace MSFileInfoScanner.Readers
                 var scanMapper = new double[scanCount];
                 var hasMS1 = false;
                 var hasMSn = false;
+
                 for (var i = 0; i < scanCount; i++)
                 {
                     // NOTE: This does not extract any drift scans for IM-QTOF files.
@@ -486,6 +489,7 @@ namespace MSFileInfoScanner.Readers
                     scanMapper[i] = scan.RetentionTime;
 
                     var scanNumber = scan.ScanID;
+
                     if (mIsImsData)
                     {
                         scanNumber = i + 1;
@@ -588,6 +592,7 @@ namespace MSFileInfoScanner.Readers
                 if (Options.SaveTICAndBPIPlots && mIsImsData && massSpecDataReader.ActualsInformation.IsActualsPresent())
                 {
                     var names = massSpecDataReader.ActualsInformation.GetActualNames();
+
                     if (names.Contains("Drift Tube Pressure"))
                     {
                         massSpecDataReader.ActualsInformation.GetActualValue("Drift Tube Pressure", out var xArray, out var yArray);
@@ -599,9 +604,11 @@ namespace MSFileInfoScanner.Readers
                         {
                             var time = xArray[i];
                             var scanIndex = Array.BinarySearch(scanMapper, time);
+
                             if (scanIndex < 0)
                             {
                                 scanIndex = ~scanIndex;
+
                                 if (scanIndex > 0 && time - scanMapper[scanIndex - 1] < scanMapper[scanIndex] - time)
                                     --scanIndex;
                             }
@@ -670,11 +677,13 @@ namespace MSFileInfoScanner.Readers
                 var deviceInfo = new AgilentDeviceInfo(diDeviceType, id);
 
                 //Console.WriteLine(format, device.ItemArray);
+
                 foreach (var column in columns)
                 {
                     // ReSharper disable StringLiteralTypo
 
                     var value = deviceData[column];
+
                     switch (column.ColumnName.ToLower())
                     {
                         case "deviceid":
@@ -724,6 +733,7 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 deviceInfo.SoftwareVersion = deviceInfo.AgilentDeviceType.ToString();
+
                 if (!string.IsNullOrWhiteSpace(deviceInfo.DriverVersion))
                     deviceInfo.SoftwareVersion += $" {deviceInfo.DriverVersion}";
 
@@ -787,6 +797,7 @@ namespace MSFileInfoScanner.Readers
                     try
                     {
                         var chromatograms = massSpecDataReader.GetChromatogram(filter);
+
                         foreach (var chromatogram in chromatograms)
                         {
                             Console.WriteLine($"Chromatogram: '{chromatogram.ChromatogramType}':'{chromatogram.MSScanType}', Device: '{chromatogram.DeviceType}' '{chromatogram.DeviceName}', Signal: '{chromatogram.SignalName}', '{chromatogram.SignalDescription}'");
@@ -875,6 +886,7 @@ namespace MSFileInfoScanner.Readers
                         var chromData = lcDataReader.GetSignal(signal);
 
                         var description = chromData.SignalDescription;
+
                         if (string.IsNullOrWhiteSpace(description) || !signalFilterList.Any(x =>
                             description.IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1))
                         {
@@ -995,9 +1007,11 @@ namespace MSFileInfoScanner.Readers
             {
                 var time = times[i];
                 var scanIndex = Array.BinarySearch(scanMapper, time);
+
                 if (scanIndex < 0)
                 {
                     scanIndex = ~scanIndex;
+
                     if (scanIndex > 0 && time - scanMapper[scanIndex - 1] < scanMapper[scanIndex] - time)
                         --scanIndex;
                 }
@@ -1018,6 +1032,7 @@ namespace MSFileInfoScanner.Readers
             var scansProcessed = 0;
 
             var scanCount = massSpecDataReader.MSScanFileInformation.TotalScansPresent;
+
             for (var i = 0; i < scanCount; i++)
             {
                 var scan = massSpecDataReader.GetScanRecord(i);
@@ -1082,6 +1097,7 @@ namespace MSFileInfoScanner.Readers
                     continue;
 
                 lastProgressTime = DateTime.UtcNow;
+
                 if (progressThresholdSeconds < 30)
                     progressThresholdSeconds += 2;
 

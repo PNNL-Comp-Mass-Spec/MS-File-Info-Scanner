@@ -149,6 +149,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 success = ValidateDataFolder(massLynxDataDirectoryPath);
+
                 if (success)
                 {
                     acquDate = mMSData.HeaderInfo.AcquDate + " " + mMSData.HeaderInfo.AcquTime;
@@ -184,6 +185,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 success = ValidateDataFolder(massLynxDataDirectoryPath);
+
                 if (success)
                 {
                     headerInfo = mMSData.HeaderInfo;
@@ -283,6 +285,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 success = ValidateDataFolder(massLynxDataDirectoryPath);
+
                 if (success)
                 {
                     if (functionNumber >= 1 && functionNumber <= mMSData.FunctionCount)
@@ -327,6 +330,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 success = ValidateDataFolder(massLynxDataDirectoryPath);
+
                 if (success)
                 {
                     if (functionNumber >= 1 && functionNumber <= mMSData.FunctionCount)
@@ -661,6 +665,7 @@ namespace MSFileInfoScanner.Readers
                     {
                         float startMass;
                         float endMass;
+
                         if (thisMSData.FunctionInfo[functionNumber].ScanCount > 0)
                         {
                             NativeIOGetScanInfo(cleanMassLynxDataFolderPath, thisMSData.FunctionInfo[functionNumber], 1, out _);
@@ -812,6 +817,7 @@ namespace MSFileInfoScanner.Readers
             if (mMSData.FunctionCount == 0 || !mMSData.UserSuppliedDataDirPath.Equals(massLynxDataDirectoryPath, StringComparison.OrdinalIgnoreCase))
             {
                 var numFunctions = LoadMSFunctionInfo(mMSData, massLynxDataDirectoryPath);
+
                 if (numFunctions > 0)
                 {
                     validDataFolder = true;
@@ -984,6 +990,7 @@ namespace MSFileInfoScanner.Readers
             msFunctionInfo.FunctionTypeID = mRawDataUtils.GetFunctionType(nativeFunctionInfo.PackedFunctionInfo);
 
             msFunctionInfo.FunctionType = 0;
+
             switch (msFunctionInfo.FunctionTypeID)
             {
                 case 0:
@@ -1062,6 +1069,7 @@ namespace MSFileInfoScanner.Readers
 
             // Since nativeFunctionInfo.ScanCount is always 0, we need to use NativeIOGetScanCount instead
             var scanCount = NativeIOGetScanCount(dataDirPath, msFunctionInfo);
+
             if (msFunctionInfo.ScanCount != scanCount)
             {
                 // This is unexpected
@@ -1087,6 +1095,7 @@ namespace MSFileInfoScanner.Readers
                 var indexFile = MSFileInfoScanner.GetFileInfo(indexFilePath);
 
                 var numberOfScansInFunction = 0;
+
                 if (indexFile.Exists)
                 {
                     // The ScanCount stored in the function index file is always 0 rather than the correct number of scans
@@ -1238,6 +1247,7 @@ namespace MSFileInfoScanner.Readers
                 scanIndexRecord.ContinuumDataOverride = mRawDataUtils.GetContinuumDataOverride(nativeScanIndexRecord.PackedScanInfo);
                 scanIndexRecord.ScanContainsMolecularMasses = mRawDataUtils.GetContainsMolecularMasses(nativeScanIndexRecord.PackedScanInfo);
                 scanIndexRecord.ScanContainsCalibratedMasses = mRawDataUtils.GetContainsCalibratedMasses(nativeScanIndexRecord.PackedScanInfo);
+
                 if (nativeScanIndexRecord.PackedScanInfo != Math.Abs(nativeScanIndexRecord.PackedScanInfo))
                 {
                     scanIndexRecord.ScanOverload = true;
@@ -1293,6 +1303,7 @@ namespace MSFileInfoScanner.Readers
                 if (calibrationParameters[calIndex].StartsWith("T", StringComparison.OrdinalIgnoreCase))
                 {
                     calibrationParameters[calIndex] = calibrationParameters[calIndex].Substring(1);
+
                     if (short.TryParse(calibrationParameters[calIndex], out var calTypeID))
                     {
                         calibrationTypeID = calTypeID;
@@ -1347,10 +1358,12 @@ namespace MSFileInfoScanner.Readers
                     var keyValue = dataLine.Substring(colonIndex + 1).Trim();
 
                     int functionNumber;
+
                     if (dataLine.ToUpper().StartsWith(CAL_FUNCTION_NAME))
                     {
                         // Calibration equation for one of the functions
                         functionNumber = CIntSafe(dataLine.Substring(CAL_FUNCTION_NAME.Length, colonIndex - CAL_FUNCTION_NAME.Length));
+
                         if (functionNumber >= 1 && functionNumber <= thisMSData.FunctionCount)
                         {
                             NativeIOParseCalibrationCoefficients(
@@ -1371,6 +1384,7 @@ namespace MSFileInfoScanner.Readers
                     else if (dataLine.ToUpper().StartsWith(CAL_STD_DEV_FUNCTION_NAME))
                     {
                         functionNumber = CIntSafe(dataLine.Substring(CAL_STD_DEV_FUNCTION_NAME.Length, colonIndex - CAL_STD_DEV_FUNCTION_NAME.Length));
+
                         if (functionNumber >= 1 && functionNumber <= thisMSData.FunctionCount)
                         {
                             if (double.TryParse(keyValue, out var calStdDev))

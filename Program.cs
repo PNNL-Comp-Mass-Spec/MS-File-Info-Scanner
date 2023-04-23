@@ -181,21 +181,25 @@ namespace MSFileInfoScanner
 
             // Assure that the user did not provide an old-style XML-based parameter file
             var paramFile = MSFileInfoScanner.GetFileInfo(parameterFilePath);
+
             if (!paramFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
                 return false;
 
             using var paramFileReader = new StreamReader(new FileStream(paramFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
             var linesRead = 0;
+
             while (!paramFileReader.EndOfStream && linesRead < 5)
             {
                 var dataLine = paramFileReader.ReadLine();
+
                 if (string.IsNullOrWhiteSpace(dataLine))
                     continue;
 
                 linesRead++;
 
                 var trimmedLine = dataLine.Trim();
+
                 if (trimmedLine.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase) ||
                     trimmedLine.StartsWith("<sections", StringComparison.OrdinalIgnoreCase))
                 {

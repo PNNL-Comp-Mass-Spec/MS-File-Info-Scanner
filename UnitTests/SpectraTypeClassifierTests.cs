@@ -117,6 +117,7 @@ namespace MSFileInfoScannerUnitTests
             testValues.Sort();
 
             Console.WriteLine("Compute the median of the following values");
+
             foreach (var value in testValues)
             {
                 Console.WriteLine(value);

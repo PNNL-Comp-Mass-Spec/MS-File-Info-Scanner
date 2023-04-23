@@ -342,6 +342,7 @@ namespace MSFileInfoScanner.Readers
                     var msLevel = 0;
 
                     string scanTypeName;
+
                     switch (splitLine[1])
                     {
                         case "MS":
@@ -545,6 +546,7 @@ namespace MSFileInfoScanner.Readers
                     var elutionTime = (float)(scanDataSorted[index].RT / 60.0);
 
                     string scanTypeName;
+
                     if (string.IsNullOrEmpty(scanDataSorted[index].SpotNumber))
                     {
                         scanTypeName = "HMS";
@@ -837,6 +839,7 @@ namespace MSFileInfoScanner.Readers
                 foreach (var instrumentDataFile in instrumentDataFiles)
                 {
                     var candidateFiles = PathUtils.FindFilesWildcard(datasetDirectory, instrumentDataFile);
+
                     if (candidateFiles.Count == 0)
                         continue;
 
@@ -1011,6 +1014,7 @@ namespace MSFileInfoScanner.Readers
                 if (!serOrFidFile.Exists)
                 {
                     serOrFidFile = MSFileInfoScanner.GetFileInfo(Path.Combine(dotDFolder.FullName, "fid"));
+
                     if (!serOrFidFile.Exists)
                         return false;
                 }
@@ -1110,6 +1114,7 @@ namespace MSFileInfoScanner.Readers
                     }
 
                     const int msLevel = 1;
+
                     if (!scanElutionTimeMap.TryGetValue(scanNumber, out var elutionTime))
                     {
                         // We're assigning an arbitrary elution time here, assuming one scan per second
@@ -1142,6 +1147,7 @@ namespace MSFileInfoScanner.Readers
                         continue;
 
                     lastProgressTime = DateTime.UtcNow;
+
                     if (progressThresholdSeconds < 30)
                         progressThresholdSeconds += 2;
 
@@ -1184,6 +1190,7 @@ namespace MSFileInfoScanner.Readers
                 var metaDataValue = ReadDbString(drReader, "Value");
 
                 bool newEntry;
+
                 if (scanData.TryGetValue(scanGuid, out var scanInfo))
                 {
                     newEntry = false;
@@ -1233,6 +1240,7 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 var dataValue = drReader[columnName].ToString();
+
                 if (!string.IsNullOrEmpty(dataValue))
                 {
                     if (int.TryParse(dataValue, out var numericValue))
