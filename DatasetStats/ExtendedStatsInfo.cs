@@ -37,6 +37,11 @@ namespace MSFileInfoScanner.DatasetStats
         public string MonoisotopicMZ { get; set; }
 
         /// <summary>
+        /// The window size, in m/z, of ions selected for MS/MS fragmentation
+        /// </summary>
+        public string IsolationWindowWidthMZ { get; set; }
+
+        /// <summary>
         /// Collision mode
         /// </summary>
         public string CollisionMode { get; set; }
@@ -61,6 +66,7 @@ namespace MSFileInfoScanner.DatasetStats
             ScanEvent = string.Empty;
             ChargeState = string.Empty;
             MonoisotopicMZ = string.Empty;
+            IsolationWindowWidthMZ = string.Empty;
             CollisionMode = string.Empty;
             ScanFilterText = string.Empty;
         }

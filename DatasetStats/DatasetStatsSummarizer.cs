@@ -132,10 +132,8 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="scanStats"></param>
         public void AddDatasetScan(ScanStatsEntry scanStats)
         {
-            if (!mDatasetScanNumbers.Contains(scanStats.ScanNumber))
-            {
-                mDatasetScanNumbers.Add(scanStats.ScanNumber);
-            }
+            // Add the scan number (if not yet present)
+            mDatasetScanNumbers.Add(scanStats.ScanNumber);
 
             mDatasetScanStats.Add(scanStats);
             mDatasetSummaryStatsUpToDate = false;
@@ -973,6 +971,7 @@ namespace MSFileInfoScanner.DatasetStats
                     ScanStatsEntry.SCAN_STATS_COL_SCAN_EVENT,
                     ScanStatsEntry.SCAN_STATS_COL_CHARGE_STATE,
                     ScanStatsEntry.SCAN_STATS_COL_MONOISOTOPIC_MZ,
+                    ScanStatsEntry.SCAN_STATS_COL_MS2_ISOLATION_WIDTH,
                     ScanStatsEntry.SCAN_STATS_COL_COLLISION_MODE,
                     ScanStatsEntry.SCAN_STATS_COL_SCAN_FILTER_TEXT
                 };
@@ -1043,6 +1042,7 @@ namespace MSFileInfoScanner.DatasetStats
                     dataValues.Add(scanStatsEntry.ExtendedScanInfo.ScanEvent);
                     dataValues.Add(scanStatsEntry.ExtendedScanInfo.ChargeState);
                     dataValues.Add(scanStatsEntry.ExtendedScanInfo.MonoisotopicMZ);
+                    dataValues.Add(scanStatsEntry.ExtendedScanInfo.IsolationWindowWidthMZ);
                     dataValues.Add(scanStatsEntry.ExtendedScanInfo.CollisionMode);
                     dataValues.Add(scanStatsEntry.ExtendedScanInfo.ScanFilterText);
 

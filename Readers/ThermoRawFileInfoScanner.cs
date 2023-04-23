@@ -690,6 +690,12 @@ namespace MSFileInfoScanner.Readers
                         continue;
                     }
 
+                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_MS2_ISOLATION_WIDTH,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        extendedScanInfo.IsolationWindowWidthMZ = scanEvent.Value;
+                        continue;
+                    }
 
                     if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_COLLISION_MODE,
                                       StringComparison.OrdinalIgnoreCase))

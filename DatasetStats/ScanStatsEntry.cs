@@ -10,8 +10,8 @@ namespace MSFileInfoScanner.DatasetStats
         public const string SCAN_STATS_COL_SCAN_EVENT = "Scan Event";
         public const string SCAN_STATS_COL_CHARGE_STATE = "Charge State";
         public const string SCAN_STATS_COL_MONOISOTOPIC_MZ = "Monoisotopic M/Z";
+        public const string SCAN_STATS_COL_MS2_ISOLATION_WIDTH = "MS2 Isolation Width";
         public const string SCAN_STATS_COL_COLLISION_MODE = "Collision Mode";
-
         public const string SCAN_STATS_COL_SCAN_FILTER_TEXT = "Scan Filter Text";
 
         /// <summary>
