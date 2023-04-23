@@ -4,6 +4,10 @@ namespace MSFileInfoScanner.DatasetStats
 {
     public class DatasetSummaryStats
     {
+        /// <summary>
+        /// Number of DIA spectra
+        /// </summary>
+        public int DIAScanCount { get; set; }
 
         /// <summary>
         /// Maximum elution time, in minutes
@@ -51,6 +55,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public void Clear()
         {
+            DIAScanCount = 0;
             ElutionTimeMax = 0;
             MSStats.Clear();
             MSnStats.Clear();

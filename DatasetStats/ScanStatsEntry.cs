@@ -89,6 +89,11 @@ namespace MSFileInfoScanner.DatasetStats
         public int IonCountRaw { get; set; }
 
         /// <summary>
+        /// True if this is a Data Independent Acquisition (DIA) scan
+        /// </summary>
+        public bool IsDIA { get; set; }
+
+        /// <summary>
         /// Smallest m/z value in the scan
         /// </summary>
         public double MzMin { get; set; }

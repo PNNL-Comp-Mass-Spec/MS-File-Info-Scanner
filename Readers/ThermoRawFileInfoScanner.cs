@@ -222,12 +222,14 @@ namespace MSFileInfoScanner.Readers
                                 scanInfo.TotalIonCurrent);
                         }
 
+                        var includeParentMZ = scanInfo.IsDIA;
+
                         var scanStatsEntry = new ScanStatsEntry
                         {
                             ScanNumber = scanNumber,
                             ScanType = scanInfo.MSLevel,
-                            ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText),
-                            ScanFilterText = XRawFileIO.MakeGenericThermoScanFilter(scanInfo.FilterText),
+                            ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText, scanInfo.IsDIA),
+                            ScanFilterText = XRawFileIO.MakeGenericThermoScanFilter(scanInfo.FilterText, includeParentMZ),
                             ElutionTime = scanInfo.RetentionTime.ToString("0.0###"),
                             TotalIonIntensity = StringUtilities.ValueToString(scanInfo.TotalIonCurrent, 5),
                             BasePeakIntensity = StringUtilities.ValueToString(scanInfo.BasePeakIntensity, 5),
@@ -236,7 +238,8 @@ namespace MSFileInfoScanner.Readers
                             IonCount = scanInfo.NumPeaks,
                             IonCountRaw = scanInfo.NumPeaks,
                             MzMin = scanInfo.LowMass,
-                            MzMax = scanInfo.HighMass
+                            MzMax = scanInfo.HighMass,
+                            IsDIA = scanInfo.IsDIA
                         };
 
                         // Store the ScanEvent values in .ExtendedScanInfo

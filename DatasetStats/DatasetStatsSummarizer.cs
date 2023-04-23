@@ -46,6 +46,10 @@ namespace MSFileInfoScanner.DatasetStats
 
         private DatasetSummaryStats mDatasetSummaryStats;
 
+        /// <summary>
+        /// Number of DIA spectra
+        /// </summary>
+        private int ScanCountDIA;
 
         /// <summary>
         /// Number of HMS spectra
@@ -103,7 +107,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public DatasetStatsSummarizer()
         {
-            FileDate = "September 23, 2021";
+            FileDate = "April 22, 2023";
 
             ErrorMessage = string.Empty;
 
@@ -253,6 +257,7 @@ namespace MSFileInfoScanner.DatasetStats
             summaryStats.MSStats.ScanCount = Math.Max(summaryStats.MSStats.ScanCount, ScanCountHMS + ScanCountMS);
             summaryStats.MSnStats.ScanCount = Math.Max(summaryStats.MSnStats.ScanCount, ScanCountHMSn + ScanCountMSn);
             summaryStats.ElutionTimeMax = Math.Max(summaryStats.ElutionTimeMax, ElutionTimeMax);
+            summaryStats.DIAScanCount = Math.Max(summaryStats.DIAScanCount, ScanCountDIA);
         }
 
         private double AssureNumeric(double value)
@@ -364,10 +369,14 @@ namespace MSFileInfoScanner.DatasetStats
 
             CreateEmptyScanStatsFiles = true;
 
+            ScanCountDIA = 0;
+
             ScanCountHMS = 0;
             ScanCountHMSn = 0;
+
             ScanCountMS = 0;
             ScanCountMSn = 0;
+
             ElutionTimeMax = 0;
         }
 
@@ -421,6 +430,7 @@ namespace MSFileInfoScanner.DatasetStats
                                                       bpiListMS);
                     }
 
+                    // The scan type key is of the form "ScanTypeName::###::ScanFilterText"
                     var scanTypeKey = statEntry.ScanTypeName + SCAN_TYPE_STATS_SEP_CHAR + statEntry.ScanFilterText;
 
                     if (summaryStats.ScanTypeStats.ContainsKey(scanTypeKey))
@@ -430,6 +440,11 @@ namespace MSFileInfoScanner.DatasetStats
                     else
                     {
                         summaryStats.ScanTypeStats.Add(scanTypeKey, 1);
+                    }
+
+                    if (statEntry.IsDIA)
+                    {
+                        summaryStats.DIAScanCount++;
                     }
                 }
 
@@ -724,6 +739,8 @@ namespace MSFileInfoScanner.DatasetStats
 
                 writer.WriteElementString("ScanCountMS", summaryStats.MSStats.ScanCount.ToString());
                 writer.WriteElementString("ScanCountMSn", summaryStats.MSnStats.ScanCount.ToString());
+                writer.WriteElementString("ScanCountDIA", summaryStats.DIAScanCount.ToString());
+
                 writer.WriteElementString("Elution_Time_Max", summaryStats.ElutionTimeMax.ToString("0.00"));
 
                 var acqTimeMinutes = datasetInfo.AcqTimeEnd.Subtract(datasetInfo.AcqTimeStart).TotalMinutes;
@@ -923,7 +940,7 @@ namespace MSFileInfoScanner.DatasetStats
                     break;
                 }
 
-                // Write the headers
+                // Write the ScanStats headers
                 var headerNames = new List<string>
                 {
                     "Dataset",
@@ -946,6 +963,7 @@ namespace MSFileInfoScanner.DatasetStats
 
                 scanStatsWriter.WriteLine(string.Join("\t", headerNames));
 
+                // Write the extended scan stats headers
                 var headerNamesEx = new List<string>
                 {
                     "Dataset",
@@ -1120,7 +1138,7 @@ namespace MSFileInfoScanner.DatasetStats
                 scanFilterText = string.Empty;
             }
 
-            var dashIndex = scanType.IndexOf('-');
+            var dashIndex = scanType.LastIndexOf('-');
 
             if (dashIndex > 0 && dashIndex < scanType.Length - 1)
             {
@@ -1168,13 +1186,16 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="scanCountHMSn"></param>
         /// <param name="scanCountMS"></param>
         /// <param name="scanCountMSn"></param>
+        /// <param name="scanCountDIA"></param>
         /// <param name="elutionTimeMax"></param>
-        public void StoreScanTypeTotals(int scanCountHMS, int scanCountHMSn, int scanCountMS, int scanCountMSn, double elutionTimeMax)
+        public void StoreScanTypeTotals(int scanCountHMS, int scanCountHMSn, int scanCountMS, int scanCountMSn, int scanCountDIA, double elutionTimeMax)
         {
             ScanCountHMS = scanCountHMS;
             ScanCountHMSn = scanCountHMSn;
             ScanCountMS = scanCountMS;
             ScanCountMSn = scanCountMSn;
+            ScanCountDIA = scanCountDIA;
+
             ElutionTimeMax = elutionTimeMax;
         }
 

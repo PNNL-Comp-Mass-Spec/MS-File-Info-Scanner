@@ -743,6 +743,7 @@ namespace MSFileInfoScanner.Readers
             mDatasetStatsSummarizer.StoreScanTypeTotals(
                 parserInfo.ScanCountHMS, parserInfo.ScanCountHMSn,
                 parserInfo.ScanCountMS, parserInfo.ScanCountMSn,
+                parserInfo.ScanCountDIA,
                 parserInfo.RuntimeMinutes);
         }
 
@@ -790,7 +791,8 @@ namespace MSFileInfoScanner.Readers
                     out var ionInjectionTime,
                     out var scanFilterText,
                     out var lowMass,
-                    out var highMass);
+                    out var highMass,
+                    out var isolationWindowWidth);
 
                 string genericScanFilter;
 
@@ -807,8 +809,17 @@ namespace MSFileInfoScanner.Readers
                     }
                     else
                     {
-                        genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanFilterText);
-                        scanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanFilterText);
+                        var isDIA = msLevels[spectrumIndex] > 1 && isolationWindowWidth >= 6.5;
+
+                        if (isDIA)
+                        {
+                            parserInfo.ScanCountDIA++;
+                        }
+
+                        var includeParentMZ = isDIA;
+
+                        scanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanFilterText, isDIA);
+                        genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanFilterText, includeParentMZ);
 
                         isHighRes = msLevels[spectrumIndex] > 1
                             ? scanStatsEntry.ScanTypeName.IndexOf("HMSn", StringComparison.OrdinalIgnoreCase) >= 0

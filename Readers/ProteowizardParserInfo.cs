@@ -55,6 +55,7 @@ namespace MSFileInfoScanner.Readers
         public int ScanCountHMSn { get; set; }
         public int ScanCountMS { get; set; }
         public int ScanCountMSn { get; set; }
+        public int ScanCountDIA { get; set; }
 
         /// <summary>
         /// Constructor
@@ -81,6 +82,7 @@ namespace MSFileInfoScanner.Readers
            ScanCountHMSn = 0;
            ScanCountMS = 0;
            ScanCountMSn = 0;
+           ScanCountDIA = 0;
         }
     }
 }
