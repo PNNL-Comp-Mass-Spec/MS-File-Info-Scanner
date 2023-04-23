@@ -455,15 +455,11 @@ namespace MSFileInfoScanner.DatasetStats
             ICollection<double> ticList,
             ICollection<double> bpiList)
         {
-            if (!string.IsNullOrWhiteSpace(scanStats.ElutionTime))
+            if (!string.IsNullOrWhiteSpace(scanStats.ElutionTime) &&
+                double.TryParse(scanStats.ElutionTime, out var elutionTime) &&
+                elutionTime > summaryStats.ElutionTimeMax)
             {
-                if (double.TryParse(scanStats.ElutionTime, out var elutionTime))
-                {
-                    if (elutionTime > summaryStats.ElutionTimeMax)
-                    {
-                        summaryStats.ElutionTimeMax = elutionTime;
-                    }
-                }
+                summaryStats.ElutionTimeMax = elutionTime;
             }
 
             if (double.TryParse(scanStats.TotalIonIntensity, out var tic))

@@ -397,45 +397,45 @@ namespace MSFileInfoScanner.Readers
                 ErrorCode = iMSFileInfoScanner.MSFileScannerErrorCodes.ThermoRawFileReaderError;
                 readError = true;
 
-                if (!MSFileInfoScanner.GetAppDirectoryPath().Substring(0, 2).Equals(rawFile.FullName.Substring(0, 2), StringComparison.InvariantCultureIgnoreCase))
+                var appDirectoryPathRoot = MSFileInfoScanner.GetAppDirectoryPath().Substring(0, 2);
+                var rawFilePathRoot = rawFile.FullName.Substring(0, 2);
+
+                if (!appDirectoryPathRoot.Equals(rawFilePathRoot, StringComparison.OrdinalIgnoreCase) && Options.CopyFileLocalOnReadError)
                 {
-                    if (Options.CopyFileLocalOnReadError)
+                    // Copy the file locally and try again
+
+                    try
                     {
-                        // Copy the file locally and try again
+                        dataFilePathLocal = Path.Combine(MSFileInfoScanner.GetAppDirectoryPath(), Path.GetFileName(dataFilePath));
 
-                        try
+                        if (!dataFilePathLocal.Equals(dataFilePath, StringComparison.OrdinalIgnoreCase))
                         {
-                            dataFilePathLocal = Path.Combine(MSFileInfoScanner.GetAppDirectoryPath(), Path.GetFileName(dataFilePath));
+                            OnDebugEvent("Copying file {0} to the working directory", Path.GetFileName(dataFilePath));
 
-                            if (!dataFilePathLocal.Equals(dataFilePath, StringComparison.InvariantCultureIgnoreCase))
+                            File.Copy(dataFilePath, dataFilePathLocal, true);
+
+                            dataFilePath = string.Copy(dataFilePathLocal);
+                            deleteLocalFile = true;
+
+                            // Update rawFile then try to re-open
+                            rawFile = MSFileInfoScanner.GetFileInfo(dataFilePath);
+
+                            if (!xcaliburAccessor.OpenRawFile(rawFile.FullName))
                             {
-                                OnDebugEvent("Copying file {0} to the working directory", Path.GetFileName(dataFilePath));
-
-                                File.Copy(dataFilePath, dataFilePathLocal, true);
-
-                                dataFilePath = string.Copy(dataFilePathLocal);
-                                deleteLocalFile = true;
-
-                                // Update rawFile then try to re-open
-                                rawFile = MSFileInfoScanner.GetFileInfo(dataFilePath);
-
-                                if (!xcaliburAccessor.OpenRawFile(rawFile.FullName))
-                                {
-                                    // File open failed
-                                    OnErrorEvent("Call to .OpenRawFile failed for: {0}", rawFile.FullName);
-                                    ErrorCode = iMSFileInfoScanner.MSFileScannerErrorCodes.ThermoRawFileReaderError;
-                                    readError = true;
-                                }
-                                else
-                                {
-                                    readError = false;
-                                }
+                                // File open failed
+                                OnErrorEvent("Call to .OpenRawFile failed for: {0}", rawFile.FullName);
+                                ErrorCode = iMSFileInfoScanner.MSFileScannerErrorCodes.ThermoRawFileReaderError;
+                                readError = true;
+                            }
+                            else
+                            {
+                                readError = false;
                             }
                         }
-                        catch (Exception)
-                        {
-                            readError = true;
-                        }
+                    }
+                    catch (Exception)
+                    {
+                        readError = true;
                     }
                 }
             }
