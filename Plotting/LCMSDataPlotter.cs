@@ -161,6 +161,7 @@ namespace MSFileInfoScanner.Plotting
                 // See, for example scan ? in BLI_CSF_2C09_2020031.raw
 
                 var mzFilterRequired = false;
+
                 for (var index = 0; index < ionCount; index++)
                 {
                     if (massIntensityPairs[0, index] >= TINY_MZ_THRESHOLD && massIntensityPairs[0, index] < HUGE_MZ_THRESHOLD)
@@ -169,6 +170,7 @@ namespace MSFileInfoScanner.Plotting
                     }
 
                     mInvalidMzWarnCount++;
+
                     if (mInvalidMzWarnCount <= 10)
                     {
                         // Example messages
@@ -232,6 +234,7 @@ namespace MSFileInfoScanner.Plotting
                         {
                             // Need to sort
                             mSortingWarnCount++;
+
                             if (mSortingWarnCount <= 10)
                             {
                                 OnWarningEvent("  Sorting m/z data for scan {0} (this typically shouldn't be required for Thermo data, though can occur for high res Orbitrap data)", scanNumber);
@@ -269,6 +272,7 @@ namespace MSFileInfoScanner.Plotting
                 // Populate ionsMZFiltered and ionsIntensityFiltered, skipping any data points with an intensity value of 0 or less than mMinIntensity
 
                 var ionCountNew = 0;
+
                 for (var index = 0; index < ionCount; index++)
                 {
                     if (massIntensityPairs[1, index] > 0 && massIntensityPairs[1, index] >= Options.MinIntensity)
@@ -411,6 +415,7 @@ namespace MSFileInfoScanner.Plotting
                     {
                         // Need to sort
                         mSortingWarnCount++;
+
                         if (mSortingWarnCount <= 10)
                         {
                             Console.WriteLine("  Sorting m/z data (this typically shouldn't be required for Thermo data, though can occur for high res Orbitrap data)");
@@ -431,6 +436,7 @@ namespace MSFileInfoScanner.Plotting
                 // Populate ionsMZFiltered and ionsIntensityFiltered, skipping any data points with an intensity value of 0 or less than mMinIntensity
 
                 var ionCountNew = 0;
+
                 for (var index = 0; index < ionListToUse.Count; index++)
                 {
                     if (ionListToUse[index].Intensity <= 0 || ionListToUse[index].Intensity < Options.MinIntensity)
@@ -472,6 +478,7 @@ namespace MSFileInfoScanner.Plotting
         {
             // Check whether any of the data points is less than Options.MZResolution m/z units apart
             var centroidRequired = false;
+
             for (var index = 0; index <= ionCount - 2; index++)
             {
                 if (ionsMZFiltered[index + 1] - ionsMZFiltered[index] < Options.MZResolution)
@@ -659,6 +666,7 @@ namespace MSFileInfoScanner.Plotting
 
                         // Examine adjacent data points to the left (lower m/z)
                         var indexAdjacent = index - 1;
+
                         while (indexAdjacent >= 0)
                         {
                             if (ionsMZ[index] - ionsMZ[indexAdjacent] < mzResolution)
@@ -678,6 +686,7 @@ namespace MSFileInfoScanner.Plotting
 
                         // Examine adjacent data points to the right (higher m/z)
                         indexAdjacent = index + 1;
+
                         while (indexAdjacent < ionCount)
                         {
                             if (ionsMZ[indexAdjacent] - ionsMZ[index] < mzResolution)
@@ -702,6 +711,7 @@ namespace MSFileInfoScanner.Plotting
 
                 // Now consolidate the data by copying in place
                 var ionCountNew = 0;
+
                 for (var index = 0; index < ionCount; index++)
                 {
                     if (ionsIntensity[index] <= float.MinValue)
@@ -733,6 +743,7 @@ namespace MSFileInfoScanner.Plotting
                 var mzIgnoreRangeEnabled = mzIgnoreRangeStart > 0 || mzIgnoreRangeEnd > 0;
 
                 int ionCountNew;
+
                 if (msSpectrum.IonCount > maxIonCountToRetain)
                 {
                     var filterDataArray = new FilterDataArrayMaxCount
@@ -774,6 +785,7 @@ namespace MSFileInfoScanner.Plotting
                     for (var ionIndex = 0; ionIndex < msSpectrum.IonCount; ionIndex++)
                     {
                         bool pointPassesFilter;
+
                         if (mzIgnoreRangeEnabled)
                         {
                             if (msSpectrum.IonsMZ[ionIndex] <= mzIgnoreRangeEnd && msSpectrum.IonsMZ[ionIndex] >= mzIgnoreRangeStart)
@@ -938,6 +950,7 @@ namespace MSFileInfoScanner.Plotting
                 // However, skip scans for which there are <= minPointsPerSpectrum data points
 
                 var masterIonIndex = 0;
+
                 foreach (var scan in mScans.Where(scan => scan.IonCount > minPointsPerSpectrum))
                 {
                     // Store the intensity values in filterDataArray
@@ -971,6 +984,7 @@ namespace MSFileInfoScanner.Plotting
                         var masterIonIndexStart = masterIonIndex;
 
                         var ionCountNew = 0;
+
                         for (var ionIndex = 0; ionIndex < scan.IonCount; ionIndex++)
                         {
                             // If the point's intensity is >= 0, then we keep it
@@ -1213,6 +1227,7 @@ namespace MSFileInfoScanner.Plotting
             var pointsByCharge = new List<List<ScatterPoint>>();
 
             var maxMonoMass = double.MaxValue;
+
             if (Options.PlottingDeisotopedData)
             {
                 maxMonoMass = Options.MaxMonoMassForDeisotopedPlot;
@@ -1235,6 +1250,7 @@ namespace MSFileInfoScanner.Plotting
 
             // Count the actual number of points that will be plotted
             pointsToPlot = 0;
+
             foreach (var series in pointsByCharge)
             {
                 pointsToPlot += series.Count;
@@ -1242,6 +1258,7 @@ namespace MSFileInfoScanner.Plotting
 
             // Round minScan down to the nearest multiple of 10
             minScan = (int)Math.Floor(minScan / 10.0) * 10;
+
             if (minScan < 0)
                 minScan = 0;
 
@@ -1351,6 +1368,7 @@ namespace MSFileInfoScanner.Plotting
                 for (var ionIndex = 0; ionIndex < scan.IonCount; ionIndex++)
                 {
                     var currentIonMonoMass = scan.IonsMZ[ionIndex];
+
                     if (currentIonMonoMass > maxMonoMass)
                         continue;
 
@@ -1525,6 +1543,7 @@ namespace MSFileInfoScanner.Plotting
             }
 
             string yAxisLabel;
+
             if (Options.PlottingDeisotopedData)
             {
                 yAxisLabel = "Monoisotopic Mass";
@@ -1565,6 +1584,7 @@ namespace MSFileInfoScanner.Plotting
             if (scanTimeMax > 0)
             {
                 string caption;
+
                 if (scanTimeMax < 2)
                 {
                     caption = Math.Round(scanTimeMax, 2).ToString("0.00") + " minutes";
@@ -1668,6 +1688,7 @@ namespace MSFileInfoScanner.Plotting
             }
 
             string yAxisLabel;
+
             if (Options.PlottingDeisotopedData)
             {
                 yAxisLabel = "Monoisotopic Mass";
@@ -1720,6 +1741,7 @@ namespace MSFileInfoScanner.Plotting
             if (scanTimeMax > 0)
             {
                 string caption;
+
                 if (scanTimeMax < 2)
                 {
                     caption = Math.Round(scanTimeMax, 2).ToString("0.00") + " minutes";

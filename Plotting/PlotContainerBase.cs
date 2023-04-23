@@ -63,6 +63,7 @@ namespace MSFileInfoScanner.Plotting
             var logDirectory = MSFileInfoScanner.GetAppDataDirectoryPath();
 
             string logFileName;
+
             if (string.IsNullOrWhiteSpace(dataSource))
             {
                 logFileName = "TICAndBPIPlotter_Debug.txt";
