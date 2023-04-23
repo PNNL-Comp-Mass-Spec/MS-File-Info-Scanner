@@ -42,7 +42,7 @@ namespace MSFileInfoScanner.DatasetStats
         public string CollisionMode { get; set; }
 
         /// <summary>
-        /// Scan filter text
+        /// Generic scan filter text
         /// </summary>
         public string ScanFilterText { get; set; }
 

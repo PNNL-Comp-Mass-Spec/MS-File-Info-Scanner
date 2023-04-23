@@ -36,16 +36,40 @@ namespace MSFileInfoScanner.DatasetStats
 
         private readonly List<ScanStatsEntry> mDatasetScanStats;
 
+        /// <summary>
+        /// The spectrum type classifier determines if spectra are centroided or profile
+        /// by examining the m/z distance between the ions in a spectrum
+        /// </summary>
         private readonly SpectrumTypeClassifier mSpectraTypeClassifier;
 
         private bool mDatasetSummaryStatsUpToDate;
 
         private DatasetSummaryStats mDatasetSummaryStats;
 
+
+        /// <summary>
+        /// Number of HMS spectra
+        /// </summary>
         private int ScanCountHMS;
+
+        /// <summary>
+        /// Number of HMSn spectra
+        /// </summary>
         private int ScanCountHMSn;
+
+        /// <summary>
+        /// Number of low res MS spectra
+        /// </summary>
         private int ScanCountMS;
+
+        /// <summary>
+        /// Number of low res MSn spectra
+        /// </summary>
         private int ScanCountMSn;
+
+        /// <summary>
+        /// Maximum elution time (in minutes)
+        /// </summary>
         private double ElutionTimeMax;
 
         /// <summary>
@@ -113,6 +137,13 @@ namespace MSFileInfoScanner.DatasetStats
             mDatasetSummaryStatsUpToDate = false;
         }
 
+        /// <summary>
+        /// When reading datasets with millions of spectra, we limit the amount of detailed scan info stored in mDatasetScanStats
+        /// This method compares the counts in summaryStats.ScanTypeStats with the sum of (ScanCountMS + ScanCountHMS + ScanCountMSn + ScanCountHMSn)
+        /// If the number of spectra tracked by summaryStats.ScanTypeStats is >= 98% of the sum, nothing is adjusted
+        /// If the number of spectra tracked by summaryStats.ScanTypeStats is less than 98%, values in summaryStats.ScanTypeStats are increased based on the spectrum distribution actually stored in summaryStats
+        /// </summary>
+        /// <param name="summaryStats"></param>
         private void AdjustSummaryStats(DatasetSummaryStats summaryStats)
         {
             // Keys in this dictionary are keys in summaryStats.ScanTypeStats
@@ -1061,7 +1092,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// Extract out the scan type and filter text from the key in scanTypeEntry
         /// </summary>
         /// <param name="scanTypeEntry"></param>
-        /// <param name="scanType">Scan Type, e.g. HMS or HCD-HMSn</param>
+        /// <param name="scanType">Scan Type, e.g. HMS or HCD-HMSn or DIA-HCD-HMSn</param>
         /// <param name="basicScanType">Simplified scan type, e.g. HMS or HMSn</param>
         /// <param name="scanFilterText">Scan filter text, e.g. "FTMS + p NSI Full ms" or "FTMS + p NSI d Full ms2 0@hcd25.00" or "IMS"</param>
         /// <returns>Scan count for this scan type and filter string</returns>

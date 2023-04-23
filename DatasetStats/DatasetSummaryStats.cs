@@ -4,10 +4,20 @@ namespace MSFileInfoScanner.DatasetStats
 {
     public class DatasetSummaryStats
     {
+
+        /// <summary>
+        /// Maximum elution time, in minutes
+        /// </summary>
         public double ElutionTimeMax { get; set; }
 
+        /// <summary>
+        /// MS1 spectra stats
+        /// </summary>
         public SummaryStatDetails MSStats { get; }
 
+        /// <summary>
+        /// MSn spectra stats
+        /// </summary>
         public SummaryStatDetails MSnStats { get; }
 
         /// <summary>
@@ -36,6 +46,9 @@ namespace MSFileInfoScanner.DatasetStats
             Clear();
         }
 
+        /// <summary>
+        /// Reset stats
+        /// </summary>
         public void Clear()
         {
             ElutionTimeMax = 0;

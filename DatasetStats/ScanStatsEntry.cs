@@ -26,7 +26,7 @@ namespace MSFileInfoScanner.DatasetStats
         public int ScanType { get; set; }
 
         /// <summary>
-        /// Scan filter text
+        /// Scan filter text (for Thermo files, generic scan filter text, created using XRawFileIO.MakeGenericThermoScanFilter)
         /// </summary>
         /// <remarks>
         /// Examples:
