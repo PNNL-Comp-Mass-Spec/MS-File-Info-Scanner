@@ -113,7 +113,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public DatasetStatsSummarizer()
         {
-            FileDate = "April 22, 2023";
+            FileDate = "April 23, 2023";
 
             ErrorMessage = string.Empty;
 

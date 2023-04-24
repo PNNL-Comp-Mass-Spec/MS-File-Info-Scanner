@@ -655,57 +655,50 @@ namespace MSFileInfoScanner.Readers
                     // We're only storing certain scan events
                     var entryNameLCase = scanEvent.Key.ToLower().TrimEnd(cTrimChars);
 
-                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_ION_INJECTION_TIME,
-                                      StringComparison.OrdinalIgnoreCase))
+                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_ION_INJECTION_TIME, StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.IonInjectionTime = scanEvent.Value;
                         continue;
                     }
 
-                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_SCAN_SEGMENT,
-                                      StringComparison.OrdinalIgnoreCase))
+                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_SCAN_SEGMENT, StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.ScanSegment = scanEvent.Value;
                         continue;
                     }
 
-                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_SCAN_EVENT,
-                                      StringComparison.OrdinalIgnoreCase))
+                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_SCAN_EVENT, StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.ScanEvent = scanEvent.Value;
                         continue;
                     }
 
-                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_CHARGE_STATE,
-                                      StringComparison.OrdinalIgnoreCase))
+                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_CHARGE_STATE, StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.ChargeState = scanEvent.Value;
                         continue;
                     }
 
-                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_MONOISOTOPIC_MZ,
-                                      StringComparison.OrdinalIgnoreCase))
+                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_MONOISOTOPIC_MZ, StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.MonoisotopicMZ = scanEvent.Value;
                         continue;
                     }
 
-                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_MS2_ISOLATION_WIDTH,
-                            StringComparison.OrdinalIgnoreCase))
+                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_MS2_ISOLATION_WIDTH, StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.IsolationWindowWidthMZ = scanEvent.Value;
                         continue;
                     }
 
-                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_COLLISION_MODE,
-                                      StringComparison.OrdinalIgnoreCase))
+                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_COLLISION_MODE, StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.CollisionMode = scanEvent.Value;
                         continue;
                     }
 
-                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_SCAN_FILTER_TEXT,
-                                      StringComparison.OrdinalIgnoreCase))
+                    // ReSharper disable once InvertIf
+                    if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_SCAN_FILTER_TEXT, StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.ScanFilterText = scanEvent.Value;
                         continue;
