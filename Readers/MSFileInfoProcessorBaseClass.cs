@@ -677,7 +677,7 @@ namespace MSFileInfoScanner.Readers
             writer.WriteLine("      padding: 2px 4px 2px 4px;");
             writer.WriteLine("      text-align: center;");
             writer.WriteLine("    }");
-            writer.WriteLine("   </style>");
+            writer.WriteLine("  </style>");
             writer.WriteLine("</head>");
             writer.WriteLine();
             writer.WriteLine("<body>");
