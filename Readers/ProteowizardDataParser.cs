@@ -809,16 +809,16 @@ namespace MSFileInfoScanner.Readers
                     }
                     else
                     {
-                        var isDIA = msLevels[spectrumIndex] > 1 && isolationWindowWidth >= 6.5;
+                        scanStatsEntry.IsDIA = msLevels[spectrumIndex] > 1 && isolationWindowWidth >= 6.5;
 
-                        if (isDIA)
+                        if (scanStatsEntry.IsDIA)
                         {
                             parserInfo.ScanCountDIA++;
                         }
 
-                        var includeParentMZ = isDIA;
+                        var includeParentMZ = scanStatsEntry.IsDIA;
 
-                        scanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanFilterText, isDIA);
+                        scanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanFilterText, scanStatsEntry.IsDIA);
                         genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanFilterText, includeParentMZ);
 
                         isHighRes = msLevels[spectrumIndex] > 1
