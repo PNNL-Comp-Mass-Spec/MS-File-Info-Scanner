@@ -603,7 +603,7 @@ namespace MSFileInfoScanner.Readers
                 const bool includePrecursorMZ = true;
 
                 // Obtain the dataset summary stats (they will be auto-computed if not up to date)
-                var summaryStats = mDatasetStatsSummarizer.GetDatasetSummaryStats(includePrecursorMZ);
+                var datasetSummaryStats = mDatasetStatsSummarizer.GetDatasetSummaryStats(includePrecursorMZ);
 
                 var htmlFilePath = Path.Combine(outputDirectoryPath, htmlFileName);
 
@@ -627,7 +627,7 @@ namespace MSFileInfoScanner.Readers
                 AppendAdditionalPlots(writer);
 
                 // Add the TIC
-                AppendTICAndSummaryStats(writer, summaryStats);
+                AppendTICAndSummaryStats(writer, datasetSummaryStats);
 
                 // Append dataset info
                 AppendDatasetInfo(writer, datasetName, outputDirectoryPath);
@@ -792,11 +792,11 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
-        private void AppendTICAndSummaryStats(TextWriter writer, DatasetSummaryStats summaryStats)
+        private void AppendTICAndSummaryStats(TextWriter writer, DatasetSummaryStats datasetSummaryStats)
         {
             writer.WriteLine("    <tr>");
 
-            if (HideEmptyHTMLSections && summaryStats.ScanTypeStats.Count == 0)
+            if (HideEmptyHTMLSections && datasetSummaryStats.ScanTypeStats.Count == 0)
             {
                 writer.WriteLine("      <td>&nbsp;</td><td style='width: 200px'>&nbsp;</td><td style='width: 200px'>&nbsp;</td>");
             }
@@ -810,7 +810,7 @@ namespace MSFileInfoScanner.Readers
                 writer.WriteLine("      <td valign=\"top\">" + qcFigureHTML + "</td>");
                 writer.WriteLine("      <td valign=\"top\">");
 
-                GenerateQCScanTypeSummaryHTML(writer, summaryStats, "        ");
+                GenerateQCScanTypeSummaryHTML(writer, datasetSummaryStats, "        ");
 
                 writer.WriteLine("      </td>");
             }
