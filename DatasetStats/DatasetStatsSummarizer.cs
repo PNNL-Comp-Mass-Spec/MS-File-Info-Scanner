@@ -407,7 +407,7 @@ namespace MSFileInfoScanner.DatasetStats
             {
                 if (scanStats == null)
                 {
-                    ReportError("scanStats is Nothing; unable to continue");
+                    ReportError("scanStats is null; unable to continue");
                     return false;
                 }
 
@@ -447,8 +447,8 @@ namespace MSFileInfoScanner.DatasetStats
                                                       bpiListMS);
                     }
 
-                    // The scan type key is of the form "ScanTypeName::###::ScanFilterText"
-                    var scanTypeKey = statEntry.ScanTypeName + SCAN_TYPE_STATS_SEP_CHAR + statEntry.ScanFilterText;
+                    // The scan type key is of the form "ScanTypeName::###::GenericScanFilter"
+                    var scanTypeKey = statEntry.ScanTypeName + SCAN_TYPE_STATS_SEP_CHAR + genericScanFilter;
 
                     if (summaryStats.ScanTypeStats.ContainsKey(scanTypeKey))
                     {
@@ -548,7 +548,7 @@ namespace MSFileInfoScanner.DatasetStats
             {
                 if (scanStats == null)
                 {
-                    ReportError("scanStats is Nothing; unable to continue in CreateDatasetInfoFile");
+                    ReportError("scanStats is null; unable to continue in CreateDatasetInfoFile");
                     return false;
                 }
 
@@ -650,7 +650,7 @@ namespace MSFileInfoScanner.DatasetStats
             {
                 if (scanStats == null)
                 {
-                    ReportError("scanStats is Nothing; unable to continue in CreateDatasetInfoXML");
+                    ReportError("scanStats is null; unable to continue in CreateDatasetInfoXML");
                     return string.Empty;
                 }
 
@@ -924,7 +924,7 @@ namespace MSFileInfoScanner.DatasetStats
             {
                 if (scanStats == null)
                 {
-                    ReportError("scanStats is Nothing; unable to continue in CreateScanStatsFile");
+                    ReportError("scanStats is null; unable to continue in CreateScanStatsFile");
                     return false;
                 }
 
@@ -1286,7 +1286,7 @@ namespace MSFileInfoScanner.DatasetStats
             {
                 if (scanStats == null)
                 {
-                    ReportError("scanStats is Nothing; unable to continue in UpdateDatasetStatsTextFile");
+                    ReportError("scanStats is null; unable to continue in UpdateDatasetStatsTextFile");
                     return false;
                 }
 
