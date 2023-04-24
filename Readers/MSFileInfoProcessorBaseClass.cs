@@ -804,11 +804,16 @@ namespace MSFileInfoScanner.Readers
             {
                 var qcFigureHTML = GenerateQCFigureHTML(mTICAndBPIPlot.GetRecentFileInfo(TICandBPIPlotter.OutputFileTypes.TIC), 250);
 
-                // Use valign=top since summaryStats can have 10, 20, or even 75 items, which can lead to long tables
+                // Use valign=top when ScanTypeStats has more than 3 scan types
+                var verticalAlignment = datasetSummaryStats.ScanTypeStats.Count > 3 ? "top" : "middle";
 
-                writer.WriteLine("      <td valign=\"top\"><br><br><br>TIC</td>");
-                writer.WriteLine("      <td valign=\"top\">" + qcFigureHTML + "</td>");
-                writer.WriteLine("      <td valign=\"top\">");
+                // When the vertical alignment is "top", place 3 line breaks before "TIC"
+                writer.WriteLine("      <td valign=\"{0}\">{1}TIC</td>",
+                    verticalAlignment,
+                    verticalAlignment == "top" ? "<br><br><br>" : string.Empty);
+
+                writer.WriteLine("      <td valign=\"{0}\">" + qcFigureHTML + "</td>", verticalAlignment);
+                writer.WriteLine("      <td valign=\"{0}\">", verticalAlignment);
 
                 GenerateQCScanTypeSummaryHTML(writer, datasetSummaryStats, "        ");
 
