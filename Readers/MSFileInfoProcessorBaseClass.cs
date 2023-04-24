@@ -600,8 +600,10 @@ namespace MSFileInfoScanner.Readers
                     htmlFileName = "index.html";
                 }
 
+                const bool includePrecursorMZ = true;
+
                 // Obtain the dataset summary stats (they will be auto-computed if not up to date)
-                var summaryStats = mDatasetStatsSummarizer.GetDatasetSummaryStats();
+                var summaryStats = mDatasetStatsSummarizer.GetDatasetSummaryStats(includePrecursorMZ);
 
                 var htmlFilePath = Path.Combine(outputDirectoryPath, htmlFileName);
 
@@ -802,9 +804,11 @@ namespace MSFileInfoScanner.Readers
             {
                 var qcFigureHTML = GenerateQCFigureHTML(mTICAndBPIPlot.GetRecentFileInfo(TICandBPIPlotter.OutputFileTypes.TIC), 250);
 
-                writer.WriteLine("      <td valign=\"middle\">TIC</td>");
-                writer.WriteLine("      <td>" + qcFigureHTML + "</td>");
-                writer.WriteLine("      <td valign=\"middle\">");
+                // Use valign=top since summaryStats can have 10, 20, or even 75 items, which can lead to long tables
+
+                writer.WriteLine("      <td valign=\"top\"><br><br><br>TIC</td>");
+                writer.WriteLine("      <td valign=\"top\">" + qcFigureHTML + "</td>");
+                writer.WriteLine("      <td valign=\"top\">");
 
                 GenerateQCScanTypeSummaryHTML(writer, summaryStats, "        ");
 

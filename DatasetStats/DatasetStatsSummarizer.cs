@@ -32,6 +32,12 @@ namespace MSFileInfoScanner.DatasetStats
 
         public const string DATE_TIME_FORMAT_STRING = "yyyy-MM-dd hh:mm:ss tt";
 
+        private struct SummaryStatsStatus
+        {
+            public bool UpToDate;
+            public bool ScanFiltersIncludePrecursorMZValues;
+        }
+
         private readonly SortedSet<int> mDatasetScanNumbers;
 
         private readonly List<ScanStatsEntry> mDatasetScanStats;
@@ -42,9 +48,9 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         private readonly SpectrumTypeClassifier mSpectraTypeClassifier;
 
-        private bool mDatasetSummaryStatsUpToDate;
-
         private DatasetSummaryStats mDatasetSummaryStats;
+
+        private SummaryStatsStatus mDatasetStatsSummaryStatus;
 
         /// <summary>
         /// Number of DIA spectra
@@ -118,7 +124,8 @@ namespace MSFileInfoScanner.DatasetStats
             mDatasetScanStats = new List<ScanStatsEntry>();
             mDatasetSummaryStats = new DatasetSummaryStats();
 
-            mDatasetSummaryStatsUpToDate = false;
+            mDatasetStatsSummaryStatus.UpToDate = false;
+            mDatasetStatsSummaryStatus.ScanFiltersIncludePrecursorMZValues = false;
 
             DatasetFileInfo = new DatasetFileInfo();
             SampleInfo = new SampleInfo();
@@ -136,7 +143,7 @@ namespace MSFileInfoScanner.DatasetStats
             mDatasetScanNumbers.Add(scanStats.ScanNumber);
 
             mDatasetScanStats.Add(scanStats);
-            mDatasetSummaryStatsUpToDate = false;
+            mDatasetStatsSummaryStatus.UpToDate = false;
         }
 
         /// <summary>
@@ -361,7 +368,8 @@ namespace MSFileInfoScanner.DatasetStats
             DatasetFileInfo.Clear();
             SampleInfo.Clear();
 
-            mDatasetSummaryStatsUpToDate = false;
+            mDatasetStatsSummaryStatus.UpToDate = false;
+            mDatasetStatsSummaryStatus.ScanFiltersIncludePrecursorMZValues = false;
 
             mSpectraTypeClassifier.Reset();
 
@@ -382,9 +390,16 @@ namespace MSFileInfoScanner.DatasetStats
         /// Summarizes the scan info in scanStats()
         /// </summary>
         /// <param name="scanStats">ScanStats data to parse</param>
+        /// <param name="includePrecursorMZ">
+        /// When true, include precursor m/z values in the generic scan filters
+        /// When false, replace the actual precursor m/z with 0
+        /// </param>
         /// <param name="summaryStats">Stats output</param>
         /// <returns>>True if success, false if error</returns>
-        public bool ComputeScanStatsSummary(List<ScanStatsEntry> scanStats, out DatasetSummaryStats summaryStats)
+        public bool ComputeScanStatsSummary(
+            List<ScanStatsEntry> scanStats,
+            bool includePrecursorMZ,
+            out DatasetSummaryStats summaryStats)
         {
             summaryStats = new DatasetSummaryStats();
 
@@ -409,6 +424,10 @@ namespace MSFileInfoScanner.DatasetStats
 
                 foreach (var statEntry in scanStats)
                 {
+                    var genericScanFilter = includePrecursorMZ
+                        ? statEntry.ScanFilterText
+                        : ThermoRawFileReader.XRawFileIO.GetScanFilterWithGenericPrecursorMZ(statEntry.ScanFilterText);
+
                     if (statEntry.ScanType > 1)
                     {
                         // MSn spectrum
@@ -639,9 +658,11 @@ namespace MSFileInfoScanner.DatasetStats
 
                 DatasetSummaryStats summaryStats;
 
+                const bool includePrecursorMZ = false;
+
                 if (scanStats == mDatasetScanStats)
                 {
-                    summaryStats = GetDatasetSummaryStats();
+                    summaryStats = GetDatasetSummaryStats(includePrecursorMZ);
 
                     if (mSpectraTypeClassifier.TotalSpectra > 0)
                     {
@@ -651,7 +672,7 @@ namespace MSFileInfoScanner.DatasetStats
                 else
                 {
                     // Parse the data in scanStats to compute the bulk values
-                    var success = ComputeScanStatsSummary(scanStats, out summaryStats);
+                    var success = ComputeScanStatsSummary(scanStats, includePrecursorMZ, out summaryStats);
 
                     if (!success)
                     {
@@ -709,11 +730,11 @@ namespace MSFileInfoScanner.DatasetStats
 
                 foreach (var scanTypeEntry in summaryStats.ScanTypeStats)
                 {
-                    var scanCountForType = GetScanTypeAndFilter(scanTypeEntry, out var scanType, out _, out var scanFilterText);
+                    var scanCountForType = GetScanTypeAndFilter(scanTypeEntry, out var scanType, out _, out var genericScanFilter);
 
                     writer.WriteStartElement("ScanType");
                     writer.WriteAttributeString("ScanCount", scanCountForType.ToString());
-                    writer.WriteAttributeString("ScanFilterText", FixNull(scanFilterText));
+                    writer.WriteAttributeString("ScanFilterText", FixNull(genericScanFilter));
                     writer.WriteString(scanType);
                     writer.WriteEndElement();
                 }
@@ -1071,16 +1092,21 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Get the DatasetSummaryStats object
         /// </summary>
-        public DatasetSummaryStats GetDatasetSummaryStats()
+        /// <param name="includePrecursorMZ">
+        /// When true, include precursor m/z values in the generic scan filters
+        /// When false, replace the actual precursor m/z with 0
+        /// </param>
+        public DatasetSummaryStats GetDatasetSummaryStats(bool includePrecursorMZ)
         {
-            if (mDatasetSummaryStatsUpToDate)
+            if (mDatasetStatsSummaryStatus.UpToDate && mDatasetStatsSummaryStatus.ScanFiltersIncludePrecursorMZValues == includePrecursorMZ)
                 return mDatasetSummaryStats;
 
-            ComputeScanStatsSummary(mDatasetScanStats, out mDatasetSummaryStats);
+            ComputeScanStatsSummary(mDatasetScanStats, includePrecursorMZ, out mDatasetSummaryStats);
 
             AdjustSummaryStats(mDatasetSummaryStats);
 
-            mDatasetSummaryStatsUpToDate = true;
+            mDatasetStatsSummaryStatus.UpToDate = true;
+            mDatasetStatsSummaryStatus.ScanFiltersIncludePrecursorMZValues = includePrecursorMZ;
 
             return mDatasetSummaryStats;
         }
@@ -1217,7 +1243,7 @@ namespace MSFileInfoScanner.DatasetStats
 
                 scan.ScanType = scanType;
                 scan.ScanTypeName = scanTypeName;
-                mDatasetSummaryStatsUpToDate = false;
+                mDatasetStatsSummaryStatus.UpToDate = false;
 
                 matchFound = true;
                 break;
@@ -1268,14 +1294,16 @@ namespace MSFileInfoScanner.DatasetStats
 
                 DatasetSummaryStats summaryStats;
 
+                const bool includePrecursorMZ = false;
+
                 if (scanStats == mDatasetScanStats)
                 {
-                    summaryStats = GetDatasetSummaryStats();
+                    summaryStats = GetDatasetSummaryStats(includePrecursorMZ);
                 }
                 else
                 {
                     // Parse the data in scanStats to compute the bulk values
-                    var summarySuccess = ComputeScanStatsSummary(scanStats, out summaryStats);
+                    var summarySuccess = ComputeScanStatsSummary(scanStats, includePrecursorMZ, out summaryStats);
 
                     if (!summarySuccess)
                     {
