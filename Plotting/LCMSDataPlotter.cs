@@ -1474,11 +1474,8 @@ namespace MSFileInfoScanner.Plotting
             if (points.Count == 0 || intensityList.Count == 0)
                 return points;
 
-            // Compute median intensity value
-            var medianIntensity = MathNet.Numerics.Statistics.Statistics.Median(intensityList);
-
-            // Set the minimum color intensity to the median
-            colorScaleMinIntensity = medianIntensity;
+            // Compute the median intensity value and use it to define the minimum color intensity
+            colorScaleMinIntensity = MathNet.Numerics.Statistics.Statistics.Median(intensityList);
 
             return points;
         }
