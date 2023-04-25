@@ -460,10 +460,9 @@ namespace MSFileInfoScanner
                     {
                         return errorMsg + "; " + MS2MzMinValidationMessage;
                     }
-                    else
-                    {
-                        return errorMsg;
-                    }
+
+                    return errorMsg;
+
                 case MSFileScannerErrorCodes.MS2MzMinValidationWarning:
                     const string warningMsg = "Some of the MS/MS spectra have a minimum m/z value larger than the required minimum; " +
                                               "reporter ion peaks likely could not be detected";
@@ -472,10 +471,8 @@ namespace MSFileInfoScanner
                     {
                         return warningMsg + "; " + MS2MzMinValidationMessage;
                     }
-                    else
-                    {
-                        return warningMsg;
-                    }
+
+                    return warningMsg;
 
                 case MSFileScannerErrorCodes.UnspecifiedError:
                     return "Unspecified localized error";
