@@ -503,24 +503,24 @@ namespace MSFileInfoScanner.DatasetStats
                 summaryStats.ElutionTimeMax = elutionTime;
             }
 
-            if (double.TryParse(scanStats.TotalIonIntensity, out var tic))
+            if (double.TryParse(scanStats.TotalIonIntensity, out var totalIonCurrent))
             {
-                if (tic > summaryStatDetails.TICMax)
+                if (totalIonCurrent > summaryStatDetails.TICMax)
                 {
-                    summaryStatDetails.TICMax = tic;
+                    summaryStatDetails.TICMax = totalIonCurrent;
                 }
 
-                ticList.Add(tic);
+                ticList.Add(totalIonCurrent);
             }
 
-            if (double.TryParse(scanStats.BasePeakIntensity, out var bpi))
+            if (double.TryParse(scanStats.BasePeakIntensity, out var basePeakIntensity))
             {
-                if (bpi > summaryStatDetails.BPIMax)
+                if (basePeakIntensity > summaryStatDetails.BPIMax)
                 {
-                    summaryStatDetails.BPIMax = bpi;
+                    summaryStatDetails.BPIMax = basePeakIntensity;
                 }
 
-                bpiList.Add(bpi);
+                bpiList.Add(basePeakIntensity);
             }
 
             summaryStatDetails.ScanCount++;
