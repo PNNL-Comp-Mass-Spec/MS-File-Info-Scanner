@@ -864,15 +864,15 @@ namespace MSFileInfoScanner.DatasetStats
                 writer.WriteEndElement();   // AcquisitionInfo EndElement
 
                 writer.WriteStartElement("TICInfo");
-                writer.WriteElementString("TIC_Max_MS", StringUtilities.ValueToString(summaryStats.MSStats.TICMax, 5));
-                writer.WriteElementString("TIC_Max_MSn", StringUtilities.ValueToString(summaryStats.MSnStats.TICMax, 5));
-                writer.WriteElementString("BPI_Max_MS", StringUtilities.ValueToString(summaryStats.MSStats.BPIMax, 5));
-                writer.WriteElementString("BPI_Max_MSn", StringUtilities.ValueToString(summaryStats.MSnStats.BPIMax, 5));
-                writer.WriteElementString("TIC_Median_MS", StringUtilities.ValueToString(summaryStats.MSStats.TICMedian, 5));
-                writer.WriteElementString("TIC_Median_MSn", StringUtilities.ValueToString(summaryStats.MSnStats.TICMedian, 5));
-                writer.WriteElementString("BPI_Median_MS", StringUtilities.ValueToString(summaryStats.MSStats.BPIMedian, 5));
-                writer.WriteElementString("BPI_Median_MSn", StringUtilities.ValueToString(summaryStats.MSnStats.BPIMedian, 5));
-                writer.WriteEndElement();       // TICInfo EndElement
+                writer.WriteElementString("TIC_Max_MS", ValueToString(summaryStats.MSStats.TICMax, 5));
+                writer.WriteElementString("TIC_Max_MSn", ValueToString(summaryStats.MSnStats.TICMax, 5));
+                writer.WriteElementString("BPI_Max_MS", ValueToString(summaryStats.MSStats.BPIMax, 5));
+                writer.WriteElementString("BPI_Max_MSn", ValueToString(summaryStats.MSnStats.BPIMax, 5));
+                writer.WriteElementString("TIC_Median_MS", ValueToString(summaryStats.MSStats.TICMedian, 5));
+                writer.WriteElementString("TIC_Median_MSn", ValueToString(summaryStats.MSnStats.TICMedian, 5));
+                writer.WriteElementString("BPI_Median_MS", ValueToString(summaryStats.MSStats.BPIMedian, 5));
+                writer.WriteElementString("BPI_Median_MSn", ValueToString(summaryStats.MSnStats.BPIMedian, 5));
+                writer.WriteEndElement();       // TICInfo
 
                 // Only write the SampleInfo block if sampleInfo contains entries
                 if (sampleInfo.HasData())
@@ -1525,6 +1525,26 @@ namespace MSFileInfoScanner.DatasetStats
                                               percentRounded, spectraType, requiredMzMin, scanCountInvalid, scanCountWithData);
 
             return percentInvalid < maxPercentAllowedFailed;
+        }
+
+        private string ValueToString(double value, byte digitsOfPrecision)
+        {
+            if (double.IsNaN(value))
+            {
+                return 0.ToString();
+            }
+
+            if (double.IsNegativeInfinity(value))
+            {
+                return StringUtilities.ValueToString(double.MinValue, digitsOfPrecision);
+            }
+
+            if (double.IsPositiveInfinity(value))
+            {
+                return StringUtilities.ValueToString(double.MaxValue, digitsOfPrecision);
+            }
+
+            return StringUtilities.ValueToString(value, 5);
         }
     }
 }
