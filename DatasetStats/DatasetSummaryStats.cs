@@ -2,6 +2,9 @@
 
 namespace MSFileInfoScanner.DatasetStats
 {
+    /// <summary>
+    /// Container for dataset summary stats
+    /// </summary>
     public class DatasetSummaryStats
     {
         /// <summary>
@@ -10,17 +13,17 @@ namespace MSFileInfoScanner.DatasetStats
         public int DIAScanCount { get; set; }
 
         /// <summary>
-        /// Maximum elution time, in minutes
+        /// Maximum elution time (retention time, in minutes
         /// </summary>
         public double ElutionTimeMax { get; set; }
 
         /// <summary>
-        /// MS1 spectra stats
+        /// MS1 stats container
         /// </summary>
         public SummaryStatDetails MSStats { get; }
 
         /// <summary>
-        /// MSn spectra stats
+        /// MSn stats container
         /// </summary>
         public SummaryStatDetails MSnStats { get; }
 

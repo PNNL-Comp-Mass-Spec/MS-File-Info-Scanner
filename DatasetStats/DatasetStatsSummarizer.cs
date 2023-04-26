@@ -27,9 +27,18 @@ namespace MSFileInfoScanner.DatasetStats
     {
         // Ignore Spelling: AcqTime, centroided, utf, yyyy-MM-dd hh:mm:ss tt
 
+        /// <summary>
+        /// Scan type stats separation character
+        /// </summary>
         public const string SCAN_TYPE_STATS_SEP_CHAR = "::###::";
+        /// <summary>
+        /// Dataset info file suffix
+        /// </summary>
         public const string DATASET_INFO_FILE_SUFFIX = "_DatasetInfo.xml";
 
+        /// <summary>
+        /// Date/time format string
+        /// </summary>
         public const string DATE_TIME_FORMAT_STRING = "yyyy-MM-dd hh:mm:ss tt";
 
         private struct SummaryStatsStatus
@@ -394,7 +403,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// When true, include precursor m/z values in the generic scan filters
         /// When false, replace the actual precursor m/z with 0
         /// </param>
-        /// <param name="summaryStats">Stats output</param>
+        /// <param name="summaryStats">Output: summarized scan stats</param>
         /// <returns>>True if success, false if error</returns>
         public bool ComputeScanStatsSummary(
             List<ScanStatsEntry> scanStats,
@@ -554,7 +563,7 @@ namespace MSFileInfoScanner.DatasetStats
 
                 ErrorMessage = string.Empty;
 
-                // If CreateDatasetInfoXML() used a StringBuilder to cache the XML data, then we would have to use Encoding.Unicode
+                // If CreateDatasetInfoXML() used a StringBuilder to cache the XML data, we would have to use System.Encoding.Unicode
                 // However, CreateDatasetInfoXML() now uses a MemoryStream, so we're able to use UTF8
                 using var writer = new StreamWriter(new FileStream(datasetInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read), Encoding.UTF8);
 
@@ -636,7 +645,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="scanStats">Scan stats to parse</param>
         /// <param name="datasetInfo">Dataset Info</param>
-        /// <param name="sampleInfo"></param>
+        /// <param name="sampleInfo">Sample Info</param>
         /// <returns>XML (as string)</returns>
         public string CreateDatasetInfoXML(
             string datasetName,
@@ -658,6 +667,7 @@ namespace MSFileInfoScanner.DatasetStats
 
                 DatasetSummaryStats summaryStats;
 
+                // This is true in MASIC, but false in MS_File_Info_Scanner
                 const bool includePrecursorMZ = false;
 
                 if (scanStats == mDatasetScanStats)
@@ -688,13 +698,13 @@ namespace MSFileInfoScanner.DatasetStats
                     Indent = true,
                     IndentChars = "  ",
                     Encoding = Encoding.UTF8,
-                    CloseOutput = false     // Do not close output automatically so that MemoryStream can be read after the XmlWriter has been closed
+                    CloseOutput = false        // Do not close output automatically so that the MemoryStream can be read after the XmlWriter has been closed
                 };
 
                 // We could cache the text using a StringBuilder, like this:
                 //
-                // var datasetInfoBuilder = new StringBuilder();
-                // var stringWriter = new StringWriter(datasetInfoBuilder);
+                // var datasetInfo = new StringBuilder();
+                // var stringWriter = new StringWriter(datasetInfo);
                 // var writer = new XmlTextWriter(stringWriter)
                 // {
                 //     Formatting = Formatting.Indented,
@@ -702,19 +712,19 @@ namespace MSFileInfoScanner.DatasetStats
                 // };
 
                 // However, when you send the output to a StringBuilder it is always encoded as Unicode (UTF-16)
-                //  since this is the only character encoding used in the .NET Framework for String values,
-                //  and thus you'll see the attribute encoding="utf-16" in the opening XML declaration
+                // since this is the only character encoding used in the .NET Framework for String values,
+                // and thus you'll see the attribute encoding="UTF-16" in the opening XML declaration
 
                 // The alternative is to use a MemoryStream.  Here, the stream encoding is set by the XmlWriter
-                //  and so you see the attribute encoding="utf-8" in the opening XML declaration encoding
-                //  (since we used xmlSettings.Encoding = Encoding.UTF8)
+                // and so you see the attribute encoding="UTF-8" in the opening XML declaration encoding
+                // (since we used xmlSettings.Encoding = Encoding.UTF8)
                 //
                 var memStream = new MemoryStream();
                 var writer = XmlWriter.Create(memStream, xmlSettings);
 
                 writer.WriteStartDocument(true);
 
-                //Write the beginning of the "Root" element.
+                // Write the beginning of the "Root" element.
                 writer.WriteStartElement("DatasetInfo");
 
                 writer.WriteStartElement("Dataset");
@@ -736,10 +746,10 @@ namespace MSFileInfoScanner.DatasetStats
                     writer.WriteAttributeString("ScanCount", scanCountForType.ToString());
                     writer.WriteAttributeString("ScanFilterText", FixNull(genericScanFilter));
                     writer.WriteString(scanType);
-                    writer.WriteEndElement();
+                    writer.WriteEndElement();     // ScanType
                 }
 
-                writer.WriteEndElement();           // ScanTypes EndElement
+                writer.WriteEndElement();       // ScanTypes
 
                 writer.WriteStartElement("AcquisitionInfo");
 
@@ -1090,7 +1100,7 @@ namespace MSFileInfoScanner.DatasetStats
         }
 
         /// <summary>
-        /// Get the DatasetSummaryStats object
+        /// Get dataset summary stats
         /// </summary>
         /// <param name="includePrecursorMZ">
         /// When true, include precursor m/z values in the generic scan filters
@@ -1131,7 +1141,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Extract out the scan type and filter text from the key in scanTypeEntry
         /// </summary>
-        /// <param name="scanTypeEntry"></param>
+        /// <param name="scanTypeEntry">Key is scan type, value is number of scans with the given scan type</param>
         /// <param name="scanType">Scan Type, e.g. HMS or HCD-HMSn or DIA-HCD-HMSn</param>
         /// <param name="basicScanType">Simplified scan type, e.g. HMS or HMSn</param>
         /// <param name="scanFilterText">Scan filter text, e.g. "FTMS + p NSI Full ms" or "FTMS + p NSI d Full ms2 0@hcd25.00" or "IMS"</param>

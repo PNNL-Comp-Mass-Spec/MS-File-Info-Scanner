@@ -7,6 +7,9 @@ using ThermoRawFileReader;
 
 namespace MSFileInfoScanner.DatasetStats
 {
+    /// <summary>
+    /// Dataset file info, including dataset ID, scan count, acquisition start time, etc.
+    /// </summary>
     public class DatasetFileInfo
     {
         /// <summary>
@@ -25,7 +28,7 @@ namespace MSFileInfoScanner.DatasetStats
         public int DatasetID { get; set; }
 
         /// <summary>
-        /// Dataset Name
+        /// Dataset name
         /// </summary>
         public string DatasetName { get; set; }
 
@@ -35,23 +38,23 @@ namespace MSFileInfoScanner.DatasetStats
         public string FileExtension { get; set; }
 
         /// <summary>
-        /// Dataset acquisition time start
+        /// Acquisition start time
         /// </summary>
         public DateTime AcqTimeStart { get; set; }
 
         /// <summary>
-        /// Dataset acquisition time end
+        /// Acquisition end time
         /// </summary>
         public DateTime AcqTimeEnd { get; set; }
 
         /// <summary>
-        /// Number of spectra (scans)
+        /// Scan count (spectrum count)
         /// </summary>
         /// <remarks>For UIMF files, the number of frames</remarks>
         public int ScanCount { get; set; }
 
         /// <summary>
-        /// File size, in bytes
+        /// Size of the file, in bytes
         /// </summary>
         public long FileSizeBytes { get; set; }
 
@@ -163,6 +166,9 @@ namespace MSFileInfoScanner.DatasetStats
             AddInstrumentFile(instrumentFile.Name, instrumentFile.Length, sha1Hash, HashUtilities.HashTypeConstants.Undefined);
         }
 
+        /// <summary>
+        /// Show the dataset name and scan count
+        /// </summary>
         public override string ToString()
         {
             return string.Format("Dataset {0}, ScanCount={1}", DatasetName, ScanCount);

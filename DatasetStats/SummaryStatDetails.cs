@@ -1,6 +1,9 @@
 ﻿
 namespace MSFileInfoScanner.DatasetStats
 {
+    /// <summary>
+    /// Summary stat details
+    /// </summary>
     public class SummaryStatDetails
     {
         /// <summary>
@@ -36,6 +39,9 @@ namespace MSFileInfoScanner.DatasetStats
             Clear();
         }
 
+        /// <summary>
+        /// Reset stored values to 0
+        /// </summary>
         public void Clear()
         {
             ScanCount = 0;
@@ -46,7 +52,7 @@ namespace MSFileInfoScanner.DatasetStats
         }
 
         /// <summary>
-        /// Display the scan count
+        /// Show the scan count
         /// </summary>
         public override string ToString()
         {

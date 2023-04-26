@@ -1,6 +1,9 @@
 ﻿
 namespace MSFileInfoScanner.DatasetStats
 {
+    /// <summary>
+    /// Information about a given scan (spectrum)
+    /// </summary>
     public class ScanStatsEntry
     {
         // Ignore Spelling: centroiding
@@ -146,7 +149,7 @@ namespace MSFileInfoScanner.DatasetStats
         }
 
         /// <summary>
-        /// Display the scan number and scan filter for this scan
+        /// Show the scan number and scan filter
         /// </summary>
         public override string ToString()
         {
