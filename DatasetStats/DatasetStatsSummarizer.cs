@@ -416,7 +416,7 @@ namespace MSFileInfoScanner.DatasetStats
             {
                 if (scanStats == null)
                 {
-                    ReportError("scanStats is null; unable to continue");
+                    ReportError("scanStats is null; unable to continue in ComputeScanStatsSummary");
                     return false;
                 }
 
@@ -440,20 +440,22 @@ namespace MSFileInfoScanner.DatasetStats
                     if (statEntry.ScanType > 1)
                     {
                         // MSn spectrum
-                        ComputeScanStatsUpdateDetails(statEntry,
-                                                      summaryStats,
-                                                      summaryStats.MSnStats,
-                                                      ticListMSn,
-                                                      bpiListMSn);
+                        ComputeScanStatsUpdateDetails(
+                            statEntry,
+                            summaryStats,
+                            summaryStats.MSnStats,
+                            ticListMSn,
+                            bpiListMSn);
                     }
                     else
                     {
                         // MS spectrum
-                        ComputeScanStatsUpdateDetails(statEntry,
-                                                      summaryStats,
-                                                      summaryStats.MSStats,
-                                                      ticListMS,
-                                                      bpiListMS);
+                        ComputeScanStatsUpdateDetails(
+                            statEntry,
+                            summaryStats,
+                            summaryStats.MSStats,
+                            ticListMS,
+                            bpiListMS);
                     }
 
                     // The scan type key is of the form "ScanTypeName::###::GenericScanFilter"
@@ -621,7 +623,10 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="sampleInfo">Sample Info</param>
         /// <returns>XML (as string)</returns>
         // ReSharper disable once UnusedMember.Global
-        public string CreateDatasetInfoXML(List<ScanStatsEntry> scanStats, DatasetFileInfo datasetInfo, SampleInfo sampleInfo)
+        public string CreateDatasetInfoXML(
+            List<ScanStatsEntry> scanStats,
+            DatasetFileInfo datasetInfo,
+            SampleInfo sampleInfo)
         {
             return CreateDatasetInfoXML(datasetInfo.DatasetName, scanStats, datasetInfo, sampleInfo);
         }
@@ -634,7 +639,10 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="datasetInfo">Dataset Info</param>
         /// <returns>XML (as string)</returns>
         // ReSharper disable once UnusedMember.Global
-        public string CreateDatasetInfoXML(string datasetName, List<ScanStatsEntry> scanStats, DatasetFileInfo datasetInfo)
+        public string CreateDatasetInfoXML(
+            string datasetName,
+            List<ScanStatsEntry> scanStats,
+            DatasetFileInfo datasetInfo)
         {
             return CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, new SampleInfo());
         }
@@ -770,7 +778,7 @@ namespace MSFileInfoScanner.DatasetStats
                 writer.WriteElementString("ScanCountMSn", summaryStats.MSnStats.ScanCount.ToString());
                 writer.WriteElementString("ScanCountDIA", summaryStats.DIAScanCount.ToString());
 
-                writer.WriteElementString("Elution_Time_Max", summaryStats.ElutionTimeMax.ToString("0.00"));
+                writer.WriteElementString("Elution_Time_Max", summaryStats.ElutionTimeMax.ToString("0.0###"));
 
                 var acqTimeMinutes = datasetInfo.AcqTimeEnd.Subtract(datasetInfo.AcqTimeStart).TotalMinutes;
                 writer.WriteElementString("AcqTimeMinutes", acqTimeMinutes.ToString("0.00"));
@@ -861,7 +869,7 @@ namespace MSFileInfoScanner.DatasetStats
                     }
                 }
 
-                writer.WriteEndElement();   // AcquisitionInfo EndElement
+                writer.WriteEndElement();       // AcquisitionInfo
 
                 writer.WriteStartElement("TICInfo");
                 writer.WriteElementString("TIC_Max_MS", ValueToString(summaryStats.MSStats.TICMax, 5));
@@ -884,9 +892,9 @@ namespace MSFileInfoScanner.DatasetStats
                     writer.WriteEndElement();
                 }
 
-                writer.WriteEndElement();           // DatasetInfo EndElement (note that DatasetInfo is the "root" element)
+                writer.WriteEndElement();  // End the "Root" element (DatasetInfo)
 
-                writer.WriteEndDocument();          // End the document
+                writer.WriteEndDocument(); // End the document
 
                 writer.Close();
 
@@ -1249,7 +1257,8 @@ namespace MSFileInfoScanner.DatasetStats
             // Look for scanNumber in mDatasetScanStats
             foreach (var scan in mDatasetScanStats)
             {
-                if (scan.ScanNumber != scanNumber) continue;
+                if (scan.ScanNumber != scanNumber)
+                    continue;
 
                 scan.ScanType = scanType;
                 scan.ScanTypeName = scanTypeName;
