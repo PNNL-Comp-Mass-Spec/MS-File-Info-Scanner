@@ -756,9 +756,12 @@ namespace MSFileInfoScanner.DatasetStats
                 {
                     var scanCountForType = GetScanTypeAndFilter(scanTypeEntry, out var scanType, out _, out var genericScanFilter);
 
+                    var windowWidths = MSFileInfoProcessorBaseClass.GetDelimitedWindowWidthList(scanTypeEntry.Key, summaryStats.ScanTypeWindowWidths);
+
                     writer.WriteStartElement("ScanType");
                     writer.WriteAttributeString("ScanCount", scanCountForType.ToString());
                     writer.WriteAttributeString("ScanFilterText", FixNull(genericScanFilter));
+                    writer.WriteAttributeString("IsolationWindowMZ", FixNull(windowWidths));
                     writer.WriteString(scanType);
                     writer.WriteEndElement();     // ScanType
                 }
