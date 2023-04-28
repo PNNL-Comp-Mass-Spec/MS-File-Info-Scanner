@@ -894,18 +894,19 @@ namespace MSFileInfoScanner.Readers
 
             foreach (var scanTypeEntry in datasetSummaryStats.ScanTypeStats)
             {
-                var scanType = scanTypeEntry.Key;
-                var indexMatch = scanType.IndexOf(DatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR, StringComparison.Ordinal);
+                var indexMatch = scanTypeEntry.Key.IndexOf(DatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR, StringComparison.Ordinal);
 
                 string scanFilterText;
 
+                string scanType;
+
                 if (indexMatch >= 0)
                 {
-                    scanFilterText = scanType.Substring(indexMatch + DatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR.Length);
+                    scanFilterText = scanTypeEntry.Key.Substring(indexMatch + DatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR.Length);
 
                     if (indexMatch > 0)
                     {
-                        scanType = scanType.Substring(0, indexMatch);
+                        scanType = scanTypeEntry.Key.Substring(0, indexMatch);
                     }
                     else
                     {
@@ -914,8 +915,10 @@ namespace MSFileInfoScanner.Readers
                 }
                 else
                 {
+                    scanType = scanTypeEntry.Key;
                     scanFilterText = string.Empty;
                 }
+
                 var scanCount = scanTypeEntry.Value;
 
                 var windowWidths = GetDelimitedWindowWidthList(scanTypeEntry.Key, datasetSummaryStats.ScanTypeWindowWidths);
