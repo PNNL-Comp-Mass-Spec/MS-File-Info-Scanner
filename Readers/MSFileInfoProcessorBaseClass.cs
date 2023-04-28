@@ -890,7 +890,7 @@ namespace MSFileInfoScanner.Readers
             indent ??= string.Empty;
 
             writer.WriteLine(indent + @"<table class=""DataTable"">");
-            writer.WriteLine(indent + @"  <tr><th class=""DataHead"">Scan Type</th><th class=""DataHead"">Scan Count</th><th class=""DataHead"">Scan Filter Text</th></tr>");
+            writer.WriteLine(indent + @"  <tr><th class=""DataHead"">Scan Type</th><th class=""DataHead"">Scan Count</th><th class=""DataHead"">Scan Filter Text</th><th class=""DataHead"">Isolation Window (m/z)</th></tr>");
 
             foreach (var scanTypeEntry in datasetSummaryStats.ScanTypeStats)
             {
@@ -918,10 +918,13 @@ namespace MSFileInfoScanner.Readers
                 }
                 var scanCount = scanTypeEntry.Value;
 
+                var windowWidths = GetDelimitedWindowWidthList(scanTypeEntry.Key, datasetSummaryStats.ScanTypeWindowWidths);
+
                 writer.WriteLine(indent + "  " +
                                  @"<tr><td class=""DataCell"">" + scanType + "</td>" +
                                  @"<td class=""DataCentered"">" + scanCount + "</td>" +
-                                 @"<td class=""DataCell"">" + scanFilterText + "</td></tr>");
+                                 @"<td class=""DataCell"">" + scanFilterText + "</td>" +
+                                 @"<td class=""DataCentered"">" + windowWidths + "</td></tr>");
             }
 
             writer.WriteLine(indent + "</table>");
@@ -932,6 +935,27 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         /// <param name="dataFilePath"></param>
         public abstract string GetDatasetNameViaPath(string dataFilePath);
+
+        /// <summary>
+        /// Convert the non-zero isolation window widths to a comma separated list
+        /// </summary>
+        /// <param name="scanTypeKey"></param>
+        /// <param name="scanTypeWindowWidths"></param>
+        /// <returns>Comma separated list, or an empty string if no valid window widths</returns>
+        public static string GetDelimitedWindowWidthList(string scanTypeKey, Dictionary<string, SortedSet<double>> scanTypeWindowWidths)
+        {
+            if (!scanTypeWindowWidths.TryGetValue(scanTypeKey, out var windowWidthList))
+                return string.Empty;
+
+            var windowWidthsToShow = new SortedSet<double>();
+
+            foreach (var item in windowWidthList.Where(item => item > 0))
+            {
+                windowWidthsToShow.Add(item);
+            }
+
+            return string.Join(", ", windowWidthsToShow);
+        }
 
         private IEnumerable<string> GetDeviceTableHTML(IEnumerable<DeviceInfo> deviceList)
         {
