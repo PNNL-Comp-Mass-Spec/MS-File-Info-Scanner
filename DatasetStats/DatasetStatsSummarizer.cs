@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
-using MSFileInfoScanner.Readers;
 using PRISM;
 using SpectraTypeClassifier;
 
@@ -32,6 +32,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// Scan type stats separation character
         /// </summary>
         public const string SCAN_TYPE_STATS_SEP_CHAR = "::###::";
+
         /// <summary>
         /// Dataset info file suffix
         /// </summary>
@@ -123,7 +124,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public DatasetStatsSummarizer()
         {
-            FileDate = "April 27, 2023";
+            FileDate = "April 28, 2023";
 
             ErrorMessage = string.Empty;
 
@@ -756,7 +757,7 @@ namespace MSFileInfoScanner.DatasetStats
                 {
                     var scanCountForType = GetScanTypeAndFilter(scanTypeEntry, out var scanType, out _, out var genericScanFilter);
 
-                    var windowWidths = MSFileInfoProcessorBaseClass.GetDelimitedWindowWidthList(scanTypeEntry.Key, summaryStats.ScanTypeWindowWidths);
+                    var windowWidths = GetDelimitedWindowWidthList(scanTypeEntry.Key, summaryStats.ScanTypeWindowWidths);
 
                     writer.WriteStartElement("ScanType");
                     writer.WriteAttributeString("ScanCount", scanCountForType.ToString());
@@ -1136,6 +1137,27 @@ namespace MSFileInfoScanner.DatasetStats
             mDatasetStatsSummaryStatus.ScanFiltersIncludePrecursorMZValues = includePrecursorMZ;
 
             return mDatasetSummaryStats;
+        }
+
+        /// <summary>
+        /// Convert the non-zero isolation window widths to a comma separated list
+        /// </summary>
+        /// <param name="scanTypeKey"></param>
+        /// <param name="scanTypeWindowWidths"></param>
+        /// <returns>Comma separated list, or an empty string if no valid window widths</returns>
+        public static string GetDelimitedWindowWidthList(string scanTypeKey, Dictionary<string, SortedSet<double>> scanTypeWindowWidths)
+        {
+            if (!scanTypeWindowWidths.TryGetValue(scanTypeKey, out var windowWidthList))
+                return string.Empty;
+
+            var windowWidthsToShow = new SortedSet<double>();
+
+            foreach (var item in windowWidthList.Where(item => item > 0))
+            {
+                windowWidthsToShow.Add(item);
+            }
+
+            return string.Join(", ", windowWidthsToShow);
         }
 
         /// <summary>
