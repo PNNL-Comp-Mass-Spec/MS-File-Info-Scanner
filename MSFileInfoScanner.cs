@@ -40,7 +40,7 @@ namespace MSFileInfoScanner
     {
         // Ignore Spelling: Bruker, centroiding, idx, Micromass, OxyPlot, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
 
-        public const string PROGRAM_DATE = "April 25, 2023";
+        public const string PROGRAM_DATE = "April 27, 2023";
 
         /// <summary>
         /// Constructor
