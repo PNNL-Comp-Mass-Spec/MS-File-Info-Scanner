@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using MSFileInfoScanner.Readers;
 using PRISM;
 using SpectraTypeClassifier;
 
@@ -464,10 +465,15 @@ namespace MSFileInfoScanner.DatasetStats
                     if (summaryStats.ScanTypeStats.ContainsKey(scanTypeKey))
                     {
                         summaryStats.ScanTypeStats[scanTypeKey]++;
+
+                        // Add the window width (if not yet present)
+                        summaryStats.ScanTypeWindowWidths[scanTypeKey].Add(statEntry.IsolationWindowWidth);
                     }
                     else
                     {
                         summaryStats.ScanTypeStats.Add(scanTypeKey, 1);
+
+                        summaryStats.ScanTypeWindowWidths.Add(scanTypeKey, new SortedSet<double> { statEntry.IsolationWindowWidth });
                     }
 
                     if (statEntry.IsDIA)

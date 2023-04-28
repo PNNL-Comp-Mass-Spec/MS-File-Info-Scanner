@@ -824,6 +824,11 @@ namespace MSFileInfoScanner.Readers
                         isHighRes = msLevels[spectrumIndex] > 1
                             ? scanStatsEntry.ScanTypeName.IndexOf("HMSn", StringComparison.OrdinalIgnoreCase) >= 0
                             : scanStatsEntry.ScanTypeName.IndexOf("HMS", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                        if (!scanStatsEntry.ScanTypeName.Equals("HMS") && !scanStatsEntry.ScanTypeName.Equals("MS"))
+                        {
+                            scanStatsEntry.IsolationWindowWidth = isolationWindowWidth;
+                        }
                     }
 
                     scanStatsEntry.MzMin = lowMass;

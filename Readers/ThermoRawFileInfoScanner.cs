@@ -242,6 +242,11 @@ namespace MSFileInfoScanner.Readers
                             IsDIA = scanInfo.IsDIA
                         };
 
+                        if (!scanStatsEntry.ScanTypeName.Equals("HMS") && !scanStatsEntry.ScanTypeName.Equals("MS"))
+                        {
+                            scanStatsEntry.IsolationWindowWidth = scanInfo.IsolationWindowWidthMZ;
+                        }
+
                         // Store the ScanEvent values in .ExtendedScanInfo
                         StoreExtendedScanInfo(scanStatsEntry.ExtendedScanInfo, scanInfo.ScanEvents);
 
