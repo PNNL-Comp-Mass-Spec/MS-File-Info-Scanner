@@ -162,10 +162,10 @@
       <Version>2.1.2</Version>
     </PackageReference>
     <PackageReference Include="PRISM-DatabaseUtils">
-      <Version>1.3.23</Version>
+      <Version>1.3.30</Version>
     </PackageReference>
     <PackageReference Include="PRISM-Library">
-      <Version>2.8.7</Version>
+      <Version>2.8.12</Version>
     </PackageReference>
     <None Include="App.config" />
     <PackageReference Include="System.Data.SQLite.Core">
