@@ -1,7 +1,7 @@
 ﻿; This is an Inno Setup configuration file
 ; https://jrsoftware.org/isinfo.php
 
-#define ApplicationVersion GetFileVersion('..\bin\MSFileInfoScanner.exe')
+#define ApplicationVersion GetFileVersion('..\MSFileInfoScanner\bin\MSFileInfoScanner.exe')
 
 [CustomMessages]
 AppName=MS File Info Scanner
@@ -12,53 +12,53 @@ WelcomeLabel2=This will install [name/ver] on your computer.
 ; WelcomeLabel2=Welcome message%n%nAdditional sentence
 
 [Files]
-Source: ..\bin\MSFileInfoScanner.exe                         ; DestDir: {app}
-Source: ..\bin\MSFileInfoScanner.pdb                         ; DestDir: {app}
-Source: ..\bin\agtsampleinforw.dll                           ; DestDir: {app}
-Source: ..\bin\BaseCommon.dll                                ; DestDir: {app}
-Source: ..\bin\BaseDataAccess.dll                            ; DestDir: {app}
-Source: ..\bin\BaseError.dll                                 ; DestDir: {app}
-Source: ..\bin\BaseTof.dll                                   ; DestDir: {app}
-Source: ..\bin\BDal.CXt.Lc.dll                               ; DestDir: {app}
-Source: ..\bin\BDal.CXt.Lc.Factory.dll                       ; DestDir: {app}
-Source: ..\bin\BDal.CXt.Lc.Interfaces.dll                    ; DestDir: {app}
-Source: ..\bin\BDal.CXt.Lc.UntU2.dll                         ; DestDir: {app}
-Source: ..\bin\BrukerDataReader.dll                          ; DestDir: {app}
-Source: ..\bin\ChemstationMSFileReader.dll                   ; DestDir: {app}
-Source: ..\bin\DataReader.dll                                ; DestDir: {app}
-Source: ..\bin\Interop.EDAL.dll                              ; DestDir: {app}
-Source: ..\bin\Interop.HSREADWRITELib.dll                    ; DestDir: {app}
-Source: ..\bin\Ionic.Zip.dll                                 ; DestDir: {app}
-Source: ..\bin\MassSpecDataReader.dll                        ; DestDir: {app}
-Source: ..\bin\MathNet.Numerics.dll                          ; DestDir: {app}
-Source: ..\bin\Microsoft.Bcl.AsyncInterfaces.dll             ; DestDir: {app}
-Source: ..\bin\MIDAC.dll                                     ; DestDir: {app}
-Source: ..\bin\MSFileInfoScannerInterfaces.dll               ; DestDir: {app}
-Source: ..\bin\netcdf.dll                                    ; DestDir: {app}
-Source: ..\bin\NetCDFReader.dll                              ; DestDir: {app}
-Source: ..\bin\Npgsql.dll                                    ; DestDir: {app}
-Source: ..\bin\OxyPlot.dll                                   ; DestDir: {app}
-Source: ..\bin\OxyPlot.Wpf.dll                               ; DestDir: {app}
-Source: ..\bin\PRISM.dll                                     ; DestDir: {app}
-Source: ..\bin\PRISMDatabaseUtils.dll                        ; DestDir: {app}
-Source: ..\bin\ProteowizardWrapper.dll                       ; DestDir: {app}
-Source: ..\bin\SpectraTypeClassifier.dll                     ; DestDir: {app}
-Source: ..\bin\System.Buffers.dll                            ; DestDir: {app}
-Source: ..\bin\System.Data.SQLite.dll                        ; DestDir: {app}
-Source: ..\bin\System.Memory.dll                             ; DestDir: {app}
-Source: ..\bin\System.Numerics.Vectors.dll                   ; DestDir: {app}
-Source: ..\bin\System.Runtime.CompilerServices.Unsafe.dll    ; DestDir: {app}
-Source: ..\bin\System.Text.Encodings.Web.dll                 ; DestDir: {app}
-Source: ..\bin\System.Text.Json.dll                          ; DestDir: {app}
-Source: ..\bin\System.Threading.Tasks.Extensions.dll         ; DestDir: {app}
-Source: ..\bin\System.ValueTuple.dll                         ; DestDir: {app}
-Source: ..\lib\RawFileReaderLicense.doc                              ; DestDir: {app}
-Source: ..\bin\ThermoFisher.CommonCore.BackgroundSubtraction.dll     ; DestDir: {app}
-Source: ..\bin\ThermoFisher.CommonCore.Data.dll                      ; DestDir: {app}
-Source: ..\bin\ThermoFisher.CommonCore.MassPrecisionEstimator.dll    ; DestDir: {app}
-Source: ..\bin\ThermoFisher.CommonCore.RawFileReader.dll             ; DestDir: {app}
-Source: ..\bin\ThermoRawFileReader.dll                               ; DestDir: {app}
-Source: ..\bin\UIMFLibrary.dll                                       ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\MSFileInfoScanner.exe                         ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\MSFileInfoScanner.pdb                         ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\agtsampleinforw.dll                           ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\BaseCommon.dll                                ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\BaseDataAccess.dll                            ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\BaseError.dll                                 ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\BaseTof.dll                                   ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\BDal.CXt.Lc.dll                               ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\BDal.CXt.Lc.Factory.dll                       ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\BDal.CXt.Lc.Interfaces.dll                    ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\BDal.CXt.Lc.UntU2.dll                         ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\BrukerDataReader.dll                          ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\ChemstationMSFileReader.dll                   ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\DataReader.dll                                ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\Interop.EDAL.dll                              ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\Interop.HSREADWRITELib.dll                    ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\Ionic.Zip.dll                                 ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\MassSpecDataReader.dll                        ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\MathNet.Numerics.dll                          ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\Microsoft.Bcl.AsyncInterfaces.dll             ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\MIDAC.dll                                     ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\MSFileInfoScannerInterfaces.dll               ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\netcdf.dll                                    ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\NetCDFReader.dll                              ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\Npgsql.dll                                    ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\OxyPlot.dll                                   ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\OxyPlot.Wpf.dll                               ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\PRISM.dll                                     ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\PRISMDatabaseUtils.dll                        ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\ProteowizardWrapper.dll                       ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\SpectraTypeClassifier.dll                     ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\System.Buffers.dll                            ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\System.Data.SQLite.dll                        ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\System.Memory.dll                             ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\System.Numerics.Vectors.dll                   ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\System.Runtime.CompilerServices.Unsafe.dll    ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\System.Text.Encodings.Web.dll                 ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\System.Text.Json.dll                          ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\System.Threading.Tasks.Extensions.dll         ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\System.ValueTuple.dll                         ; DestDir: {app}
+Source: ..\MSFileInfoScanner\lib\RawFileReaderLicense.doc                              ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\ThermoFisher.CommonCore.BackgroundSubtraction.dll     ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\ThermoFisher.CommonCore.Data.dll                      ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\ThermoFisher.CommonCore.MassPrecisionEstimator.dll    ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\ThermoFisher.CommonCore.RawFileReader.dll             ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\ThermoRawFileReader.dll                               ; DestDir: {app}
+Source: ..\MSFileInfoScanner\bin\UIMFLibrary.dll                                       ; DestDir: {app}
 
 Source: ..\Readme.md                                                 ; DestDir: {app}
 Source: ..\RevisionHistory.txt                                       ; DestDir: {app}

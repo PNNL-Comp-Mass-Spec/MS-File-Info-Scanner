@@ -43,42 +43,42 @@
   <ItemGroup>
     <Reference Include="BaseCommon, Version=8.0.8208.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Lib\BaseCommon.dll</HintPath>
+      <HintPath>..\Lib\BaseCommon.dll</HintPath>
     </Reference>
     <Reference Include="BaseDataAccess, Version=8.0.8208.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Lib\BaseDataAccess.dll</HintPath>
+      <HintPath>..\Lib\BaseDataAccess.dll</HintPath>
     </Reference>
     <Reference Include="BrukerDataReader">
-      <HintPath>Lib\BrukerDataReader.dll</HintPath>
+      <HintPath>..\Lib\BrukerDataReader.dll</HintPath>
     </Reference>
     <Reference Include="ChemstationMSFileReader">
-      <HintPath>Lib\ChemstationMSFileReader.dll</HintPath>
+      <HintPath>..\Lib\ChemstationMSFileReader.dll</HintPath>
     </Reference>
     <Reference Include="Ionic.Zip">
-      <HintPath>Lib\Ionic.Zip.dll</HintPath>
+      <HintPath>..\Lib\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="MassSpecDataReader, Version=8.0.8208.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Lib\MassSpecDataReader.dll</HintPath>
+      <HintPath>..\Lib\MassSpecDataReader.dll</HintPath>
     </Reference>
     <Reference Include="MSFileInfoScannerInterfaces">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Lib\MSFileInfoScannerInterfaces.dll</HintPath>
+      <HintPath>..\Lib\MSFileInfoScannerInterfaces.dll</HintPath>
     </Reference>
     <Reference Include="NetCDFReader">
-      <HintPath>Lib\NetCDFReader.dll</HintPath>
+      <HintPath>..\Lib\NetCDFReader.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="ProteowizardWrapper">
-      <HintPath>Lib\ProteowizardWrapper.dll</HintPath>
+      <HintPath>..\Lib\ProteowizardWrapper.dll</HintPath>
     </Reference>
     <Reference Include="pwiz_bindings_cli">
-      <HintPath>Lib\pwiz_bindings_cli.dll</HintPath>
+      <HintPath>..\Lib\pwiz_bindings_cli.dll</HintPath>
     </Reference>
     <Reference Include="SpectraTypeClassifier, Version=1.1.5988.17918, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Lib\SpectraTypeClassifier.dll</HintPath>
+      <HintPath>..\Lib\SpectraTypeClassifier.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -175,9 +175,9 @@
 if exist "$(TargetDir)SQLite.Interop.dll" (del "$(TargetDir)SQLite.Interop.dll")
 rem if not exist "$(TargetDir)x86" mkdir "$(TargetDir)x86"
 rem if not exist "$(TargetDir)x64" mkdir "$(TargetDir)x64"
-rem xcopy "$(ProjectDir)Lib\x86\SQLite.Interop.dll" "$(TargetDir)x86" /D /Y
-rem xcopy "$(ProjectDir)Lib\x64\SQLite.Interop.dll" "$(TargetDir)x64" /D /Y
-xcopy "$(ProjectDir)Lib\netcdf.dll" "$(TargetDir)" /D /Y
-xcopy "$(ProjectDir)Python\MSFileInfoScanner_Plotter.py"  "$(TargetDir)" /D /Y</PostBuildEvent>
+rem xcopy "$(ProjectDir)..\Lib\x86\SQLite.Interop.dll" "$(TargetDir)x86" /D /Y
+rem xcopy "$(ProjectDir)..\Lib\x64\SQLite.Interop.dll" "$(TargetDir)x64" /D /Y
+xcopy "$(ProjectDir)..\Lib\netcdf.dll" "$(TargetDir)" /D /Y
+xcopy "$(ProjectDir)..\Python\MSFileInfoScanner_Plotter.py"  "$(TargetDir)" /D /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>

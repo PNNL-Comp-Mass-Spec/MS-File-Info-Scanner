@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFileInfoScanner_with_ThermoRawFileReader", "MSFileInfoScanner_with_ThermoRawFileReader.csproj", "{0807EDD3-878A-42AE-9507-F1CC2CC2D3A9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFileInfoScanner_with_ThermoRawFileReader", "MSFileInfoScanner\MSFileInfoScanner_with_ThermoRawFileReader.csproj", "{0807EDD3-878A-42AE-9507-F1CC2CC2D3A9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFileInfoScannerUnitTests", "UnitTests\MSFileInfoScannerUnitTests.csproj", "{12D4ADD8-E0E6-45A1-9699-2409B26F2637}"
 EndProject

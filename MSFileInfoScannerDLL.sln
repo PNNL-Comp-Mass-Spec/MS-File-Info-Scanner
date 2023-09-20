@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.352
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33103.184
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFileInfoScannerDLL", "MSFileInfoScannerDLL.csproj", "{E8C41FCC-E186-4453-8929-65292FB8F4A6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFileInfoScannerDLL", "MSFileInfoScanner\MSFileInfoScannerDLL.csproj", "{E8C41FCC-E186-4453-8929-65292FB8F4A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

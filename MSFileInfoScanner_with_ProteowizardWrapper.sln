@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33103.184
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFileInfoScanner_with_ProteowizardWrapper", "MSFileInfoScanner_with_ProteowizardWrapper.csproj", "{5453CFD1-0DF7-4D70-B81F-0DF6970183C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFileInfoScanner_with_ProteowizardWrapper", "MSFileInfoScanner\MSFileInfoScanner_with_ProteowizardWrapper.csproj", "{5453CFD1-0DF7-4D70-B81F-0DF6970183C0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProteowizardWrapper", "..\ProteowizardWrapper\ProteowizardWrapper.csproj", "{DACEE7D5-5A6A-4001-9602-FAB1A9A2DE59}"
 EndProject

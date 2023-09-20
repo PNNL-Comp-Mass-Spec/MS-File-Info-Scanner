@@ -66,7 +66,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MSFileInfoScanner.csproj">
+    <ProjectReference Include="..\MSFileInfoScanner\MSFileInfoScanner.csproj">
       <Project>{ed7fbc96-ff30-4e96-aad7-2f0d8d4f31e9}</Project>
       <Name>MSFileInfoScanner</Name>
     </ProjectReference>
