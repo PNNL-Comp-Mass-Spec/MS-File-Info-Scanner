@@ -1,0 +1,25 @@
+{ // Monolithic/shared versioning config file
+  "$schema": "https://raw.githubusercontent.com/dotnet/Nerdbank.GitVersioning/main/src/NerdBank.GitVersioning/version.schema.json",
+  "version": "2.1",
+  "assemblyVersion": {
+    "precision": "revision"
+  },
+  "pathFilters": [
+    ":/", // Consider all committed file changes in the repo root folder for version increases
+    ":^/README.md", // Exclude changes to README.md
+    ":^/RevisionHistory.txt", // Exclude changes to RevisionHistory.txt
+    ":^/Readme_Exe_vs_DLL_Usage.txt", // Exclude changes to Readme_Exe_vs_DLL_Usage.txt
+    ":^/BatchFiles", // Exclude changes to BatchFiles
+    ":^/docs", // Exclude changes to docs
+    ":^/MSFileInfoScanner_Installer", // Exclude changes to MSFileInfoScanner_Installer
+    ":^/MSFileInfoScanner_SourceCode", // Exclude changes to MSFileInfoScanner_SourceCode
+    ":^/UnitTests", // Exclude changes to UnitTests
+    ":^/MSFileInfoScanner_with_ProteowizardWrapper.sln.DotSettings", // Exclude changes to MSFileInfoScanner_with_ProteowizardWrapper.sln.DotSettings
+    ":^/MSFileInfoScanner_with_ThermoRawfileReader.sln.DotSettings", // Exclude changes to MSFileInfoScanner_with_ThermoRawfileReader.sln.DotSettings
+    ":^/MSFileInfoScanner_DLL.sln.DotSettings", // Exclude changes to MSFileInfoScanner_DLL.sln.DotSettings
+    ":^/.gitignore" // Exclude changes to .gitignore
+  ],
+  "publicReleaseRefSpec": [
+    "^refs/heads/master$" // we release out of master
+  ]
+}

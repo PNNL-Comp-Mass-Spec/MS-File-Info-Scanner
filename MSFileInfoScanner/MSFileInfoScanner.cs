@@ -40,7 +40,12 @@ namespace MSFileInfoScanner
     {
         // Ignore Spelling: Bruker, centroiding, idx, Micromass, OxyPlot, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
 
-        public const string PROGRAM_DATE = "August 11, 2023";
+        public static readonly string PROGRAM_DATE;
+
+        static MSFileInfoScanner()
+        {
+            PROGRAM_DATE = ThisAssembly.GitCommitDate.ToLocalTime().ToString("MMMM dd, yyyy");
+        }
 
         /// <summary>
         /// Constructor
