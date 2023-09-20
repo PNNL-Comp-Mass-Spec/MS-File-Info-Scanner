@@ -895,7 +895,13 @@ namespace MSFileInfoScanner.Readers
                 // Update the dataset name and file extension
                 datasetFileInfo.DatasetName = GetDatasetNameViaPath(datasetDirectory.FullName);
                 datasetFileInfo.FileExtension = string.Empty;
-                datasetFileInfo.FileSizeBytes = primaryInstrumentFile.Length;
+
+                // To only use the "primary" file for dataset size:
+                //datasetFileInfo.FileSizeBytes = primaryInstrumentFile.Length;
+                // To only use the "added" instrument files for dataset size:
+                //datasetFileInfo.FileSizeBytes = instrumentFilesToAdd.Sum(x => x.Length);
+                // To use all dataset files for dataset size:
+                datasetFileInfo.FileSizeBytes = PathUtils.FindFilesWildcard(datasetDirectory, "*", true).Sum(x => x.Length);
 
                 // Find the apexAcquisition.method or submethods.xml file in the XMASS_Method.m subdirectory to determine .AcqTimeStart
                 // This method updates datasetFileInfo.AcqTimeEnd and datasetFileInfo.AcqTimeStart to have the same time
