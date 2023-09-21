@@ -98,8 +98,6 @@ namespace MSFileInfoScanner
 
         public const string ABORT_PROCESSING_FILENAME = "AbortProcessing.txt";
 
-        public const string XML_SECTION_MSFILESCANNER_SETTINGS = "MSFileInfoScannerSettings";
-
         private const int FILE_MODIFICATION_WINDOW_MINUTES = 60;
 
         private const int MAX_FILE_READ_ACCESS_ATTEMPTS = 2;
