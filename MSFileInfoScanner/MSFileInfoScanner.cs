@@ -38,7 +38,7 @@ namespace MSFileInfoScanner
     /// </remarks>
     public sealed class MSFileInfoScanner : iMSFileInfoScanner
     {
-        // Ignore Spelling: Bruker, centroiding, idx, Micromass, OxyPlot, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
+        // Ignore Spelling: app, Bruker, centroiding, idx, LCMS, Micromass, OxyPlot, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
 
         public static readonly string PROGRAM_DATE;
 
@@ -1332,6 +1332,7 @@ namespace MSFileInfoScanner
                                     //}
                                     else if (PathUtils.FindDirectoriesWildcard(datasetDirectory, AgilentMassHunterDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Count > 0)
                                     {
+                                        // ReSharper disable once CommentTypo
                                         // Uses Agilent's MassSpecDataReader to read the file
                                         mMSInfoScanner = new AgilentMassHunterDFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     }
