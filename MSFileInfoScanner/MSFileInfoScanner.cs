@@ -256,21 +256,22 @@ namespace MSFileInfoScanner
 
                 mLastCheckForAbortProcessingFile = DateTime.UtcNow;
 
-                if (File.Exists(ABORT_PROCESSING_FILENAME))
+                if (!File.Exists(ABORT_PROCESSING_FILENAME))
+                    return;
+
+                AbortProcessing = true;
+
+                try
                 {
-                    AbortProcessing = true;
-                    try
+                    if (File.Exists(ABORT_PROCESSING_FILENAME + ".done"))
                     {
-                        if (File.Exists(ABORT_PROCESSING_FILENAME + ".done"))
-                        {
-                            File.Delete(ABORT_PROCESSING_FILENAME + ".done");
-                        }
-                        File.Move(ABORT_PROCESSING_FILENAME, ABORT_PROCESSING_FILENAME + ".done");
+                        File.Delete(ABORT_PROCESSING_FILENAME + ".done");
                     }
-                    catch (Exception)
-                    {
-                        // Ignore errors here
-                    }
+                    File.Move(ABORT_PROCESSING_FILENAME, ABORT_PROCESSING_FILENAME + ".done");
+                }
+                catch (Exception)
+                {
+                    // Ignore errors here
                 }
             }
             catch (Exception)
