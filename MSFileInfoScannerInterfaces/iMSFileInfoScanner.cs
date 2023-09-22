@@ -8,6 +8,8 @@ namespace MSFileInfoScannerInterfaces
     // ReSharper disable once InconsistentNaming
     public abstract class iMSFileInfoScanner : EventNotifier
     {
+        // Ignore Spelling: lcms
+
         /// <summary>
         /// MSFileInfoScanner error codes
         /// </summary>

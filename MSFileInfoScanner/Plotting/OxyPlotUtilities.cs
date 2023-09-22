@@ -7,7 +7,7 @@ namespace MSFileInfoScanner.Plotting
 {
     public static class OxyPlotUtilities
     {
-        // Ignore Spelling: Arial
+        // Ignore Spelling: Arial, Oxy
 
 #pragma warning disable CS3002 // Return type is not CLS-compliant
         public static PlotModel GetBasicPlotModel(string title, string xAxisLabel, string yAxisLabel)

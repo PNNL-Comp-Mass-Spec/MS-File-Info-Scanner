@@ -18,7 +18,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public class DeconToolsIsosInfoScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: Da, isos, mw, deisotoped
+        // Ignore Spelling: Da, decon, decontools, deisotoped, isos, lcms, mw
 
         /// <summary>
         /// Constructor

@@ -26,7 +26,7 @@ namespace MSFileInfoScanner.DatasetStats
     /// </remarks>
     public class DatasetStatsSummarizer : EventNotifier
     {
-        // Ignore Spelling: AcqTime, centroided, utf, yyyy-MM-dd hh:mm:ss tt
+        // Ignore Spelling: AcqTime, centroided, centroiding, lcms, sep, utf, yyyy-MM-dd hh:mm:ss tt
 
         /// <summary>
         /// Scan type stats separation character

@@ -7,7 +7,7 @@ namespace MSFileInfoScannerInterfaces
     /// </summary>
     public class LCMSDataPlotterOptions
     {
-        // Ignore Spelling: centroiding, deisotoped
+        // Ignore Spelling: centroiding, deisotoped, lcms
 
         public const int DEFAULT_MAX_CHARGE_STATE = 12;
 

@@ -20,7 +20,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public class ThermoRawFileInfoScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: centroided, xcalibur
+        // Ignore Spelling: centroided, lcms, xcalibur
 
         // Note: The extension must be in all caps
         public const string THERMO_RAW_FILE_EXTENSION = ".RAW";

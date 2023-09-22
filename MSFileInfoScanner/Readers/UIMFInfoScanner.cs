@@ -21,7 +21,7 @@ namespace MSFileInfoScanner.Readers
     public class UIMFInfoScanner : MSFileInfoProcessorBaseClass
     {
         // ReSharper disable once CommentTypo
-        // Ignore Spelling: Addon, Sarc, ns, AcqTimeEnd
+        // Ignore Spelling: AcqTimeEnd, Addon, lcms, ns, Sarc, uimf
 
         // Note: The extension must be in all caps
         public const string UIMF_FILE_EXTENSION = ".UIMF";

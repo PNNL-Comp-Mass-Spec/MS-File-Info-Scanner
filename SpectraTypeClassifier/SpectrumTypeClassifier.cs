@@ -11,7 +11,7 @@ namespace SpectraTypeClassifier
     [CLSCompliant(true)]
     public class SpectrumTypeClassifier : EventNotifier
     {
-        // Ignore Spelling: centroided, ppmDiffs, PpmDiffThreshold
+        // Ignore Spelling: centroided, centroiding, diff, Diffs, dta, ppmDiffs, PpmDiffThreshold
 
         /// <summary>
         /// Default spacing between adjacent data points for deciding that data is thresholded (default is 50 ppm)
