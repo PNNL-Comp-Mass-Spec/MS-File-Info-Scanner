@@ -122,9 +122,9 @@ namespace SpectraTypeClassifier
                 // Swap is not required
                 return;
             }
-            var temp = dataPoints[i];
-            dataPoints[i] = dataPoints[j];
-            dataPoints[j] = temp;
+
+            // Swap values (swap via deconstruction)
+            (dataPoints[i], dataPoints[j]) = (dataPoints[j], dataPoints[i]);
         }
 
         /// <summary>
