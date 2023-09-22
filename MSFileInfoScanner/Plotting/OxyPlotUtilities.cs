@@ -44,7 +44,7 @@ namespace MSFileInfoScanner.Plotting
 #pragma warning restore CS3002 // Return type is not CLS-compliant
 #pragma warning restore CS3001 // Argument type is not CLS-compliant
         {
-            var axis = new LinearAxis
+            return new LinearAxis
             {
                 Position = position,
                 Title = axisTitle,
@@ -61,8 +61,6 @@ namespace MSFileInfoScanner.Plotting
                 StringFormat = AxisInfo.DEFAULT_AXIS_LABEL_FORMAT,
                 Font = "Arial"
             };
-
-            return axis;
         }
 
         /// <summary>
