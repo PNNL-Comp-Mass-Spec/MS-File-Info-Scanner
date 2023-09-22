@@ -46,7 +46,7 @@ namespace MSFileInfoScanner.Readers
             public float Fit;
             public double MonoMass;
 
-            public override string ToString()
+            public readonly override string ToString()
             {
                 return string.Format("{0:N3} m/z, {1}+, {2:N3} Da", MZ, Charge, MonoMass);
             }
@@ -66,7 +66,7 @@ namespace MSFileInfoScanner.Readers
             public int NumDeisotoped;
             public string FilterText;
 
-            public override string ToString()
+            public readonly override string ToString()
             {
                 return string.Format("Scan {0} at {1:N2} minutes: {2} peaks, {3} deisotoped", Scan, ElutionTime, NumPeaks, NumDeisotoped);
             }
