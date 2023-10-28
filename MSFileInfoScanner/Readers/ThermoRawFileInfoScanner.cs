@@ -398,7 +398,7 @@ namespace MSFileInfoScanner.Readers
             RegisterEvents(xcaliburAccessor);
 
             // Open a handle to the data file
-            if (!xcaliburAccessor.OpenRawFile(rawFile.FullName))
+            if (!xcaliburAccessor.OpenRawFile(rawFile.FullName) && !xcaliburAccessor.HasNoMSDevice)
             {
                 // File open failed
                 OnErrorEvent("Call to .OpenRawFile failed for: {0}", rawFile.FullName);
@@ -428,7 +428,7 @@ namespace MSFileInfoScanner.Readers
                             // Update rawFile then try to re-open
                             rawFile = MSFileInfoScanner.GetFileInfo(dataFilePath);
 
-                            if (!xcaliburAccessor.OpenRawFile(rawFile.FullName))
+                            if (!xcaliburAccessor.OpenRawFile(rawFile.FullName) && !xcaliburAccessor.HasNoMSDevice)
                             {
                                 // File open failed
                                 OnErrorEvent("Call to .OpenRawFile failed for: {0}", rawFile.FullName);
@@ -473,7 +473,9 @@ namespace MSFileInfoScanner.Readers
                             var scanEnd = xcaliburAccessor.FileInfo.ScanEnd;
                             xcaliburAccessor.GetScanInfo(scanEnd, out var scanInfo);
 
-                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(scanInfo.RetentionTime);
+                            // scanInfo.RetentionTime will be '0' for files with no MS data; fall back to the last scan time reported by RawFileReader.
+                            var lastScanMinutes = scanInfo.RetentionTime > 0 ? scanInfo.RetentionTime : xcaliburAccessor.LastScanTimeMinutes;
+                            datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(lastScanMinutes);
                         }
                         else
                         {
@@ -487,25 +489,29 @@ namespace MSFileInfoScanner.Readers
                         datasetFileInfo.ScanCount = 0;
                     }
 
-                    if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFile ||
-                        Options.SaveLCMS2DPlots || Options.CheckCentroidingStatus || Options.MS2MzMin > 0)
+                    if (!xcaliburAccessor.HasNoMSDevice)
                     {
-                        // Load data from each scan
-                        // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
-                        LoadScanDetails(xcaliburAccessor);
-                    }
+                        // If there is no MS device, then there won't be any data returned to perform these operations anyway
+                        if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFile ||
+                            Options.SaveLCMS2DPlots || Options.CheckCentroidingStatus || Options.MS2MzMin > 0)
+                        {
+                            // Load data from each scan
+                            // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File
+                            LoadScanDetails(xcaliburAccessor);
+                        }
 
-                    if (Options.ComputeOverallQualityScores)
-                    {
-                        // Note that this call will also create the TICs and BPIs
-                        ComputeQualityScores(xcaliburAccessor, datasetFileInfo);
-                    }
+                        if (Options.ComputeOverallQualityScores)
+                        {
+                            // Note that this call will also create the TICs and BPIs
+                            ComputeQualityScores(xcaliburAccessor, datasetFileInfo);
+                        }
 
-                    if (Options.MS2MzMin > 0 && datasetFileInfo.ScanCount > 0)
-                    {
-                        // Verify that all of the MS2 spectra have m/z values below the required minimum
-                        // Useful for validating that reporter ions can be detected
-                        ValidateMS2MzMin();
+                        if (Options.MS2MzMin > 0 && datasetFileInfo.ScanCount > 0)
+                        {
+                            // Verify that all of the MS2 spectra have m/z values below the required minimum
+                            // Useful for validating that reporter ions can be detected
+                            ValidateMS2MzMin();
+                        }
                     }
                 }
             }
