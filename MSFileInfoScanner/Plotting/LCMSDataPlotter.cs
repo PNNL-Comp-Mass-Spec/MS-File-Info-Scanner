@@ -237,7 +237,7 @@ namespace MSFileInfoScanner.Plotting
 
                             if (mSortingWarnCount <= 10)
                             {
-                                OnWarningEvent("  Sorting m/z data for scan {0} (this typically shouldn't be required for Thermo data, though can occur for high res Orbitrap data)", scanNumber);
+                                OnWarningEvent("  Sorting m/z data for scan {0} (this typically isn't required for Thermo data, though can be needed for Astral data and high res Orbitrap data)", scanNumber);
                             }
                             else if (mSortingWarnCount % 100 == 0)
                             {
