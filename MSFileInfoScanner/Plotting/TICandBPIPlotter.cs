@@ -382,8 +382,8 @@ namespace MSFileInfoScanner.Plotting
 
             }
 
-            if (minScan == maxScan)
             // Override the auto-computed X-axis range
+            if (Math.Abs(minScan - maxScan) < float.Epsilon)
             {
                 myPlot.Axes[0].Minimum = minScan - 1;
                 myPlot.Axes[0].Maximum = minScan + 1;
