@@ -367,9 +367,7 @@ namespace MSFileInfoScanner.Readers
 
             // Write out the Overview 2D plot of m/z vs. intensity
             // Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-            var success = mLCMS2DPlotOverview.Save2DPlots(datasetName, outputDirectoryPath, "HighAbu_", scanModeSuffixAddon);
-
-            return success;
+            return mLCMS2DPlotOverview.Save2DPlots(datasetName, outputDirectoryPath, "HighAbu_", scanModeSuffixAddon);
         }
 
         /// <summary>
