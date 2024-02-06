@@ -147,7 +147,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Add a new scan
         /// </summary>
-        /// <param name="scanStats"></param>
+        /// <param name="scanStats">Scan stats to add</param>
         public void AddDatasetScan(ScanStatsEntry scanStats)
         {
             // Add the scan number (if not yet present)
@@ -163,7 +163,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// If the number of spectra tracked by summaryStats.ScanTypeStats is >= 98% of the sum, nothing is adjusted
         /// If the number of spectra tracked by summaryStats.ScanTypeStats is less than 98%, values in summaryStats.ScanTypeStats are increased based on the spectrum distribution actually stored in summaryStats
         /// </summary>
-        /// <param name="summaryStats"></param>
+        /// <param name="summaryStats">Summary stats to update</param>
         private void AdjustSummaryStats(DatasetSummaryStats summaryStats)
         {
             // Keys in this dictionary are keys in summaryStats.ScanTypeStats
@@ -191,7 +191,7 @@ namespace MSFileInfoScanner.DatasetStats
             if (totalScansInSummaryStats >= (ScanCountMS + ScanCountHMS + ScanCountMSn + ScanCountHMSn) * 0.98)
                 return;
 
-            // The dataset summary stats object does not contain data for all of the scans
+            // The dataset summary stats object does not contain data for all the scans
 
             // Adjust the scan counts in summaryStats.ScanTypeStats using the counts in
             // ScanCountMS, ScanCountHMS, ScanCountMSn, and ScanCountHMSn
@@ -293,9 +293,9 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Examine the m/z values in the spectrum to determine if the data is centroided
         /// </summary>
-        /// <param name="mzList"></param>
-        /// <param name="msLevel"></param>
-        /// <param name="spectrumTitle"></param>
+        /// <param name="mzList">m/z values</param>
+        /// <param name="msLevel">MS level (1 for MS1, 2 for MS2, etc.)</param>
+        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void ClassifySpectrum(List<double> mzList, int msLevel, string spectrumTitle)
         {
             ClassifySpectrum(mzList, msLevel, SpectrumTypeClassifier.CentroidStatusConstants.Unknown, spectrumTitle);
@@ -304,9 +304,9 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Examine the m/z values in the spectrum to determine if the data is centroided
         /// </summary>
-        /// <param name="mzList">MZ values</param>
-        /// <param name="msLevel"></param>
-        /// <param name="centroidingStatus"></param>
+        /// <param name="mzList">m/z values</param>
+        /// <param name="msLevel">MS level (1 for MS1, 2 for MS2, etc.)</param>
+        /// <param name="centroidingStatus">Centroiding status</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void ClassifySpectrum(List<double> mzList, int msLevel, SpectrumTypeClassifier.CentroidStatusConstants centroidingStatus, string spectrumTitle)
         {
@@ -320,8 +320,8 @@ namespace MSFileInfoScanner.DatasetStats
         /// Increments mSpectraTypeClassifier.TotalSpectra if data is found
         /// Increments mSpectraTypeClassifier.CentroidedSpectra if the data is centroided
         /// </remarks>
-        /// <param name="mzArray">MZ values</param>
-        /// <param name="msLevel"></param>
+        /// <param name="mzArray">m/z values</param>
+        /// <param name="msLevel">MS level (1 for MS1, 2 for MS2, etc.)</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void ClassifySpectrum(double[] mzArray, int msLevel, string spectrumTitle)
         {
@@ -336,8 +336,8 @@ namespace MSFileInfoScanner.DatasetStats
         /// Increments mSpectraTypeClassifier.CentroidedSpectra if the data is centroided
         /// </remarks>
         /// <param name="ionCount">Number of items in mzArray; if -1, then parses all data in mzArray</param>
-        /// <param name="mzArray">MZ values</param>
-        /// <param name="msLevel"></param>
+        /// <param name="mzArray">m/z values</param>
+        /// <param name="msLevel">MS level (1 for MS1, 2 for MS2, etc.)</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void ClassifySpectrum(int ionCount, double[] mzArray, int msLevel, string spectrumTitle)
         {
@@ -352,9 +352,9 @@ namespace MSFileInfoScanner.DatasetStats
         /// Increments mSpectraTypeClassifier.CentroidedSpectra if the data is centroided
         /// </remarks>
         /// <param name="ionCount">Number of items in mzArray; if -1, then parses all data in mzArray</param>
-        /// <param name="mzArray">MZ values</param>
-        /// <param name="msLevel"></param>
-        /// <param name="centroidingStatus"></param>
+        /// <param name="mzArray">m/z values</param>
+        /// <param name="msLevel">MS level (1 for MS1, 2 for MS2, etc.)</param>
+        /// <param name="centroidingStatus">Centroiding status</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         // ReSharper disable once UnusedMember.Global
         public void ClassifySpectrum(
@@ -1142,8 +1142,8 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Convert the non-zero isolation window widths to a comma separated list
         /// </summary>
-        /// <param name="scanTypeKey"></param>
-        /// <param name="scanTypeWindowWidths"></param>
+        /// <param name="scanTypeKey">Scan type key</param>
+        /// <param name="scanTypeWindowWidths">Scan type window widths</param>
         /// <returns>Comma separated list, or an empty string if no valid window widths</returns>
         public static string GetDelimitedWindowWidthList(string scanTypeKey, Dictionary<string, SortedSet<double>> scanTypeWindowWidths)
         {
@@ -1163,7 +1163,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Extract out the scan type and filter text from scanTypeKey
         /// </summary>
-        /// <param name="scanTypeKey"></param>
+        /// <param name="scanTypeKey">Scan type key</param>
         /// <param name="scanType">Scan Type, e.g. HMS or HCD-HMSn</param>
         /// <param name="basicScanType">Simplified scan type, e.g. HMS or HMSn</param>
         /// <param name="scanFilterText">Scan filter text, e.g. "FTMS + p NSI Full ms" or "FTMS + p NSI d Full ms2 0@hcd25.00" or "IMS"</param>
@@ -1230,7 +1230,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Return true if the given scan number has been stored using AddDatasetScan
         /// </summary>
-        /// <param name="scanNumber"></param>
+        /// <param name="scanNumber">Scan number</param>
         public bool HasScanNumber(int scanNumber)
         {
             return mDatasetScanNumbers.Contains(scanNumber);
@@ -1254,15 +1254,15 @@ namespace MSFileInfoScanner.DatasetStats
         /// Store scan counts, by scan type
         /// </summary>
         /// <remarks>
-        /// Counts passed to this method are relevant when reading datasets with millions of spectra
+        /// Counts passed to this method are relevant when reading datasets with millions of spectra,
         /// and we limited the amount of detailed scan info stored in mDatasetScanStats
         /// </remarks>
-        /// <param name="scanCountHMS"></param>
-        /// <param name="scanCountHMSn"></param>
-        /// <param name="scanCountMS"></param>
-        /// <param name="scanCountMSn"></param>
-        /// <param name="scanCountDIA"></param>
-        /// <param name="elutionTimeMax"></param>
+        /// <param name="scanCountHMS">High resolution MS1 scans</param>
+        /// <param name="scanCountHMSn">High resolution MSn scans</param>
+        /// <param name="scanCountMS">Low resolution MS1 scans</param>
+        /// <param name="scanCountMSn">Low resolution MSn scans</param>
+        /// <param name="scanCountDIA">DIA scans</param>
+        /// <param name="elutionTimeMax">Elution time max</param>
         public void StoreScanTypeTotals(int scanCountHMS, int scanCountHMSn, int scanCountMS, int scanCountMSn, int scanCountDIA, double elutionTimeMax)
         {
             ScanCountHMS = scanCountHMS;
@@ -1277,9 +1277,9 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Updates the scan type information for the specified scan number
         /// </summary>
-        /// <param name="scanNumber"></param>
-        /// <param name="scanType"></param>
-        /// <param name="scanTypeName"></param>
+        /// <param name="scanNumber">Scan number</param>
+        /// <param name="scanType"> Scan Type (aka MSLevel)</param>
+        /// <param name="scanTypeName">Scan type name</param>
         /// <returns>True if the scan was found and updated; otherwise false</returns>
         public bool UpdateDatasetScanType(int scanNumber, int scanType, string scanTypeName)
         {
@@ -1428,12 +1428,12 @@ namespace MSFileInfoScanner.DatasetStats
         /// Log a warning if some spectra, but fewer than 10% of the total, have a minimum higher than the threshold
         /// </summary>
         /// <remarks>
-        /// If a dataset has a mix of MS2 and MS3 spectra, and if all of the MS3 spectra meet the minimum m/z requirement, a warning is not raised
+        /// If a dataset has a mix of MS2 and MS3 spectra, and if all the MS3 spectra meet the minimum m/z requirement, a warning is not raised
         /// Example dataset: UCLA_Dun_TMT_set2_03_QE_24May19_Rage_Rep-19-04-r01
         /// </remarks>
-        /// <param name="requiredMzMin">Minimum m/z threshold; the </param>
-        /// <param name="errorOrWarningMsg"></param>
-        /// <param name="maxPercentAllowedFailed"></param>
+        /// <param name="requiredMzMin">Required minimum m/z value</param>
+        /// <param name="errorOrWarningMsg">Output: error or warning message</param>
+        /// <param name="maxPercentAllowedFailed">Maximum percentage of spectra allowed to have a minimum m/z larger than the required minimum</param>
         /// <returns>True if valid data, false if at least 10% of the spectra has a minimum m/z higher than the threshold</returns>
         public bool ValidateMS2MzMin(float requiredMzMin, out string errorOrWarningMsg, int maxPercentAllowedFailed)
         {
@@ -1486,12 +1486,12 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Determine the percentage of scans with the given msLevel that have a minimum m/z value greater than requiredMzMin
         /// </summary>
-        /// <param name="msLevel"></param>
-        /// <param name="requiredMzMin"></param>
-        /// <param name="maxPercentAllowedFailed"></param>
-        /// <param name="scanCountForMSLevel"></param>
-        /// <param name="scanCountWithData"></param>
-        /// <param name="errorOrWarningMsg"></param>
+        /// <param name="msLevel">MS level (1 for MS1, 2 for MS2, etc.)</param>
+        /// <param name="requiredMzMin">Required minimum m/z value</param>
+        /// <param name="maxPercentAllowedFailed">Maximum percentage of spectra allowed to have a minimum m/z larger than the required minimum</param>
+        /// <param name="scanCountForMSLevel">Output: scan count for the given MS level</param>
+        /// <param name="scanCountWithData">Output: scan count with data</param>
+        /// <param name="errorOrWarningMsg">Output: error or warning message</param>
         private bool ValidateMSnMzMin(
             int msLevel,
             float requiredMzMin,

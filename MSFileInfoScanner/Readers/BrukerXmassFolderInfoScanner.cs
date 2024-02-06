@@ -73,8 +73,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
-        /// <param name="lcms2DPlotOptions"></param>
+        /// <param name="options">Options</param>
+        /// <param name="lcms2DPlotOptions">Plotting options</param>
         public BrukerXmassFolderInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
             base(options, lcms2DPlotOptions)
         { }
@@ -122,8 +122,8 @@ namespace MSFileInfoScanner.Readers
         /// Uses the file modification time as the run start time
         /// Also looks for the .hdx file in the dataset directory and examine its modification time
         /// </summary>
-        /// <param name="datasetDirectory"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="datasetDirectory">Dataset directory</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if a valid file is found; otherwise false</returns>
         private void DetermineAcqStartTime(DirectoryInfo datasetDirectory, DatasetFileInfo datasetFileInfo)
         {
@@ -370,9 +370,9 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Read data from the analysis.baf or analysis.tdf file using ProteoWizard
         /// </summary>
-        /// <param name="datasetFileOrDirectory"></param>
-        /// <param name="datasetFileInfo"></param>
-        /// <param name="bafFileChecked">Output: true if the file exists and we tried to open it (will still be true if the file is corrupt)</param>
+        /// <param name="datasetFileOrDirectory">Dataset file or directory</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
+        /// <param name="bafFileChecked">Output: true if the file exists, and we tried to open it (will still be true if the file is corrupt)</param>
         /// <returns>True if success, false if an error</returns>
         private bool ParseBAFFile(FileSystemInfo datasetFileOrDirectory, DatasetFileInfo datasetFileInfo, out bool bafFileChecked)
         {
@@ -791,7 +791,7 @@ namespace MSFileInfoScanner.Readers
         /// Process a Bruker Xmass directory, specified by dataFilePath
         /// </summary>
         /// <param name="dataFilePath">Either the dataset directory containing the XMass files, or any of the XMass files in the dataset directory</param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
@@ -888,7 +888,7 @@ namespace MSFileInfoScanner.Readers
                 var primaryInstrumentFile = matchedFiles.First();
 
                 // Read the file info from the file system
-                // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
+                // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all the necessary steps are taken)
                 // This will also compute the SHA-1 hash of the primary instrument file and add it to mDatasetStatsSummarizer.DatasetFileInfo
                 UpdateDatasetFileStats(primaryInstrumentFile, datasetFileInfo.DatasetID, out var primaryFileAdded);
 

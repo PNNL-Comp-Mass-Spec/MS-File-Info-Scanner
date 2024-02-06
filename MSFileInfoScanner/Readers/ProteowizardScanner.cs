@@ -18,8 +18,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
-        /// <param name="lcms2DPlotOptions"></param>
+        /// <param name="options">Processing options</param>
+        /// <param name="lcms2DPlotOptions">Plotting options</param>
         protected ProteoWizardScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) : base(options, lcms2DPlotOptions)
         {
             if (options.SaveTICAndBPIPlots)
@@ -37,8 +37,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// This method is used to determine one or more overall quality scores
         /// </summary>
-        /// <param name="msDataFileReader"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="msDataFileReader">MS data file reader</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         private void ComputeQualityScores(
             MSDataFileReader msDataFileReader,
             DatasetFileInfo datasetFileInfo)
@@ -51,7 +51,7 @@ namespace MSFileInfoScanner.Readers
             if (mLCMS2DPlot.ScanCountCached > 0)
             {
                 // Obtain the overall average intensity value using the data cached in mLCMS2DPlot
-                // This avoids having to reload all of the data using msDataFileReader
+                // This avoids having to reload all the data using msDataFileReader
                 const int msLevelFilter = 1;
                 overallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(msLevelFilter);
             }
@@ -107,8 +107,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Load data using the ProteoWizardWrapper
         /// </summary>
-        /// <param name="datasetFileOrDirectory"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="datasetFileOrDirectory">Dataset file or directory</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <param name="unknownCompressorIdIsWarning">When true, if error "unknown compressor id" occurs, report it as a warning instead of an error</param>
         /// <returns>True if successful, false if an error</returns>
         public bool ProcessWithProteoWizard(

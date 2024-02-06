@@ -122,7 +122,7 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Add a new TICAndBPIPlotter instance to mInstrumentSpecificPlots
         /// </summary>
-        /// <param name="dataSource"></param>
+        /// <param name="dataSource">Data source</param>
         protected TICandBPIPlotter AddInstrumentSpecificPlot(string dataSource)
         {
             var plotContainer = new TICandBPIPlotter(dataSource, true);
@@ -136,7 +136,7 @@ namespace MSFileInfoScanner.Readers
         /// Find the largest file in the instrument directory
         /// Compute its SHA-1 hash then add to mDatasetStatsSummarizer.DatasetFileInfo
         /// </summary>
-        /// <param name="instrumentDirectory"></param>
+        /// <param name="instrumentDirectory">Instrument directory path</param>
         protected void AddLargestInstrumentFile(DirectoryInfo instrumentDirectory)
         {
             // List of files by size, sorted descending
@@ -211,7 +211,7 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Creates a tab-delimited text file with details on each scan tracked by this class (stored in mDatasetScanStats)
         /// </summary>
-        /// <param name="inputFileName">Input file name</param>
+        /// <param name="inputFileName">Input file path</param>
         /// <param name="outputDirectoryPath">Output directory path</param>
         /// <returns>True if success; False if failure</returns>
         public bool CreateDatasetScanStatsFile(string inputFileName, string outputDirectoryPath)
@@ -356,8 +356,8 @@ namespace MSFileInfoScanner.Readers
             // than the MaxPointsToPlot value in mLCMS2DPlot
             mLCMS2DPlotOverview.Options.MaxPointsToPlot = (int)Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / (double)overviewPlotDivisor, 0);
 
-            // Copy the data from mLCMS2DPlot to mLCMS2DPlotOverview
-            // mLCMS2DPlotOverview will auto-filter the data to track, at most, mLCMS2DPlotOverview.Options.MaxPointsToPlot points
+            // Copy the data from mLCMS2DPlot to mLCMS2DPlotOverview,
+            // which will auto-filter the data to track, at most, mLCMS2DPlotOverview.Options.MaxPointsToPlot points
             for (var index = 0; index < mLCMS2DPlot.ScanCountCached; index++)
             {
                 var scan = mLCMS2DPlot.GetCachedScanByIndex(index);
@@ -375,8 +375,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Create the output files
         /// </summary>
-        /// <param name="inputFileName"></param>
-        /// <param name="outputDirectoryPath"></param>
+        /// <param name="inputFileName">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
         public bool CreateOutputFiles(string inputFileName, string outputDirectoryPath)
         {
             bool successOverall;
@@ -936,7 +936,7 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Returns the dataset name for the given file
         /// </summary>
-        /// <param name="dataFilePath"></param>
+        /// <param name="dataFilePath">Data file path</param>
         public abstract string GetDatasetNameViaPath(string dataFilePath);
 
         private IEnumerable<string> GetDeviceTableHTML(IEnumerable<DeviceInfo> deviceList)
@@ -1010,7 +1010,7 @@ namespace MSFileInfoScanner.Readers
         /// Converts an integer to engineering notation
         /// For example, 50000 will be returned as 50K
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">Value to format</param>
         private string IntToEngineeringNotation(int value)
         {
             if (value < 1000)
@@ -1123,8 +1123,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Process the dataset
         /// </summary>
-        /// <param name="dataFilePath"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <param name="datasetFileInfo">Dataset file info</param>
         /// <returns>True if success, False if an error or if the file has no scans</returns>
         public abstract bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo);
 
@@ -1201,8 +1201,8 @@ namespace MSFileInfoScanner.Readers
         /// Initialize the Acquisition start/end times using to the last write time
         /// Computes the SHA-1 hash of the instrument file
         /// </summary>
-        /// <param name="instrumentFile"></param>
-        /// <param name="datasetID"></param>
+        /// <param name="instrumentFile">Instrument file path</param>
+        /// <param name="datasetID">Dataset ID</param>
         /// <returns>True if success, false if an error</returns>
         protected bool UpdateDatasetFileStats(FileInfo instrumentFile, int datasetID)
         {
@@ -1214,9 +1214,9 @@ namespace MSFileInfoScanner.Readers
         /// Initialize the Acquisition start/end times using to the last write time
         /// Computes the SHA-1 hash of the instrument file
         /// </summary>
-        /// <param name="instrumentFile"></param>
-        /// <param name="datasetID"></param>
-        /// <param name="fileAdded"></param>
+        /// <param name="instrumentFile">Instrument file path</param>
+        /// <param name="datasetID">Dataset ID</param>
+        /// <param name="fileAdded">Output: true if the file was added</param>
         /// <returns>True if success, false if an error</returns>
         protected bool UpdateDatasetFileStats(FileInfo instrumentFile, int datasetID, out bool fileAdded)
         {
@@ -1369,7 +1369,7 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and this.DatasetFileInfo)
         /// </summary>
-        /// <param name="inputFileName">Input file name</param>
+        /// <param name="inputFileName">Input file path</param>
         /// <param name="outputDirectoryPath">Output directory path</param>
         /// <returns>True if success; False if failure</returns>
         // ReSharper disable once UnusedMember.Global
@@ -1382,7 +1382,7 @@ namespace MSFileInfoScanner.Readers
         /// Updates a tab-delimited text file, adding a new line summarizing the data stored in this class (in mDatasetScanStats and this.DatasetFileInfo)
         /// The dataset stats summarizer does not check for duplicate entries; it simply appends a new line
         /// </summary>
-        /// <param name="inputFileName">Input file name</param>
+        /// <param name="inputFileName">Input file path</param>
         /// <param name="outputDirectoryPath">Output directory path</param>
         /// <param name="datasetStatsFilename">Dataset stats file name</param>
         /// <returns>True if success; False if failure</returns>

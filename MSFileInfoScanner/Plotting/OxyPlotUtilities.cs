@@ -67,9 +67,9 @@ namespace MSFileInfoScanner.Plotting
         /// Examine the values in dataPoints to see if they are all less than 10 (or all less than 1)
         /// If they are, change the axis format code from the default of "#,##0" (see DEFAULT_AXIS_LABEL_FORMAT)
         /// </summary>
-        /// <param name="currentAxis"></param>
-        /// <param name="dataPoints"></param>
-        /// <param name="integerData"></param>
+        /// <param name="currentAxis">Current axis</param>
+        /// <param name="dataPoints">Data points</param>
+        /// <param name="integerData">True if the data values are integers</param>
 #pragma warning disable CS3001 // Argument type is not CLS-compliant
         public static void UpdateAxisFormatCodeIfSmallValues(Axis currentAxis, List<double> dataPoints, bool integerData)
 #pragma warning restore CS3001

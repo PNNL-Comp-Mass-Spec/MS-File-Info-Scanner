@@ -71,8 +71,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// This method is used to determine one or more overall quality scores
         /// </summary>
-        /// <param name="xcaliburAccessor"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="xcaliburAccessor">Instance of XRawFileIO for reading Thermo .raw files</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         private void ComputeQualityScores(XRawFileIO xcaliburAccessor, DatasetFileInfo datasetFileInfo)
         {
             float overallScore;
@@ -83,7 +83,7 @@ namespace MSFileInfoScanner.Readers
             if (mLCMS2DPlot.ScanCountCached > 0)
             {
                 // Obtain the overall average intensity value using the data cached in mLCMS2DPlot
-                // This avoids having to reload all of the data using xcaliburAccessor
+                // This avoids having to reload all the data using xcaliburAccessor
                 const int msLevelFilter = 1;
                 overallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(msLevelFilter);
             }
@@ -160,7 +160,7 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Returns the dataset name for the given file
         /// </summary>
-        /// <param name="dataFilePath"></param>
+        /// <param name="dataFilePath">Data file path</param>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             try
@@ -338,8 +338,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Process the dataset
         /// </summary>
-        /// <param name="dataFilePath"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if success, False if an error or if the file has no scans</returns>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
@@ -508,7 +508,7 @@ namespace MSFileInfoScanner.Readers
 
                         if (Options.MS2MzMin > 0 && datasetFileInfo.ScanCount > 0)
                         {
-                            // Verify that all of the MS2 spectra have m/z values below the required minimum
+                            // Verify that all the MS2 spectra have m/z values below the required minimum
                             // Useful for validating that reporter ions can be detected
                             ValidateMS2MzMin();
                         }
@@ -613,7 +613,7 @@ namespace MSFileInfoScanner.Readers
             xcaliburAccessor.CloseRawFile();
 
             // Read the file info from the file system
-            // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
+            // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all the necessary steps are taken)
             // This will also compute the SHA-1 hash of the .Raw file and add it to mDatasetStatsSummarizer.DatasetFileInfo
             UpdateDatasetFileStats(rawFile, datasetID);
 

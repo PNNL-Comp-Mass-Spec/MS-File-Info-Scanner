@@ -345,7 +345,7 @@ namespace MSFileInfoScanner
         /// Get the appData directory for this program
         /// For example: C:\Users\username\AppData\Roaming\MSFileInfoScanner
         /// </summary>
-        /// <param name="appName"></param>
+        /// <param name="appName">Application name</param>
         public static string GetAppDataDirectoryPath(string appName = "")
         {
             if (string.IsNullOrWhiteSpace(appName))
@@ -366,7 +366,7 @@ namespace MSFileInfoScanner
         /// Obtain a DirectoryInfo object for the given path
         /// </summary>
         /// <remarks>If the path length is over 210 and not on Linux, converts the path to a Win32 long path</remarks>
-        /// <param name="directoryPath"></param>
+        /// <param name="directoryPath">Directory path</param>
         public static DirectoryInfo GetDirectoryInfo(string directoryPath)
         {
             return directoryPath.Length >= NativeIOFileTools.FILE_PATH_LENGTH_THRESHOLD - 50 && !SystemInfo.IsLinux
@@ -378,7 +378,7 @@ namespace MSFileInfoScanner
         /// Obtain a FileInfo object for the given path
         /// </summary>
         /// <remarks>If the path length is over 260 and not on Linux, converts the path to a Win32 long path</remarks>
-        /// <param name="filePath"></param>
+        /// <param name="filePath">File path</param>
         public static FileInfo GetFileInfo(string filePath)
         {
             return filePath.Length >= NativeIOFileTools.FILE_PATH_LENGTH_THRESHOLD && !SystemInfo.IsLinux
@@ -656,7 +656,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Read settings from a Key=Value parameter file
         /// </summary>
-        /// <param name="parameterFilePath"></param>
+        /// <param name="parameterFilePath">Parameter file path</param>
         public override bool LoadParameterFileSettings(string parameterFilePath)
         {
             try
@@ -1187,8 +1187,8 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Main processing method with input / output paths, error code reset flag, and processing state
         /// </summary>
-        /// <param name="inputFileOrDirectoryPath"></param>
-        /// <param name="outputDirectoryPath"></param>
+        /// <param name="inputFileOrDirectoryPath">Input file or directory path</param>
+        /// <param name="outputDirectoryPath">Directory to write any results files to</param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessMSFileOrDirectory(string inputFileOrDirectoryPath, string outputDirectoryPath)
         {
@@ -1198,10 +1198,10 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Main processing method with input / output paths, error code reset flag, and processing state
         /// </summary>
-        /// <param name="inputFileOrDirectoryPath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="resetErrorCode"></param>
-        /// <param name="msFileProcessingState"></param>
+        /// <param name="inputFileOrDirectoryPath">Input file or directory path</param>
+        /// <param name="outputDirectoryPath">Directory to write any results files to</param>
+        /// <param name="resetErrorCode">If true, reset the error code</param>
+        /// <param name="msFileProcessingState">MS file processing state</param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessMSFileOrDirectory(
             string inputFileOrDirectoryPath,
@@ -1563,7 +1563,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="inputFileOrDirectoryPath">Path to the input file or directory; can contain a wildcard (* or ?)</param>
         /// <param name="outputDirectoryPath">Directory to write any results files to</param>
-        /// <param name="resetErrorCode"></param>
+        /// <param name="resetErrorCode">If true, reset the error code</param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessMSFileOrDirectoryWildcard(string inputFileOrDirectoryPath, string outputDirectoryPath, bool resetErrorCode)
         {
@@ -2293,8 +2293,8 @@ namespace MSFileInfoScanner
         /// Raise event ErrorEvent and call LogMessage
         /// </summary>
         /// <remarks>The calling thread needs to monitor this event and display it at the console</remarks>
-        /// <param name="errorMessage"></param>
-        /// <param name="ex"></param>
+        /// <param name="errorMessage">Error message</param>
+        /// <param name="ex">Exception</param>
         private void ReportError(string errorMessage, Exception ex = null)
         {
             OnErrorEvent(errorMessage, ex);
@@ -2316,9 +2316,9 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Report a status message and optionally write to the log file
         /// </summary>
-        /// <param name="message"></param>
-        /// <param name="allowLogToFile"></param>
-        /// <param name="messageType"></param>
+        /// <param name="message">Message</param>
+        /// <param name="allowLogToFile">If true, append the message to the log file</param>
+        /// <param name="messageType">Message type</param>
         private void ReportMessage(
             string message,
             bool allowLogToFile = true,
@@ -2349,8 +2349,8 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Report a warning message and optionally write to the log file
         /// </summary>
-        /// <param name="message"></param>
-        /// <param name="allowLogToFile"></param>
+        /// <param name="message">Message</param>
+        /// <param name="allowLogToFile">If true, append the message to the log file</param>
         private void ReportWarning(string message, bool allowLogToFile = true)
         {
             OnWarningEvent(message);

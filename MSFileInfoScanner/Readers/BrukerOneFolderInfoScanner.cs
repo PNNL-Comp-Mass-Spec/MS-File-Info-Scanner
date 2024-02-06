@@ -39,8 +39,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
-        /// <param name="lcms2DPlotOptions"></param>
+        /// <param name="options">Processing options</param>
+        /// <param name="lcms2DPlotOptions">Plotting options</param>
         public BrukerOneFolderInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
             base(options, lcms2DPlotOptions)
         { }
@@ -75,8 +75,8 @@ namespace MSFileInfoScanner.Readers
         /// Parse out the date from a string of the form
         /// Sat Aug 20 07:56:55 2005
         /// </summary>
-        /// <param name="dataLine"></param>
-        /// <param name="acqDate"></param>
+        /// <param name="dataLine">Data line to parse</param>
+        /// <param name="acqDate">Output: acquisition date</param>
         private bool ParseBrukerDateFromArray(string dataLine, out DateTime acqDate)
         {
             bool success;
@@ -200,8 +200,8 @@ namespace MSFileInfoScanner.Readers
         /// Updates datasetFileInfo.FileSizeBytes with this info, while also updating datasetFileInfo.ScanCount with the total number of files found
         /// Also computes the SHA-1 hash of each file
         /// </summary>
-        /// <param name="zippedSFilesDirectoryInfo"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="zippedSFilesDirectoryInfo">Zipped s files directory</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if success and also if no matching Zip files were found; returns False if error</returns>
         private bool ParseBrukerZippedSFolders(DirectoryInfo zippedSFilesDirectoryInfo, DatasetFileInfo datasetFileInfo)
         {
@@ -383,7 +383,7 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         /// <remarks>If a Bruker 1 directory, it must contain file acqu and typically contains file LOCK</remarks>
         /// <param name="dataFilePath">Bruker 1 directory path or Bruker s001.zip file</param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {

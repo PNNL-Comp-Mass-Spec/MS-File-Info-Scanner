@@ -30,7 +30,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">Processing options</param>
         public FileIntegrityChecker(InfoScannerOptions options)
         {
             InitializeLocalVariables();
@@ -622,8 +622,8 @@ namespace MSFileInfoScanner
         /// <param name="requireEqualCommasPerLine">If True, then requires that every line have an equal number of commas</param>
         /// <param name="requiredTextLineHeaders">Optional list of text that must be found at the start of any of the text lines (within the first mMaximumTextFileLinesToCheck lines); the search text is case-sensitive</param>
         /// <param name="requiredTextMatchesLineStart">When True, then only examine the start of the line for the text in requiredTextLineHeaders</param>
-        /// <param name="charCountSkipsBlankLines"></param>
-        /// <param name="requiredTextMinMatchCount"></param>
+        /// <param name="charCountSkipsBlankLines">When true, skip blank lines when counting characters</param>
+        /// <param name="requiredTextMinMatchCount">Minimum number of items in requiredItemNames that needed to be found; 0 to require all items to be found</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         private bool CheckTextFileWork(
             string filePath,
@@ -643,7 +643,7 @@ namespace MSFileInfoScanner
             // File will fail the check if all of these conditions are not met
 
             // This counts the number of line headers that have been found
-            // Using a variable for speed (vs. checking all of the items in the dictionary over and over)
+            // Using a variable for speed (vs. checking all the items in the dictionary over and over)
             var lineHeaderMatchCount = 0;
 
             // Keys in this dictionary are line headers to find
@@ -651,7 +651,7 @@ namespace MSFileInfoScanner
             var textLineHeaders = ConvertTextListToDictionary(requiredTextLineHeaders);
 
             // This is set to true if requiredTextLineHeaders has data
-            // However, once all of the expected headers are found, it is changed to false
+            // However, once all the expected headers are found, it is changed to false
             var needToCheckLineHeaders = textLineHeaders.Count > 0;
 
             var linesRead = 0;
@@ -753,7 +753,7 @@ namespace MSFileInfoScanner
 
                 if (textLineHeaders.Count > 0 && !errorLogged)
                 {
-                    // Make sure that all of the required line headers were found; log an error if any were missing
+                    // Make sure that all the required line headers were found; log an error if any were missing
                     ValidateRequiredTextFound(filePath, "line headers", needToCheckLineHeaders, textLineHeaders,
                                               requiredTextMinMatchCount, ref errorLogged);
                 }
@@ -857,7 +857,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Checks the integrity of files without an extension
         /// </summary>
-        /// <param name="filePath"></param>
+        /// <param name="filePath">File path</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         private bool CheckExtensionFreeFile(string filePath)
         {
@@ -887,9 +887,9 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Checks the integrity of a Sequest Params file
+        /// Checks the integrity of a SEQUEST Params file
         /// </summary>
-        /// <param name="filePath"></param>
+        /// <param name="filePath">File path</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         private bool CheckParamsFile(string filePath)
         {
@@ -947,7 +947,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Checks the integrity of an ICR-2LS TIC file
         /// </summary>
-        /// <param name="filePath"></param>
+        /// <param name="filePath">File path</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         private bool CheckTICFile(string filePath)
         {
@@ -1153,7 +1153,7 @@ namespace MSFileInfoScanner
         /// Extracts each file in the zip file to a temporary file. Will return false if you run out of disk space
         /// </remarks>
         /// <param name="zipFilePath">Path to the zip file to validate</param>
-        /// <param name="checkAllData"></param>
+        /// <param name="checkAllData">When true, check all data</param>
         /// <param name="throwExceptionIfInvalid">If True, then throws exceptions, otherwise simply returns True or False</param>
         /// <returns>True if the file is Valid; false if an error</returns>
         private bool CheckZipFileIntegrity(string zipFilePath, bool checkAllData, bool throwExceptionIfInvalid)
@@ -1228,7 +1228,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Checks the integrity of a CSV file
         /// </summary>
-        /// <param name="filePath"></param>
+        /// <param name="filePath">File path</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
         private bool CheckCSVFile(string filePath)
         {
@@ -1464,7 +1464,7 @@ namespace MSFileInfoScanner
                 var requiredElements = ConvertTextListToDictionary(requiredElementNames);
 
                 // This is set to true if requiredElementNames has data
-                // However, once all of the elements have been found, it is changed to false
+                // However, once all the elements have been found, it is changed to false
                 var needToCheckElementNames = requiredElements.Count > 0;
 
                 // Keys in this dictionary are attribute names to find
@@ -1472,7 +1472,7 @@ namespace MSFileInfoScanner
                 var requiredAttributes = ConvertTextListToDictionary(requiredAttributeNames);
 
                 // This is set to true if requiredAttributeNames has data
-                // However, once all of the attributes have been found, it is changed to false
+                // However, once all the attributes have been found, it is changed to false
                 var needToCheckAttributeNames = requiredAttributes.Count > 0;
 
                 var maximumXMLElementNodesToCheck = mMaximumXMLElementNodesToCheck <= 0 ? int.MaxValue : mMaximumXMLElementNodesToCheck;
@@ -1550,14 +1550,14 @@ namespace MSFileInfoScanner
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     if (requiredElements.Count > 0 && !errorLogged)
                     {
-                        // Make sure that all of the required element names were found; log an error if any were missing
+                        // Make sure that all the required element names were found; log an error if any were missing
                         ValidateRequiredTextFound(filePath, "XML elements", needToCheckElementNames,
                                                   requiredElements, requiredElements.Count, ref errorLogged);
                     }
 
                     if (requiredAttributes.Count > 0 && !errorLogged)
                     {
-                        // Make sure that all of the required attribute names were found; log an error if any were missing
+                        // Make sure that all the required attribute names were found; log an error if any were missing
                         ValidateRequiredTextFound(filePath, "XML attributes", needToCheckAttributeNames,
                                                   requiredAttributes, requiredAttributes.Count, ref errorLogged);
                     }
@@ -1791,10 +1791,10 @@ namespace MSFileInfoScanner
         /// Searches lineToSearch for each of the items in requiredText; if matchStart = True, then only checks the start of the line
         /// </summary>
         /// <param name="textToSearch">Text to search</param>
-        /// <param name="needToCheckItems">True if we have not yet found all of the items</param>
+        /// <param name="needToCheckItems">True if we have not yet found all the items</param>
         /// <param name="requiredTextItems">List of items to look for; values are set to True as each item is found</param>
         /// <param name="requiredTextMatchCount">Total number of items that have been matched; equivalent to the number of True entries in textLineHeaders</param>
-        /// <param name="matchStart"></param>
+        /// <param name="matchStart">When true, only check the start of the line</param>
         private void FindRequiredTextInLine(
             string textToSearch,
             ref bool needToCheckItems,
@@ -1875,8 +1875,8 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Look for currentItemName in requiredItemNames; if found, set the entry to true
         /// </summary>
-        /// <param name="currentItemName"></param>
-        /// <param name="requiredItemNames"></param>
+        /// <param name="currentItemName">Current item name</param>
+        /// <param name="requiredItemNames">Required item names</param>
         /// <returns>
         /// If requiredItemNames contains currentItemName, returns the number of items in requiredItemNames that are true
         /// If not found, returns 0
@@ -1918,8 +1918,8 @@ namespace MSFileInfoScanner
         /// </remarks>
         /// <param name="filePath">File to examine</param>
         /// <param name="elementsToMatch">Element names to match; item text must start with a less than sign followed by the element name</param>
-        /// <param name="maximumTextFileLinesToCheck"></param>
-        /// <param name="caseSensitiveElementNames">True if element names should be case sensitive</param>
+        /// <param name="maximumTextFileLinesToCheck">Maximum number of lines to check</param>
+        /// <param name="caseSensitiveElementNames">True if element names should be case-sensitive</param>
         /// <returns>True if this file contains the required element text</returns>
         private bool XMLFileContainsElements(string filePath, IReadOnlyList<string> elementsToMatch, int maximumTextFileLinesToCheck = 50, bool caseSensitiveElementNames = false)
         {
@@ -2041,7 +2041,7 @@ namespace MSFileInfoScanner
         /// Calculates the MD5 hash of a given file
         /// Code from Tim Hastings, http://www.nonhostile.com/page000017.asp (retired)
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">File path</param>
         // ReSharper disable once UnusedMember.Global
         public string MD5CalcFile(string path)
         {
@@ -2059,7 +2059,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Calculates the SHA-1 hash of a given file
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">File path</param>
         public string Sha1CalcFile(string path)
         {
             var sha1Hasher = new System.Security.Cryptography.SHA1CryptoServiceProvider();
@@ -2078,7 +2078,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="filePath">File path</param>
         /// <param name="itemDescription">Description of the types of items that were searched</param>
-        /// <param name="needToCheckItem">True if we were still checking for items when this code was reached; if True, then indicates that not all of the items were found</param>
+        /// <param name="needToCheckItem">True if we were still checking for items when this code was reached; if True, then indicates that not all the items were found</param>
         /// <param name="requiredItemNames">Names to find; values are True if found</param>
         /// <param name="requiredItemMatchCountMinimum">Minimum number of items in requiredItemNames that needed to be found; 0 to require all items to be found</param>
         /// <param name="errorLogged">Set to True if any items were missing</param>

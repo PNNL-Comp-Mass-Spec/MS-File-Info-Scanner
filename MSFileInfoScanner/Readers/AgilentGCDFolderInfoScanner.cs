@@ -344,8 +344,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Process the dataset
         /// </summary>
-        /// <param name="dataFilePath"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
@@ -432,7 +432,7 @@ namespace MSFileInfoScanner.Readers
                         if (datasetFileInfo.FileSizeBytes == 0)
                         {
                             // File size was not determined from the MS file
-                            // Instead, sum up the sizes of all of the files in this directory
+                            // Instead, sum up the sizes of all the files in this directory
                             foreach (var item in agilentDFolder.GetFiles())
                             {
                                 datasetFileInfo.FileSizeBytes += item.Length;

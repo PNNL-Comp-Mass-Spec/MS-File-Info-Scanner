@@ -46,8 +46,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
-        /// <param name="lcms2DPlotOptions"></param>
+        /// <param name="options">Processing options</param>
+        /// <param name="lcms2DPlotOptions">Plotting options</param>
         // ReSharper disable once IdentifierTypo
         public AgilentMassHunterDFolderInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
             base(options, lcms2DPlotOptions)
@@ -69,8 +69,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Reads the Contents.xml file to look for the AcquiredTime entry
         /// </summary>
-        /// <param name="directoryPath"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="directoryPath">Directory path to search</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if the file exists and the AcquiredTime entry was successfully parsed; otherwise false</returns>
         private bool ProcessContentsXMLFile(string directoryPath, DatasetFileInfo datasetFileInfo)
         {
@@ -136,9 +136,9 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Reads the MSTS.xml file to determine the acquisition length and the number of scans
         /// </summary>
-        /// <param name="directoryPath"></param>
-        /// <param name="datasetFileInfo"></param>
-        /// <param name="totalAcqTimeMinutes"></param>
+        /// <param name="directoryPath">Directory to search</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
+        /// <param name="totalAcqTimeMinutes">Output: total acquisition time, in minutes</param>
         private bool ProcessTimeSegmentFile(string directoryPath, DatasetFileInfo datasetFileInfo, out double totalAcqTimeMinutes)
         {
             var success = false;
@@ -219,8 +219,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Process the dataset
         /// </summary>
-        /// <param name="dataFilePath"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
@@ -247,7 +247,7 @@ namespace MSFileInfoScanner.Readers
 
                 if (acqDataDirectory.Exists)
                 {
-                    // Sum up the sizes of all of the files in the AcqData directory
+                    // Sum up the sizes of all the files in the AcqData directory
                     foreach (var file in PathUtils.FindFilesWildcard(acqDataDirectory, "*", true))
                     {
                         datasetFileInfo.FileSizeBytes += file.Length;

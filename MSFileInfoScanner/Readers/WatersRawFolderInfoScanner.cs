@@ -25,8 +25,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
-        /// <param name="lcms2DPlotOptions"></param>
+        /// <param name="options">Processing options</param>
+        /// <param name="lcms2DPlotOptions">Plotting options</param>
         public WatersRawFolderInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
             base(options, lcms2DPlotOptions)
         { }
@@ -62,8 +62,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Process the dataset
         /// </summary>
-        /// <param name="dataFilePath"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
@@ -90,7 +90,7 @@ namespace MSFileInfoScanner.Readers
                 ProcessRawDirectory(datasetDirectory, datasetFileInfo, out var primaryDataFiles);
 
                 // Read the file info from the file system
-                // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
+                // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all the necessary steps are taken)
                 // This will also add the primary data files to mDatasetStatsSummarizer.DatasetFileInfo
                 // The SHA-1 hash of the first file in primaryDataFiles will also be computed
                 UpdateDatasetFileStats(datasetDirectory, primaryDataFiles, datasetFileInfo.DatasetID);
@@ -113,7 +113,7 @@ namespace MSFileInfoScanner.Readers
         {
             primaryDataFiles = new List<FileInfo>();
 
-            // Sum up the sizes of all of the files in this directory
+            // Sum up the sizes of all the files in this directory
             datasetFileInfo.FileSizeBytes = 0;
 
             var fileCount = 0;
@@ -165,10 +165,10 @@ namespace MSFileInfoScanner.Readers
         /// Reads the acquisition date and time from the .raw directory
         /// Also determines the total number of scans
         /// </summary>
-        /// <param name="datasetDirectory"></param>
-        /// <param name="datasetFileInfo"></param>
-        /// <param name="nativeFileIO"></param>
-        /// <param name="headerInfo"></param>
+        /// <param name="datasetDirectory">Dataset directory</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
+        /// <param name="nativeFileIO">MassLynx data file reader class</param>
+        /// <param name="headerInfo">MS header info</param>
         private void ReadMassLynxAcquisitionInfo(
             FileSystemInfo datasetDirectory,
             DatasetFileInfo datasetFileInfo,
@@ -182,7 +182,7 @@ namespace MSFileInfoScanner.Readers
             if (functionCount > 0)
             {
                 // Sum up the scan count of all of the functions
-                // Additionally, find the largest EndRT value in all of the functions
+                // Additionally, find the largest EndRT value in the functions
                 float endRT = 0;
 
                 for (var functionNumber = 1; functionNumber <= functionCount; functionNumber++)

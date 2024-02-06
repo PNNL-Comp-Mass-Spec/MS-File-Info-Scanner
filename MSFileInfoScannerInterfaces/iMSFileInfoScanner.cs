@@ -152,18 +152,18 @@ namespace MSFileInfoScannerInterfaces
         /// <summary>
         /// Main processing function, with input file / directory path, plus output directory path
         /// </summary>
-        /// <param name="inputFileOrDirectoryPath"></param>
-        /// <param name="outputDirectoryPath"></param>
+        /// <param name="inputFileOrDirectoryPath">Path to the input file or directory; can contain a wildcard (* or ?)</param>
+        /// <param name="outputDirectoryPath">Directory to write any results files to</param>
         /// <returns>True if success, False if an error</returns>
         public abstract bool ProcessMSFileOrDirectory(string inputFileOrDirectoryPath, string outputDirectoryPath);
 
         /// <summary>
         /// Main processing function with input / output paths, error code reset flag, and processing state
         /// </summary>
-        /// <param name="inputFileOrDirectoryPath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="resetErrorCode"></param>
-        /// <param name="msFileProcessingState"></param>
+        /// <param name="inputFileOrDirectoryPath">Path to the input file or directory; can contain a wildcard (* or ?)</param>
+        /// <param name="outputDirectoryPath">Directory to write any results files to</param>
+        /// <param name="resetErrorCode">If true, reset the error code</param>
+        /// <param name="msFileProcessingState">MS file processing state</param>
         /// <returns>True if success, False if an error</returns>
         public abstract bool ProcessMSFileOrDirectory(string inputFileOrDirectoryPath, string outputDirectoryPath, bool resetErrorCode,
                                                       out MSFileProcessingStateConstants msFileProcessingState);
@@ -173,7 +173,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         /// <param name="inputFileOrDirectoryPath">Path to the input file or directory; can contain a wildcard (* or ?)</param>
         /// <param name="outputDirectoryPath">Directory to write any results files to</param>
-        /// <param name="resetErrorCode"></param>
+        /// <param name="resetErrorCode">If true, reset the error code</param>
         /// <returns>True if success, False if an error</returns>
         public abstract bool ProcessMSFileOrDirectoryWildcard(string inputFileOrDirectoryPath, string outputDirectoryPath, bool resetErrorCode);
 

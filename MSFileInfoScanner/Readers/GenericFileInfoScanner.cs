@@ -19,7 +19,7 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Returns the dataset name for the given file
         /// </summary>
-        /// <param name="dataFilePath"></param>
+        /// <param name="dataFilePath">Data file path</param>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             try
@@ -36,8 +36,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Process the dataset
         /// </summary>
-        /// <param name="dataFilePath"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if success, False if an error or if the file has no scans</returns>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {

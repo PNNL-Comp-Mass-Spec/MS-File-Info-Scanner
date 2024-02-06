@@ -181,7 +181,7 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Examine the spectra in a _DTA.txt file to determine the number of centroided spectra
         /// </summary>
-        /// <param name="concatenatedDtaPath"></param>
+        /// <param name="concatenatedDtaPath">_DTA.txt file path</param>
         /// <returns>True on success, false if an error</returns>
         public bool CheckCDTAFile(string concatenatedDtaPath)
         {
@@ -278,8 +278,8 @@ namespace SpectraTypeClassifier
         /// Increments class property TotalSpectra if ppmDiffs is not empty
         /// Increments class property CentroidedSpectra if the data is centroided
         /// </remarks>
-        /// <param name="mzValues"></param>
-        /// <param name="ppmDiffs"></param>
+        /// <param name="mzValues">List of m/z values</param>
+        /// <param name="ppmDiffs">List of ppm differences</param>
         /// <param name="msLevel">1 for MS1, 2 for MS2, etc.</param>
         /// <param name="centroidingStatus">Expected centroid mode</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
@@ -298,7 +298,7 @@ namespace SpectraTypeClassifier
             if (RaiseDebugEvents)
             {
                 if (string.IsNullOrWhiteSpace(spectrumTitle))
-                    OnDebugEvent(string.Format("Examining MS{0} spectrum", msLevel));
+                    OnDebugEvent("Examining MS{0} spectrum", msLevel);
                 else
                     OnDebugEvent("Examining " + spectrumTitle);
             }
@@ -354,8 +354,8 @@ namespace SpectraTypeClassifier
         /// Increments class property TotalSpectra if mzValues is not empty
         /// Increments class property CentroidedSpectra if the data is centroided
         /// </remarks>
-        /// <param name="mzValues"></param>
-        /// <param name="msLevel"></param>
+        /// <param name="mzValues">List of m/z values</param>
+        /// <param name="msLevel">MS level (1 for MS1, 2 for MS2, etc.)</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void CheckSpectrum(List<double> mzValues, int msLevel, string spectrumTitle = "")
         {
@@ -369,9 +369,9 @@ namespace SpectraTypeClassifier
         /// Increments class property TotalSpectra if mzValues is not empty
         /// Increments class property CentroidedSpectra if the data is centroided
         /// </remarks>
-        /// <param name="mzValues"></param>
-        /// <param name="msLevel"></param>
-        /// <param name="centroidingStatus"></param>
+        /// <param name="mzValues">List of m/z values</param>
+        /// <param name="msLevel">1 for MS1, 2 for MS2, etc.</param>
+        /// <param name="centroidingStatus">Expected centroid mode</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void CheckSpectrum(List<double> mzValues, int msLevel, CentroidStatusConstants centroidingStatus, string spectrumTitle = "")
         {
@@ -385,10 +385,10 @@ namespace SpectraTypeClassifier
         /// Increments class property TotalSpectra if mzValues is not empty
         /// Increments class property CentroidedSpectra if the data is centroided
         /// </remarks>
-        /// <param name="mzValues"></param>
-        /// <param name="msLevel"></param>
-        /// <param name="assumeSorted"></param>
-        /// <param name="centroidingStatus"></param>
+        /// <param name="mzValues">List of m/z values</param>
+        /// <param name="msLevel">1 for MS1, 2 for MS2, etc.</param>
+        /// <param name="assumeSorted">If true, assume the data is already sorted</param>
+        /// <param name="centroidingStatus">Expected centroid mode</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void CheckSpectrum(
             List<double> mzValues,
@@ -430,8 +430,8 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Step through the MZ values in array mzValues and compute the ppm-based mass difference between adjacent points
         /// </summary>
-        /// <param name="mzValues"></param>
-        /// <param name="msLevel"></param>
+        /// <param name="mzValues">List of m/z values</param>
+        /// <param name="msLevel">1 for MS1, 2 for MS2, etc.</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void CheckSpectrum(double[] mzValues, int msLevel, string spectrumTitle = "")
         {
@@ -442,9 +442,9 @@ namespace SpectraTypeClassifier
         /// Step through the MZ values in array mzValues and compute the ppm-based mass difference between adjacent points
         /// </summary>
         /// <param name="ionCount">Number of items in mzValues; if -1, then parses all data in mzValues</param>
-        /// <param name="mzValues"></param>
-        /// <param name="msLevel"></param>
-        /// <param name="centroidingStatus"></param>
+        /// <param name="mzValues">List of m/z values</param>
+        /// <param name="msLevel">1 for MS1, 2 for MS2, etc.</param>
+        /// <param name="centroidingStatus">Expected centroid mode</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         public void CheckSpectrum(
             int ionCount,
@@ -533,7 +533,7 @@ namespace SpectraTypeClassifier
         /// </summary>
         /// <param name="mzValues">m/z values to examine</param>
         /// <param name="regionCount">Regions to divide data into</param>
-        /// <param name="spectrumTitle">Regions to divide data into</param>
+        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
         /// <returns>
         /// True if less than one third of the regions appears to be profile mode
         /// False if two thirds of the regions is profile mode</returns>
@@ -644,8 +644,8 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Send a message via a debug event, optionally prefixing with a title
         /// </summary>
-        /// <param name="spectrumTitle"></param>
-        /// <param name="msg"></param>
+        /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
+        /// <param name="msg">Debug message</param>
         private void NotifyDebug(string spectrumTitle, string msg)
         {
             if (!RaiseDebugEvents)

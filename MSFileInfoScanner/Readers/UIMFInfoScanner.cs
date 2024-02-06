@@ -29,8 +29,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
-        /// <param name="lcms2DPlotOptions"></param>
+        /// <param name="options">Processing options</param>
+        /// <param name="lcms2DPlotOptions">Plotting options</param>
         public UIMFInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
             base(options, lcms2DPlotOptions)
         { }
@@ -38,10 +38,10 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// This method is used to determine one or more overall quality scores
         /// </summary>
-        /// <param name="uimfReader"></param>
-        /// <param name="datasetFileInfo"></param>
-        /// <param name="masterFrameList"></param>
-        /// <param name="masterFrameNumList"></param>
+        /// <param name="uimfReader">UIMF reader</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
+        /// <param name="masterFrameList">Dictionary that tracks frame type by frame number</param>
+        /// <param name="masterFrameNumList">Master frame number list</param>
         private void ComputeQualityScores(
             DataReader uimfReader,
             DatasetFileInfo datasetFileInfo,
@@ -56,7 +56,7 @@ namespace MSFileInfoScanner.Readers
             if (mLCMS2DPlot.ScanCountCached > 0)
             {
                 // Obtain the overall average intensity value using the data cached in mLCMS2DPlot
-                // This avoids having to reload all of the data using the UIMFReader
+                // This avoids having to reload all the data using the UIMFReader
                 const int msLevelFilter = 1;
                 overallScore = mLCMS2DPlot.ComputeAverageIntensityAllScans(msLevelFilter);
             }
@@ -108,7 +108,7 @@ namespace MSFileInfoScanner.Readers
                     Array.Clear(mzList, 0, mzList.Length);
                     Array.Clear(intensityList, 0, intensityList.Length);
 
-                    // Process all of the IMS scans in this Frame to compute a summed spectrum representative of the frame
+                    // Process all the IMS scans in this Frame to compute a summed spectrum representative of the frame
                     // Scans likely range from 0 to frameParams.Scans-1, but we'll use frameParams.Scans just to be safe
                     var ionCount = uimfReader.GetSpectrum(frameNumber, frameNumber, frameType, 0, frameParams.Scans, out mzList, out intensityList);
 
@@ -181,9 +181,9 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Obtain the TIC and BPI for each MS frame
         /// </summary>
-        /// <param name="uimfReader"></param>
-        /// <param name="frameStart"></param>
-        /// <param name="frameEnd"></param>
+        /// <param name="uimfReader">UIMF reader</param>
+        /// <param name="frameStart">Start frame</param>
+        /// <param name="frameEnd">End frame</param>
         /// <param name="ticByFrame">Keys are frame number, values are the total ion current (total intensity) for the frame</param>
         /// <param name="bpiByFrame">Keys are frame number, values are the base peak intensity for the frame</param>
         private void ConstructTICAndBPI(
@@ -464,7 +464,7 @@ namespace MSFileInfoScanner.Readers
                             Array.Clear(mzList, 0, mzList.Length);
                             Array.Clear(intensityList, 0, intensityList.Length);
 
-                            // Process all of the IMS scans in this Frame to compute a summed spectrum representative of the frame
+                            // Process all the IMS scans in this Frame to compute a summed spectrum representative of the frame
 
                             // In UIMF files from IMS04,                            if Frame_Parameters.Scans = 360, Frame_Scans will have scans 0 through 359
                             // In UIMF files from IMS08, prior to December 1, 2014, if Frame_Parameters.Scans = 374, Frame_Scans will have scans 0 through 373
@@ -552,8 +552,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Process the dataset
         /// </summary>
-        /// <param name="dataFilePath"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
@@ -960,7 +960,7 @@ namespace MSFileInfoScanner.Readers
             uimfReader?.Dispose();
 
             // Read the file info from the file system
-            // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
+            // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all the necessary steps are taken)
             // This will also compute the SHA-1 hash of the .UIMF file and add it to mDatasetStatsSummarizer.DatasetFileInfo
             UpdateDatasetFileStats(uimfFile, datasetID);
 

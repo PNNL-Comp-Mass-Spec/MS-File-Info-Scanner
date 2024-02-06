@@ -46,12 +46,12 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="plotTitle"></param>
-        /// <param name="xAxisTitle"></param>
-        /// <param name="yAxisTitle"></param>
-        /// <param name="zAxisTitle"></param>
-        /// <param name="writeDebug"></param>
-        /// <param name="dataSource"></param>
+        /// <param name="plotTitle">Plot title</param>
+        /// <param name="xAxisTitle">X-axis label</param>
+        /// <param name="yAxisTitle">Y-axis label</param>
+        /// <param name="zAxisTitle">Z-axis label</param>
+        /// <param name="writeDebug">When true, create a debug file that tracks processing steps</param>
+        /// <param name="dataSource">Data source</param>
         public PythonPlotContainer3D(
             string plotTitle = "Undefined", string xAxisTitle = "X", string yAxisTitle = "Y", string zAxisTitle = "Z",
             bool writeDebug = false, string dataSource = "") : base(plotTitle, xAxisTitle, yAxisTitle, writeDebug, dataSource)

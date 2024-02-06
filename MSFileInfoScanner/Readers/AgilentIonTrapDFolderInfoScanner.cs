@@ -27,8 +27,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
-        /// <param name="lcms2DPlotOptions"></param>
+        /// <param name="options">Processing options</param>
+        /// <param name="lcms2DPlotOptions">Plotting options</param>
         public AgilentIonTrapDFolderInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
             base(options, lcms2DPlotOptions)
         { }
@@ -210,7 +210,7 @@ namespace MSFileInfoScanner.Readers
         /// Process the data file
         /// </summary>
         /// <param name="dataFilePath">Dataset directory path</param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
@@ -265,7 +265,7 @@ namespace MSFileInfoScanner.Readers
                         datasetFileInfo.AcqTimeEnd = runLog.LastWriteTime;
                         success = true;
 
-                        // Sum up the sizes of all of the files in this directory
+                        // Sum up the sizes of all the files in this directory
                         datasetFileInfo.FileSizeBytes = 0;
 
                         foreach (var datasetFile in datasetDirectory.GetFiles())

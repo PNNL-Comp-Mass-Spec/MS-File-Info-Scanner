@@ -87,8 +87,8 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Constructor that takes Dataset ID and Dataset Name
         /// </summary>
-        /// <param name="datasetId"></param>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetId">Dataset ID</param>
+        /// <param name="datasetName">Dataset name</param>
         public DatasetFileInfo(int datasetId, string datasetName)
         {
             Clear();
@@ -118,7 +118,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Compute the SHA-1 hash of the given file, then add it to InstrumentFiles
         /// </summary>
-        /// <param name="instrumentFile"></param>
+        /// <param name="instrumentFile">Instrument file</param>
         public bool AddInstrumentFile(FileInfo instrumentFile)
         {
             var sha1Hash = HashUtilities.ComputeFileHashSha1(instrumentFile.FullName);
@@ -129,10 +129,10 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Add an instrument file, optionally including its file hash
         /// </summary>
-        /// <param name="instrumentFileRelativePath"></param>
-        /// <param name="fileSizeBytes"></param>
-        /// <param name="hashValue"></param>
-        /// <param name="hashType"></param>
+        /// <param name="instrumentFileRelativePath">Relative path to the instrument file</param>
+        /// <param name="fileSizeBytes">File size, in bytes</param>
+        /// <param name="hashValue">Hash value</param>
+        /// <param name="hashType">Hash type</param>
         public void AddInstrumentFile(string instrumentFileRelativePath, long fileSizeBytes, string hashValue, HashUtilities.HashTypeConstants hashType)
         {
             if (InstrumentFiles.ContainsKey(instrumentFileRelativePath))

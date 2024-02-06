@@ -292,7 +292,7 @@ namespace MSFileInfoScannerUnitTests
         /// <summary>
         /// Use this method to chain events between classes
         /// </summary>
-        /// <param name="classifier"></param>
+        /// <param name="classifier">Spectrum type classifier</param>
         private void RegisterEvents(SpectrumTypeClassifier classifier)
         {
             classifier.RaiseDebugEvents = true;

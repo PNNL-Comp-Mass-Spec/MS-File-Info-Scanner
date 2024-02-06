@@ -56,8 +56,8 @@ namespace MSFileInfoScanner.Plotting
         /// Constructor
         /// </summary>
         /// <param name="thePlot">The plot (type OxyPlot.PlotModel)</param>
-        /// <param name="writeDebug"></param>
-        /// <param name="dataSource"></param>
+        /// <param name="writeDebug">When true, create a debug file that tracks processing steps</param>
+        /// <param name="dataSource">Data source</param>
         public PlotContainer(
             PlotModel thePlot,
             bool writeDebug = false,

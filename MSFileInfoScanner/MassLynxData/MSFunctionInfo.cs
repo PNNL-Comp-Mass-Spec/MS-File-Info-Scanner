@@ -137,7 +137,7 @@ namespace MSFileInfoScanner.MassLynxData
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="functionNumber"></param>
+        /// <param name="functionNumber">Function number</param>
         public MSFunctionInfo(int functionNumber)
         {
             Initialize(functionNumber);
@@ -146,7 +146,7 @@ namespace MSFileInfoScanner.MassLynxData
         /// <summary>
         /// Initialize the variables, including reserving space for 7 calibration coefficients
         /// </summary>
-        /// <param name="functionNumber"></param>
+        /// <param name="functionNumber">Function number</param>
         private void Initialize(int functionNumber)
         {
             FunctionNumber = functionNumber;

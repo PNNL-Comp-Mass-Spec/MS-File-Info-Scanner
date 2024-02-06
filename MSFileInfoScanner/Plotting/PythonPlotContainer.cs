@@ -46,11 +46,11 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="plotTitle"></param>
-        /// <param name="xAxisTitle"></param>
-        /// <param name="yAxisTitle"></param>
-        /// <param name="writeDebug"></param>
-        /// <param name="dataSource"></param>
+        /// <param name="plotTitle">Plot title</param>
+        /// <param name="xAxisTitle">X-axis label</param>
+        /// <param name="yAxisTitle">Y-axis label</param>
+        /// <param name="writeDebug">When true, create a debug file that tracks processing steps</param>
+        /// <param name="dataSource">Data source name</param>
         protected PythonPlotContainer(
             string plotTitle = "Undefined", string xAxisTitle = "X", string yAxisTitle = "Y",
             bool writeDebug = false, string dataSource = "") : base(writeDebug, dataSource)

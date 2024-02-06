@@ -117,14 +117,14 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Retrieves information on the given MassLynx data file (actually a directory)
         /// </summary>
-        /// <param name="massLynxDataDirectoryPath"></param>
-        /// <param name="acquDate"></param>
-        /// <param name="acquName"></param>
-        /// <param name="instrument"></param>
-        /// <param name="instrumentType"></param>
-        /// <param name="sampleDesc"></param>
-        /// <param name="versionMajor"></param>
-        /// <param name="versionMinor"></param>
+        /// <param name="massLynxDataDirectoryPath">MassLynx directory path</param>
+        /// <param name="acquDate">Output: acquisition date</param>
+        /// <param name="acquName">Output: acquisition name</param>
+        /// <param name="instrument">Output: instrument</param>
+        /// <param name="instrumentType">Output: instrument type</param>
+        /// <param name="sampleDesc">Output: sample description</param>
+        /// <param name="versionMajor">Output: major version</param>
+        /// <param name="versionMinor">Output: minor version</param>
         /// <returns>True if success, false if failure</returns>
         public bool GetFileInfo(
             string massLynxDataDirectoryPath,
@@ -380,7 +380,7 @@ namespace MSFileInfoScanner.Readers
         /// Retrieve the number of scans for the given function
         /// </summary>
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
-        /// <param name="functionNumber"></param>
+        /// <param name="functionNumber">Function number</param>
         /// <returns>Number of scans, or 0 if an error</returns>
         public int GetNumScans(string massLynxDataDirectoryPath, int functionNumber = 1)
         {
@@ -412,14 +412,14 @@ namespace MSFileInfoScanner.Readers
         /// Retrieves scan information
         /// </summary>
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
-        /// <param name="functionNumber"></param>
-        /// <param name="scanNumber"></param>
+        /// <param name="functionNumber">Function number</param>
+        /// <param name="scanNumber">Scan number</param>
         /// <param name="scanType">Output: 0 means MS-only scan (survey scan), 1 or greater means MS/MS scan</param>
-        /// <param name="basePeakMZ"></param>
-        /// <param name="parentIonMZ"></param>
-        /// <param name="retentionTime"></param>
-        /// <param name="basePeakIntensity"></param>
-        /// <param name="totalIonCurrent"></param>
+        /// <param name="basePeakMZ">Output: base peak m/z</param>
+        /// <param name="parentIonMZ">Output: parent ion m/z</param>
+        /// <param name="retentionTime">Output: retention time (aka elution time)</param>
+        /// <param name="basePeakIntensity">Output: base peak intensity (BPI)</param>
+        /// <param name="totalIonCurrent">Output: total ion current (TIC)</param>
         /// <returns>True if no error, False if an error</returns>
         public bool GetScanInfo(
             string massLynxDataDirectoryPath,
@@ -445,19 +445,19 @@ namespace MSFileInfoScanner.Readers
         /// Note that if LoadMSScanHeader returns 0, indicating no data points, this method will still return True
         /// </remarks>
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
-        /// <param name="functionNumber"></param>
-        /// <param name="scanNumber"></param>
+        /// <param name="functionNumber">Function number</param>
+        /// <param name="scanNumber">Scan number</param>
         /// <param name="scanType">Output: 0 means MS-only scan (survey scan), 1 or greater means MS/MS scan</param>
-        /// <param name="basePeakMZ"></param>
-        /// <param name="parentIonMZ"></param>
-        /// <param name="retentionTime"></param>
-        /// <param name="basePeakIntensity"></param>
-        /// <param name="totalIonCurrent"></param>
-        /// <param name="calibrated"></param>
-        /// <param name="continuum"></param>
-        /// <param name="overload"></param>
-        /// <param name="massStart"></param>
-        /// <param name="massEnd"></param>
+        /// <param name="basePeakMZ">Output: base peak m/z</param>
+        /// <param name="parentIonMZ">Output: parent ion m/z</param>
+        /// <param name="retentionTime">Output: retention time (aka elution time)</param>
+        /// <param name="basePeakIntensity">Output: base peak intensity (BPI)</param>
+        /// <param name="totalIonCurrent">Output: total ion current (TIC)</param>
+        /// <param name="calibrated">Output: true if calibrated</param>
+        /// <param name="continuum">Output: true if continuum</param>
+        /// <param name="overload">Output: true if overload flag is set</param>
+        /// <param name="massStart">Output: first m/z</param>
+        /// <param name="massEnd">Output: last m/z</param>
         /// <returns>True if no error, False if an error</returns>
         public bool GetScanInfoEx(
             string massLynxDataDirectoryPath,
@@ -518,7 +518,7 @@ namespace MSFileInfoScanner.Readers
         /// Return true if the function has MS/MS data
         /// </summary>
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
-        /// <param name="functionNumber"></param>
+        /// <param name="functionNumber">Function number</param>
         public bool IsFunctionMsMs(string massLynxDataDirectoryPath, int functionNumber)
         {
             if (GetFunctionInfo(massLynxDataDirectoryPath, functionNumber, out short functionType))
@@ -533,8 +533,8 @@ namespace MSFileInfoScanner.Readers
         /// Return true if the spectrum has continuum (profile) data
         /// </summary>
         /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
-        /// <param name="functionNumber"></param>
-        /// <param name="scanNumber"></param>
+        /// <param name="functionNumber">Function number</param>
+        /// <param name="scanNumber">Scan number</param>
         public bool IsSpectrumContinuumData(string massLynxDataDirectoryPath, int functionNumber, int scanNumber = 1)
         {
             if (GetScanInfoEx(massLynxDataDirectoryPath, functionNumber, scanNumber,
@@ -610,8 +610,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Determines the number of functions in the given data file
         /// </summary>
-        /// <param name="thisMSData"></param>
-        /// <param name="massLynxDataDirectoryPath"></param>
+        /// <param name="thisMSData">Info on the dataset directory; the calling method must initialize it</param>
+        /// <param name="massLynxDataDirectoryPath">Instrument data directory path</param>
         /// <returns>The function count, or 0 on failure</returns>
         private int LoadMSFunctionInfo(MSData thisMSData, string massLynxDataDirectoryPath)
         {
@@ -743,10 +743,10 @@ namespace MSFileInfoScanner.Readers
         /// to populate .FunctionInfo before calling this function
         /// </para>
         /// </remarks>
-        /// <param name="scanStatsSingleScan"></param>
-        /// <param name="thisMSData"></param>
-        /// <param name="functionNumber"></param>
-        /// <param name="scanNumber"></param>
+        /// <param name="scanStatsSingleScan">Output: scan stats for the given function and scan</param>
+        /// <param name="thisMSData">Info on the dataset directory; the calling method must initialize it</param>
+        /// <param name="functionNumber">Function number</param>
+        /// <param name="scanNumber">Scan number</param>
         private void LoadMSScanHeader(out MassLynxScanStats scanStatsSingleScan, MSData thisMSData, int functionNumber, int scanNumber)
         {
             scanStatsSingleScan = new MassLynxScanStats();
@@ -863,7 +863,7 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Retrieves the number of functions
         /// </summary>
-        /// <param name="dataDirPath"></param>
+        /// <param name="dataDirPath">Data directory path</param>
         /// <returns>The number of functions, 0 if an error</returns>
         private int NativeIOGetFunctionCount(string dataDirPath)
         {
@@ -892,8 +892,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Retrieve the function info
         /// </summary>
-        /// <param name="dataDirPath"></param>
-        /// <param name="msFunctionInfo"></param>
+        /// <param name="dataDirPath">Data directory path</param>
+        /// <param name="msFunctionInfo">MS function info</param>
         /// <returns>True if success, False if failure</returns>
         private bool NativeIOGetFunctionInfo(string dataDirPath, MSFunctionInfo msFunctionInfo)
         {
@@ -1084,8 +1084,8 @@ namespace MSFileInfoScanner.Readers
         /// <remarks>
         /// msFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
         /// </remarks>
-        /// <param name="dataDirPath"></param>
-        /// <param name="msFunctionInfo"></param>
+        /// <param name="dataDirPath">Data directory path</param>
+        /// <param name="msFunctionInfo">MS function info</param>
         /// <returns>Number of scans, or 0 if an error</returns>
         private int NativeIOGetScanCount(string dataDirPath, MSFunctionInfo msFunctionInfo)
         {
@@ -1121,11 +1121,11 @@ namespace MSFileInfoScanner.Readers
         /// <remarks>
         /// msFunctionInfo.FunctionNumber should correspond to the function number, ranging from 1 to MSData.FunctionCount
         /// </remarks>
-        /// <param name="dataDirPath"></param>
-        /// <param name="msFunctionInfo"></param>
-        /// <param name="scanNumber"></param>
-        /// <param name="scanIndexRecord"></param>
-        /// <param name="scanOffsetAndPeakCountOnly"></param>
+        /// <param name="dataDirPath">Data directory path</param>
+        /// <param name="msFunctionInfo">MS function info</param>
+        /// <param name="scanNumber">Scan number</param>
+        /// <param name="scanIndexRecord">Output: instance of ScanIndexRecord</param>
+        /// <param name="scanOffsetAndPeakCountOnly">When true, only determine the scan offset and peak count</param>
         /// <returns>True if success, False if failure</returns>
         private bool NativeIOGetScanInfo(
             string dataDirPath,
@@ -1319,7 +1319,7 @@ namespace MSFileInfoScanner.Readers
         /// <remarks>
         /// Should only be called by LoadMSFunctionInfo and only after the functions have been determined
         /// </remarks>
-        /// <param name="thisMSData"></param>
+        /// <param name="thisMSData">Info on the dataset directory; the calling method must initialize it</param>
         /// <returns>True if successful, False if not</returns>
         private bool NativeIOReadCalInfoFromHeader(MSData thisMSData)
         {
@@ -1407,8 +1407,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Populates the header info by reading _HEADER.TXT
         /// </summary>
-        /// <param name="dataDirPath"></param>
-        /// <param name="headerInfo"></param>
+        /// <param name="dataDirPath">Data directory path</param>
+        /// <param name="headerInfo">Output: MS header info</param>
         /// <returns>True if successful, False if not</returns>
         private bool NativeIOReadHeader(string dataDirPath, out MSHeaderInfo headerInfo)
         {

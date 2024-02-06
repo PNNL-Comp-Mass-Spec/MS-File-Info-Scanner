@@ -105,7 +105,7 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">Processing options</param>
         public LCMSDataPlotter(LCMSDataPlotterOptions options)
         {
             Options = options;
@@ -899,7 +899,7 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Returns the cached scan data for the scan index
         /// </summary>
-        /// <param name="index"></param>
+        /// <param name="index">Scan index</param>
         /// <returns>ScanData class</returns>
         public ScanData GetCachedScanByIndex(int index)
         {
@@ -929,13 +929,13 @@ namespace MSFileInfoScanner.Plotting
         /// more than targetDataPointCount, depending on minPointsPerSpectrum
         /// </para>
         /// <para>
-        /// For example, if minPointsPerSpectrum = 5 and we have 5000 scans, there will be
+        /// For example, if minPointsPerSpectrum = 5, and we have 5000 scans, there will be
         /// at least 5*5000 = 25000 data points in memory.  If targetDataPointCount = 10000, then
         /// there could be as many as 25000 + 10000 = 25000 points in memory
         /// </para>
         /// </remarks>
         /// <param name="targetDataPointCount">Target max number of data points (see remarks for caveat)</param>
-        /// <param name="minPointsPerSpectrum"></param>
+        /// <param name="minPointsPerSpectrum">Minimum points per spectrum</param>
         private void TrimCachedData(int targetDataPointCount, int minPointsPerSpectrum)
         {
             try
@@ -1598,7 +1598,7 @@ namespace MSFileInfoScanner.Plotting
                 plotContainer.AnnotationBottomRight = caption;
             }
 
-            // Override the auto-computed X axis range
+            // Override the auto-computed X-axis range
             if (Options.UseObservedMinScan)
             {
                 myPlot.Axes[0].Minimum = minScan;
@@ -1725,10 +1725,10 @@ namespace MSFileInfoScanner.Plotting
 
             // Update the axis format codes if the data values are small or the range of data is small
 
-            // Assume the X axis is plotting integers
+            // Assume the X-axis is plotting integers
             PlotUtilities.GetAxisFormatInfo(xMin, xMax, true, plotContainer.XAxisInfo);
 
-            // Assume the Y axis is plotting doubles
+            // Assume the Y-axis is plotting doubles
             PlotUtilities.GetAxisFormatInfo(yMin, yMax, false, plotContainer.YAxisInfo);
 
             // Add a label showing the number of points displayed
@@ -1755,7 +1755,7 @@ namespace MSFileInfoScanner.Plotting
                 plotContainer.AnnotationBottomRight = caption;
             }
 
-            // Override the auto-computed X axis range
+            // Override the auto-computed X-axis range
             if (Options.UseObservedMinScan)
             {
                 plotContainer.XAxisInfo.Minimum = minScan;
@@ -1816,7 +1816,7 @@ namespace MSFileInfoScanner.Plotting
         /// Converts an integer to engineering notation
         /// For example, 50000 will be returned as 50K
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">Value to format</param>
         private string IntToEngineeringNotation(int value)
         {
             if (value < 1000)
@@ -1843,7 +1843,7 @@ namespace MSFileInfoScanner.Plotting
             {
                 ClearRecentFileInfo();
 
-                // Check whether all of the spectra have .MSLevel = 0
+                // Check whether all the spectra have .MSLevel = 0
                 // If they do, change the level to 1
                 ValidateMSLevel();
 

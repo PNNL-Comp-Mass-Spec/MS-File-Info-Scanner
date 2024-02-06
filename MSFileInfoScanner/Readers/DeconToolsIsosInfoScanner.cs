@@ -77,7 +77,7 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Returns the dataset name for the given file
         /// </summary>
-        /// <param name="dataFilePath"></param>
+        /// <param name="dataFilePath">Data file path</param>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             try
@@ -473,7 +473,7 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         /// <param name="columnMapping">Dictionary where keys are column names and values are the column index, or -1 if not present</param>
         /// <param name="dataColumns">Column names from the header row of the input file</param>
-        /// <param name="fileDescription"></param>
+        /// <param name="fileDescription">File description</param>
         private void ParseColumnHeaders(Dictionary<string, int> columnMapping, IList<string> dataColumns, string fileDescription)
         {
             foreach (var columnName in columnMapping.Keys.ToList())
@@ -496,7 +496,7 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         /// <remarks>Will also read the _scans.csv file if present (to determine ElutionTime and MSLevel</remarks>
         /// <param name="dataFilePath">Isos file path</param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
@@ -537,7 +537,7 @@ namespace MSFileInfoScanner.Readers
             }
 
             // Read the file info from the file system
-            // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
+            // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all the necessary steps are taken)
             // This will also compute the SHA-1 hash of the isos file and add it to mDatasetStatsSummarizer.DatasetFileInfo
             UpdateDatasetFileStats(isosFile, datasetID);
 

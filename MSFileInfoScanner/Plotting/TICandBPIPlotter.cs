@@ -47,6 +47,10 @@ namespace MSFileInfoScanner.Plotting
         private readonly List<OutputFileInfoType> mRecentFiles;
 
         private readonly string mDataSource;
+
+        /// <summary>
+        /// When true, create a debug file that tracks processing steps
+        /// </summary>
         private readonly bool mWriteDebug;
 
         public bool BPIAutoMinMaxY { get; set; }
@@ -107,8 +111,8 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="dataSource"></param>
-        /// <param name="writeDebug"></param>
+        /// <param name="dataSource">Data source</param>
+        /// <param name="writeDebug">When true, create a debug file that tracks processing steps</param>
         // ReSharper disable once IdentifierTypo
         public TICandBPIPlotter(string dataSource = "", bool writeDebug = false)
         {
@@ -244,11 +248,11 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="chromatogramData">Data to display</param>
         /// <param name="plotTitle">Title of the plot</param>
         /// <param name="msLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
-        /// <param name="xAxisLabel"></param>
-        /// <param name="yAxisLabel"></param>
-        /// <param name="autoMinMaxY"></param>
-        /// <param name="yAxisExponentialNotation"></param>
-        /// <param name="xAxisIsTimeMinutes">If true, <see cref="ChromatogramDataPoint.TimeMinutes"/> is used for the x axis instead of <see cref="ChromatogramDataPoint.ScanNum"/></param>
+        /// <param name="xAxisLabel">X-axis label</param>
+        /// <param name="yAxisLabel">Y-axis label</param>
+        /// <param name="autoMinMaxY">When true, auto define the Y-axis range</param>
+        /// <param name="yAxisExponentialNotation">When true, label the Y-axis using exponential notation</param>
+        /// <param name="xAxisIsTimeMinutes">If true, <see cref="ChromatogramDataPoint.TimeMinutes"/> is used for the X-axis instead of <see cref="ChromatogramDataPoint.ScanNum"/></param>
         /// <returns>OxyPlot PlotContainer</returns>
         private PlotContainer InitializeOxyPlot(
             ChromatogramInfo chromatogramData,
@@ -378,8 +382,8 @@ namespace MSFileInfoScanner.Plotting
 
             }
 
-            // Override the auto-computed X axis range
             if (minScan == maxScan)
+            // Override the auto-computed X-axis range
             {
                 myPlot.Axes[0].Minimum = minScan - 1;
                 myPlot.Axes[0].Maximum = minScan + 1;
@@ -401,7 +405,7 @@ namespace MSFileInfoScanner.Plotting
             // Assure that we don't see ticks between scan numbers
             OxyPlotUtilities.ValidateMajorStep(myPlot.Axes[0]);
 
-            // Override the auto-computed Y axis range
+            // Override the auto-computed Y-axis range
             if (autoMinMaxY)
             {
                 // Auto scale
@@ -424,11 +428,11 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="chromatogramData">Data to display</param>
         /// <param name="plotTitle">Title of the plot</param>
         /// <param name="msLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
-        /// <param name="xAxisLabel"></param>
-        /// <param name="yAxisLabel"></param>
-        /// <param name="autoMinMaxY"></param>
-        /// <param name="yAxisExponentialNotation"></param>
-        /// <param name="xAxisIsTimeMinutes">If true, <see cref="ChromatogramDataPoint.TimeMinutes"/> is used for the x axis instead of <see cref="ChromatogramDataPoint.ScanNum"/></param>
+        /// <param name="xAxisLabel">X-axis label</param>
+        /// <param name="yAxisLabel">Y-axis label</param>
+        /// <param name="autoMinMaxY">When true, auto define the Y-axis range</param>
+        /// <param name="yAxisExponentialNotation">When true, label the Y-axis using exponential notation</param>
+        /// <param name="xAxisIsTimeMinutes">If true, <see cref="ChromatogramDataPoint.TimeMinutes"/> is used for the X-axis instead of <see cref="ChromatogramDataPoint.ScanNum"/></param>
         /// <returns>Python PlotContainer</returns>
         private PythonPlotContainer InitializePythonPlot(
             ChromatogramInfo chromatogramData,
@@ -493,11 +497,11 @@ namespace MSFileInfoScanner.Plotting
 
             // Update the axis format codes if the data values are small or the range of data is small
 
-            // Assume the X axis is plotting integers
+            // Assume the X-axis is plotting integers
             var xVals = (from item in points select item.X).ToList();
             PlotUtilities.GetAxisFormatInfo(xVals, true, plotContainer.XAxisInfo);
 
-            // Assume the Y axis is plotting doubles
+            // Assume the Y-axis is plotting doubles
             var yVals = (from item in points select item.Y).ToList();
             PlotUtilities.GetAxisFormatInfo(yVals, false, plotContainer.YAxisInfo);
 
@@ -522,7 +526,7 @@ namespace MSFileInfoScanner.Plotting
                 plotContainer.AnnotationBottomRight = caption;
             }
 
-            // Override the auto-computed Y axis range
+            // Override the auto-computed Y-axis range
             if (autoMinMaxY)
             {
                 // Auto scale
@@ -617,8 +621,8 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Save BPI and TIC plots
         /// </summary>
-        /// <param name="datasetName"></param>
-        /// <param name="outputDirectory"></param>
+        /// <param name="datasetName">Dataset name</param>
+        /// <param name="outputDirectory">Output directory</param>
         /// <returns>True if success, false if an error</returns>
         public bool SaveTICAndBPIPlotFiles(string datasetName, string outputDirectory)
         {

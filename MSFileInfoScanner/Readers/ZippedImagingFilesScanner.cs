@@ -25,8 +25,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
-        /// <param name="lcms2DPlotOptions"></param>
+        /// <param name="options">Processing options</param>
+        /// <param name="lcms2DPlotOptions">Plotting options</param>
         public ZippedImagingFilesScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
             base(options, lcms2DPlotOptions)
         { }
@@ -36,8 +36,8 @@ namespace MSFileInfoScanner.Readers
         /// Determines the oldest and newest modified analysis.baf files (or apexAcquisition.method file if analysis.baf files are not found)
         /// Presumes this is the AcqStartTime and AcqEndTime
         /// </summary>
-        /// <param name="zipFile"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="zipFile">Zip file</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if at least one valid file is found; otherwise false</returns>
         private void DetermineAcqStartEndTime(FileInfo zipFile, DatasetFileInfo datasetFileInfo)
         {
@@ -179,8 +179,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Process the dataset
         /// </summary>
-        /// <param name="dataFilePath"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if success, False if an error</returns>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
@@ -241,7 +241,7 @@ namespace MSFileInfoScanner.Readers
 
                 foreach (var zipFile in zipFiles)
                 {
-                    // Examine all of the apexAcquisition.method files in this zip file
+                    // Examine the apexAcquisition.method files in this zip file
                     DetermineAcqStartEndTime(zipFile, datasetFileInfo);
 
                     if (Options.DisableInstrumentHash)

@@ -55,13 +55,13 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="msDataFileReader"></param>
-        /// <param name="datasetStatsSummarizer"></param>
-        /// <param name="ticAndBPIPlot"></param>
-        /// <param name="lcms2DPlot"></param>
-        /// <param name="saveLCMS2DPlots"></param>
-        /// <param name="saveTICAndBPI"></param>
-        /// <param name="checkCentroidingStatus"></param>
+        /// <param name="msDataFileReader">MS data file reader</param>
+        /// <param name="datasetStatsSummarizer">Dataset stats summarizer</param>
+        /// <param name="ticAndBPIPlot">TIC and BPI plotter</param>
+        /// <param name="lcms2DPlot">LCMS data plotter</param>
+        /// <param name="saveLCMS2DPlots">When true, save 2D LC/MS plots</param>
+        /// <param name="saveTICAndBPI">When true, save TIC and BPI plots</param>
+        /// <param name="checkCentroidingStatus">When true, check for centroided data</param>
         public ProteoWizardDataParser(
             MSDataFileReader msDataFileReader,
             DatasetStatsSummarizer datasetStatsSummarizer,
@@ -246,7 +246,7 @@ namespace MSFileInfoScanner.Readers
         /// <remarks>
         /// Uses ticScanTimes and ticScanNumbers to determine the closest scan number for each SRM value's scan time
         /// </remarks>
-        /// <param name="chromatogramID"></param>
+        /// <param name="chromatogramID">Chromatogram ID</param>
         /// <param name="scanTimes">SRM scan times, in seconds</param>
         /// <param name="intensities">SRM intensities</param>
         /// <param name="ticScanTimes">TIC scan times, in seconds</param>
@@ -307,7 +307,7 @@ namespace MSFileInfoScanner.Readers
                     scanStatsEntry.BasePeakMZ = "0";
                 }
 
-                // Base peak signal to noise ratio
+                // Base peak signal-to-noise ratio
                 scanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
                 scanStatsEntry.IonCount = 1;
@@ -345,7 +345,7 @@ namespace MSFileInfoScanner.Readers
         /// <param name="ticScanTimes">Start time of each scan, in minutes (populated by this method)</param>
         /// <param name="ticScanNumbers">Scan numbers (populated by this method)</param>
         /// <param name="runtimeMinutes">Input/output: total runtime, in minutes</param>
-        /// <param name="storeInTICAndBPIPlot"></param>
+        /// <param name="storeInTICAndBPIPlot">When true, store the TIC values in mTICAndBPIPlot</param>
         private void ProcessTIC(
             IReadOnlyList<float> scanTimes,
             IReadOnlyList<float> intensities,
@@ -1126,7 +1126,7 @@ namespace MSFileInfoScanner.Readers
 
             if (scanNumMin2D / (double)scanNumMax2D > 0.5)
             {
-                // Zoom in the 2D plot to prevent all of the data from being scrunched to the right
+                // Zoom in the 2D plot to prevent all the data from being scrunched to the right
                 mLCMS2DPlot.Options.UseObservedMinScan = true;
             }
         }

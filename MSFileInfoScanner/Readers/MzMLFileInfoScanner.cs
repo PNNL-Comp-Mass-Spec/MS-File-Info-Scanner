@@ -29,7 +29,7 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Returns the dataset name for the given file
         /// </summary>
-        /// <param name="dataFilePath"></param>
+        /// <param name="dataFilePath">Data file path</param>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             try
@@ -46,8 +46,8 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// Process the dataset
         /// </summary>
-        /// <param name="dataFilePath"></param>
-        /// <param name="datasetFileInfo"></param>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <returns>True if success, False if an error or if the file has no scans</returns>
         public override bool ProcessDataFile(string dataFilePath, DatasetFileInfo datasetFileInfo)
         {
@@ -89,7 +89,7 @@ namespace MSFileInfoScanner.Readers
             var success = ProcessWithProteoWizard(dataFile, datasetFileInfo);
 
             // Read the file info from the file system
-            // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all of the necessary steps are taken)
+            // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all the necessary steps are taken)
             // This will also compute the SHA-1 hash of the .mzML file and add it to mDatasetStatsSummarizer.DatasetFileInfo
             UpdateDatasetFileStats(dataFile, datasetID);
 

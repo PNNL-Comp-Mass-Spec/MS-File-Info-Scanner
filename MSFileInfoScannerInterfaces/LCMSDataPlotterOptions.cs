@@ -224,7 +224,7 @@ namespace MSFileInfoScannerInterfaces
         /// <summary>
         /// Constructor that accepts an options class
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">Options</param>
         public LCMSDataPlotterOptions(InfoScannerOptions options)
         {
             DeleteTempFiles = true;

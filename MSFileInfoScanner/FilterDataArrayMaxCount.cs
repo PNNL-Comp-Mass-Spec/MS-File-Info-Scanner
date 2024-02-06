@@ -51,8 +51,8 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Add a data point to track
         /// </summary>
-        /// <param name="abundance"></param>
-        /// <param name="dataPointIndex"></param>
+        /// <param name="abundance">Abundance</param>
+        /// <param name="dataPointIndex">Data point index</param>
         public void AddDataPoint(float abundance, int dataPointIndex)
         {
             mDataValues.Add(new Tuple<float, int>(abundance, dataPointIndex));
@@ -328,7 +328,7 @@ namespace MSFileInfoScanner
                 {
                     // This shouldn't normally be necessary
 
-                    // We have to sort all of the data; this can be quite slow
+                    // We have to sort all the data; this can be quite slow
                     SortAndMarkPointsToSkip(mDataValues, MaximumDataCountToLoad, SUBTASK_STEP_COUNT);
                 }
 
@@ -345,11 +345,11 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <remarks>
         /// This sub uses a full sort to filter the data
-        /// This will be slow for large arrays and you should therefore use FilterDataByMaxDataCountToKeep if possible
+        /// This will be slow for large arrays, and you should therefore use FilterDataByMaxDataCountToKeep if possible
         /// </remarks>
-        /// <param name="dataValuesAndIndices"></param>
-        /// <param name="maximumDataCountInArraysToLoad"></param>
-        /// <param name="subtaskStepCount"></param>
+        /// <param name="dataValuesAndIndices">Data values and indices</param>
+        /// <param name="maximumDataCountInArraysToLoad">Maximum data count in arrays to load</param>
+        /// <param name="subtaskStepCount">Number of subtask steps</param>
         private void SortAndMarkPointsToSkip(
             List<Tuple<float, int>> dataValuesAndIndices,
             int maximumDataCountInArraysToLoad, int subtaskStepCount)
