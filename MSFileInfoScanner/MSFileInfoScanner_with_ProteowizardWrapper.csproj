@@ -168,7 +168,7 @@
       <Version>1.0.111</Version>
     </PackageReference>
     <PackageReference Include="ThermoRawFileReader">
-      <Version>4.2.23</Version>
+      <Version>4.2.29</Version>
     </PackageReference>
     <PackageReference Include="UIMFLibrary">
       <Version>3.8.26</Version>
