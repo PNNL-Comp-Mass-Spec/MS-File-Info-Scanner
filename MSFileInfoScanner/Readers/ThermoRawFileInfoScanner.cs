@@ -40,9 +40,9 @@ namespace MSFileInfoScanner.Readers
         public ThermoRawFileInfoScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
             base(options, lcms2DPlotOptions)
         {
-            mIsCentroid = new Regex("([FI]TMS [+-] c .+)|([FI]TMS {[^ ]+} +[+-] c .+)|(^ *[+-] c .+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            mIsCentroid = new Regex("((ASTMS|FTMS|ITMS) [+-] c .+)|((ASTMS|FTMS|ITMS) {[^ ]+} +[+-] c .+)|(^ *[+-] c .+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-            mIsProfileM = new Regex("([FI]TMS [+-] p .+)|([FI]TMS {[^ ]+} +[+-] p .+)|(^ *[+-] p .+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            mIsProfileM = new Regex("((ASTMS|FTMS|ITMS) [+-] p .+)|((ASTMS|FTMS|ITMS) {[^ ]+} +[+-] p .+)|(^ *[+-] p .+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         }
 
         private void AddThermoDevices(
