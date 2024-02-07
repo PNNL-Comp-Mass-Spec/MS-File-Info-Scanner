@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScanner.Plotting;
@@ -90,6 +91,7 @@ namespace MSFileInfoScanner.Readers
             else
             {
                 var scanCount = xcaliburAccessor.GetNumScans();
+
                 GetStartAndEndScans(scanCount, out var scanStart, out var scanEnd);
 
                 for (var scanNumber = scanStart; scanNumber <= scanEnd; scanNumber++)
@@ -172,6 +174,35 @@ namespace MSFileInfoScanner.Readers
             {
                 return string.Empty;
             }
+        }
+
+        private string GetDeviceDescription(DeviceInfo device)
+        {
+            var instrumentName = GetDeviceValueIfDefined(device.InstrumentName);
+            var model = GetDeviceValueIfDefined(device.Model);
+            var description = GetDeviceValueIfDefined(device.DeviceDescription);
+
+            if (string.IsNullOrWhiteSpace(model) && string.IsNullOrWhiteSpace(instrumentName))
+                return description;
+
+            if (string.IsNullOrWhiteSpace(model) && !string.IsNullOrWhiteSpace(instrumentName))
+                return string.Format("{0}, {1}", description, instrumentName);
+
+            if (!string.IsNullOrWhiteSpace(model) && string.IsNullOrWhiteSpace(instrumentName))
+                return string.Format("{0}, {1}", description, model);
+
+            if (string.IsNullOrWhiteSpace(description))
+                return string.Format("{0}, {1}", instrumentName, model);
+
+            return string.Format("{0}, {1}, {2}", description, instrumentName, model);
+        }
+
+        private string GetDeviceValueIfDefined(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value) || value.Equals("None", StringComparison.OrdinalIgnoreCase))
+                return string.Empty;
+
+            return value;
         }
 
         private void LoadScanDetails(XRawFileIO xcaliburAccessor)
@@ -530,7 +561,8 @@ namespace MSFileInfoScanner.Readers
             AddThermoDevices(xcaliburAccessor, datasetFileInfo, deviceFilterList, new SortedSet<Device>());
 
             // Now add any non-mass spec devices
-            var deviceSkipList = new SortedSet<Device> {
+            var deviceSkipList = new SortedSet<Device>
+            {
                 Device.MS,
                 Device.MSAnalog,
                 Device.None             // Skip devices of type "None"; for example, see dataset 20200122_rmi049_SPZ_01_FAIMS_m40_CD
@@ -542,13 +574,22 @@ namespace MSFileInfoScanner.Readers
             {
                 mInstrumentSpecificPlots.Clear();
 
-                foreach (var device in datasetFileInfo.DeviceList)
+                var scanCount = xcaliburAccessor.GetNumScans();
+
+                GetStartAndEndScans(scanCount, out var scanStart, out var scanEnd);
+
+                var deviceList = datasetFileInfo.DeviceList.Where(device => device.DeviceType is not (Device.MS or Device.MSAnalog)).ToList();
+
+                var deviceCount = deviceList.Count;
+
+                for (var deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++)
                 {
-                    if (device.DeviceType == Device.MS || device.DeviceType == Device.MSAnalog)
-                        continue;
+                    var device = deviceList[deviceIndex];
+
+                    OnStatusEvent("Loading chromatogram info for device {0} / {1}: {2}", deviceIndex + 1, deviceCount, GetDeviceDescription(device));
 
                     // Note: This method calls GetChromatogramData2D
-                    var chromatogramData = xcaliburAccessor.GetChromatogramData(device.DeviceType, device.DeviceNumber);
+                    var chromatogramData = xcaliburAccessor.GetChromatogramData(device.DeviceType, device.DeviceNumber, scanStart, scanEnd);
 
                     if (chromatogramData.Count == 0)
                         continue;
