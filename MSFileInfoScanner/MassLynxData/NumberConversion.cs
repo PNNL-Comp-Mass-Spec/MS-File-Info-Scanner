@@ -31,7 +31,7 @@ namespace MSFileInfoScanner.MassLynxData
 
         public static short UnsignedToInt16(int value)
         {
-            if (value < 0 || value >= OFFSET_2)
+            if (value is < 0 or >= OFFSET_2)
                 throw new ArgumentOutOfRangeException(nameof(value));
 
             if (value <= MAX_INT_2)

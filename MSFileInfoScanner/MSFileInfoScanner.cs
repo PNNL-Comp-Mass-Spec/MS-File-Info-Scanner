@@ -1621,8 +1621,7 @@ namespace MSFileInfoScanner
                     {
                         success = ProcessMSFileOrDirectory(fileItem.FullName, outputDirectoryPath, resetErrorCode, out msFileProcessingState);
 
-                        if (msFileProcessingState == MSFileProcessingStateConstants.ProcessedSuccessfully ||
-                            msFileProcessingState == MSFileProcessingStateConstants.FailedProcessing)
+                        if (msFileProcessingState is MSFileProcessingStateConstants.ProcessedSuccessfully or MSFileProcessingStateConstants.FailedProcessing)
                         {
                             processedFileList.Add(fileItem.FullName);
                         }
@@ -1649,7 +1648,7 @@ namespace MSFileInfoScanner
                     {
                         success = ProcessMSFileOrDirectory(directoryItem.FullName, outputDirectoryPath, resetErrorCode, out msFileProcessingState);
 
-                        if (msFileProcessingState == MSFileProcessingStateConstants.ProcessedSuccessfully || msFileProcessingState == MSFileProcessingStateConstants.FailedProcessing)
+                        if (msFileProcessingState is MSFileProcessingStateConstants.ProcessedSuccessfully or MSFileProcessingStateConstants.FailedProcessing)
                         {
                             processedFileList.Add(directoryItem.FullName);
                         }
@@ -1971,7 +1970,7 @@ namespace MSFileInfoScanner
                                 fileProcessed = true;
                                 success = ProcessMSFileOrDirectory(fileItem.FullName, outputDirectoryPath, true, out msFileProcessingState);
 
-                                if (msFileProcessingState == MSFileProcessingStateConstants.ProcessedSuccessfully || msFileProcessingState == MSFileProcessingStateConstants.FailedProcessing)
+                                if (msFileProcessingState is MSFileProcessingStateConstants.ProcessedSuccessfully or MSFileProcessingStateConstants.FailedProcessing)
                                 {
                                     processedFileList.Add(fileItem.FullName);
                                 }
@@ -1995,7 +1994,7 @@ namespace MSFileInfoScanner
                                         processedZippedSFolder = true;
                                         success = ProcessMSFileOrDirectory(fileItem.FullName, outputDirectoryPath, true, out msFileProcessingState);
 
-                                        if (msFileProcessingState == MSFileProcessingStateConstants.ProcessedSuccessfully || msFileProcessingState == MSFileProcessingStateConstants.FailedProcessing)
+                                        if (msFileProcessingState is MSFileProcessingStateConstants.ProcessedSuccessfully or MSFileProcessingStateConstants.FailedProcessing)
                                         {
                                             processedFileList.Add(fileItem.FullName);
                                         }
