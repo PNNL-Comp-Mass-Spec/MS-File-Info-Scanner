@@ -22,7 +22,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public abstract class MSFileInfoProcessorBaseClass : EventNotifier
     {
-        // Ignore Spelling: AcqTime, Abu, Addnl, Bruker, href, html
+        // Ignore Spelling: AcqTime, Abu, Addnl, Bruker, href, html, lcms
 
         public const int PROGRESS_SPECTRA_LOADED = 90;
         public const int PROGRESS_SAVED_TIC_AND_BPI_PLOT = 92;

@@ -247,7 +247,7 @@ namespace MSFileInfoScanner.Plotting
         /// </summary>
         /// <param name="chromatogramData">Data to display</param>
         /// <param name="plotTitle">Title of the plot</param>
-        /// <param name="msLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
+        /// <param name="msLevelFilter">0 to use all the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
         /// <param name="xAxisLabel">X-axis label</param>
         /// <param name="yAxisLabel">Y-axis label</param>
         /// <param name="autoMinMaxY">When true, auto define the Y-axis range</param>
@@ -427,7 +427,7 @@ namespace MSFileInfoScanner.Plotting
         /// </summary>
         /// <param name="chromatogramData">Data to display</param>
         /// <param name="plotTitle">Title of the plot</param>
-        /// <param name="msLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
+        /// <param name="msLevelFilter">0 to use all the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
         /// <param name="xAxisLabel">X-axis label</param>
         /// <param name="yAxisLabel">Y-axis label</param>
         /// <param name="autoMinMaxY">When true, auto define the Y-axis range</param>
@@ -630,7 +630,7 @@ namespace MSFileInfoScanner.Plotting
             {
                 mRecentFiles.Clear();
 
-                // Check whether all of the spectra have .MSLevel = 0
+                // Check whether all the spectra have .MSLevel = 0
                 // If they do, change the level to 1
                 ValidateMSLevel(mBPI);
                 ValidateMSLevel(mTIC);

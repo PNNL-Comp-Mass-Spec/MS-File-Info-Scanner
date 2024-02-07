@@ -181,7 +181,7 @@ namespace MSFileInfoScanner.Readers
 
             if (functionCount > 0)
             {
-                // Sum up the scan count of all of the functions
+                // Sum up the scan count of each function
                 // Additionally, find the largest EndRT value in the functions
                 float endRT = 0;
 

@@ -1485,7 +1485,7 @@ namespace MSFileInfoScanner.Plotting
         /// When PlottingDeisotopedData is True, creates a 2D plot of monoisotopic mass vs. scan number, using charge state as the 3rd dimension to color the data points
         /// </summary>
         /// <param name="plotTitle">Title of the plot</param>
-        /// <param name="msLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
+        /// <param name="msLevelFilter">0 to use all the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
         /// <param name="skipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set skipTrimCachedData to False on the first call and True on subsequent calls)</param>
         /// <returns>OxyPlot PlotContainer</returns>
         private PlotContainerBase InitializePlot(string plotTitle, int msLevelFilter, bool skipTrimCachedData)
@@ -1503,7 +1503,7 @@ namespace MSFileInfoScanner.Plotting
         /// When PlottingDeisotopedData is True, creates a 2D plot of monoisotopic mass vs. scan number, using charge state as the 3rd dimension to color the data points
         /// </summary>
         /// <param name="plotTitle">Title of the plot</param>
-        /// <param name="msLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
+        /// <param name="msLevelFilter">0 to use all the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
         /// <param name="skipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set skipTrimCachedData to False on the first call and True on subsequent calls)</param>
         /// <returns>OxyPlot PlotContainer</returns>
         private PlotContainerBase InitializeOxyPlot(string plotTitle, int msLevelFilter, bool skipTrimCachedData)
@@ -1666,7 +1666,7 @@ namespace MSFileInfoScanner.Plotting
         /// When PlottingDeisotopedData is True, creates a 2D plot of monoisotopic mass vs. scan number, using charge state as the 3rd dimension to color the data points
         /// </summary>
         /// <param name="plotTitle">Title of the plot</param>
-        /// <param name="msLevelFilter">0 to use all of the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
+        /// <param name="msLevelFilter">0 to use all the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
         /// <param name="skipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set skipTrimCachedData to False on the first call and True on subsequent calls)</param>
         /// <returns>OxyPlot PlotContainer</returns>
         private PlotContainerBase InitializePythonPlot(string plotTitle, int msLevelFilter, bool skipTrimCachedData)

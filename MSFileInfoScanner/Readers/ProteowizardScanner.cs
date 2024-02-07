@@ -194,7 +194,7 @@ namespace MSFileInfoScanner.Readers
 
                 if (Options.MS2MzMin > 0 && datasetFileInfo.ScanCount > 0)
                 {
-                    // Verify that all of the MS2 spectra have m/z values below the required minimum
+                    // Verify that each MS2 spectrum has m/z values below the required minimum
                     // Useful for validating that reporter ions can be detected
                     ValidateMS2MzMin();
                 }

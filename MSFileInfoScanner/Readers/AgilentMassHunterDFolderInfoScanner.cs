@@ -22,7 +22,7 @@ namespace MSFileInfoScanner.Readers
     // ReSharper disable once IdentifierTypo
     public class AgilentMassHunterDFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: AcqData, AcqTime, Midac, ns, μs
+        // Ignore Spelling: AcqData, AcqTime, IMS, lcms, Midac, ns, μs
 
         // Note: The extension must be in all caps
         public const string AGILENT_DATA_FOLDER_D_EXTENSION = ".D";
@@ -41,7 +41,7 @@ namespace MSFileInfoScanner.Readers
 
         public const string AGILENT_TIME_SEGMENT_FILE = "MSTS.xml";
 
-        private bool mIsImsData = false;
+        private bool mIsImsData;
 
         /// <summary>
         /// Constructor
@@ -559,7 +559,7 @@ namespace MSFileInfoScanner.Readers
                         scanStatsEntry.BasePeakMZ = "0";
                     }
 
-                    // Base peak signal to noise ratio
+                    // Base peak signal-to-noise ratio
                     scanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
                     // NOTE: These are set when spectra are read

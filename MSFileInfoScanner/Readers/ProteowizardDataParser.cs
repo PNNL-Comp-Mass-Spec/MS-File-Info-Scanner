@@ -16,7 +16,7 @@ namespace MSFileInfoScanner.Readers
     [CLSCompliant(false)]
     public class ProteoWizardDataParser : EventNotifier
     {
-        // Ignore Spelling: Bruker, timsTOF
+        // Ignore Spelling: Bruker, Proteo, timsTOF
 
         private const int PROGRESS_START = 0;
         private const int PROGRESS_SCAN_TIMES_LOADED = 10;
@@ -518,7 +518,7 @@ namespace MSFileInfoScanner.Readers
                 return;
             }
 
-            // Now that all of the chromatograms have been processed, transfer data from parent2DData and product2DData into mLCMS2DPlot
+            // Now that all the chromatograms have been processed, transfer data from parent2DData and product2DData into mLCMS2DPlot
             mLCMS2DPlot.Options.MS1PlotTitle = "Q1 m/z";
             mLCMS2DPlot.Options.MS2PlotTitle = "Q3 m/z";
 
@@ -950,7 +950,7 @@ namespace MSFileInfoScanner.Readers
                     }
                 }
 
-                // Base peak signal to noise ratio
+                // Base peak signal-to-noise ratio
                 scanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
                 scanStatsEntry.IonCount = msDataSpectrum.Mzs.Length;

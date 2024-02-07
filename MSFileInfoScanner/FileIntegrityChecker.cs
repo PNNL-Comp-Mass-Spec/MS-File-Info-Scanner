@@ -760,8 +760,7 @@ namespace MSFileInfoScanner
 
                 if (!errorLogged && linesRead < minimumLineCount)
                 {
-                    errorMessage = "File contains " + linesRead + " lines of text, but the required minimum is " +
-                                      minimumLineCount;
+                    errorMessage = "File contains " + linesRead + " lines of text, but the required minimum is " + minimumLineCount;
                     LogFileIntegrityError(filePath, errorMessage);
                     errorLogged = true;
                 }
@@ -2097,7 +2096,7 @@ namespace MSFileInfoScanner
                 return;
             }
 
-            var errorMessage = "File did not contain all of the expected " + itemDescription;
+            var errorMessage = "File did not contain all the expected " + itemDescription;
 
             foreach (var requiredItem in requiredItemNames)
             {
@@ -2113,7 +2112,7 @@ namespace MSFileInfoScanner
 
             if (requiredItemMatchCountMinimum > 0 && matchCount >= requiredItemMatchCountMinimum)
             {
-                // Not all of the items in requiredItemNames were matched, but at least requiredTextMinMatchCount were, so all is fine
+                // Not all the items in requiredItemNames were matched, but at least requiredTextMinMatchCount were, so all is fine
             }
             else
             {

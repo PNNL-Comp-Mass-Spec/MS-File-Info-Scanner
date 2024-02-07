@@ -437,7 +437,7 @@ namespace MSFileInfoScanner.Readers
 
                     scanStatsEntry.BasePeakMZ = "0";
 
-                    // Base peak signal to noise ratio
+                    // Base peak signal-to-noise ratio
                     scanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
                     scanStatsEntry.IonCount = nonZeroPointsInFrame;

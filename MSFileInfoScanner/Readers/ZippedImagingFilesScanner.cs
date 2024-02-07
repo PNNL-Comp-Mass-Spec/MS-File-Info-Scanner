@@ -107,7 +107,7 @@ namespace MSFileInfoScanner.Readers
                             IonCountRaw = 0
                         };
 
-                        // Base peak signal to noise ratio
+                        // Base peak signal-to-noise ratio
 
                         mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
 
