@@ -287,7 +287,7 @@ namespace MSFileInfoScanner
                         }
 
                         // Synchronize the data in binToSortAbundances and binToSortDataIndices with mDataValues
-                        // mDataValues has not been sorted and therefore mDataIndices should currently be sorted ascending on "valid data point index"
+                        // At this point, mDataValues has not been sorted and therefore mDataIndices should currently be sorted ascending on "valid data point index"
                         // binToSortDataIndices should also currently be sorted ascending on "valid data point index" so the following Do Loop within a For Loop should sync things up
 
                         var originalDataArrayIndex = 0;

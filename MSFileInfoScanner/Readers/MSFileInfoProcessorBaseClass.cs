@@ -36,7 +36,7 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         protected MSFileInfoProcessorBaseClass(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions)
         {
-            mTICAndBPIPlot = new TICandBPIPlotter("TICAndBPIPlot", false);
+            mTICAndBPIPlot = new TICandBPIPlotter("TICAndBPIPlot");
             RegisterEvents(mTICAndBPIPlot);
 
             mInstrumentSpecificPlots = new List<TICandBPIPlotter>();
@@ -90,6 +90,8 @@ namespace MSFileInfoScanner.Readers
         /// When true, do not include the Scan Type table in the QC Plot HTML file
         /// </summary>
         protected bool HideEmptyHTMLSections { get; set; }
+
+        // ReSharper disable once UnusedMember.Global
 
         /// <summary>
         /// LC/MS 2D plot options
@@ -492,7 +494,7 @@ namespace MSFileInfoScanner.Readers
                         if (mLCMS2DPlot.Options.OverviewPlotDivisor > 0)
                         {
                             // Also save the Overview 2D Plots
-                            // Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
+                            // The plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
                             var success4 = CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DPlot.Options.OverviewPlotDivisor);
                             lcMSPlotStepsComplete++;
                             ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
@@ -936,6 +938,8 @@ namespace MSFileInfoScanner.Readers
             var deviceSerialRow = new StringBuilder();
             var deviceSwVersionRow = new StringBuilder();
 
+            // ReSharper disable UseRawString
+
             deviceTypeRow.Append(@"<th class=""DataHead"">Device Type:</th>");
             deviceNameRow.Append(@"<th class=""DataHead"">Name:</th>");
             deviceModelRow.Append(@"<th class=""DataHead"">Model:</th>");
@@ -947,6 +951,8 @@ namespace MSFileInfoScanner.Readers
             var devicesDisplayed = new SortedSet<string>();
 
             const string tdFormatter = @"<td class=""DataCell"">{0}</td>";
+
+            // ReSharper restore UseRawString
 
             foreach (var device in deviceList)
             {
@@ -965,7 +971,9 @@ namespace MSFileInfoScanner.Readers
 
             // Padding is: top right bottom left
 
-            var html = new List<string>
+            // ReSharper disable UseRawString
+
+            return new List<string>
             {
                 @"<table class=""DataTable"">",
                 string.Format("  <tr>{0}</tr>", deviceTypeRow),
@@ -976,7 +984,7 @@ namespace MSFileInfoScanner.Readers
                 "</table>"
             };
 
-            return html;
+            // ReSharper restore UseRawString
         }
 
         [CLSCompliant(false)]
