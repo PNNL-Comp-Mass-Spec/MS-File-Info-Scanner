@@ -12,6 +12,7 @@ namespace MSFileInfoScanner.MassLynxData
         private short maskAcquisitionDataType;
         private short maskCollisionEnergy;
 
+        // ReSharper disable once NotAccessedField.Local
         private int maskSegmentChannelCount;
 
         // Scan Info Masks
@@ -35,6 +36,7 @@ namespace MSFileInfoScanner.MassLynxData
 
         private int maskBPStandardDataMass;
 
+        // ReSharper disable once NotAccessedField.Local
         private int maskBPUncalibratedDataChannelNumber;
 
         /// <summary>
@@ -111,6 +113,7 @@ namespace MSFileInfoScanner.MassLynxData
             maskBPUncalibratedDataChannelNumber = (int)CreateMask(0, 27);
         }
 
+        // ReSharper disable once UnusedMember.Local
         private int ExtractFromBitsInt32(int packedValue, byte startBit, byte endBit)
         {
             int unpackedValue;
