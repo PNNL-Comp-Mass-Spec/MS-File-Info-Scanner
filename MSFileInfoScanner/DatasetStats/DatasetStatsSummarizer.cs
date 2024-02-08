@@ -54,6 +54,19 @@ namespace MSFileInfoScanner.DatasetStats
             }
         }
 
+        public struct SummaryStatsScanInfo
+        {
+            public int ScanCount;
+            public string IsolationWindowWidths;
+
+            public readonly override string ToString()
+            {
+                return string.IsNullOrWhiteSpace(IsolationWindowWidths)
+                    ? string.Format("{0} scans", ScanCount)
+                    : string.Format("{0} scans with isolation window {1} m/z", ScanCount, IsolationWindowWidths);
+            }
+        }
+
         private readonly SortedSet<int> mDatasetScanNumbers;
 
         private readonly List<ScanStatsEntry> mDatasetScanStats;
@@ -168,7 +181,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// If the number of spectra tracked by summaryStats.ScanTypeStats is >= 98% of the sum, nothing is adjusted
         /// If the number of spectra tracked by summaryStats.ScanTypeStats is less than 98%, values in summaryStats.ScanTypeStats are increased based on the spectrum distribution actually stored in summaryStats
         /// </summary>
-        /// <param name="summaryStats">Summary stats to update</param>
+        /// <param name="summaryStats">Summarized scan stats to update</param>
         private void AdjustSummaryStats(DatasetSummaryStats summaryStats)
         {
             // Keys in this dictionary are keys in summaryStats.ScanTypeStats
@@ -444,6 +457,20 @@ namespace MSFileInfoScanner.DatasetStats
                         ? statEntry.ScanFilterText
                         : ThermoRawFileReader.XRawFileIO.GetScanFilterWithGenericPrecursorMZ(statEntry.ScanFilterText);
 
+                    var msLevel = statEntry.ScanType;
+
+                    if (!summaryStats.ScanTypeNamesByMSLevel.ContainsKey(msLevel))
+                    {
+                        summaryStats.ScanTypeNameOrder.Add(msLevel, new List<string>());
+                        summaryStats.ScanTypeNamesByMSLevel.Add(msLevel, new SortedSet<string>());
+                    }
+
+                    if (!summaryStats.ScanTypeNamesByMSLevel[msLevel].Contains(statEntry.ScanTypeName))
+                    {
+                        summaryStats.ScanTypeNamesByMSLevel[msLevel].Add(statEntry.ScanTypeName);
+                        summaryStats.ScanTypeNameOrder[msLevel].Add(statEntry.ScanTypeName);
+                    }
+
                     if (statEntry.ScanType > 1)
                     {
                         // MSn spectrum
@@ -478,7 +505,6 @@ namespace MSFileInfoScanner.DatasetStats
                     else
                     {
                         summaryStats.ScanTypeStats.Add(scanTypeKey, 1);
-
                         summaryStats.ScanTypeWindowWidths.Add(scanTypeKey, new SortedSet<double> { statEntry.IsolationWindowWidth });
                     }
 
@@ -758,18 +784,26 @@ namespace MSFileInfoScanner.DatasetStats
 
                 writer.WriteStartElement("ScanTypes");
 
-                foreach (var scanTypeEntry in summaryStats.ScanTypeStats)
+                GetSortedScanTypeSummaryTypes(summaryStats, out var scanInfoByScanType);
+
+                foreach (var scanTypeList in summaryStats.ScanTypeNameOrder)
                 {
-                    var scanCountForType = GetScanTypeAndFilter(scanTypeEntry, out var scanType, out _, out var genericScanFilter);
+                    foreach (var scanTypeName in scanTypeList.Value)
+                    {
+                        foreach (var scanFilterInfo in scanInfoByScanType[scanTypeName])
+                        {
+                            var genericScanFilter = scanFilterInfo.Key;
+                            var scanCountForType = scanFilterInfo.Value.ScanCount;
+                            var windowWidths = scanFilterInfo.Value.IsolationWindowWidths;
 
-                    var windowWidths = GetDelimitedWindowWidthList(scanTypeEntry.Key, summaryStats.ScanTypeWindowWidths);
-
-                    writer.WriteStartElement("ScanType");
-                    writer.WriteAttributeString("ScanCount", scanCountForType.ToString());
-                    writer.WriteAttributeString("ScanFilterText", FixNull(genericScanFilter));
-                    writer.WriteAttributeString("IsolationWindowMZ", FixNull(windowWidths));
-                    writer.WriteString(scanType);
-                    writer.WriteEndElement();     // ScanType
+                            writer.WriteStartElement("ScanType");
+                            writer.WriteAttributeString("ScanCount", scanCountForType.ToString());
+                            writer.WriteAttributeString("ScanFilterText", FixNull(genericScanFilter));
+                            writer.WriteAttributeString("IsolationWindowMZ", FixNull(windowWidths));
+                            writer.WriteString(scanTypeName);
+                            writer.WriteEndElement(); // ScanType
+                        }
+                    }
                 }
 
                 writer.WriteEndElement();       // ScanTypes
@@ -1188,7 +1222,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="basicScanType">Simplified scan type, e.g. HMS or HMSn</param>
         /// <param name="scanFilterText">Scan filter text, e.g. "FTMS + p NSI Full ms" or "FTMS + p NSI d Full ms2 0@hcd25.00" or "IMS"</param>
         /// <returns>Scan count for this scan type and filter string</returns>
-        private int GetScanTypeAndFilter(
+        private static int GetScanTypeAndFilter(
             KeyValuePair<string, int> scanTypeEntry,
             out string scanType,
             out string basicScanType,
@@ -1275,6 +1309,58 @@ namespace MSFileInfoScanner.DatasetStats
             ScanCountDIA = scanCountDIA;
 
             ElutionTimeMax = elutionTimeMax;
+        }
+        /// <summary>
+        /// Step through the scan type stats tracked by summaryStats and populate two dictionaries with the details
+        /// </summary>
+        /// <param name="summaryStats">Summarized scan stats</param>
+        /// <param name="scanInfoByScanType">Output: dictionary where keys are scan type names and values are a sorted dictionary of generic scan filters and the ScanCount IsolationWindowWidths for each generic scan filter</param>
+        public static void GetSortedScanTypeSummaryTypes(
+            DatasetSummaryStats summaryStats,
+            out Dictionary<string, SortedDictionary<string, SummaryStatsScanInfo>> scanInfoByScanType)
+        {
+            // Keys in this dictionary are scan type names
+            // Values are a sorted dictionary where keys are scan filters (e.g. "FTMS + p NSI d Full ms2 0@hcd25.00") and values are the number of scans of that type
+            scanInfoByScanType = new Dictionary<string, SortedDictionary<string, SummaryStatsScanInfo>>();
+
+            var scanTypeNames = new SortedSet<string>();
+
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+            foreach (var scanTypeList in summaryStats.ScanTypeNameOrder)
+            {
+                foreach (var scanTypeName in scanTypeList.Value)
+                {
+                    if (!scanTypeNames.Add(scanTypeName))
+                    {
+                        throw new Exception(string.Format("Scan type {0} occurs more than once in ScanTypeNameOrder; this is a programming bug", scanTypeName));
+                    }
+                }
+            }
+
+            foreach (var scanTypeEntry in summaryStats.ScanTypeStats)
+            {
+                var scanCountForType = GetScanTypeAndFilter(scanTypeEntry, out var scanTypeName, out _, out var scanFilterText);
+
+                if (!scanTypeNames.Contains(scanTypeName))
+                {
+                    throw new Exception(string.Format("ScanTypeStats has scan type {0}, but that name is not present in ScanTypeNameOrder; this is a programming bug", scanTypeName));
+                }
+
+                if (!scanInfoByScanType.ContainsKey(scanTypeName))
+                {
+                    scanInfoByScanType.Add(scanTypeName, new SortedDictionary<string, SummaryStatsScanInfo>());
+                }
+
+                var windowWidths = GetDelimitedWindowWidthList(scanTypeEntry.Key, summaryStats.ScanTypeWindowWidths);
+
+                var scanInfo = new SummaryStatsScanInfo
+                {
+                    ScanCount = scanCountForType,
+                    IsolationWindowWidths = windowWidths
+                };
+
+                scanInfoByScanType[scanTypeName].Add(scanFilterText, scanInfo);
+            }
         }
 
         /// <summary>

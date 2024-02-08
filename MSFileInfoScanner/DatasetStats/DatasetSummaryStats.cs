@@ -43,6 +43,24 @@ namespace MSFileInfoScanner.DatasetStats
         public Dictionary<string, int> ScanTypeStats { get; }
 
         /// <summary>
+        /// Lists the scan type names in the order that they were first seen in the dataset
+        /// </summary>
+        /// <remarks>
+        /// Keys are MS level (1 for MS1, 2 for MS2, etc.)
+        /// Values are the list of scan type names
+        /// </remarks>
+        public SortedDictionary<int, List<string>> ScanTypeNameOrder { get; }
+
+        /// <summary>
+        /// Dictionary tracking the scan type names by MS level; used to avoid duplicate scan type names in the ScanTypeNameOrder dictionary
+        /// </summary>
+        /// <remarks>
+        /// Keys are MS level (1 for MS1, 2 for MS2, etc.)
+        /// Values are a sorted set of scan type names
+        /// </remarks>
+        public Dictionary<int, SortedSet<string>> ScanTypeNamesByMSLevel { get; }
+
+        /// <summary>
         /// Keeps track of each ScanType in the dataset, along with the isolation window width(s) for the scan type
         /// </summary>
         /// <remarks>
@@ -65,6 +83,8 @@ namespace MSFileInfoScanner.DatasetStats
             MSStats = new SummaryStatDetails();
             MSnStats = new SummaryStatDetails();
             ScanTypeStats = new Dictionary<string, int>();
+            ScanTypeNameOrder = new SortedDictionary<int, List<string>>();
+            ScanTypeNamesByMSLevel = new Dictionary<int, SortedSet<string>>();
             ScanTypeWindowWidths = new Dictionary<string, SortedSet<double>>();
             Clear();
         }

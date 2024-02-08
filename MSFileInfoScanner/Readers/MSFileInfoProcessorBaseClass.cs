@@ -887,45 +887,36 @@ namespace MSFileInfoScanner.Readers
         {
             indent ??= string.Empty;
 
+            // ReSharper disable UseRawString
+
             writer.WriteLine(indent + @"<table class=""DataTable"">");
             writer.WriteLine(indent + @"  <tr><th class=""DataHead"">Scan Type</th><th class=""DataHead"">Scan Count</th><th class=""DataHead"">Scan Filter Text</th><th class=""DataHead"">Isolation Window (m/z)</th></tr>");
 
-            foreach (var scanTypeEntry in datasetSummaryStats.ScanTypeStats)
+            // ReSharper restore UseRawString
+
+            DatasetStatsSummarizer.GetSortedScanTypeSummaryTypes(datasetSummaryStats, out var scanInfoByScanType);
+
+            foreach (var scanTypeList in datasetSummaryStats.ScanTypeNameOrder)
             {
-                var indexMatch = scanTypeEntry.Key.IndexOf(DatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR, StringComparison.Ordinal);
-
-                string scanFilterText;
-
-                string scanType;
-
-                if (indexMatch >= 0)
+                foreach (var scanTypeName in scanTypeList.Value)
                 {
-                    scanFilterText = scanTypeEntry.Key.Substring(indexMatch + DatasetStatsSummarizer.SCAN_TYPE_STATS_SEP_CHAR.Length);
+                    foreach (var scanFilterInfo in scanInfoByScanType[scanTypeName])
+                    {
+                        var genericScanFilter = scanFilterInfo.Key;
+                        var scanCountForType = scanFilterInfo.Value.ScanCount;
+                        var windowWidths = scanFilterInfo.Value.IsolationWindowWidths;
 
-                    if (indexMatch > 0)
-                    {
-                        scanType = scanTypeEntry.Key.Substring(0, indexMatch);
-                    }
-                    else
-                    {
-                        scanType = string.Empty;
+                        // ReSharper disable UseRawString
+
+                        writer.WriteLine(indent + "  " +
+                                         @"<tr><td class=""DataCell"">" + scanTypeName + "</td>" +
+                                         @"<td class=""DataCentered"">" + scanCountForType + "</td>" +
+                                         @"<td class=""DataCell"">" + genericScanFilter + "</td>" +
+                                         @"<td class=""DataCentered"">" + windowWidths + "</td></tr>");
+
+                        // ReSharper restore UseRawString
                     }
                 }
-                else
-                {
-                    scanType = scanTypeEntry.Key;
-                    scanFilterText = string.Empty;
-                }
-
-                var scanCount = scanTypeEntry.Value;
-
-                var windowWidths = DatasetStatsSummarizer.GetDelimitedWindowWidthList(scanTypeEntry.Key, datasetSummaryStats.ScanTypeWindowWidths);
-
-                writer.WriteLine(indent + "  " +
-                                 @"<tr><td class=""DataCell"">" + scanType + "</td>" +
-                                 @"<td class=""DataCentered"">" + scanCount + "</td>" +
-                                 @"<td class=""DataCell"">" + scanFilterText + "</td>" +
-                                 @"<td class=""DataCentered"">" + windowWidths + "</td></tr>");
             }
 
             writer.WriteLine(indent + "</table>");
