@@ -17,6 +17,8 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public class AgilentTOFOrQStarWiffFileInfoScanner : MSFileInfoProcessorBaseClass
     {
+        // Ignore Spelling: lcms, QStar, TOF, Wiff
+
         // Note: The extension must be in all caps
         public const string AGILENT_TOF_OR_QSTAR_FILE_EXTENSION = ".WIFF";
 

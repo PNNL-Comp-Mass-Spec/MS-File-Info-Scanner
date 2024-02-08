@@ -10,6 +10,8 @@ namespace MSFileInfoScanner.Readers
 {
     public abstract class ProteoWizardScanner : MSFileInfoProcessorBaseClass
     {
+        // Ignore Spelling: lcms, Proteo
+
         /// <summary>
         /// Class MzMLFileInfoScanner sets this to true
         /// </summary>

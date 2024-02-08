@@ -18,7 +18,7 @@ namespace MSFileInfoScanner.Plotting
     /// </summary>
     internal class PlotContainer : PlotContainerBase
     {
-        // Ignore Spelling: OxyPlot, png, Arial
+        // Ignore Spelling: Arial, Jpg, png, OxyPlot
 
         private const double PIXELS_PER_DIP = 1.25;
 

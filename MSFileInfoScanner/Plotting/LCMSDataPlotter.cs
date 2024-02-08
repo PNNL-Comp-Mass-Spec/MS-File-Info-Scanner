@@ -18,7 +18,7 @@ namespace MSFileInfoScanner.Plotting
     /// </summary>
     public class LCMSDataPlotter : EventNotifier
     {
-        // Ignore Spelling: centroided, deisotoped, Orbitrap, OxyPlot
+        // Ignore Spelling: Addon, centroided, deisotoped, Orbitrap, OxyPlot
 
         /// <summary>
         /// Data points with m/z values smaller than this value are ignored

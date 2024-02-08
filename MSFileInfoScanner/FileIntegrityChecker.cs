@@ -20,10 +20,10 @@ namespace MSFileInfoScanner
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: Acetyl, acqu, acqus, amu, bioml, Cn, Const, deisotoped, dta, extract_msn
+        // Ignore Spelling: Acetyl, acqu, acqus, amu, bioml, Calc, Cn, Const, deisotoped, dta, extract_msn
         // Ignore Spelling: fht, Filt, frag, ftms, fwhm, Hyperscore, IodoAcet, lcq, mostabundant_mw, mw
-        // Ignore Spelling: Orbitrap, Oxy, PeakScanStart, Prot, Proteomics, Scannum, SEQUEST, sptype, StatMomentsDataCountUsed
-        // Ignore Spelling: taxon, Tid, ver, Wiff, Xc, Xcorr,
+        // Ignore Spelling: Orbitrap, Oxy, PeakScanStart, Prot, Proteomics, QTrap, Scannum, SEQUEST, Sha, sptype, StatMomentsDataCountUsed
+        // Ignore Spelling: taxon, Tid, TOF, Utils, ver, Wiff, Xc, Xcorr,
 
         // ReSharper restore CommentTypo
 

@@ -13,7 +13,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public class MzMLFileInfoScanner : ProteoWizardScanner
     {
-        // Ignore Spelling: centroided, xcalibur
+        // Ignore Spelling: centroided, lcms, mzML, xcalibur
 
         // Note: The extension must be in all caps
         public const string MZML_FILE_EXTENSION = ".MZML";

@@ -16,7 +16,7 @@ namespace MSFileInfoScanner.Readers
     [CLSCompliant(false)]
     public class ProteoWizardDataParser : EventNotifier
     {
-        // Ignore Spelling: Bruker, Proteo, timsTOF
+        // Ignore Spelling: Acq, Bruker, centroiding, lcms, Proteo, SRM, timsTOF
 
         private const int PROGRESS_START = 0;
         private const int PROGRESS_SCAN_TIMES_LOADED = 10;

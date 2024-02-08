@@ -16,7 +16,7 @@ namespace MSFileInfoScanner.Readers
     // ReSharper disable once IdentifierTypo
     public class AgilentTOFDFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: AcqData, AcqTime
+        // Ignore Spelling: AcqData, AcqTime, lcms
 
         // Note: The extension must be in all caps
         public const string AGILENT_DATA_FOLDER_D_EXTENSION = ".D";

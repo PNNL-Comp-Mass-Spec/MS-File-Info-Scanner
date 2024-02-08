@@ -15,7 +15,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public class WatersRawFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: Micromass, Synapt
+        // Ignore Spelling: lcms, Micromass, Synapt
 
         // Note: The extension must be in all caps
         public const string MICROMASS_RAW_FOLDER_EXTENSION = ".RAW";

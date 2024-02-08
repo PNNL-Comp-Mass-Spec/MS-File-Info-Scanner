@@ -13,6 +13,8 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public class AgilentIonTrapDFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
+        // Ignore Spelling: lcms
+
         // Note: The extension must be in all caps
         public const string AGILENT_ION_TRAP_D_EXTENSION = ".D";
         private const string AGILENT_YEP_FILE = "Analysis.yep";

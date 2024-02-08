@@ -17,7 +17,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public class AgilentGCDFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: acqmeth, AcqTimes
+        // Ignore Spelling: Acq, acqmeth, AcqTimes, GC, Ini, Lcms
 
         // Note: The extension must be in all caps
         public const string AGILENT_DATA_FOLDER_D_EXTENSION = ".D";

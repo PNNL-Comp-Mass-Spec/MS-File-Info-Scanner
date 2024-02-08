@@ -12,7 +12,7 @@ namespace MSFileInfoScanner.Plotting
     // ReSharper disable once IdentifierTypo
     public class TICandBPIPlotter : EventNotifier
     {
-        // Ignore Spelling: OxyPlot
+        // Ignore Spelling: OxyPlot, Zeroes
 
         // ReSharper disable InconsistentNaming
         // ReSharper disable IdentifierTypo

@@ -16,7 +16,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public class ZippedImagingFilesScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: AcqStartTime, AcqEndTime
+        // Ignore Spelling: AcqStartTime, AcqEndTime, lcms
 
         public const string ZIPPED_IMAGING_FILE_SEARCH_SPEC = "0_R*.zip";
 

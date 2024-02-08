@@ -4,6 +4,8 @@ namespace MSFileInfoScanner.MassLynxData
 {
     internal class RawDataUtils
     {
+        // Ignore Spelling: Utils
+
         // Function Info Masks
         private short maskFunctionType;
         private short maskIonMode;

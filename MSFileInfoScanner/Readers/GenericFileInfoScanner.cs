@@ -7,6 +7,8 @@ namespace MSFileInfoScanner.Readers
 {
     internal class GenericFileInfoScanner : MSFileInfoProcessorBaseClass
     {
+        // Ignore Spelling: lcms
+
         /// <summary>
         /// Constructor
         /// </summary>

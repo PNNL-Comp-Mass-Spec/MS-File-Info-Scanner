@@ -12,6 +12,8 @@ namespace MSFileInfoScanner.DatasetStats
     /// </summary>
     public class DatasetFileInfo
     {
+        // Ignore Spelling: Acq
+
         /// <summary>
         /// File creation time (local time)
         /// </summary>

@@ -7,7 +7,7 @@ namespace MSFileInfoScanner.Plotting
 {
     internal abstract class PlotContainerBase : EventNotifier
     {
-        // Ignore Spelling: yyyy-MM-dd hh:mm:ss
+        // Ignore Spelling: deisotoped, png, yyyy-MM-dd hh:mm:ss
 
         protected StreamWriter mLogWriter;
 

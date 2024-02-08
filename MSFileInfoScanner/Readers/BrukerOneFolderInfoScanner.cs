@@ -17,7 +17,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public class BrukerOneFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: acqu, Bruker, fid, ser, yyyy-MMM-dd hh:mm:ss
+        // Ignore Spelling: acqu, Bruker, fid, lcms, ser, yyyy-MMM-dd hh:mm:ss
 
         public const string BRUKER_ONE_FOLDER_NAME = "1";
         private const string BRUKER_LOCK_FILE = "LOCK";

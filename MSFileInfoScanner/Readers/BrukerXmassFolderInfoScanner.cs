@@ -21,7 +21,7 @@ namespace MSFileInfoScanner.Readers
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: AcqTime, acqus, Bruker, fid, GuidA, idx, maxpeak, scanlist, ser, Xmass
+        // Ignore Spelling: acq, AcqTime, acqus, baf, Bruker, fid, GuidA, idx, lcms, maxpeak, mcf, scanlist, ser, SQLite, tdf, Xmass
 
         // ReSharper restore CommentTypo
 
