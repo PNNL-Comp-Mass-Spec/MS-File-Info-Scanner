@@ -47,6 +47,11 @@ namespace MSFileInfoScanner.DatasetStats
         {
             public bool UpToDate;
             public bool ScanFiltersIncludePrecursorMZValues;
+
+            public readonly override string ToString()
+            {
+                return string.Format("Up-to-date: {0}; Scan filters including precursor m/z: {1}", UpToDate, ScanFiltersIncludePrecursorMZValues);
+            }
         }
 
         private readonly SortedSet<int> mDatasetScanNumbers;

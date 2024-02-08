@@ -32,6 +32,11 @@ namespace MSFileInfoScanner.Plotting
             public OutputFileTypes FileType;
             public string FileName;
             public string FilePath;
+
+            public readonly override string ToString()
+            {
+                return string.Format("{0,-15} {1}", FileType + " file:", FileName);
+            }
         }
 
         /// <summary>

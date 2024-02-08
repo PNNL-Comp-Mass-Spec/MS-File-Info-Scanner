@@ -47,6 +47,11 @@ namespace MSFileInfoScanner.Plotting
             public OutputFileTypes FileType;
             public string FileName;
             public string FilePath;
+
+            public readonly override string ToString()
+            {
+                return string.Format("File type {0}: {1}", FileType, FileName);
+            }
         }
 
         public struct MSIonType
@@ -59,7 +64,7 @@ namespace MSFileInfoScanner.Plotting
             /// <summary>
             /// Display the m/z, intensity, and charge
             /// </summary>
-            public override string ToString()
+            public readonly override string ToString()
             {
                 if (Charge > 0)
                 {
