@@ -458,7 +458,7 @@ namespace MSFileInfoScanner
 
                     // Over 10% of the MS/MS spectra have a minimum m/z value larger than the required minimum
                     var errorMsg = string.Format("Over {0}% of the MS/MS spectra have a minimum m/z value larger than the required minimum; " +
-                                                 "reporter ion peaks likely could not be detected", MSFileInfoProcessorBaseClass.MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED);
+                                                 "reporter ion peaks likely could not be detected", MSFileInfoProcessorBaseClass.MAX_PERCENT_MS2_MZMIN_ALLOWED_FAILED);
 
                     if (!string.IsNullOrWhiteSpace(MS2MzMinValidationMessage))
                     {

@@ -62,7 +62,7 @@ namespace MSFileInfoScanner.Readers
         /// Used for checking if over 10% of the spectra failed MS2MzMin validation
         /// </summary>
         // ReSharper disable once IdentifierTypo
-        public const int MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED = 10;
+        public const int MAX_PERCENT_MS2_MZMIN_ALLOWED_FAILED = 10;
 
         /// <summary>
         /// This variable tracks TIC and BPI data (vs. scan)
@@ -1455,7 +1455,7 @@ namespace MSFileInfoScanner.Readers
         /// <returns>True if valid data, false if at least 10% of the spectra has a minimum m/z higher than the threshold</returns>
         protected bool ValidateMS2MzMin()
         {
-            var validData = mDatasetStatsSummarizer.ValidateMS2MzMin(Options.MS2MzMin, out var errorOrWarningMsg, MAX_PERCENT_MS2MZMIN_ALLOWED_FAILED);
+            var validData = mDatasetStatsSummarizer.ValidateMS2MzMin(Options.MS2MzMin, out var errorOrWarningMsg, MAX_PERCENT_MS2_MZMIN_ALLOWED_FAILED);
 
             if (validData && string.IsNullOrWhiteSpace(errorOrWarningMsg))
                 return true;
