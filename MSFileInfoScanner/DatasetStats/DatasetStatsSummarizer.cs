@@ -867,10 +867,9 @@ namespace MSFileInfoScanner.DatasetStats
                     {
                         var deviceKey = string.Format("{0}_{1}_{2}", device.InstrumentName, device.Model, device.SerialNumber);
 
-                        if (devicesDisplayed.Contains(deviceKey))
+                        // Add the device if not yet present
+                        if (!devicesDisplayed.Add(deviceKey))
                             continue;
-
-                        devicesDisplayed.Add(deviceKey);
 
                         writer.WriteStartElement("Device");
                         writer.WriteAttributeString("Type", device.DeviceType.ToString());

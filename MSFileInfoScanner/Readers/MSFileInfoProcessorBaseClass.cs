@@ -952,10 +952,9 @@ namespace MSFileInfoScanner.Readers
             {
                 var deviceKey = string.Format("{0}_{1}_{2}", device.InstrumentName, device.Model, device.SerialNumber);
 
-                if (devicesDisplayed.Contains(deviceKey))
+                // Add the device key if not yet present
+                if (!devicesDisplayed.Add(deviceKey))
                     continue;
-
-                devicesDisplayed.Add(deviceKey);
 
                 deviceTypeRow.AppendFormat(tdFormatter, device.DeviceDescription);
                 deviceNameRow.AppendFormat(tdFormatter, device.InstrumentName);
