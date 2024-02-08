@@ -944,7 +944,7 @@ namespace MSFileInfoScanner.Readers
                     InterSegmentChannelTime = reader.ReadSingle()
                 };
 
-                // Up to 32 segment scans can be conducted for a MS/MS run
+                // Up to 32 segment scans can be acquired for an MS/MS run
                 // The following three arrays store the segment times, start, and end masses
                 for (var index = 0; index < 32; index++)
                 {
@@ -1138,8 +1138,8 @@ namespace MSFileInfoScanner.Readers
             var nativeScanIndexRecord = new RawScanIndexRecord();
 
             // This is used for files with msFunctionInfo.AcquisitionDataType = 0
-            // The difference is that structure RawScanIndexRecordType ends in an Int16 then a Int32
-            //  while this structure ends in a Int32, then an Int16
+            // The difference is that structure RawScanIndexRecordType ends in an Int16 then an Int32
+            //  while this structure ends in an Int32, then an Int16
             // When this structure is used, its values are copied to nativeScanIndexRecord directly after reading
             var nativeScanIndexRecordCompressedScan = new RawScanIndexRecordCompressedScan();
 

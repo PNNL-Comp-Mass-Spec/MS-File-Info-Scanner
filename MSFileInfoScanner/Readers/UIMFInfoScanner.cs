@@ -733,7 +733,7 @@ namespace MSFileInfoScanner.Readers
 
                     if (masterFrameNumList.Length > 0)
                     {
-                        // Ideally, we would lookup the acquisition time of the first frame and the last frame, then subtract the two times to determine the run time
+                        // Ideally, we would look up the acquisition time of the first frame and the last frame, then subtract the two times to determine the run time
                         // However, given the odd values that can be present in the StartTime field, we need to construct a full list of start times and then parse it
 
                         // Get the start time of the first frame

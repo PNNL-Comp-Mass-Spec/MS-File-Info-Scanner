@@ -1503,7 +1503,7 @@ namespace MSFileInfoScanner
                     if (Options.UseCacheFiles && !Options.ReprocessExistingFiles)
                     {
                         // See if the datasetName in inputFileOrDirectoryPath is already present in mCachedResults
-                        // If it is present, don't process it (unless mReprocessIfCachedSizeIsZero = True and it's size is 0)
+                        // If it is present, don't process it (unless mReprocessIfCachedSizeIsZero = True, and it's size is 0)
 
                         if (datasetName.Length > 0 && mMSFileInfoDataCache.CachedMSInfoContainsDataset(datasetName, out var dataRow))
                         {
@@ -2516,7 +2516,7 @@ namespace MSFileInfoScanner
 
             foreach (var item in fileStats)
             {
-                // Note: HH:mm:ss corresponds to time in 24 hour format
+                // Note: HH:mm:ss corresponds to time in 24-hour format
                 writer.WriteLine(
                     directoryID.ToString() + '\t' +
                     item.FileName + '\t' +
@@ -2538,7 +2538,7 @@ namespace MSFileInfoScanner
             if (writer == null)
                 return;
 
-            // Note: HH:mm:ss corresponds to time in 24 hour format
+            // Note: HH:mm:ss corresponds to time in 24-hour format
             writer.WriteLine(filePath + '\t' + message + '\t' + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
             if (DateTime.UtcNow.Subtract(mLastWriteTimeFileIntegrityFailure).TotalMinutes > 1)

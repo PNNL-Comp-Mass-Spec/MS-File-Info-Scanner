@@ -110,7 +110,7 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 // Populate a dictionary with the text strings for finding lines with runtime information
-                // Note that "Post Run" occurs twice in the file, so we use LineMatchSearchInfo.Matched to track whether or not the text has been matched
+                // Note that "Post Run" occurs twice in the file, so we use LineMatchSearchInfo.Matched to track whether the text has been matched
                 // Keys in this dictionary are text to find; values are match search info
                 var runTimeTextLabels = new Dictionary<string, LineMatchSearchInfo>
                 {

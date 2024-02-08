@@ -454,7 +454,7 @@ namespace MSFileInfoScanner.Readers
 
                 var connectionString = "Data Source = " + metadataFile.FullName + "; Version=3; DateTimeFormat=Ticks;";
 
-                // Open the Storage.mcf_idx file to lookup the metadata name to ID mapping
+                // Open the Storage.mcf_idx file to look up the metadata name to ID mapping
                 using (var connection = new SQLiteConnection(connectionString, true))
                 {
                     connection.Open();

@@ -429,6 +429,7 @@ namespace MSFileInfoScanner.Plotting
                         {
                             Console.WriteLine("  Sorting m/z data (i = " + mSortingWarnCount + ")");
                         }
+
                         ionListToUse.Sort(new MSIonTypeComparer());
                         break;
                     }

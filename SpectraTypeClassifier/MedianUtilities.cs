@@ -14,7 +14,7 @@ namespace SpectraTypeClassifier
     [Obsolete("Use MathNet.Numerics.Statistics.Statistics.Median()")]
     public class MedianUtilities
     {
-        // Ignore Spelling: Corman et al
+        // Ignore Spelling: Corman, et, al
 
         private readonly Random mRandom;
         public enum EventListCountBehaviorType
@@ -36,10 +36,10 @@ namespace SpectraTypeClassifier
 
         /// <summary>
         /// Partitions the given list around a pivot element such that all elements on left of pivot are less than or equal to pivot
-        /// and the ones at the right are greater than pivot. This method can be used for sorting, N-order statistics such as
-        /// as median finding algorithms.
-        /// Pivot is selected randomly if random number generator is supplied else its selected as last element in the list.
-        /// Reference: Introduction to Algorithms 3rd Edition, Corman et al, pp 171
+        /// and the ones at the right are greater than pivot.
+        /// This method can be used for sorting, N-order statistics such as median finding algorithms.
+        /// Pivot is selected randomly if a random number generator is supplied, otherwise the last element in the list is used as the pivot
+        /// Reference: Introduction to Algorithms 3rd Edition, Corman, et al., pp 171
         /// </summary>
         private int Partition(IList<double> dataPoints, int startIndex, int endIndex, Random oRandom)
         {
@@ -67,7 +67,7 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Returns Nth smallest element from the list. Here n starts from 0 so that n=0 returns minimum, n=1 returns 2nd smallest element etc.
         /// Note: specified list will be mutated in the process.
-        /// Reference: Introduction to Algorithms 3rd Edition, Corman et al, pp 216
+        /// Reference: Introduction to Algorithms 3rd Edition, Corman, et al., pp 216
         /// </summary>
         public double NthOrderStatistic(IList<double> dataPoints, int n)
         {
@@ -77,7 +77,7 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Returns Nth smallest element from the list. Here n starts from 0 so that n=0 returns minimum, n=1 returns 2nd smallest element etc.
         /// Note: specified list will be mutated in the process.
-        /// Reference: Introduction to Algorithms 3rd Edition, Corman et al, pp 216
+        /// Reference: Introduction to Algorithms 3rd Edition, Corman, et al., pp 216
         /// </summary>
         // ReSharper disable once UnusedMember.Global
         public double NthOrderStatistic(IList<double> dataPoints, int n, Random oRandom)
@@ -88,7 +88,7 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Returns Nth smallest element from the list. Here n starts from 0 so that n=0 returns minimum, n=1 returns 2nd smallest element etc.
         /// Note: specified list will be mutated in the process.
-        /// Reference: Introduction to Algorithms 3rd Edition, Corman et al, pp 216
+        /// Reference: Introduction to Algorithms 3rd Edition, Corman, et al., pp 216
         /// </summary>
         private double NthOrderStatistic(IList<double> dataPoints, int n, int startIndex, int endIndex, Random oRandom)
         {

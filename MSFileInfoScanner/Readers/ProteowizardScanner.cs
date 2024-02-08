@@ -141,8 +141,8 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 // Instantiate the ProteoWizard Data Parser class
-                // For Thermo .raw files, uses the FilterText value to determine if spectra are high res or low res MS1 and MS2
-                // For other instrument types, assumes spectra are high res MS1 and MS2
+                // For Thermo .raw files, uses the FilterText value to determine if spectra are high-res or low-res MS1 and MS2
+                // For other instrument types, assumes spectra are high-res MS1 and MS2
                 var pWizParser = new ProteoWizardDataParser(
                     msDataFileReader,
                     mDatasetStatsSummarizer,

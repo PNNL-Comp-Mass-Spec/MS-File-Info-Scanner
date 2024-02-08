@@ -293,7 +293,7 @@ namespace MSFileInfoScanner.Readers
 
                     if (!primaryFileAdded)
                     {
-                        // Add largest file in the AcqData directory
+                        // Add the largest file in the AcqData directory
                         AddLargestInstrumentFile(acqDataDirectory);
                     }
 

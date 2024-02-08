@@ -193,6 +193,7 @@ namespace MSFileInfoScanner.Readers
                         var currentScan = (from item in scanList where item.Scan == currentScanNumber select item).ToList().FirstOrDefault();
 
                         ionList.Sort(new LCMSDataPlotter.MSIonTypeComparer());
+
                         mLCMS2DPlot.AddScan(currentScanNumber, currentScan.MSLevel, currentScan.ElutionTime, ionList);
 
                         if (scansFileIsMissing && Options.SaveTICAndBPIPlots)
