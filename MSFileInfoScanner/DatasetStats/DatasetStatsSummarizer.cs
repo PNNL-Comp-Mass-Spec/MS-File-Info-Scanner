@@ -236,7 +236,7 @@ namespace MSFileInfoScanner.DatasetStats
             // Adjust the scan counts in summaryStats.ScanTypeStats
             foreach (var scanTypeEntry in basicScanTypeByScanTypeKey)
             {
-                GetScanTypeAndFilter(scanTypeEntry.Key, out var scanType, out _, out var scanTypeFilter);
+                GetScanTypeAndFilter(scanTypeEntry.Key, out var scanType, out var scanTypeFilter);
 
                 var basicScanType = scanTypeEntry.Value;
 
@@ -1170,16 +1170,14 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         /// <param name="scanTypeKey">Scan type key</param>
         /// <param name="scanType">Scan Type, e.g. HMS or HCD-HMSn</param>
-        /// <param name="basicScanType">Simplified scan type, e.g. HMS or HMSn</param>
         /// <param name="scanFilterText">Scan filter text, e.g. "FTMS + p NSI Full ms" or "FTMS + p NSI d Full ms2 0@hcd25.00" or "IMS"</param>
         private void GetScanTypeAndFilter(
             string scanTypeKey,
             out string scanType,
-            out string basicScanType,
             out string scanFilterText)
         {
             var placeholderEntry = new KeyValuePair<string, int>(scanTypeKey, 0);
-            GetScanTypeAndFilter(placeholderEntry, out scanType, out basicScanType, out scanFilterText);
+            GetScanTypeAndFilter(placeholderEntry, out scanType, out _, out scanFilterText);
         }
 
         /// <summary>
