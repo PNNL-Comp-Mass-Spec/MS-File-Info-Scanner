@@ -1041,15 +1041,12 @@ namespace MSFileInfoScanner.Readers
                     var runStartTime = GetRunStartTime(msDataFileReader);
 
                     // Possibly update AcqTimeStart
-                    if (runStartTime < datasetFileInfo.AcqTimeEnd)
+                    if (runStartTime < datasetFileInfo.AcqTimeEnd && datasetFileInfo.AcqTimeEnd.Subtract(runStartTime).TotalDays < 1)
                     {
-                        if (datasetFileInfo.AcqTimeEnd.Subtract(runStartTime).TotalDays < 1)
+                        if (datasetFileInfo.AcqTimeStart == DateTime.MinValue ||
+                            Math.Abs(datasetFileInfo.AcqTimeStart.Subtract(runStartTime).TotalSeconds) > 0)
                         {
-                            if (datasetFileInfo.AcqTimeStart == DateTime.MinValue ||
-                                Math.Abs(datasetFileInfo.AcqTimeStart.Subtract(runStartTime).TotalSeconds) > 0)
-                            {
-                                UpdateAcqStartAndEndTimes(datasetFileInfo, msDataFileReader, runStartTime);
-                            }
+                            UpdateAcqStartAndEndTimes(datasetFileInfo, msDataFileReader, runStartTime);
                         }
                     }
                 }
