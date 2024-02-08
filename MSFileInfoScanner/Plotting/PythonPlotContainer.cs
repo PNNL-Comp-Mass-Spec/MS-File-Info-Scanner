@@ -129,16 +129,14 @@ namespace MSFileInfoScanner.Plotting
             if (!string.IsNullOrWhiteSpace(PythonPath))
                 return true;
 
-            if (PRISM.SystemInfo.IsLinux)
+            if (SystemInfo.IsLinux)
             {
                 PythonPath = "/usr/bin/python3";
                 ConsoleMsgUtils.ShowDebug("Assuming Python 3 is at {0}", PythonPath);
                 return true;
             }
 
-            var pathsToCheck = PythonPathsToCheck();
-
-            foreach (var directoryPath in pathsToCheck)
+            foreach (var directoryPath in PythonPathsToCheck())
             {
                 var exePath = FindPythonExe(directoryPath);
 

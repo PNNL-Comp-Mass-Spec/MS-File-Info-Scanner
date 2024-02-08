@@ -1615,8 +1615,8 @@ namespace MSFileInfoScanner
                 {
                     foreach (var item in filesToIgnore)
                     {
-                        if (!filesToIgnoreSorted.Contains(item))
-                            filesToIgnoreSorted.Add(item);
+                        // Add the file if not yet present
+                        filesToIgnoreSorted.Add(item);
                     }
 
                     useIgnoreList = true;
