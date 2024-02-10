@@ -887,6 +887,14 @@ namespace MSFileInfoScanner.Readers
 
         private void GenerateQCScanTypeSummaryHTML(TextWriter writer, DatasetSummaryStats datasetSummaryStats, string indent)
         {
+            var scanInfoCount = DatasetStatsSummarizer.GetSortedScanTypeSummaryTypes(datasetSummaryStats, out var scanInfoByScanType);
+
+            if (scanInfoCount == 0)
+            {
+                OnDebugEvent("Not including the Scan Type table in the QC HTML file since the instrument file does not have any mass spectra");
+                return;
+            }
+
             indent ??= string.Empty;
 
             // ReSharper disable UseRawString
@@ -895,8 +903,6 @@ namespace MSFileInfoScanner.Readers
             writer.WriteLine(indent + @"  <tr><th class=""DataHead"">Scan Type</th><th class=""DataHead"">Scan Count</th><th class=""DataHead"">Scan Filter Text</th><th class=""DataHead"">Isolation Window (m/z)</th></tr>");
 
             // ReSharper restore UseRawString
-
-            DatasetStatsSummarizer.GetSortedScanTypeSummaryTypes(datasetSummaryStats, out var scanInfoByScanType);
 
             foreach (var scanTypeList in datasetSummaryStats.ScanTypeNameOrder)
             {

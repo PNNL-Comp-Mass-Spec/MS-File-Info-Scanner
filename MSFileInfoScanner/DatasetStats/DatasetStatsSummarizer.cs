@@ -1314,7 +1314,8 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         /// <param name="summaryStats">Summarized scan stats</param>
         /// <param name="scanInfoByScanType">Output: dictionary where keys are scan type names and values are a sorted dictionary of generic scan filters and the ScanCount IsolationWindowWidths for each generic scan filter</param>
-        public static void GetSortedScanTypeSummaryTypes(
+        /// <returns>The number of items in the sorted dictionary instances tracked by scanInfoByScanType</returns>
+        public static int GetSortedScanTypeSummaryTypes(
             DatasetSummaryStats summaryStats,
             out Dictionary<string, SortedDictionary<string, SummaryStatsScanInfo>> scanInfoByScanType)
         {
@@ -1335,6 +1336,8 @@ namespace MSFileInfoScanner.DatasetStats
                     }
                 }
             }
+
+            var scanInfoCount = 0;
 
             foreach (var scanTypeEntry in summaryStats.ScanTypeStats)
             {
@@ -1359,7 +1362,10 @@ namespace MSFileInfoScanner.DatasetStats
                 };
 
                 scanInfoByScanType[scanTypeName].Add(scanFilterText, scanInfo);
+                scanInfoCount++;
             }
+
+            return scanInfoCount;
         }
 
         /// <summary>
