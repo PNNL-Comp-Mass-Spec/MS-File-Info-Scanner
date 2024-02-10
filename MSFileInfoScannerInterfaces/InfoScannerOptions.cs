@@ -223,6 +223,11 @@ namespace MSFileInfoScannerInterfaces
                        "When this is false, device specific plots will also be disabled")]
         public bool SaveTICAndBPIPlots { get; set; }
 
+        [Option("HideEmptyHTMLSections", "HideEmpty",
+            HelpShowsDefault = true, SecondaryArg = true,
+            HelpText = "When creating the index.html file that displays the TIC and BPI plots (and scan type stats), do not include empty rows if this is true")]
+        public bool HideEmptyHTMLSections { get; set; }
+
         [Option("CreateGradientPlots", "LCGrad",
             HelpShowsDefault = false, Hidden = true,
             HelpText = "Save a series of 2D LC plots, each using a different color scheme\n" +
@@ -470,6 +475,7 @@ namespace MSFileInfoScannerInterfaces
             UseCacheFiles = false;
 
             SaveTICAndBPIPlots = true;
+            HideEmptyHTMLSections = false;
             SaveLCMS2DPlots = false;
             TestLCMSGradientColorSchemes = false;
 

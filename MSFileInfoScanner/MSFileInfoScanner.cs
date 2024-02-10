@@ -1498,6 +1498,11 @@ namespace MSFileInfoScanner
                     // Attach the events
                     RegisterEvents(mMSInfoScanner);
 
+                    if (Options.HideEmptyHTMLSections)
+                    {
+                        mMSInfoScanner.HideEmptyHTMLSections = Options.HideEmptyHTMLSections;
+                    }
+
                     var datasetName = mMSInfoScanner.GetDatasetNameViaPath(fileOrDirectoryInfo.FullName);
 
                     if (Options.UseCacheFiles && !Options.ReprocessExistingFiles)

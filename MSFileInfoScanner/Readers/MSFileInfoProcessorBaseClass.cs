@@ -89,7 +89,7 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// When true, do not include the Scan Type table in the QC Plot HTML file
         /// </summary>
-        protected bool HideEmptyHTMLSections { get; set; }
+        public bool HideEmptyHTMLSections { get; set; }
 
         // ReSharper disable once UnusedMember.Global
 

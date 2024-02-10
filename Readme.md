@@ -50,7 +50,7 @@ MSFileInfoScanner.exe
  [/ScanStart:0] [/ScanEnd:0] [/Debug]
  [/C] [/M:nnn] [/H] [/QZ]
  [/CF] [/R] [/Z]
- [/PythonPlot]
+ [/PythonPlot] [/HideEmpty]
  [/Conf:KeyValueParamFilePath] [/CreateParamFile]
 ```
 
@@ -84,7 +84,7 @@ Use `/LCDiv` to specify the divisor to use when creating the overview 2D LCMS pl
 * Use `/LCDiv:0` to disable creation of the overview plots
 
 By default, the MS File Info Scanner creates TIC and BPI plots, showing intensity vs. time
-* Use `/TIC:False` to disable creating TIC and BPI plots; also disables any device specific plots
+* Use `/TIC:False` or `/SaveTICAndBPIPlots:False` to disable creating TIC and BPI plots; this will also disable any device specific plots
 * Plots created:
   * Separate BPI plots for MS and MS2 spectra
   * Single TIC plot for all spectra
@@ -92,7 +92,7 @@ By default, the MS File Info Scanner creates TIC and BPI plots, showing intensit
   if the .raw file has pressure data (or similar) stored in it, this program will also create plots of pressure vs. time
   * These are labeled "Addnl Plots" in the index.html file
 * For .UIMF files, if the file includes pressure information, a pressure vs. time plot will be created
-* The software also creates an html file named `index.html` that shows an overview of each plot, plus a table with scan stats 
+* The software also creates an HTML file named `index.html` that shows an overview of each plot, plus a table with scan stats 
 
 Use `/LCGrad` to save a series of 2D LC plots, each using a different color scheme
 * The default color scheme is OxyPalettes.Jet
@@ -155,7 +155,7 @@ only if their cached size is 0 bytes
 
 Use `/PostToDMS` to store the dataset info in the DMS database
 * To customize the server name and/or stored procedure to use for posting, use an XML parameter file
-with the following settings :
+with the following settings:
   * `DSInfoConnectionString`
   * `DSInfoDBPostingEnabled`
   * `DSInfoStoredProcedure`
@@ -163,6 +163,9 @@ with the following settings :
 By default, plots are created using OxyPlot, which only works on Windows
 * Use `/PythonPlot` to create plots with Python instead of OxyPlot
   * Alternatively, set `PythonPlot` to `True` in the key/value parameter file
+  
+When creating the index.html file that displays the TIC and BPI plots (and scan type stats), all plot rows are included by default, even if the instrument file has no mass spectra
+* Use `/HideEmpty` or `HideEmptyHTMLSections` to not include empty rows in the index.html file
 
 The processing options can be specified in a parameter file using `/ParamFile:Options.conf` or `/Conf:Options.conf`
 * Define options using the format `ArgumentName=Value`
