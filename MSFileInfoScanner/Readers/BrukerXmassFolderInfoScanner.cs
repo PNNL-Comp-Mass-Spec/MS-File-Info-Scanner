@@ -49,6 +49,7 @@ namespace MSFileInfoScanner.Readers
 
         private struct MCFScanInfoType
         {
+            // ReSharper disable once NotAccessedField.Local
             public double ScanMode;
             public int MSLevel;
             public double RT;
@@ -117,6 +118,8 @@ namespace MSFileInfoScanner.Readers
 
             mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
         }
+
+        // ReSharper disable once GrammarMistakeInComment
 
         /// <summary>
         /// Looks for a .m directory then looks for apexAcquisition.method or submethods.xml in that directory
@@ -1572,8 +1575,9 @@ namespace MSFileInfoScanner.Readers
         {
             public string Title { get; }
             public string Unit { get; }
-            public string Color { get; }
+            private string Color { get; }
 
+            // ReSharper disable once ConvertToPrimaryConstructor
             public ChromatographyTraceDefinition(string title, string unit, string color)
             {
                 Title = title;
@@ -1591,8 +1595,9 @@ namespace MSFileInfoScanner.Readers
         {
             public int Id { get; }
             public string Description { get; }
-            public double TimeOffset { get; }
+            private double TimeOffset { get; }
 
+            // ReSharper disable once ConvertToPrimaryConstructor
             public ChromatographyTraceSource(int id, string description, double timeOffset)
             {
                 Id = id;
@@ -1611,6 +1616,7 @@ namespace MSFileInfoScanner.Readers
             public double Time { get; }
             public float Value { get; }
 
+            // ReSharper disable once ConvertToPrimaryConstructor
             public ChromatographyTraceValue(double time, float value)
             {
                 Time = time;
