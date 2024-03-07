@@ -668,9 +668,9 @@ namespace MSFileInfoScanner.Readers
                                         skipRead = true;
                                         break;
 
-                                    default:
-                                        // Ignore it
-                                        break;
+                                    // Ignore others
+                                    // default:
+                                    //    break;
                                 }
                             }
                             else
@@ -1534,10 +1534,6 @@ namespace MSFileInfoScanner.Readers
 
                 case McfMetadataFields.SpotNumber:
                     scanInfo.SpotNumber = dataValue;
-                    break;
-
-                default:
-                    // Unknown field
                     break;
             }
         }
