@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScannerInterfaces;
@@ -964,6 +965,11 @@ namespace MSFileInfoScanner.Readers
                 // Parse the AutoMS.txt file (if it exists) to determine which scans are MS and which are MS/MS
                 ParseAutoMSFile(datasetDirectory);
 
+                mInstrumentSpecificPlots.Clear();
+
+                // Read data from chromatography-data.sqlite that is not TIC or BPC for plotting
+                ParseChromatographyTraces(datasetDirectory);
+
                 if (instrumentFilesToAdd.Count == 0 && !primaryFileAdded)
                 {
                     // Add the largest file in instrument directory
@@ -1170,6 +1176,210 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
+        public bool ParseChromatographyTraces(DirectoryInfo datasetDirectory)
+        {
+            var methodsDir = datasetDirectory.GetDirectories("*.m");
+            if (methodsDir.Length == 0)
+            {
+                return false;
+            }
+
+            if (!ParseChromatographyTraceDefinitions(Path.Combine(methodsDir[0].FullName, "apexAcquisition.method"), out var traceDefinitions))
+            {
+                return false;
+            }
+
+            var sqlitePath = Path.Combine(datasetDirectory.FullName, "chromatography-data.sqlite");
+            if (!File.Exists(sqlitePath))
+            {
+                return false;
+            }
+
+            using var connection = new SQLiteConnection($"Data Source={sqlitePath}; Version=3; Read Only=True");
+            connection.Open();
+            var sources = ParseChromatographyTraceSources(connection);
+
+            var traces = ParseChromatographyTraceChunks(connection);
+
+            connection.Close();
+
+            foreach (var source in sources)
+            {
+                if (source.Description.StartsWith("TIC", StringComparison.OrdinalIgnoreCase) ||
+                    source.Description.StartsWith("BPC", StringComparison.OrdinalIgnoreCase) ||
+                    source.Description.StartsWith("Capillary", StringComparison.OrdinalIgnoreCase))
+                {
+                    // We either already have these plots, or don't care about them.
+                    continue;
+                }
+
+                var hasTrace = traces.TryGetValue(source.Id, out var trace);
+                var definition = traceDefinitions.FirstOrDefault(x => x.Title?.Equals(source.Description, StringComparison.OrdinalIgnoreCase) ?? false);
+
+                if (hasTrace)
+                {
+
+                    if (source.Description.StartsWith("EIC", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Recorded, but not plotted
+                        // TODO:
+                        continue;
+                    }
+
+                    if (Options.SaveTICAndBPIPlots)
+                    {
+                        var addedPlot = AddInstrumentSpecificPlot(source.Description);
+                        addedPlot.TICXAxisLabel = "Time (minutes)";
+                        addedPlot.TICYAxisLabel = definition.Unit;
+                        addedPlot.TICXAxisIsTimeMinutes = true;
+
+                        var max = trace.Max(x => x.Value);
+                        addedPlot.TICYAxisExponentialNotation = max > 10000;
+                        addedPlot.TICAutoMinMaxY = true;
+
+                        addedPlot.TICPlotAbbrev = Regex.Replace(source.Description, @"[ ():\/]", "_");
+
+                        for (var i = 0; i < trace.Count; i++)
+                        {
+                            addedPlot.AddDataTICOnly(i + 1, 1, (float)(trace[i].Time / 60), trace[i].Value);
+                        }
+
+                        //Console.WriteLine($"Trace id {source.Id} ({source.Description}, {definition.Unit}, {definition.Color}): {string.Join("; ", trace)}");
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private bool ParseChromatographyTraceDefinitions(string filePath, out List<ChromatographyTraceDefinition> traceDefinitions)
+        {
+            var success = false;
+            traceDefinitions = new List<ChromatographyTraceDefinition>(20);
+
+            try
+            {
+                using var reader = new XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                while (!reader.EOF)
+                {
+                    reader.Read();
+
+                    switch (reader.NodeType)
+                    {
+                        case XmlNodeType.Element:
+
+                            // ReSharper disable once StringLiteralTypo
+                            if (reader.Name.Equals("tracedata", StringComparison.OrdinalIgnoreCase))
+                            {
+                                try
+                                {
+                                    var title = reader.GetAttribute("title");
+                                    var unit = reader.GetAttribute("unit");
+                                    var color = reader.GetAttribute("color_rgb");
+
+                                    traceDefinitions.Add(new ChromatographyTraceDefinition(title, unit, color));
+                                }
+                                catch
+                                {
+                                    // Ignore errors here
+                                }
+                            }
+                            break;
+                    }
+                }
+
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                // Exception reading file
+                OnErrorEvent(string.Format("Exception reading {0}: {1}", "apexAcquisition.method", ex.Message), ex);
+                success = false;
+            }
+
+            return success;
+        }
+
+        private List<ChromatographyTraceSource> ParseChromatographyTraceSources(SQLiteConnection sqliteDb)
+        {
+            var traceSources = new List<ChromatographyTraceSource>(20);
+            try
+            {
+                var command = new SQLiteCommand("SELECT Id, Description, TimeOffset FROM TraceSources", sqliteDb);
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var id = reader.GetInt32(0);
+                    var description = reader.GetString(1);
+                    var timeOffset = reader.GetDouble(2);
+
+                    traceSources.Add(new ChromatographyTraceSource(id, description, timeOffset));
+                }
+            }
+            catch
+            {
+                return traceSources;
+            }
+
+            return traceSources;
+        }
+
+        private Dictionary<int, List<ChromatographyTraceValue>> ParseChromatographyTraceChunks(SQLiteConnection sqliteDb)
+        {
+            const int floatSize = sizeof(float);
+            const int doubleSize = sizeof(double);
+
+            var traceLists = new Dictionary<int, List<ChromatographyTraceValue>>(20);
+            try
+            {
+                var command = new SQLiteCommand("SELECT Trace, Times, Intensities FROM TraceChunks", sqliteDb);
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var id = reader.GetInt32(0);
+                    var times = reader.GetValue(1) as byte[];
+                    var intensities = reader.GetValue(2) as byte[];
+
+                    if (!traceLists.TryGetValue(id, out var traceValues))
+                    {
+                        traceValues = new List<ChromatographyTraceValue>(15);
+                        traceLists.Add(id, traceValues);
+                    }
+
+                    if (times == null || intensities == null)
+                    {
+                        //OnErrorEvent("Error casting DB data to byte arrays: chromatography-data.sqlite:TraceChunks");
+                        continue;
+                    }
+
+                    var valueCount = times.Length / doubleSize;
+
+                    if (times.Length / doubleSize != intensities.Length / floatSize)
+                    {
+                        //OnErrorEvent("Array size mismatch: chromatography-data.sqlite");
+                        continue;
+                    }
+
+                    for (var i = 0; i < valueCount; i++)
+                    {
+                        var time = BitConverter.ToDouble(times, doubleSize * i);
+                        var intensity = BitConverter.ToSingle(intensities, floatSize * i);
+
+                        traceValues.Add(new ChromatographyTraceValue(time, intensity));
+                    }
+                }
+            }
+            catch
+            {
+                return traceLists;
+            }
+
+            return traceLists;
+        }
+
         private void ReadAndStoreMcfIndexData(
             SQLiteConnection connection,
             IReadOnlyDictionary<string, int> metadataNameToID,
@@ -1349,6 +1559,61 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 return string.CompareOrdinal(x.SpotNumber, y.SpotNumber);
+            }
+        }
+
+        private readonly struct ChromatographyTraceDefinition
+        {
+            public string Title { get; }
+            public string Unit { get; }
+            public string Color { get; }
+
+            public ChromatographyTraceDefinition(string title, string unit, string color)
+            {
+                Title = title;
+                Unit = unit;
+                Color = color;
+            }
+
+            public override string ToString()
+            {
+                return $"Trace: '{Title}' ({Unit}, {Color})";
+            }
+        }
+
+        private readonly struct ChromatographyTraceSource
+        {
+            public int Id { get; }
+            public string Description { get; }
+            public double TimeOffset { get; }
+
+            public ChromatographyTraceSource(int id, string description, double timeOffset)
+            {
+                Id = id;
+                Description = description;
+                TimeOffset = timeOffset;
+            }
+
+            public override string ToString()
+            {
+                return $"TraceSource {Id}: {Description} with offset {TimeOffset}";
+            }
+        }
+
+        private readonly struct ChromatographyTraceValue
+        {
+            public double Time { get; }
+            public float Value { get; }
+
+            public ChromatographyTraceValue(double time, float value)
+            {
+                Time = time;
+                Value = value;
+            }
+
+            public override string ToString()
+            {
+                return $"{Time:F3}: {Value:F3}";
             }
         }
     }
