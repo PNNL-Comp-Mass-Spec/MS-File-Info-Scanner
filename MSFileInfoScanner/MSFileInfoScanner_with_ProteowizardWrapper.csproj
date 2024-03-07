@@ -95,6 +95,7 @@
     <Compile Include="DatasetStats\DatasetStatsSummarizer.cs" />
     <Compile Include="DatasetStats\DatasetSummaryStats.cs" />
     <Compile Include="DatasetStats\ExtendedStatsInfo.cs" />
+    <Compile Include="DatasetStats\ExtractedIonStats.cs" />
     <Compile Include="DatasetStats\InstrumentFileInfo.cs" />
     <Compile Include="DatasetStats\SampleInfo.cs" />
     <Compile Include="DatasetStats\ScanStatsEntry.cs" />
