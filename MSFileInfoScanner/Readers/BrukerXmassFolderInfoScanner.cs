@@ -1216,7 +1216,7 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 var hasTrace = traces.TryGetValue(source.Id, out var trace);
-                var definition = traceDefinitions.FirstOrDefault(x => x.Title?.Equals(source.Description, StringComparison.OrdinalIgnoreCase) ?? false);
+                var definition = traceDefinitions.Find(x => x.Title?.Equals(source.Description, StringComparison.OrdinalIgnoreCase) ?? false);
 
                 if (hasTrace)
                 {
