@@ -966,6 +966,7 @@ namespace MSFileInfoScanner.Readers
                 ParseAutoMSFile(datasetDirectory);
 
                 mInstrumentSpecificPlots.Clear();
+                mDatasetStatsSummarizer.ExtractedIonStats.Clear();
 
                 // Read data from chromatography-data.sqlite that is not TIC or BPC for plotting
                 ParseChromatographyTraces(datasetDirectory);
@@ -1178,6 +1179,7 @@ namespace MSFileInfoScanner.Readers
 
         public bool ParseChromatographyTraces(DirectoryInfo datasetDirectory)
         {
+            var eicMzMatcher = new Regex(@"([0-9]+\.[0-9]+)", RegexOptions.Compiled);
             var methodsDir = datasetDirectory.GetDirectories("*.m");
             if (methodsDir.Length == 0)
             {
@@ -1218,11 +1220,24 @@ namespace MSFileInfoScanner.Readers
 
                 if (hasTrace)
                 {
-
                     if (source.Description.StartsWith("EIC", StringComparison.OrdinalIgnoreCase))
                     {
-                        // Recorded, but not plotted
-                        // TODO:
+                        // EIC traces are recorded (as maximum/median intensity), but not plotted
+                        var mzMatch = eicMzMatcher.Match(source.Description);
+                        if (!mzMatch.Success || trace.Count == 0)
+                        {
+                            // Matching the m/z to extract it didn't work, or there's no data for statistics.
+                            continue;
+                        }
+
+                        var mz = double.Parse(mzMatch.Value);
+                        var maxIntensity = trace.Max(x => x.Value);
+                        var medianIntensity = MathNet.Numerics.Statistics.Statistics.Median(trace.Select(x => x.Value));
+                        var stats = new ExtractedIonStats(mz, maxIntensity, medianIntensity);
+
+                        mDatasetStatsSummarizer.ExtractedIonStats.Add(stats);
+
+                        // Not plotting this, so skip to the next trace
                         continue;
                     }
 
@@ -1243,8 +1258,6 @@ namespace MSFileInfoScanner.Readers
                         {
                             addedPlot.AddDataTICOnly(i + 1, 1, (float)(trace[i].Time / 60), trace[i].Value);
                         }
-
-                        //Console.WriteLine($"Trace id {source.Id} ({source.Description}, {definition.Unit}, {definition.Color}): {string.Join("; ", trace)}");
                     }
                 }
             }

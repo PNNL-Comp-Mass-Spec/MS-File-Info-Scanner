@@ -89,6 +89,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DatasetStats\ExtractedIonStats.cs" />
     <Compile Include="FileIntegrityChecker.cs" />
     <Compile Include="FilterDataArrayMaxCount.cs" />
     <Compile Include="GlobalSuppressions.cs" />

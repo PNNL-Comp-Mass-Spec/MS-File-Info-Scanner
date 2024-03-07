@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -138,6 +139,11 @@ namespace MSFileInfoScanner.DatasetStats
         public SampleInfo SampleInfo { get; }
 
         /// <summary>
+        /// Extracted ion stats
+        /// </summary>
+        public List<ExtractedIonStats> ExtractedIonStats { get; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public DatasetStatsSummarizer()
@@ -158,6 +164,7 @@ namespace MSFileInfoScanner.DatasetStats
 
             DatasetFileInfo = new DatasetFileInfo();
             SampleInfo = new SampleInfo();
+            ExtractedIonStats = new List<ExtractedIonStats>(10);
 
             ClearCachedData();
         }
@@ -574,7 +581,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <returns>True if success; False if failure</returns>
         public bool CreateDatasetInfoFile(string datasetName, string datasetInfoFilePath)
         {
-            return CreateDatasetInfoFile(datasetName, datasetInfoFilePath, mDatasetScanStats, DatasetFileInfo, SampleInfo);
+            return CreateDatasetInfoFile(datasetName, datasetInfoFilePath, mDatasetScanStats, DatasetFileInfo, SampleInfo, ExtractedIonStats);
         }
 
         /// <summary>
@@ -585,13 +592,15 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="scanStats">Scan stats to parse</param>
         /// <param name="datasetInfo">Dataset Info</param>
         /// <param name="sampleInfo">Sample Info</param>
+        /// <param name="extractedIonStats">Extracted ion statistics</param>
         /// <returns>True if success; False if failure</returns>
         public bool CreateDatasetInfoFile(
             string datasetName,
             string datasetInfoFilePath,
             List<ScanStatsEntry> scanStats,
             DatasetFileInfo datasetInfo,
-            SampleInfo sampleInfo)
+            SampleInfo sampleInfo,
+            IReadOnlyList<ExtractedIonStats> extractedIonStats)
         {
             try
             {
@@ -607,7 +616,7 @@ namespace MSFileInfoScanner.DatasetStats
                 // However, CreateDatasetInfoXML() now uses a MemoryStream, so we're able to use UTF8
                 using var writer = new StreamWriter(new FileStream(datasetInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read), Encoding.UTF8);
 
-                writer.WriteLine(CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, sampleInfo));
+                writer.WriteLine(CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, sampleInfo, extractedIonStats));
 
                 return true;
             }
@@ -625,7 +634,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <returns>XML (as string)</returns>
         public string CreateDatasetInfoXML()
         {
-            return CreateDatasetInfoXML(DatasetFileInfo.DatasetName, mDatasetScanStats, DatasetFileInfo, SampleInfo);
+            return CreateDatasetInfoXML(DatasetFileInfo.DatasetName, mDatasetScanStats, DatasetFileInfo, SampleInfo, ExtractedIonStats);
         }
 
         /// <summary>
@@ -636,7 +645,7 @@ namespace MSFileInfoScanner.DatasetStats
         // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(string datasetName)
         {
-            return CreateDatasetInfoXML(datasetName, mDatasetScanStats, DatasetFileInfo, SampleInfo);
+            return CreateDatasetInfoXML(datasetName, mDatasetScanStats, DatasetFileInfo, SampleInfo, ExtractedIonStats);
         }
 
         /// <summary>
@@ -649,7 +658,7 @@ namespace MSFileInfoScanner.DatasetStats
         // ReSharper disable once UnusedMember.Global
         public string CreateDatasetInfoXML(List<ScanStatsEntry> scanStats, DatasetFileInfo datasetInfo)
         {
-            return CreateDatasetInfoXML(datasetInfo.DatasetName, scanStats, datasetInfo, new SampleInfo());
+            return CreateDatasetInfoXML(datasetInfo.DatasetName, scanStats, datasetInfo, new SampleInfo(), new List<ExtractedIonStats>());
         }
 
         /// <summary>
@@ -666,7 +675,7 @@ namespace MSFileInfoScanner.DatasetStats
             DatasetFileInfo datasetInfo,
             SampleInfo sampleInfo)
         {
-            return CreateDatasetInfoXML(datasetInfo.DatasetName, scanStats, datasetInfo, sampleInfo);
+            return CreateDatasetInfoXML(datasetInfo.DatasetName, scanStats, datasetInfo, sampleInfo, new List<ExtractedIonStats>());
         }
 
         /// <summary>
@@ -682,7 +691,7 @@ namespace MSFileInfoScanner.DatasetStats
             List<ScanStatsEntry> scanStats,
             DatasetFileInfo datasetInfo)
         {
-            return CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, new SampleInfo());
+            return CreateDatasetInfoXML(datasetName, scanStats, datasetInfo, new SampleInfo(), new List<ExtractedIonStats>());
         }
 
         /// <summary>
@@ -692,12 +701,14 @@ namespace MSFileInfoScanner.DatasetStats
         /// <param name="scanStats">Scan stats to parse</param>
         /// <param name="datasetInfo">Dataset Info</param>
         /// <param name="sampleInfo">Sample Info</param>
+        /// <param name="extractedIonStats">Extracted ion statistics</param>
         /// <returns>XML (as string)</returns>
         public string CreateDatasetInfoXML(
             string datasetName,
             List<ScanStatsEntry> scanStats,
             DatasetFileInfo datasetInfo,
-            SampleInfo sampleInfo)
+            SampleInfo sampleInfo,
+            IReadOnlyList<ExtractedIonStats> extractedIonStats)
         {
             var includeCentroidStats = false;
 
@@ -929,6 +940,21 @@ namespace MSFileInfoScanner.DatasetStats
                 writer.WriteElementString("BPI_Median_MS", ValueToString(summaryStats.MSStats.BPIMedian, 5));
                 writer.WriteElementString("BPI_Median_MSn", ValueToString(summaryStats.MSnStats.BPIMedian, 5));
                 writer.WriteEndElement();       // TICInfo
+
+                // Only write the EICInfo block if there are EIC Stats to write
+                if (extractedIonStats?.Count > 0)
+                {
+                    writer.WriteStartElement("EICInfo");
+                    foreach (var extractedIon in extractedIonStats)
+                    {
+                        writer.WriteStartElement("EICStats");
+                        writer.WriteAttributeString("Mz", extractedIon.Mz.ToString("F2", CultureInfo.InvariantCulture));
+                        writer.WriteAttributeString("MaxIntensity", ValueToString(extractedIon.MaxIntensity, 5));
+                        writer.WriteAttributeString("MedianIntensity", ValueToString(extractedIon.MedianIntensity, 5));
+                        writer.WriteEndElement();
+                    }
+                    writer.WriteEndElement();
+                }
 
                 // Only write the SampleInfo block if sampleInfo contains entries
                 if (sampleInfo.HasData())
