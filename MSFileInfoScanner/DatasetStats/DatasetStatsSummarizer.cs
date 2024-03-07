@@ -1678,7 +1678,7 @@ namespace MSFileInfoScanner.DatasetStats
                 return StringUtilities.ValueToString(double.MaxValue, digitsOfPrecision);
             }
 
-            return StringUtilities.ValueToString(value, 5);
+            return StringUtilities.ValueToString(value, digitsOfPrecision);
         }
     }
 }
