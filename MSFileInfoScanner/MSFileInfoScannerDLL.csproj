@@ -28,7 +28,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\DLL\MSFileInfoScanner.XML</DocumentationFile>
-    <NoWarn>1591, 0162</NoWarn>
+    <NoWarn>1591, 0162, IDE0290</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -38,7 +38,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\DLL\Release\MSFileInfoScanner.XML</DocumentationFile>
-    <NoWarn>1591, 0162</NoWarn>
+    <NoWarn>1591, 0162, IDE0290</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BaseCommon, Version=8.0.8208.0, Culture=neutral, processorArchitecture=MSIL">
