@@ -321,8 +321,22 @@ namespace MSFileInfoScanner.Plotting
                 return emptyContainer;
             }
 
-            // Round maxScan down to the nearest multiple of 10
-            maxScan = (int)Math.Ceiling(maxScan / 10.0) * 10;
+
+            if (maxScan < 20 && xAxisIsTimeMinutes)
+            {
+                // Add 1% (for Oxyplot) so the max value is not at the limit of the plot area
+                maxScan *= 1.01;
+            }
+            else if (maxScan < 200)
+            {
+                // Add one (for Oxyplot) so the max value is not at the limit of the plot area
+                maxScan++;
+            }
+            else
+            {
+                // Round maxScan down to the nearest multiple of 10
+                maxScan = (int)Math.Ceiling(maxScan / 10.0) * 10;
+            }
 
             // Multiply maxIntensity by 2% and then round up to the nearest integer
             maxIntensity = Math.Ceiling(maxIntensity * 1.02);
@@ -405,6 +419,17 @@ namespace MSFileInfoScanner.Plotting
                 {
                     myPlot.Axes[0].Maximum = maxScan;
                 }
+            }
+
+            if (myPlot.Axes[0].Maximum - myPlot.Axes[0].Minimum <= 1.1)
+            {
+                // Show decimal places on the plot axis if the range is really small
+                myPlot.Axes[0].StringFormat = "#0.0#";
+            }
+            else if (myPlot.Axes[0].Maximum - myPlot.Axes[0].Minimum <= 10)
+            {
+                // Make sure the major step is 1 if the range is less than 10
+                myPlot.Axes[0].MajorStep = 1;
             }
 
             // Assure that we don't see ticks between scan numbers

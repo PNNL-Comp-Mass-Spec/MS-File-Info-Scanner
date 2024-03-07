@@ -1268,8 +1268,16 @@ namespace MSFileInfoScanner.Plotting
             if (minScan < 0)
                 minScan = 0;
 
-            // Round maxScan up to the nearest multiple of 10
-            maxScan = (int)Math.Ceiling(maxScan / 10.0) * 10;
+            if (maxScan < 200)
+            {
+                // Add one (for Oxyplot) so the max value is not at the limit of the plot area
+                maxScan++;
+            }
+            else
+            {
+                // Round maxScan up to the nearest multiple of 10
+                maxScan = (int)Math.Ceiling(maxScan / 10.0) * 10;
+            }
 
             // Round minMZ down to the nearest multiple of 100
             minMZ = (long)Math.Floor(minMZ / 100.0) * 100;
@@ -1633,6 +1641,12 @@ namespace MSFileInfoScanner.Plotting
             {
                 myPlot.Axes[0].Minimum = minScan - 1;
                 myPlot.Axes[0].Maximum = minScan + 1;
+            }
+
+            // Make sure the major step is 1 if the range is less than 10
+            if (myPlot.Axes[0].Maximum - myPlot.Axes[0].Minimum <= 10)
+            {
+                myPlot.Axes[0].MajorStep = 1;
             }
 
             // Assure that we don't see ticks between scan numbers
