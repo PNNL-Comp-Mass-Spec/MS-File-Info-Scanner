@@ -1267,7 +1267,6 @@ namespace MSFileInfoScanner.Readers
 
         private bool ParseChromatographyTraceDefinitions(string filePath, out List<ChromatographyTraceDefinition> traceDefinitions)
         {
-            var success = false;
             traceDefinitions = new List<ChromatographyTraceDefinition>(20);
 
             try
@@ -1302,16 +1301,14 @@ namespace MSFileInfoScanner.Readers
                     }
                 }
 
-                success = true;
+                return true;
             }
             catch (Exception ex)
             {
                 // Exception reading file
                 OnErrorEvent(string.Format("Exception reading {0}: {1}", "apexAcquisition.method", ex.Message), ex);
-                success = false;
+                return false;
             }
-
-            return success;
         }
 
         private List<ChromatographyTraceSource> ParseChromatographyTraceSources(SQLiteConnection sqliteDb)
