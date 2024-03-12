@@ -1394,7 +1394,7 @@ namespace MSFileInfoScanner.Readers
             catch (Exception ex)
             {
                 // Exception reading file
-                OnErrorEvent(string.Format("Exception reading {0}: {1}", "apexAcquisition.method", ex.Message), ex);
+                OnErrorEvent(string.Format("Exception reading {0}: {1}", "microTOFQImpacTemAcquisition.method", ex.Message), ex);
                 return false;
             }
         }
