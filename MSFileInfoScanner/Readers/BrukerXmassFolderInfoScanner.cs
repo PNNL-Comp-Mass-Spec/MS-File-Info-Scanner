@@ -1183,13 +1183,8 @@ namespace MSFileInfoScanner.Readers
         public bool ParseChromatographyTraces(DirectoryInfo datasetDirectory)
         {
             var eicMzMatcher = new Regex(@"([0-9]+\.[0-9]+)", RegexOptions.Compiled);
-            var methodsDir = datasetDirectory.GetDirectories("*.m");
-            if (methodsDir.Length == 0)
-            {
-                return false;
-            }
 
-            if (!ParseChromatographyTraceDefinitions(Path.Combine(methodsDir[0].FullName, "apexAcquisition.method"), out var traceDefinitions))
+            if (!ParseChromatographyTraceDefinitions(datasetDirectory, out var traceDefinitions))
             {
                 return false;
             }
@@ -1268,7 +1263,34 @@ namespace MSFileInfoScanner.Readers
             return true;
         }
 
-        private bool ParseChromatographyTraceDefinitions(string filePath, out List<ChromatographyTraceDefinition> traceDefinitions)
+        private bool ParseChromatographyTraceDefinitions(DirectoryInfo datasetDirectory, out List<ChromatographyTraceDefinition> traceDefinitions)
+        {
+            traceDefinitions = new List<ChromatographyTraceDefinition>(20);
+
+            var methodsDir = datasetDirectory.GetDirectories("*.m");
+            if (methodsDir.Length == 0)
+            {
+                return false;
+            }
+
+            var apexAcqFilePath = Path.Combine(methodsDir[0].FullName, "apexAcquisition.method");
+            var microTOFQImpacTemAcqFilePath = Path.Combine(methodsDir[0].FullName, "microTOFQImpacTemAcquisition.method");
+
+            if (File.Exists(apexAcqFilePath))
+            {
+                return ParseChromatographyTraceDefinitionsApexAcq(apexAcqFilePath, out traceDefinitions);
+            }
+
+            // ReSharper disable once ConvertIfStatementToReturnStatement
+            if (File.Exists(microTOFQImpacTemAcqFilePath))
+            {
+                return ParseChromatographyTraceDefinitionsMicroTOFQImpacTemAcq(microTOFQImpacTemAcqFilePath, out traceDefinitions);
+            }
+
+            return false;
+        }
+
+        private bool ParseChromatographyTraceDefinitionsApexAcq(string filePath, out List<ChromatographyTraceDefinition> traceDefinitions)
         {
             traceDefinitions = new List<ChromatographyTraceDefinition>(20);
 
@@ -1302,6 +1324,69 @@ namespace MSFileInfoScanner.Readers
                             }
                             break;
                     }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Exception reading file
+                OnErrorEvent(string.Format("Exception reading {0}: {1}", "apexAcquisition.method", ex.Message), ex);
+                return false;
+            }
+        }
+
+        private bool ParseChromatographyTraceDefinitionsMicroTOFQImpacTemAcq(string filePath, out List<ChromatographyTraceDefinition> traceDefinitions)
+        {
+            traceDefinitions = new List<ChromatographyTraceDefinition>(20);
+
+            // ReSharper disable StringLiteralTypo
+            const string traceShowXPath = "//timetable/segment/para_vec_int[@permname='Internal_ChromatogramTraceShow']/entry_int";
+            const string traceColorXPath = "//timetable/segment/para_vec_int[@permname='Internal_ChromatogramTraceColor']/entry_int";
+            const string traceDefinitionXPath = "//timetable/segment/para_vec_string[@permname='Internal_ChromatogramTraceDefinition']/entry_string";
+            // ReSharper restore StringLiteralTypo
+
+            try
+            {
+                var document = new XmlDocument();
+                using var reader = new XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                document.Load(reader);
+                var nsManager = new XmlNamespaceManager(document.NameTable);
+                var traceShow = document.SelectNodes(traceShowXPath, nsManager);
+                var traceColor = document.SelectNodes(traceColorXPath, nsManager);
+                var traceDefinition = document.SelectNodes(traceDefinitionXPath, nsManager);
+
+                if (traceShow == null || traceColor == null || traceDefinition == null)
+                {
+                    // no data matched?
+                    return false;
+                }
+
+                if (traceDefinition.Count != traceColor.Count || traceDefinition.Count != traceColor.Count)
+                {
+                    // mismatched data counts
+                    return false;
+                }
+
+                if (traceDefinition.Count == 0)
+                {
+                    // no data
+                    return false;
+                }
+
+                for (var i = 0; i < traceDefinition.Count; i++)
+                {
+                    // Not actually using values from traceShow for now, since if it is '1', it is in chromatogram-data.sqlite, but if it is '0', it is not included, and we automatically ignore it.
+                    var show = traceShow[i].Attributes["value"].Value;
+                    var color = traceColor[i].Attributes["value"].Value; // integer value, when converted to hex it is the color in BGR format (because of byte ordering, maybe?)
+                    var definition = traceDefinition[i].Attributes["value"].Value;
+
+                    var colorInt = int.Parse(color);
+                    // Value looks like 'nBGR' (byte-by-byte).
+                    // Convert to an array of bytes, reverse, convert back to integer (now RGBn), then shift right 8 bits to remove the 'n' value (now [0x00|0xFF]RGB) and mask with 0x00FFFFFF to drop a possible leading 'FF' since we don't have 'A' values
+                    var rgbColor = BitConverter.ToInt32(BitConverter.GetBytes(colorInt).Reverse().ToArray(), 0) >> 8 & 0x00FFFFFF;
+
+                    traceDefinitions.Add(new ChromatographyTraceDefinition(definition, "Intensity", $"#{rgbColor:x6}"));
                 }
 
                 return true;
