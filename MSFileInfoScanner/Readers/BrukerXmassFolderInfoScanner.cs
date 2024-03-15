@@ -1274,6 +1274,7 @@ namespace MSFileInfoScanner.Readers
             }
 
             var apexAcqFilePath = Path.Combine(methodsDir[0].FullName, "apexAcquisition.method");
+
             var microTOFQImpacTemAcqFilePath = Path.Combine(methodsDir[0].FullName, "microTOFQImpacTemAcquisition.method");
 
             if (File.Exists(apexAcqFilePath))
@@ -1377,11 +1378,25 @@ namespace MSFileInfoScanner.Readers
                 for (var i = 0; i < traceDefinition.Count; i++)
                 {
                     // Not actually using values from traceShow for now, since if it is '1', it is in chromatogram-data.sqlite, but if it is '0', it is not included, and we automatically ignore it.
-                    var show = traceShow[i].Attributes["value"].Value;
-                    var color = traceColor[i].Attributes["value"].Value; // integer value, when converted to hex it is the color in BGR format (because of byte ordering, maybe?)
-                    var definition = traceDefinition[i].Attributes["value"].Value;
+                    // var show = traceShow[i].Attributes["value"].Value;
+
+                    var xmlAttributeCollection = traceColor[i].Attributes;
+
+                    if (xmlAttributeCollection == null)
+                        continue;
+
+                    // integer value, when converted to hex it is the color in BGR format (because of byte ordering, maybe?)
+                    var color = xmlAttributeCollection["value"].Value;
+
+                    var attributeCollection = traceDefinition[i].Attributes;
+
+                    if (attributeCollection == null)
+                        continue;
+
+                    var definition = attributeCollection["value"].Value;
 
                     var colorInt = int.Parse(color);
+
                     // Value looks like 'nBGR' (byte-by-byte).
                     // Convert to an array of bytes, reverse, convert back to integer (now RGBn), then shift right 8 bits to remove the 'n' value (now [0x00|0xFF]RGB) and mask with 0x00FFFFFF to drop a possible leading 'FF' since we don't have 'A' values
                     var rgbColor = BitConverter.ToInt32(BitConverter.GetBytes(colorInt).Reverse().ToArray(), 0) >> 8 & 0x00FFFFFF;
