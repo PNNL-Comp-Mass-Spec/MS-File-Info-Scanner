@@ -701,7 +701,16 @@ namespace MSFileInfoScanner.Plotting
 
                 if (ticPlot.SeriesCount > 0)
                 {
-                    var pngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(outputDirectory, datasetName + "_" + TICPlotAbbrev + ".png"));
+                    // Change the micron symbol to a lowercase u
+                    // In addition, replace spaces with underscores
+
+                    var plotAbbreviation = TICPlotAbbrev.Replace('µ', 'u').Replace(' ', '_');
+
+                    // Dataset names should not have spaces, but replace with underscores in case one does
+                    var plotFileName = datasetName.Replace(' ', '_') + "_" + plotAbbreviation + ".png";
+
+                    var pngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(outputDirectory, plotFileName));
+
                     successTIC = ticPlot.SaveToPNG(pngFile, 1024, 600, 96);
                     AddRecentFile(pngFile.FullName, OutputFileTypes.TIC);
                 }
