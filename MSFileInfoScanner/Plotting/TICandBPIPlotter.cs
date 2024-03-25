@@ -203,6 +203,8 @@ namespace MSFileInfoScanner.Plotting
             return string.Empty;
         }
 
+        // ReSharper disable once UnusedMember.Global
+
         /// <summary>
         /// Returns the file name and path of the recently saved file of the given type
         /// </summary>
@@ -423,7 +425,7 @@ namespace MSFileInfoScanner.Plotting
 
             if (myPlot.Axes[0].Maximum - myPlot.Axes[0].Minimum <= 1.1)
             {
-                // Show decimal places on the plot axis if the range is really small
+                // Show decimal places on the plot axis if the range is small
                 myPlot.Axes[0].StringFormat = "#0.0#";
             }
             else if (myPlot.Axes[0].Maximum - myPlot.Axes[0].Minimum <= 10)
@@ -667,7 +669,8 @@ namespace MSFileInfoScanner.Plotting
 
                 if (RemoveZeroesFromEnds)
                 {
-                    // Check whether the last few scans have values if 0; if they do, remove them
+                    // See if the last few values in the BPI or TIC are zero, but the data before them is non-zero
+                    // If this is the case, remove the final entries
                     RemoveZeroesAtFrontAndBack(mBPI);
                     RemoveZeroesAtFrontAndBack(mTIC);
                 }
