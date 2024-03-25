@@ -1250,9 +1250,6 @@ namespace MSFileInfoScanner.Readers
                         addedPlot.TICYAxisExponentialNotation = max > 10000;
                         addedPlot.TICAutoMinMaxY = true;
 
-                        // Replaces forward and backslashes with underscores
-                        addedPlot.TICPlotAbbrev = Regex.Replace(source.Description, @"[\/\\]", "_");
-
                         // Replace a colon with a comma
                         // Replace " - []" with an empty string
                         // Replace square brackets with parentheses

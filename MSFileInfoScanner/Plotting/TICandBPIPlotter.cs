@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using OxyPlot;
 using OxyPlot.Series;
 using PRISM;
@@ -704,10 +705,11 @@ namespace MSFileInfoScanner.Plotting
 
                 if (ticPlot.SeriesCount > 0)
                 {
-                    // Change the micron symbol to a lowercase u
-                    // In addition, replace spaces with underscores
+                    // Replace forward and backslashes with underscores
+                    // Change the micron symbol to a lowercase u (to avoid URLs with µ)
+                    // Replace spaces with underscores
 
-                    var plotAbbreviation = TICPlotAbbrev.Replace('µ', 'u').Replace(' ', '_');
+                    var plotAbbreviation = Regex.Replace(TICPlotAbbrev, @"[\/\\]", "_").Replace('µ', 'u').Replace(' ', '_');
 
                     // Dataset names should not have spaces, but replace with underscores in case one does
                     var plotFileName = datasetName.Replace(' ', '_') + "_" + plotAbbreviation + ".png";
