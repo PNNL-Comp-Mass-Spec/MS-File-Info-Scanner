@@ -1250,7 +1250,13 @@ namespace MSFileInfoScanner.Readers
                         addedPlot.TICYAxisExponentialNotation = max > 10000;
                         addedPlot.TICAutoMinMaxY = true;
 
-                        addedPlot.TICPlotAbbrev = Regex.Replace(source.Description, @"[ ():\/]", "_");
+                        // Replaces forward and backslashes with underscores
+                        addedPlot.TICPlotAbbrev = Regex.Replace(source.Description, @"[\/\\]", "_");
+
+                        // Replace a colon with a comma
+                        // Replace " - []" with an empty string
+                        // Replace square brackets with parentheses
+                        addedPlot.TICPlotAbbrev = addedPlot.TICPlotAbbrev.Replace(":", ", ").Replace(" - []", "").Replace('[', '(').Replace(']', ')').Replace("  ", " ");
 
                         for (var i = 0; i < trace.Count; i++)
                         {
@@ -1275,7 +1281,11 @@ namespace MSFileInfoScanner.Readers
 
             var apexAcqFilePath = Path.Combine(methodsDir[0].FullName, "apexAcquisition.method");
 
+            // ReSharper disable IdentifierTypo
+
             var microTOFQImpacTemAcqFilePath = Path.Combine(methodsDir[0].FullName, "microTOFQImpacTemAcquisition.method");
+
+            // ReSharper restore IdentifierTypo
 
             if (File.Exists(apexAcqFilePath))
             {
