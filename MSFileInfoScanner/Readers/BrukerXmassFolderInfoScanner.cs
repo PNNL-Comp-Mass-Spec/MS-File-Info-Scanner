@@ -1253,7 +1253,7 @@ namespace MSFileInfoScanner.Readers
                         // Replace a colon with a comma
                         // Replace " - []" with an empty string
                         // Replace square brackets with parentheses
-                        addedPlot.TICPlotAbbrev = addedPlot.TICPlotAbbrev.Replace(":", ", ").Replace(" - []", "").Replace('[', '(').Replace(']', ')').Replace("  ", " ");
+                        addedPlot.TICPlotAbbrev = source.Description.Replace(":", ", ").Replace(" - []", "").Replace('[', '(').Replace(']', ')').Replace("  ", " ");
 
                         for (var i = 0; i < trace.Count; i++)
                         {
