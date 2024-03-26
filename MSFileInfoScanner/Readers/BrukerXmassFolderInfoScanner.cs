@@ -1203,6 +1203,8 @@ namespace MSFileInfoScanner.Readers
 
             connection.Close();
 
+            var unitsMatcher = new Regex(@"\[(?<Units>[^]]+)\]", RegexOptions.Compiled);
+
             foreach (var source in sources)
             {
                 if (source.Description.StartsWith("TIC", StringComparison.OrdinalIgnoreCase) ||
@@ -1249,6 +1251,14 @@ namespace MSFileInfoScanner.Readers
                         var max = trace.Max(x => x.Value);
                         addedPlot.TICYAxisExponentialNotation = max > 10000;
                         addedPlot.TICAutoMinMaxY = true;
+
+                        if (string.IsNullOrWhiteSpace(addedPlot.TICYAxisLabel) ||
+                            addedPlot.TICYAxisLabel.StartsWith("Unnamed", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var match = unitsMatcher.Match(source.Description);
+
+                            addedPlot.TICYAxisLabel = match.Success ? match.Groups["Units"].Value : "Value";
+                        }
 
                         // Replace a colon with a comma
                         // Replace " - []" with an empty string
