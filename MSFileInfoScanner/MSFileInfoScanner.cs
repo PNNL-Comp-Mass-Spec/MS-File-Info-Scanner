@@ -456,7 +456,9 @@ namespace MSFileInfoScanner
                     return "Database posting error";
                 case MSFileScannerErrorCodes.MS2MzMinValidationError:
 
-                    // Over 10% of the MS/MS spectra have a minimum m/z value larger than the required minimum
+                    // Over 10% of the MS/MS spectra have a minimum m/z value larger than the required minimum; reporter ion peaks likely could not be detected;
+                    // 20% of the MS2 spectra have a minimum m/z value larger than 126.0 m/z (543 / 2,766);
+                    // To ignore this error, use Exec add_update_task_parameter 6670258, 'JobParameters', 'SkipMinimumMzValidation', 'true'
                     var errorMsg = string.Format("Over {0}% of the MS/MS spectra have a minimum m/z value larger than the required minimum; " +
                                                  "reporter ion peaks likely could not be detected", MSFileInfoProcessorBaseClass.MAX_PERCENT_MS2_MZMIN_ALLOWED_FAILED);
 
