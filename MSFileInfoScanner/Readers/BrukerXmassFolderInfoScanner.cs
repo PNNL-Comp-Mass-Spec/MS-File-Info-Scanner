@@ -22,7 +22,7 @@ namespace MSFileInfoScanner.Readers
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: acq, AcqTime, acqus, baf, Bruker, fid, GuidA, idx, lcms, maxpeak, mcf, scanlist, ser, SQLite, tdf, Xmass
+        // Ignore Spelling: acq, AcqTime, acqus, baf, Bruker, fid, GuidA, idx, lcms, maxpeak, mcf, scanlist, ser, SQLite, tdf, tsf, Xmass
 
         // ReSharper restore CommentTypo
 
@@ -823,9 +823,9 @@ namespace MSFileInfoScanner.Readers
 
                 mDatasetStatsSummarizer.ClearCachedData();
 
-                // Look for the analysis.baf or analysis.tdf file in datasetDirectory
+                // Look for the analysis.baf, analysis.tdf, or analysis.tsf file in datasetDirectory
                 // Use its modification time as the AcqTime start and End values
-                // If we cannot find the analysis.baf or analysis.tdf file, look for a ser file or a fid file
+                // If we cannot find those files, look for a ser file or a fid file
 
                 var instrumentDataFiles = new List<string> {
                     BRUKER_BAF_FILE_NAME,
@@ -1358,6 +1358,12 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
+        /// <summary>
+        /// Extract the chromatography trace definitions for a Bruker microTOF Q ImpacT instrument
+        /// </summary>
+        /// <param name="filePath">microTOFQImpacTemAcquisition.method file</param>
+        /// <param name="traceDefinitions">Output: list of chromatography trace definitions</param>
+        /// <returns>True if successful, false if no chromatograms or an error</returns>
         private bool ParseChromatographyTraceDefinitionsMicroTOFQImpacTemAcq(string filePath, out List<ChromatographyTraceDefinition> traceDefinitions)
         {
             traceDefinitions = new List<ChromatographyTraceDefinition>(20);
