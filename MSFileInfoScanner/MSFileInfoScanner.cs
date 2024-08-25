@@ -1311,6 +1311,7 @@ namespace MSFileInfoScanner
 
                                     if (PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME).Count > 0 ||
                                         PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_TDF_FILE_NAME).Count > 0 ||
+                                        PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_TSF_FILE_NAME).Count > 0 ||
                                         PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_SER_FILE_NAME).Count > 0 ||
                                         PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_FID_FILE_NAME).Count > 0 ||
                                         PathUtils.FindFilesWildcard(datasetDirectory, BrukerXmassFolderInfoScanner.BRUKER_BAF_FILE_NAME + "_idx").Count > 0 ||
@@ -1371,6 +1372,11 @@ namespace MSFileInfoScanner
                             knownMSDataType = true;
                         }
                         else if (fileOrDirectoryInfo.Name.Equals(BrukerXmassFolderInfoScanner.BRUKER_TDF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+                        {
+                            mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
+                            knownMSDataType = true;
+                        }
+                        else if (fileOrDirectoryInfo.Name.Equals(BrukerXmassFolderInfoScanner.BRUKER_TSF_FILE_NAME, StringComparison.OrdinalIgnoreCase))
                         {
                             mMSInfoScanner = new BrukerXmassFolderInfoScanner(Options, LCMS2DPlotOptions);
                             knownMSDataType = true;
