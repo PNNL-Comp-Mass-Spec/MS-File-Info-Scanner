@@ -997,6 +997,7 @@ namespace MSFileInfoScanner.Readers
                         }
                         else
                         {
+                            OnStatusEvent("Computing SHA-1 hash for file {0}", fileToAdd.Name);
                             mDatasetStatsSummarizer.DatasetFileInfo.AddInstrumentFile(fileToAdd);
                         }
                     }
