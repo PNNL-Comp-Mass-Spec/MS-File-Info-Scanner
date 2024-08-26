@@ -508,7 +508,7 @@ namespace MSFileInfoScannerInterfaces
         [Option("DatabaseConnectionString", "ConnectionString",
             HelpShowsDefault = true, Hidden = true,
             HelpText = "Connection string for storing dataset info in DMS")]
-        public string DatabaseConnectionString { get; set; } = "Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;";
+        public string DatabaseConnectionString { get; set; } = "host=prismdb2.emsl.pnl.gov;Port=5432;Database=dms;UserId=dmsreader;Password=dms4fun";
 
         // ReSharper restore StringLiteralTypo
 
