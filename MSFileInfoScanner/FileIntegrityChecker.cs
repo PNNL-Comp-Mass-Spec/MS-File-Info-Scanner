@@ -1596,7 +1596,7 @@ namespace MSFileInfoScanner
 
                             elementsRead++;
 
-                            if (elementsRead >= MaximumXMLElementNodesToCheck)
+                            if (elementsRead >= maximumXMLElementNodesToCheck)
                             {
                                 break;
                             }
