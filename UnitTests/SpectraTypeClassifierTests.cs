@@ -108,10 +108,10 @@ namespace MSFileInfoScannerUnitTests
 
             var median = MathNet.Numerics.Statistics.Statistics.Median(testValues);
 
-            medianUtilities.EvenNumberedListCountBehavior = MedianUtilities.EventListCountBehaviorType.ReportMidpointAverage;
+            medianUtilities.EvenNumberedListCountBehavior = MedianUtilities.EvenListCountBehaviorType.ReportMidpointAverage;
             var medianMidpointAverage = medianUtilities.Median_Old(testValues);
 
-            medianUtilities.EvenNumberedListCountBehavior = MedianUtilities.EventListCountBehaviorType.ReportNearest;
+            medianUtilities.EvenNumberedListCountBehavior = MedianUtilities.EvenListCountBehaviorType.ReportNearest;
             var medianReportNearest = medianUtilities.Median_Old(testValues);
 
             testValues.Sort();

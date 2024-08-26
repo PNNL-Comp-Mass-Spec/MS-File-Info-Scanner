@@ -17,13 +17,27 @@ namespace SpectraTypeClassifier
         // Ignore Spelling: Corman, et, al
 
         private readonly Random mRandom;
-        public enum EventListCountBehaviorType
+
+        /// <summary>
+        /// Behavior type for computing the median value for a list with an even number of values
+        /// </summary>
+        public enum EvenListCountBehaviorType
         {
+            /// <summary>
+            /// Report the midpoint average
+            /// </summary>
             ReportMidpointAverage = 0,
+
+            /// <summary>
+            /// Report the nearest value
+            /// </summary>
             ReportNearest = 1
         }
 
-        public EventListCountBehaviorType EvenNumberedListCountBehavior { get; set; }
+        /// <summary>
+        /// Method to use for computing the median value for a list with an even number of values
+        /// </summary>
+        public EvenListCountBehaviorType EvenNumberedListCountBehavior { get; set; }
 
         /// <summary>
         /// Constructor
@@ -31,7 +45,7 @@ namespace SpectraTypeClassifier
         public MedianUtilities()
         {
             mRandom = new Random();
-            EvenNumberedListCountBehavior = EventListCountBehaviorType.ReportMidpointAverage;
+            EvenNumberedListCountBehavior = EvenListCountBehaviorType.ReportMidpointAverage;
         }
 
         /// <summary>
@@ -158,7 +172,7 @@ namespace SpectraTypeClassifier
             var midPoint1 = Convert.ToInt32(Math.Floor((dataPoints.Count - 1) / 2.0));
             var median1 = NthOrderStatistic(dataPoints, midPoint1);
 
-            if (dataPoints.Count % 2 > 0 || EvenNumberedListCountBehavior == EventListCountBehaviorType.ReportNearest)
+            if (dataPoints.Count % 2 > 0 || EvenNumberedListCountBehavior == EvenListCountBehaviorType.ReportNearest)
             {
                 return median1;
             }
