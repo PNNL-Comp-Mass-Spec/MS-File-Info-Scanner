@@ -419,7 +419,7 @@ namespace MSFileInfoScanner
 
             OnDebugEvent("Loading cached directory integrity info from: {0}", Path.GetFileName(mDirectoryIntegrityInfoFilePath));
 
-            if (File.Exists(mDirectoryIntegrityInfoFilePath))
+            if (mDirectoryIntegrityInfoFilePath != null && File.Exists(mDirectoryIntegrityInfoFilePath))
             {
                 // Read the entries from mDirectoryIntegrityInfoFilePath, populating mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE]
                 using var reader = new StreamReader(mDirectoryIntegrityInfoFilePath);
@@ -483,7 +483,7 @@ namespace MSFileInfoScanner
 
             OnDebugEvent("Loading cached acquisition time file data from: {0}", Path.GetFileName(mAcquisitionTimeFilePath));
 
-            if (File.Exists(mAcquisitionTimeFilePath))
+            if (mAcquisitionTimeFilePath != null && File.Exists(mAcquisitionTimeFilePath))
             {
                 // Read the entries from mAcquisitionTimeFilePath, populating mMSFileInfoDataset.Tables(MS_FILE_INFO_DATA_TABLE)
                 using var reader = new StreamReader(mAcquisitionTimeFilePath);
@@ -633,7 +633,8 @@ namespace MSFileInfoScanner
 
             if (mDirectoryIntegrityInfoDataset == null ||
                 mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE].Rows.Count <= 0 ||
-                mDirectoryIntegrityInfoResultsState != CachedResultsStateConstants.Modified)
+                mDirectoryIntegrityInfoResultsState != CachedResultsStateConstants.Modified ||
+                mDirectoryIntegrityInfoFilePath == null)
             {
                 return false;
             }
@@ -686,7 +687,8 @@ namespace MSFileInfoScanner
             var success = false;
 
             if (mMSFileInfoDataset?.Tables[MS_FILE_INFO_DATA_TABLE].Rows.Count > 0 &&
-                mMSFileInfoCachedResultsState == CachedResultsStateConstants.Modified)
+                mMSFileInfoCachedResultsState == CachedResultsStateConstants.Modified &&
+                mAcquisitionTimeFilePath != null)
             {
                 OnDebugEvent("Saving cached acquisition time file data to: {0}", Path.GetFileName(mAcquisitionTimeFilePath));
 
