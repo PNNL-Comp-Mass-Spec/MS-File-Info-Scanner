@@ -338,7 +338,7 @@ namespace MSFileInfoScanner.Readers
                             {
                                 if (dataLine.StartsWith(TIC_FILE_TIC_FILE_LIST_END))
                                 {
-                                    parsingTICFileList = false;
+                                    // Break out of the while loop
                                     break;
                                 }
 
@@ -419,7 +419,6 @@ namespace MSFileInfoScanner.Readers
                 if (brukerDatasetFile.Exists)
                 {
                     // Parsing a zipped S folder
-                    parsingBrukerOneFolder = false;
 
                     // The dataset name is equivalent to the name of the directory containing dataFilePath
                     zippedSFilesDirectoryInfo = brukerDatasetFile.Directory;

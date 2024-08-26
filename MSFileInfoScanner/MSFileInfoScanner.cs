@@ -904,9 +904,6 @@ namespace MSFileInfoScanner
         /// <returns>True if success; false if failure</returns>
         public override bool PostDatasetInfoToDB(string datasetName, string datasetInfoXML, string connectionString, string storedProcedureName)
         {
-            const int MAX_RETRY_COUNT = 3;
-            const int SEC_BETWEEN_RETRIES = 20;
-
             bool success;
 
             try
@@ -957,7 +954,7 @@ namespace MSFileInfoScanner
 
                 dbTools.AddParameter(cmd, "@DatasetInfoXML", SqlType.XML).Value = dsInfoXMLClean;
 
-                var result = dbTools.ExecuteSP(cmd, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES);
+                var result = dbTools.ExecuteSP(cmd);
 
                 if (result == DbUtilsConstants.RET_VAL_OK)
                 {
@@ -1009,9 +1006,6 @@ namespace MSFileInfoScanner
         /// <returns>True if success; false if failure</returns>
         public override bool PostDatasetInfoUseDatasetID(int datasetID, string datasetInfoXML, string connectionString, string storedProcedureName)
         {
-            const int MAX_RETRY_COUNT = 3;
-            const int SEC_BETWEEN_RETRIES = 20;
-
             bool success;
 
             try
@@ -1066,7 +1060,7 @@ namespace MSFileInfoScanner
                 dbTools.AddParameter(cmd, "@DatasetID", SqlType.Int).Value = datasetID;
                 dbTools.AddParameter(cmd, "@DatasetInfoXML", SqlType.XML).Value = dsInfoXMLClean;
 
-                var result = dbTools.ExecuteSP(cmd, MAX_RETRY_COUNT, SEC_BETWEEN_RETRIES);
+                var result = dbTools.ExecuteSP(cmd);
 
                 if (result == DbUtilsConstants.RET_VAL_OK)
                 {

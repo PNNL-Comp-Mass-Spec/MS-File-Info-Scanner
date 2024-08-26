@@ -467,7 +467,8 @@ namespace MSFileInfoScanner.Readers
                                 // File open failed
                                 OnErrorEvent("Call to .OpenRawFile failed for: {0}", rawFile.FullName);
                                 ErrorCode = iMSFileInfoScanner.MSFileScannerErrorCodes.ThermoRawFileReaderError;
-                                readError = true;
+
+                                // readError should already be true;
                             }
                             else
                             {
