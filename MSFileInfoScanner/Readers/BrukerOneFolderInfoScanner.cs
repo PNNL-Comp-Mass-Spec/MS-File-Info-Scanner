@@ -349,24 +349,23 @@ namespace MSFileInfoScanner.Readers
                                 }
 
                                 fileListCount++;
+                                continue;
                             }
-                            else
+
+                            if (dataLine.StartsWith(TIC_FILE_NUMBER_OF_FILES_LINE_START))
                             {
-                                if (dataLine.StartsWith(TIC_FILE_NUMBER_OF_FILES_LINE_START))
-                                {
-                                    // Number of files line found
-                                    // Parse out the file count
-                                    datasetFileInfo.ScanCount = int.Parse(dataLine.Substring(TIC_FILE_NUMBER_OF_FILES_LINE_START.Length).Trim());
-                                }
-                                else if (dataLine.StartsWith(TIC_FILE_TIC_FILE_LIST_START))
-                                {
-                                    parsingTICFileList = true;
-                                }
-                                else if (dataLine == TIC_FILE_COMMENT_SECTION_END)
-                                {
-                                    // Found the end of the text section; exit the loop
-                                    break;
-                                }
+                                // Number of files line found
+                                // Parse out the file count
+                                datasetFileInfo.ScanCount = int.Parse(dataLine.Substring(TIC_FILE_NUMBER_OF_FILES_LINE_START.Length).Trim());
+                            }
+                            else if (dataLine.StartsWith(TIC_FILE_TIC_FILE_LIST_START))
+                            {
+                                parsingTICFileList = true;
+                            }
+                            else if (dataLine == TIC_FILE_COMMENT_SECTION_END)
+                            {
+                                // Found the end of the text section; exit the loop
+                                break;
                             }
                         }
                     }

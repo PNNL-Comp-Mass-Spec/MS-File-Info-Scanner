@@ -169,13 +169,7 @@ namespace MSFileInfoScanner
         public int MaximumXMLElementNodesToCheck
         {
             get => mMaximumXMLElementNodesToCheck;
-            set
-            {
-                if (value < 0)
-                    mMaximumXMLElementNodesToCheck = 0;
-                else
-                    mMaximumXMLElementNodesToCheck = value;
-            }
+            set => mMaximumXMLElementNodesToCheck = value < 0 ? 0 : value;
         }
 
         /// <summary>
@@ -770,55 +764,53 @@ namespace MSFileInfoScanner
                         var dataLine = reader.ReadLine();
                         linesRead++;
 
-                        bool success;
-
                         if (charCountSkipsBlankLines && dataLine.Trim().Length == 0)
                         {
-                            success = true;
+                            continue;
                         }
-                        else
+
+                        bool success;
+
+                        if (minimumTabCount > 0)
                         {
-                            if (minimumTabCount > 0)
-                            {
-                                // Count the number of tabs
-                                success = CheckTextFileCountChars(dataLine, ref blankLineRead, linesRead,
-                                                                  ref expectedTabCount, '\t', "Tab",
-                                                                  minimumTabCount, requireEqualTabsPerLine,
-                                                                  out errorMessage);
+                            // Count the number of tabs
+                            success = CheckTextFileCountChars(dataLine, ref blankLineRead, linesRead,
+                                                              ref expectedTabCount, '\t', "Tab",
+                                                              minimumTabCount, requireEqualTabsPerLine,
+                                                              out errorMessage);
 
-                                if (!success)
-                                {
-                                    LogFileIntegrityError(filePath, errorMessage);
-                                    errorLogged = true;
-                                    break;
-                                }
-                            }
-
-                            if (minimumCommaCount > 0)
+                            if (!success)
                             {
-                                // Count the number of commas
-                                success = CheckTextFileCountChars(dataLine, ref blankLineRead, linesRead,
-                                                                  ref expectedCommaCount, ',', "Comma",
-                                                                  minimumCommaCount, requireEqualCommasPerLine,
-                                                                  out errorMessage);
-
-                                if (!success)
-                                {
-                                    LogFileIntegrityError(filePath, errorMessage);
-                                    errorLogged = true;
-                                    break;
-                                }
-                            }
-
-                            if (needToCheckLineHeaders)
-                            {
-                                FindRequiredTextInLine(dataLine, ref needToCheckLineHeaders, textLineHeaders, ref lineHeaderMatchCount, requiredTextMatchesLineStart);
-                            }
-                            else if (minimumTabCount == 0 && minimumCommaCount == 0 && linesRead > minimumLineCount)
-                            {
-                                // All conditions have been met; no need to continue reading the file
+                                LogFileIntegrityError(filePath, errorMessage);
+                                errorLogged = true;
                                 break;
                             }
+                        }
+
+                        if (minimumCommaCount > 0)
+                        {
+                            // Count the number of commas
+                            success = CheckTextFileCountChars(dataLine, ref blankLineRead, linesRead,
+                                                              ref expectedCommaCount, ',', "Comma",
+                                                              minimumCommaCount, requireEqualCommasPerLine,
+                                                              out errorMessage);
+
+                            if (!success)
+                            {
+                                LogFileIntegrityError(filePath, errorMessage);
+                                errorLogged = true;
+                                break;
+                            }
+                        }
+
+                        if (needToCheckLineHeaders)
+                        {
+                            FindRequiredTextInLine(dataLine, ref needToCheckLineHeaders, textLineHeaders, ref lineHeaderMatchCount, requiredTextMatchesLineStart);
+                        }
+                        else if (minimumTabCount == 0 && minimumCommaCount == 0 && linesRead > minimumLineCount)
+                        {
+                            // All conditions have been met; no need to continue reading the file
+                            break;
                         }
                     }
                 }
