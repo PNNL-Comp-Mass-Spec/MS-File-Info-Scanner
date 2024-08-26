@@ -2075,14 +2075,12 @@ namespace MSFileInfoScanner
         /// <returns></returns>
         public static DirectoryStatsType GetNewDirectoryStats(string directoryPath)
         {
-            var directoryStats = new DirectoryStatsType
+            return new DirectoryStatsType
             {
                 DirectoryPath = directoryPath,
                 FileCount = 0,
                 FileCountFailIntegrity = 0
             };
-
-            return directoryStats;
         }
 
         private void InitializeLocalVariables()

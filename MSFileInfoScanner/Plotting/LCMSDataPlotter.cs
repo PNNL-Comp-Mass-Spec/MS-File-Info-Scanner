@@ -2135,10 +2135,9 @@ namespace MSFileInfoScanner.Plotting
             /// </summary>
             public override string ToString()
             {
-                if (MSLevel > 0)
-                    return string.Format("Scan {0}, MS{1}", ScanNumber, MSLevel);
-
-                return string.Format("Scan {0}", ScanNumber);
+                return MSLevel > 0
+                    ? string.Format("Scan {0}, MS{1}", ScanNumber, MSLevel)
+                    : string.Format("Scan {0}", ScanNumber);
             }
         }
 

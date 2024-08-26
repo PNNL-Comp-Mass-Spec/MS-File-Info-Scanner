@@ -448,13 +448,11 @@ namespace MSFileInfoScanner
         /// <returns>List of directory extensions</returns>
         public List<string> GetKnownDirectoryExtensionsList()
         {
-            var extensionsToParse = new List<string>
+            return new List<string>
             {
                 AgilentIonTrapDFolderInfoScanner.AGILENT_ION_TRAP_D_EXTENSION.ToUpper(),
                 WatersRawFolderInfoScanner.MICROMASS_RAW_FOLDER_EXTENSION.ToUpper()
             };
-
-            return extensionsToParse;
         }
 
         /// <summary>
@@ -472,7 +470,7 @@ namespace MSFileInfoScanner
         /// <returns>List of file extensions</returns>
         public List<string> GetKnownFileExtensionsList()
         {
-            var extensionsToParse = new List<string>
+            return new List<string>
             {
                 ThermoRawFileInfoScanner.THERMO_RAW_FILE_EXTENSION.ToUpper(),
                 AgilentTOFOrQStarWiffFileInfoScanner.AGILENT_TOF_OR_QSTAR_FILE_EXTENSION.ToUpper(),
@@ -482,8 +480,6 @@ namespace MSFileInfoScanner
                 UIMFInfoScanner.UIMF_FILE_EXTENSION.ToUpper(),
                 DeconToolsIsosInfoScanner.DECONTOOLS_CSV_FILE_EXTENSION.ToUpper()
             };
-
-            return extensionsToParse;
         }
 
         /// <summary>
