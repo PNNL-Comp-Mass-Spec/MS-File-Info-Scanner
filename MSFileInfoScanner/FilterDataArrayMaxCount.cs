@@ -306,7 +306,7 @@ namespace MSFileInfoScanner
 
                         var binnedDataCount = binnedData.Count;
 
-                        if (MaximumDataCountToLoad - dataCountImplicitlyIncluded - binnedDataCount == 0)
+                        if (MaximumDataCountToLoad - dataCountImplicitlyIncluded == binnedDataCount)
                         {
                             // No need to sort and examine the data for BinToSort since we'll ultimately include all of it
                         }
