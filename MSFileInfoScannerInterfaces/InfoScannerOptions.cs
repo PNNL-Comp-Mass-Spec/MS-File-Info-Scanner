@@ -5,6 +5,9 @@ using PRISM;
 
 namespace MSFileInfoScannerInterfaces
 {
+    /// <summary>
+    /// MS file info scanner options
+    /// </summary>
     public class InfoScannerOptions
     {
         // Ignore Spelling: ArgExistsProperty, centroided, centroiding, conf, csv, deisotoped, Html, iTRAQ
@@ -93,6 +96,9 @@ namespace MSFileInfoScannerInterfaces
                        "The equivalent notation in a parameter file is MaxLevelsToRecurse=2")]
         public int MaxLevelsToRecurse { get; set; }
 
+        /// <summary>
+        /// When true, ignore errors when recursing
+        /// </summary>
         [Option("IgnoreErrorsWhenRecursing", "IE",
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "Ignore errors when recursing")]
@@ -107,6 +113,9 @@ namespace MSFileInfoScannerInterfaces
         /// </remarks>
         public bool LogMessagesToFile { get; set; }
 
+        /// <summary>
+        /// Log file path
+        /// </summary>
         [Option("LogFilePath", "LogFile", "Log", "L",
             ArgExistsProperty = nameof(LogMessagesToFile), HelpShowsDefault = false,
             HelpText = "Log file path.\n" +
@@ -115,6 +124,9 @@ namespace MSFileInfoScannerInterfaces
                        "In a Key=Value parameter file, define a file name or path to enable logging to a file.")]
         public string LogFilePath { get; set; }
 
+        /// <summary>
+        /// Log directory path
+        /// </summary>
         [Option("LogDirectoryPath", "LogDirectory", "LogDir",
             ArgExistsProperty = nameof(LogMessagesToFile), HelpShowsDefault = false,
             HelpText = "The directory where the log file should be written")]
@@ -216,6 +228,9 @@ namespace MSFileInfoScannerInterfaces
                        "Use /LCDiv:0 to disable creation of the overview plots (or comment out the LCMSOverviewPlotDivisor line in a parameter file)")]
         public int LCMSOverviewPlotDivisor { get; set; } = LCMSDataPlotterOptions.DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR;
 
+        /// <summary>
+        /// When true, save TIC and BPI plots
+        /// </summary>
         [Option("SaveTICAndBPIPlots", "TIC",
             HelpShowsDefault = true, SecondaryArg = true,
             HelpText = "By default, the MS File Info Scanner creates TIC and BPI plots\n" +
@@ -223,17 +238,26 @@ namespace MSFileInfoScannerInterfaces
                        "When this is false, device specific plots will also be disabled")]
         public bool SaveTICAndBPIPlots { get; set; }
 
+        /// <summary>
+        /// When true, hide empty HTML sections
+        /// </summary>
         [Option("HideEmptyHTMLSections", "HideEmpty",
             HelpShowsDefault = true, SecondaryArg = true,
             HelpText = "When creating the index.html file that displays the TIC and BPI plots (and scan type stats), do not include empty rows if this is true")]
         public bool HideEmptyHTMLSections { get; set; }
 
+        /// <summary>
+        /// When true, save a series of 2D LC plots, each using a different color scheme
+        /// </summary>
         [Option("CreateGradientPlots", "LCGrad",
             HelpShowsDefault = false, Hidden = true,
             HelpText = "Save a series of 2D LC plots, each using a different color scheme\n" +
                        "The default color scheme is OxyPalettes.Jet")]
         public bool TestLCMSGradientColorSchemes { get; set; }
 
+        /// <summary>
+        /// When true, use dataset name for the HTML plot file
+        /// </summary>
         [Option("UseDatasetNameForHtmlPlotsFile", "CustomHtmlPlotsFile",
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "The HTML file for viewing plots is named index.html by default;\n" +
@@ -241,6 +265,9 @@ namespace MSFileInfoScannerInterfaces
                        "This is auto-set to true if the input file spec has a wildcard")]
         public bool UseDatasetNameForHtmlPlotsFile { get; set; }
 
+        /// <summary>
+        /// Dataset ID
+        /// </summary>
         [Option("DatasetID",
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "Define the dataset's DatasetID value (where # is an integer);\n" +
@@ -248,24 +275,39 @@ namespace MSFileInfoScannerInterfaces
             Min = 0)]
         public int DatasetID { get; set; }
 
+        /// <summary>
+        /// When true, create the dataset info XML file
+        /// </summary>
         [Option("CreateDatasetInfoFile", "DI", HelpShowsDefault = false,
             HelpText = "If supplied, create a dataset info XML file for each dataset")]
         public bool CreateDatasetInfoFile { get; set; }
 
+        /// <summary>
+        /// When true, create scan stats files
+        /// </summary>
         [Option("CreateScanStatsFile", "SS", HelpShowsDefault = false,
             HelpText = "If supplied, create files _ScanStats.txt and _ScanStatsEx.txt for each dataset")]
         public bool CreateScanStatsFile { get; set; }
 
+        /// <summary>
+        /// When true, compute quality scores
+        /// </summary>
         [Option("ComputeQualityScores", "QS",
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "If supplied, compute an overall quality score for the data in each datasets")]
         public bool ComputeOverallQualityScores { get; set; }
 
+        /// <summary>
+        /// When true, check centroiding status
+        /// </summary>
         [Option("CheckCentroidingStatus", "CC",
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "If supplied, check spectral data for whether it is centroided or profile")]
         public bool CheckCentroidingStatus { get; set; }
 
+        /// <summary>
+        /// When true, copy the instrument file locally if a read error occurs
+        /// </summary>
         [Option("CopyFileLocalOnReadError", "CopyLocalOnError",
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "When true, if an error is encountered while reading the file, copy it to the local drive and try again")]
@@ -300,6 +342,9 @@ namespace MSFileInfoScannerInterfaces
         /// <remarks>Auto-defined when Validate is called based on MS2MzMinString</remarks>
         public float MS2MzMin { get; set; }
 
+        /// <summary>
+        /// When true, disable computing the SHA-1 hash for the primary instrument data file(s)
+        /// </summary>
         [Option("DisableInstrumentHash", "NoHash",
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "If supplied, disables creating a SHA-1 hash for the primary instrument data file(s)")]
@@ -314,6 +359,9 @@ namespace MSFileInfoScannerInterfaces
         /// </remarks>
         public bool UpdateDatasetStatsTextFile { get; set; }
 
+        /// <summary>
+        /// When defined, update (or create) a tab-delimited text file with overview stats for the dataset
+        /// </summary>
         [Option("DatasetStatsTextFileName", "DST", ArgExistsProperty = nameof(UpdateDatasetStatsTextFile),
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "If supplied, update (or create) a tab-delimited text file with overview stats for the dataset\n" +
@@ -323,6 +371,9 @@ namespace MSFileInfoScannerInterfaces
                        "to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt")]
         public string DatasetStatsTextFileName { get; set; }
 
+        /// <summary>
+        /// Optional filter for the first scan number to process
+        /// </summary>
         [Option("ScanStart", "Start",
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "Use to limit the scan range to process; this is useful for files where the first few scans are corrupt\n" +
@@ -331,6 +382,9 @@ namespace MSFileInfoScannerInterfaces
             Min = 0)]
         public int ScanStart { get; set; }
 
+        /// <summary>
+        /// Optional filter for the last scan number to process
+        /// </summary>
         [Option("ScanEnd", "End", "ScanStop", "Stop",
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "Use to limit the scan range to process; this is useful for processing just part of a file for speed purposes\n" +
@@ -338,6 +392,9 @@ namespace MSFileInfoScannerInterfaces
             Min = 0)]
         public int ScanEnd { get; set; }
 
+        /// <summary>
+        /// When true, show debug messages
+        /// </summary>
         [Option("ShowDebugInfo", "Debug",
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "If supplied, display debug information at the console, " +
@@ -347,6 +404,9 @@ namespace MSFileInfoScannerInterfaces
 
         private bool mCheckFileIntegrity;
 
+        /// <summary>
+        /// When true, check file integrity
+        /// </summary>
         [Option("CheckFileIntegrity", "CheckIntegrity", "C",
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "Use to perform an integrity check on all known file types; " +
@@ -440,16 +500,29 @@ namespace MSFileInfoScannerInterfaces
                        "DSInfoDBPostingEnabled, and DSInfoStoredProcedure")]
         public bool PostResultsToDMS { get; set; }
 
+        // ReSharper disable StringLiteralTypo
+
+        /// <summary>
+        /// Database connection string
+        /// </summary>
         [Option("DatabaseConnectionString", "ConnectionString",
             HelpShowsDefault = true, Hidden = true,
             HelpText = "Connection string for storing dataset info in DMS")]
         public string DatabaseConnectionString { get; set; } = "Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;";
 
+        // ReSharper restore StringLiteralTypo
+
+        /// <summary>
+        /// Dataset info stored procedure name
+        /// </summary>
         [Option("DSInfoStoredProcedure",
             HelpShowsDefault = true, Hidden = true,
             HelpText = "Procedure to call to store dataset info in DMS")]
         public string DSInfoStoredProcedure { get; set; } = "update_dataset_file_info_xml";
 
+        /// <summary>
+        /// When true, use Python script MSFileInfoScanner_Plotter.py instead of OxyPlot to create the plots
+        /// </summary>
         [Option("PythonPlot", "PlotWithPython", "Python", HelpShowsDefault = false,
             HelpText = "If supplied, create plots with Python script MSFileInfoScanner_Plotter.py instead of OxyPlot")]
         public bool PlotWithPython { get; set; }

@@ -485,6 +485,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Get the error message, or an empty string if no error
         /// </summary>
+        /// <returns>Error message, or empty string</returns>
         public override string GetErrorMessage()
         {
             switch (ErrorCode)
@@ -718,6 +719,7 @@ namespace MSFileInfoScanner
         /// Read settings from a Key=Value parameter file
         /// </summary>
         /// <param name="parameterFilePath">Parameter file path</param>
+        /// <returns>True if successful, false if an error</returns>
         public override bool LoadParameterFileSettings(string parameterFilePath)
         {
             try
@@ -2342,7 +2344,7 @@ namespace MSFileInfoScanner
         /// <summary>
         /// Save parameter file settings
         /// </summary>
-        /// <param name="parameterFilePath">Parameter file ath</param>
+        /// <param name="parameterFilePath">Parameter file path</param>
         /// <returns>True if successful, false if an error</returns>
         public override bool SaveParameterFileSettings(string parameterFilePath)
         {

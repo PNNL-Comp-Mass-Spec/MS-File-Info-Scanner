@@ -134,7 +134,7 @@ namespace MSFileInfoScanner.Plotting
         public Device DeviceType { get; set; }
 
         /// <summary>
-        /// When true, use Python script MSFileInfoScanner_Plotter.py to create the plots
+        /// When true, use Python script MSFileInfoScanner_Plotter.py instead of OxyPlot to create the plots
         /// </summary>
         public bool PlotWithPython { get; set; }
 

@@ -5,6 +5,9 @@
 
 namespace MSFileInfoScannerInterfaces
 {
+    /// <summary>
+    /// MS File Info Scanner interface
+    /// </summary>
     // ReSharper disable once InconsistentNaming
     public abstract class iMSFileInfoScanner : EventNotifier
     {
@@ -15,26 +18,89 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         public enum MSFileScannerErrorCodes
         {
+            /// <summary>
+            /// No error
+            /// </summary>
             NoError = 0,
+
+            /// <summary>
+            /// Invalid input file path
+            /// </summary>
             InvalidInputFilePath = 1,
+
+            /// <summary>
+            /// Invalid output directory path
+            /// </summary>
             InvalidOutputDirectoryPath = 2,
+
+            /// <summary>
+            /// Parameter file not found
+            /// </summary>
             ParameterFileNotFound = 3,
+
+            /// <summary>
+            /// File path error
+            /// </summary>
             FilePathError = 4,
 
+            /// <summary>
+            /// Parameter file read error
+            /// </summary>
             ParameterFileReadError = 5,
+
+            /// <summary>
+            /// Unknown file extension
+            /// </summary>
             UnknownFileExtension = 6,
+
+            /// <summary>
+            /// Input file access error
+            /// </summary>
             InputFileAccessError = 7,
+
+            /// <summary>
+            /// Input file read error
+            /// </summary>
             InputFileReadError = 8,
+
+            /// <summary>
+            /// Output file write error
+            /// </summary>
             OutputFileWriteError = 9,
+
+            /// <summary>
+            /// File integrity check error
+            /// </summary>
             FileIntegrityCheckError = 10,
 
+            /// <summary>
+            /// Database posting error
+            /// </summary>
             DatabasePostingError = 11,
+
+            /// <summary>
+            /// MS2 m/z minimum validation error
+            /// </summary>
             MS2MzMinValidationError = 12,
+
+            /// <summary>
+            /// MS2 m/z minimum validation warning
+            /// </summary>
             MS2MzMinValidationWarning = 13,
 
+            /// <summary>
+            /// Thermo .raw file reader error
+            /// </summary>
             ThermoRawFileReaderError = 14,
+
+            /// <summary>
+            /// Dataset has not spectra
+            /// </summary>
             DatasetHasNoSpectra = 15,
 
+            /// <summary>
+            /// Unspecified error
+            /// </summary>
             UnspecifiedError = -1
         }
 
@@ -43,9 +109,24 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         public enum MSFileProcessingStateConstants
         {
+            /// <summary>
+            /// Not processed
+            /// </summary>
             NotProcessed = 0,
+
+            /// <summary>
+            /// Skipped since found in cache
+            /// </summary>
             SkippedSinceFoundInCache = 1,
+
+            /// <summary>
+            /// Failed processing
+            /// </summary>
             FailedProcessing = 2,
+
+            /// <summary>
+            /// Successfully processed
+            /// </summary>
             ProcessedSuccessfully = 3
         }
 
@@ -54,14 +135,35 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         public enum DataFileTypeConstants
         {
+            /// <summary>
+            /// MS file info
+            /// </summary>
             MSFileInfo = 0,
+
+            /// <summary>
+            /// Directory integrity info
+            /// </summary>
             DirectoryIntegrityInfo = 1,
+
+            /// <summary>
+            /// File integrity details
+            /// </summary>
             FileIntegrityDetails = 2,
+
+            /// <summary>
+            /// File integrity errors
+            /// </summary>
             FileIntegrityErrors = 3
         }
 
+        /// <summary>
+        /// The calling process can set this to true to abort processing
+        /// </summary>
         public virtual bool AbortProcessing { get; set; }
 
+        /// <summary>
+        /// Acquisition time file name
+        /// </summary>
         public virtual string AcquisitionTimeFilename { get; set; }
 
         /// <summary>
@@ -69,6 +171,9 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         public virtual string DatasetInfoXML { get; protected set; }
 
+        /// <summary>
+        /// Error code
+        /// </summary>
         public virtual MSFileScannerErrorCodes ErrorCode { get; protected set; }
 
         /// <summary>
@@ -86,12 +191,29 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         public virtual InfoScannerOptions Options { get; protected set; }
 
+        /// <summary>
+        /// Obtain the list of known directory extensions (as an array)
+        /// </summary>
+        /// <returns>List of directory extensions</returns>
         public abstract string[] GetKnownDirectoryExtensions();
 
+        /// <summary>
+        /// Obtain the list of known file extensions (as an array)
+        /// </summary>
+        /// <returns>List of file extensions</returns>
         public abstract string[] GetKnownFileExtensions();
 
+        /// <summary>
+        /// Get the error message, or an empty string if no error
+        /// </summary>
+        /// <returns>Error message, or empty string</returns>
         public abstract string GetErrorMessage();
 
+        /// <summary>
+        /// Read settings from a Key=Value parameter file
+        /// </summary>
+        /// <param name="parameterFilePath">Parameter file path</param>
+        /// <returns>True if successful, false if an error</returns>
         public abstract bool LoadParameterFileSettings(string parameterFilePath);
 
         /// <summary>
@@ -186,10 +308,24 @@ namespace MSFileInfoScannerInterfaces
         /// <returns>True if success, False if an error</returns>
         public abstract bool ProcessMSFilesAndRecurseDirectories(string inputFilePathOrDirectory, string outputDirectoryPath, int maxLevelsToRecurse);
 
+        /// <summary>
+        /// Save cached results now
+        /// </summary>
+        /// <returns>True if successful, false if an error</returns>
         public abstract bool SaveCachedResults();
 
+        /// <summary>
+        /// Save cached results now
+        /// </summary>
+        /// <param name="clearCachedData">When true, clear cached data</param>
+        /// <returns>True if successful, false if an error</returns>
         public abstract bool SaveCachedResults(bool clearCachedData);
 
+        /// <summary>
+        /// Save parameter file settings
+        /// </summary>
+        /// <param name="parameterFilePath">Parameter file path</param>
+        /// <returns>True if successful, false if an error</returns>
         public abstract bool SaveParameterFileSettings(string parameterFilePath);
     }
 }

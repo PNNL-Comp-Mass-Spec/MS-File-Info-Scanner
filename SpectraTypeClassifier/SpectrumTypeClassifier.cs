@@ -8,6 +8,9 @@ using PRISM;
 
 namespace SpectraTypeClassifier
 {
+    /// <summary>
+    /// Spectrum type classifier
+    /// </summary>
     [CLSCompliant(true)]
     public class SpectrumTypeClassifier : EventNotifier
     {
@@ -28,10 +31,24 @@ namespace SpectraTypeClassifier
         /// </summary>
         private const double FRACTION_REGIONS_PROFILE = 2.0 / 3.0;
 
+        /// <summary>
+        /// Centroid status constants
+        /// </summary>
         public enum CentroidStatusConstants
         {
+            /// <summary>
+            /// Unknown
+            /// </summary>
             Unknown = 0,
+
+            /// <summary>
+            /// Profile
+            /// </summary>
             Profile = 1,
+
+            /// <summary>
+            /// Centroided
+            /// </summary>
             Centroid = 2
         }
 
@@ -55,10 +72,25 @@ namespace SpectraTypeClassifier
         /// <remarks>Tracks the number of spectra at each MSLevel (1 for MS1, 2 for MS2, etc.)</remarks>
         private readonly Dictionary<int, int> mTotalSpectra;
 
+        /// <summary>
+        /// Reading spectra event
+        /// </summary>
         public event ReadingSpectraEventHandler ReadingSpectra;
+
+        /// <summary>
+        /// Reading spectra event handler
+        /// </summary>
+        /// <param name="spectraProcessed"></param>
         public delegate void ReadingSpectraEventHandler(int spectraProcessed);
 
+        /// <summary>
+        /// Processing complete event
+        /// </summary>
         public event ProcessingCompleteEventHandler ProcessingComplete;
+
+        /// <summary>
+        /// Processing complete event handler
+        /// </summary>
         public delegate void ProcessingCompleteEventHandler(int spectraProcessed);
 
         /// <summary>

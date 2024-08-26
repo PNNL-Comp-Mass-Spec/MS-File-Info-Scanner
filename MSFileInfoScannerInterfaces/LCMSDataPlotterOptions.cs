@@ -9,22 +9,49 @@ namespace MSFileInfoScannerInterfaces
     {
         // Ignore Spelling: centroiding, deisotoped, lcms
 
+        /// <summary>
+        /// Default maximum charge state to display when plotting deisotoped data (from a DeconTools _isos.csv file)
+        /// </summary>
         public const int DEFAULT_MAX_CHARGE_STATE = 12;
 
+        /// <summary>
+        /// Default maximum number of points to plot on each LC/MS 2D plot
+        /// </summary>
         public const int DEFAULT_MAX_POINTS_TO_PLOT = 200000;
 
+        /// <summary>
+        /// Default minimum points per spectrum for inclusion on LC/MS 2D plots
+        /// </summary>
         public const int DEFAULT_MIN_POINTS_PER_SPECTRUM = 2;
 
+        /// <summary>
+        /// Default divisor to use when creating the overview 2D LC/MS plots
+        /// </summary>
         public const int DEFAULT_LCMS2D_OVERVIEW_PLOT_DIVISOR = 10;
 
+        /// <summary>
+        /// Default m/z resolution when centroiding data for LC/MS 2D plots
+        /// </summary>
         public const float DEFAULT_MZ_RESOLUTION = 0.4f;
 
+        /// <summary>
+        /// Default MS1 plot title
+        /// </summary>
         private const string DEFAULT_MS1_PLOT_TITLE = "MS Spectra";
 
+        /// <summary>
+        /// Default MS2 plot title
+        /// </summary>
         private const string DEFAULT_MS2_PLOT_TITLE = "MS2 Spectra";
 
+        /// <summary>
+        /// Default maximum monoisotopic mass for deisotoped LC/MS plots
+        /// </summary>
         public const double DEFAULT_MAX_MONO_MASS_FOR_DEISOTOPED_PLOT = 12000;
 
+        /// <summary>
+        /// Default maximum monoisotopic mass for the zoomed deisotoped LC/MS plot
+        /// </summary>
         public const double DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT = 4000;
 
         private int mMaxPointsToPlot;
@@ -179,6 +206,9 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         public bool PlottingDeisotopedData { get; set; }
 
+        /// <summary>
+        /// When true, use Python script MSFileInfoScanner_Plotter.py instead of OxyPlot to create the plots
+        /// </summary>
         public bool PlotWithPython { get; set; }
 
         /// <summary>
