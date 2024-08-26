@@ -2113,7 +2113,7 @@ namespace MSFileInfoScanner.Plotting
             /// </summary>
             public void ShrinkArrays()
             {
-                if (IonCount < IonsMZ.Length)
+                if (IonsMZ.Length > IonCount)
                 {
                     Array.Resize(ref IonsMZ, IonCount);
                     Array.Resize(ref IonsIntensity, IonCount);
