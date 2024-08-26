@@ -8,6 +8,8 @@ namespace MSFileInfoScanner.DatasetStats
     {
         // Ignore Spelling: centroiding
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
         public const string SCAN_STATS_COL_ION_INJECTION_TIME = "Ion Injection Time (ms)";
         public const string SCAN_STATS_COL_SCAN_SEGMENT = "Scan Segment";
         public const string SCAN_STATS_COL_SCAN_EVENT = "Scan Event";
@@ -16,6 +18,8 @@ namespace MSFileInfoScanner.DatasetStats
         public const string SCAN_STATS_COL_MS2_ISOLATION_WIDTH = "MS2 Isolation Width";
         public const string SCAN_STATS_COL_COLLISION_MODE = "Collision Mode";
         public const string SCAN_STATS_COL_SCAN_FILTER_TEXT = "Scan Filter Text";
+
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
         /// <summary>
         /// Scan number

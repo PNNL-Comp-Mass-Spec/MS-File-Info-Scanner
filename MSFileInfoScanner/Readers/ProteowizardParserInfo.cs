@@ -1,8 +1,16 @@
 ﻿
 namespace MSFileInfoScanner.Readers
 {
+    /// <summary>
+    /// ProteoWizard parser info
+    /// </summary>
     public class ProteoWizardParserInfo
     {
+        // Ignore Spelling: Proteo
+
+        /// <summary>
+        /// Minimum scan index without scan times
+        /// </summary>
         public int MinScanIndexWithoutScanTimes { get; set; }
 
         /// <summary>
@@ -47,14 +55,44 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         public int ScanCountError { get; set; }
 
+        /// <summary>
+        /// Number of skipped empty scans
+        /// </summary>
         public int SkippedEmptyScans { get; set; }
+
+        /// <summary>
+        /// Number of stored spectra
+        /// </summary>
         public int ScansStored { get; set; }
+
+        /// <summary>
+        /// Number of TIC and BPI scans stored
+        /// </summary>
         public int TicAndBpiScansStored { get; set; }
 
+        /// <summary>
+        /// High-resolution MS scan count
+        /// </summary>
         public int ScanCountHMS { get; set; }
+
+        /// <summary>
+        /// High-resolution MSn scan count
+        /// </summary>
         public int ScanCountHMSn { get; set; }
+
+        /// <summary>
+        /// Low-resolution MS scan count
+        /// </summary>
         public int ScanCountMS { get; set; }
+
+        /// <summary>
+        /// Low-resolution MSn scan count
+        /// </summary>
         public int ScanCountMSn { get; set; }
+
+        /// <summary>
+        /// DIA scan count
+        /// </summary>
         public int ScanCountDIA { get; set; }
 
         /// <summary>
@@ -69,6 +107,9 @@ namespace MSFileInfoScanner.Readers
             RuntimeMinutes = runtimeMinutes;
         }
 
+        /// <summary>
+        /// Reset scan counts
+        /// </summary>
         public void ResetCounts()
         {
            ScanCountSuccess = 0;

@@ -8,12 +8,16 @@ using PRISM;
 
 namespace MSFileInfoScanner
 {
+    /// <summary>
+    /// MS File info data cache
+    /// </summary>
     public class MSFileInfoDataCache : EventNotifier
     {
-        // Ignore Spelling: AcqTime, yyyy-MM-dd, HH:mm:ss
+        // Ignore Spelling: Acq, AcqTime, SHA, yyyy-MM-dd, HH:mm:ss
 
         private const string MS_FILE_INFO_DATA_TABLE = "MSFileInfoTable";
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public const string COL_NAME_DATASET_ID = "DatasetID";
         public const string COL_NAME_DATASET_NAME = "DatasetName";
         public const string COL_NAME_FILE_EXTENSION = "FileExtension";
@@ -36,6 +40,9 @@ namespace MSFileInfoScanner
 
         private const string DIRECTORY_INTEGRITY_INFO_DATA_TABLE = "DirectoryIntegrityInfoTable";
 
+        /// <summary>
+        /// MS file info results file columns
+        /// </summary>
         public enum MSFileInfoResultsFileColumns
         {
             DatasetID = 0,
@@ -49,6 +56,9 @@ namespace MSFileInfoScanner
             FileModificationDate = 8
         }
 
+        /// <summary>
+        /// Directory integrity info file columns
+        /// </summary>
         public enum DirectoryIntegrityInfoFileColumns
         {
             DirectoryID = 0,
@@ -58,6 +68,11 @@ namespace MSFileInfoScanner
             InfoLastModified = 4
         }
 
+        // ReSharper disable UnusedMember.Global
+
+        /// <summary>
+        /// File integrity details file columns
+        /// </summary>
         public enum FileIntegrityDetailsFileColumns
         {
             FolderID = 0,
@@ -68,6 +83,9 @@ namespace MSFileInfoScanner
             Sha1Hash = 5,
             InfoLastModified = 6
         }
+        // ReSharper restore UnusedMember.Global
+
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
         private enum CachedResultsStateConstants
         {
@@ -91,12 +109,18 @@ namespace MSFileInfoScanner
 
         private int mMaximumDirectoryIntegrityInfoDirectoryID;
 
+        /// <summary>
+        /// Acquisition time file path
+        /// </summary>
         public string AcquisitionTimeFilePath
         {
             get => mAcquisitionTimeFilePath;
             set => mAcquisitionTimeFilePath = value;
         }
 
+        /// <summary>
+        /// Directory integrity info file path
+        /// </summary>
         public string DirectoryIntegrityInfoFilePath
         {
             get => mDirectoryIntegrityInfoFilePath;
@@ -116,6 +140,9 @@ namespace MSFileInfoScanner
         }
 
         public void AutosaveCachedResults()
+        /// <summary>
+        /// Save the cached results
+        /// </summary>
         {
             if (mCachedResultsAutoSaveIntervalMinutes > 0)
             {
@@ -139,25 +166,46 @@ namespace MSFileInfoScanner
             }
         }
 
+        /// <summary>
+        /// Return true if the cached MS info includes the given dataset
+        /// </summary>
+        /// <param name="datasetName">Dataset name</param>
+        /// <returns>True if found, otherwise false</returns>
         public bool CachedMSInfoContainsDataset(string datasetName)
         {
             return CachedMSInfoContainsDataset(datasetName, out _);
         }
 
+        /// <summary>
+        /// Return true if the cached MS info includes the given dataset
+        /// </summary>
+        /// <param name="datasetName">Dataset name</param>
+        /// <param name="rowMatch">Output: the matching data row</param>
+        /// <returns>True if found, otherwise false</returns>
         public bool CachedMSInfoContainsDataset(string datasetName, out DataRow rowMatch)
         {
             return DatasetTableContainsPrimaryKeyValue(mMSFileInfoDataset, MS_FILE_INFO_DATA_TABLE, datasetName, out rowMatch);
         }
 
+        /// <summary>
+        /// Return true if the cached directory integrity info includes the given directory
+        /// </summary>
+        /// <param name="directoryPath">Directory path</param>
+        /// <param name="directoryID">Output: directory ID</param>
+        /// <returns>True if found, otherwise false</returns>
         public bool CachedDirectoryIntegrityInfoContainsDirectory(string directoryPath, out int directoryID)
         {
             return CachedDirectoryIntegrityInfoContainsDirectory(directoryPath, out directoryID, out _);
         }
 
-        public bool CachedDirectoryIntegrityInfoContainsDirectory(
-            string directoryPath,
-            out int directoryID,
-            out DataRow rowMatch)
+        /// <summary>
+        /// Return true if the cached directory integrity info includes the given directory
+        /// </summary>
+        /// <param name="directoryPath">Directory path</param>
+        /// <param name="directoryID">Output: directory ID</param>
+        /// <param name="rowMatch">Output: the matching data row</param>
+        /// <returns>True if found, otherwise false</returns>
+        public bool CachedDirectoryIntegrityInfoContainsDirectory(string directoryPath, out int directoryID, out DataRow rowMatch)
         {
             if (DatasetTableContainsPrimaryKeyValue(mDirectoryIntegrityInfoDataset, DIRECTORY_INTEGRITY_INFO_DATA_TABLE, directoryPath, out rowMatch))
             {
@@ -183,6 +231,11 @@ namespace MSFileInfoScanner
             mMaximumDirectoryIntegrityInfoDirectoryID = 0;
         }
 
+        /// <summary>
+        /// Obtain the header line for the given file type
+        /// </summary>
+        /// <param name="dataFileType">Data file type</param>
+        /// <returns>Tab-delimited list of header column names</returns>
         public string ConstructHeaderLine(iMSFileInfoScanner.DataFileTypeConstants dataFileType)
         {
             var columnNames = dataFileType switch
@@ -263,6 +316,9 @@ namespace MSFileInfoScanner
             }
         }
 
+        /// <summary>
+        /// Reset variables to defaults
+        /// </summary>
         public void InitializeVariables()
         {
             mCachedResultsAutoSaveIntervalMinutes = 5;
@@ -339,6 +395,10 @@ namespace MSFileInfoScanner
             mDirectoryIntegrityInfoResultsState = CachedResultsStateConstants.NotInitialized;
         }
 
+        /// <summary>
+        /// Load cached results
+        /// </summary>
+        /// <param name="forceLoad"></param>
         public void LoadCachedResults(bool forceLoad)
         {
             if (forceLoad || mMSFileInfoCachedResultsState == CachedResultsStateConstants.NotInitialized)
@@ -361,7 +421,7 @@ namespace MSFileInfoScanner
 
             if (File.Exists(mDirectoryIntegrityInfoFilePath))
             {
-                // Read the entries from mDirectoryIntegrityInfoFilePath, populating mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE)
+                // Read the entries from mDirectoryIntegrityInfoFilePath, populating mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE]
                 using var reader = new StreamReader(mDirectoryIntegrityInfoFilePath);
 
                 while (!reader.EndOfStream)
@@ -503,8 +563,6 @@ namespace MSFileInfoScanner
 
         private void PopulateMSInfoDataRow(DatasetFileInfo datasetFileInfo, DataRow currentRow, DateTime infoLastModified)
         {
-            // ToDo: Update datasetFileInfo to include some overall quality scores
-
             currentRow[COL_NAME_DATASET_ID] = datasetFileInfo.DatasetID;
             currentRow[COL_NAME_DATASET_NAME] = datasetFileInfo.DatasetName;
             currentRow[COL_NAME_FILE_EXTENSION] = datasetFileInfo.FileExtension;
@@ -551,6 +609,11 @@ namespace MSFileInfoScanner
             return SaveCachedResults(true);
         }
 
+        /// <summary>
+        /// Save cached MS info and directory integrity results
+        /// </summary>
+        /// <param name="clearCachedData">When true, clear the cached data</param>
+        /// <returns>True if successful, false if an error</returns>
         public bool SaveCachedResults(bool clearCachedData)
         {
             var success1 = SaveCachedMSInfoResults(clearCachedData);
@@ -559,6 +622,11 @@ namespace MSFileInfoScanner
             return success1 && success2;
         }
 
+        /// <summary>
+        /// Save cached directory integrity results
+        /// </summary>
+        /// <param name="clearCachedData">When true, clear the cached data</param>
+        /// <returns>True if successful, false if an error</returns>
         public bool SaveCachedDirectoryIntegrityInfoResults(bool clearCachedData)
         {
             bool success;
@@ -574,7 +642,7 @@ namespace MSFileInfoScanner
 
             try
             {
-                // Write all of mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE) to the results file
+                // Write all of mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE] to the results file
                 using (var writer = new StreamWriter(new FileStream(mDirectoryIntegrityInfoFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
                     writer.WriteLine(ConstructHeaderLine(iMSFileInfoScanner.DataFileTypeConstants.DirectoryIntegrityInfo));
@@ -608,6 +676,11 @@ namespace MSFileInfoScanner
             return success;
         }
 
+        /// <summary>
+        /// Save cached MS info results
+        /// </summary>
+        /// <param name="clearCachedData">When true, clear the cached data</param>
+        /// <returns>True if successful, false if an error</returns>
         public bool SaveCachedMSInfoResults(bool clearCachedData)
         {
             var success = false;
@@ -654,6 +727,11 @@ namespace MSFileInfoScanner
             return success;
         }
 
+        /// <summary>
+        /// Update cached MS file info
+        /// </summary>
+        /// <param name="datasetFileInfo">Dataset file info</param>
+        /// <returns>True if successful, false if an error</returns>
         public bool UpdateCachedMSFileInfo(DatasetFileInfo datasetFileInfo)
         {
             // Update the entry for this dataset in mMSFileInfoDataset.Tables(MS_FILE_INFO_DATA_TABLE)
@@ -696,11 +774,15 @@ namespace MSFileInfoScanner
             return success;
         }
 
-        public bool UpdateCachedDirectoryIntegrityInfo(
-            FileIntegrityChecker.DirectoryStatsType directoryStats,
-            out int directoryID)
+        /// <summary>
+        /// Update cached directory integrity info
+        /// </summary>
+        /// <param name="directoryStats">Directory stats</param>
+        /// <param name="directoryID">Directory ID</param>
+        /// <returns>True if successful, false if an error</returns>
+        public bool UpdateCachedDirectoryIntegrityInfo(FileIntegrityChecker.DirectoryStatsType directoryStats, out int directoryID)
         {
-            // Update the entry for this dataset in mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE)
+            // Update the entry for this dataset in mDirectoryIntegrityInfoDataset.Tables[DIRECTORY_INTEGRITY_INFO_DATA_TABLE]
 
             bool success;
 
@@ -755,7 +837,7 @@ namespace MSFileInfoScanner
 
         private void WriteMSInfoDataLine(TextWriter writer, DataRow currentRow)
         {
-            // Note: HH:mm:ss corresponds to time in 24 hour format
+            // Note: HH:mm:ss corresponds to time in 24-hour format
             writer.WriteLine(
                 currentRow[COL_NAME_DATASET_ID].ToString() + '\t' +
                 currentRow[COL_NAME_DATASET_NAME] + '\t' +

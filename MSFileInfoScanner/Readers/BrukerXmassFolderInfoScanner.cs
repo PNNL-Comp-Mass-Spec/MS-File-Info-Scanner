@@ -26,6 +26,7 @@ namespace MSFileInfoScanner.Readers
 
         // ReSharper restore CommentTypo
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public const string BRUKER_BAF_FILE_NAME = "analysis.baf";
         public const string BRUKER_TDF_FILE_NAME = "analysis.tdf";
         public const string BRUKER_TDF_BIN_FILE_NAME = "analysis.tdf_bin";
@@ -38,12 +39,26 @@ namespace MSFileInfoScanner.Readers
 
         public const string BRUKER_SQLITE_INDEX_FILE_NAME = "Storage.mcf_idx";
 
-        // Note: The extension must be in all caps
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
+        /// <summary>
+        /// Bruker BAF file extension
+        /// </summary>
+        /// <remarks>The extension must be in all caps</remarks>
         public const string BRUKER_BAF_FILE_EXTENSION = ".BAF";
 
+        /// <summary>
+        /// Bruker MCF file extension
+        /// </summary>
+        /// <remarks>The extension must be in all caps</remarks>
         public const string BRUKER_MCF_FILE_EXTENSION = ".MCF";
 
+        /// <summary>
+        /// Bruker MCF index file extension
+        /// </summary>
+        /// <remarks>The extension must be in all caps</remarks>
         public const string BRUKER_SQLITE_INDEX_EXTENSION = ".MCF_IDX";
+
         private const string BRUKER_SCANINFO_XML_FILE = "scan.xml";
 
         // ReSharper disable once IdentifierTypo
@@ -387,11 +402,15 @@ namespace MSFileInfoScanner.Readers
 
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (manualOverride)
+                // ReSharper disable HeuristicUnreachableCode
+#pragma warning disable CS0162 // Unreachable code detected
             {
                 // ReSharper disable once StringLiteralTypo
                 const string newDataFilePath = @"c:\temp\analysis.baf";
                 datasetFileOrDirectory = MSFileInfoScanner.GetFileInfo(newDataFilePath);
             }
+#pragma warning restore CS0162 // Unreachable code detected
+            // ReSharper restore HeuristicUnreachableCode
 
             mLCMS2DPlot.Options.UseObservedMinScan = false;
             bafFileChecked = datasetFileOrDirectory.Exists;
@@ -769,6 +788,11 @@ namespace MSFileInfoScanner.Readers
             return MSFileInfoScanner.GetDirectoryInfo(dataFilePath);
         }
 
+        /// <summary>
+        /// Extract the dataset name from the file path
+        /// </summary>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <returns>Dataset name</returns>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             var datasetName = string.Empty;
@@ -1185,6 +1209,11 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
+        /// <summary>
+        /// Parse chromatography traces
+        /// </summary>
+        /// <param name="datasetDirectory">Dataset directory</param>
+        /// <returns>True if successful, false if an error</returns>
         public bool ParseChromatographyTraces(DirectoryInfo datasetDirectory)
         {
             var eicMzMatcher = new Regex(@"([0-9]+\.[0-9]+)", RegexOptions.Compiled);

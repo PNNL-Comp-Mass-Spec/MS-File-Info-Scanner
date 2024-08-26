@@ -29,12 +29,27 @@ namespace MSFileInfoScanner.Readers
             MaxFit = DEFAULT_MAX_FIT;
         }
 
-        // Note: The extension must be in all caps
+        /// <summary>
+        /// DeconTools CSV file extension
+        /// </summary>
+        /// <remarks>The extension must be in all caps</remarks>
         public const string DECONTOOLS_CSV_FILE_EXTENSION = ".CSV";
+
+        /// <summary>
+        /// DeconTools Isos file extension
+        /// </summary>
+        /// <remarks>The extension must be in all caps</remarks>
         public const string DECONTOOLS_ISOS_FILE_SUFFIX = "_ISOS.CSV";
 
+        /// <summary>
+        /// DeconTools Scans file extension
+        /// </summary>
+        /// <remarks>The extension must be in all caps</remarks>
         public const string DECONTOOLS_SCANS_FILE_SUFFIX = "_SCANS.CSV";
 
+        /// <summary>
+        /// Default max isotopic fit value
+        /// </summary>
         public const float DEFAULT_MAX_FIT = 0.15f;
 
         private struct IsosDataType
@@ -72,6 +87,9 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
+        /// <summary>
+        /// Maximum isotopic fit value
+        /// </summary>
         public float MaxFit { get; set; }
 
         /// <summary>

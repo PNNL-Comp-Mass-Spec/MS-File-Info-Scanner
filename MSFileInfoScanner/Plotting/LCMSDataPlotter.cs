@@ -36,9 +36,19 @@ namespace MSFileInfoScanner.Plotting
         /// </summary>
         private const int MAX_ALLOWABLE_ION_COUNT = 50000;
 
+        /// <summary>
+        /// Output file types
+        /// </summary>
         public enum OutputFileTypes
         {
+            /// <summary>
+            /// LC-MS
+            /// </summary>
             LCMS = 0,
+
+            /// <summary>
+            /// LC-MS/MSn
+            /// </summary>
             LCMSMSn = 1
         }
 
@@ -54,11 +64,24 @@ namespace MSFileInfoScanner.Plotting
             }
         }
 
+        /// <summary>
+        /// MS ion type
+        /// </summary>
         public struct MSIonType
         {
+            /// <summary>
+            /// m/z
+            /// </summary>
             public double MZ;
+
+            /// <summary>
+            /// Intensity
+            /// </summary>
             public double Intensity;
 
+            /// <summary>
+            /// Charge
+            /// </summary>
             public byte Charge;
 
             /// <summary>
@@ -95,8 +118,14 @@ namespace MSFileInfoScanner.Plotting
 
         private DateTime mLastGCTime;
 
+        /// <summary>
+        /// Plotting options
+        /// </summary>
         public LCMSDataPlotterOptions Options { get; set; }
 
+        /// <summary>
+        /// Number of cached spectra
+        /// </summary>
         public int ScanCountCached => mScans.Count;
 
         /// <summary>
@@ -139,6 +168,15 @@ namespace MSFileInfoScanner.Plotting
             mRecentFiles.Add(outputFileInfo);
         }
 
+        /// <summary>
+        /// Add a 2D scan using m/z and intensity values (stored as separate arrays)
+        /// </summary>
+        /// <param name="scanNumber">Scan number</param>
+        /// <param name="msLevel">MS level</param>
+        /// <param name="scanTimeMinutes">Scan time, in minutes</param>
+        /// <param name="mzList">m/z values</param>
+        /// <param name="intensityList">Intensity values</param>
+        /// <returns>True if successful, false if an error</returns>
         public bool AddScan2D(int scanNumber, int msLevel, float scanTimeMinutes, float[] mzList, float[] intensityList)
         {
             var massIntensityPairs = new double[2, mzList.Length + 1];
@@ -152,6 +190,15 @@ namespace MSFileInfoScanner.Plotting
             return AddScan2D(scanNumber, msLevel, scanTimeMinutes, mzList.Length, massIntensityPairs);
         }
 
+        /// <summary>
+        /// Add a 2D scan using m/z and intensity values (stored as a 2D array)
+        /// </summary>
+        /// <param name="scanNumber">Scan number</param>
+        /// <param name="msLevel">MS level</param>
+        /// <param name="scanTimeMinutes">Scan time, in minutes</param>
+        /// <param name="ionCount">Ion count</param>
+        /// <param name="massIntensityPairs">2D array of mass and intensity pairs</param>
+        /// <returns>True if successful, false if an error</returns>
         public bool AddScan2D(int scanNumber, int msLevel, float scanTimeMinutes, int ionCount, double[,] massIntensityPairs)
         {
             try
@@ -178,12 +225,17 @@ namespace MSFileInfoScanner.Plotting
 
                     if (mInvalidMzWarnCount <= 10)
                     {
+                        // ReSharper disable GrammarMistakeInComment
+
                         // Example messages
                         // Scan 26486 has a tiny m/z value of 3.00E-003; this typically indicates a corrupt scan
                         // Scan 26486 has a huge m/z value of 7.99E+027; this typically indicates a corrupt scan
 
+                        // ReSharper restore GrammarMistakeInComment
+
                         OnWarningEvent("  Scan {0} has a {1} m/z value of {2:E2}; this typically indicates a corrupt scan",
                             scanNumber,
+                            // ReSharper disable once HeuristicUnreachableCode
                             0.003 <= TINY_MZ_THRESHOLD ? "tiny" : "huge",
                             0.003);
 
@@ -310,6 +362,16 @@ namespace MSFileInfoScanner.Plotting
             return true;
         }
 
+        /// <summary>
+        /// Add a scan using m/z and intensity values (stored as separate arrays)
+        /// </summary>
+        /// <param name="scanNumber">Scan number</param>
+        /// <param name="msLevel">MS level</param>
+        /// <param name="scanTimeMinutes">Scan time, in minutes</param>
+        /// <param name="ionCount">Ion count</param>
+        /// <param name="ionsMZ">m/z values</param>
+        /// <param name="ionsIntensity">Intensity values</param>
+        /// <returns>True if successful, false if an error</returns>
         public bool AddScan(int scanNumber, int msLevel, float scanTimeMinutes, int ionCount, double[] ionsMZ, double[] ionsIntensity)
         {
             List<MSIonType> ionList;
@@ -358,6 +420,14 @@ namespace MSFileInfoScanner.Plotting
             return AddScan(scanNumber, msLevel, scanTimeMinutes, ionList);
         }
 
+        /// <summary>
+        /// Add a scan using m/z and intensity values (stored as a single list)
+        /// </summary>
+        /// <param name="scanNumber">Scan number</param>
+        /// <param name="msLevel">MS level</param>
+        /// <param name="scanTimeMinutes">Scan time, in minutes</param>
+        /// <param name="ionList">List of ions</param>
+        /// <returns>True if successful, false if an error</returns>
         public bool AddScan(int scanNumber, int msLevel, float scanTimeMinutes, List<MSIonType> ionList)
         {
             try
@@ -539,12 +609,18 @@ namespace MSFileInfoScanner.Plotting
             }
         }
 
+        /// <summary>
+        /// Add a scan, but skip filters
+        /// </summary>
+        /// <param name="sourceData">Source data</param>
+        /// <returns>True if successful, false if an error</returns>
         public bool AddScanSkipFilters(ScanData sourceData)
         {
             bool success;
 
             try
             {
+                // ReSharper disable once MergeIntoNegatedPattern
                 if (sourceData == null || sourceData.IonCount <= 0)
                 {
                     // No data to add
@@ -582,11 +658,19 @@ namespace MSFileInfoScanner.Plotting
             return success;
         }
 
+        /// <summary>
+        /// Clear recent file info
+        /// </summary>
         public void ClearRecentFileInfo()
         {
             mRecentFiles.Clear();
         }
 
+        /// <summary>
+        /// Compute the average intensity across all scans
+        /// </summary>
+        /// <param name="msLevelFilter">MS level filter (if 0, average all MS levels)</param>
+        /// <returns>Average intensity</returns>
         public float ComputeAverageIntensityAllScans(int msLevelFilter)
         {
             if (msLevelFilter > 0)
@@ -656,8 +740,8 @@ namespace MSFileInfoScanner.Plotting
 
                 // Now process the data from the highest intensity to the lowest intensity
                 // As each data point is processed, we will either:
-                //  a) set its intensity to the negative of the actual intensity to mark it as being processed
-                //  b) set its intensity to float.MinValue (-3.40282347E+38) if the point is to be removed
+                //  a. set its intensity to the negative of the actual intensity to mark it as being processed
+                //  b. set its intensity to float.MinValue (-3.40282347E+38) if the point is to be removed
                 //     because it is within mzResolution m/z units of a point with a higher intensity
 
                 var pointerIndex = ionCount - 1;
@@ -760,10 +844,12 @@ namespace MSFileInfoScanner.Plotting
 
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     if (writeDebugData)
+                        // ReSharper disable HeuristicUnreachableCode
                     {
                         writer = new StreamWriter(new FileStream("DataDump_" + msSpectrum.ScanNumber.ToString() + "_BeforeFilter.txt", FileMode.Create, FileAccess.Write, FileShare.Read));
                         writer.WriteLine("m/z" + '\t' + "Intensity");
                     }
+                    // ReSharper restore HeuristicUnreachableCode
 
                     // Store the intensity values in filterDataArray
                     for (var ionIndex = 0; ionIndex < msSpectrum.IonCount; ionIndex++)
@@ -772,16 +858,20 @@ namespace MSFileInfoScanner.Plotting
 
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if (writeDebugData)
+                            // ReSharper disable HeuristicUnreachableCode
                         {
                             writer.WriteLine(msSpectrum.IonsMZ[ionIndex] + '\t' + msSpectrum.IonsIntensity[ionIndex]);
                         }
+                        // ReSharper restore HeuristicUnreachableCode
                     }
 
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     if (writeDebugData)
+                        // ReSharper disable HeuristicUnreachableCode
                     {
                         writer.Close();
                     }
+                    // ReSharper restore HeuristicUnreachableCode
 
                     // Call .FilterData, which will determine which data points to keep
                     filterDataArray.FilterData();
@@ -840,6 +930,7 @@ namespace MSFileInfoScanner.Plotting
 
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                 if (writeDebugData)
+                    // ReSharper disable HeuristicUnreachableCode
                 {
                     writer = new StreamWriter(new FileStream("DataDump_" + msSpectrum.ScanNumber.ToString() + "_PostFilter.txt", FileMode.Create, FileAccess.Write, FileShare.Read));
                     writer.WriteLine("m/z" + '\t' + "Intensity");
@@ -851,6 +942,7 @@ namespace MSFileInfoScanner.Plotting
                     }
                     writer.Close();
                 }
+                // ReSharper restore HeuristicUnreachableCode
             }
             catch (Exception ex)
             {
@@ -884,6 +976,7 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="fileName">File name (output)</param>
         /// <param name="filePath">File Path (output)</param>
         /// <returns>True if a match was found; otherwise returns false</returns>
+        // ReSharper disable once UnusedMember.Global
         public bool GetRecentFileInfo(OutputFileTypes fileType, out string fileName, out string filePath)
         {
             for (var index = 0; index < mRecentFiles.Count; index++)
@@ -917,6 +1010,9 @@ namespace MSFileInfoScanner.Plotting
             return null;
         }
 
+        /// <summary>
+        /// Remove all cached data and reset data point counts to 0
+        /// </summary>
         public void Reset()
         {
             mPointCountCached = 0;
@@ -1536,16 +1632,20 @@ namespace MSFileInfoScanner.Plotting
 
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (writeDebugData)
+                // ReSharper disable HeuristicUnreachableCode
             {
                 debugWriter = new StreamWriter(new FileStream(plotTitle + " - LCMS Top " + IntToEngineeringNotation(Options.MaxPointsToPlot) + " points.txt", FileMode.Create, FileAccess.Write, FileShare.Read));
                 debugWriter.WriteLine("scan" + '\t' + "m/z" + '\t' + "Intensity");
             }
+            // ReSharper restore HeuristicUnreachableCode
 
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (writeDebugData)
+                // ReSharper disable HeuristicUnreachableCode
             {
                 debugWriter.Close();
             }
+            // ReSharper restore HeuristicUnreachableCode
 
             if (pointsToPlot == 0)
             {
@@ -1852,11 +1952,25 @@ namespace MSFileInfoScanner.Plotting
             return (int)Math.Round(value / 1000.0 / 1000, 0) + "M";
         }
 
+        /// <summary>
+        /// Save 2D plots
+        /// </summary>
+        /// <param name="datasetName">Dataset name</param>
+        /// <param name="outputDirectory">Output directory</param>
+        /// <returns>True if successful, false if an error</returns>
         public bool Save2DPlots(string datasetName, string outputDirectory)
         {
             return Save2DPlots(datasetName, outputDirectory, string.Empty, string.Empty);
         }
 
+        /// <summary>
+        /// Save 2D plots
+        /// </summary>
+        /// <param name="datasetName">Dataset name</param>
+        /// <param name="outputDirectory">Output directory</param>
+        /// <param name="fileNameSuffixAddon">Optional suffix to add to file names</param>
+        /// <param name="scanModeSuffixAddon">Optional suffix to add to scan modes</param>
+        /// <returns>True if successful, false if an error</returns>
         public bool Save2DPlots(string datasetName, string outputDirectory, string fileNameSuffixAddon, string scanModeSuffixAddon)
         {
             try
@@ -1932,19 +2046,51 @@ namespace MSFileInfoScanner.Plotting
         /// </summary>
         public class ScanData
         {
+            /// <summary>
+            /// Ion count
+            /// </summary>
             public int IonCount { get; set; }
 
+            /// <summary>
+            /// m/z values
+            /// </summary>
             public double[] IonsMZ;
+
+            /// <summary>
+            /// Intensity values
+            /// </summary>
             public float[] IonsIntensity;
 
+            /// <summary>
+            /// Charge state(s)
+            /// </summary>
             public byte[] Charge;
 
+            /// <summary>
+            /// MS level
+            /// </summary>
             public int MSLevel { get; private set; }
 
+            /// <summary>
+            /// Scan number
+            /// </summary>
             public int ScanNumber { get; }
 
+            /// <summary>
+            /// Scan time, in minutes
+            /// </summary>
             public float ScanTimeMinutes { get; }
 
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            /// <param name="scanNumber">Scan number</param>
+            /// <param name="msLevel">MS level</param>
+            /// <param name="scanTimeMinutes">Scan time, in minutes</param>
+            /// <param name="dataCount">Number of data points</param>
+            /// <param name="ionsMZ">m/z values</param>
+            /// <param name="ionsIntensity">Intensity values</param>
+            /// <param name="charge">Charge state(s)</param>
             public ScanData(int scanNumber, int msLevel, float scanTimeMinutes, int dataCount, double[] ionsMZ, float[] ionsIntensity, byte[] charge)
             {
                 ScanNumber = scanNumber;
@@ -1962,6 +2108,9 @@ namespace MSFileInfoScanner.Plotting
                 Array.Copy(charge, Charge, dataCount);
             }
 
+            /// <summary>
+            /// Shrink arrays to length IonCount
+            /// </summary>
             public void ShrinkArrays()
             {
                 if (IonCount < IonsMZ.Length)
@@ -1972,6 +2121,10 @@ namespace MSFileInfoScanner.Plotting
                 }
             }
 
+            /// <summary>
+            /// Update the MS level
+            /// </summary>
+            /// <param name="newMSLevel"></param>
             public void UpdateMSLevel(int newMSLevel)
             {
                 MSLevel = newMSLevel;
@@ -1989,8 +2142,17 @@ namespace MSFileInfoScanner.Plotting
             }
         }
 
+        /// <summary>
+        /// MS ion type comparer
+        /// </summary>
         public class MSIonTypeComparer : IComparer<MSIonType>
         {
+            /// <summary>
+            /// Compare two values
+            /// </summary>
+            /// <param name="x">Value 1</param>
+            /// <param name="y">Value 2</param>
+            /// <returns>Comparison result</returns>
             public int Compare(MSIonType x, MSIonType y)
             {
                 return x.MZ.CompareTo(y.MZ);

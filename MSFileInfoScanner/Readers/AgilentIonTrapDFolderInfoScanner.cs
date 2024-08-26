@@ -15,8 +15,12 @@ namespace MSFileInfoScanner.Readers
     {
         // Ignore Spelling: lcms
 
-        // Note: The extension must be in all caps
+        /// <summary>
+        /// Agilent data folder .d extension
+        /// </summary>
+        /// <remarks>The extension must be capitalized, even though .d directories for Bruker datasets are lowercase</remarks>
         public const string AGILENT_ION_TRAP_D_EXTENSION = ".D";
+
         private const string AGILENT_YEP_FILE = "Analysis.yep";
         private const string AGILENT_RUN_LOG_FILE = "RUN.LOG";
 
@@ -57,6 +61,11 @@ namespace MSFileInfoScanner.Readers
             return success;
         }
 
+        /// <summary>
+        /// Extract the dataset name from the file path
+        /// </summary>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <returns>Dataset name</returns>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             // The dataset name is simply the directory name without .D

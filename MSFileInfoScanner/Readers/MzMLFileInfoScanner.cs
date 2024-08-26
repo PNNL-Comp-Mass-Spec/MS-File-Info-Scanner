@@ -15,7 +15,10 @@ namespace MSFileInfoScanner.Readers
     {
         // Ignore Spelling: centroided, lcms, mzML, xcalibur
 
-        // Note: The extension must be in all caps
+        /// <summary>
+        /// mzML file extension
+        /// </summary>
+        /// <remarks>The extension must be in all caps</remarks>
         public const string MZML_FILE_EXTENSION = ".MZML";
 
         /// <summary>
@@ -27,9 +30,10 @@ namespace MSFileInfoScanner.Readers
         }
 
         /// <summary>
-        /// Returns the dataset name for the given file
+        /// Extract the dataset name from the file path
         /// </summary>
         /// <param name="dataFilePath">Data file path</param>
+        /// <returns>Dataset name</returns>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             try

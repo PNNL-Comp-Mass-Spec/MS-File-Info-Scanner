@@ -7,19 +7,28 @@ using PRISM;
 
 namespace MSFileInfoScanner.Readers
 {
+    // ReSharper disable once IdentifierTypo
+    // ReSharper disable once UnusedMember.Global
+
     /// <summary>
     /// Agilent TOF .D folder Info Scanner; Uses ProteoWizard to read files
     /// </summary>
     /// <remarks>
     /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
     /// </remarks>
-    // ReSharper disable once IdentifierTypo
     public class AgilentTOFDFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: AcqData, AcqTime, lcms
 
-        // Note: The extension must be in all caps
+        // ReSharper disable once UnusedMember.Global
+
+        /// <summary>
+        /// Agilent data folder .d extension
+        /// </summary>
+        /// <remarks>The extension must be capitalized, even though .d directories for Bruker datasets are lowercase</remarks>
         public const string AGILENT_DATA_FOLDER_D_EXTENSION = ".D";
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
         // ReSharper disable once IdentifierTypo
         public const string AGILENT_ACQDATA_FOLDER_NAME = "AcqData";
@@ -33,6 +42,8 @@ namespace MSFileInfoScanner.Readers
 
         public const string AGILENT_TIME_SEGMENT_FILE = "MSTS.xml";
 
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -43,6 +54,11 @@ namespace MSFileInfoScanner.Readers
             base(options, lcms2DPlotOptions)
         { }
 
+        /// <summary>
+        /// Extract the dataset name from the file path
+        /// </summary>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <returns>Dataset name</returns>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             // The dataset name is simply the directory name without .D
@@ -174,6 +190,7 @@ namespace MSFileInfoScanner.Readers
                                     success = true;
                                     break;
 
+                                // ReSharper disable once RedundantEmptySwitchSection
                                 default:
                                     // Ignore it
                                     break;

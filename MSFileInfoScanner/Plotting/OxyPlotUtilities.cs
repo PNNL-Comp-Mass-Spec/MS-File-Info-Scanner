@@ -5,10 +5,20 @@ using OxyPlot.Axes;
 
 namespace MSFileInfoScanner.Plotting
 {
+    /// <summary>
+    /// OxyPlot utilities
+    /// </summary>
     public static class OxyPlotUtilities
     {
         // Ignore Spelling: Arial, Oxy
 
+        /// <summary>
+        /// Return plot model with the given title and axis labels
+        /// </summary>
+        /// <param name="title">Plot title</param>
+        /// <param name="xAxisLabel">X-axis label</param>
+        /// <param name="yAxisLabel">Y-axis label</param>
+        /// <returns></returns>
 #pragma warning disable CS3002 // Return type is not CLS-compliant
         public static PlotModel GetBasicPlotModel(string title, string xAxisLabel, string yAxisLabel)
 #pragma warning restore CS3002 // Argument type is not CLS-compliant
@@ -38,6 +48,13 @@ namespace MSFileInfoScanner.Plotting
             return myPlot;
         }
 
+        /// <summary>
+        /// Obtain a linear axis
+        /// </summary>
+        /// <param name="position">Axis position</param>
+        /// <param name="axisTitle">Axis title</param>
+        /// <param name="baseFontSize">Base font size</param>
+        /// <returns></returns>
 #pragma warning disable CS3001 // Argument type is not CLS-compliant
 #pragma warning disable CS3002 // Return type is not CLS-compliant
         public static LinearAxis MakeLinearAxis(AxisPosition position, string axisTitle, int baseFontSize)
@@ -85,6 +102,10 @@ namespace MSFileInfoScanner.Plotting
             currentAxis.MinorGridlineThickness = axisInfo.MinorGridlineThickness;
         }
 
+        /// <summary>
+        /// Validate the major step size for the given axis
+        /// </summary>
+        /// <param name="currentAxis">Axis</param>
 #pragma warning disable CS3001 // Argument type is not CLS-compliant
         public static void ValidateMajorStep(Axis currentAxis)
 #pragma warning restore CS3001

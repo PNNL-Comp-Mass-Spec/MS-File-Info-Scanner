@@ -1,6 +1,9 @@
 ﻿
 namespace MSFileInfoScanner.DatasetStats
 {
+    /// <summary>
+    /// Extended stats info
+    /// </summary>
     public class ExtendedStatsInfo
     {
         // Ignore Spelling: Orbitrap
@@ -59,6 +62,9 @@ namespace MSFileInfoScanner.DatasetStats
             Clear();
         }
 
+        /// <summary>
+        /// Reset cached data to empty strings
+        /// </summary>
         public void Clear()
         {
             IonInjectionTime = string.Empty;

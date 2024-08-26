@@ -18,8 +18,14 @@ namespace MSFileInfoScanner.Readers
     {
         // Ignore Spelling: AcqStartTime, AcqEndTime, lcms
 
+        /// <summary>
+        /// Zipped imaging file search filter
+        /// </summary>
         public const string ZIPPED_IMAGING_FILE_SEARCH_SPEC = "0_R*.zip";
 
+        /// <summary>
+        /// Zipped imaging file name prefix
+        /// </summary>
         public const string ZIPPED_IMAGING_FILE_NAME_PREFIX = "0_R";
 
         /// <summary>
@@ -30,6 +36,8 @@ namespace MSFileInfoScanner.Readers
         public ZippedImagingFilesScanner(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions) :
             base(options, lcms2DPlotOptions)
         { }
+
+        // ReSharper disable once GrammarMistakeInComment
 
         /// <summary>
         /// Examines the subdirectories in the specified zip file
@@ -139,6 +147,11 @@ namespace MSFileInfoScanner.Readers
             return MSFileInfoScanner.GetDirectoryInfo(dataFilePath);
         }
 
+        /// <summary>
+        /// Extract the dataset name from the file path
+        /// </summary>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <returns>Dataset name</returns>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             var datasetName = string.Empty;
@@ -163,6 +176,11 @@ namespace MSFileInfoScanner.Readers
             return datasetName;
         }
 
+        /// <summary>
+        /// Return true if the file path is a zipped imaging file
+        /// </summary>
+        /// <param name="imagingFilePath">File path</param>
+        /// <returns>True if a match</returns>
         public static bool IsZippedImagingFile(string imagingFilePath)
         {
             if (string.IsNullOrWhiteSpace(imagingFilePath))

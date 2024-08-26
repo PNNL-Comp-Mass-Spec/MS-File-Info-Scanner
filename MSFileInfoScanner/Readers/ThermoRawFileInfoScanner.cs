@@ -23,7 +23,10 @@ namespace MSFileInfoScanner.Readers
     {
         // Ignore Spelling: centroided, lcms, xcalibur
 
-        // Note: The extension must be in all caps
+        /// <summary>
+        /// Thermo raw file extension
+        /// </summary>
+        /// <remarks>The extension must be in all caps</remarks>
         public const string THERMO_RAW_FILE_EXTENSION = ".RAW";
 
         private readonly Regex mIsCentroid;
@@ -753,6 +756,7 @@ namespace MSFileInfoScanner.Readers
                     if (entryNameLCase.Equals(ScanStatsEntry.SCAN_STATS_COL_SCAN_FILTER_TEXT, StringComparison.OrdinalIgnoreCase))
                     {
                         extendedScanInfo.ScanFilterText = scanEvent.Value;
+                        // ReSharper disable once RedundantJumpStatement
                         continue;
                     }
                 }

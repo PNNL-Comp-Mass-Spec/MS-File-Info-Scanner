@@ -19,7 +19,11 @@ namespace MSFileInfoScanner.Readers
     {
         // Ignore Spelling: acqu, Bruker, fid, lcms, ser, yyyy-MMM-dd hh:mm:ss
 
+        /// <summary>
+        /// Bruker "1" folder name
+        /// </summary>
         public const string BRUKER_ONE_FOLDER_NAME = "1";
+
         private const string BRUKER_LOCK_FILE = "LOCK";
         private const string BRUKER_ACQU_FILE = "acqu";
         private const string BRUKER_ACQU_FILE_ACQ_LINE_START = "##$AQ_DATE= <";
@@ -45,6 +49,11 @@ namespace MSFileInfoScanner.Readers
             base(options, lcms2DPlotOptions)
         { }
 
+        /// <summary>
+        /// Extract the dataset name from the file path
+        /// </summary>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <returns>Dataset name</returns>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             var datasetName = string.Empty;
@@ -65,6 +74,11 @@ namespace MSFileInfoScanner.Readers
             return datasetName;
         }
 
+        /// <summary>
+        /// Return true if the file path is a zipped S folder
+        /// </summary>
+        /// <param name="filePath">File path</param>
+        /// <returns>True if a match</returns>
         public static bool IsZippedSFolder(string filePath)
         {
             var reIsZippedSFolder = new Regex("s[0-9]+\\.zip", RegexOptions.IgnoreCase);

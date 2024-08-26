@@ -11,17 +11,36 @@ using ThermoFisher.CommonCore.Data.Business;
 namespace MSFileInfoScanner.Plotting
 {
     // ReSharper disable once IdentifierTypo
+#pragma warning disable VSSpell001 // Spell Check
+    /// <summary>
+    /// TIC and BPI plotter
+    /// </summary>
     public class TICandBPIPlotter : EventNotifier
+#pragma warning restore VSSpell001 // Spell Check
     {
         // Ignore Spelling: OxyPlot, Zeroes
 
         // ReSharper disable InconsistentNaming
         // ReSharper disable IdentifierTypo
 
+        /// <summary>
+        /// Output file types
+        /// </summary>
         public enum OutputFileTypes
         {
+            /// <summary>
+            /// Total Ion Chromatogram
+            /// </summary>
             TIC = 0,
+
+            /// <summary>
+            /// Base Peak Intensity Chromatogram for MS1 spectra
+            /// </summary>
             BPIMS = 1,
+
+            /// <summary>
+            /// Base Peak Intensity Chromatogram for MSn spectra
+            /// </summary>
             BPIMSn = 2
         }
 
@@ -59,6 +78,9 @@ namespace MSFileInfoScanner.Plotting
         /// </summary>
         private readonly bool mWriteDebug;
 
+        /// <summary>
+        /// When true, auto-define the Y-axis range for the BPI
+        /// </summary>
         public bool BPIAutoMinMaxY { get; set; }
 
         /// <summary>
@@ -69,20 +91,41 @@ namespace MSFileInfoScanner.Plotting
 
         // ReSharper disable IdentifierTypo
 
+        /// <summary>
+        /// BPI X-axis label
+        /// </summary>
         public string BPIXAxisLabel { get; set; } = "LC Scan Number";
 
-        public bool BPIXAxisIsTimeMinutes { get; set; } = false;
+        /// <summary>
+        /// When true, the BPI X-axis is time, in minutes
+        /// </summary>
+        public bool BPIXAxisIsTimeMinutes { get; set; }
 
+        /// <summary>
+        /// BPI Y-axis label
+        /// </summary>
         public string BPIYAxisLabel { get; set; } = "Intensity";
 
+        /// <summary>
+        /// When true, use exponential notation for the BPI Y-axis
+        /// </summary>
         public bool BPIYAxisExponentialNotation { get; set; } = true;
 
         // ReSharper restore IdentifierTypo
 
+        /// <summary>
+        /// Number of scans in the BPI chromatogram
+        /// </summary>
         public int CountBPI => mBPI.ScanCount;
 
+        /// <summary>
+        /// Number of scans in the TIC
+        /// </summary>
         public int CountTIC => mTIC.ScanCount;
 
+        /// <summary>
+        /// When true, delete temporary files after creating the plots
+        /// </summary>
         public bool DeleteTempFiles { get; set; }
 
         /// <summary>
@@ -90,26 +133,47 @@ namespace MSFileInfoScanner.Plotting
         /// </summary>
         public Device DeviceType { get; set; }
 
+        /// <summary>
+        /// When true, use Python script MSFileInfoScanner_Plotter.py to create the plots
+        /// </summary>
         public bool PlotWithPython { get; set; }
 
+        /// <summary>
+        /// When true, remove zero-intensity scans from the beginning and ending of the chromatograms
+        /// </summary>
         public bool RemoveZeroesFromEnds { get; set; }
 
+        /// <summary>
+        /// When true, auto-define the Y-axis range for the TIC
+        /// </summary>
         public bool TICAutoMinMaxY { get; set; }
 
         /// <summary>
-        /// Plot title abbreviation
+        /// TIC title abbreviation
         /// </summary>
         /// <remarks>This name is included in the plot title and is used when creating the .png file</remarks>
         public string TICPlotAbbrev { get; set; } = "TIC";
 
         // ReSharper disable IdentifierTypo
 
+        /// <summary>
+        /// TIC X-axis label
+        /// </summary>
         public string TICXAxisLabel { get; set; } = "LC Scan Number";
 
+        /// <summary>
+        /// When true, the TIC X-axis is time, in minutes
+        /// </summary>
         public bool TICXAxisIsTimeMinutes { get; set; } = false;
 
+        /// <summary>
+        /// TIC Y-axis label
+        /// </summary>
         public string TICYAxisLabel { get; set; } = "Intensity";
 
+        /// <summary>
+        /// When true, use exponential notation for the TIC Y-axis
+        /// </summary>
         public bool TICYAxisExponentialNotation { get; set; } = true;
 
         // ReSharper restore IdentifierTypo
@@ -120,7 +184,9 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="dataSource">Data source</param>
         /// <param name="writeDebug">When true, create a debug file that tracks processing steps</param>
         // ReSharper disable once IdentifierTypo
+#pragma warning disable VSSpell001 // Spell Check
         public TICandBPIPlotter(string dataSource = "", bool writeDebug = false)
+#pragma warning restore VSSpell001 // Spell Check
         {
             mRecentFiles = new List<OutputFileInfoType>();
 
@@ -132,17 +198,39 @@ namespace MSFileInfoScanner.Plotting
             Reset();
         }
 
+        /// <summary>
+        /// Add a data point to the BPI and TIC
+        /// </summary>
+        /// <param name="scanNumber">Scan number</param>
+        /// <param name="msLevel">MS Level</param>
+        /// <param name="scanTimeMinutes">Scan time, in minutes</param>
+        /// <param name="bpi">BPI</param>
+        /// <param name="tic">TIC</param>
         public void AddData(int scanNumber, int msLevel, float scanTimeMinutes, double bpi, double tic)
         {
             mBPI.AddPoint(scanNumber, msLevel, scanTimeMinutes, bpi);
             mTIC.AddPoint(scanNumber, msLevel, scanTimeMinutes, tic);
         }
 
+        /// <summary>
+        /// Add a data point to the BPI
+        /// </summary>
+        /// <param name="scanNumber">Scan number</param>
+        /// <param name="msLevel">MS Level</param>
+        /// <param name="scanTimeMinutes">Scan time, in minutes</param>
+        /// <param name="bpi">BPI</param>
         public void AddDataBPIOnly(int scanNumber, int msLevel, float scanTimeMinutes, double bpi)
         {
             mBPI.AddPoint(scanNumber, msLevel, scanTimeMinutes, bpi);
         }
 
+        /// <summary>
+        /// Add a data point to the TIC
+        /// </summary>
+        /// <param name="scanNumber">Scan number</param>
+        /// <param name="msLevel">MS Level</param>
+        /// <param name="scanTimeMinutes">Scan time, in minutes</param>
+        /// <param name="tic">TIC</param>
         public void AddDataTICOnly(int scanNumber, int msLevel, float scanTimeMinutes, double tic)
         {
             mTIC.AddPoint(scanNumber, msLevel, scanTimeMinutes, tic);
@@ -323,7 +411,6 @@ namespace MSFileInfoScanner.Plotting
                 emptyContainer.WriteDebugLog("points.Count == 0 in InitializeOxyPlot for plot " + plotTitle);
                 return emptyContainer;
             }
-
 
             if (maxScan < 20 && xAxisIsTimeMinutes)
             {

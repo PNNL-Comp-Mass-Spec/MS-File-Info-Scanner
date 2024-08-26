@@ -13,6 +13,9 @@ using ThermoRawFileReader;
 
 namespace MSFileInfoScanner.Readers
 {
+    /// <summary>
+    /// ProteoWizard data parser
+    /// </summary>
     [CLSCompliant(false)]
     public class ProteoWizardDataParser : EventNotifier
     {
@@ -48,8 +51,14 @@ namespace MSFileInfoScanner.Readers
 
         private bool mWarnedAccessViolationException;
 
+        /// <summary>
+        /// True if the data file has high resolution MS1 spectra
+        /// </summary>
         public bool HighResMS1 { get; set; }
 
+        /// <summary>
+        /// True if the data file has high resolution MS2 spectra
+        /// </summary>
         public bool HighResMS2 { get; set; }
 
         /// <summary>
@@ -225,6 +234,11 @@ namespace MSFileInfoScanner.Readers
             OnProgressUpdate(string.Format("Spectra examined: {0:N0}", scansLoaded), percentCompleteOverall);
         }
 
+        /// <summary>
+        /// Update the acquisition start time if the runtime is non-zero and the alternate start time is before datasetFileInfo.AcqTimeStart
+        /// </summary>
+        /// <param name="datasetFileInfo">Dataset file info</param>
+        /// <param name="runtimeMinutes">Run time, in minutes</param>
         public void PossiblyUpdateAcqTimeStart(DatasetFileInfo datasetFileInfo, double runtimeMinutes)
         {
             if (runtimeMinutes > 0)
@@ -418,6 +432,13 @@ namespace MSFileInfoScanner.Readers
                 currentCount % 100000 == 0;
         }
 
+        /// <summary>
+        /// Store chromatogram info
+        /// </summary>
+        /// <param name="datasetFileInfo">Dataset file info</param>
+        /// <param name="ticStored">Output: true if the TIC was stored</param>
+        /// <param name="srmDataCached">Output: true if SRM data was cached</param>
+        /// <param name="runtimeMinutes">Output: run time, in minutes</param>
         [HandleProcessCorruptedStateExceptions]
         public void StoreChromatogramInfo(DatasetFileInfo datasetFileInfo, out bool ticStored, out bool srmDataCached, out double runtimeMinutes)
         {

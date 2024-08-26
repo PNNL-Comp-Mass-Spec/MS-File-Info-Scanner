@@ -19,7 +19,10 @@ namespace MSFileInfoScanner.Readers
     {
         // Ignore Spelling: lcms, QStar, TOF, Wiff
 
-        // Note: The extension must be in all caps
+        /// <summary>
+        /// Agilent TOF or QStar file extension
+        /// </summary>
+        /// <remarks>The extension must be in all caps</remarks>
         public const string AGILENT_TOF_OR_QSTAR_FILE_EXTENSION = ".WIFF";
 
         /// <summary>
@@ -37,6 +40,11 @@ namespace MSFileInfoScanner.Readers
             base(options, lcms2DPlotOptions)
         { }
 
+        /// <summary>
+        /// Extract the dataset name from the file path
+        /// </summary>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <returns>Dataset name</returns>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             // The dataset name is simply the file name without .wiff

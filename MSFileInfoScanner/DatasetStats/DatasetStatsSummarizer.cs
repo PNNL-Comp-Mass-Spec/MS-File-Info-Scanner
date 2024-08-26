@@ -10,6 +10,8 @@ using SpectraTypeClassifier;
 
 namespace MSFileInfoScanner.DatasetStats
 {
+    // ReSharper disable once GrammarMistakeInComment
+
     /// <summary>
     /// <para>This class computes aggregate stats for a dataset</para>
     /// <para>
@@ -55,11 +57,25 @@ namespace MSFileInfoScanner.DatasetStats
             }
         }
 
+        /// <summary>
+        /// Summary stats scan info
+        /// </summary>
         public struct SummaryStatsScanInfo
         {
+            /// <summary>
+            /// Scan count
+            /// </summary>
             public int ScanCount;
+
+            /// <summary>
+            /// Isolation window widths
+            /// </summary>
             public string IsolationWindowWidths;
 
+            /// <summary>
+            /// Show the number of scans
+            /// </summary>
+            /// <returns>Scan count description</returns>
             public readonly override string ToString()
             {
                 return string.IsNullOrWhiteSpace(IsolationWindowWidths)

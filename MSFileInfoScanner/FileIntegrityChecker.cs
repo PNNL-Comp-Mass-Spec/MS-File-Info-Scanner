@@ -38,6 +38,8 @@ namespace MSFileInfoScanner
             MaximumXMLElementNodesToCheck = options.MaximumXMLElementNodesToCheck;
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
         public const string FILE_EXTENSION_TXT = ".TXT";
         public const string FILE_EXTENSION_LOG = ".LOG";
         public const string FILE_EXTENSION_PARAMS = ".PARAMS";
@@ -52,22 +54,63 @@ namespace MSFileInfoScanner
 
         public const string AGILENT_TOF_OR_QTRAP_FILE_EXTENSION = ".WIFF";
 
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
+        /// <summary>
+        /// Directory stats
+        /// </summary>
         public struct DirectoryStatsType
         {
+            /// <summary>
+            /// Directory path
+            /// </summary>
             public string DirectoryPath;
+
+            /// <summary>
+            /// Number of files in the directory
+            /// </summary>
             public int FileCount;
+
+            /// <summary>
+            /// Number of files that failed the integrity check
+            /// </summary>
             public int FileCountFailIntegrity;
         }
 
+        /// <summary>
+        /// File stats
+        /// </summary>
         public struct FileStatsType
         {
+            /// <summary>
+            /// File name
+            /// </summary>
             public string FileName;
+
+            /// <summary>
+            /// File size, in bytes
+            /// </summary>
             public long SizeBytes;
+
+            /// <summary>
+            /// Modification date
+            /// </summary>
             public DateTime ModificationDate;
+
+            /// <summary>
+            /// True if the file failed the integrity check
+            /// </summary>
             public bool FailIntegrity;
 
+            /// <summary>
+            /// File hash
+            /// </summary>
             public string FileHash;
 
+            /// <summary>
+            /// Clear values
+            /// </summary>
+            // ReSharper disable once UnusedMember.Global
             public void Clear()
             {
                 FileName = string.Empty;
@@ -94,7 +137,16 @@ namespace MSFileInfoScanner
         private bool mFastZippedSFileCheck;
         private ZipFileWorkParamsType mZipFileWorkParams;
 
+        /// <summary>
+        /// File integrity failure event
+        /// </summary>
         public event FileIntegrityFailureEventHandler FileIntegrityFailure;
+
+        /// <summary>
+        /// File integrity failure event handler
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="message"></param>
         public delegate void FileIntegrityFailureEventHandler(string filePath, string message);
 
         /// <summary>
@@ -102,18 +154,18 @@ namespace MSFileInfoScanner
         /// </summary>
         public bool ComputeFileHashes { get; set; }
 
+        /// <summary>
+        /// Maximum number of lines to examine in a text file
+        /// </summary>
         public int MaximumTextFileLinesToCheck
         {
             get => mMaximumTextFileLinesToCheck;
-            set
-            {
-                if (value < 0)
-                    mMaximumTextFileLinesToCheck = 0;
-                else
-                    mMaximumTextFileLinesToCheck = value;
-            }
+            set => mMaximumTextFileLinesToCheck = value < 0 ? 0 : value;
         }
 
+        /// <summary>
+        /// Maximum number of nodes to examine in an XML file
+        /// </summary>
         public int MaximumXMLElementNodesToCheck
         {
             get => mMaximumXMLElementNodesToCheck;
@@ -126,6 +178,9 @@ namespace MSFileInfoScanner
             }
         }
 
+        /// <summary>
+        /// Status message
+        /// </summary>
         public string StatusMessage { get; private set; }
 
         /// <summary>
@@ -273,6 +328,9 @@ namespace MSFileInfoScanner
             if (fileNameLower.EndsWith("_SICStats.txt".ToLower()))
             {
                 // Note: Header line could be missing, but the file will usually (but not always) contain data
+
+                // ReSharper disable once CommentTypo
+
                 // Example contents:
                 //  Dataset	ParentIonIndex	MZ	SurveyScanNumber	FragScanNumber	OptimalPeakApexScanNumber	PeakApexOverrideParentIonIndex	CustomSICPeak	PeakScanStart	PeakScanEnd	PeakScanMaxIntensity	PeakMaxIntensity	PeakSignalToNoiseRatio	FWHMInScans	PeakArea	ParentIonIntensity	PeakBaselineNoiseLevel	PeakBaselineNoiseStDev	PeakBaselinePointsUsed	StatMomentsArea	CenterOfMassScan	PeakStDev	PeakSkew	PeakKSStat	StatMomentsDataCountUsed
                 //  113591	0	445.12	8	9	133	79	0	3	86	66	14881	0.4267	78	906920	11468	34870	22736	768	293248	68	6.36	-0.16	0.4162	5
@@ -283,6 +341,8 @@ namespace MSFileInfoScanner
 
             if (fileNameLower.StartsWith("cat_log"))
             {
+                // ReSharper disable once GrammarMistakeInComment
+
                 // Example contents:
                 //  5/16/2008 7:41:55 PM, 14418 'dta' files were concatenated to 'D:\DMS_Work\OU_CN32_002_run3_3Apr08_Draco_07-12-25_dta.txt', Normal,
                 //  5/16/2008 7:48:47 PM, 14418 'out' files were concatenated to 'D:\DMS_Work\OU_CN32_002_run3_3Apr08_Draco_07-12-25_out.txt', Normal,
@@ -318,6 +378,8 @@ namespace MSFileInfoScanner
 
                 // SEQUEST
             }
+
+            // ReSharper disable once StringLiteralTypo
 
             if (fileNameLower.EndsWith("_fht_prot.txt"))
             {
@@ -478,6 +540,8 @@ namespace MSFileInfoScanner
 
             if (fileNameLower.EndsWith("_SeqToProteinMap.txt".ToLower()))
             {
+                // ReSharper disable once CommentTypo
+
                 // Example contents:
                 //  Unique_Seq_ID	Cleavage_State	Terminus_State	Protein_Name	Protein_Expectation_Value_Log(e)	Protein_Intensity_Log(I)
                 //  1	2	0	P005|G3P_RABIT
@@ -505,6 +569,9 @@ namespace MSFileInfoScanner
             if (fileNameLower == "sequest.log")
             {
                 // Free form text file
+
+                // ReSharper disable once CommentTypo
+
                 // Example contents:
                 //  TurboSEQUEST - PVM Master v.27 (rev. 12), (c) 1998-2005
                 //  Molecular Biotechnology, Univ. of Washington, J.Eng/S.Morgan/J.Yates
@@ -620,7 +687,7 @@ namespace MSFileInfoScanner
         /// <param name="minimumCommaCount">Minimum number of commas to require in each line</param>
         /// <param name="requireEqualTabsPerLine">If True, then requires that every line have an equal number of Tab characters</param>
         /// <param name="requireEqualCommasPerLine">If True, then requires that every line have an equal number of commas</param>
-        /// <param name="requiredTextLineHeaders">Optional list of text that must be found at the start of any of the text lines (within the first mMaximumTextFileLinesToCheck lines); the search text is case-sensitive</param>
+        /// <param name="requiredTextLineHeaders">Optional list of text that must be found at the start of the text lines (within the first mMaximumTextFileLinesToCheck lines); the search text is case-sensitive</param>
         /// <param name="requiredTextMatchesLineStart">When True, then only examine the start of the line for the text in requiredTextLineHeaders</param>
         /// <param name="charCountSkipsBlankLines">When true, skip blank lines when counting characters</param>
         /// <param name="requiredTextMinMatchCount">Minimum number of items in requiredItemNames that needed to be found; 0 to require all items to be found</param>
@@ -684,10 +751,15 @@ namespace MSFileInfoScanner
 
             try
             {
-                // '' FHT protein files may have an extra tab at the end of the header line; need to account for this
-                //'If filePath.EndsWith("_fht_prot.txt") Then
-                //'    fhtProtFile = True
-                //'End If
+                // ReSharper disable CommentTypo
+
+                // First-hit protein files may have an extra tab at the end of the header line; need to account for this
+                // if (filePath.EndsWith("_fht_prot.txt"))
+                // {
+                //     fhtProtFile = true;
+                // }
+
+                // ReSharper restore CommentTypo
 
                 // Open the file
                 using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
@@ -876,6 +948,8 @@ namespace MSFileInfoScanner
                 case "lock":
                     lineIsValid = CheckTextFileWork(filePath, 1, new List<string> { "ftms" }, true);
                     break;
+
+                // ReSharper disable once StringLiteralTypo
 
                 case "sptype":
                     // Skip this file
@@ -1659,7 +1733,7 @@ namespace MSFileInfoScanner
                                     break;
 
                                 case FILE_EXTENSION_DAT:
-                                    // ToDo: Possibly check these files (Decon2LS DAT files)
+                                    // Decon2LS DAT files; ignore these
                                     break;
 
                                 case FILE_EXTENSION_TIC:
@@ -1706,6 +1780,8 @@ namespace MSFileInfoScanner
                                     // No extension
                                     passedIntegrityCheck = CheckExtensionFreeFile(dataFile.FullName);
                                     break;
+
+                                // ReSharper disable once RedundantEmptySwitchSection
 
                                 default:
                                     // Do not check this file (but add it to fileStats anyway)
@@ -1992,6 +2068,11 @@ namespace MSFileInfoScanner
             return allElementsFound;
         }
 
+        /// <summary>
+        /// Obtain a new Directory Stats instance
+        /// </summary>
+        /// <param name="directoryPath"></param>
+        /// <returns></returns>
         public static DirectoryStatsType GetNewDirectoryStats(string directoryPath)
         {
             var directoryStats = new DirectoryStatsType

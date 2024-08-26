@@ -26,17 +26,41 @@ namespace MSFileInfoScanner
         /// </summary>
         private List<Tuple<float, int>> mDataValues;
 
+        /// <summary>
+        /// Progress changed event
+        /// </summary>
         public event ProgressChangedEventHandler ProgressChanged;
+
+        /// <summary>
+        /// Progress changed event handler
+        /// </summary>
+        /// <param name="progress"></param>
         public delegate void ProgressChangedEventHandler(float progress);
 
+        /// <summary>
+        /// Maximum data count o load
+        /// </summary>
         public int MaximumDataCountToLoad { get; set; }
 
+        /// <summary>
+        /// Percent complete
+        /// </summary>
+        /// <remarks>Value between 0 and 100</remarks>
         public float Progress { get; private set; }
 
+        /// <summary>
+        /// Value to use for skipped data points
+        /// </summary>
         public float SkipDataPointFlag { get; set; }
 
+        /// <summary>
+        /// True if the total intensity percentage filter is enabled
+        /// </summary>
         public bool TotalIntensityPercentageFilterEnabled { get; set; }
 
+        /// <summary>
+        /// Total intensity percentage filter
+        /// </summary>
         public float TotalIntensityPercentageFilter { get; set; }
 
         /// <summary>
@@ -71,6 +95,11 @@ namespace MSFileInfoScanner
             mDataValues = new List<Tuple<float, int>>();
         }
 
+        /// <summary>
+        /// Get the intensity of the given data point
+        /// </summary>
+        /// <param name="dataPointIndex">Data point index</param>
+        /// <returns>Intensity</returns>
         public float GetAbundanceByIndex(int dataPointIndex)
         {
             if (dataPointIndex >= 0 && dataPointIndex < mDataValues.Count)
@@ -376,6 +405,7 @@ namespace MSFileInfoScanner
 
             UpdateProgress(3f / subtaskStepCount * 100.0f);
         }
+
         private void UpdateProgress(float progress)
         {
             Progress = progress;

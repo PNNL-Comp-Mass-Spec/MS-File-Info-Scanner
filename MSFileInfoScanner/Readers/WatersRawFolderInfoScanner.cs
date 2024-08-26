@@ -17,7 +17,10 @@ namespace MSFileInfoScanner.Readers
     {
         // Ignore Spelling: lcms, Micromass, Synapt
 
-        // Note: The extension must be in all caps
+        /// <summary>
+        /// Micromass .raw folder extension
+        /// </summary>
+        /// <remarks>The extension must be in all caps</remarks>
         public const string MICROMASS_RAW_FOLDER_EXTENSION = ".RAW";
 
         private readonly DateTime MINIMUM_ACCEPTABLE_ACQ_START_TIME = new(1975, 1, 1);
@@ -31,6 +34,11 @@ namespace MSFileInfoScanner.Readers
             base(options, lcms2DPlotOptions)
         { }
 
+        /// <summary>
+        /// Extract the dataset name from the file path
+        /// </summary>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <returns>Dataset name</returns>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             // The dataset name is simply the directory name without .Raw
@@ -152,6 +160,7 @@ namespace MSFileInfoScanner.Readers
             {
                 ReadMassLynxAcquisitionInfo(datasetDirectory, datasetFileInfo, nativeFileIO, headerInfo);
             }
+            // ReSharper disable once RedundantIfElseBlock
             else
             {
                 // Error getting the header info using MassLynxNativeIO
@@ -187,6 +196,8 @@ namespace MSFileInfoScanner.Readers
 
                 for (var functionNumber = 1; functionNumber <= functionCount; functionNumber++)
                 {
+                    // ReSharper disable once RedundantNameQualifier
+
                     if (nativeFileIO.GetFunctionInfo(datasetDirectory.FullName, 1, out MassLynxData.MSFunctionInfo functionInfo))
                     {
                         datasetFileInfo.ScanCount += functionInfo.ScanCount;

@@ -19,12 +19,29 @@ namespace MSFileInfoScanner.Readers
     {
         // Ignore Spelling: Acq, acqmeth, AcqTimes, GC, Ini, Lcms
 
-        // Note: The extension must be in all caps
+        // ReSharper disable once UnusedMember.Global
+
+        /// <summary>
+        /// Agilent data folder .d extension
+        /// </summary>
+        /// <remarks>The extension must be capitalized, even though .d directories for Bruker datasets are lowercase</remarks>
         public const string AGILENT_DATA_FOLDER_D_EXTENSION = ".D";
+
+        /// <summary>
+        /// Agilent MS data file name
+        /// </summary>
         public const string AGILENT_MS_DATA_FILE = "DATA.MS";
+
+        /// <summary>
+        /// agilent acquisition method file name
+        /// </summary>
         public const string AGILENT_ACQ_METHOD_FILE = "acqmeth.txt";
 
+        /// <summary>
+        /// Agilent GC .ini file
+        /// </summary>
         public const string AGILENT_GC_INI_FILE = "GC.ini";
+
         private const string ACQ_METHOD_FILE_EQUILIBRATION_TIME_LINE = "Equilibration Time";
         private const string ACQ_METHOD_FILE_RUN_TIME_LINE = "Run Time";
 
@@ -63,6 +80,11 @@ namespace MSFileInfoScanner.Readers
             mExtractTime = new Regex("([0-9.]+) min", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
         }
 
+        /// <summary>
+        /// Extract the dataset name from the file path
+        /// </summary>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <returns>Dataset name</returns>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             // The dataset name is simply the directory name without .D
@@ -453,6 +475,8 @@ namespace MSFileInfoScanner.Readers
                         if (!success)
                         {
                             // Try to extract Runtime from the GC.ini file
+
+                            // ReSharper disable once RedundantAssignment
                             success = ParseGCIniFile(dataFilePath, datasetFileInfo);
                         }
                     }
@@ -464,6 +488,8 @@ namespace MSFileInfoScanner.Readers
                     // We set success to true, even if either of the above methods fail
                     success = true;
                 }
+
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
 
                 if (success)
                 {

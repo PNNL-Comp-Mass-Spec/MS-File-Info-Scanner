@@ -24,11 +24,29 @@ namespace MSFileInfoScanner.Readers
     {
         // Ignore Spelling: AcqTime, Abu, Acq, Addnl, Bruker, href, html, lcms, MzMin, proteo
 
+        /// <summary>
+        /// Progress value for spectra loaded
+        /// </summary>
         public const int PROGRESS_SPECTRA_LOADED = 90;
+
+        /// <summary>
+        /// Progress value for TIC and BPI plots saved
+        /// </summary>
         public const int PROGRESS_SAVED_TIC_AND_BPI_PLOT = 92;
+
+        /// <summary>
+        /// Progress value for 2D plots saved
+        /// </summary>
         public const int PROGRESS_SAVED_2D_PLOTS = 99;
 
+        /// <summary>
+        /// Maximum number of scans to track in detail
+        /// </summary>
         public const int MAX_SCANS_TO_TRACK_IN_DETAIL = 750000;
+
+        /// <summary>
+        /// Maximum number of scans to track with the TIC and BPI
+        /// </summary>
         public const int MAX_SCANS_FOR_TIC_AND_BPI = 1000000;
 
         /// <summary>
@@ -75,10 +93,16 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         protected readonly List<TICandBPIPlotter> mInstrumentSpecificPlots;
 
+        /// <summary>
+        /// LCMS 2D plot
+        /// </summary>
         protected readonly LCMSDataPlotter mLCMS2DPlot;
 
         private readonly LCMSDataPlotter mLCMS2DPlotOverview;
 
+        /// <summary>
+        /// Dataset stats summarizer
+        /// </summary>
         protected readonly DatasetStatsSummarizer mDatasetStatsSummarizer;
 
         /// <summary>
@@ -318,6 +342,9 @@ namespace MSFileInfoScanner.Readers
             HideEmptyHTMLSections = false;
         }
 
+        /// <summary>
+        /// Initialize TIC and BPI plots
+        /// </summary>
         protected void InitializeTICAndBPI()
         {
             // Initialize TIC, BPI, and m/z vs. time arrays
@@ -330,6 +357,9 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
+        /// <summary>
+        /// Initialize LCMS 2D plot
+        /// </summary>
         protected void InitializeLCMS2DPlot()
         {
             // Initialize var that tracks m/z vs. time
@@ -993,6 +1023,11 @@ namespace MSFileInfoScanner.Readers
             // ReSharper restore UseRawString
         }
 
+        /// <summary>
+        /// Get acquisition start time
+        /// </summary>
+        /// <param name="msDataFileReader">MS data file reader</param>
+        /// <returns>Start time</returns>
         [CLSCompliant(false)]
         protected DateTime GetRunStartTime(MSDataFileReader msDataFileReader)
         {
@@ -1028,6 +1063,14 @@ namespace MSFileInfoScanner.Readers
             return (int)Math.Round(value / 1000.0 / 1000, 0) + "M";
         }
 
+        /// <summary>
+        /// Load scan data using ProteoWizard
+        /// </summary>
+        /// <param name="datasetFileOrDirectory">Dataset file or directory</param>
+        /// <param name="datasetFileInfo">Dataset file info</param>
+        /// <param name="skipScansWithNoIons">If true, skip empty scans</param>
+        /// <param name="highResMS1">If true, the MS1 spectra are high-resolution</param>
+        /// <param name="highResMS2">If true, the MS2 spectra are high-resolution</param>
         [HandleProcessCorruptedStateExceptions]
         protected void LoadScanDataWithProteoWizard(
             FileSystemInfo datasetFileOrDirectory,
@@ -1114,6 +1157,9 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
+        /// <summary>
+        /// Perform required post-processing tasks
+        /// </summary>
         protected void PostProcessTasks()
         {
             ShowInstrumentFiles();
@@ -1135,6 +1181,9 @@ namespace MSFileInfoScanner.Readers
                                  lcMSPlotStepsComplete / (float)lcMSPlotStepsTotal * 100));
         }
 
+        /// <summary>
+        /// Reset results
+        /// </summary>
         protected void ResetResults()
         {
             MS2MzMinValidationError = false;
@@ -1174,6 +1223,12 @@ namespace MSFileInfoScanner.Readers
             OnDebugEvent(fileInfo.ToString());
         }
 
+        /// <summary>
+        /// Update acquisition start and end times
+        /// </summary>
+        /// <param name="datasetFileInfo">Dataset file info</param>
+        /// <param name="msDataFileReader">MS data file reader</param>
+        /// <param name="runStartTime">Acquisition start time</param>
         [CLSCompliant(false)]
         protected void UpdateAcqStartAndEndTimes(DatasetFileInfo datasetFileInfo, MSDataFileReader msDataFileReader, DateTime runStartTime)
         {
@@ -1346,6 +1401,11 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
+        /// <summary>
+        /// Update dataset stats using dataset file info
+        /// </summary>
+        /// <param name="datasetFileInfo">Dataset file info</param>
+        /// <param name="copyFileSystemTimes">If true, copy file system times</param>
         protected void UpdateDatasetStatsSummarizerUsingDatasetFileInfo(DatasetFileInfo datasetFileInfo, bool copyFileSystemTimes = true)
         {
             if (copyFileSystemTimes)

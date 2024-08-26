@@ -24,8 +24,15 @@ namespace MSFileInfoScanner.Readers
     {
         // Ignore Spelling: AcqData, AcqTime, IMS, lcms, Midac, ns, μs
 
-        // Note: The extension must be in all caps
+        // ReSharper disable once UnusedMember.Global
+
+        /// <summary>
+        /// Agilent data folder .d extension
+        /// </summary>
+        /// <remarks>The extension must be capitalized, even though .d directories for Bruker datasets are lowercase</remarks>
         public const string AGILENT_DATA_FOLDER_D_EXTENSION = ".D";
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
         // ReSharper disable once IdentifierTypo
         public const string AGILENT_ACQDATA_FOLDER_NAME = "AcqData";
@@ -41,6 +48,8 @@ namespace MSFileInfoScanner.Readers
 
         public const string AGILENT_TIME_SEGMENT_FILE = "MSTS.xml";
 
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
         private bool mIsImsData;
 
         /// <summary>
@@ -53,6 +62,11 @@ namespace MSFileInfoScanner.Readers
             base(options, lcms2DPlotOptions)
         { }
 
+        /// <summary>
+        /// Extract the dataset name from the file path
+        /// </summary>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <returns>Dataset name</returns>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             // The dataset name is simply the directory name without .D
@@ -414,8 +428,11 @@ namespace MSFileInfoScanner.Readers
                 // Open the data directory using the ProteoWizardWrapper
 
                 var massSpecDataReader = (IMsdrDataReader)new MassSpecDataReader();
+
+                // ReSharper disable once UnusedVariable
                 var open = massSpecDataReader.OpenDataFile(dataDirectoryPath);
-                // TODO: Check value of "open"!
+
+                // Could check the value of open and take action if false
 
                 try
                 {
@@ -743,6 +760,11 @@ namespace MSFileInfoScanner.Readers
 
         private class AgilentDeviceInfo : ThermoRawFileReader.DeviceInfo
         {
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            /// <param name="deviceType">Device type</param>
+            /// <param name="id">Device ID</param>
             public AgilentDeviceInfo(Device deviceType, int id) : base(deviceType, id)
             { }
 
@@ -785,6 +807,8 @@ namespace MSFileInfoScanner.Readers
                 var bpcData = massSpecDataReader.GetChromatogram(filter)[0];
                 AddChromatogram(bpcData, scanMapper, scanStats);
 
+                // ReSharper disable CommentTypo
+
                 /* NOTE: The following code may extract other chromatogram types; the primary ones seen are MRM and EIC. This does not work for instrument curves (pump pressure).
                 var filter = (IBDAChromFilter)new BDAChromFilter();
                 filter.ChromatogramType = ChromType.Unspecified;
@@ -809,6 +833,8 @@ namespace MSFileInfoScanner.Readers
                     }
                 }
                 */
+
+                // ReSharper restore CommentTypo
             }
 
             if (Options.SaveTICAndBPIPlots /* && massSpecDataReader.FileInformation.IsNonMSDataPresent()*/)

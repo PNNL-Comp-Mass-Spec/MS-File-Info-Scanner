@@ -8,6 +8,9 @@ using pwiz.ProteowizardWrapper;
 
 namespace MSFileInfoScanner.Readers
 {
+    /// <summary>
+    /// ProteoWizard scanner
+    /// </summary>
     public abstract class ProteoWizardScanner : MSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: lcms, Proteo
@@ -71,6 +74,7 @@ namespace MSFileInfoScanner.Readers
                         continue;
                     }
 
+                    // ReSharper disable once RedundantArgumentDefaultValue
                     var spectrum = msDataFileReader.GetSpectrum(scanIndex, true);
 
                     if (spectrum == null)

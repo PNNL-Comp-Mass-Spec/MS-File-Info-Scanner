@@ -162,6 +162,10 @@ namespace MSFileInfoScanner.DatasetStats
             InstrumentFiles.Add(instrumentFileRelativePath, instFileInfo);
         }
 
+        /// <summary>
+        /// Add an instrument file, but do not compute the SHA-1 hash
+        /// </summary>
+        /// <param name="instrumentFile">Instrument file info</param>
         public void AddInstrumentFileNoHash(FileInfo instrumentFile)
         {
             var sha1Hash = string.Empty;

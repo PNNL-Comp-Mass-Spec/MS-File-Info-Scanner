@@ -23,7 +23,11 @@ namespace MSFileInfoScanner.Readers
         // ReSharper disable once CommentTypo
         // Ignore Spelling: AcqTimeEnd, Addon, lcms, ns, Sarc, uimf
 
-        // Note: The extension must be in all caps
+        /// <summary>
+        /// UIMF file extension
+        /// </summary>
+        /// <remarks>The extension must be in all caps</remarks>
+
         public const string UIMF_FILE_EXTENSION = ".UIMF";
 
         /// <summary>
@@ -149,9 +153,7 @@ namespace MSFileInfoScanner.Readers
                         continue;
                     }
 
-                    // ToDo: Analyze ionMZ and ionIntensity to compute a quality scores
-                    // Keep track of the quality scores and then store one or more overall quality scores in datasetFileInfo.OverallQualityScore
-                    // For now, this just computes the average intensity for each scan and then computes and overall average intensity value
+                    // Compute the average intensity for each scan and then compute an overall average intensity value
 
                     double intensitySum = 0;
 
@@ -209,6 +211,11 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
+        /// <summary>
+        /// Extract the dataset name from the file path
+        /// </summary>
+        /// <param name="dataFilePath">Data file path</param>
+        /// <returns>Dataset name</returns>
         public override string GetDatasetNameViaPath(string dataFilePath)
         {
             // The dataset name is simply the file name without .UIMF
@@ -468,7 +475,7 @@ namespace MSFileInfoScanner.Readers
 
                             // In UIMF files from IMS04,                            if Frame_Parameters.Scans = 360, Frame_Scans will have scans 0 through 359
                             // In UIMF files from IMS08, prior to December 1, 2014, if Frame_Parameters.Scans = 374, Frame_Scans will have scans 0 through 373
-                            // in UIMF files from IMS08, after December 1, 2014     if Frame_Parameters.Scans = 374, Frame_Scans will have scans 1 through 374
+                            // in UIMF files from IMS08, after December 1, 2014,    if Frame_Parameters.Scans = 374, Frame_Scans will have scans 1 through 374
 
                             var ionCount = uimfReader.GetSpectrum(frameNumber, frameNumber, frameType, 0, frameParams.Scans, out mzList, out intensityList);
 

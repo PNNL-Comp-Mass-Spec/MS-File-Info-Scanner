@@ -40,6 +40,9 @@ namespace MSFileInfoScanner
     {
         // Ignore Spelling: app, Bruker, centroiding, idx, LCMS, Micromass, OxyPlot, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
 
+        /// <summary>
+        /// Program date
+        /// </summary>
         public static readonly string PROGRAM_DATE;
 
         static MSFileInfoScanner()
@@ -88,14 +91,29 @@ namespace MSFileInfoScanner
             mLastCheckForAbortProcessingFile = oneHourAgo;
         }
 
+        /// <summary>
+        /// Default acquisition time file name
+        /// </summary>
         public const string DEFAULT_ACQUISITION_TIME_FILENAME_TXT = "DatasetTimeFile.txt";
 
+        /// <summary>
+        /// Default directory integrity file name
+        /// </summary>
         public const string DEFAULT_DIRECTORY_INTEGRITY_INFO_FILENAME_TXT = "DirectoryIntegrityInfo.txt";
 
+        /// <summary>
+        /// Default file integrity file name
+        /// </summary>
         public const string DEFAULT_FILE_INTEGRITY_DETAILS_FILENAME_TXT = "FileIntegrityDetails.txt";
 
+        /// <summary>
+        /// Default file integrity errors file name
+        /// </summary>
         public const string DEFAULT_FILE_INTEGRITY_ERRORS_FILENAME_TXT = "FileIntegrityErrors.txt";
 
+        /// <summary>
+        /// Abort processing file name
+        /// </summary>
         public const string ABORT_PROCESSING_FILENAME = "AbortProcessing.txt";
 
         private const int FILE_MODIFICATION_WINDOW_MINUTES = 60;
@@ -156,8 +174,14 @@ namespace MSFileInfoScanner
         private DateTime mLastWriteTimeFileIntegrityFailure;
         private DateTime mLastCheckForAbortProcessingFile;
 
+        /// <summary>
+        /// The calling process can set this to true to abort processing
+        /// </summary>
         public override bool AbortProcessing { get; set; }
 
+        /// <summary>
+        /// Acquisition time file name
+        /// </summary>
         public override string AcquisitionTimeFilename
         {
             get => GetDataFileFilename(DataFileTypeConstants.MSFileInfo);
@@ -169,6 +193,11 @@ namespace MSFileInfoScanner
         /// </summary>
         public override string DatasetInfoXML { get; protected set; }
 
+        /// <summary>
+        /// Obtain the data file path for the given file type
+        /// </summary>
+        /// <param name="dataFileType">Data file type</param>
+        /// <returns>Full or relative file path</returns>
         public string GetDataFileFilename(DataFileTypeConstants dataFileType)
         {
             return dataFileType switch
@@ -181,6 +210,12 @@ namespace MSFileInfoScanner
             };
         }
 
+        /// <summary>
+        /// Set the data file path for the given file type
+        /// </summary>
+        /// <param name="filePath">Full or relative file path</param>
+        /// <param name="dataFileType">File type</param>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public void SetDataFileFilename(string filePath, DataFileTypeConstants dataFileType)
         {
             switch (dataFileType)
@@ -203,8 +238,16 @@ namespace MSFileInfoScanner
             }
         }
 
+        /// <summary>
+        /// Default acquisition time file name
+        /// </summary>
         public static string DefaultAcquisitionTimeFilename => DefaultDataFileName(DataFileTypeConstants.MSFileInfo);
 
+        /// <summary>
+        /// Default data file name
+        /// </summary>
+        /// <param name="dataFileType"></param>
+        /// <returns></returns>
         public static string DefaultDataFileName(DataFileTypeConstants dataFileType)
         {
             return dataFileType switch
@@ -356,6 +399,10 @@ namespace MSFileInfoScanner
             return AppUtils.GetAppDataDirectoryPath(appName);
         }
 
+        /// <summary>
+        /// Obtain the application directory path
+        /// </summary>
+        /// <returns></returns>
         public static string GetAppDirectoryPath()
         {
             // Could use Application.StartupPath, but .GetExecutingAssembly is better
@@ -386,11 +433,19 @@ namespace MSFileInfoScanner
                 : new FileInfo(filePath);
         }
 
+        /// <summary>
+        /// Obtain the list of known directory extensions (as an array)
+        /// </summary>
+        /// <returns>List of directory extensions</returns>
         public override string[] GetKnownDirectoryExtensions()
         {
             return GetKnownDirectoryExtensionsList().ToArray();
         }
 
+        /// <summary>
+        /// Obtain the list of known directory extensions (as list)
+        /// </summary>
+        /// <returns>List of directory extensions</returns>
         public List<string> GetKnownDirectoryExtensionsList()
         {
             var extensionsToParse = new List<string>
@@ -402,11 +457,19 @@ namespace MSFileInfoScanner
             return extensionsToParse;
         }
 
+        /// <summary>
+        /// Obtain the list of known file extensions (as an array)
+        /// </summary>
+        /// <returns>List of file extensions</returns>
         public override string[] GetKnownFileExtensions()
         {
             return GetKnownFileExtensionsList().ToArray();
         }
 
+        /// <summary>
+        /// Obtain the list of known file extensions (as a list)
+        /// </summary>
+        /// <returns>List of file extensions</returns>
         public List<string> GetKnownFileExtensionsList()
         {
             var extensionsToParse = new List<string>
@@ -1277,11 +1340,14 @@ namespace MSFileInfoScanner
                             return true;
                         }
                         else
-                        // ReSharper disable once HeuristicUnreachableCode
+                            // ReSharper disable HeuristicUnreachableCode
+#pragma warning disable CS0162 // Unreachable code detected
                         {
                             SetErrorCode(MSFileScannerErrorCodes.FilePathError);
                             return false;
                         }
+#pragma warning restore CS0162 // Unreachable code detected
+                        // ReSharper restore HeuristicUnreachableCode
                     }
 
                     var knownMSDataType = false;
@@ -1327,11 +1393,13 @@ namespace MSFileInfoScanner
                                     {
                                         mMSInfoScanner = new AgilentGCDFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     }
+                                    // ReSharper disable CommentTypo
                                     //else if (PathUtils.FindDirectoriesWildcard(datasetDirectory, AgilentTOFDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Count > 0)
                                     //{
                                     //    // Uses ProteoWizard to read the file
                                     //    mMSInfoScanner = new AgilentTOFDFolderInfoScanner(Options, LCMS2DPlotOptions);
                                     //}
+                                    // ReSharper restore CommentTypo
                                     else if (PathUtils.FindDirectoriesWildcard(datasetDirectory, AgilentMassHunterDFolderInfoScanner.AGILENT_ACQDATA_FOLDER_NAME).Count > 0)
                                     {
                                         // ReSharper disable once CommentTypo
@@ -1646,7 +1714,13 @@ namespace MSFileInfoScanner
 
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if (!success && !SKIP_FILES_IN_ERROR)
+                            // ReSharper disable HeuristicUnreachableCode
+#pragma warning disable CS0162 // Unreachable code detected
+                        {
                             break;
+                        }
+#pragma warning restore CS0162 // Unreachable code detected
+                        // ReSharper restore HeuristicUnreachableCode
 
                         matchCount++;
 
@@ -1673,7 +1747,13 @@ namespace MSFileInfoScanner
 
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if (!success && !SKIP_FILES_IN_ERROR)
+                            // ReSharper disable HeuristicUnreachableCode
+#pragma warning disable CS0162 // Unreachable code detected
+                        {
                             break;
+                        }
+#pragma warning restore CS0162 // Unreachable code detected
+                        // ReSharper restore HeuristicUnreachableCode
 
                         matchCount++;
 
@@ -1781,7 +1861,7 @@ namespace MSFileInfoScanner
         {
             bool success;
 
-            // Examine inputFilePathOrDirectory to see if it contains a filename; if not, assume it points to a directory
+            // Examine inputFilePathOrDirectory to see if it contains a file name; if not, assume it points to a directory
             // First, see if it contains a * or ?
             try
             {
@@ -2245,11 +2325,20 @@ namespace MSFileInfoScanner
             return success;
         }
 
+        /// <summary>
+        /// Save cached results now
+        /// </summary>
+        /// <returns>True if successful, false if an error</returns>
         public override bool SaveCachedResults()
         {
             return SaveCachedResults(true);
         }
 
+        /// <summary>
+        /// Save cached results now
+        /// </summary>
+        /// <param name="clearCachedData">When true, clear cached data</param>
+        /// <returns>True if successful, false if an error</returns>
         public override bool SaveCachedResults(bool clearCachedData)
         {
             if (Options.UseCacheFiles)
@@ -2260,6 +2349,11 @@ namespace MSFileInfoScanner
             return true;
         }
 
+        /// <summary>
+        /// Save parameter file settings
+        /// </summary>
+        /// <param name="parameterFilePath">Parameter file ath</param>
+        /// <returns>True if successful, false if an error</returns>
         public override bool SaveParameterFileSettings(string parameterFilePath)
         {
             var settingsFile = new XmlSettingsFileAccessor();
@@ -2445,6 +2539,12 @@ namespace MSFileInfoScanner
             return option ? "Enabled" : "Disabled";
         }
 
+        /// <summary>
+        /// Make sure that filePath is not an empty string, and assure that the file's parent directory exists
+        /// </summary>
+        /// <param name="filePath">File path (will auto-define if an empty string)</param>
+        /// <param name="dataFileType">File type</param>
+        /// <returns>True if successful, false if an error</returns>
         public static bool ValidateDataFilePath(ref string filePath, DataFileTypeConstants dataFileType)
         {
             if (string.IsNullOrEmpty(filePath))
