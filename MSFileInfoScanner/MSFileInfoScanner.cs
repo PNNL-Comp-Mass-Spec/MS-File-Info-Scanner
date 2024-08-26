@@ -284,7 +284,7 @@ namespace MSFileInfoScanner
         {
             if (Options.UseCacheFiles)
             {
-                mMSFileInfoDataCache.AutosaveCachedResults();
+                mMSFileInfoDataCache.AutoSaveCachedResults();
             }
         }
 

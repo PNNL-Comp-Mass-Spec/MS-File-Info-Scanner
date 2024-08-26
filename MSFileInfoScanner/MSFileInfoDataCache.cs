@@ -139,10 +139,10 @@ namespace MSFileInfoScanner
             return date;
         }
 
-        public void AutosaveCachedResults()
         /// <summary>
         /// Save the cached results
         /// </summary>
+        public void AutoSaveCachedResults()
         {
             if (mCachedResultsAutoSaveIntervalMinutes > 0)
             {
