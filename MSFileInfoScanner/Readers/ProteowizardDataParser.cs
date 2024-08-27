@@ -1003,6 +1003,15 @@ namespace MSFileInfoScanner.Readers
 
                     for (var index = 0; index < mzList.Length; index++)
                     {
+                        if (index >= intensities.Length)
+                        {
+                            OnWarningEvent("Mzs list for spectrum index {0} has more data points than the Intensities list: {1} vs. {2}",
+                                spectrumIndex, mzList.Length, intensities.Length);
+
+                            // Break out of the for loop
+                            break;
+                        }
+
                         tic += intensities[index];
 
                         if (intensities[index] > bpi)
