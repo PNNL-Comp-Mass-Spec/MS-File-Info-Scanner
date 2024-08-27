@@ -1153,7 +1153,7 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent("Error using ProteoWizard reader", ex);
+                OnErrorEvent(string.Format("Error using ProteoWizard reader; {0}", StackTraceFormatter.GetExceptionStackTrace(ex)), ex);
             }
         }
 

@@ -687,7 +687,12 @@ namespace MSFileInfoScanner.Readers
             }
             catch (Exception ex)
             {
-                OnErrorEvent(string.Format("Error reading instrument data with ProteoWizard: {0}", ex.Message), ex);
+                var stackTraceIfMissing = ex.Message.IndexOf("Stack trace:", StringComparison.OrdinalIgnoreCase) >= 0
+                    ? string.Empty
+                    : StackTraceFormatter.GetExceptionStackTrace(ex);
+
+                OnErrorEvent(string.Format("Error reading instrument data with ProteoWizard: {0}; {1}", ex.Message, stackTraceIfMissing), ex);
+
                 return false;
             }
         }
