@@ -27,7 +27,6 @@ namespace MSFileInfoScanner.Readers
         /// UIMF file extension
         /// </summary>
         /// <remarks>The extension must be in all caps</remarks>
-
         public const string UIMF_FILE_EXTENSION = ".UIMF";
 
         /// <summary>
