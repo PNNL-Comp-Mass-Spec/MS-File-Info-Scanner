@@ -735,6 +735,15 @@ namespace MSFileInfoScanner.Readers
 
                 try
                 {
+                    if (spectrumIndex >= minuteBasedScanTimes.Count)
+                    {
+                        OnWarningEvent("Spectrum index {0} is out of range for list minuteBasedScanTimes, which has {1} items",
+                            spectrumIndex, minuteBasedScanTimes.Count);
+
+                        // Break out of the for loop
+                        break;
+                    }
+
                     StoreSingleSpectrum(minuteBasedScanTimes[spectrumIndex], msLevels, parserInfo, spectrumIndex);
                 }
                 catch (Exception ex)
