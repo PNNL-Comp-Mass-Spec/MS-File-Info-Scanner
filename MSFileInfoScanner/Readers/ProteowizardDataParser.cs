@@ -728,7 +728,15 @@ namespace MSFileInfoScanner.Readers
             {
                 var scanNumber = spectrumIndex + 1;
 
-                StoreSingleSpectrum(minuteBasedScanTimes[spectrumIndex], msLevels, parserInfo, spectrumIndex);
+                try
+                {
+                    StoreSingleSpectrum(minuteBasedScanTimes[spectrumIndex], msLevels, parserInfo, spectrumIndex);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(string.Format("Error calling StoreSingleSpectrum for spectrum index {0} (scan {1}): {2}; {3}",
+                        spectrumIndex, scanNumber, ex.Message, StackTraceFormatter.GetExceptionStackTrace(ex)));
+                }
 
                 if (DateTime.UtcNow.Subtract(lastStatusProgressTime).TotalMinutes > 5)
                 {
