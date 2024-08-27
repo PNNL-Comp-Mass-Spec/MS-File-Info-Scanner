@@ -493,11 +493,11 @@ namespace MSFileInfoScanner.Plotting
 
                         if (mSortingWarnCount <= 10)
                         {
-                            Console.WriteLine("  Sorting m/z data (this typically shouldn't be required for Thermo data, though can occur for high res Orbitrap data)");
+                            Console.WriteLine("  Sorting m/z data for scan {0} (this typically shouldn't be required for Thermo data, but it can be required for high res Orbitrap data and timsTOF data)", scanNumber);
                         }
                         else if (mSortingWarnCount % 100 == 0)
                         {
-                            Console.WriteLine("  Sorting m/z data (i = " + mSortingWarnCount + ")");
+                            Console.WriteLine("  Sorting m/z data ({0} scans sorted)", mSortingWarnCount);
                         }
 
                         ionListToUse.Sort(new MSIonTypeComparer());
