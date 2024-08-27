@@ -41,6 +41,11 @@ namespace MSFileInfoScanner.Readers
 
         private CancellationTokenSource mCancellationToken;
         private DateTime mGetScanTimesStartTime;
+
+        /// <summary>
+        /// Maximum time to wait for mMSDataFileReader.GetScanTimesAndMsLevels() to finish determining scan times and MS levels
+        /// </summary>
+        /// <remarks>Prior to August 2024 this was set to 90 seconds. It was increased to 900 seconds to handle timsTOF SCP datasets</remarks>
         private int mGetScanTimesMaxWaitTimeSeconds;
         private bool mGetScanTimesAutoAborted;
 
@@ -609,7 +614,7 @@ namespace MSFileInfoScanner.Readers
                 var msLevels = Array.Empty<byte>();
 
                 mGetScanTimesStartTime = DateTime.UtcNow;
-                mGetScanTimesMaxWaitTimeSeconds = 90;
+                mGetScanTimesMaxWaitTimeSeconds = 900;
                 mGetScanTimesAutoAborted = false;
 
                 parserInfo.MinScanIndexWithoutScanTimes = int.MaxValue;
