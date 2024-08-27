@@ -719,6 +719,8 @@ namespace MSFileInfoScanner.Readers
             parserInfo.ResetCounts();
             var minuteBasedScanTimes = new List<double>();
 
+            var scanLengthSum = 0.0;
+
             // The scan times returned by .GetScanTimesAndMsLevels() are the acquisition time in seconds from the start of the analysis
             // Convert these to minutes
             for (var spectrumIndex = 0; spectrumIndex < spectrumCount; spectrumIndex++)
@@ -726,7 +728,26 @@ namespace MSFileInfoScanner.Readers
                 if (spectrumIndex >= parserInfo.MinScanIndexWithoutScanTimes)
                     break;
 
-                minuteBasedScanTimes.Add(scanTimes[spectrumIndex] / 60.0);
+                var scanTimeMinutes = scanTimes[spectrumIndex] / 60.0;
+
+                minuteBasedScanTimes.Add(scanTimeMinutes);
+
+                if (spectrumIndex > 0)
+                {
+                    scanLengthSum += scanTimeMinutes - minuteBasedScanTimes[spectrumIndex - 1];
+                }
+            }
+
+            // This is the average acquisition time for each spectrum, in minutes
+            double averageAcqTimePerSpectrum;
+
+            if (minuteBasedScanTimes.Count > 0)
+            {
+                averageAcqTimePerSpectrum = scanLengthSum / minuteBasedScanTimes.Count;
+            }
+            else
+            {
+                averageAcqTimePerSpectrum = 1 / 60.0;
             }
 
             Console.WriteLine();
@@ -741,16 +762,33 @@ namespace MSFileInfoScanner.Readers
 
                 try
                 {
-                    if (spectrumIndex >= minuteBasedScanTimes.Count)
-                    {
-                        OnWarningEvent("Spectrum index {0} is out of range for list minuteBasedScanTimes, which has {1} items",
-                            spectrumIndex, minuteBasedScanTimes.Count);
+                    double scanTimeMinutes;
 
-                        // Break out of the for loop
-                        break;
+                    if (spectrumIndex < minuteBasedScanTimes.Count)
+                    {
+                        scanTimeMinutes = minuteBasedScanTimes[spectrumIndex];
+                    }
+                    else
+                    {
+                        if (spectrumIndex == minuteBasedScanTimes.Count)
+                        {
+                            OnWarningEvent(
+                                "Spectrum index {0} is out of range for list minuteBasedScanTimes, which has {1} items; remaining scan times will be extrapolated using the average acquisition time per spectrum ({2:0.0000} seconds)",
+                                spectrumIndex, minuteBasedScanTimes.Count, averageAcqTimePerSpectrum * 60);
+                        }
+
+                        if (minuteBasedScanTimes.Count == 0)
+                        {
+                            scanTimeMinutes = scanNumber * averageAcqTimePerSpectrum;
+                        }
+                        else
+                        {
+                            // Estimate the acquisition time for the scan by extrapolating from the last value in minuteBasedScanTimes[]
+                            scanTimeMinutes = minuteBasedScanTimes[minuteBasedScanTimes.Count - 1] + (scanNumber - minuteBasedScanTimes.Count) * averageAcqTimePerSpectrum;
+                        }
                     }
 
-                    StoreSingleSpectrum(minuteBasedScanTimes[spectrumIndex], msLevels, parserInfo, spectrumIndex);
+                    StoreSingleSpectrum(scanTimeMinutes, msLevels, parserInfo, spectrumIndex);
                 }
                 catch (Exception ex)
                 {
