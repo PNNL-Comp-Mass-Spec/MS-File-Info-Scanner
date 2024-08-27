@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 using System.Threading;
+using MathNet.Numerics.Statistics;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScanner.Plotting;
 using PRISM;
@@ -932,19 +933,37 @@ namespace MSFileInfoScanner.Readers
                     }
                 }
 
-                var ionMobility = msDataSpectrum.IonMobility.Mobility ?? 0;
+                double ionMobility;
+
+                if (msDataSpectrum.IonMobilities?.Length > 0)
+                {
+                    ionMobility = msDataSpectrum.IonMobilities.Median();
+                }
+                else
+                {
+                    ionMobility = msDataSpectrum.IonMobility.Mobility ?? 0;
+                }
+
                 var ionMobilityUnits = msDataSpectrum.IonMobility.Units;
 
                 scanStatsEntry.ScanFilterText = ionMobility > 0 ? "IMS" : genericScanFilter;
                 scanStatsEntry.ExtendedScanInfo.ScanFilterText = scanStatsEntry.ScanFilterText;
 
-                scanStatsEntry.DriftTimeMsec = ionMobilityUnits switch
+                if (msDataSpectrum.IonMobilities?.Length > 0 && ionMobilityUnits is eIonMobilityUnits.none or eIonMobilityUnits.unknown)
                 {
-                    eIonMobilityUnits.drift_time_msec => ionMobility.ToString("0.0###"),
-                    eIonMobilityUnits.none => string.Empty,
-                    eIonMobilityUnits.unknown => string.Empty,
-                    _ => msDataSpectrum.IonMobility.ToString()
-                };
+                    // Assume the units are milliseconds
+                    scanStatsEntry.DriftTimeMsec = ionMobility.ToString("0.0###");
+                }
+                else
+                {
+                    scanStatsEntry.DriftTimeMsec = ionMobilityUnits switch
+                    {
+                        eIonMobilityUnits.drift_time_msec => ionMobility.ToString("0.0###"),
+                        eIonMobilityUnits.none => string.Empty,
+                        eIonMobilityUnits.unknown => string.Empty,
+                        _ => msDataSpectrum.IonMobility.ToString()
+                    };
+                }
 
                 scanStatsEntry.ElutionTime = scanTimeMinutes.ToString("0.0###");
 

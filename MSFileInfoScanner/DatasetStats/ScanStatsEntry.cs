@@ -63,6 +63,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Drift time, in milliseconds
         /// </summary>
+        /// <remarks>If a spectrum has a list of drift times, this is the median value</remarks>
         public string DriftTimeMsec { get; set; }
 
         /// <summary>
