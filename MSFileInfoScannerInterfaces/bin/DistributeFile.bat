@@ -1,5 +1,5 @@
 F:
-cd F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScannerInterfaces\bin\
+cd F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScannerInterfaces\bin\Debug\net48\
 
 xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\CodeTest\Lib\" /Y /D
 xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\CodeTest\bin\" /Y /D
@@ -56,14 +56,19 @@ xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Mana
 xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestAScorePlugIn\bin\Debug\" /Y /D
 xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestMultiAlignPlugIn\bin\Debug\" /Y /D
 
-xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\RefLib\" /Y /D
-xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\DeployedFiles\" /Y /D
-xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\CaptureTaskManager\bin\Debug\" /Y /D
-xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\CTM_Shared\bin\Debug\" /Y /D
-xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\DatasetInfoPlugin\bin\Debug" /Y /D
-
-xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Lib\" /Y /D
+xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Lib\net48\" /Y /D
+xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\RefLib\net48" /Y /D
 xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\" /Y /D
 xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\" /Y /D
+
+
+cd F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScannerInterfaces\bin\Debug\net8.0-windows
+if not exist F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\RefLib\net8.0-windows\ mkdir F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\RefLib\net8.0-windows\
+xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\RefLib\net8.0-windows\" /Y /D
+xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\DeployedFiles\net8.0-windows\" /Y /D
+xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\CaptureTaskManager\bin\Debug\net8.0-windows\" /Y /D
+rem xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\CTM_Shared\bin\Debug\" /Y /D
+xcopy MSFileInfoScannerInterfaces.dll "F:\Documents\Projects\DataMining\DMS_Managers\Capture_Task_Manager\DatasetInfoPlugin\bin\Debug\net8.0-windows" /Y /D
+
 
 if not "%1"=="NoPause" pause
