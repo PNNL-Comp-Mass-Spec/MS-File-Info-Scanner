@@ -1916,11 +1916,10 @@ namespace MSFileInfoScanner
         /// <returns>True if this file contains the XML elements that indicate this is a Decon2LS XML settings file</returns>
         private bool FileIsDeconToolsXMLSettingsFile(string filePath)
         {
-            return XMLFileContainsElements(filePath, new[]
-            {
+            return XMLFileContainsElements(filePath, [
                 "<parameters>",
                 "<PeakParameters>"
-            });
+            ]);
         }
 
         /// <summary>
@@ -1931,12 +1930,11 @@ namespace MSFileInfoScanner
         private bool FileIsXMLSettingsFile(string filePath)
         {
             // Note that section and item only have a less than sign because XMLFileContainsElements uses a simple stream reader and not an XmlTextReader
-            return XMLFileContainsElements(filePath, new[]
-            {
+            return XMLFileContainsElements(filePath, [
                 "<sections>",
                 "<section",
                 "<item"
-            });
+            ]);
         }
 
         /// <summary>
