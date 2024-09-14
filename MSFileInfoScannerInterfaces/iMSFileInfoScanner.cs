@@ -259,6 +259,7 @@ namespace MSFileInfoScannerInterfaces
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
+        [Obsolete("This method has been moved to the DatasetInfoPlugin in the Capture Task Manager")]
         public abstract bool PostDatasetInfoUseDatasetID(int datasetID, string connectionString, string storedProcedureName);
 
         /// <summary>
@@ -270,6 +271,7 @@ namespace MSFileInfoScannerInterfaces
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
+        [Obsolete("This method has been moved to the DatasetInfoPlugin in the Capture Task Manager")]
         public abstract bool PostDatasetInfoUseDatasetID(int datasetID, string dsInfoXML, string connectionString, string storedProcedureName);
 
         /// <summary>

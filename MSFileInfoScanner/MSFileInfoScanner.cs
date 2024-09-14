@@ -1016,6 +1016,7 @@ namespace MSFileInfoScanner
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
+        [Obsolete("This method has been moved to the DatasetInfoPlugin in the Capture Task Manager")]
         public override bool PostDatasetInfoUseDatasetID(int datasetID, string connectionString, string storedProcedureName)
         {
             return PostDatasetInfoUseDatasetID(datasetID, DatasetInfoXML, connectionString, storedProcedureName);
@@ -1030,6 +1031,7 @@ namespace MSFileInfoScanner
         /// <param name="connectionString">Database connection string</param>
         /// <param name="storedProcedureName">Stored procedure</param>
         /// <returns>True if success; false if failure</returns>
+        [Obsolete("This method has been moved to the DatasetInfoPlugin in the Capture Task Manager")]
         public override bool PostDatasetInfoUseDatasetID(int datasetID, string datasetInfoXML, string connectionString, string storedProcedureName)
         {
             bool success;
