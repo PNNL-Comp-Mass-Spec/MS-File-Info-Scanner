@@ -1,5 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
     <OutputType>Library</OutputType>
@@ -10,33 +10,27 @@
     <Copyright>Copyright © PNNL 2016</Copyright>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-
   <PropertyGroup>
     <NoWarn>IDE0290</NoWarn>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="Properties\**" />
   </ItemGroup>
-
   <ItemGroup>
     <None Include="..\version.json">
       <Link>Properties\version.json</Link>
     </None>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="3.6.143">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PRISM-Library" Version="2.8.34" />
+    <PackageReference Include="PRISM-Library" Version="2.8.36" />
   </ItemGroup>
-
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="if not exist &quot;$(ProjectDir)..\Lib\$(TargetFramework)&quot; mkdir &quot;$(ProjectDir)..\Lib\$(TargetFramework)&quot;" />
     <Exec Command="xcopy &quot;$(TargetPath)&quot; &quot;$(ProjectDir)..\Lib\$(TargetFramework)&quot; /Y" />
   </Target>
-
 </Project>
