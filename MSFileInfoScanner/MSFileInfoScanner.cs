@@ -78,6 +78,10 @@ namespace MSFileInfoScanner
             mLogFilePath = string.Empty;
             mLogDirectoryPath = string.Empty;
 
+            mProcessingStatus = new ProcessingStatus();
+            mStatusFilePath = string.Empty;
+            mStatusFileTools = new StatusFileTools();
+
             LCMS2DPlotOptions = new LCMSDataPlotterOptions(Options);
 
             mFileIntegrityDetailsFilePath = Path.Combine(GetAppDirectoryPath(), DefaultDataFileName(DataFileTypeConstants.FileIntegrityDetails));
@@ -166,13 +170,19 @@ namespace MSFileInfoScanner
 
         private StreamWriter mFileIntegrityErrorsWriter;
 
+        private DateTime mLastWriteTimeFileIntegrityDetails;
+        private DateTime mLastWriteTimeFileIntegrityFailure;
+        private DateTime mLastCheckForAbortProcessingFile;
+
         private MSFileInfoProcessorBaseClass mMSInfoScanner;
 
         private readonly MSFileInfoDataCache mMSFileInfoDataCache;
 
-        private DateTime mLastWriteTimeFileIntegrityDetails;
-        private DateTime mLastWriteTimeFileIntegrityFailure;
-        private DateTime mLastCheckForAbortProcessingFile;
+        private readonly ProcessingStatus mProcessingStatus;
+
+        private string mStatusFilePath;
+
+        private readonly StatusFileTools mStatusFileTools;
 
         /// <summary>
         /// The calling process can set this to true to abort processing
@@ -793,6 +803,20 @@ namespace MSFileInfoScanner
             }
         }
 
+        /// <summary>Progress update</summary>
+        /// <param name="progressMessage">Progress message</param>
+        /// <param name="percentComplete">Value between 0 and 100</param>
+        private void MSFileScanner_ProgressUpdate(string progressMessage, float percentComplete)
+        {
+            mProcessingStatus.ProgressMessage = progressMessage;
+            mProcessingStatus.ProgressPercentComplete = percentComplete;
+
+            if (Options.WriteStatusToFile)
+            {
+                WriteStatusFile();
+            }
+        }
+
         private void OpenFileIntegrityDetailsFile()
         {
             OpenFileIntegrityOutputFile(DataFileTypeConstants.FileIntegrityDetails, ref mFileIntegrityDetailsFilePath, ref mFileIntegrityDetailsWriter);
@@ -864,7 +888,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
+        /// Post the most recently determine dataset into XML to the database, using the specified dataset name
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <returns>True if success; false if failure</returns>
@@ -874,7 +898,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
+        /// Post the dataset into XML to the database
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="datasetInfoXML">Database info XML</param>
@@ -885,7 +909,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
+        /// Post the most recently determine dataset into XML to the database, using the specified dataset name, connection string, and stored procedure
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="connectionString">Database connection string</param>
@@ -897,7 +921,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Post the dataset info in datasetInfoXML to the database, using the specified connection string and stored procedure
+        /// Post the dataset info in datasetInfoXML to the database, using the specified dataset name, connection string, and stored procedure
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="datasetInfoXML">Database info XML</param>
@@ -985,7 +1009,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Post the dataset info in datasetInfoXML to the database, using the specified connection string and stored procedure
+        /// Post the most recently determine dataset into XML to the database, using the specified dataset ID, connection string and stored procedure
         /// This version assumes the stored procedure takes DatasetID as the first parameter
         /// </summary>
         /// <param name="datasetID">Dataset ID to send to the stored procedure</param>
@@ -998,7 +1022,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Post the dataset info in datasetInfoXML to the database, using the specified connection string and stored procedure
+        /// Post the dataset info in datasetInfoXML to the database, using the specified dataset ID, connection string and stored procedure
         /// This version assumes the stored procedure takes DatasetID as the first parameter
         /// </summary>
         /// <param name="datasetID">Dataset ID to send to the stored procedure</param>
@@ -1275,6 +1299,8 @@ namespace MSFileInfoScanner
 
             var success = false;
 
+            mProcessingStatus.Reset();
+
             if (resetErrorCode)
             {
                 SetErrorCode(MSFileScannerErrorCodes.NoError);
@@ -1292,6 +1318,7 @@ namespace MSFileInfoScanner
             // Update mOutputDirectoryPath
             mOutputDirectoryPath = string.Copy(outputDirectoryPath);
 
+            mStatusFilePath = string.Empty;
             DatasetInfoXML = string.Empty;
 
             LoadCachedResults(false);
@@ -1565,6 +1592,8 @@ namespace MSFileInfoScanner
 
                     // Attach the events
                     RegisterEvents(mMSInfoScanner);
+
+                    mMSInfoScanner.ProgressUpdate += MSFileScanner_ProgressUpdate;
 
                     if (Options.HideEmptyHTMLSections)
                     {
@@ -2662,5 +2691,80 @@ namespace MSFileInfoScanner
 
             WriteFileIntegrityFailure(mFileIntegrityErrorsWriter, filePath, message);
         }
+
+        private void WriteStatusFile()
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(mStatusFilePath))
+                {
+                    string statusFilePath;
+
+                    if (string.IsNullOrEmpty(Options.StatusFilePath) ||
+                        Options.StatusFilePath.Equals("True", StringComparison.OrdinalIgnoreCase) ||
+                        Options.StatusFilePath.Equals("."))
+                    {
+                        // Auto-name the status file
+                        statusFilePath = string.Format("{0}_Status.xml", Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location));
+                    }
+                    else
+                    {
+                        statusFilePath = Options.StatusFilePath;
+                    }
+
+                    string statusDirectoryPath;
+
+                    try
+                    {
+                        statusDirectoryPath = string.IsNullOrEmpty(Options.LogDirectoryPath) ? string.Empty : Options.LogDirectoryPath;
+
+                        if (statusDirectoryPath.Length == 0)
+                        {
+                            // Log directory is undefined; use mOutputDirectoryPath if it is defined
+                            if (!string.IsNullOrEmpty(mOutputDirectoryPath))
+                            {
+                                statusDirectoryPath = string.Copy(mOutputDirectoryPath);
+                            }
+                        }
+
+                        if (statusDirectoryPath.Length > 0)
+                        {
+                            // Create the directory if it doesn't exist
+                            if (!Directory.Exists(statusDirectoryPath))
+                            {
+                                Directory.CreateDirectory(statusDirectoryPath);
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        statusDirectoryPath = string.Empty;
+                    }
+
+                    try
+                    {
+                        if (statusDirectoryPath.Length > 0 && !Path.IsPathRooted(statusFilePath))
+                        {
+                            mStatusFilePath = Path.Combine(statusDirectoryPath, statusFilePath);
+                        }
+                        else
+                        {
+                            mStatusFilePath = statusFilePath;
+                        }
+                    } catch (Exception)
+                    {
+                        mStatusFilePath = statusFilePath;
+                    }
+                }
+
+                mStatusFileTools.WriteStatusFile(mStatusFilePath, mProcessingStatus);
+            }
+            catch (Exception ex)
+            {
+                // Error creating the status file
+                OnWarningEvent(string.Format("Error creating the status file at '{0}'", mStatusFilePath), ex);
+            }
+        }
+
     }
 }

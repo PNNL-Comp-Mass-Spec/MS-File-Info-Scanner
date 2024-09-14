@@ -1,4 +1,5 @@
 ﻿using PRISM;
+using System;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedMemberInSuper.Global
@@ -217,14 +218,14 @@ namespace MSFileInfoScannerInterfaces
         public abstract bool LoadParameterFileSettings(string parameterFilePath);
 
         /// <summary>
-        /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
+        /// Post the most recently determined dataset into XML to the database
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <returns>True if success; false if failure</returns>
         public abstract bool PostDatasetInfoToDB(string datasetName);
 
         /// <summary>
-        /// Post the most recently determine dataset into XML to the database, using the specified connection string and stored procedure
+        /// Post the most recently determine dataset into XML to the database, using the given dataset name
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="datasetInfoXML">Database info XML</param>

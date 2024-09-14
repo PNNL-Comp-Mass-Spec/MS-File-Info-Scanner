@@ -129,8 +129,28 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         [Option("LogDirectoryPath", "LogDirectory", "LogDir",
             ArgExistsProperty = nameof(LogMessagesToFile), HelpShowsDefault = false,
-            HelpText = "The directory where the log file should be written")]
+            HelpText = "The directory where the log file should be written.\n" +
+                       "This directory will also be used for the status file if StatusFilePath is not a rooted path")]
         public string LogDirectoryPath { get; set; }
+
+        /// <summary>
+        /// When true, report progress and errors using a status file
+        /// </summary>
+        /// <remarks>
+        /// This is auto-set to true if /SF is used at the command line, or if
+        /// StatusFilePath has a name defined in a parameter file
+        /// </remarks>
+        public bool WriteStatusToFile { get; set; }
+
+        /// <summary>
+        /// Status file path
+        /// </summary>
+        [Option("StatusFilePath", "StatusFile", "SF",
+            ArgExistsProperty = nameof(WriteStatusToFile), HelpShowsDefault = false,
+            HelpText = "The status file name (either file name or file path).\n" +
+                       "If a rooted path, will use as-is.\n" +
+                       "Otherwise, creates the status file in either the log directory path or in the output directory")]
+        public string StatusFilePath { get; set; }
 
         /// <summary>
         /// m/z resolution when centroiding data for LC/MS 2D plots

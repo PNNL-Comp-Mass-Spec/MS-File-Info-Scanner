@@ -42,7 +42,7 @@ Syntax:
 MSFileInfoScanner.exe
  /I:InputFileNameOrDirectoryPath [/O:OutputDirectoryPath]
  [/P:ParameterFilePath] [/S[:MaxLevel]]
- [/IE] [/L:LogFilePath]
+ [/IE] [/L:LogFilePath] [/SF:StatusFileName] 
  [/LC[:MaxPointsToPlot]] [/TIC] [/LCGrad]
  [/DI] [/SS] [/QS] [/CC]
  [/MS2MzMin:MzValue] [/NoHash]
@@ -74,6 +74,10 @@ Use `/S` to process all valid files in the input directory and subdirectories
 Use `/L` to specify the file path for logging messages
 * For example, `/L:InfoScannerLog.txt`
 * Alternatively, define `LogMessagesToFile=True` in a key/value parameter file and optionally define the log file name using `LogFilePath=FilePath.txt`
+
+Use `/SF` to create a status file that is regularly updated during processing
+* The default file name is `MSFileInfoScanner_Status.xml`
+* Optionally specify a custom file name or path, e.g. `/SF:MSFileInfoScanner_Status.xml` or `/SF:C:\DMS_WorkDir1\MSFileInfoScanner_Status.xml`
 
 Use `/LC` to create 2D LCMS plots (this process could take several minutes for each dataset)
 * By default, plots the top 200000 points
@@ -113,7 +117,7 @@ Use `/MS2MzMin` to specify a minimum m/z value that all MS/MS spectra should hav
 * Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold
 * Useful for validating instrument files where the sample is iTRAQ or TMT labeled and it is important to detect the reporter ions in the MS/MS spectra
 * Select the default minimum m/z for iTRAQ (113) using `/MS2MzMin:iTRAQ`
-* Select the default mnimum m/z for TMT (126) using `/MS2MzMin:TMT`
+* Select the default minimum m/z for TMT (126) using `/MS2MzMin:TMT`
 * Specify a custom minimum m/z value using `/MS2MzMin:110`
 
 A SHA-1 hash is computed for the primary instrument data file(s)
