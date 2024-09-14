@@ -60,10 +60,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Lib\MassSpecDataReader.dll</HintPath>
     </Reference>
-    <Reference Include="MSFileInfoScannerInterfaces">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Lib\MSFileInfoScannerInterfaces.dll</HintPath>
-    </Reference>
     <Reference Include="NetCDFReader">
       <HintPath>..\Lib\NetCDFReader.dll</HintPath>
     </Reference>
@@ -179,6 +175,12 @@
     <PackageReference Include="UIMFLibrary">
       <Version>3.8.29</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MSFileInfoScannerInterfaces\MSFileInfoScannerInterfaces.csproj">
+      <Project>{378c3a36-522b-42c6-90ee-71cbbfa7ce63}</Project>
+      <Name>MSFileInfoScannerInterfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
