@@ -124,6 +124,8 @@ namespace MSFileInfoScanner
 
         private const int MAX_FILE_READ_ACCESS_ATTEMPTS = 2;
 
+        private const int MINIMUM_STATUS_FILE_UPDATE_INTERVAL_SECONDS = 15;
+
         private const bool SKIP_FILES_IN_ERROR = true;
 
         private enum MessageTypeConstants
@@ -173,6 +175,8 @@ namespace MSFileInfoScanner
         private DateTime mLastWriteTimeFileIntegrityDetails;
         private DateTime mLastWriteTimeFileIntegrityFailure;
         private DateTime mLastCheckForAbortProcessingFile;
+
+        private DateTime mLastStatusWriteTime;
 
         private MSFileInfoProcessorBaseClass mMSInfoScanner;
 
@@ -1321,6 +1325,7 @@ namespace MSFileInfoScanner
             mOutputDirectoryPath = string.Copy(outputDirectoryPath);
 
             mStatusFilePath = string.Empty;
+            mLastStatusWriteTime = DateTime.UtcNow.Subtract(new TimeSpan(0, 0, MINIMUM_STATUS_FILE_UPDATE_INTERVAL_SECONDS * 2));
             DatasetInfoXML = string.Empty;
 
             LoadCachedResults(false);
@@ -1657,6 +1662,7 @@ namespace MSFileInfoScanner
             finally
             {
                 mMSInfoScanner = null;
+                WriteStatusFile(true);
             }
 
             return success;
@@ -2694,10 +2700,17 @@ namespace MSFileInfoScanner
             WriteFileIntegrityFailure(mFileIntegrityErrorsWriter, filePath, message);
         }
 
-        private void WriteStatusFile()
+        private void WriteStatusFile(bool forceWrite = false)
         {
             try
             {
+                if (!forceWrite && DateTime.UtcNow.Subtract(mLastStatusWriteTime).TotalSeconds < MINIMUM_STATUS_FILE_UPDATE_INTERVAL_SECONDS)
+                {
+                    return;
+                }
+
+                mLastStatusWriteTime = DateTime.UtcNow;
+
                 if (string.IsNullOrWhiteSpace(mStatusFilePath))
                 {
                     string statusFilePath;
@@ -2753,7 +2766,8 @@ namespace MSFileInfoScanner
                         {
                             mStatusFilePath = statusFilePath;
                         }
-                    } catch (Exception)
+                    }
+                    catch (Exception)
                     {
                         mStatusFilePath = statusFilePath;
                     }
