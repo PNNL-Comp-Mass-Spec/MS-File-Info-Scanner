@@ -2760,6 +2760,32 @@ namespace MSFileInfoScanner
                 }
 
                 mStatusFileTools.WriteStatusFile(mStatusFilePath, mProcessingStatus);
+
+                // Change to true to read the status file to validate mStatusFileTools.ReadStatusFile()
+                const bool VALIDATE_STATUS_FILE = false;
+
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                if (!VALIDATE_STATUS_FILE)
+                    return;
+
+#pragma warning disable CS0162 // Unreachable code detected
+
+                // ReSharper disable once HeuristicUnreachableCode
+                var success = mStatusFileTools.ReadStatusFile(mStatusFilePath, out var status);
+
+#pragma warning restore CS0162 // Unreachable code detected
+
+                if (!success)
+                {
+                    OnWarningEvent("mStatusFileTools.ReadStatusFile returned false reading {0}", mStatusFilePath);
+                }
+
+                ConsoleMsgUtils.ShowDebug("Processing status loaded from {0}", mStatusFilePath);
+                ConsoleMsgUtils.ShowDebugCustom(string.Format("LastUpdate:       {0:yyyy-MM-dd hh:mm:ss tt}", status.LastUpdate), emptyLinesBeforeMessage: 0);
+                ConsoleMsgUtils.ShowDebugCustom(string.Format("Progress:         {0:0.0}% complete", status.ProgressPercentComplete), emptyLinesBeforeMessage: 0);
+                ConsoleMsgUtils.ShowDebugCustom(string.Format("Progress Message: {0}", status.ProgressMessage), emptyLinesBeforeMessage: 0);
+                ConsoleMsgUtils.ShowDebugCustom(string.Format("Error Code:       {0}", (int)status.ErrorCode), emptyLinesBeforeMessage: 0);
+                ConsoleMsgUtils.ShowDebugCustom(string.Format("Error Message:    {0}", status.ErrorMessage), emptyLinesBeforeMessage: 0);
             }
             catch (Exception ex)
             {

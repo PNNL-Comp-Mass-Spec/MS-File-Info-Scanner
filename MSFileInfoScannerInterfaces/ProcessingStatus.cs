@@ -1,4 +1,6 @@
-﻿namespace MSFileInfoScannerInterfaces
+﻿using System;
+
+namespace MSFileInfoScannerInterfaces
 {
     /// <summary>
     /// MS File Info Scanner processing status
@@ -14,6 +16,11 @@
         /// Error message
         /// </summary>
         public string ErrorMessage { get; set; }
+
+        /// <summary>
+        /// Processing status date/time
+        /// </summary>
+        public DateTime LastUpdate { get; set; }
 
         /// <summary>
         /// Progress message
@@ -40,6 +47,7 @@
         {
             ErrorCode = iMSFileInfoScanner.MSFileScannerErrorCodes.NoError;
             ErrorMessage = string.Empty;
+            LastUpdate = DateTime.MinValue;
             ProgressMessage = string.Empty;
             ProgressPercentComplete = 0;
         }
