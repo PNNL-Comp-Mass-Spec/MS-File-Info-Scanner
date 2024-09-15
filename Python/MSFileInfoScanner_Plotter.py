@@ -1,4 +1,5 @@
 import glob
+import matplotlib as mpl
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
@@ -243,19 +244,21 @@ def generate_heat_map(columnNames, xData, yData, zData, title, r_label, l_label,
 
     baseFontSize = 12
 
-    dataMin=np.min(zData)
-    dataMedian=np.median(zData)
-    dataMax=np.max(zData)
-    dataRange = dataMax - dataMin
+    dataMin    = np.min(zData)
+    dataMedian = np.median(zData)
+    dataMax    = np.max(zData)
+    dataRange  = dataMax - dataMin
 
     if chargeData:
-        cm = plt.cm.get_cmap('Set1')
-        normMin=dataMin
-        normMax=dataMax
+        # cm = plt.cm.get_cmap('Set1')
+        cm = mpl.colormaps['Set1']
+        normMin = dataMin
+        normMax = dataMax
     else:
-        cm = plt.cm.get_cmap('Blues')
-        normMin=dataMin-dataRange/1000
-        normMax=dataMax/100
+        # cm = plt.cm.get_cmap('Blues')
+        cm = mpl.colormaps['Blues']
+        normMin = dataMin - dataRange / 1000
+        normMax = dataMax / 100
 
     if normMax <= normMin:
         normMax = normMin + 1
