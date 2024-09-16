@@ -6,3 +6,4 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Allowed name", Scope = "type", Target = "~T:MSFileInfoScannerInterfaces.iMSFileInfoScanner")]
+[assembly: SuppressMessage("Roslynator", "RCS1146:Use conditional access", Justification = "Leave as-is for readability", Scope = "member", Target = "~M:MSFileInfoScannerInterfaces.StatusFileTools.ReadStatusFile(System.String,MSFileInfoScannerInterfaces.ProcessingStatus@)~System.Boolean")]

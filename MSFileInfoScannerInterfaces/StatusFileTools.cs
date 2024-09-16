@@ -10,7 +10,7 @@ namespace MSFileInfoScannerInterfaces
     /// </summary>
     public class StatusFileTools : EventNotifier
     {
-        private DateTime GetXmlValue(XmlNode node, DateTime valueIfMissing)
+        private static DateTime GetXmlValue(XmlNode node, DateTime valueIfMissing)
         {
             if (node == null)
                 return valueIfMissing;
@@ -18,7 +18,7 @@ namespace MSFileInfoScannerInterfaces
             return DateTime.TryParse(node.InnerText, out var value) ? value : valueIfMissing;
         }
 
-        private float GetXmlValue(XmlNode node, float valueIfMissing)
+        private static float GetXmlValue(XmlNode node, float valueIfMissing)
         {
             if (node == null)
                 return valueIfMissing;
@@ -26,7 +26,7 @@ namespace MSFileInfoScannerInterfaces
             return float.TryParse(node.InnerText, out var value) ? value : valueIfMissing;
         }
 
-        private iMSFileInfoScanner.MSFileScannerErrorCodes GetXmlValue(XmlNode node, iMSFileInfoScanner.MSFileScannerErrorCodes valueIfMissing)
+        private static iMSFileInfoScanner.MSFileScannerErrorCodes GetXmlValue(XmlNode node, iMSFileInfoScanner.MSFileScannerErrorCodes valueIfMissing)
         {
             if (node == null)
                 return valueIfMissing;
@@ -34,7 +34,7 @@ namespace MSFileInfoScannerInterfaces
             return Enum.TryParse(node.InnerText, out iMSFileInfoScanner.MSFileScannerErrorCodes value) ? value : valueIfMissing;
         }
 
-        private string GetXmlValue(XmlNode node, string valueIfMissing)
+        private static string GetXmlValue(XmlNode node, string valueIfMissing)
         {
             return node == null ? valueIfMissing : node.InnerText;
         }
