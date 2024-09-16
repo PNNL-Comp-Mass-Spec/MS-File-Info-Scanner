@@ -119,6 +119,8 @@ namespace MSFileInfoScannerInterfaces
                     writer.WriteElementString("ProgressMessage", status.ProgressMessage);
                     writer.WriteElementString("ErrorCode", status.ErrorCode.ToString());
                     writer.WriteElementString("ErrorMessage", status.ErrorMessage);
+                    writer.WriteElementString("ErrorCountLoadDataForScan", status.ErrorCountLoadDataForScan.ToString());
+                    writer.WriteElementString("ErrorCountUnknownScanFilterFormat", status.ErrorCountUnknownScanFilterFormat.ToString());
                     writer.WriteEndElement();   // End the "General" element
 
                     writer.WriteEndElement();   // End the "Root" element

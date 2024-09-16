@@ -13,6 +13,16 @@ namespace MSFileInfoScannerInterfaces
         public iMSFileInfoScanner.MSFileScannerErrorCodes ErrorCode { get; set; }
 
         /// <summary>
+        /// Number of times an error message starting with "Unable to load data for scan" was raised by ThermoRawFileReader
+        /// </summary>
+        public int ErrorCountLoadDataForScan { get; set; }
+
+        /// <summary>
+        /// Number of times an error message starting with "Unknown format for Scan Filter" was raised by ThermoRawFileReader
+        /// </summary>
+        public int ErrorCountUnknownScanFilterFormat { get; set; }
+
+        /// <summary>
         /// Error message
         /// </summary>
         public string ErrorMessage { get; set; }
@@ -46,6 +56,8 @@ namespace MSFileInfoScannerInterfaces
         public void Reset()
         {
             ErrorCode = iMSFileInfoScanner.MSFileScannerErrorCodes.NoError;
+            ErrorCountLoadDataForScan = 0;
+            ErrorCountUnknownScanFilterFormat = 0;
             ErrorMessage = string.Empty;
             LastUpdate = DateTime.MinValue;
             ProgressMessage = string.Empty;

@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using JetBrains.Annotations;
 using MSFileInfoScanner.DatasetStats;
 using MSFileInfoScanner.Plotting;
 using MSFileInfoScanner.Readers;
@@ -807,6 +808,33 @@ namespace MSFileInfoScanner
             }
         }
 
+        /// <summary>
+        /// Examine error messages to look for messages reported by ThermoRawFileReader
+        /// </summary>
+        /// <param name="message">Error message</param>
+        /// <param name="ex">Exception</param>
+        private void MSFileScanner_ErrorEvent(string message, Exception ex)
+        {
+            if (message.StartsWith("Unable to load data for scan", StringComparison.OrdinalIgnoreCase))
+            {
+                mProcessingStatus.ErrorCountLoadDataForScan++;
+
+                if (mProcessingStatus.ErrorCountLoadDataForScan > 25 && mProcessingStatus.ErrorCountLoadDataForScan % 1000 != 0)
+                {
+                    ConsoleMsgUtils.ShowWarning("Error running MSFileInfoScanner: " + message);
+                }
+            }
+            else if (message.StartsWith("Unknown format for Scan Filter", StringComparison.OrdinalIgnoreCase))
+            {
+                mProcessingStatus.ErrorCountUnknownScanFilterFormat++;
+
+                if (mProcessingStatus.ErrorCountUnknownScanFilterFormat > 25 && mProcessingStatus.ErrorCountUnknownScanFilterFormat % 1000 != 0)
+                {
+                    ConsoleMsgUtils.ShowWarning("Error running MSFileInfoScanner: " + message);
+                }
+            }
+        }
+
         /// <summary>Progress update</summary>
         /// <param name="progressMessage">Progress message</param>
         /// <param name="percentComplete">Value between 0 and 100</param>
@@ -1600,6 +1628,7 @@ namespace MSFileInfoScanner
                     // Attach the events
                     RegisterEvents(mMSInfoScanner);
 
+                    mMSInfoScanner.ErrorEvent += MSFileScanner_ErrorEvent;
                     mMSInfoScanner.ProgressUpdate += MSFileScanner_ProgressUpdate;
 
                     if (Options.HideEmptyHTMLSections)
