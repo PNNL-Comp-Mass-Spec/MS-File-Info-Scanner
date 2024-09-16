@@ -26,6 +26,14 @@ namespace MSFileInfoScannerInterfaces
             return float.TryParse(node.InnerText, out var value) ? value : valueIfMissing;
         }
 
+        private static int GetXmlValue(XmlNode node, int valueIfMissing)
+        {
+            if (node == null)
+                return valueIfMissing;
+
+            return int.TryParse(node.InnerText, out var value) ? value : valueIfMissing;
+        }
+
         private static iMSFileInfoScanner.MSFileScannerErrorCodes GetXmlValue(XmlNode node, iMSFileInfoScanner.MSFileScannerErrorCodes valueIfMissing)
         {
             if (node == null)
@@ -54,6 +62,7 @@ namespace MSFileInfoScannerInterfaces
             try
             {
                 var statusFile = new FileInfo(statusFilePath);
+
                 if (!statusFile.Exists)
                 {
                     OnErrorEvent("Status file not found: {0}", statusFile.FullName);
@@ -81,6 +90,8 @@ namespace MSFileInfoScannerInterfaces
                 status.ProgressMessage = GetXmlValue(generalNode.SelectSingleNode("ProgressMessage"), string.Empty);
                 status.ErrorCode = GetXmlValue(generalNode.SelectSingleNode("ErrorCode"), iMSFileInfoScanner.MSFileScannerErrorCodes.NoError);
                 status.ErrorMessage = GetXmlValue(generalNode.SelectSingleNode("ErrorMessage"), string.Empty);
+                status.ErrorCountLoadDataForScan = GetXmlValue(generalNode.SelectSingleNode("ErrorCountLoadDataForScan"), 0);
+                status.ErrorCountUnknownScanFilterFormat = GetXmlValue(generalNode.SelectSingleNode("ErrorCountUnknownScanFilterFormat"), 0);
 
                 return true;
             }
