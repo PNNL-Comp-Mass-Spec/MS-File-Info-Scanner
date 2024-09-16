@@ -2592,6 +2592,22 @@ namespace MSFileInfoScanner
             Console.WriteLine();
         }
 
+        /// <summary>
+        /// Show a debug message, but do not add a blank line before the message
+        /// </summary>
+        /// <param name="format">Message format string</param>
+        /// <param name="args">Arguments to use with formatString</param>
+        [StringFormatMethod("format")]
+        private void ShowDebugMessageNoBlankLine(string format, params object[] args)
+        {
+            ConsoleMsgUtils.ShowDebugCustom(string.Format(format, args), emptyLinesBeforeMessage: 0);
+        }
+
+        private void SleepNow(int sleepTimeSeconds)
+        {
+            Thread.Sleep(sleepTimeSeconds * 10);
+        }
+
         private string TrueFalseToEnabledDisabled(bool option)
         {
             return option ? "Enabled" : "Disabled";
@@ -2639,11 +2655,6 @@ namespace MSFileInfoScanner
             }
 
             return validFile;
-        }
-
-        private void SleepNow(int sleepTimeSeconds)
-        {
-            Thread.Sleep(sleepTimeSeconds * 10);
         }
 
         private bool ValidateExtensions(IList<string> extensions)
@@ -2824,11 +2835,13 @@ namespace MSFileInfoScanner
                 }
 
                 ConsoleMsgUtils.ShowDebug("Processing status loaded from {0}", mStatusFilePath);
-                ConsoleMsgUtils.ShowDebugCustom(string.Format("LastUpdate:       {0:yyyy-MM-dd hh:mm:ss tt}", status.LastUpdate), emptyLinesBeforeMessage: 0);
-                ConsoleMsgUtils.ShowDebugCustom(string.Format("Progress:         {0:0.0}% complete", status.ProgressPercentComplete), emptyLinesBeforeMessage: 0);
-                ConsoleMsgUtils.ShowDebugCustom(string.Format("Progress Message: {0}", status.ProgressMessage), emptyLinesBeforeMessage: 0);
-                ConsoleMsgUtils.ShowDebugCustom(string.Format("Error Code:       {0}", (int)status.ErrorCode), emptyLinesBeforeMessage: 0);
-                ConsoleMsgUtils.ShowDebugCustom(string.Format("Error Message:    {0}", status.ErrorMessage), emptyLinesBeforeMessage: 0);
+                ShowDebugMessageNoBlankLine("LastUpdate:       {0:yyyy-MM-dd hh:mm:ss tt}", status.LastUpdate);
+                ShowDebugMessageNoBlankLine("Progress:         {0:0.0}% complete", status.ProgressPercentComplete);
+                ShowDebugMessageNoBlankLine("Progress Message: {0}", status.ProgressMessage);
+                ShowDebugMessageNoBlankLine("Error Code:       {0}", (int)status.ErrorCode);
+                ShowDebugMessageNoBlankLine("Error Message:    {0}", status.ErrorMessage);
+                ShowDebugMessageNoBlankLine("Error Count Load Data For Scan:         {0}", status.ErrorCountLoadDataForScan);
+                ShowDebugMessageNoBlankLine("Error Count Unknown Scan Filter Format: {0}", status.ErrorCountUnknownScanFilterFormat);
             }
             catch (Exception ex)
             {
@@ -2836,6 +2849,5 @@ namespace MSFileInfoScanner
                 OnWarningEvent(string.Format("Error creating the status file at '{0}'", mStatusFilePath), ex);
             }
         }
-
     }
 }
