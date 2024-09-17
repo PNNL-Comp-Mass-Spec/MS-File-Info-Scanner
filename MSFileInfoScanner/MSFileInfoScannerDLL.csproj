@@ -62,9 +62,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Lib\MassSpecDataReader.dll</HintPath>
     </Reference>
-    <Reference Include="MSFileInfoScannerInterfaces">
+    <Reference Include="MSFileInfoScannerInterfaces, Version=2.1.131.61869, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Lib\MSFileInfoScannerInterfaces.dll</HintPath>
+      <HintPath>..\Lib\net48\MSFileInfoScannerInterfaces.dll</HintPath>
     </Reference>
     <Reference Include="NetCDFReader">
       <HintPath>..\Lib\NetCDFReader.dll</HintPath>
