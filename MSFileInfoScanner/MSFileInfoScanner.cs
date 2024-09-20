@@ -2461,6 +2461,11 @@ namespace MSFileInfoScanner
             }
 
             ErrorCode = newErrorCode;
+
+            if (mProcessingStatus == null)
+                return;
+
+            mProcessingStatus.ErrorCode = newErrorCode;
         }
 
         /// <summary>
