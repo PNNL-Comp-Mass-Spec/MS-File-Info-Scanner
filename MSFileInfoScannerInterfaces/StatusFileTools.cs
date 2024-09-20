@@ -92,6 +92,7 @@ namespace MSFileInfoScannerInterfaces
                 status.ErrorMessage = GetXmlValue(generalNode.SelectSingleNode("ErrorMessage"), string.Empty);
                 status.ErrorCountLoadDataForScan = GetXmlValue(generalNode.SelectSingleNode("ErrorCountLoadDataForScan"), 0);
                 status.ErrorCountUnknownScanFilterFormat = GetXmlValue(generalNode.SelectSingleNode("ErrorCountUnknownScanFilterFormat"), 0);
+                status.MS2MzMinValidationMessage = GetXmlValue(generalNode.SelectSingleNode("MS2MzMinValidationMessage"), string.Empty);
 
                 return true;
             }
@@ -123,8 +124,8 @@ namespace MSFileInfoScannerInterfaces
 
                     // Write the beginning of the "Root" element.
                     writer.WriteStartElement("Root");
-
                     writer.WriteStartElement("General");
+
                     writer.WriteElementString("LastUpdate", DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt"));
                     writer.WriteElementString("Progress", StringUtilities.DblToString(status.ProgressPercentComplete, 2));
                     writer.WriteElementString("ProgressMessage", status.ProgressMessage);
@@ -132,8 +133,9 @@ namespace MSFileInfoScannerInterfaces
                     writer.WriteElementString("ErrorMessage", status.ErrorMessage);
                     writer.WriteElementString("ErrorCountLoadDataForScan", status.ErrorCountLoadDataForScan.ToString());
                     writer.WriteElementString("ErrorCountUnknownScanFilterFormat", status.ErrorCountUnknownScanFilterFormat.ToString());
-                    writer.WriteEndElement();   // End the "General" element
+                    writer.WriteElementString("MS2MzMinValidationMessage", status.MS2MzMinValidationMessage);
 
+                    writer.WriteEndElement();   // End the "General" element
                     writer.WriteEndElement();   // End the "Root" element
                     writer.WriteEndDocument();  // End the document
                 }

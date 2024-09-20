@@ -179,6 +179,8 @@ namespace MSFileInfoScanner
 
         private DateTime mLastStatusWriteTime;
 
+        private string mMS2MzMinValidationMessage = string.Empty;
+
         private MSFileInfoProcessorBaseClass mMSInfoScanner;
 
         private readonly MSFileInfoDataCache mMSFileInfoDataCache;
@@ -286,9 +288,17 @@ namespace MSFileInfoScanner
         public override LCMSDataPlotterOptions LCMS2DPlotOptions { get; protected set; }
 
         /// <summary>
-        /// MS2MzMin validation error or warning Message
+        /// MS2MzMin validation error or warning message
         /// </summary>
-        public override string MS2MzMinValidationMessage { get; protected set; }
+        public override string MS2MzMinValidationMessage
+        {
+            get => mMS2MzMinValidationMessage;
+            protected set
+            {
+                mMS2MzMinValidationMessage = value;
+                mProcessingStatus.MS2MzMinValidationMessage = value;
+            }
+        }
 
         /// <summary>
         /// Processing options
@@ -1394,7 +1404,7 @@ namespace MSFileInfoScanner
                             return true;
                         }
                         else
-                            // ReSharper disable HeuristicUnreachableCode
+                        // ReSharper disable HeuristicUnreachableCode
 #pragma warning disable CS0162 // Unreachable code detected
                         {
                             SetErrorCode(MSFileScannerErrorCodes.FilePathError);
@@ -1772,7 +1782,7 @@ namespace MSFileInfoScanner
 
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if (!success && !SKIP_FILES_IN_ERROR)
-                            // ReSharper disable HeuristicUnreachableCode
+                        // ReSharper disable HeuristicUnreachableCode
 #pragma warning disable CS0162 // Unreachable code detected
                         {
                             break;
@@ -1805,7 +1815,7 @@ namespace MSFileInfoScanner
 
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if (!success && !SKIP_FILES_IN_ERROR)
-                            // ReSharper disable HeuristicUnreachableCode
+                        // ReSharper disable HeuristicUnreachableCode
 #pragma warning disable CS0162 // Unreachable code detected
                         {
                             break;

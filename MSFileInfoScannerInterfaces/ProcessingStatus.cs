@@ -33,6 +33,11 @@ namespace MSFileInfoScannerInterfaces
         public DateTime LastUpdate { get; set; }
 
         /// <summary>
+        /// MS2MzMin validation error or warning message
+        /// </summary>
+        public string MS2MzMinValidationMessage { get; set; }
+
+        /// <summary>
         /// Progress message
         /// </summary>
         public string ProgressMessage { get; set; }
@@ -60,6 +65,7 @@ namespace MSFileInfoScannerInterfaces
             ErrorCountUnknownScanFilterFormat = 0;
             ErrorMessage = string.Empty;
             LastUpdate = DateTime.MinValue;
+            MS2MzMinValidationMessage = string.Empty;
             ProgressMessage = string.Empty;
             ProgressPercentComplete = 0;
         }
