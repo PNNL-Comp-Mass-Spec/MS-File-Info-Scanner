@@ -14,12 +14,12 @@ using Device = ThermoFisher.CommonCore.Data.Business.Device;
 namespace MSFileInfoScanner.Readers
 {
     /// <summary>
-    /// Agilent MassHunter .D folder Info Scanner (MassHunter is used for TOF/QTOF/IM-QTOF/QQQ instruments, and always contain a "AcqData" folder)
+    /// Agilent MassHunter .D folder Info Scanner (MassHunter is used for TOF/QTOF/IM-QTOF/QQQ instruments)
+    /// .D folders will always contain an "AcqData" folder
     /// </summary>
     /// <remarks>
     /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2012
     /// </remarks>
-    // ReSharper disable once IdentifierTypo
     public class AgilentMassHunterDFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
         // Ignore Spelling: AcqData, AcqTime, IMS, lcms, Midac, ns, μs
@@ -425,7 +425,7 @@ namespace MSFileInfoScanner.Readers
 
             try
             {
-                // Open the data directory using the ProteoWizardWrapper
+                // Open the data directory using the Agilent.MassSpectrometry.DataAnalysis.MassSpecDataReader
 
                 var massSpecDataReader = (IMsdrDataReader)new MassSpecDataReader();
 
@@ -487,7 +487,7 @@ namespace MSFileInfoScanner.Readers
                     }
                     catch
                     {
-                        // Do nothing
+                        // Ignore errors here
                     }
                 }
 
@@ -499,7 +499,7 @@ namespace MSFileInfoScanner.Readers
 
                 for (var i = 0; i < scanCount; i++)
                 {
-                    // NOTE: This does not extract any drift scans for IM-QTOF files.
+                    // Note: This does not extract any drift scans for IM-QTOF files.
                     var scan = massSpecDataReader.GetScanRecord(i);
 
                     // Array of scan index->retention time for binary search with chromatograms
@@ -579,7 +579,7 @@ namespace MSFileInfoScanner.Readers
                     // Base peak signal-to-noise ratio
                     scanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
-                    // NOTE: These are set when spectra are read
+                    // Note: These are updated when spectra are read
                     scanStatsEntry.IonCount = 0;
                     scanStatsEntry.IonCountRaw = 0;
 
@@ -596,7 +596,7 @@ namespace MSFileInfoScanner.Readers
                     scanStats[i] = scanStatsEntry;
                 }
 
-                // Assumption: if we have both MS1 and MSn data, then we shouldn't sum "cycles" (frame or scan sets) in the chromatograms
+                // Assumption: if we have both MS1 and MSn data, we shouldn't sum "cycles" (frame or scan sets) in the chromatograms
                 // This may not be 100% correct, but it helps with data output
                 var chromatogramSumCycles = !(hasMS1 && hasMSn);
 
@@ -664,8 +664,9 @@ namespace MSFileInfoScanner.Readers
             var devices = massSpecDataReader.FileInformation.GetDeviceTable(StoredDataType.All);
 
             var columns = devices.Columns.OfType<DataColumn>().ToList();
-            //var format = string.Join("\t", Enumerable.Range(0, columns.Count).Select(x => $"{{{x}}}"));
-            //Console.WriteLine(format, columns.Select(x => (object) x.ColumnName).ToArray());
+
+            // var format = string.Join("\t", Enumerable.Range(0, columns.Count).Select(x => $"{{{x}}}"));
+            // Console.WriteLine(format, columns.Select(x => (object) x.ColumnName).ToArray());
 
             var dataTypeCol = columns.Find(x => x.ColumnName.Equals("StoredDataType", StringComparison.OrdinalIgnoreCase));
             var deviceIdCol = columns.Find(x => x.ColumnName.Equals("DeviceID", StringComparison.OrdinalIgnoreCase));
@@ -794,22 +795,25 @@ namespace MSFileInfoScanner.Readers
                 filter.DoCycleSum = sumCycles;
 
                 // Process the chromatograms
-                // NOTE: The TIC and BPC times are not full matches, so better to process them separately
-                // Convenience method always sums cycles; don't use it
-                //var ticData = massSpecDataReader.GetTIC();
+                // The TIC and BPC times are not full matches, so better to process them separately
+
+                // Convenience method GetTIC() always sums cycles; don't use it
+                // var ticData = massSpecDataReader.GetTIC();
+
                 filter.ChromatogramType = ChromType.TotalIon;
                 var ticData = massSpecDataReader.GetChromatogram(filter)[0];
                 AddChromatogram(ticData, scanMapper, scanStats);
 
-                // Convenience method always sums cycles; don't use it
-                //var bpcData = massSpecDataReader.GetBPC();
+                // Convenience method GetBPC() always sums cycles; don't use it
+                // var bpcData = massSpecDataReader.GetBPC();
+
                 filter.ChromatogramType = ChromType.BasePeak;
                 var bpcData = massSpecDataReader.GetChromatogram(filter)[0];
                 AddChromatogram(bpcData, scanMapper, scanStats);
 
                 // ReSharper disable CommentTypo
 
-                /* NOTE: The following code may extract other chromatogram types; the primary ones seen are MRM and EIC. This does not work for instrument curves (pump pressure).
+                /* The following code may extract other chromatogram types; the primary ones seen are MRM and EIC. This does not work for instrument curves (pump pressure).
                 var filter = (IBDAChromFilter)new BDAChromFilter();
                 filter.ChromatogramType = ChromType.Unspecified;
 
@@ -902,9 +906,12 @@ namespace MSFileInfoScanner.Readers
                         continue;
                     }
 
-                    // NOTE: not reading chromatograms from DAD devices (that requires 'StoredDataType.Chromatograms')
-                    // NOTE: To preview these "Instrument Curves" externally, open the file in Agilent's Qualitative Analysis, then select the menu item Actions->"Extract All Instrument Curves"
+                    // Note: not reading chromatograms from DAD devices (since that requires 'StoredDataType.Chromatograms')
+                    // To preview these "Instrument Curves" externally, open the file in Agilent's Qualitative Analysis, then select the menu item Actions->"Extract All Instrument Curves"
+
+#pragma warning disable RCS1124FadeOut
                     var signals = lcDataReader.GetSignalInfo(device, StoredDataType.InstrumentCurves);
+#pragma warning restore RCS1124FadeOut
 
                     foreach (var signal in signals)
                     {
@@ -958,6 +965,7 @@ namespace MSFileInfoScanner.Readers
                         devicePlot.TICYAxisExponentialNotation = false;
 
                         devicePlot.DeviceType = agDevice.DeviceType;
+
                         // Add description to avoid overwriting files when there are multiple plots per device
                         devicePlot.TICPlotAbbrev = string.Format("{0}{1}{2}", agDevice.AgilentDeviceType.ToString(), agDevice.DeviceNumber, description.Trim().Replace(" ", ""));
                         devicePlot.TICAutoMinMaxY = true;
@@ -968,8 +976,9 @@ namespace MSFileInfoScanner.Readers
                         {
                             var time = chromData.XArray[i];
                             var value = chromData.YArray[i];
-                            // NOTE: values can be too close to cast as int, and don't correlate with actual scan numbers so collisions are likely
-                            // Use an artificial scan number
+
+                            // Note: values can be too close to cast as int, and don't correlate with actual scan numbers so collisions are likely
+                            // Instead, use an artificial scan number (1-based)
                             devicePlot.AddDataTICOnly(i + 1, 1, (float)time, value);
                         }
                     }
@@ -1042,8 +1051,8 @@ namespace MSFileInfoScanner.Readers
                         --scanIndex;
                 }
 
-                //mTICAndBPIPlot.AddData(scanNumber, scanMsLevel[scanNumber], (float)time, bpAbundances[i], abundances[i]);
-                //mTICAndBPIPlot.AddDataTICOnly(scanStats[scanIndex].ScanNumber, scanStats[scanIndex].ScanType, (float)time, values[i]);
+                // mTICAndBPIPlot.AddData(scanNumber, scanMsLevel[scanNumber], (float)time, bpAbundances[i], abundances[i]);
+                // mTICAndBPIPlot.AddDataTICOnly(scanStats[scanIndex].ScanNumber, scanStats[scanIndex].ScanType, (float)time, values[i]);
                 addMethod(scanStats[scanIndex].ScanNumber, scanStats[scanIndex].ScanType, (float)time, values[i]);
             }
         }
@@ -1069,7 +1078,6 @@ namespace MSFileInfoScanner.Readers
                 var xArray = spec.XArray;
                 var yArray = spec.YArray;
 
-                //
                 var data = new List<LCMSDataPlotter.MSIonType>(xArray.Length);
 
                 for (var j = 0; j < xArray.Length; j++)
@@ -1092,11 +1100,11 @@ namespace MSFileInfoScanner.Readers
 
                 // TODO: These need to be set, but it looks like we must read the spectrum to get them.
                 // TODO: TotalDataPoints and XArray are full-TOF-range, not non-zero data points.
-                //scanStatsEntry.IonCount = spec.TotalDataPoints;
-                //scanStatsEntry.IonCount = xArray.Length;
-                //scanStatsEntry.IonCountRaw = scanStatsEntry.IonCount;
-                //scanStatsEntry.MzMin = xArray[0];
-                //scanStatsEntry.MzMax = xArray[xArray.Length - 1];
+                // scanStatsEntry.IonCount = spec.TotalDataPoints;
+                // scanStatsEntry.IonCount = xArray.Length;
+                // scanStatsEntry.IonCountRaw = scanStatsEntry.IonCount;
+                // scanStatsEntry.MzMin = xArray[0];
+                // scanStatsEntry.MzMax = xArray[xArray.Length - 1];
 
                 scanStatsEntry.IonCount = data.Count;
                 scanStatsEntry.IonCountRaw = scanStatsEntry.IonCount;
@@ -1105,16 +1113,16 @@ namespace MSFileInfoScanner.Readers
 
                 if (Options.SaveLCMS2DPlots)
                 {
-                    mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, scanStatsEntry.ScanType, (float)scan.RetentionTime,
-                        //scanStatsEntry.IonCount, xArray, yArray);
-                        data);
+                    mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, scanStatsEntry.ScanType, (float)scan.RetentionTime, data);
                 }
 
                 if (Options.CheckCentroidingStatus)
                 {
-                    // Supply full array to not mis-classify sparse data
+                    // Option 1:
+                    // mDatasetStatsSummarizer.ClassifySpectrum(data.Select(x => x.MZ).ToList(), scanStatsEntry.ScanType, "Scan " + scanStatsEntry.ScanNumber);
+
+                    // Option 2: Supply full array to not mis-classify sparse data
                     mDatasetStatsSummarizer.ClassifySpectrum(xArray, scanStatsEntry.ScanType, "Scan " + scanStatsEntry.ScanNumber);
-                    //mDatasetStatsSummarizer.ClassifySpectrum(data.Select(x => x.MZ).ToList(), scanStatsEntry.ScanType, "Scan " + scanStatsEntry.ScanNumber);
                 }
 
                 scansProcessed++;
