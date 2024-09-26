@@ -427,6 +427,16 @@ namespace MSFileInfoScanner.Readers
                         acqTimeDetermined = true;
                     }
                 }
+                else
+                {
+                    LoadScanDataWithProteoWizard(agilentDFolder, datasetFileInfo, true);
+
+                    if (datasetFileInfo.ScanCount > 0)
+                    {
+                        success = true;
+                        acqTimeDetermined = true;
+                    }
+                }
 
                 if (!success)
                 {
