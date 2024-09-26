@@ -24,7 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.CLSCompliantAttribute">
-        <_Parameter1>true</_Parameter1>
+      <_Parameter1>true</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
@@ -32,7 +32,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PRISM-Library" Version="2.8.36" />
+    <PackageReference Include="PRISM-Library" Version="2.8.38" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="if not exist &quot;$(ProjectDir)..\Lib\$(TargetFramework)&quot; mkdir &quot;$(ProjectDir)..\Lib\$(TargetFramework)&quot;" />
