@@ -27,6 +27,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\b
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.pdb"             \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
 
 rem The Analysis Manager uses MSFileInfoScanner.dll after it runs DeconTools
+rem Analysis Manager parameter "MSFileInfoScannerDir" refers to C:\DMS_Programs\MSFileInfoScanner\DLL
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\*.dll"                           C:\DMS_Programs\MSFileInfoScanner\DLL\ /y /d /i
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MSFileInfoScanner.*"             C:\DMS_Programs\MSFileInfoScanner\DLL\ /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MSFileInfoScanner.xml"           C:\DMS_Programs\MSFileInfoScanner\DLL\ /y /d
@@ -44,6 +45,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\b
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\ProteowizardWrapper.pdb"         C:\DMS_Programs\MSFileInfoScanner\DLL\ /y /d
 
 rem The Capture Task Manager calls MSFileInfoScanner.exe
+rem Capture Task Manager parameter "MSFileInfoScannerDir" refers to C:\DMS_Programs\MSFileInfoScanner
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.exe"               C:\DMS_Programs\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.pdb"               C:\DMS_Programs\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\SpectraTypeClassifier.dll"           C:\DMS_Programs\MSFileInfoScanner /y /d
@@ -67,6 +69,8 @@ echo.
 if not "%1"=="NoPause" pause
 @echo on
 
+rem The Capture Task Manager calls MSFileInfoScanner.exe
+rem Capture Task Manager parameter "MSFileInfoScannerDir" refers to C:\DMS_Programs\MSFileInfoScanner
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.exe"               \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.exe.config"        \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.pdb"               \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
@@ -96,6 +100,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\b
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.pdb"             \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 
 rem The Analysis Manager uses MSFileInfoScanner.dll after it runs DeconTools
+rem Analysis Manager parameter "MSFileInfoScannerDir" refers to C:\DMS_Programs\MSFileInfoScanner\DLL
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\*.dll"                           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d /i
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MSFileInfoScanner.*"             \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MSFileInfoScanner.xml"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
