@@ -311,7 +311,7 @@ namespace MSFileInfoScanner.Readers
                             ScanType = msLevel,
                             ScanTypeName = "GC-MS",
                             ScanFilterText = string.Empty,
-                            ElutionTime = spectrum.RetentionTimeMinutes.ToString("0.0###"),
+                            ElutionTime = spectrum.RetentionTimeMinutes.ToString("0.0000###"),
                             TotalIonIntensity = StringUtilities.ValueToString(spectrum.TIC, 1),
                             BasePeakIntensity = StringUtilities.ValueToString(spectrum.BasePeakAbundance, 1),
                             BasePeakMZ = spectrum.BasePeakMZ.ToString("0.0###"),

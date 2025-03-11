@@ -548,7 +548,7 @@ namespace MSFileInfoScanner.Readers
 
                     scanStatsEntry.ExtendedScanInfo.ScanFilterText = scanStatsEntry.ScanFilterText;
 
-                    scanStatsEntry.ElutionTime = scan.RetentionTime.ToString("0.0###");
+                    scanStatsEntry.ElutionTime = scan.RetentionTime.ToString("0.0000###");
 
                     if (!mIsImsData)
                     {

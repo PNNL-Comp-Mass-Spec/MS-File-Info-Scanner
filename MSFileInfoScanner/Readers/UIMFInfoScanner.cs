@@ -421,7 +421,7 @@ namespace MSFileInfoScanner.Readers
                     scanStatsEntry.ScanFilterText = "IMS";
                     scanStatsEntry.ExtendedScanInfo.ScanFilterText = scanStatsEntry.ScanFilterText;
 
-                    scanStatsEntry.ElutionTime = elutionTime.ToString("0.0###");
+                    scanStatsEntry.ElutionTime = elutionTime.ToString("0.0000###");
 
                     if (tic > BAD_TIC_OR_BPI)
                     {

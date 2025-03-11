@@ -119,7 +119,7 @@ namespace MSFileInfoScanner.Readers
                 ScanType = msLevel,
                 ScanTypeName = scanTypeName,
                 ScanFilterText = string.Empty,
-                ElutionTime = elutionTime.ToString("0.0###"),
+                ElutionTime = elutionTime.ToString("0.0000###"),
                 TotalIonIntensity = StringUtilities.ValueToString(tic, 5),
                 BasePeakIntensity = StringUtilities.ValueToString(bpi, 5),
                 BasePeakMZ = "0",

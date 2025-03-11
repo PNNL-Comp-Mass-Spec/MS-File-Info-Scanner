@@ -309,7 +309,7 @@ namespace MSFileInfoScanner.Readers
                     ScanType = 1,
                     ScanTypeName = "SRM",
                     ScanFilterText = StripExtraFromChromatogramID(chromatogramID),
-                    ElutionTime = scanTimes[index].ToString("0.0###"),
+                    ElutionTime = scanTimes[index].ToString("0.0000###"),
                     TotalIonIntensity = intensities[index].ToString("0.0"),
                     BasePeakIntensity = intensities[index].ToString("0.0")
                 };
@@ -1008,7 +1008,7 @@ namespace MSFileInfoScanner.Readers
                     };
                 }
 
-                scanStatsEntry.ElutionTime = scanTimeMinutes.ToString("0.0###");
+                scanStatsEntry.ElutionTime = scanTimeMinutes.ToString("0.0000###");
 
                 // Bump up runtimeMinutes if necessary
                 if (scanTimeMinutes > parserInfo.RuntimeMinutes)
