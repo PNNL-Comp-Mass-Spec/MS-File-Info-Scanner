@@ -107,7 +107,8 @@ Use `/DatasetID:#` to define the dataset's DatasetID value (where # is an intege
 
 Use `/DI` to create a dataset info XML file for each dataset
 
-Use `/SS` to create a _ScanStats.txt  file for each dataset
+Use `/SS` to create files _ScanStats.txt and _ScanStatsEx.txt for each dataset
+
 
 Use `/QS` to compute an overall quality score for the data in each datasets
 

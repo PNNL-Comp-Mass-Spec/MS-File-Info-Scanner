@@ -91,7 +91,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         [Option("MaxLevelsToRecurse", "S", ArgExistsProperty = nameof(RecurseDirectories),
             HelpShowsDefault = false, SecondaryArg = true,
-            HelpText = "If supplied, process all valid files in the input directory and subdirectories\n" +
+            HelpText = "If defined, process all valid files in the input directory and subdirectories\n" +
                        "Include a number after /S (like /S:2) to limit the level of subdirectories to examine (0 means to recurse infinitely)\n" +
                        "The equivalent notation in a parameter file is MaxLevelsToRecurse=2")]
         public int MaxLevelsToRecurse { get; set; }
@@ -299,14 +299,14 @@ namespace MSFileInfoScannerInterfaces
         /// When true, create the dataset info XML file
         /// </summary>
         [Option("CreateDatasetInfoFile", "DI", HelpShowsDefault = false,
-            HelpText = "If supplied, create a dataset info XML file for each dataset")]
+            HelpText = "If defined, create a dataset info XML file for each dataset")]
         public bool CreateDatasetInfoFile { get; set; }
 
         /// <summary>
         /// When true, create scan stats files
         /// </summary>
-        [Option("CreateScanStatsFile", "SS", HelpShowsDefault = false,
-            HelpText = "If supplied, create files _ScanStats.txt and _ScanStatsEx.txt for each dataset")]
+        [Option("CreateScanStatsFiles", "CreateScanStatsFile", "SS", HelpShowsDefault = false,
+            HelpText = "If defined, create files _ScanStats.txt and _ScanStatsEx.txt for each dataset")]
         public bool CreateScanStatsFiles { get; set; }
 
         /// <summary>
@@ -323,7 +323,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         [Option("ComputeQualityScores", "QS",
             HelpShowsDefault = false, SecondaryArg = true,
-            HelpText = "If supplied, compute an overall quality score for the data in each datasets")]
+            HelpText = "If defined, compute an overall quality score for the data in each datasets")]
         public bool ComputeOverallQualityScores { get; set; }
 
         /// <summary>
@@ -331,7 +331,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         [Option("CheckCentroidingStatus", "CC",
             HelpShowsDefault = false, SecondaryArg = true,
-            HelpText = "If supplied, check spectral data for whether it is centroided or profile")]
+            HelpText = "If defined, check spectral data for whether it is centroided or profile")]
         public bool CheckCentroidingStatus { get; set; }
 
         /// <summary>
@@ -356,7 +356,7 @@ namespace MSFileInfoScannerInterfaces
         /// Can be a numeric value, or the text iTRAQ or TMT
         /// </summary>
         [Option("MS2MzMin", HelpShowsDefault = false,
-            HelpText = "If supplied, specifies a minimum m/z value that all MS/MS spectra should have\n" +
+            HelpText = "If defined, specifies a minimum m/z value that all MS/MS spectra should have\n" +
                        "Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold\n" +
                        "Useful for validating instrument files where the sample is iTRAQ or TMT labeled " +
                        "and it is important to detect the reporter ions in the MS/MS spectra" +
@@ -376,7 +376,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         [Option("DisableInstrumentHash", "NoHash",
             HelpShowsDefault = false, SecondaryArg = true,
-            HelpText = "If supplied, disables creating a SHA-1 hash for the primary instrument data file(s)")]
+            HelpText = "If defined, disables creating a SHA-1 hash for the primary instrument data file(s)")]
         public bool DisableInstrumentHash { get; set; }
 
         /// <summary>
@@ -393,7 +393,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         [Option("DatasetStatsTextFileName", "DST", ArgExistsProperty = nameof(UpdateDatasetStatsTextFile),
             HelpShowsDefault = false, SecondaryArg = true,
-            HelpText = "If supplied, update (or create) a tab-delimited text file with overview stats for the dataset\n" +
+            HelpText = "If defined, update (or create) a tab-delimited text file with overview stats for the dataset\n" +
                        "If /DI is used (or CreateDatasetInfoFile=True), will include detailed scan counts; otherwise, will just have the dataset name, " +
                        "acquisition date, and (if available) sample name and comment\n" +
                        "By default, the file is named " + DEFAULT_DATASET_STATS_FILENAME + "; " +
@@ -426,7 +426,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         [Option("ShowDebugInfo", "Debug",
             HelpShowsDefault = false, SecondaryArg = true,
-            HelpText = "If supplied, display debug information at the console, " +
+            HelpText = "If defined, display debug information at the console, " +
                        "including showing the scan number prior to reading each scan's data\n" +
                        "Also, when /Debug is enabled, temporary files for creating plots with Python will not be deleted")]
         public bool ShowDebugInfo { get; set; }
@@ -480,15 +480,15 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         [Option("ComputeFileHashes", "H",
             HelpShowsDefault = false, SecondaryArg = true,
-            HelpText = "If supplied, compute SHA-1 file hashes when verifying file integrity")]
+            HelpText = "If defined, compute SHA-1 file hashes when verifying file integrity")]
         public bool ComputeFileHashes { get; set; }
 
         /// <summary>
         /// When CheckFileIntegrity is true, also validate zip files (quick check)
         /// </summary>
         [Option("ZipFileCheckAllData", "QZ",
-            HelpShowsDefault = false, SecondaryArg = true,
-            HelpText = "If supplied, run a quick zip-file validation test when verifying file integrity\n" +
+            HelpShowsDefault = true, SecondaryArg = true,
+            HelpText = "If defined, run a quick zip-file validation test when verifying file integrity\n" +
                        "(the test does not check all data in the .Zip file)")]
         public bool ZipFileCheckAllData { get; set; } = true;
 
@@ -497,7 +497,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         [Option("UseCacheFiles", "CF",
             HelpShowsDefault = false, SecondaryArg = true,
-            HelpText = "If supplied, save/load information from the acquisition time file (cache file)\n" +
+            HelpText = "If defined, save/load information from the acquisition time file (cache file)\n" +
                        "This option is auto-enabled if you use /C")]
         public bool UseCacheFiles { get; set; }
 
@@ -506,7 +506,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         [Option("ReprocessExistingFiles", "R",
             HelpShowsDefault = false, SecondaryArg = true,
-            HelpText = "If supplied, reprocess files that are already defined in the acquisition time file")]
+            HelpText = "If defined, reprocess files that are already defined in the acquisition time file")]
         public bool ReprocessExistingFiles { get; set; }
 
         /// <summary>
@@ -514,7 +514,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         [Option("ReprocessIfCachedSizeIsZero", "Z",
             HelpShowsDefault = false, SecondaryArg = true,
-            HelpText = "If supplied, reprocess files that are already defined in the acquisition time file " +
+            HelpText = "If defined, reprocess files that are already defined in the acquisition time file " +
                        "only if their cached size is 0 bytes")]
         public bool ReprocessIfCachedSizeIsZero { get; set; }
 
@@ -523,7 +523,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         [Option("PostResultsToDMS", "PostToDMS",
             HelpShowsDefault = false, Hidden = true,
-            HelpText = "If supplied, store the dataset info in the DMS database\n" +
+            HelpText = "If defined, store the dataset info in the DMS database\n" +
                        "To customize the server name and/or stored procedure to use for posting, " +
                        "use an XML parameter file with settings DSInfoConnectionString, " +
                        "DSInfoDBPostingEnabled, and DSInfoStoredProcedure")]
@@ -553,7 +553,7 @@ namespace MSFileInfoScannerInterfaces
         /// When true, use Python script MSFileInfoScanner_Plotter.py instead of OxyPlot to create the plots
         /// </summary>
         [Option("PythonPlot", "PlotWithPython", "Python", HelpShowsDefault = false,
-            HelpText = "If supplied, create plots with Python script MSFileInfoScanner_Plotter.py instead of OxyPlot")]
+            HelpText = "If defined, create plots with Python script MSFileInfoScanner_Plotter.py instead of OxyPlot")]
         public bool PlotWithPython { get; set; }
 
         /// <summary>
