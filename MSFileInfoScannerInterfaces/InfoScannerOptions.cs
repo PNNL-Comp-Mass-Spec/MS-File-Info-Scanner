@@ -256,7 +256,7 @@ namespace MSFileInfoScannerInterfaces
             HelpText = "By default, the MS File Info Scanner creates TIC and BPI plots\n" +
                        "Use /TIC:False to disable saving TIC and BPI plots (or use SaveTICAndBPIPlots=False in a parameter file)\n" +
                        "When this is false, device specific plots will also be disabled")]
-        public bool SaveTICAndBPIPlots { get; set; }
+        public bool SaveTICAndBPIPlots { get; set; } = true;
 
         /// <summary>
         /// When true, hide empty HTML sections
@@ -490,7 +490,7 @@ namespace MSFileInfoScannerInterfaces
             HelpShowsDefault = false, SecondaryArg = true,
             HelpText = "If supplied, run a quick zip-file validation test when verifying file integrity\n" +
                        "(the test does not check all data in the .Zip file)")]
-        public bool ZipFileCheckAllData { get; set; }
+        public bool ZipFileCheckAllData { get; set; } = true;
 
         /// <summary>
         /// When enabled, save/load information from the acquisition time file (cache file)
@@ -576,7 +576,7 @@ namespace MSFileInfoScannerInterfaces
             ReprocessIfCachedSizeIsZero = false;
             UseCacheFiles = false;
 
-            SaveTICAndBPIPlots = true;
+            // Defined above: SaveTICAndBPIPlots = true;
             HideEmptyHTMLSections = false;
             SaveLCMS2DPlots = false;
             TestLCMSGradientColorSchemes = false;
@@ -596,13 +596,14 @@ namespace MSFileInfoScannerInterfaces
             ComputeOverallQualityScores = false;
             CreateDatasetInfoFile = false;
             CreateScanStatsFiles = false;
+            // Defined above: CreateEmptyScanStatsFiles = true;
 
             UpdateDatasetStatsTextFile = false;
             DatasetStatsTextFileName = string.Empty;
 
             CheckFileIntegrity = false;
             ComputeFileHashes = false;
-            ZipFileCheckAllData = true;
+            // Defined above: ZipFileCheckAllData = true;
 
             PostResultsToDMS = false;
             PlotWithPython = false;
