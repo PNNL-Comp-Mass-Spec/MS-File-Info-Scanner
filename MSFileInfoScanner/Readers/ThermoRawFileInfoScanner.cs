@@ -410,7 +410,7 @@ namespace MSFileInfoScanner.Readers
 
             datasetFileInfo.ScanCount = 0;
 
-            mDatasetStatsSummarizer.ClearCachedData();
+            mDatasetStatsSummarizer.ClearCachedData(Options.CreateEmptyScanStatsFiles);
 
             var deleteLocalFile = false;
             var readError = false;
@@ -526,8 +526,8 @@ namespace MSFileInfoScanner.Readers
 
                     if (!xcaliburAccessor.HasNoMSDevice)
                     {
-                        // If there is no MS device, then there won't be any data returned to perform these operations anyway
-                        if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFile ||
+                        // If there is no MS device, there won't be any data returned to perform these operations anyway
+                        if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFiles ||
                             Options.SaveLCMS2DPlots || Options.CheckCentroidingStatus || Options.MS2MzMin > 0)
                         {
                             // Load data from each scan

@@ -2580,7 +2580,7 @@ namespace MSFileInfoScanner
             Console.WriteLine("CheckCentroidingStatus:         {0}", TrueFalseToEnabledDisabled(Options.CheckCentroidingStatus));
             Console.WriteLine("Compute Overall Quality Scores: {0}", TrueFalseToEnabledDisabled(Options.ComputeOverallQualityScores));
             Console.WriteLine("Create dataset info XML file:   {0}", TrueFalseToEnabledDisabled(Options.CreateDatasetInfoFile));
-            Console.WriteLine("Create scan stats files:        {0}", TrueFalseToEnabledDisabled(Options.CreateScanStatsFile));
+            Console.WriteLine("Create scan stats files:        {0}", TrueFalseToEnabledDisabled(Options.CreateScanStatsFiles));
             Console.WriteLine("MS2MzMin:                       {0:N0}", Options.MS2MzMin);
             Console.WriteLine("SHA-1 hashing:                  {0}", TrueFalseToEnabledDisabled(!Options.DisableInstrumentHash));
 

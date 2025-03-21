@@ -574,7 +574,7 @@ namespace MSFileInfoScanner.Readers
                     createQCPlotHTMLFile = true;
                 }
 
-                if (Options.CreateScanStatsFile)
+                if (Options.CreateScanStatsFiles)
                 {
                     // Create the _ScanStats.txt file
                     var success = CreateDatasetScanStatsFile(inputFileName, outputDirectory.FullName);

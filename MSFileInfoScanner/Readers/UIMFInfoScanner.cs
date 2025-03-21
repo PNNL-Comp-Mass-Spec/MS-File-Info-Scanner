@@ -948,7 +948,7 @@ namespace MSFileInfoScanner.Readers
                     OnWarningEvent("Exception extracting acquisition time information: {0}", ex.Message);
                 }
 
-                if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFile || Options.SaveLCMS2DPlots)
+                if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFiles || Options.SaveLCMS2DPlots)
                 {
                     // Load data from each frame
                     // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File

@@ -307,7 +307,7 @@ namespace MSFileInfoScannerInterfaces
         /// </summary>
         [Option("CreateScanStatsFile", "SS", HelpShowsDefault = false,
             HelpText = "If supplied, create files _ScanStats.txt and _ScanStatsEx.txt for each dataset")]
-        public bool CreateScanStatsFile { get; set; }
+        public bool CreateScanStatsFiles { get; set; }
 
         /// <summary>
         /// When true, compute quality scores
@@ -586,7 +586,7 @@ namespace MSFileInfoScannerInterfaces
 
             ComputeOverallQualityScores = false;
             CreateDatasetInfoFile = false;
-            CreateScanStatsFile = false;
+            CreateScanStatsFiles = false;
 
             UpdateDatasetStatsTextFile = false;
             DatasetStatsTextFileName = string.Empty;
