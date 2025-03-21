@@ -6,7 +6,7 @@ InputFilePath=
 # If omitted, the output files will be created in the program directory
 OutputDirectoryPath=
 
-# If supplied, process all valid files in the input directory and subdirectories
+# If non-zero, process all valid files in the input directory and subdirectories
 # Include a number after /S (like /S:2) to limit the level of subdirectories to examine (0 means to recurse infinitely)
 # The equivalent notation in a parameter file is MaxLevelsToRecurse=2
 # MaxLevelsToRecurse=0
@@ -61,22 +61,25 @@ SaveTICAndBPIPlots=True
 # this is only appropriate if processing a single dataset
 # DatasetID=0
 
-# If supplied, create a dataset info XML file for each dataset
+# If true, create a dataset info XML file for each dataset
 CreateDatasetInfoFile=True
 
-# If supplied, create a _ScanStats.txt  file for each dataset
-CreateScanStatsFile=True
+# If true, create files _ScanStats.txt and _ScanStatsEx.txt for each dataset
+CreateScanStatsFiles=True
 
-# If supplied, compute an overall quality score for the data in each datasets
+# When true, if the input file does not have any spectra (scans), create scan stats files that only have a header row
+CreateEmptyScanStatsFiles=True
+
+# If true, compute an overall quality score for the data in each datasets
 ComputeQualityScores=True
 
-# If supplied, check spectral data for whether it is centroided or profile
+# If true, check spectral data for whether it is centroided or profile
 CheckCentroidingStatus=True
 
 # When true, if an error is encountered while reading the file, copy it to the local drive and try again
 # CopyFileLocalOnReadError=False
 
-# If supplied, specifies a minimum m/z value that all MS/MS spectra should have
+# If defined, specifies a minimum m/z value that all MS/MS spectra should have
 # Will report an error if any MS/MS spectra have minimum m/z value larger than the threshold
 # Useful for validating instrument files where the sample is iTRAQ or TMT labeled and it is important to detect the reporter ions in the MS/MS spectra
 #   - select the default iTRAQ m/z (113) using /MS2MzMin:iTRAQ
@@ -84,10 +87,10 @@ CheckCentroidingStatus=True
 #   - specify a m/z value using /MS2MzMin:110
 MS2MzMin=TMT
 
-# If supplied, disables creating a SHA-1 hash for the primary instrument data file(s)
+# If true, disables creating a SHA-1 hash for the primary instrument data file(s)
 # DisableInstrumentHash=False
 
-# If supplied, update (or create) a tab-delimited text file with overview stats for the dataset
+# If defined, update (or create) a tab-delimited text file with overview stats for the dataset
 # If /DI is used (or CreateDatasetInfoFile=True), will include detailed scan counts; otherwise, will just have the dataset name, acquisition date, and (if available) sample name and comment
 # By default, the file is named MSFileInfo_DatasetStats.txt; to override, add the file name after the /DST switch, for example /DST:DatasetStatsFileName.txt
 # DatasetStatsTextFileName=
@@ -101,7 +104,7 @@ MS2MzMin=TMT
 # For example, to end processing at scan 1000, use /ScanEnd:1000
 # ScanEnd=0
 
-# If supplied, display debug information at the console, including showing the scan number prior to reading each scan's data
+# If true, display debug information at the console, including showing the scan number prior to reading each scan's data
 # Also, when /Debug is enabled, temporary files for creating plots with Python will not be deleted
 # ShowDebugInfo=False
 
@@ -115,24 +118,24 @@ MS2MzMin=TMT
 # Maximum number of XML nodes to examine when checking XML files
 # MaximumXMLElementNodesToCheck=500
 
-# If supplied, compute SHA-1 file hashes when verifying file integrity
+# If true, compute SHA-1 file hashes when verifying file integrity
 # ComputeFileHashes=False
 
-# If supplied, run a quick zip-file validation test when verifying file integrity
+# If true, run a quick zip-file validation test when verifying file integrity
 # (the test does not check all data in the .Zip file)
 # ZipFileCheckAllData=True
 
-# If supplied, save/load information from the acquisition time file (cache file)
+# If true, save/load information from the acquisition time file (cache file)
 # This option is auto-enabled if you use /C
 # UseCacheFiles=False
 
-# If supplied, reprocess files that are already defined in the acquisition time file
+# If true, reprocess files that are already defined in the acquisition time file
 # ReprocessExistingFiles=False
 
-# If supplied, reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes
+# If true, reprocess files that are already defined in the acquisition time file only if their cached size is 0 bytes
 # ReprocessIfCachedSizeIsZero=False
 
-# If supplied, create plots with Python script MSFileInfoScanner_Plotter.py instead of OxyPlot
+# If true, create plots with Python script MSFileInfoScanner_Plotter.py instead of OxyPlot
 PythonPlot=True
 
 # Secondary arguments are shown above with their default value, but commented out using #

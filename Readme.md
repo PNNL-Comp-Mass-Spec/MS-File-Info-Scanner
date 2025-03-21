@@ -44,7 +44,7 @@ MSFileInfoScanner.exe
  [/P:ParameterFilePath] [/S[:MaxLevel]]
  [/IE] [/L:LogFilePath] [/SF:StatusFileName] 
  [/LC[:MaxPointsToPlot]] [/TIC] [/LCGrad]
- [/DI] [/SS] [/QS] [/CC]
+ [/DI] [/SS] [/CreateEmptySS] [/QS] [/CC]
  [/MS2MzMin:MzValue] [/NoHash]
  [/DST:DatasetStatsFileName]
  [/ScanStart:0] [/ScanEnd:0] [/Debug]
@@ -109,6 +109,7 @@ Use `/DI` to create a dataset info XML file for each dataset
 
 Use `/SS` to create files _ScanStats.txt and _ScanStatsEx.txt for each dataset
 
+Use `/CreateEmptySS=False` to prevent empty _ScanStats.txt files from being created
 
 Use `/QS` to compute an overall quality score for the data in each datasets
 
