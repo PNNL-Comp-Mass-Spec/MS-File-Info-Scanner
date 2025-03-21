@@ -597,7 +597,7 @@ namespace MSFileInfoScanner.Readers
 
             datasetFileInfo.ScanCount = 0;
 
-            mDatasetStatsSummarizer.ClearCachedData();
+            mDatasetStatsSummarizer.ClearCachedData(Options.CreateEmptyScanStatsFiles);
 
             var readError = false;
             var inaccurateStartTime = false;

@@ -74,7 +74,7 @@ namespace MSFileInfoScanner.Readers
 
             datasetFileInfo.ScanCount = 0;
 
-            mDatasetStatsSummarizer.ClearCachedData();
+            mDatasetStatsSummarizer.ClearCachedData(Options.CreateEmptyScanStatsFiles);
 
             // Read the file info from the file system
             // This will also compute the SHA-1 hash of the .Raw file and add it to mDatasetStatsSummarizer.DatasetFileInfo

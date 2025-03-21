@@ -88,7 +88,7 @@ namespace MSFileInfoScanner.Readers
 
             datasetFileInfo.ScanCount = 0;
 
-            mDatasetStatsSummarizer.ClearCachedData();
+            mDatasetStatsSummarizer.ClearCachedData(Options.CreateEmptyScanStatsFiles);
 
             var success = ProcessWithProteoWizard(dataFile, datasetFileInfo);
 

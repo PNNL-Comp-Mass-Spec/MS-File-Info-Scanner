@@ -164,7 +164,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public DatasetStatsSummarizer()
         {
-            FileDate = "April 28, 2023";
+            FileDate = "March 21, 2025";
 
             ErrorMessage = string.Empty;
 
@@ -411,7 +411,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// <summary>
         /// Clear cached data
         /// </summary>
-        public void ClearCachedData()
+        public void ClearCachedData(bool createEmptyScanStatsFiles = true)
         {
             mDatasetScanNumbers.Clear();
             mDatasetScanStats.Clear();
@@ -425,7 +425,7 @@ namespace MSFileInfoScanner.DatasetStats
 
             mSpectraTypeClassifier.Reset();
 
-            CreateEmptyScanStatsFiles = true;
+            CreateEmptyScanStatsFiles = createEmptyScanStatsFiles;
 
             ScanCountDIA = 0;
 

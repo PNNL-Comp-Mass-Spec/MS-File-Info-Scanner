@@ -845,7 +845,7 @@ namespace MSFileInfoScanner.Readers
                 datasetFileInfo.AcqTimeStart = datasetDirectory.CreationTime;
                 datasetFileInfo.AcqTimeEnd = datasetDirectory.CreationTime;
 
-                mDatasetStatsSummarizer.ClearCachedData();
+                mDatasetStatsSummarizer.ClearCachedData(Options.CreateEmptyScanStatsFiles);
 
                 // Look for the analysis.baf, analysis.tdf, or analysis.tsf file in datasetDirectory
                 // Use its modification time as the AcqTime start and End values

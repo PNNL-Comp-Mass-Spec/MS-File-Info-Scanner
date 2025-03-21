@@ -546,7 +546,7 @@ namespace MSFileInfoScanner.Readers
 
             datasetFileInfo.ScanCount = 0;
 
-            mDatasetStatsSummarizer.ClearCachedData();
+            mDatasetStatsSummarizer.ClearCachedData(Options.CreateEmptyScanStatsFiles);
 
             if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFiles || Options.SaveLCMS2DPlots)
             {

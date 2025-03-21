@@ -92,7 +92,7 @@ namespace MSFileInfoScanner.Readers
 
                 datasetFileInfo.ScanCount = 0;
 
-                mDatasetStatsSummarizer.ClearCachedData();
+                mDatasetStatsSummarizer.ClearCachedData(Options.CreateEmptyScanStatsFiles);
                 mLCMS2DPlot.Options.UseObservedMinScan = false;
 
                 ProcessRawDirectory(datasetDirectory, datasetFileInfo, out var primaryDataFiles);
