@@ -2581,6 +2581,7 @@ namespace MSFileInfoScanner
             Console.WriteLine("Compute Overall Quality Scores: {0}", TrueFalseToEnabledDisabled(Options.ComputeOverallQualityScores));
             Console.WriteLine("Create dataset info XML file:   {0}", TrueFalseToEnabledDisabled(Options.CreateDatasetInfoFile));
             Console.WriteLine("Create scan stats files:        {0}", TrueFalseToEnabledDisabled(Options.CreateScanStatsFiles));
+            Console.WriteLine("Create empty scan stats files:  {0}", TrueFalseToEnabledDisabled(Options.CreateEmptyScanStatsFiles));
             Console.WriteLine("MS2MzMin:                       {0:N0}", Options.MS2MzMin);
             Console.WriteLine("SHA-1 hashing:                  {0}", TrueFalseToEnabledDisabled(!Options.DisableInstrumentHash));
 

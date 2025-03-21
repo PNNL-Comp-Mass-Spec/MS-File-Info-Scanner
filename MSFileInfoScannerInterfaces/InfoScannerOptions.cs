@@ -310,6 +310,15 @@ namespace MSFileInfoScannerInterfaces
         public bool CreateScanStatsFiles { get; set; }
 
         /// <summary>
+        /// When true, if the input file does not have any spectra (scans), create scan stats files that only have a header row
+        /// </summary>
+        /// <remarks>Ignored if <see cref="CreateScanStatsFiles"/> is false
+        /// </remarks>
+        [Option("CreateEmptyScanStatsFiles", "CreateEmptySS", HelpShowsDefault = true,
+            HelpText = "If defined, and if the input file does not have any spectra (scans), create scan stats files that only have a header row")]
+        public bool CreateEmptyScanStatsFiles { get; set; } = true;
+
+        /// <summary>
         /// When true, compute quality scores
         /// </summary>
         [Option("ComputeQualityScores", "QS",
