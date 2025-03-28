@@ -2090,7 +2090,7 @@ namespace MSFileInfoScanner
 
         private void LogErrors(string source, string message, Exception ex)
         {
-            StatusMessage = string.Copy(message);
+            StatusMessage = message;
 
             var messageWithoutCRLF = StatusMessage.Replace(Environment.NewLine, "; ");
 

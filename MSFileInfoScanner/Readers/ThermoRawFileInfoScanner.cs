@@ -456,7 +456,7 @@ namespace MSFileInfoScanner.Readers
 
                             File.Copy(dataFilePath, dataFilePathLocal, true);
 
-                            dataFilePath = string.Copy(dataFilePathLocal);
+                            dataFilePath = dataFilePathLocal;
                             deleteLocalFile = true;
 
                             // Update rawFile then try to re-open

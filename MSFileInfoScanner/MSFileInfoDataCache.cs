@@ -521,7 +521,7 @@ namespace MSFileInfoScanner
                         var datasetId = Convert.ToInt32(splitLine[(int)MSFileInfoResultsFileColumns.DatasetID]);
                         var datasetFileInfo = new DatasetFileInfo(datasetId, datasetName)
                         {
-                            FileExtension = string.Copy(splitLine[(int)MSFileInfoResultsFileColumns.FileExtension]),
+                            FileExtension = splitLine[(int)MSFileInfoResultsFileColumns.FileExtension],
                             AcqTimeStart = ParseDate(splitLine[(int)MSFileInfoResultsFileColumns.AcqTimeStart]),
                             AcqTimeEnd = ParseDate(splitLine[(int)MSFileInfoResultsFileColumns.AcqTimeEnd]),
                             ScanCount = Convert.ToInt32(splitLine[(int)MSFileInfoResultsFileColumns.ScanCount]),

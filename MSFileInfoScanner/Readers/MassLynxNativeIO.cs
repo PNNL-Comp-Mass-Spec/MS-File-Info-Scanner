@@ -635,7 +635,7 @@ namespace MSFileInfoScanner.Readers
                 }
                 else
                 {
-                    cleanMassLynxDataFolderPath = string.Copy(massLynxDataDirectoryPath);
+                    cleanMassLynxDataFolderPath = massLynxDataDirectoryPath;
                 }
 
                 if (!LoadMSFileHeader(thisMSData, cleanMassLynxDataFolderPath))

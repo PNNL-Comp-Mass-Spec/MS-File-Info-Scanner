@@ -99,8 +99,8 @@ namespace MSFileInfoScanner.Readers
             UpdateDatasetFileStats(datasetFile, datasetFileInfo.DatasetID);
 
             // Copy over the updated file time info and scan info from datasetFileInfo to mDatasetStatsSummarizer.DatasetFileInfo
-            mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
-            mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
+            mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = datasetFileInfo.DatasetName;
+            mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = datasetFileInfo.FileExtension;
             mDatasetStatsSummarizer.DatasetFileInfo.FileSizeBytes = datasetFileInfo.FileSizeBytes;
             mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
             mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;

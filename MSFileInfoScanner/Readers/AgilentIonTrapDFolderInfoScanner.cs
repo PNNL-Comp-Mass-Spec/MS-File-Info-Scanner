@@ -119,7 +119,7 @@ namespace MSFileInfoScanner.Readers
                     if (!dataLine.StartsWith(RUN_LOG_FILE_METHOD_LINE_START))
                         continue;
 
-                    mostRecentMethodLine = string.Copy(dataLine);
+                    mostRecentMethodLine = dataLine;
 
                     // Method line found
                     // See if the line contains a key phrase

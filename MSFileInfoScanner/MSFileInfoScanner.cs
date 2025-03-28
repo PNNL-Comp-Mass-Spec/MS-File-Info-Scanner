@@ -656,7 +656,7 @@ namespace MSFileInfoScanner
                             // Log directory is undefined; use mOutputDirectoryPath if it is defined
                             if (!string.IsNullOrEmpty(mOutputDirectoryPath))
                             {
-                                mLogDirectoryPath = string.Copy(mOutputDirectoryPath);
+                                mLogDirectoryPath = mOutputDirectoryPath;
                             }
                         }
 
@@ -1360,7 +1360,7 @@ namespace MSFileInfoScanner
             }
 
             // Update mOutputDirectoryPath
-            mOutputDirectoryPath = string.Copy(outputDirectoryPath);
+            mOutputDirectoryPath = outputDirectoryPath;
 
             mStatusFilePath = string.Empty;
             mLastStatusWriteTime = DateTime.UtcNow.Subtract(new TimeSpan(0, 0, MINIMUM_STATUS_FILE_UPDATE_INTERVAL_SECONDS * 2));
@@ -2794,7 +2794,7 @@ namespace MSFileInfoScanner
                             // Log directory is undefined; use mOutputDirectoryPath if it is defined
                             if (!string.IsNullOrEmpty(mOutputDirectoryPath))
                             {
-                                statusDirectoryPath = string.Copy(mOutputDirectoryPath);
+                                statusDirectoryPath = mOutputDirectoryPath;
                             }
                         }
 

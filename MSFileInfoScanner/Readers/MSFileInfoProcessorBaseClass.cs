@@ -1415,8 +1415,8 @@ namespace MSFileInfoScanner.Readers
             }
 
             mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = datasetFileInfo.DatasetID;
-            mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = string.Copy(datasetFileInfo.DatasetName);
-            mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = string.Copy(datasetFileInfo.FileExtension);
+            mDatasetStatsSummarizer.DatasetFileInfo.DatasetName = datasetFileInfo.DatasetName;
+            mDatasetStatsSummarizer.DatasetFileInfo.FileExtension = datasetFileInfo.FileExtension;
             mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeStart;
             mDatasetStatsSummarizer.DatasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeEnd;
             mDatasetStatsSummarizer.DatasetFileInfo.ScanCount = datasetFileInfo.ScanCount;
