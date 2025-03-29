@@ -268,7 +268,7 @@ namespace MSFileInfoScanner.Readers
                             TotalIonIntensity = StringUtilities.ValueToString(scanInfo.TotalIonCurrent, 5),
                             BasePeakIntensity = StringUtilities.ValueToString(scanInfo.BasePeakIntensity, 5),
                             BasePeakMZ = scanInfo.BasePeakMZ.ToString("0.0###"),
-                            BasePeakSignalToNoiseRatio = "0",
+                            BasePeakSignalToNoiseRatio = "0",       // This is computed by MASIC but not computed by this program
                             IonCount = scanInfo.NumPeaks,
                             IonCountRaw = scanInfo.NumPeaks,
                             MzMin = scanInfo.LowMass,

@@ -82,7 +82,7 @@ namespace MSFileInfoScanner.DatasetStats
         public string BasePeakMZ { get; set; }
 
         /// <summary>
-        /// Signal to noise ratio (S/N)
+        /// Signal-to-noise ratio (S/N)
         /// </summary>
         public string BasePeakSignalToNoiseRatio { get; set; }
 

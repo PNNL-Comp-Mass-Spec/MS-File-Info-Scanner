@@ -1074,7 +1074,7 @@ namespace MSFileInfoScanner.Readers
                     }
                 }
 
-                // Base peak signal-to-noise ratio
+                // Base peak signal-to-noise ratio (computed by MASIC but not computed by this program)
                 scanStatsEntry.BasePeakSignalToNoiseRatio = "0";
 
                 scanStatsEntry.IonCount = msDataSpectrum.Mzs.Length;
