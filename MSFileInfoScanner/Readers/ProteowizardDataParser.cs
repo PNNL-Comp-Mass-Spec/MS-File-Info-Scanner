@@ -924,7 +924,7 @@ namespace MSFileInfoScanner.Readers
 
                         var includeParentMZ = scanStatsEntry.IsDIA;
 
-                        scanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanFilterText, scanStatsEntry.IsDIA);
+                        scanStatsEntry.ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanFilterText, scanStatsEntry.IsDIA, parentIonMonoisotopicMZ);
                         genericScanFilter = XRawFileIO.MakeGenericThermoScanFilter(scanFilterText, includeParentMZ);
 
                         isHighRes = msLevels[spectrumIndex] > 1

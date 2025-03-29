@@ -262,7 +262,7 @@ namespace MSFileInfoScanner.Readers
                         {
                             ScanNumber = scanNumber,
                             ScanType = scanInfo.MSLevel,
-                            ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText, scanInfo.IsDIA),
+                            ScanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanInfo.FilterText, scanInfo.IsDIA, scanInfo.ParentIonMonoisotopicMZ),
                             ScanFilterText = XRawFileIO.MakeGenericThermoScanFilter(scanInfo.FilterText, includeParentMZ),
                             ElutionTime = scanInfo.RetentionTime.ToString("0.0000###"),
                             TotalIonIntensity = StringUtilities.ValueToString(scanInfo.TotalIonCurrent, 5),

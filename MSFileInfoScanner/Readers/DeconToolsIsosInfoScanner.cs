@@ -453,7 +453,7 @@ namespace MSFileInfoScanner.Readers
                     }
                     else
                     {
-                        scanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanData.FilterText, false);
+                        scanTypeName = XRawFileIO.GetScanTypeNameFromThermoScanFilterText(scanData.FilterText, false, null);
                     }
 
                     var scanStatsEntry = new ScanStatsEntry
