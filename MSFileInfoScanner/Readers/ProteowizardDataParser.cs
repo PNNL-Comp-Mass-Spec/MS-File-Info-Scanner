@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -175,6 +176,20 @@ namespace MSFileInfoScanner.Readers
             }
 
             return indexMatch;
+        }
+
+        private static double? GetParentIonMonoisotopicMz(SpectrumScanContainer cvScanInfo)
+        {
+            foreach (var item in cvScanInfo.Scans.SelectMany(scanEntry => scanEntry.UserParams))
+            {
+                if (item.Key.StartsWith("[Thermo Trailer Extra]Monoisotopic M/Z", StringComparison.OrdinalIgnoreCase) &&
+                    double.TryParse(item.Value, out var parentIonMonoisotopicMZ))
+                {
+                    return parentIonMonoisotopicMZ;
+                }
+            }
+
+            return null;
         }
 
         private int GetSpectrumCountWithRetry(MSDataFileReader msDataFileReader, int maxAttempts = 3)
@@ -880,6 +895,10 @@ namespace MSFileInfoScanner.Readers
                     out var lowMass,
                     out var highMass,
                     out var isolationWindowWidth);
+
+                var cvScanInfo = mMSDataFileReader.GetSpectrumScanInfo(spectrumIndex);
+
+                var parentIonMonoisotopicMZ = GetParentIonMonoisotopicMz(cvScanInfo);
 
                 string genericScanFilter;
 
