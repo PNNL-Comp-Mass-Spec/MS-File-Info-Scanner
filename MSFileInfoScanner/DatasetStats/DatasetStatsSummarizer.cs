@@ -164,7 +164,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public DatasetStatsSummarizer()
         {
-            FileDate = "March 21, 2025";
+            FileDate = "April 11, 2025";
 
             ErrorMessage = string.Empty;
 
@@ -1569,7 +1569,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </remarks>
         /// <param name="requiredMzMin">Required minimum m/z value</param>
         /// <param name="errorOrWarningMsg">Output: error or warning message</param>
-        /// <param name="maxPercentAllowedFailed">Maximum percentage of spectra allowed to have a minimum m/z larger than the required minimum</param>
+        /// <param name="maxPercentAllowedFailed">Maximum percentage of spectra allowed to have a minimum m/z larger than the required minimum (value between 0 and 100)</param>
         /// <returns>True if valid data, false if at least 10% of the spectra has a minimum m/z higher than the threshold</returns>
         public bool ValidateMS2MzMin(float requiredMzMin, out string errorOrWarningMsg, int maxPercentAllowedFailed)
         {
@@ -1624,10 +1624,13 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         /// <param name="msLevel">MS level (1 for MS1, 2 for MS2, etc.)</param>
         /// <param name="requiredMzMin">Required minimum m/z value</param>
-        /// <param name="maxPercentAllowedFailed">Maximum percentage of spectra allowed to have a minimum m/z larger than the required minimum</param>
+        /// <param name="maxPercentAllowedFailed">Maximum percentage of spectra allowed to have a minimum m/z larger than the required minimum (value between 0 and 100)</param>
         /// <param name="scanCountForMSLevel">Output: scan count for the given MS level</param>
         /// <param name="scanCountWithData">Output: scan count with data</param>
         /// <param name="errorOrWarningMsg">Output: error or warning message</param>
+        /// <returns>
+        /// True if a sufficient number of spectra have a minimum m/z value below the required minimum, false if too many do not have the required minimum
+        /// </returns>
         private bool ValidateMSnMzMin(
             int msLevel,
             float requiredMzMin,
