@@ -1609,12 +1609,19 @@ namespace MSFileInfoScanner.DatasetStats
                 return true;
             }
 
+            // ReSharper disable once ConvertIfStatementToSwitchStatement
             if (scanCountWithDataMS2 > 0 && scanCountWithDataMS3 == 0)
+            {
                 errorOrWarningMsg = messageMS2;
+            }
             else if (scanCountWithDataMS2 == 0 && scanCountWithDataMS3 > 0)
+            {
                 errorOrWarningMsg = messageMS3;
+            }
             else
+            {
                 errorOrWarningMsg = messageMS2 + "; " + messageMS3;
+            }
 
             return false;
         }
@@ -1706,7 +1713,7 @@ namespace MSFileInfoScanner.DatasetStats
             return percentInvalid < maxPercentAllowedFailed;
         }
 
-        private string ValueToString(double value, byte digitsOfPrecision)
+        private static string ValueToString(double value, byte digitsOfPrecision)
         {
             if (double.IsNaN(value))
             {
