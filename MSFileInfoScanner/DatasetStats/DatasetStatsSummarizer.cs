@@ -1646,10 +1646,11 @@ namespace MSFileInfoScanner.DatasetStats
             out int scanCountWithData,
             out string errorOrWarningMsg)
         {
-            scanCountWithData = 0;
             scanCountForMSLevel = 0;
 
-            var scanCountInvalid = 0;
+            // Keys in this dictionary are scan filter text (for Thermo files, generic scan filter text, created using XRawFileIO.MakeGenericThermoScanFilter)
+            // Values are scan count into
+            var scanCountsByScanFilter = new Dictionary<string, MSnMzMinStats>();
 
             foreach (var scan in mDatasetScanStats)
             {
@@ -1661,56 +1662,142 @@ namespace MSFileInfoScanner.DatasetStats
                 if (scan.IonCount == 0 && scan.IonCountRaw == 0)
                     continue;
 
-                scanCountWithData++;
+                var invalidMzMin = scan.MzMin > requiredMzMin;
 
-                if (scan.MzMin > requiredMzMin)
+                if (!scanCountsByScanFilter.TryGetValue(scan.ScanFilterText, out var mzMinStats))
                 {
-                    scanCountInvalid++;
+                    var newItem = new MSnMzMinStats(scan.ScanFilterText, maxPercentAllowedFailed, requiredMzMin)
+                    {
+                        ScanCountWithData = 1
+                    };
+
+                    if (invalidMzMin)
+                    {
+                        newItem.ScanCountInvalid = 1;
+                    }
+
+                    scanCountsByScanFilter.Add(scan.ScanFilterText, newItem);
+                    continue;
+                }
+
+                mzMinStats.ScanCountWithData++;
+
+                if (invalidMzMin)
+                {
+                    mzMinStats.ScanCountInvalid++;
                 }
             }
 
-            string spectraType;
+            var spectraType = msLevel switch
+            {
+                2 => "MS2",
+                3 => "MS3",
+                _ => "MSn"
+            };
 
-            if (msLevel == 2)
-                spectraType = "MS2";
-            else if (msLevel == 3)
-                spectraType = "MS3";
-            else
-                spectraType = "MSn";
+            var scanCountWithDataAllFilters = scanCountsByScanFilter.Sum(item => item.Value.ScanCountWithData);
+            var scanCountInvalidAllFilters = scanCountsByScanFilter.Sum(item => item.Value.ScanCountInvalid);
 
             if (scanCountForMSLevel == 0)
             {
                 // There are no MS2 (or MS3) spectra
                 errorOrWarningMsg = string.Format("Dataset has no {0} spectra; cannot validate minimum m/z", spectraType);
+                scanCountWithData = 0;
                 return false;
             }
 
-            if (scanCountWithData == 0)
+            if (scanCountWithDataAllFilters == 0)
             {
                 // None of the MS2 (or MS3) spectra has data; cannot validate
                 errorOrWarningMsg = string.Format("None of the {0} spectra has data; cannot validate minimum m/z", spectraType);
+                scanCountWithData = 0;
                 return false;
             }
 
-            if (scanCountInvalid == 0)
+            if (scanCountInvalidAllFilters == 0)
             {
                 errorOrWarningMsg = string.Empty;
+                scanCountWithData = scanCountWithDataAllFilters;
                 return true;
             }
 
-            var percentInvalid = scanCountInvalid / (float)scanCountWithData * 100;
+            var validScanFilters = 0;
+            var scanCountsWithData = new List<float>();
 
-            var percentRounded = percentInvalid.ToString(percentInvalid < 10 ? "F1" : "F0");
+            foreach (var item in scanCountsByScanFilter.Values)
+            {
+                item.ComputePercentInvalid();
 
-            // Example messages:
-            // 3.8% of the MS2 spectra have a minimum m/z value larger than 113.0 m/z (950 / 25,000)
-            // 2.5% of the MS3 spectra have a minimum m/z value larger than 113.0 m/z (75 / 3,000)
-            // 100% of the MS2 spectra have a minimum m/z value larger than 126.0 m/z (32,489 / 32,489)
+                // Example messages:
+                // 3.8% of the MS2 spectra have a minimum m/z value larger than 113.0 m/z (950 / 25,000)
+                // 2.5% of the MS3 spectra have a minimum m/z value larger than 113.0 m/z (75 / 3,000)
+                // 100% of the MS2 spectra have a minimum m/z value larger than 126.0 m/z (32,489 / 32,489)
 
-            errorOrWarningMsg = string.Format("{0}% of the {1} spectra have a minimum m/z value larger than {2:F1} m/z ({3:N0} / {4:N0})",
-                                              percentRounded, spectraType, requiredMzMin, scanCountInvalid, scanCountWithData);
+                item.ErrorOrWarningMessage = string.Format("{0}% of the {1} spectra have a minimum m/z value larger than {2:F1} m/z ({3:N0} / {4:N0})",
+                    item.PercentInvalidRounded, spectraType, requiredMzMin, item.ScanCountInvalid, item.ScanCountWithData);
 
-            return percentInvalid < maxPercentAllowedFailed;
+                if (item.PercentInvalidPassesFilter)
+                {
+                    validScanFilters++;
+                }
+
+                scanCountsWithData.Add(item.ScanCountWithData);
+            }
+
+            var medianScanCountWithData = (int)MathNet.Numerics.Statistics.Statistics.Median(scanCountsWithData);
+
+            if (validScanFilters > 1)
+            {
+                // At least one of the scan filters has a sufficient number of spectra with a minimum m/z value below the required minimum
+                // Return true if the number of scans in the scan filter is at least 15% of the median scan count across the scan filters
+
+                foreach (var item in scanCountsByScanFilter.Values)
+                {
+                    if (!item.PercentInvalidPassesFilter)
+                        continue;
+
+                    if (item.ScanCountWithData < medianScanCountWithData * 0.15)
+                        continue;
+
+                    errorOrWarningMsg = item.ErrorOrWarningMessage;
+                    scanCountWithData = scanCountWithDataAllFilters;
+                    return true;
+                }
+
+                // None of the scan filters has a scan count of at least 15% of the median scan count
+                foreach (var item in scanCountsByScanFilter.Values)
+                {
+                    if (!item.PercentInvalidPassesFilter)
+                        continue;
+
+                    errorOrWarningMsg = string.Format(
+                        "For scan filter \"{0}\", {1}% of the {2} spectra have a minimum m/z value larger than {3:F1} m/z ({4:N0} / {5:N0}); " +
+                        "although this is below the minimum threshold of {6}%, this scan filter's scan count is less than 15% of the median scan count " +
+                        "across all of the scan filters ({7} vs. 15% of {8})",
+                        item.ScanFilter, item.PercentInvalidRounded, spectraType, requiredMzMin,
+                        item.ScanCountInvalid, item.ScanCountWithData,
+                        maxPercentAllowedFailed, item.ScanCountWithData, medianScanCountWithData);
+
+                    scanCountWithData = scanCountWithDataAllFilters;
+                    return false;
+                }
+            }
+
+            // None of the scan filters has a sufficient number of spectra with a minimum m/z value below the required minimum
+            // Return false, and return the error message for the first scan filter where PercentInvalidPassesFilter is false
+            foreach (var item in scanCountsByScanFilter.Values)
+            {
+                if (item.PercentInvalidPassesFilter)
+                    continue;
+
+                errorOrWarningMsg = item.ErrorOrWarningMessage;
+                scanCountWithData = scanCountWithDataAllFilters;
+                return false;
+            }
+
+            errorOrWarningMsg = scanCountsByScanFilter.Values.First().ErrorOrWarningMessage;
+            scanCountWithData = scanCountWithDataAllFilters;
+            return false;
         }
 
         private static string ValueToString(double value, byte digitsOfPrecision)
