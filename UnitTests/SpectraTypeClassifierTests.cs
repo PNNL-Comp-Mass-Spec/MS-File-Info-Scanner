@@ -83,19 +83,22 @@ namespace MSFileInfoScannerUnitTests
             Console.WriteLine("Fraction centroided:     {0}", classifier.FractionCentroided);
             Console.WriteLine("Fraction centroided MSn: {0}", classifier.FractionCentroidedMSn);
 
-            Assert.AreEqual(20, classifier.TotalSpectra, "Total spectra");
-            Assert.AreEqual(4, classifier.TotalMS1Spectra, "Total MS1 spectra");
-            Assert.AreEqual(16, classifier.TotalMSnSpectra, "Total MSn spectra");
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(classifier.TotalSpectra, Is.EqualTo(20), "Total spectra");
+                Assert.That(classifier.TotalMS1Spectra, Is.EqualTo(4), "Total MS1 spectra");
+                Assert.That(classifier.TotalMSnSpectra, Is.EqualTo(16), "Total MSn spectra");
 
-            Assert.AreEqual(17, classifier.CentroidedSpectra, "Centroided spectra");
-            Assert.AreEqual(1, classifier.CentroidedMS1Spectra, "Centroided MS1 spectra");
-            Assert.AreEqual(16, classifier.CentroidedMSnSpectra, "Centroided MSn spectra");
+                Assert.That(classifier.CentroidedSpectra, Is.EqualTo(17), "Centroided spectra");
+                Assert.That(classifier.CentroidedMS1Spectra, Is.EqualTo(1), "Centroided MS1 spectra");
+                Assert.That(classifier.CentroidedMSnSpectra, Is.EqualTo(16), "Centroided MSn spectra");
 
-            Assert.AreEqual(1, classifier.CentroidedMS1SpectraClassifiedAsProfile, "Centroided MS1 spectra classified as profile");
-            Assert.AreEqual(0, classifier.CentroidedMSnSpectraClassifiedAsProfile, "Centroided MSn spectra classified as profile");
+                Assert.That(classifier.CentroidedMS1SpectraClassifiedAsProfile, Is.EqualTo(1), "Centroided MS1 spectra classified as profile");
+                Assert.That(classifier.CentroidedMSnSpectraClassifiedAsProfile, Is.EqualTo(0), "Centroided MSn spectra classified as profile");
 
-            Assert.AreEqual(0.85, classifier.FractionCentroided, 0.001, "Fraction centroided");
-            Assert.AreEqual(1, classifier.FractionCentroidedMSn, 0.001, "Fraction centroided MSn");
+                Assert.That(classifier.FractionCentroided, Is.EqualTo(0.85).Within(0.001), "Fraction centroided");
+                Assert.That(classifier.FractionCentroidedMSn, Is.EqualTo(1).Within(0.001), "Fraction centroided MSn");
+            }
         }
 
         [Test]
@@ -124,13 +127,13 @@ namespace MSFileInfoScannerUnitTests
             }
 
             Console.WriteLine("Median using MathNet.Numerics:                              {0}", median);
-            Assert.AreEqual(10.75, median, 0.0001, "Median mode:  MathNet.Numerics");
+            Assert.That(median, Is.EqualTo(10.75).Within(0.0001), "Median mode:  MathNet.Numerics");
 
             Console.WriteLine("Median using the average of the values around the midpoint: {0}", medianMidpointAverage);
-            Assert.AreEqual(10.75, medianMidpointAverage, 0.0001, "Median mode: midpoint average");
+            Assert.That(medianMidpointAverage, Is.EqualTo(10.75).Within(0.0001), "Median mode: midpoint average");
 
             Console.WriteLine("Median using the value nearest the midpoint:                {0}", medianReportNearest);
-            Assert.AreEqual(9.5, medianReportNearest, 0.0001, "Median mode: report nearest");
+            Assert.That(medianReportNearest, Is.EqualTo(9.5).Within(0.0001), "Median mode: report nearest");
 #pragma warning restore 618
         }
 
@@ -157,7 +160,7 @@ namespace MSFileInfoScannerUnitTests
 
             classifier.CheckSpectrum(lstMZs, 2, false);
 
-            Assert.AreEqual(1, classifier.CentroidedMSnSpectra, "Centroided spectrum was classified as profile mode");
+            Assert.That(classifier.CentroidedMSnSpectra, Is.EqualTo(1), "Centroided spectrum was classified as profile mode");
         }
 
         [Test]
@@ -185,7 +188,7 @@ namespace MSFileInfoScannerUnitTests
 
             classifier.CheckSpectrum(lstMZs, 2, false);
 
-            Assert.AreEqual(1, classifier.CentroidedMSnSpectra, "Centroided spectrum was classified as profile mode");
+            Assert.That(classifier.CentroidedMSnSpectra, Is.EqualTo(1), "Centroided spectrum was classified as profile mode");
         }
 
         [Test]
@@ -212,7 +215,7 @@ namespace MSFileInfoScannerUnitTests
 
             classifier.CheckSpectrum(lstMZs, 2, false);
 
-            Assert.AreEqual(1, classifier.CentroidedMSnSpectra, "Centroided spectrum was classified as profile mode");
+            Assert.That(classifier.CentroidedMSnSpectra, Is.EqualTo(1), "Centroided spectrum was classified as profile mode");
         }
 
         [Test]
@@ -241,7 +244,7 @@ namespace MSFileInfoScannerUnitTests
 
             classifier.CheckSpectrum(lstMZs, 2, false);
 
-            Assert.AreEqual(1, classifier.CentroidedMSnSpectra, "Centroided spectrum was classified as profile mode");
+            Assert.That(classifier.CentroidedMSnSpectra, Is.EqualTo(1), "Centroided spectrum was classified as profile mode");
         }
 
         [Test]
@@ -284,9 +287,12 @@ namespace MSFileInfoScannerUnitTests
 
             classifier.CheckSpectrum(lstProfileMZs, 1, false);
 
-            Assert.AreEqual(0, classifier.CentroidedMS1Spectra, "Profile mode spectrum was classified as centroided");
-            Assert.AreEqual(1, classifier.TotalMS1Spectra, "MS1 spectrum count is not 1");
-            Assert.AreEqual(0, classifier.TotalMSnSpectra, "MSn spectrum count is not 0");
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(classifier.CentroidedMS1Spectra, Is.EqualTo(0), "Profile mode spectrum was classified as centroided");
+                Assert.That(classifier.TotalMS1Spectra, Is.EqualTo(1), "MS1 spectrum count is not 1");
+                Assert.That(classifier.TotalMSnSpectra, Is.EqualTo(0), "MSn spectrum count is not 0");
+            }
         }
 
         /// <summary>
