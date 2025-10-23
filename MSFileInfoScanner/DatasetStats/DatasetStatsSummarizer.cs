@@ -1746,7 +1746,7 @@ namespace MSFileInfoScanner.DatasetStats
 
             var medianScanCountWithData = (int)MathNet.Numerics.Statistics.Statistics.Median(scanCountsWithData);
 
-            if (validScanFilters > 1)
+            if (validScanFilters > 0)
             {
                 // At least one of the scan filters has a sufficient number of spectra with a minimum m/z value below the required minimum
                 // Return true if the number of scans in the scan filter is at least 15% of the median scan count across the scan filters
