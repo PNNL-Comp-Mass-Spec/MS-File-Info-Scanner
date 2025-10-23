@@ -1751,16 +1751,20 @@ namespace MSFileInfoScanner.DatasetStats
                 // At least one of the scan filters has a sufficient number of spectra with a minimum m/z value below the required minimum
                 // Return true if the number of scans in the scan filter is at least 15% of the median scan count across the scan filters
 
-                foreach (var item in scanCountsByScanFilter.Values)
+                foreach (var item in scanCountsByScanFilter)
                 {
-                    if (!item.PercentInvalidPassesFilter)
+                    if (!item.Value.PercentInvalidPassesFilter)
                         continue;
 
-                    if (item.ScanCountWithData < medianScanCountWithData * 0.15)
+                    if (item.Value.ScanCountWithData < medianScanCountWithData * 0.15)
                         continue;
 
-                    errorOrWarningMsg = item.ErrorOrWarningMessage;
+                    // This scan filter has a sufficient number of spectra with a minimum m/z value below the required minimum, so return true
+                    // Only update the warning message if PercentInvalid is greater than 1%
+
+                    errorOrWarningMsg = item.Value.PercentInvalid > 1 ? string.Format("{0} (for {1})", item.Value.ErrorOrWarningMessage, item.Key) : string.Empty;
                     scanCountWithData = scanCountWithDataAllFilters;
+
                     return true;
                 }
 
