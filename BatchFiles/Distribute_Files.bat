@@ -71,51 +71,51 @@ if not "%1"=="NoPause" pause
 
 rem The Capture Task Manager calls MSFileInfoScanner.exe
 rem Capture Task Manager parameter "MSFileInfoScannerDir" refers to C:\DMS_Programs\MSFileInfoScanner
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.exe"               \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.exe.config"        \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.pdb"               \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.xml"               \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\SpectraTypeClassifier.dll"           \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\*.dll"                               \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                                       \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md"                                                 \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner_Plotter.py"        \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\UIMFLibrary.*"                       \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MathNet.Numerics.*"                  \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.dll"             \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.pdb"             \\pnl\projects\OmicsSW\DMS_Programs\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.exe"               \\Proto-3\DMS_Programs_Dist\CaptureTaskManagerDistribution\MSFileInfoScanner /y
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.exe.config"        \\Proto-3\DMS_Programs_Dist\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.pdb"               \\Proto-3\DMS_Programs_Dist\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.xml"               \\Proto-3\DMS_Programs_Dist\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\SpectraTypeClassifier.dll"           \\Proto-3\DMS_Programs_Dist\CaptureTaskManagerDistribution\MSFileInfoScanner /y
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\*.dll"                               \\Proto-3\DMS_Programs_Dist\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                                       \\Proto-3\DMS_Programs_Dist\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md"                                                 \\Proto-3\DMS_Programs_Dist\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner_Plotter.py"        \\Proto-3\DMS_Programs_Dist\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\UIMFLibrary.*"                       \\Proto-3\DMS_Programs_Dist\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MathNet.Numerics.*"                  \\Proto-3\DMS_Programs_Dist\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.dll"             \\Proto-3\DMS_Programs_Dist\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.pdb"             \\Proto-3\DMS_Programs_Dist\CaptureTaskManagerDistribution\MSFileInfoScanner /y /d
 
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.exe"               \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.exe.config"        \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.pdb"               \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.xml"               \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\SpectraTypeClassifier.dll"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\*.dll"                               \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                                       \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md"                                                 \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner_Plotter.py"        \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\UIMFLibrary.*"                       \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MathNet.Numerics.*"                  \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.dll"             \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.pdb"             \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.exe"               \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner /y
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.exe.config"        \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.pdb"               \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.xml"               \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\SpectraTypeClassifier.dll"           \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner /y
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\*.dll"                               \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                                       \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md"                                                 \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner_Plotter.py"        \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\UIMFLibrary.*"                       \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MathNet.Numerics.*"                  \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.dll"             \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.pdb"             \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner /y /d
 
 rem The Analysis Manager uses MSFileInfoScanner.dll after it runs DeconTools
 rem Analysis Manager parameter "MSFileInfoScannerDir" refers to C:\DMS_Programs\MSFileInfoScanner\DLL
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\*.dll"                           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d /i
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MSFileInfoScanner.*"             \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MSFileInfoScanner.xml"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MSFileInfoScanner.pdb"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\SpectraTypeClassifier.dll"       \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MSFileInfoScannerInterfaces.*"   \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner_Plotter.py"        \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\UIMFLibrary.*"                   \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MathNet.Numerics.*"              \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\PRISM*.dll"                      \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\ThermoRawFileReader.*"           \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\Thermo*.dll"                     \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\BrukerDataReader.dll"            \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\ProteowizardWrapper.dll"         \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\ProteowizardWrapper.pdb"         \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\*.dll"                           \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d /i
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MSFileInfoScanner.*"             \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MSFileInfoScanner.xml"           \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MSFileInfoScanner.pdb"           \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\SpectraTypeClassifier.dll"       \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MSFileInfoScannerInterfaces.*"   \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner_Plotter.py"        \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\UIMFLibrary.*"                   \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\MathNet.Numerics.*"              \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\PRISM*.dll"                      \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\ThermoRawFileReader.*"           \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\Thermo*.dll"                     \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\BrukerDataReader.dll"            \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\ProteowizardWrapper.dll"         \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\DLL\ProteowizardWrapper.pdb"         \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\MSFileInfoScanner\DLL\ /y /d
 
 
 if not "%1"=="NoPause" pause
