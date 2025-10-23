@@ -250,6 +250,9 @@ namespace MSFileInfoScanner
             Console.WriteLine(message);
         }
 
+        /// <summary>Progress update</summary>
+        /// <param name="progressMessage">Progress message</param>
+        /// <param name="percentComplete">Value between 0 and 100</param>
         private static void MSFileScanner_ProgressUpdate(string progressMessage, float percentComplete)
         {
             if (DateTime.UtcNow.Subtract(mLastProgressTime).TotalSeconds < 5)

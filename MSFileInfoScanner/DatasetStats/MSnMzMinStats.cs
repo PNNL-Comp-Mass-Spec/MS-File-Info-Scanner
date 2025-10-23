@@ -15,6 +15,7 @@
         /// <summary>
         /// Percent of spectra with a minimum m/z value larger than <see cref="RequiredMzMin">RequiredMzMin</see>
         /// </summary>
+        /// <remarks>Value between 0 and 100</remarks>
         public float PercentInvalid { get; private set; }
 
         /// <summary>
