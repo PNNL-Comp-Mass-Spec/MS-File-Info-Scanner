@@ -22,7 +22,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public class AgilentMassHunterDFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: AcqData, AcqTime, IMS, lcms, Midac, ns, μs
+        // Ignore Spelling: AcqData, AcqTime, actuals, IMS, lcms, Midac, ns, μs
 
         // ReSharper disable once UnusedMember.Global
 
