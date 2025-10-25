@@ -46,6 +46,7 @@ namespace MSFileInfoScanner.Readers
         private const string AGILENT_IMS_FRAME_METHOD_FILE = "IMSFrameMeth.xml";
         private const string AGILENT_IMS_FRAME_BIN_FILE = "IMSFrame.bin";
 
+        private const string AGILENT_XML_SAMPLE_INFO_FILE = "sample_info.xml";
         private const string AGILENT_TIME_SEGMENT_FILE = "MSTS.xml";
 
         private bool mIsImsData;
@@ -176,6 +177,68 @@ namespace MSFileInfoScanner.Readers
             }
 
             return success;
+        }
+
+        /// <summary>
+        /// Reads the sample_info.xml file to look for the AcqTime entry
+        /// </summary>
+        /// <param name="directoryPath">Directory path to search</param>
+        /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
+        /// <returns>True if the file exists and the AcqTime (Acquisition Time) entry was successfully parsed; otherwise false</returns>
+        private bool ProcessSampleInfoXMLFile(string directoryPath, DatasetFileInfo datasetFileInfo)
+        {
+            // This XPath query selects the AcqTime node (<Field><Name>AcqTime</Name></Field>)
+            // It then uses "following-sibling" to select the next <Value></Value> node (which is a sibling of the <Name></Name> node)
+            const string acqTimeXPath = "//SampleInfo/Field/Name[text()='AcqTime']/following-sibling::Value[1]";
+
+            try
+            {
+                // Open the sample_info.xml file
+                var xmlFile = new FileInfo(Path.Combine(directoryPath, AGILENT_XML_SAMPLE_INFO_FILE));
+
+                if (!xmlFile.Exists)
+                {
+                    OnStatusEvent("File not found (not necessarily an error): {0}", xmlFile.Name);
+                    return false;
+                }
+
+                var document = new XmlDocument();
+                using var reader = new XmlTextReader(new FileStream(xmlFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                document.Load(reader);
+                var nsManager = new XmlNamespaceManager(document.NameTable);
+
+                var acqTime = document.SelectNodes(acqTimeXPath, nsManager);
+
+                if (acqTime == null)
+                {
+                    return false;
+                }
+
+                foreach (XmlNode item in acqTime)
+                {
+                    if (!DateTime.TryParse(item.InnerXml, out var acquisitionTime))
+                        continue;
+
+                    var acquisitionLength = datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart);
+
+                    datasetFileInfo.AcqTimeStart = acquisitionTime.ToLocalTime();
+
+                    datasetFileInfo.AcqTimeEnd = acquisitionLength.TotalSeconds > 0
+                        ? datasetFileInfo.AcqTimeStart.Add(acquisitionLength)
+                        : datasetFileInfo.AcqTimeStart;
+
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // Exception reading file
+                OnErrorEvent(string.Format("Exception reading {0}: {1}", AGILENT_XML_SAMPLE_INFO_FILE, ex.Message), ex);
+                return false;
+            }
         }
 
         /// <summary>
@@ -375,16 +438,36 @@ namespace MSFileInfoScanner.Readers
                 {
                     // The AcqData directory exists
 
-                    // Parse the Contents.xml file to determine the acquisition start time
-                    var acqStartTimeDetermined = ProcessContentsXMLFile(acqDataDirectory.FullName, datasetFileInfo);
+                    // Parse the Contents.xml file (if it exists) to determine the acquisition start time
+                    var acqStartTimeDeterminedA = ProcessContentsXMLFile(acqDataDirectory.FullName, datasetFileInfo);
+
+                    bool acqStartTimeDeterminedB;
+
+                    // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
+                    if (acqStartTimeDeterminedA)
+                    {
+                        acqStartTimeDeterminedB = false;
+                    }
+                    else
+                    {
+                        // Parse the sample_info.xml (if it exists) to determine the acquisition start time
+                        acqStartTimeDeterminedB = ProcessSampleInfoXMLFile(acqDataDirectory.FullName, datasetFileInfo);
+                    }
 
                     // Parse the MSTS.xml file to determine the acquisition length and number of scans
                     var validMSTS = ProcessTimeSegmentFile(acqDataDirectory.FullName, datasetFileInfo, out var acquisitionLengthMinutes);
 
-                    if (!acqStartTimeDetermined && validMSTS)
+                    if (validMSTS && !(acqStartTimeDeterminedA || acqStartTimeDeterminedB))
                     {
-                        // Compute the start time from .AcqTimeEnd minus acquisitionLengthMinutes
+                        // Compute the start time using .AcqTimeEnd (which is the modification date of the MSProfile.bin file)
                         datasetFileInfo.AcqTimeStart = datasetFileInfo.AcqTimeEnd.AddMinutes(-acquisitionLengthMinutes);
+                    }
+
+                    if (validMSTS &&
+                        (acqStartTimeDeterminedA || acqStartTimeDeterminedB) &&
+                        datasetFileInfo.AcqTimeEnd <= datasetFileInfo.AcqTimeStart)
+                    {
+                        datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddMinutes(acquisitionLengthMinutes);
                     }
 
                     // Note: could parse the AcqMethod.xml file to determine if MS2 spectra are present

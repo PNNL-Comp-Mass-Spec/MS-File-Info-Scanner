@@ -1408,8 +1408,10 @@ namespace MSFileInfoScanner.Readers
             {
                 var document = new XmlDocument();
                 using var reader = new XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+
                 document.Load(reader);
                 var nsManager = new XmlNamespaceManager(document.NameTable);
+
                 var traceShow = document.SelectNodes(traceShowXPath, nsManager);
                 var traceColor = document.SelectNodes(traceColorXPath, nsManager);
                 var traceDefinition = document.SelectNodes(traceDefinitionXPath, nsManager);
