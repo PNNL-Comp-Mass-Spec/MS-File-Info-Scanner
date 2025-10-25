@@ -147,9 +147,15 @@ namespace MSFileInfoScanner.Readers
                                 }
                             }
 
+                            if (reader.Name == "TotalRunDuration")
+                            {
+                                try
+                                {
+                                    var runDurationSeconds = reader.ReadElementContentAsDouble();
+
+                                    if (runDurationSeconds > 1)
                                     {
-                                        datasetFileInfo.AcqTimeStart = acquisitionStartTime.ToLocalTime();
-                                        success = true;
+                                        datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart.AddSeconds(runDurationSeconds);
                                     }
                                 }
                                 catch (Exception)
@@ -157,6 +163,7 @@ namespace MSFileInfoScanner.Readers
                                     // Ignore errors here
                                 }
                             }
+
                             break;
                     }
                 }
