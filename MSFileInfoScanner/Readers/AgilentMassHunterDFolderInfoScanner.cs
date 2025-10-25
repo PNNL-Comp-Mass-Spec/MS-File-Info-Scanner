@@ -91,9 +91,15 @@ namespace MSFileInfoScanner.Readers
             try
             {
                 // Open the Contents.xml file
-                var filePath = Path.Combine(directoryPath, AGILENT_XML_CONTENTS_FILE);
+                var xmlFile = new FileInfo(Path.Combine(directoryPath, AGILENT_XML_CONTENTS_FILE));
 
-                using var reader = new XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                if (!xmlFile.Exists)
+                {
+                    OnStatusEvent("File not found (not necessarily an error): {0}", xmlFile.Name);
+                    return false;
+                }
+
+                using var reader = new XmlTextReader(new FileStream(xmlFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
                 while (!reader.EOF)
                 {
@@ -164,10 +170,16 @@ namespace MSFileInfoScanner.Readers
             {
                 datasetFileInfo.ScanCount = 0;
 
-                // Open the Contents.xml file
-                var filePath = Path.Combine(directoryPath, AGILENT_TIME_SEGMENT_FILE);
+                // Open the MSTS.xml file
+                var xmlFile = new FileInfo(Path.Combine(directoryPath, AGILENT_TIME_SEGMENT_FILE));
 
-                using var reader = new XmlTextReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                if (!xmlFile.Exists)
+                {
+                    OnStatusEvent("File not found (not necessarily an error): {0}", xmlFile.Name);
+                    return false;
+                }
+
+                using var reader = new XmlTextReader(new FileStream(xmlFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
                 while (!reader.EOF)
                 {
