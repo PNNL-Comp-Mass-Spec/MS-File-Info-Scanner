@@ -115,18 +115,38 @@ namespace MSFileInfoScanner.Readers
                                 {
                                     var acquisitionStartTime = reader.ReadElementContentAsDateTime();
 
-                                    // Convert from Universal time to Local time
-                                    var acquisitionTime = acquisitionStartTime.ToLocalTime();
-
                                     // ReSharper disable CommentTypo
 
                                     // There have been some cases where the acquisition start time is several years before the file modification time,
                                     // for example XG_A83CapiHSSWash1.d where the time in the Contents.xml file is 3/20/2005 while the file modification time is 2010
-                                    // Thus, we use a sanity check of a maximum run time of 24 hours
 
                                     // ReSharper restore CommentTypo
 
-                                    if (datasetFileInfo.AcqTimeEnd.Subtract(acquisitionTime).TotalDays < 1)
+                                    // Prior to October 2025, we would ignore the AcquiredTime in the Contents.xml file if it was more than 24 hours older than the file modification time
+
+                                    // However, if the data was multiplexed when it was required, the file modification time of the demultiplexed file
+                                    // will not correspond to the acquisition end time, and thus we will trust the AcquiredTime defined in the Contents.xml file
+
+                                    // Convert from Universal time to Local time
+                                    datasetFileInfo.AcqTimeStart = acquisitionStartTime.ToLocalTime();
+                                    success = true;
+
+                                    if (datasetFileInfo.AcqTimeEnd.Subtract(datasetFileInfo.AcqTimeStart).TotalDays > 1)
+                                    {
+                                        // The acquisition end time is more than one day later than the acquisition start time
+
+                                        // Assume that the file modification time does not represent the actual acquisition end time,
+                                        // and thus set AcqTimeEnd to AcqTimeStart
+
+                                        datasetFileInfo.AcqTimeEnd = datasetFileInfo.AcqTimeStart;
+                                    }
+                                }
+                                catch (Exception)
+                                {
+                                    // Ignore errors here
+                                }
+                            }
+
                                     {
                                         datasetFileInfo.AcqTimeStart = acquisitionStartTime.ToLocalTime();
                                         success = true;
