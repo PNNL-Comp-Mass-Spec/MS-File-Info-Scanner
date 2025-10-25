@@ -32,23 +32,21 @@ namespace MSFileInfoScanner.Readers
         /// <remarks>The extension must be capitalized, even though .d directories for Bruker datasets are lowercase</remarks>
         public const string AGILENT_DATA_FOLDER_D_EXTENSION = ".D";
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
-        // ReSharper disable once IdentifierTypo
+        /// <summary>
+        /// AcqData folder name
+        /// </summary>
         public const string AGILENT_ACQDATA_FOLDER_NAME = "AcqData";
-        public const string AGILENT_MS_PEAK_FILE = "MSPeak.bin";
+        private const string AGILENT_MS_PEAK_FILE = "MSPeak.bin";
 
         // ReSharper disable once IdentifierTypo
-        public const string AGILENT_MS_PEAK_PERIODIC_ACTUALS_FILE = "MSPeriodicActuals.bin";
-        public const string AGILENT_MS_PROFILE_FILE = "MSProfile.bin";
-        public const string AGILENT_MS_SCAN_FILE = "MSScan.bin";
-        public const string AGILENT_XML_CONTENTS_FILE = "Contents.xml";
-        public const string AGILENT_IMS_FRAME_METHOD_FILE = "IMSFrameMeth.xml";
-        public const string AGILENT_IMS_FRAME_BIN_FILE = "IMSFrame.bin";
+        private const string AGILENT_MS_PEAK_PERIODIC_ACTUALS_FILE = "MSPeriodicActuals.bin";
+        private const string AGILENT_MS_PROFILE_FILE = "MSProfile.bin";
+        private const string AGILENT_MS_SCAN_FILE = "MSScan.bin";
+        private const string AGILENT_XML_CONTENTS_FILE = "Contents.xml";
+        private const string AGILENT_IMS_FRAME_METHOD_FILE = "IMSFrameMeth.xml";
+        private const string AGILENT_IMS_FRAME_BIN_FILE = "IMSFrame.bin";
 
-        public const string AGILENT_TIME_SEGMENT_FILE = "MSTS.xml";
-
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+        private const string AGILENT_TIME_SEGMENT_FILE = "MSTS.xml";
 
         private bool mIsImsData;
 
