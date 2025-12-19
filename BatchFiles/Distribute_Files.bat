@@ -61,7 +61,7 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\b
 
 @echo off
 echo.
-echo About to copy to \\pnl\projects\OmicsSW\DMS_Programs
+echo About to copy to \\Proto-3\DMS_Programs_Dist
 echo.
 echo Be sure you have built the Exe in Debug mode
 echo.
