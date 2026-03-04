@@ -6,7 +6,7 @@ namespace MSFileInfoScanner.Readers
     /// </summary>
     public class ProteoWizardParserInfo
     {
-        // Ignore Spelling: Proteo
+        // Ignore Spelling: Bpi, Proteo
 
         /// <summary>
         /// Minimum scan index without scan times
@@ -44,6 +44,11 @@ namespace MSFileInfoScanner.Readers
         /// If less than zero, store all scans
         /// </summary>
         public int MaxScansForTicAndBpi { get; set; }
+
+        /// <summary>
+        /// When true, do not add the BPI or TIC value for a scan if already defined, when false, raise an exception if the scan already has a TIC or BPI value
+        /// </summary>
+        public bool SkipDuplicateTicOrBpiScans { get; set; }
 
         /// <summary>
         /// Number of scans successfully read

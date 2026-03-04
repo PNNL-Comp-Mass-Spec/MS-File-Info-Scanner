@@ -21,7 +21,7 @@ namespace MSFileInfoScanner.Readers
     [CLSCompliant(false)]
     public class ProteoWizardDataParser : EventNotifier
     {
-        // Ignore Spelling: Acq, Bruker, centroiding, lcms, Proteo, SRM, timsTOF
+        // Ignore Spelling: Acq, Bpi, Bruker, centroiding, lcms, Proteo, SRM, timsTOF
 
         private const int PROGRESS_START = 0;
         private const int PROGRESS_SCAN_TIMES_LOADED = 10;
@@ -373,7 +373,7 @@ namespace MSFileInfoScanner.Readers
         }
 
         /// <summary>
-        /// Process the TIC values, populating ticScanTimes and ticScanNumbers, assuring that their sorted
+        /// Process the TIC values, populating ticScanTimes and ticScanNumbers, assuring that they are sorted
         /// </summary>
         /// <param name="scanTimes">Start time of each scan, in minutes</param>
         /// <param name="intensities">TIC values for each scan</param>
@@ -381,13 +381,15 @@ namespace MSFileInfoScanner.Readers
         /// <param name="ticScanNumbers">Scan numbers (populated by this method)</param>
         /// <param name="runtimeMinutes">Input/output: total runtime, in minutes</param>
         /// <param name="storeInTICAndBPIPlot">When true, store the TIC values in mTICAndBPIPlot</param>
+        /// <param name="skipDuplicateTicOrBpiScans">When true, do not add the BPI or TIC value for a scan if already defined, when false, raise an exception if the scan already has a TIC or BPI value</param>
         private void ProcessTIC(
             IReadOnlyList<float> scanTimes,
             IReadOnlyList<float> intensities,
             List<float> ticScanTimes,
             List<int> ticScanNumbers,
             ref double runtimeMinutes,
-            bool storeInTICAndBPIPlot)
+            bool storeInTICAndBPIPlot,
+            bool skipDuplicateTicOrBpiScans)
         {
             for (var spectrumIndex = 0; spectrumIndex < scanTimes.Count; spectrumIndex++)
             {
@@ -405,7 +407,7 @@ namespace MSFileInfoScanner.Readers
                 if (storeInTICAndBPIPlot)
                 {
                     // Use this TIC chromatogram for this dataset since there are no normal Mass Spectra
-                    mTICAndBPIPlot.AddDataTICOnly(scanNumber, 1, scanTimes[spectrumIndex], intensities[spectrumIndex]);
+                    mTICAndBPIPlot.AddDataTICOnly(scanNumber, 1, scanTimes[spectrumIndex], intensities[spectrumIndex], skipDuplicateTicOrBpiScans);
                 }
             }
 
@@ -457,11 +459,17 @@ namespace MSFileInfoScanner.Readers
         /// Store chromatogram info
         /// </summary>
         /// <param name="datasetFileInfo">Dataset file info</param>
+        /// <param name="skipDuplicateTicOrBpiScans">When true, do not add the BPI or TIC value for a scan if already defined, when false, raise an exception if the scan already has a TIC or BPI value</param>
         /// <param name="ticStored">Output: true if the TIC was stored</param>
         /// <param name="srmDataCached">Output: true if SRM data was cached</param>
         /// <param name="runtimeMinutes">Output: run time, in minutes</param>
         [HandleProcessCorruptedStateExceptions]
-        public void StoreChromatogramInfo(DatasetFileInfo datasetFileInfo, out bool ticStored, out bool srmDataCached, out double runtimeMinutes)
+        public void StoreChromatogramInfo(
+            DatasetFileInfo datasetFileInfo,
+            bool skipDuplicateTicOrBpiScans,
+            out bool ticStored,
+            out bool srmDataCached,
+            out double runtimeMinutes)
         {
             var ticScanTimes = new List<float>();
             var ticScanNumbers = new List<int>();
@@ -510,7 +518,7 @@ namespace MSFileInfoScanner.Readers
 
                         var storeInTICAndBPIPlot = (mSaveTICAndBPIPlots && spectrumCount == 0);
 
-                        ProcessTIC(scanTimes, intensities, ticScanTimes, ticScanNumbers, ref runtimeMinutes, storeInTICAndBPIPlot);
+                        ProcessTIC(scanTimes, intensities, ticScanTimes, ticScanNumbers, ref runtimeMinutes, storeInTICAndBPIPlot, skipDuplicateTicOrBpiScans);
 
                         ticStored = storeInTICAndBPIPlot;
 
@@ -582,6 +590,7 @@ namespace MSFileInfoScanner.Readers
         /// Maximum number of scans to store in mTICAndBPIPlot; limit to 2 million to reduce memory usage.
         /// If less than zero, store all scans
         /// </param>
+        /// <param name="skipDuplicateTicOrBpiScans">When true, do not add the BPI or TIC value for a scan if already defined, when false, raise an exception if the scan already has a TIC or BPI value</param>
         /// <returns>True if at least 50% of the spectra were successfully read</returns>
         public bool StoreMSSpectraInfo(
             bool ticStored,
@@ -589,7 +598,8 @@ namespace MSFileInfoScanner.Readers
             bool skipExistingScans,
             bool skipScansWithNoIons,
             int maxScansToTrackInDetail,
-            int maxScansForTicAndBpi)
+            int maxScansForTicAndBpi,
+            bool skipDuplicateTicOrBpiScans)
         {
             var parserInfo = new ProteoWizardParserInfo(runtimeMinutes)
             {
@@ -597,7 +607,8 @@ namespace MSFileInfoScanner.Readers
                 SkipExistingScans = skipExistingScans,
                 SkipScansWithNoIons = skipScansWithNoIons,
                 MaxScansToTrackInDetail = maxScansToTrackInDetail,
-                MaxScansForTicAndBpi = maxScansForTicAndBpi
+                MaxScansForTicAndBpi = maxScansForTicAndBpi,
+                SkipDuplicateTicOrBpiScans = skipDuplicateTicOrBpiScans
             };
 
             return StoreMSSpectraInfo(parserInfo);
@@ -1142,7 +1153,7 @@ namespace MSFileInfoScanner.Readers
                 if (mSaveTICAndBPIPlots && !parserInfo.TicStored &&
                     (parserInfo.MaxScansForTicAndBpi < 0 || parserInfo.TicAndBpiScansStored < parserInfo.MaxScansForTicAndBpi))
                 {
-                    mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevels[spectrumIndex], (float)scanTimeMinutes, bpi, tic);
+                    mTICAndBPIPlot.AddData(scanStatsEntry.ScanNumber, msLevels[spectrumIndex], (float)scanTimeMinutes, bpi, tic, parserInfo.SkipDuplicateTicOrBpiScans);
                     parserInfo.TicAndBpiScansStored++;
                 }
 

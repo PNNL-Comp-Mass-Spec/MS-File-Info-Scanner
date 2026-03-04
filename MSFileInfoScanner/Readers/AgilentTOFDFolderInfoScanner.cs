@@ -42,6 +42,8 @@ namespace MSFileInfoScanner.Readers
 
         public const string AGILENT_TIME_SEGMENT_FILE = "MSTS.xml";
 
+        private const bool SKIP_DUPLICATE_TIC_OR_BPI_SCANS = false;
+
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
         /// <summary>
@@ -414,7 +416,7 @@ namespace MSFileInfoScanner.Readers
                 if (msDataFileReader.ChromatogramCount > 0)
                 {
                     // Process the chromatograms
-                    pWizParser.StoreChromatogramInfo(datasetFileInfo, out ticStored, out _, out runtimeMinutes);
+                    pWizParser.StoreChromatogramInfo(datasetFileInfo, SKIP_DUPLICATE_TIC_OR_BPI_SCANS, out ticStored, out _, out runtimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }
 
@@ -427,7 +429,8 @@ namespace MSFileInfoScanner.Readers
                                                   skipExistingScans,
                                                   skipScansWithNoIons: true,
                                                   maxScansToTrackInDetail: MAX_SCANS_TO_TRACK_IN_DETAIL,
-                                                  maxScansForTicAndBpi: MAX_SCANS_FOR_TIC_AND_BPI);
+                                                  maxScansForTicAndBpi: MAX_SCANS_FOR_TIC_AND_BPI,
+                                                  skipDuplicateTicOrBpiScans: SKIP_DUPLICATE_TIC_OR_BPI_SCANS);
 
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }

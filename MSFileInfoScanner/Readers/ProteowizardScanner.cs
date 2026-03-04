@@ -13,7 +13,7 @@ namespace MSFileInfoScanner.Readers
     /// </summary>
     public abstract class ProteoWizardScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: lcms, Proteo
+        // Ignore Spelling: Bpi, lcms, Proteo
 
         /// <summary>
         /// Class MzMLFileInfoScanner sets this to true
@@ -116,11 +116,13 @@ namespace MSFileInfoScanner.Readers
         /// <param name="datasetFileOrDirectory">Dataset file or directory</param>
         /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
         /// <param name="unknownCompressorIdIsWarning">When true, if error "unknown compressor id" occurs, report it as a warning instead of an error</param>
+        /// <param name="skipDuplicateTicOrBpiScans">When true, do not add the BPI or TIC value for a scan if already defined, when false, raise an exception if the scan already has a TIC or BPI value</param>
         /// <returns>True if successful, false if an error</returns>
         public bool ProcessWithProteoWizard(
             FileSystemInfo datasetFileOrDirectory,
             DatasetFileInfo datasetFileInfo,
-            bool unknownCompressorIdIsWarning = false)
+            bool unknownCompressorIdIsWarning = false,
+            bool skipDuplicateTicOrBpiScans = false)
         {
             try
             {
@@ -133,7 +135,7 @@ namespace MSFileInfoScanner.Readers
                     // Possibly update AcqTimeStart
                     // In particular, if reading a .mzML file, AcqTimeStart and AcqTimeEnd will initially be set to the modification time of the .mzML file
 
-                    if (runStartTime < datasetFileInfo.AcqTimeEnd && datasetFileInfo.AcqTimeEnd.Subtract(runStartTime).TotalDays < 1 ||
+                    if ((runStartTime < datasetFileInfo.AcqTimeEnd && datasetFileInfo.AcqTimeEnd.Subtract(runStartTime).TotalDays < 1) ||
                         InputFileIsMzML)
                     {
                         UpdateAcqStartAndEndTimes(datasetFileInfo, msDataFileReader, runStartTime);
@@ -171,7 +173,7 @@ namespace MSFileInfoScanner.Readers
                 if (msDataFileReader.ChromatogramCount > 0)
                 {
                     // Process the chromatograms
-                    pWizParser.StoreChromatogramInfo(datasetFileInfo, out ticStored, out srmDataCached, out runtimeMinutes);
+                    pWizParser.StoreChromatogramInfo(datasetFileInfo, skipDuplicateTicOrBpiScans, out ticStored, out srmDataCached, out runtimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
 
                     datasetFileInfo.ScanCount = msDataFileReader.ChromatogramCount;
@@ -185,7 +187,8 @@ namespace MSFileInfoScanner.Readers
                                                   skipExistingScans,
                                                   skipScansWithNoIons: true,
                                                   maxScansToTrackInDetail: MSFileInfoProcessorBaseClass.MAX_SCANS_TO_TRACK_IN_DETAIL,
-                                                  maxScansForTicAndBpi: MSFileInfoProcessorBaseClass.MAX_SCANS_FOR_TIC_AND_BPI);
+                                                  maxScansForTicAndBpi: MSFileInfoProcessorBaseClass.MAX_SCANS_FOR_TIC_AND_BPI,
+                                                  skipDuplicateTicOrBpiScans);
 
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
 

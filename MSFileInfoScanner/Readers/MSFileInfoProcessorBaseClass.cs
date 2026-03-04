@@ -22,7 +22,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public abstract class MSFileInfoProcessorBaseClass : EventNotifier
     {
-        // Ignore Spelling: AcqTime, Abu, Acq, Addnl, Bruker, href, html, lcms, MzMin, proteo
+        // Ignore Spelling: AcqTime, Abu, Acq, Addnl, bpi, Bruker, href, html, lcms, MzMin, proteo
 
         /// <summary>
         /// Progress value for spectra loaded
@@ -1071,13 +1071,15 @@ namespace MSFileInfoScanner.Readers
         /// <param name="skipScansWithNoIons">If true, skip empty scans</param>
         /// <param name="highResMS1">If true, the MS1 spectra are high-resolution</param>
         /// <param name="highResMS2">If true, the MS2 spectra are high-resolution</param>
+        /// <param name="skipDuplicateTicOrBpiScans">When true, do not add the BPI or TIC value for a scan if already defined, when false, raise an exception if the scan already has a TIC or BPI value</param>
         [HandleProcessCorruptedStateExceptions]
         protected void LoadScanDataWithProteoWizard(
             FileSystemInfo datasetFileOrDirectory,
             DatasetFileInfo datasetFileInfo,
             bool skipScansWithNoIons,
             bool highResMS1 = true,
-            bool highResMS2 = true)
+            bool highResMS2 = true,
+            bool skipDuplicateTicOrBpiScans = false)
         {
             try
             {
@@ -1123,7 +1125,7 @@ namespace MSFileInfoScanner.Readers
                 if (msDataFileReader.ChromatogramCount > 0)
                 {
                     // Process the chromatograms
-                    pWizParser.StoreChromatogramInfo(datasetFileInfo, out ticStored, out srmDataCached, out runtimeMinutes);
+                    pWizParser.StoreChromatogramInfo(datasetFileInfo, skipDuplicateTicOrBpiScans, out ticStored, out srmDataCached, out runtimeMinutes);
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }
 
@@ -1134,7 +1136,8 @@ namespace MSFileInfoScanner.Readers
                     pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes,
                                                   skipExistingScans, skipScansWithNoIons,
                                                   maxScansToTrackInDetail: MAX_SCANS_TO_TRACK_IN_DETAIL,
-                                                  maxScansForTicAndBpi: MAX_SCANS_FOR_TIC_AND_BPI);
+                                                  maxScansForTicAndBpi: MAX_SCANS_FOR_TIC_AND_BPI,
+                                                  skipDuplicateTicOrBpiScans: false);
 
                     pWizParser.PossiblyUpdateAcqTimeStart(datasetFileInfo, runtimeMinutes);
                 }

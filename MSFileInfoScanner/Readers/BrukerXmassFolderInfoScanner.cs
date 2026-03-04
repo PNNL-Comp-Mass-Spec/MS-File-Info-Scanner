@@ -64,6 +64,8 @@ namespace MSFileInfoScanner.Readers
         // ReSharper disable once IdentifierTypo
         private const string BRUKER_AUTOMS_FILE = "AutoMS.txt";
 
+        private const bool SKIP_DUPLICATE_TIC_OR_BPI_SCANS = true;
+
         private struct MCFScanInfoType
         {
             // ReSharper disable once NotAccessedField.Local
@@ -110,7 +112,7 @@ namespace MSFileInfoScanner.Readers
         {
             if (Options.SaveTICAndBPIPlots && scanNumber > 0 && !ticAndBpiPlotDataAlreadyDefined)
             {
-                mTICAndBPIPlot.AddData(scanNumber, msLevel, elutionTime, bpi, tic);
+                mTICAndBPIPlot.AddData(scanNumber, msLevel, elutionTime, bpi, tic, SKIP_DUPLICATE_TIC_OR_BPI_SCANS);
             }
 
             var scanStatsEntry = new ScanStatsEntry
@@ -401,8 +403,8 @@ namespace MSFileInfoScanner.Readers
             const bool manualOverride = false;
 
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            // ReSharper disable HeuristicUnreachableCode
             if (manualOverride)
-                // ReSharper disable HeuristicUnreachableCode
 #pragma warning disable CS0162 // Unreachable code detected
             {
                 // ReSharper disable once StringLiteralTypo
@@ -442,7 +444,7 @@ namespace MSFileInfoScanner.Readers
 
                 // ReSharper restore CommentTypo
 
-                return ProcessWithProteoWizard(datasetFileOrDirectory, datasetFileInfo, true);
+                return ProcessWithProteoWizard(datasetFileOrDirectory, datasetFileInfo, true, SKIP_DUPLICATE_TIC_OR_BPI_SCANS);
             }
             catch (Exception ex)
             {
@@ -692,9 +694,9 @@ namespace MSFileInfoScanner.Readers
                                         skipRead = true;
                                         break;
 
-                                    // Ignore others
-                                    // default:
-                                    //    break;
+                                        // Ignore others
+                                        // default:
+                                        //    break;
                                 }
                             }
                             else

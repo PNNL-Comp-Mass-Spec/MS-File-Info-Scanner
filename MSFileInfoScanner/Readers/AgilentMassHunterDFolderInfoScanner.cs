@@ -1147,7 +1147,7 @@ namespace MSFileInfoScanner.Readers
             }
         }
 
-        private void AddChromatogram(Action<int, int, float, double> addMethod, IBDAChromData chromatogram, double[] scanMapper, IReadOnlyList<ScanStatsEntry> scanStats)
+        private void AddChromatogram(Action<int, int, float, double, bool> addMethod, IBDAChromData chromatogram, double[] scanMapper, IReadOnlyList<ScanStatsEntry> scanStats)
         {
             if (addMethod == null)
             {
@@ -1173,7 +1173,7 @@ namespace MSFileInfoScanner.Readers
 
                 // mTICAndBPIPlot.AddData(scanNumber, scanMsLevel[scanNumber], (float)time, bpAbundances[i], abundances[i]);
                 // mTICAndBPIPlot.AddDataTICOnly(scanStats[scanIndex].ScanNumber, scanStats[scanIndex].ScanType, (float)time, values[i]);
-                addMethod(scanStats[scanIndex].ScanNumber, scanStats[scanIndex].ScanType, (float)time, values[i]);
+                addMethod(scanStats[scanIndex].ScanNumber, scanStats[scanIndex].ScanType, (float)time, values[i], false);
             }
         }
 

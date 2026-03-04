@@ -18,7 +18,7 @@ namespace MSFileInfoScanner.Plotting
     public class TICandBPIPlotter : EventNotifier
 #pragma warning restore VSSpell001 // Spell Check
     {
-        // Ignore Spelling: OxyPlot, Zeroes
+        // Ignore Spelling: bpi, OxyPlot, Zeroes
 
         // ReSharper disable InconsistentNaming
         // ReSharper disable IdentifierTypo
@@ -206,10 +206,11 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="scanTimeMinutes">Scan time, in minutes</param>
         /// <param name="bpi">BPI</param>
         /// <param name="tic">TIC</param>
-        public void AddData(int scanNumber, int msLevel, float scanTimeMinutes, double bpi, double tic)
+        /// <param name="skipDuplicateScanNumbers">When true, do not add the BPI or TIC value for a scan if already defined, when false, raise an exception if the scan already has a TIC or BPI value</param>
+        public void AddData(int scanNumber, int msLevel, float scanTimeMinutes, double bpi, double tic, bool skipDuplicateScanNumbers = false)
         {
-            mBPI.AddPoint(scanNumber, msLevel, scanTimeMinutes, bpi);
-            mTIC.AddPoint(scanNumber, msLevel, scanTimeMinutes, tic);
+            mBPI.AddPoint(scanNumber, msLevel, scanTimeMinutes, bpi, skipDuplicateScanNumbers);
+            mTIC.AddPoint(scanNumber, msLevel, scanTimeMinutes, tic, skipDuplicateScanNumbers);
         }
 
         /// <summary>
@@ -219,9 +220,10 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="msLevel">MS Level</param>
         /// <param name="scanTimeMinutes">Scan time, in minutes</param>
         /// <param name="bpi">BPI</param>
-        public void AddDataBPIOnly(int scanNumber, int msLevel, float scanTimeMinutes, double bpi)
+        /// <param name="skipDuplicateScanNumbers">When true, do not add the BPI or TIC value for a scan if already defined, when false, raise an exception if the scan already has a TIC or BPI value</param>
+        public void AddDataBPIOnly(int scanNumber, int msLevel, float scanTimeMinutes, double bpi, bool skipDuplicateScanNumbers = false)
         {
-            mBPI.AddPoint(scanNumber, msLevel, scanTimeMinutes, bpi);
+            mBPI.AddPoint(scanNumber, msLevel, scanTimeMinutes, bpi, skipDuplicateScanNumbers);
         }
 
         /// <summary>
@@ -231,9 +233,10 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="msLevel">MS Level</param>
         /// <param name="scanTimeMinutes">Scan time, in minutes</param>
         /// <param name="tic">TIC</param>
-        public void AddDataTICOnly(int scanNumber, int msLevel, float scanTimeMinutes, double tic)
+        /// <param name="skipDuplicateScanNumbers">When true, do not add the BPI or TIC value for a scan if already defined, when false, raise an exception if the scan already has a TIC or BPI value</param>
+        public void AddDataTICOnly(int scanNumber, int msLevel, float scanTimeMinutes, double tic, bool skipDuplicateScanNumbers = false)
         {
-            mTIC.AddPoint(scanNumber, msLevel, scanTimeMinutes, tic);
+            mTIC.AddPoint(scanNumber, msLevel, scanTimeMinutes, tic, skipDuplicateScanNumbers);
         }
 
         private void AddRecentFile(string filePath, OutputFileTypes fileType)
@@ -866,10 +869,13 @@ namespace MSFileInfoScanner.Plotting
                 mScanNumbers = new SortedSet<int>();
             }
 
-            public void AddPoint(int scanNumber, int msLevel, float scanTimeMinutes, double intensity)
+            public void AddPoint(int scanNumber, int msLevel, float scanTimeMinutes, double intensity, bool skipDuplicateScanNumbers)
             {
                 if (mScanNumbers.Contains(scanNumber))
                 {
+                    if (skipDuplicateScanNumbers)
+                        return;
+
                     throw new Exception("Scan " + scanNumber + " has already been added to the TIC or BPI; programming error");
                 }
 
