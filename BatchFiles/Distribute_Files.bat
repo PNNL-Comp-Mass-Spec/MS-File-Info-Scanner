@@ -1,6 +1,6 @@
-rem Obsolete: xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner_Installer\Debug\MSFileInfoScanner_Installer.msi" \\floyd\Software\MSFileInfoScanner /y
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt" \\floyd\Software\MSFileInfoScanner /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md" \\floyd\Software\MSFileInfoScanner /y /d
+rem Obsolete: xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner_Installer\Debug\MSFileInfoScanner_Installer.msi" \\proto-2\Software\MSFileInfoScanner /y
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt" \\proto-2\Software\MSFileInfoScanner /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md" \\proto-2\Software\MSFileInfoScanner /y /d
 
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScannerInterfaces\bin\Debug\net48\MSFileInfoScannerInterfaces.dll"          "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\bin\" /y /d
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScannerInterfaces\bin\Debug\net48\MSFileInfoScannerInterfaces.dll"          "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\" /y /d
@@ -14,17 +14,17 @@ xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScannerIn
                                                                                                       
 xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\SpectraTypeClassifier.dll"           "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\" /y /d
                                                                                                       
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.exe"               \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\SpectraTypeClassifier.dll"           \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScannerInterfaces.*"       \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\*.dll"                               \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                                       \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md"                                                 \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner_Plotter.py"        \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\UIMFLibrary.*"                       \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MathNet.Numerics.*"                  \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.dll"             \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
-xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.pdb"             \\floyd\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner.exe"               \\proto-2\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\SpectraTypeClassifier.dll"           \\proto-2\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScannerInterfaces.*"       \\proto-2\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\*.dll"                               \\proto-2\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\RevisionHistory.txt"                                       \\proto-2\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\Readme.md"                                                 \\proto-2\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MSFileInfoScanner_Plotter.py"        \\proto-2\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\UIMFLibrary.*"                       \\proto-2\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\MathNet.Numerics.*"                  \\proto-2\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.dll"             \\proto-2\Software\MSFileInfoScanner\Exe_Only /y /d
+xcopy "F:\Documents\Projects\DataMining\MS_File_Info_Scanner\MSFileInfoScanner\bin\ProteowizardWrapper.pdb"             \\proto-2\Software\MSFileInfoScanner\Exe_Only /y /d
 
 rem The Analysis Manager uses MSFileInfoScanner.dll after it runs DeconTools
 rem Analysis Manager parameter "MSFileInfoScannerDir" refers to C:\DMS_Programs\MSFileInfoScanner\DLL
