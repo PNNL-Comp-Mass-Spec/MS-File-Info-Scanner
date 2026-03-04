@@ -129,6 +129,11 @@ namespace MSFileInfoScanner.Plotting
         public int ScanCountCached => mScans.Count;
 
         /// <summary>
+        /// Scan numbers tracked by this class
+        /// </summary>
+        public SortedSet<int> ScanNumbers { get; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public LCMSDataPlotter()
@@ -143,6 +148,9 @@ namespace MSFileInfoScanner.Plotting
         public LCMSDataPlotter(LCMSDataPlotterOptions options)
         {
             Options = options;
+
+            ScanNumbers = new();
+
             mRecentFiles = new List<OutputFileInfoType>();
 
             mInvalidMzWarnCount = 0;
@@ -592,6 +600,8 @@ namespace MSFileInfoScanner.Plotting
             }
 
             mScans.Add(scanData);
+            ScanNumbers.Add(scanData.ScanNumber);
+
             mPointCountCached += scanData.IonCount;
 
             if (mPointCountCached <= Options.MaxPointsToPlot * 5)
@@ -631,6 +641,8 @@ namespace MSFileInfoScanner.Plotting
                 var scanData = new ScanData(sourceData.ScanNumber, sourceData.MSLevel, sourceData.ScanTimeMinutes, sourceData.IonCount, sourceData.IonsMZ, sourceData.IonsIntensity, sourceData.Charge);
 
                 mScans.Add(scanData);
+                ScanNumbers.Add(scanData.ScanNumber);
+
                 mPointCountCached += scanData.IonCount;
 
                 if (mPointCountCached > Options.MaxPointsToPlot * 5)
