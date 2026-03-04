@@ -1157,7 +1157,7 @@ namespace MSFileInfoScanner.Readers
                     parserInfo.TicAndBpiScansStored++;
                 }
 
-                if (mSaveLCMS2DPlots && addScan)
+                if (mSaveLCMS2DPlots && !mLCMS2DPlot.ScanNumbers.Contains(scanStatsEntry.ScanNumber))
                 {
                     mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevels[spectrumIndex], (float)scanTimeMinutes, msDataSpectrum.Mzs.Length,
                         msDataSpectrum.Mzs, msDataSpectrum.Intensities);
