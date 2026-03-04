@@ -287,6 +287,7 @@ namespace MSFileInfoScanner.Plotting
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs"),
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Programs\Python"),
                 @"C:\ProgramData\Anaconda3",
+                @"C:\Python3",
                 @"C:\"
             };
         }
