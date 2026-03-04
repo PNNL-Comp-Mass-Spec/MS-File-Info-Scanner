@@ -978,19 +978,28 @@ namespace MSFileInfoScanner.Readers
                         Options.SaveTICAndBPIPlots && mTICAndBPIPlot.CountBPI + mTICAndBPIPlot.CountTIC == 0 ||
                         Options.SaveLCMS2DPlots && mLCMS2DPlot.ScanCountCached == 0)
                     {
-                        // If a ser or fid file exists, we can read the data from it to create the TIC and BPI plots, plus also the 2D plot
+                        bool successWithPrimaryFileOrDirectory;
 
-                        var serOrFidParsed = ParseSerOrFidFile(primaryInstrumentFile.Directory, scanElutionTimeMap, datasetFileInfo, duplicateScanCount);
-
-                        if (!serOrFidParsed && !bafFileChecked)
+                        if (bafFileChecked)
                         {
+                            successWithPrimaryFileOrDirectory = false;
+                        }
+                        else
+                        {
+                            // If an analysis.baf or analysis.tdf file exists, parse it using ProteoWizard
                             // Look for an analysis.baf or analysis.tdf file
-                            var successWithPrimaryFile = ParseBAFFile(primaryInstrumentFile, datasetFileInfo, out _);
+                            successWithPrimaryFileOrDirectory = ParseBAFFile(primaryInstrumentFile, datasetFileInfo, out _);
 
-                            if (!successWithPrimaryFile)
+                            if (!successWithPrimaryFileOrDirectory)
                             {
-                                ParseBAFFile(primaryInstrumentFile.Directory, datasetFileInfo, out _);
+                                successWithPrimaryFileOrDirectory = ParseBAFFile(primaryInstrumentFile.Directory, datasetFileInfo, out _);
                             }
+                        }
+
+                        if (!successWithPrimaryFileOrDirectory)
+                        {
+                            // If a ser or fid file exists, we can read the data from it to create the TIC and BPI plots, plus also the 2D plot
+                            ParseSerOrFidFile(primaryInstrumentFile.Directory, scanElutionTimeMap, datasetFileInfo, duplicateScanCount);
                         }
                     }
                 }
@@ -1303,7 +1312,7 @@ namespace MSFileInfoScanner.Readers
 
                         for (var i = 0; i < trace.Count; i++)
                         {
-                            addedPlot.AddDataTICOnly(i + 1, 1, (float)(trace[i].Time / 60), trace[i].Value);
+                            addedPlot.AddDataTICOnly(i + 1, 1, (float)(trace[i].Time / 60), trace[i].Value, SKIP_DUPLICATE_TIC_OR_BPI_SCANS);
                         }
                     }
                 }
