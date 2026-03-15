@@ -306,11 +306,22 @@ namespace MSFileInfoScanner.Readers
                         // Load the ions for this scan
                         var ionCount = xcaliburAccessor.GetScanData2D(scanNumber, out var massIntensityPairs);
 
+                        // Obtain centroided data for this scan
+                        // If the mass spectrum was acquired in centroided mode, ionCount and ionCountCentroided will be the same value (as will the mass/intensity pair values)
+                        var ionCountCentroided = xcaliburAccessor.GetScanData2D(scanNumber, out var massIntensityPairsCentroided, maxNumberOfPeaks: 0, centroidData: true);
+
+                        ionCountCentroided = 0;
+
+                        if (ionCountCentroided > 0 && Options.SaveLCMS2DPlots)
+                        {
+                            mLCMS2DPlot.AddScan2D(scanNumber, scanInfo.MSLevel, (float)scanInfo.RetentionTime, ionCountCentroided, massIntensityPairsCentroided, dataIsCentroided: true);
+                        }
+
                         if (ionCount > 0)
                         {
-                            if (Options.SaveLCMS2DPlots)
+                            if (Options.SaveLCMS2DPlots && ionCountCentroided <= 0)
                             {
-                                mLCMS2DPlot.AddScan2D(scanNumber, scanInfo.MSLevel, (float)scanInfo.RetentionTime, ionCount, massIntensityPairs);
+                                mLCMS2DPlot.AddScan2D(scanNumber, scanInfo.MSLevel, (float)scanInfo.RetentionTime, ionCount, massIntensityPairs, dataIsCentroided: false);
                             }
 
                             if (Options.CheckCentroidingStatus)

@@ -21,7 +21,7 @@ namespace MSFileInfoScanner.Readers
     [CLSCompliant(false)]
     public class ProteoWizardDataParser : EventNotifier
     {
-        // Ignore Spelling: Acq, Bpi, Bruker, centroiding, lcms, Proteo, SRM, timsTOF
+        // Ignore Spelling: Acq, Bpi, Bruker, centroided, centroiding, lcms, Proteo, SRM, timsTOF
 
         private const int PROGRESS_START = 0;
         private const int PROGRESS_SCAN_TIMES_LOADED = 10;
@@ -57,6 +57,16 @@ namespace MSFileInfoScanner.Readers
         private int mScanTimeMismatchCount;
 
         private bool mWarnedAccessViolationException;
+
+        /// <summary>
+        /// If true, apply vendor-based centroiding when loading MS1 data
+        /// </summary>
+        public bool GetCentroidedDataMS1 { get; set; }
+
+        /// <summary>
+        /// If true, apply vendor-based centroiding when loading MS2 data
+        /// </summary>
+        public bool GetCentroidedDataMS2 { get; set; }
 
         /// <summary>
         /// True if the data file has high resolution MS1 spectra
@@ -1159,8 +1169,20 @@ namespace MSFileInfoScanner.Readers
 
                 if (mSaveLCMS2DPlots && !mLCMS2DPlot.ScanNumbers.Contains(scanStatsEntry.ScanNumber))
                 {
-                    mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevels[spectrumIndex], (float)scanTimeMinutes, msDataSpectrum.Mzs.Length,
-                        msDataSpectrum.Mzs, msDataSpectrum.Intensities);
+                    var msLevel = msLevels[spectrumIndex];
+
+                    var dataIsCentroided = (msLevel == 1 && GetCentroidedDataMS1) ||
+                                           (msLevel > 1 && GetCentroidedDataMS2) ||
+                                           mMSDataFileReader.IsCentroided(spectrumIndex);
+
+                    mLCMS2DPlot.AddScan(
+                        scanStatsEntry.ScanNumber,
+                        msLevel,
+                        (float)scanTimeMinutes,
+                        msDataSpectrum.Mzs.Length,
+                        msDataSpectrum.Mzs,
+                        msDataSpectrum.Intensities,
+                        dataIsCentroided: dataIsCentroided);
                 }
 
                 if (mCheckCentroidingStatus)
@@ -1207,8 +1229,8 @@ namespace MSFileInfoScanner.Readers
             UpdateDataRanges(parent2DData, ref max2DDataCount, ref scanNumMin2D, ref scanNumMax2D);
             UpdateDataRanges(product2DData, ref max2DDataCount, ref scanNumMin2D, ref scanNumMax2D);
 
-            Store2DPlotDataWork(parent2DData, scanTime2DData, 1, max2DDataCount, scanNumMin2D, scanNumMax2D);
-            Store2DPlotDataWork(product2DData, scanTime2DData, 2, max2DDataCount, scanNumMin2D, scanNumMax2D);
+            Store2DPlotDataWork(parent2DData, scanTime2DData, 1, max2DDataCount, scanNumMin2D, scanNumMax2D, dataIsCentroided: false);
+            Store2DPlotDataWork(product2DData, scanTime2DData, 2, max2DDataCount, scanNumMin2D, scanNumMax2D, dataIsCentroided: false);
         }
 
         private void Store2DPlotDataPoint(IDictionary<int, Dictionary<double, double>> dct2DData, int scanNumber, double mz, double intensity)
@@ -1240,7 +1262,8 @@ namespace MSFileInfoScanner.Readers
             int msLevel,
             int max2DDataCount,
             int scanNumMin2D,
-            int scanNumMax2D)
+            int scanNumMax2D,
+            bool dataIsCentroided)
         {
             var mzList = new double[max2DDataCount];
             var intensityList = new double[max2DDataCount];
@@ -1265,7 +1288,7 @@ namespace MSFileInfoScanner.Readers
                 // Store the data
                 mLCMS2DPlot.AddScan(
                     scanNumber, msLevel, scanTime2DData[scanNumber],
-                    mzAndIntensityList.Count, mzList, intensityList);
+                    mzAndIntensityList.Count, mzList, intensityList, dataIsCentroided);
             }
 
             if (scanNumMin2D / (double)scanNumMax2D > 0.5)

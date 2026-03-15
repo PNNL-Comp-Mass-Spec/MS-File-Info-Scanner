@@ -429,7 +429,7 @@ namespace MSFileInfoScanner.Readers
                 }
                 else
                 {
-                    LoadScanDataWithProteoWizard(agilentDFolder, datasetFileInfo, true);
+                    LoadScanDataWithProteoWizard(agilentDFolder, datasetFileInfo, false, false, true);
 
                     if (datasetFileInfo.ScanCount > 0)
                     {

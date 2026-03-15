@@ -517,7 +517,7 @@ namespace MSFileInfoScanner.Readers
 
                                     if (Options.SaveLCMS2DPlots)
                                     {
-                                        mLCMS2DPlot.AddScan(frameNumber, msLevel, (float)elutionTime, ionCount, mzList, ionsIntensity);
+                                        mLCMS2DPlot.AddScan(frameNumber, msLevel, (float)elutionTime, ionCount, mzList, ionsIntensity, dataIsCentroided: false);
                                     }
 
                                     if (Options.CheckCentroidingStatus)

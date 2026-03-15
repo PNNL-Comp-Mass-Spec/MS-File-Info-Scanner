@@ -167,7 +167,7 @@ namespace MSFileInfoScanner.Readers
                 // Continue anyway since we've populated some of the values
             }
 
-            LoadScanDataWithProteoWizard(datasetDirectory, datasetFileInfo, true);
+            LoadScanDataWithProteoWizard(datasetDirectory, datasetFileInfo, true, true, true);
         }
 
         /// <summary>

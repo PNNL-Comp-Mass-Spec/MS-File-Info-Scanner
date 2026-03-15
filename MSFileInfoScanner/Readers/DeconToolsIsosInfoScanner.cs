@@ -212,7 +212,7 @@ namespace MSFileInfoScanner.Readers
 
                         ionList.Sort(new LCMSDataPlotter.MSIonTypeComparer());
 
-                        mLCMS2DPlot.AddScan(currentScanNumber, currentScan.MSLevel, currentScan.ElutionTime, ionList);
+                        mLCMS2DPlot.AddScan(currentScanNumber, currentScan.MSLevel, currentScan.ElutionTime, ionList, dataIsCentroided: false);
 
                         if (scansFileIsMissing && Options.SaveTICAndBPIPlots)
                         {

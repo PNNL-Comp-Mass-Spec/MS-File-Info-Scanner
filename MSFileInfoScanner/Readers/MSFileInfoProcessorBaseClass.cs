@@ -22,7 +22,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public abstract class MSFileInfoProcessorBaseClass : EventNotifier
     {
-        // Ignore Spelling: AcqTime, Abu, Acq, Addnl, bpi, Bruker, href, html, lcms, MzMin, proteo
+        // Ignore Spelling: AcqTime, Abu, Acq, Addnl, bpi, Bruker, Centroided, href, html, lcms, MzMin, proteo
 
         /// <summary>
         /// Progress value for spectra loaded
@@ -362,7 +362,7 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         protected void InitializeLCMS2DPlot()
         {
-            // Initialize var that tracks m/z vs. time
+            // Initialize variable that tracks m/z vs. time
             mLCMS2DPlot.Reset();
             mLCMS2DPlotOverview.Reset();
         }
@@ -1068,6 +1068,8 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         /// <param name="datasetFileOrDirectory">Dataset file or directory</param>
         /// <param name="datasetFileInfo">Dataset file info</param>
+        /// <param name="getCentroidedDataMS1">When true, use vendor centroiding when retrieving MS1 data</param>
+        /// <param name="getCentroidedDataMS2">When true, use vendor centroiding when retrieving MS2 (or higher) data</param>
         /// <param name="skipScansWithNoIons">If true, skip empty scans</param>
         /// <param name="highResMS1">If true, the MS1 spectra are high-resolution</param>
         /// <param name="highResMS2">If true, the MS2 spectra are high-resolution</param>
@@ -1076,6 +1078,8 @@ namespace MSFileInfoScanner.Readers
         protected void LoadScanDataWithProteoWizard(
             FileSystemInfo datasetFileOrDirectory,
             DatasetFileInfo datasetFileInfo,
+            bool getCentroidedDataMS1,
+            bool getCentroidedDataMS2,
             bool skipScansWithNoIons,
             bool highResMS1 = true,
             bool highResMS2 = true,
@@ -1085,7 +1089,7 @@ namespace MSFileInfoScanner.Readers
             {
                 // Open the instrument data using the ProteoWizardWrapper
 
-                var msDataFileReader = new MSDataFileReader(datasetFileOrDirectory.FullName);
+                var msDataFileReader = new MSDataFileReader(datasetFileOrDirectory.FullName, requireVendorCentroidedMS1: getCentroidedDataMS1, requireVendorCentroidedMS2: getCentroidedDataMS2);
 
                 try
                 {

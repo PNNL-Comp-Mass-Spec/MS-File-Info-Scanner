@@ -444,7 +444,15 @@ namespace MSFileInfoScanner.Readers
 
                 // ReSharper restore CommentTypo
 
-                return ProcessWithProteoWizard(datasetFileOrDirectory, datasetFileInfo, true, SKIP_DUPLICATE_TIC_OR_BPI_SCANS);
+                var getCentroidedData = Options.SaveLCMS2DPlots;
+
+                return ProcessWithProteoWizard(
+                    datasetFileOrDirectory,
+                    datasetFileInfo,
+                    getCentroidedDataMS1: getCentroidedData,
+                    getCentroidedDataMS2: getCentroidedData,
+                    unknownCompressorIdIsWarning: true,
+                    SKIP_DUPLICATE_TIC_OR_BPI_SCANS);
             }
             catch (Exception ex)
             {
@@ -970,7 +978,7 @@ namespace MSFileInfoScanner.Readers
                     if (!success)
                     {
                         // Use ProteoWizard to extract the scan counts and acquisition time information
-                        // If Options.SaveLCMS2DPlots= True, this method will also read the m/z and intensity values from each scan so that we can make 2D plots
+                        // If Options.SaveLCMS2DPlots is True, this method will also read the m/z and intensity values from each scan so that we can make 2D plots
                         ParseBAFFile(primaryInstrumentFile, datasetFileInfo, out bafFileChecked);
                     }
 
@@ -1194,7 +1202,7 @@ namespace MSFileInfoScanner.Readers
 
                     if (mzList.Length > 0 && Options.SaveLCMS2DPlots)
                     {
-                        mLCMS2DPlot.AddScan2D(scanNumber, msLevel, elutionTime, mzList, intensityList);
+                        mLCMS2DPlot.AddScan2D(scanNumber, msLevel, elutionTime, mzList, intensityList, dataIsCentroided: false);
                     }
 
                     scansProcessed++;

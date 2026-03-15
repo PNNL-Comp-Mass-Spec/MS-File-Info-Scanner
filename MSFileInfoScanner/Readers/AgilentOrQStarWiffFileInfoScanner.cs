@@ -91,7 +91,7 @@ namespace MSFileInfoScanner.Readers
             mDatasetStatsSummarizer.ClearCachedData(Options.CreateEmptyScanStatsFiles);
             mLCMS2DPlot.Options.UseObservedMinScan = false;
 
-            LoadScanDataWithProteoWizard(datasetFile, datasetFileInfo, true);
+            LoadScanDataWithProteoWizard(datasetFile, datasetFileInfo, false, false, true);
 
             // Read the file info from the file system
             // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all the necessary steps are taken)

@@ -1233,7 +1233,7 @@ namespace MSFileInfoScanner.Readers
 
                 if (Options.SaveLCMS2DPlots)
                 {
-                    mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, scanStatsEntry.ScanType, (float)scan.RetentionTime, data);
+                    mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, scanStatsEntry.ScanType, (float)scan.RetentionTime, data, dataIsCentroided: true);
                 }
 
                 if (Options.CheckCentroidingStatus)

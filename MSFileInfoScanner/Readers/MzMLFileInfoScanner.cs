@@ -90,7 +90,7 @@ namespace MSFileInfoScanner.Readers
 
             mDatasetStatsSummarizer.ClearCachedData(Options.CreateEmptyScanStatsFiles);
 
-            var success = ProcessWithProteoWizard(dataFile, datasetFileInfo);
+            var success = ProcessWithProteoWizard(dataFile, datasetFileInfo, getCentroidedDataMS1: false, getCentroidedDataMS2: false);
 
             // Read the file info from the file system
             // (much of this is already in datasetFileInfo, but we'll call UpdateDatasetFileStats() anyway to make sure all the necessary steps are taken)

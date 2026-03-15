@@ -13,7 +13,7 @@ namespace MSFileInfoScanner.Readers
     /// </summary>
     public abstract class ProteoWizardScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: Bpi, lcms, Proteo
+        // Ignore Spelling: Bpi, Centroided, lcms, Proteo
 
         /// <summary>
         /// Class MzMLFileInfoScanner sets this to true
@@ -115,18 +115,22 @@ namespace MSFileInfoScanner.Readers
         /// </summary>
         /// <param name="datasetFileOrDirectory">Dataset file or directory</param>
         /// <param name="datasetFileInfo">Instance of DatasetFileInfo</param>
+        /// <param name="getCentroidedDataMS1">When true, use vendor centroiding when retrieving MS1 data</param>
+        /// <param name="getCentroidedDataMS2">When true, use vendor centroiding when retrieving MS2 (or higher) data</param>
         /// <param name="unknownCompressorIdIsWarning">When true, if error "unknown compressor id" occurs, report it as a warning instead of an error</param>
         /// <param name="skipDuplicateTicOrBpiScans">When true, do not add the BPI or TIC value for a scan if already defined, when false, raise an exception if the scan already has a TIC or BPI value</param>
         /// <returns>True if successful, false if an error</returns>
         public bool ProcessWithProteoWizard(
             FileSystemInfo datasetFileOrDirectory,
             DatasetFileInfo datasetFileInfo,
+            bool getCentroidedDataMS1,
+            bool getCentroidedDataMS2,
             bool unknownCompressorIdIsWarning = false,
             bool skipDuplicateTicOrBpiScans = false)
         {
             try
             {
-                var msDataFileReader = new MSDataFileReader(datasetFileOrDirectory.FullName);
+                var msDataFileReader = new MSDataFileReader(datasetFileOrDirectory.FullName, requireVendorCentroidedMS1: getCentroidedDataMS1, requireVendorCentroidedMS2: getCentroidedDataMS2);
 
                 try
                 {
@@ -159,7 +163,9 @@ namespace MSFileInfoScanner.Readers
                     Options.CheckCentroidingStatus)
                 {
                     HighResMS1 = true,
-                    HighResMS2 = true
+                    HighResMS2 = true,
+                    GetCentroidedDataMS1 = getCentroidedDataMS1,
+                    GetCentroidedDataMS2 = getCentroidedDataMS2
                 };
 
                 RegisterEvents(pWizParser);

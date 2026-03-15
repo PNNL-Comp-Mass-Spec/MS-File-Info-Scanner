@@ -184,8 +184,9 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="scanTimeMinutes">Scan time, in minutes</param>
         /// <param name="mzList">m/z values</param>
         /// <param name="intensityList">Intensity values</param>
+        /// <param name="dataIsCentroided">True if the data is already centroided</param>
         /// <returns>True if successful, false if an error</returns>
-        public bool AddScan2D(int scanNumber, int msLevel, float scanTimeMinutes, float[] mzList, float[] intensityList)
+        public bool AddScan2D(int scanNumber, int msLevel, float scanTimeMinutes, float[] mzList, float[] intensityList, bool dataIsCentroided)
         {
             var massIntensityPairs = new double[2, mzList.Length + 1];
 
@@ -195,7 +196,7 @@ namespace MSFileInfoScanner.Plotting
                 massIntensityPairs[1, i] = intensityList[i];
             }
 
-            return AddScan2D(scanNumber, msLevel, scanTimeMinutes, mzList.Length, massIntensityPairs);
+            return AddScan2D(scanNumber, msLevel, scanTimeMinutes, mzList.Length, massIntensityPairs, dataIsCentroided);
         }
 
         /// <summary>
@@ -206,8 +207,9 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="scanTimeMinutes">Scan time, in minutes</param>
         /// <param name="ionCount">Ion count</param>
         /// <param name="massIntensityPairs">2D array of mass and intensity pairs</param>
+        /// <param name="dataIsCentroided">True if the data is already centroided</param>
         /// <returns>True if successful, false if an error</returns>
-        public bool AddScan2D(int scanNumber, int msLevel, float scanTimeMinutes, int ionCount, double[,] massIntensityPairs)
+        public bool AddScan2D(int scanNumber, int msLevel, float scanTimeMinutes, int ionCount, double[,] massIntensityPairs, bool dataIsCentroided)
         {
             try
             {
@@ -325,7 +327,7 @@ namespace MSFileInfoScanner.Plotting
                                 ionList.Add(ion);
                             }
 
-                            return AddScan(scanNumber, msLevel, scanTimeMinutes, ionList);
+                            return AddScan(scanNumber, msLevel, scanTimeMinutes, ionList, dataIsCentroided);
                         }
                     }
                 }
@@ -359,7 +361,7 @@ namespace MSFileInfoScanner.Plotting
                     }
                 }
 
-                AddScanCheckData(scanNumber, msLevel, scanTimeMinutes, ionCountNew, ionsMZFiltered, ionsIntensityFiltered, chargeFiltered);
+                AddScanCheckData(scanNumber, msLevel, scanTimeMinutes, ionCountNew, ionsMZFiltered, ionsIntensityFiltered, chargeFiltered, dataIsCentroided);
             }
             catch (Exception ex)
             {
@@ -379,8 +381,9 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="ionCount">Ion count</param>
         /// <param name="ionsMZ">m/z values</param>
         /// <param name="ionsIntensity">Intensity values</param>
+        /// <param name="dataIsCentroided">True if the data is already centroided</param>
         /// <returns>True if successful, false if an error</returns>
-        public bool AddScan(int scanNumber, int msLevel, float scanTimeMinutes, int ionCount, double[] ionsMZ, double[] ionsIntensity)
+        public bool AddScan(int scanNumber, int msLevel, float scanTimeMinutes, int ionCount, double[] ionsMZ, double[] ionsIntensity, bool dataIsCentroided)
         {
             List<MSIonType> ionList;
 
@@ -425,7 +428,7 @@ namespace MSFileInfoScanner.Plotting
                 }
             }
 
-            return AddScan(scanNumber, msLevel, scanTimeMinutes, ionList);
+            return AddScan(scanNumber, msLevel, scanTimeMinutes, ionList, dataIsCentroided);
         }
 
         /// <summary>
@@ -435,8 +438,9 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="msLevel">MS level</param>
         /// <param name="scanTimeMinutes">Scan time, in minutes</param>
         /// <param name="ionList">List of ions</param>
+        /// <param name="dataIsCentroided">True if the data is already centroided</param>
         /// <returns>True if successful, false if an error</returns>
-        public bool AddScan(int scanNumber, int msLevel, float scanTimeMinutes, List<MSIonType> ionList)
+        public bool AddScan(int scanNumber, int msLevel, float scanTimeMinutes, List<MSIonType> ionList, bool dataIsCentroided)
         {
             try
             {
@@ -547,7 +551,7 @@ namespace MSFileInfoScanner.Plotting
                     ionCountNew++;
                 }
 
-                AddScanCheckData(scanNumber, msLevel, scanTimeMinutes, ionCountNew, ionsMZFiltered, ionsIntensityFiltered, charge);
+                AddScanCheckData(scanNumber, msLevel, scanTimeMinutes, ionCountNew, ionsMZFiltered, ionsIntensityFiltered, charge, dataIsCentroided);
             }
             catch (Exception ex)
             {
@@ -558,27 +562,49 @@ namespace MSFileInfoScanner.Plotting
             return true;
         }
 
-        private void AddScanCheckData(int scanNumber, int msLevel, float scanTimeMinutes, int ionCount, double[] ionsMZFiltered, float[] ionsIntensityFiltered, byte[] chargeFiltered)
+        /// <summary>
+        /// Centroid the data, if required, then add to mScans (limiting to 50,000 data points)
+        /// </summary>
+        /// <param name="scanNumber">Scan number</param>
+        /// <param name="msLevel">MS Level</param>
+        /// <param name="scanTimeMinutes">Scan time, in minutes</param>
+        /// <param name="ionCount">Data point count in the m/z, intensity, and charge arrays</param>
+        /// <param name="ionsMZFiltered">m/z values</param>
+        /// <param name="ionsIntensityFiltered">Intensity values</param>
+        /// <param name="chargeFiltered">Charge values</param>
+        /// <param name="dataIsCentroided">True if the data is already centroided</param>
+        private void AddScanCheckData(
+            int scanNumber,
+            int msLevel,
+            float scanTimeMinutes,
+            int ionCount,
+            double[] ionsMZFiltered,
+            float[] ionsIntensityFiltered,
+            byte[] chargeFiltered,
+            bool dataIsCentroided)
         {
-            // Check whether any of the data points is less than Options.MZResolution m/z units apart
-            var centroidRequired = false;
-
-            for (var index = 0; index <= ionCount - 2; index++)
+            if (!dataIsCentroided)
             {
-                if (ionsMZFiltered[index + 1] - ionsMZFiltered[index] < Options.MZResolution)
+                // Check whether any of the data points is less than Options.MZResolution m/z units apart
+                var centroidRequired = false;
+
+                for (var index = 0; index <= ionCount - 2; index++)
                 {
-                    centroidRequired = true;
-                    break;
+                    if (ionsMZFiltered[index + 1] - ionsMZFiltered[index] < Options.MZResolution)
+                    {
+                        centroidRequired = true;
+                        break;
+                    }
+                }
+
+                if (centroidRequired)
+                {
+                    // Consolidate any points closer than Options.MZResolution m/z units
+                    CentroidMSData(Options.MZResolution, ref ionCount, ionsMZFiltered, ionsIntensityFiltered, chargeFiltered);
                 }
             }
 
-            if (centroidRequired)
-            {
-                // Consolidate any points closer than Options.MZResolution m/z units
-                CentroidMSData(Options.MZResolution, ref ionCount, ionsMZFiltered, ionsIntensityFiltered, chargeFiltered);
-            }
-
-            // Instantiate a new ScanData var for this scan
+            // Instantiate a new ScanData instance for this scan
             var scanData = new ScanData(scanNumber, msLevel, scanTimeMinutes, ionCount, ionsMZFiltered, ionsIntensityFiltered, chargeFiltered);
 
             if (scanData.IonCount > MAX_ALLOWABLE_ION_COUNT)
