@@ -399,7 +399,7 @@ namespace MSFileInfoScanner.Readers
 
             // Write out the Overview 2D plot of m/z vs. intensity
             // Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-            return mLCMS2DPlotOverview.Save2DPlots(datasetName, outputDirectoryPath, "HighAbu_", scanModeSuffixAddon);
+            return mLCMS2DPlotOverview.Save2DPlots(datasetName, outputDirectoryPath, "HighAbu_", scanModeSuffixAddon, out _);
         }
 
         /// <summary>
@@ -511,7 +511,7 @@ namespace MSFileInfoScanner.Readers
 
                     // Write out the 2D plot of m/z vs. intensity
                     // Plots will be named Dataset_LCMS.png and Dataset_LCMSn.png
-                    var success3 = mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName);
+                    var success3 = mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName, out var pointsPlotted);
                     var lcMSPlotStepsComplete = 1;
                     ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
 
@@ -521,11 +521,23 @@ namespace MSFileInfoScanner.Readers
                     }
                     else
                     {
-                        if (mLCMS2DPlot.Options.OverviewPlotDivisor > 0)
+                        int overviewPlotDataCount;
+
+                        if (mLCMS2DPlot.Options.OverviewPlotDivisor > 1)
+                        {
+                            overviewPlotDataCount = (int)Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / (double)mLCMS2DPlot.Options.OverviewPlotDivisor, 0);
+                        }
+                        else
+                        {
+                            overviewPlotDataCount = 0;
+                        }
+
+                        if (overviewPlotDataCount > 0 && overviewPlotDataCount < pointsPlotted)
                         {
                             // Also save the Overview 2D Plots
                             // The plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
                             var success4 = CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DPlot.Options.OverviewPlotDivisor);
+
                             lcMSPlotStepsComplete++;
                             ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
 
@@ -545,11 +557,11 @@ namespace MSFileInfoScanner.Readers
                             mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = LCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
                             mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = LCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
 
-                            mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName, string.Empty, "_zoom");
+                            mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName, string.Empty, "_zoom", out var deisotopedPointsPlotted);
                             lcMSPlotStepsComplete++;
                             ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
 
-                            if (mLCMS2DPlot.Options.OverviewPlotDivisor > 0)
+                            if (overviewPlotDataCount > 0 && overviewPlotDataCount < deisotopedPointsPlotted)
                             {
                                 CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DPlot.Options.OverviewPlotDivisor, "_zoom");
                                 lcMSPlotStepsComplete++;
@@ -644,10 +656,10 @@ namespace MSFileInfoScanner.Readers
                 // Add HTML headers and <table>
                 AppendHTMLHeader(writer, datasetName);
 
-                // First add the plots with the top 50,000 points
+                // First add the plots with the top 20,000 points
                 AppendLCMS2DPlots(writer, mLCMS2DPlotOverview);
 
-                // Now add the plots with the top 500,000 points
+                // Now add the plots with the top 200,000 points
                 AppendLCMS2DPlots(writer, mLCMS2DPlot);
 
                 // Add the BPI plots
@@ -736,8 +748,19 @@ namespace MSFileInfoScanner.Readers
             if (file1.Length == 0 && file2.Length == 0)
                 return;
 
+            string rowLabel;
+
+            if (file1.Contains(LCMSDataPlotter.SINGLE_MS_SPECTRUM_FILE_TAG))
+            {
+                rowLabel = "Mass Spectrum";
+            }
+            else
+            {
+                rowLabel = "LCMS<br>(Top " + top + ")";
+            }
+
             writer.WriteLine("    <tr>");
-            writer.WriteLine("      <td valign=\"middle\">LCMS<br>(Top " + top + ")</td>");
+            writer.WriteLine("      <td valign=\"middle\">" + rowLabel + "</td>");
             writer.WriteLine("      <td>" + GenerateQCFigureHTML(file1, 250) + "</td>");
             writer.WriteLine("      <td>" + GenerateQCFigureHTML(file2, 250) + "</td>");
             writer.WriteLine("    </tr>");

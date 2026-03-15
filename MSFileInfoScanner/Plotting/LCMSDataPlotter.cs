@@ -37,6 +37,11 @@ namespace MSFileInfoScanner.Plotting
         private const int MAX_ALLOWABLE_ION_COUNT = 50000;
 
         /// <summary>
+        /// Text to include in the filename when saving a single mass spectrum as a 2D plot
+        /// </summary>
+        public const string SINGLE_MS_SPECTRUM_FILE_TAG = "_Scan_";
+
+        /// <summary>
         /// Output file types
         /// </summary>
         public enum OutputFileTypes
@@ -101,7 +106,7 @@ namespace MSFileInfoScanner.Plotting
         /// <summary>
         /// Tracks the total number of data points cached in mScans
         /// </summary>
-        private int mPointCountCached;
+        public int PointCountCached { get; private set; }
 
         private int mPointCountCachedAfterLastTrim;
 
@@ -628,9 +633,9 @@ namespace MSFileInfoScanner.Plotting
             mScans.Add(scanData);
             ScanNumbers.Add(scanData.ScanNumber);
 
-            mPointCountCached += scanData.IonCount;
+            PointCountCached += scanData.IonCount;
 
-            if (mPointCountCached <= Options.MaxPointsToPlot * 5)
+            if (PointCountCached <= Options.MaxPointsToPlot * 5)
                 return;
 
             // Too many data points are being tracked; trim out the low abundance ones
@@ -638,7 +643,7 @@ namespace MSFileInfoScanner.Plotting
             // However, only repeat the trim if the number of cached data points has increased by 10%
             // This helps speed up program execution by avoiding trimming data after every new scan is added
 
-            if (mPointCountCached > mPointCountCachedAfterLastTrim * 1.1)
+            if (PointCountCached > mPointCountCachedAfterLastTrim * 1.1)
             {
                 // Step through the scans and reduce the number of points in memory
                 TrimCachedData(Options.MaxPointsToPlot, Options.MinPointsPerSpectrum);
@@ -669,16 +674,16 @@ namespace MSFileInfoScanner.Plotting
                 mScans.Add(scanData);
                 ScanNumbers.Add(scanData.ScanNumber);
 
-                mPointCountCached += scanData.IonCount;
+                PointCountCached += scanData.IonCount;
 
-                if (mPointCountCached > Options.MaxPointsToPlot * 5)
+                if (PointCountCached > Options.MaxPointsToPlot * 5)
                 {
                     // Too many data points are being tracked; trim out the low abundance ones
 
                     // However, only repeat the trim if the number of cached data points has increased by 10%
                     // This helps speed up program execution by avoiding trimming data after every new scan is added
 
-                    if (mPointCountCached > mPointCountCachedAfterLastTrim * 1.1)
+                    if (PointCountCached > mPointCountCachedAfterLastTrim * 1.1)
                     {
                         // Step through the scans and reduce the number of points in memory
                         TrimCachedData(Options.MaxPointsToPlot, Options.MinPointsPerSpectrum);
@@ -716,7 +721,7 @@ namespace MSFileInfoScanner.Plotting
                 ValidateMSLevel();
             }
 
-            if (mPointCountCached > Options.MaxPointsToPlot)
+            if (PointCountCached > Options.MaxPointsToPlot)
             {
                 // Need to step through the scans and reduce the number of points in memory
 
@@ -882,7 +887,7 @@ namespace MSFileInfoScanner.Plotting
 
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     if (writeDebugData)
-                        // ReSharper disable HeuristicUnreachableCode
+                    // ReSharper disable HeuristicUnreachableCode
                     {
                         writer = new StreamWriter(new FileStream("DataDump_" + msSpectrum.ScanNumber.ToString() + "_BeforeFilter.txt", FileMode.Create, FileAccess.Write, FileShare.Read));
                         writer.WriteLine("m/z" + '\t' + "Intensity");
@@ -896,7 +901,7 @@ namespace MSFileInfoScanner.Plotting
 
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if (writeDebugData)
-                            // ReSharper disable HeuristicUnreachableCode
+                        // ReSharper disable HeuristicUnreachableCode
                         {
                             writer.WriteLine(msSpectrum.IonsMZ[ionIndex] + '\t' + msSpectrum.IonsIntensity[ionIndex]);
                         }
@@ -905,7 +910,7 @@ namespace MSFileInfoScanner.Plotting
 
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     if (writeDebugData)
-                        // ReSharper disable HeuristicUnreachableCode
+                    // ReSharper disable HeuristicUnreachableCode
                     {
                         writer.Close();
                     }
@@ -968,7 +973,7 @@ namespace MSFileInfoScanner.Plotting
 
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                 if (writeDebugData)
-                    // ReSharper disable HeuristicUnreachableCode
+                // ReSharper disable HeuristicUnreachableCode
                 {
                     writer = new StreamWriter(new FileStream("DataDump_" + msSpectrum.ScanNumber.ToString() + "_PostFilter.txt", FileMode.Create, FileAccess.Write, FileShare.Read));
                     writer.WriteLine("m/z" + '\t' + "Intensity");
@@ -1053,7 +1058,7 @@ namespace MSFileInfoScanner.Plotting
         /// </summary>
         public void Reset()
         {
-            mPointCountCached = 0;
+            PointCountCached = 0;
             mPointCountCachedAfterLastTrim = 0;
 
             mScans.Clear();
@@ -1106,7 +1111,7 @@ namespace MSFileInfoScanner.Plotting
 
                 // Step through the scans and trim the data as needed
                 masterIonIndex = 0;
-                mPointCountCached = 0;
+                PointCountCached = 0;
 
                 foreach (var scan in mScans)
                 {
@@ -1189,11 +1194,11 @@ namespace MSFileInfoScanner.Plotting
                     }
 
                     // Bump up the total point count cached
-                    mPointCountCached += scan.IonCount;
+                    PointCountCached += scan.IonCount;
                 }
 
                 // Update mPointCountCachedAfterLastTrim
-                mPointCountCachedAfterLastTrim = mPointCountCached;
+                mPointCountCachedAfterLastTrim = PointCountCached;
             }
             catch (Exception ex)
             {
@@ -1349,7 +1354,7 @@ namespace MSFileInfoScanner.Plotting
             colorScaleMinIntensity = 0;
             colorScaleMaxIntensity = 0;
 
-            if (!skipTrimCachedData && mPointCountCached > Options.MaxPointsToPlot)
+            if (!skipTrimCachedData && PointCountCached > Options.MaxPointsToPlot)
             {
                 // Need to step through the scans and reduce the number of points in memory
 
@@ -1586,7 +1591,8 @@ namespace MSFileInfoScanner.Plotting
 
                     intensityList.Add(currentValue);
 
-                    var dataPoint = new ScatterPoint(scan.ScanNumber,
+                    var dataPoint = new ScatterPoint(
+                        scan.ScanNumber,
                         scan.IonsMZ[ionIndex])
                     {
                         Value = currentValue
@@ -1630,20 +1636,35 @@ namespace MSFileInfoScanner.Plotting
 
         /// <summary>
         /// When PlottingDeisotopedData is False, creates a 2D plot of m/z vs. scan number, using Intensity as the 3rd dimension to color the data points
+        /// However, if PlotMzVsIntensityIfSingleScan is true and the data is all from a single scan, the mass spectrum is plotted as a 2D plot
         /// When PlottingDeisotopedData is True, creates a 2D plot of monoisotopic mass vs. scan number, using charge state as the 3rd dimension to color the data points
         /// </summary>
-        /// <param name="plotTitle">Title of the plot</param>
+        /// <param name="datasetName">Dataset Name</param>
+        /// <param name="plotTitleSuffix">Text to append to the dataset name</param>
         /// <param name="msLevelFilter">0 to use all the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
         /// <param name="skipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set skipTrimCachedData to False on the first call and True on subsequent calls)</param>
+        /// <param name="plottingSingleMassSpectrum">Output: true if the plot container is a 2D plot of the mass spectrum of a single scan</param>
+        /// <param name="singleScanNumber">Output: the scan number being plotted when plottingSingleMassSpectrum is true</param>
+        /// <param name="pointsPlotted">Output: number of points plotted (3D or 2D, max between MS1 and MS2)</param>
         /// <returns>OxyPlot PlotContainer</returns>
-        private PlotContainerBase InitializePlot(string plotTitle, int msLevelFilter, bool skipTrimCachedData)
+        private PlotContainerBase InitializePlot(
+            string datasetName,
+            string plotTitleSuffix,
+            int msLevelFilter,
+            bool skipTrimCachedData,
+            out bool plottingSingleMassSpectrum,
+            out int singleScanNumber,
+            out int pointsPlotted)
         {
             if (Options.PlotWithPython)
             {
-                return InitializePythonPlot(plotTitle, msLevelFilter, skipTrimCachedData);
+                return InitializePythonPlot(datasetName, plotTitleSuffix, msLevelFilter, skipTrimCachedData, out plottingSingleMassSpectrum, out singleScanNumber, out pointsPlotted);
             }
 
-            return InitializeOxyPlot(plotTitle, msLevelFilter, skipTrimCachedData);
+            plottingSingleMassSpectrum = false;
+            singleScanNumber = 0;
+
+            return InitializeOxyPlot(datasetName + " - " + plotTitleSuffix, msLevelFilter, skipTrimCachedData, out pointsPlotted);
         }
 
         /// <summary>
@@ -1653,8 +1674,9 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="plotTitle">Title of the plot</param>
         /// <param name="msLevelFilter">0 to use all the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
         /// <param name="skipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set skipTrimCachedData to False on the first call and True on subsequent calls)</param>
+        /// <param name="pointsPlotted">Output: number of points plotted (3D or 2D, max between MS1 and MS2)</param>
         /// <returns>OxyPlot PlotContainer</returns>
-        private PlotContainerBase InitializeOxyPlot(string plotTitle, int msLevelFilter, bool skipTrimCachedData)
+        private PlotContainerBase InitializeOxyPlot(string plotTitle, int msLevelFilter, bool skipTrimCachedData, out int pointsPlotted)
         {
             var pointsByCharge = GetDataToPlot(
                 msLevelFilter, skipTrimCachedData,
@@ -1670,7 +1692,7 @@ namespace MSFileInfoScanner.Plotting
 
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (writeDebugData)
-                // ReSharper disable HeuristicUnreachableCode
+            // ReSharper disable HeuristicUnreachableCode
             {
                 debugWriter = new StreamWriter(new FileStream(plotTitle + " - LCMS Top " + IntToEngineeringNotation(Options.MaxPointsToPlot) + " points.txt", FileMode.Create, FileAccess.Write, FileShare.Read));
                 debugWriter.WriteLine("scan" + '\t' + "m/z" + '\t' + "Intensity");
@@ -1679,11 +1701,13 @@ namespace MSFileInfoScanner.Plotting
 
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (writeDebugData)
-                // ReSharper disable HeuristicUnreachableCode
+            // ReSharper disable HeuristicUnreachableCode
             {
                 debugWriter.Close();
             }
             // ReSharper restore HeuristicUnreachableCode
+
+            pointsPlotted = pointsToPlot;
 
             if (pointsToPlot == 0)
             {
@@ -1823,11 +1847,22 @@ namespace MSFileInfoScanner.Plotting
         /// When PlottingDeisotopedData is False, creates a 2D plot of m/z vs. scan number, using Intensity as the 3rd dimension to color the data points
         /// When PlottingDeisotopedData is True, creates a 2D plot of monoisotopic mass vs. scan number, using charge state as the 3rd dimension to color the data points
         /// </summary>
-        /// <param name="plotTitle">Title of the plot</param>
+        /// <param name="datasetName">Dataset Name</param>
+        /// <param name="plotTitleSuffix">Text to append to the dataset name</param>
         /// <param name="msLevelFilter">0 to use all the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
         /// <param name="skipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set skipTrimCachedData to False on the first call and True on subsequent calls)</param>
+        /// <param name="plottingSingleMassSpectrum">Output: true if the plot container is a 2D plot of the mass spectrum of a single scan</param>
+        /// <param name="singleScanNumber">Output: the scan number being plotted when plottingSingleMassSpectrum is true</param>
+        /// <param name="pointsPlotted">Output: number of points plotted (3D or 2D, max between MS1 and MS2)</param>
         /// <returns>OxyPlot PlotContainer</returns>
-        private PlotContainerBase InitializePythonPlot(string plotTitle, int msLevelFilter, bool skipTrimCachedData)
+        private PlotContainerBase InitializePythonPlot(
+            string datasetName,
+            string plotTitleSuffix,
+            int msLevelFilter,
+            bool skipTrimCachedData,
+            out bool plottingSingleMassSpectrum,
+            out int singleScanNumber,
+            out int pointsPlotted)
         {
             var pointsByCharge = GetDataToPlot(
                 msLevelFilter, skipTrimCachedData,
@@ -1836,12 +1871,132 @@ namespace MSFileInfoScanner.Plotting
                 out var minMZ, out var maxMZ,
                 out var colorScaleMinIntensity, out var colorScaleMaxIntensity);
 
+            pointsPlotted = pointsToPlot;
+
             if (pointsToPlot == 0)
             {
                 // Nothing to plot
+                plottingSingleMassSpectrum = false;
+                singleScanNumber = 0;
+
                 return new PythonPlotContainer3D();
             }
 
+            // These track the minimum and maximum values, using the Absolute value of any data in pointsByCharge
+            var xMinScan = double.MaxValue;
+            var xMaxScan = double.MinValue;
+            var yMinIntensity = double.MaxValue;
+            var yMaxIntensity = double.MinValue;
+
+            // Determine min/max values for the X and Y data
+            foreach (var dataSeries in pointsByCharge)
+            {
+                UpdateAbsValueRange((from item in dataSeries select item.X).ToList(), ref xMinScan, ref xMaxScan);
+                UpdateAbsValueRange((from item in dataSeries select item.Y).ToList(), ref yMinIntensity, ref yMaxIntensity);
+            }
+
+            if (Options.PlotMzVsIntensityIfSingleScan && Math.Abs(xMinScan - xMaxScan) < float.Epsilon)
+            {
+                // The data in pointsByCharge all comes from the same scan
+                // Instead of plotting a 2D plot, plot the mass spectrum as m/z vs. intensity
+
+                plottingSingleMassSpectrum = true;
+                singleScanNumber = (int)(Math.Round(xMinScan, 0));
+
+                return InitializePythonPlotMassSpectrum(
+                    datasetName + " - Scan " + singleScanNumber,
+                    pointsByCharge,
+                    scanTimeMax,
+                    minMZ, maxMZ
+                    );
+            }
+
+            plottingSingleMassSpectrum = false;
+            singleScanNumber = 0;
+
+            return InitializePythonPlot2D(
+                datasetName + " - " + plotTitleSuffix,
+                pointsByCharge,
+                pointsToPlot, scanTimeMax,
+                minScan, maxScan,
+                minMZ, maxMZ,
+                colorScaleMinIntensity, colorScaleMaxIntensity,
+                xMinScan, xMaxScan,
+                yMinIntensity, yMaxIntensity);
+
+        }
+
+        private PlotContainerBase InitializePythonPlotMassSpectrum(
+            string plotTitle,
+            IEnumerable<List<ScatterPoint>> pointsByCharge,
+            double scanTimeMax,
+            double minMZ, double maxMZ)
+        {
+#pragma warning disable IDE0017
+            var plotContainer = new PythonPlotContainer2D(plotTitle, "m/z", "Intensity")
+            {
+                DeleteTempFiles = Options.DeleteTempFiles
+            };
+#pragma warning restore IDE0017
+
+            plotContainer.PlotTitle = plotTitle;
+
+            var dataPoints = new List<DataPoint>();
+
+            foreach (var point in pointsByCharge.First())
+            {
+                // point.X is scan number
+                // point.Y is m/z
+                // point.Value is intensity
+                dataPoints.Add(new DataPoint(point.Y, point.Value));
+            }
+
+            plotContainer.SetData(dataPoints);
+
+            // Assume the X-axis is plotting doubles
+            PlotUtilities.GetAxisFormatInfo(minMZ, maxMZ, false, plotContainer.XAxisInfo);
+
+            // Add a label showing the number of points displayed
+            plotContainer.AnnotationBottomLeft = dataPoints.Count.ToString("0,000") + " points plotted";
+
+            // Possibly add a label showing the maximum elution time
+            if (scanTimeMax > 0)
+            {
+                string caption;
+
+                if (scanTimeMax < 2)
+                {
+                    caption = Math.Round(scanTimeMax, 2).ToString("0.00") + " minutes";
+                }
+                else if (scanTimeMax < 10)
+                {
+                    caption = Math.Round(scanTimeMax, 1).ToString("0.0") + " minutes";
+                }
+                else
+                {
+                    caption = Math.Round(scanTimeMax, 0).ToString("0") + " minutes";
+                }
+
+                plotContainer.AnnotationBottomRight = caption;
+            }
+
+            // Override the auto-computed axis range
+            plotContainer.YAxisInfo.Minimum = minMZ;
+            plotContainer.YAxisInfo.Maximum = maxMZ;
+
+            return plotContainer;
+        }
+
+        private PlotContainerBase InitializePythonPlot2D(
+            string plotTitle,
+            IList<List<ScatterPoint>> pointsByCharge,
+            int pointsToPlot, double scanTimeMax,
+            int minScan, int maxScan,
+            double minMZ, double maxMZ,
+            float colorScaleMinIntensity, float colorScaleMaxIntensity,
+            double xMinScan, double xMaxScan,
+            double yMinMZ, double yMaxMZ)
+        {
             string yAxisLabel;
 
             if (Options.PlottingDeisotopedData)
@@ -1868,26 +2023,13 @@ namespace MSFileInfoScanner.Plotting
                 AddPythonPlotSeriesMzVsScan(plotTitle, pointsByCharge.First(), colorScaleMinIntensity, colorScaleMaxIntensity, plotContainer);
             }
 
-            // These track the minimum and maximum values, using the Absolute value of any data in pointsByCharge
-            var xMin = double.MaxValue;
-            var xMax = double.MinValue;
-            var yMin = double.MaxValue;
-            var yMax = double.MinValue;
-
-            // Determine min/max values for the X and Y data
-            foreach (var dataSeries in pointsByCharge)
-            {
-                UpdateAbsValueRange((from item in dataSeries select item.X).ToList(), ref xMin, ref xMax);
-                UpdateAbsValueRange((from item in dataSeries select item.Y).ToList(), ref yMin, ref yMax);
-            }
-
             // Update the axis format codes if the data values are small or the range of data is small
 
-            // Assume the X-axis is plotting integers
-            PlotUtilities.GetAxisFormatInfo(xMin, xMax, true, plotContainer.XAxisInfo);
+            // Assume the X-axis is plotting integers (scan numbers)
+            PlotUtilities.GetAxisFormatInfo(xMinScan, xMaxScan, true, plotContainer.XAxisInfo);
 
             // Assume the Y-axis is plotting doubles
-            PlotUtilities.GetAxisFormatInfo(yMin, yMax, false, plotContainer.YAxisInfo);
+            PlotUtilities.GetAxisFormatInfo(yMinMZ, yMaxMZ, false, plotContainer.YAxisInfo);
 
             // Add a label showing the number of points displayed
             plotContainer.AnnotationBottomLeft = pointsToPlot.ToString("0,000") + " points plotted";
@@ -1995,10 +2137,11 @@ namespace MSFileInfoScanner.Plotting
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="outputDirectory">Output directory</param>
+        /// <param name="pointsPlotted">Output: number of points plotted (3D or 2D, max between MS1 and MS2)</param>
         /// <returns>True if successful, false if an error</returns>
-        public bool Save2DPlots(string datasetName, string outputDirectory)
+        public bool Save2DPlots(string datasetName, string outputDirectory, out int pointsPlotted)
         {
-            return Save2DPlots(datasetName, outputDirectory, string.Empty, string.Empty);
+            return Save2DPlots(datasetName, outputDirectory, string.Empty, string.Empty, out pointsPlotted);
         }
 
         /// <summary>
@@ -2006,10 +2149,11 @@ namespace MSFileInfoScanner.Plotting
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="outputDirectory">Output directory</param>
-        /// <param name="fileNameSuffixAddon">Optional suffix to add to file names</param>
+        /// <param name="fileNameSuffixAddon">Optional suffix to add to file names, e.g. "HighAbu_"</param>
         /// <param name="scanModeSuffixAddon">Optional suffix to add to scan modes</param>
+        /// <param name="pointsPlotted">Output: number of points plotted (3D or 2D, max between MS1 and MS2)</param>
         /// <returns>True if successful, false if an error</returns>
-        public bool Save2DPlots(string datasetName, string outputDirectory, string fileNameSuffixAddon, string scanModeSuffixAddon)
+        public bool Save2DPlots(string datasetName, string outputDirectory, string fileNameSuffixAddon, string scanModeSuffixAddon, out int pointsPlotted)
         {
             try
             {
@@ -2022,10 +2166,10 @@ namespace MSFileInfoScanner.Plotting
                 fileNameSuffixAddon ??= string.Empty;
                 scanModeSuffixAddon ??= string.Empty;
 
-                var ms1Plot = InitializePlot(datasetName + " - " + Options.MS1PlotTitle, 1, false);
+                var ms1Plot = InitializePlot(datasetName, Options.MS1PlotTitle, 1, false, out var plottingSingleMS1Scan, out var singleMS1ScanNumber, out pointsPlotted);
                 RegisterEvents(ms1Plot);
 
-                ms1Plot.PlottingDeisotopedData = Options.PlottingDeisotopedData;
+                ms1Plot.PlottingDeisotopedData = Options.PlottingDeisotopedData && !plottingSingleMS1Scan;
 
                 if (Options.TestGradientColorSchemes)
                 {
@@ -2051,18 +2195,40 @@ namespace MSFileInfoScanner.Plotting
 
                 if (ms1Plot.SeriesCount > 0)
                 {
-                    var pngFilename = datasetName + "_" + fileNameSuffixAddon + "LCMS" + scanModeSuffixAddon + ".png";
+                    string pngFilename;
+                    if (plottingSingleMS1Scan)
+                    {
+                        pngFilename = datasetName + SINGLE_MS_SPECTRUM_FILE_TAG + singleMS1ScanNumber + scanModeSuffixAddon + ".png";
+                    }
+                    else
+                    {
+                        pngFilename = datasetName + "_" + fileNameSuffixAddon + "LCMS" + scanModeSuffixAddon + ".png";
+                    }
+
                     var pngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(outputDirectory, pngFilename));
                     successMS1 = ms1Plot.SaveToPNG(pngFile, 1024, 700, 96);
                     AddRecentFile(pngFile.FullName, OutputFileTypes.LCMS);
                 }
 
-                var ms2Plot = InitializePlot(datasetName + " - " + Options.MS2PlotTitle, 2, true);
+                var ms2Plot = InitializePlot(datasetName, Options.MS2PlotTitle, 2, true, out var plottingSingleMS2Scan, out var singleMS2ScanNumber, out var pointsPlottedMS2);
                 RegisterEvents(ms2Plot);
 
                 if (ms2Plot.SeriesCount > 0)
                 {
-                    var pngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(outputDirectory, datasetName + "_" + fileNameSuffixAddon + "LCMS_MSn" + scanModeSuffixAddon + ".png"));
+                    if (pointsPlottedMS2 > pointsPlotted)
+                        pointsPlotted = pointsPlottedMS2;
+
+                    string pngFilename;
+                    if (plottingSingleMS2Scan)
+                    {
+                        pngFilename = datasetName + SINGLE_MS_SPECTRUM_FILE_TAG + singleMS2ScanNumber + scanModeSuffixAddon + ".png";
+                    }
+                    else
+                    {
+                        pngFilename = datasetName + "_" + fileNameSuffixAddon + "LCMS_MSn" + scanModeSuffixAddon + ".png";
+                    }
+
+                    var pngFile = MSFileInfoScanner.GetFileInfo(Path.Combine(outputDirectory, pngFilename));
                     successMS2 = ms2Plot.SaveToPNG(pngFile, 1024, 700, 96);
                     AddRecentFile(pngFile.FullName, OutputFileTypes.LCMSMSn);
                 }
@@ -2072,6 +2238,7 @@ namespace MSFileInfoScanner.Plotting
             catch (Exception ex)
             {
                 OnErrorEvent(string.Format("Error in LCMSDataPlotter.Save2DPlots: {0}", ex.Message), ex);
+                pointsPlotted = 0;
                 return false;
             }
         }

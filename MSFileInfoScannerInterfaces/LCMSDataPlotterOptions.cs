@@ -202,6 +202,12 @@ namespace MSFileInfoScannerInterfaces
         }
 
         /// <summary>
+        /// If the cached data comes from only a single scan, plot the data as a mass spectrum (m/z on the X axis) instead of a 2D plot (time on the X axis)
+        /// </summary>
+        /// <remarks>If this is true, PlottingDeisotopedData is ignored</remarks>
+        public bool PlotMzVsIntensityIfSingleScan { get; set; }
+
+        /// <summary>
         /// This will be set to true when we're plotting deisotoped data (from a DeconTools _isos.csv file)
         /// </summary>
         public bool PlottingDeisotopedData { get; set; }
@@ -238,6 +244,7 @@ namespace MSFileInfoScannerInterfaces
                 MS1PlotTitle = MS1PlotTitle,
                 MS2PlotTitle = MS2PlotTitle,
                 PlottingDeisotopedData = PlottingDeisotopedData,
+                PlotMzVsIntensityIfSingleScan = PlotMzVsIntensityIfSingleScan,
                 PlotWithPython = PlotWithPython,
                 UseObservedMinScan = UseObservedMinScan,
                 MaxMonoMassForDeisotopedPlot = MaxMonoMassForDeisotopedPlot
@@ -275,6 +282,7 @@ namespace MSFileInfoScannerInterfaces
             mMaxMonoMass = options.LCMSPlotMaxMonoMass;
 
             PlottingDeisotopedData = false;
+            PlotMzVsIntensityIfSingleScan = true;
             PlotWithPython = false;
             UseObservedMinScan = false;
         }

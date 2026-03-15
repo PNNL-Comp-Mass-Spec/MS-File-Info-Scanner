@@ -338,7 +338,7 @@ namespace MSFileInfoScanner.Readers
                                     ionsIntensity[index] = intensityList[index];
                                 }
 
-                                mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevel, spectrum.RetentionTimeMinutes, ionsMZ.Length, ionsMZ, ionsIntensity);
+                                mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, msLevel, spectrum.RetentionTimeMinutes, ionsMZ.Length, ionsMZ, ionsIntensity, dataIsCentroided: true);
                             }
                         }
 

@@ -164,7 +164,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public DatasetStatsSummarizer()
         {
-            FileDate = "April 11, 2025";
+            FileDate = "October 22, 2025";
 
             ErrorMessage = string.Empty;
 
