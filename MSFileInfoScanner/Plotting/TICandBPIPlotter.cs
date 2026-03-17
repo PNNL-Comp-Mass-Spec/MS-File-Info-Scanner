@@ -18,7 +18,7 @@ namespace MSFileInfoScanner.Plotting
     public class TICandBPIPlotter : EventNotifier
 #pragma warning restore VSSpell001 // Spell Check
     {
-        // Ignore Spelling: bpi, OxyPlot, Zeroes
+        // Ignore Spelling: bpi, Oxy, OxyPlot, Zeroes
 
         // ReSharper disable InconsistentNaming
         // ReSharper disable IdentifierTypo
@@ -250,7 +250,12 @@ namespace MSFileInfoScanner.Plotting
             mRecentFiles.Add(outputFileInfo);
         }
 
-        private void AddOxyPlotSeries(PlotModel myPlot, IReadOnlyCollection<DataPoint> points)
+        /// <summary>
+        /// Add an OxyPlot line series to the plot model
+        /// </summary>
+        /// <param name="myPlot">Plot model</param>
+        /// <param name="points">Data points</param>
+        public static void AddOxyPlotLineSeries(PlotModel myPlot, IReadOnlyCollection<DataPoint> points)
         {
             // Generate a black curve with no symbols
             var series = new LineSeries();
@@ -441,7 +446,7 @@ namespace MSFileInfoScanner.Plotting
                 myPlot.Axes[1].StringFormat = AxisInfo.EXPONENTIAL_FORMAT;
             }
 
-            AddOxyPlotSeries(myPlot, points);
+            AddOxyPlotLineSeries(myPlot, points);
 
             // Update the axis format codes if the data values are small or the range of data is small
             var xVals = (from item in points select item.X).ToList();

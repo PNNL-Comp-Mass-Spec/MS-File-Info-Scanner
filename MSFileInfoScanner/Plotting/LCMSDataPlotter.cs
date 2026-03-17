@@ -1117,9 +1117,8 @@ namespace MSFileInfoScanner.Plotting
                 {
                     if (scan.IonCount <= minPointsPerSpectrum)
                     {
-                        // Skip this can since it has too few points
+                        // Skip this scan since it has too few points
                         // No need to update masterIonIndex since it was skipped above when calling filterDataArray.AddDataPoint
-
                     }
                     else
                     {
@@ -1132,7 +1131,7 @@ namespace MSFileInfoScanner.Plotting
 
                         for (var ionIndex = 0; ionIndex < scan.IonCount; ionIndex++)
                         {
-                            // If the point's intensity is >= 0, then we keep it
+                            // If the point's intensity is >= 0, we keep it
                             if (filterDataArray.GetAbundanceByIndex(masterIonIndex) >= 0)
                             {
                                 ionCountNew++;
@@ -1678,22 +1677,30 @@ namespace MSFileInfoScanner.Plotting
                 return InitializePythonPlot(datasetName, plotTitleSuffix, msLevelFilter, skipTrimCachedData, out plottingSingleMassSpectrum, out singleScanNumber, out pointsPlotted);
             }
 
-            plottingSingleMassSpectrum = false;
-            singleScanNumber = 0;
-
-            return InitializeOxyPlot(datasetName + " - " + plotTitleSuffix, msLevelFilter, skipTrimCachedData, out pointsPlotted);
+            return InitializeOxyPlot(datasetName, plotTitleSuffix, msLevelFilter, skipTrimCachedData, out plottingSingleMassSpectrum, out singleScanNumber, out pointsPlotted);
         }
 
         /// <summary>
         /// When PlottingDeisotopedData is False, creates a 2D plot of m/z vs. scan number, using Intensity as the 3rd dimension to color the data points
         /// When PlottingDeisotopedData is True, creates a 2D plot of monoisotopic mass vs. scan number, using charge state as the 3rd dimension to color the data points
         /// </summary>
-        /// <param name="plotTitle">Title of the plot</param>
+        /// <param name="datasetName">Dataset name</param>
+        /// <param name="plotTitleSuffix">Text to append to the dataset name</param>
         /// <param name="msLevelFilter">0 to use all the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
         /// <param name="skipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set skipTrimCachedData to False on the first call and True on subsequent calls)</param>
+        /// <param name="plottingSingleMassSpectrum">Output: true if the plot container is a 2D plot of the mass spectrum of a single scan</param>
+        /// <param name="singleScanNumber">Output: the scan number being plotted when plottingSingleMassSpectrum is true</param>
         /// <param name="pointsPlotted">Output: number of points plotted (3D or 2D, max between MS1 and MS2)</param>
         /// <returns>OxyPlot PlotContainer</returns>
-        private PlotContainerBase InitializeOxyPlot(string plotTitle, int msLevelFilter, bool skipTrimCachedData, out int pointsPlotted)
+        private PlotContainerBase InitializeOxyPlot(
+            string datasetName,
+            string plotTitleSuffix,
+            int msLevelFilter,
+            bool skipTrimCachedData,
+            out bool plottingSingleMassSpectrum,
+            out int singleScanNumber,
+            out int pointsPlotted
+            )
         {
             var pointsByCharge = GetDataToPlot(
                 msLevelFilter, skipTrimCachedData,
@@ -1706,6 +1713,8 @@ namespace MSFileInfoScanner.Plotting
             // Used for debugging
             var writeDebugData = false;
             StreamWriter debugWriter = null;
+
+            var plotTitle = datasetName + " - " + plotTitleSuffix;
 
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (writeDebugData)
@@ -1729,9 +1738,121 @@ namespace MSFileInfoScanner.Plotting
             if (pointsToPlot == 0)
             {
                 // Nothing to plot
+                plottingSingleMassSpectrum = false;
+                singleScanNumber = 0;
+
                 return new PlotContainer(new PlotModel());
             }
 
+            GetMinMaxValues(pointsByCharge, out var xMinScan, out var xMaxScan, out _, out _);
+
+            if (Options.PlotMzVsIntensityIfSingleScan && Math.Abs(xMinScan - xMaxScan) < float.Epsilon)
+            {
+                // The data in pointsByCharge all comes from the same scan
+                // Instead of plotting a 2D plot, plot the mass spectrum as m/z vs. intensity
+
+                plottingSingleMassSpectrum = true;
+                singleScanNumber = (int)(Math.Round(xMinScan, 0));
+
+                return InitializeOxyPlotMassSpectrum(
+                    datasetName + " - Scan " + singleScanNumber,
+                    pointsByCharge,
+                    scanTimeMax
+                );
+            }
+
+            plottingSingleMassSpectrum = false;
+            singleScanNumber = 0;
+
+            return InitializeOxyPlot2D(
+                datasetName + " - " + plotTitleSuffix,
+                pointsByCharge,
+                pointsToPlot, scanTimeMax,
+                minScan, maxScan,
+                minMZ, maxMZ,
+                colorScaleMinIntensity, colorScaleMaxIntensity);
+        }
+
+        private PlotContainerBase InitializeOxyPlotMassSpectrum(
+            string plotTitle,
+            IEnumerable<List<ScatterPoint>> pointsByCharge,
+            double scanTimeMax)
+        {
+            var dataPoints = new List<DataPoint>();
+
+            foreach (var point in pointsByCharge.First())
+            {
+                // point.X is scan number
+                // point.Y is m/z
+                // point.Value is intensity
+                dataPoints.Add(new DataPoint(point.Y, point.Value));
+            }
+
+            if (dataPoints.Count == 0)
+            {
+                // Nothing to plot
+                var emptyContainer = new PlotContainer(new PlotModel(), false, "InitializeOxyPlotMassSpectrum");
+                emptyContainer.WriteDebugLog("points.Count == 0 in InitializeOxyPlotMassSpectrum for plot " + plotTitle);
+                return emptyContainer;
+            }
+
+            var myPlot = OxyPlotUtilities.GetBasicPlotModel(plotTitle, "m/z", "Intensity");
+
+            TICandBPIPlotter.AddOxyPlotLineSeries(myPlot, dataPoints);
+
+            // Update the axis format codes if the data values are small or the range of data is small
+            var xVals = (from item in dataPoints select item.X).ToList();
+            OxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[0], xVals, false);
+
+            var yVals = (from item in dataPoints select item.Y).ToList();
+            OxyPlotUtilities.UpdateAxisFormatCodeIfSmallValues(myPlot.Axes[1], yVals, false);
+
+            var plotContainer = new PlotContainer(myPlot)
+            {
+                FontSizeBase = PlotContainer.DEFAULT_BASE_FONT_SIZE,
+                // Add a label showing the number of points displayed
+                AnnotationBottomLeft = dataPoints.Count.ToString("0,000") + " points plotted"
+            };
+
+            // Possibly add a label showing the maximum elution time
+
+            if (scanTimeMax > 0)
+            {
+                string caption;
+
+                if (scanTimeMax < 2)
+                {
+                    caption = Math.Round(scanTimeMax, 2).ToString("0.00") + " minutes";
+                }
+                else if (scanTimeMax < 10)
+                {
+                    caption = Math.Round(scanTimeMax, 1).ToString("0.0") + " minutes";
+                }
+                else
+                {
+                    caption = Math.Round(scanTimeMax, 0).ToString("0") + " minutes";
+                }
+
+                plotContainer.AnnotationBottomRight = caption;
+            }
+
+            // Assure that we don't see ticks between m/z values
+            OxyPlotUtilities.ValidateMajorStep(myPlot.Axes[0]);
+
+            // Hide the legend
+            myPlot.IsLegendVisible = false;
+
+            return plotContainer;
+        }
+
+        private PlotContainerBase InitializeOxyPlot2D(
+            string plotTitle,
+            IList<List<ScatterPoint>> pointsByCharge,
+            int pointsToPlot, double scanTimeMax,
+            int minScan, int maxScan,
+            double minMZ, double maxMZ,
+            float colorScaleMinIntensity, float colorScaleMaxIntensity)
+        {
             string yAxisLabel;
 
             if (Options.PlottingDeisotopedData)
@@ -1867,7 +1988,7 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="plotTitleSuffix">Text to append to the dataset name</param>
         /// <param name="msLevelFilter">0 to use all the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
-        /// <param name="skipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set skipTrimCachedData to False on the first call and True on subsequent calls)</param>
+        /// <param name="skipTrimCachedData">When True, doesn't call TrimCachedData (when making several plots in succession, each with a different value for msLevelFilter, set skipTrimCachedData to False on the first call and True on subsequent calls)</param>
         /// <param name="plottingSingleMassSpectrum">Output: true if the plot container is a 2D plot of the mass spectrum of a single scan</param>
         /// <param name="singleScanNumber">Output: the scan number being plotted when plottingSingleMassSpectrum is true</param>
         /// <param name="pointsPlotted">Output: number of points plotted (3D or 2D, max between MS1 and MS2)</param>
@@ -1929,7 +2050,6 @@ namespace MSFileInfoScanner.Plotting
                 colorScaleMinIntensity, colorScaleMaxIntensity,
                 xMinScan, xMaxScan,
                 yMinIntensity, yMaxIntensity);
-
         }
 
         private PlotContainerBase InitializePythonPlotMassSpectrum(
@@ -2222,7 +2342,9 @@ namespace MSFileInfoScanner.Plotting
                 if (ms2Plot.SeriesCount > 0)
                 {
                     if (pointsPlottedMS2 > pointsPlotted)
+                    {
                         pointsPlotted = pointsPlottedMS2;
+                    }
 
                     string pngFilename;
                     if (plottingSingleMS2Scan)
