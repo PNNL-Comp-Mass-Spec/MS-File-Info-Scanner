@@ -62,7 +62,7 @@ def process_file(dataFilePath):
         uprint('Plot "' + data.columns[0] + '" vs. "' + data.columns[1] + '"')
         uprint("  {:,}".format(len(data.index)) + ' data points')
         print()
-        plot_lc_intensity(outputFilePath, data.columns, data[data.columns[0]], data[data.columns[1]], plotLabels['Title'], plotLabels['BottomRight'])
+        plot_lc_intensity(outputFilePath, data.columns, data[data.columns[0]], data[data.columns[1]], plotLabels['Title'], plotLabels['BottomRight'], plotLabels['BottomLeft'])
         return
 
     if len(data.columns) == 3:
@@ -209,7 +209,7 @@ def set_title_and_labels(ax, plt, baseFontSize, title, xDataMin, xDataMax, xAxis
     if len(l_label) > 0:
         plt.gcf().text(0.01, 0.02, l_label, fontsize=baseFontSize-1)
 
-def plot_lc_intensity(outputFilePath, columnNames, lc_scan_num, intensities, title, r_label):
+def plot_lc_intensity(outputFilePath, columnNames, lc_scan_num, intensities, title, r_label, l_label):
 
     fig = plt.figure(figsize=(8.5333,5), dpi=120)
     ax = fig.add_subplot(111, facecolor='whitesmoke')
@@ -228,7 +228,7 @@ def plot_lc_intensity(outputFilePath, columnNames, lc_scan_num, intensities, tit
     # Y axis is intensity
     yAxisLabel = columnNames[1]
 
-    set_title_and_labels(ax, plt, baseFontSize, title, np.min(lc_scan_num), np.max(lc_scan_num), xAxisLabel, yAxisLabel, '%.2e', r_label, '')
+    set_title_and_labels(ax, plt, baseFontSize, title, np.min(lc_scan_num), np.max(lc_scan_num), xAxisLabel, yAxisLabel, '%.2e', r_label, l_label)
     plt.tight_layout()
 
     plt.savefig(outputFilePath)
