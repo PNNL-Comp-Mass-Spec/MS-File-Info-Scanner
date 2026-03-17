@@ -160,7 +160,8 @@ namespace MSFileInfoScanner.Readers
                     mLCMS2DPlot,
                     Options.SaveLCMS2DPlots,
                     Options.SaveTICAndBPIPlots,
-                    Options.CheckCentroidingStatus)
+                    Options.CheckCentroidingStatus,
+                    Options.ComputeNaturalOrganicMatterStats)
                 {
                     HighResMS1 = true,
                     HighResMS2 = true,

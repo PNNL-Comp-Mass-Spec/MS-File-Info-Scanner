@@ -490,6 +490,9 @@ namespace MSFileInfoScanner.Readers
                     OnProgressUpdate("TIC and BPI plots saved", PROGRESS_SAVED_TIC_AND_BPI_PLOT);
                 }
 
+                if (Options.ComputeNaturalOrganicMatterStats)
+                {
+                }
 
                 if (Options.SaveLCMS2DPlots)
                 {
@@ -1149,9 +1152,15 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 // Instantiate the ProteoWizard Data Parser class
-                var pWizParser = new ProteoWizardDataParser(msDataFileReader, mDatasetStatsSummarizer, mTICAndBPIPlot,
-                                                            mLCMS2DPlot, Options.SaveLCMS2DPlots, Options.SaveTICAndBPIPlots,
-                                                            Options.CheckCentroidingStatus)
+                var pWizParser = new ProteoWizardDataParser(
+                    msDataFileReader,
+                    mDatasetStatsSummarizer,
+                    mTICAndBPIPlot,
+                    mLCMS2DPlot,
+                    Options.SaveLCMS2DPlots,
+                    Options.SaveTICAndBPIPlots,
+                    Options.CheckCentroidingStatus,
+                    Options.ComputeNaturalOrganicMatterStats)
                 {
                     HighResMS1 = highResMS1,
                     HighResMS2 = highResMS2

@@ -400,9 +400,15 @@ namespace MSFileInfoScanner.Readers
                 }
 
                 // Instantiate the ProteoWizard Data Parser class
-                var pWizParser = new ProteoWizardDataParser(msDataFileReader, mDatasetStatsSummarizer, mTICAndBPIPlot,
-                                                            mLCMS2DPlot, Options.SaveLCMS2DPlots, Options.SaveTICAndBPIPlots,
-                                                            Options.CheckCentroidingStatus)
+                var pWizParser = new ProteoWizardDataParser(
+                    msDataFileReader,
+                    mDatasetStatsSummarizer,
+                    mTICAndBPIPlot,
+                    mLCMS2DPlot,
+                    Options.SaveLCMS2DPlots,
+                    Options.SaveTICAndBPIPlots,
+                    Options.CheckCentroidingStatus,
+                    Options.ComputeNaturalOrganicMatterStats)
                 {
                     HighResMS1 = true,
                     HighResMS2 = true

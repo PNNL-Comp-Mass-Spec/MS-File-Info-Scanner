@@ -31,6 +31,8 @@ namespace MSFileInfoScanner.Readers
         private readonly DatasetStatsSummarizer mDatasetStatsSummarizer;
         private readonly TICandBPIPlotter mTICAndBPIPlot;
 
+        private readonly bool mComputeNOMStats;
+
         private readonly LCMSDataPlotter mLCMS2DPlot;
         private readonly bool mSaveLCMS2DPlots;
         private readonly bool mSaveTICAndBPIPlots;
@@ -88,6 +90,7 @@ namespace MSFileInfoScanner.Readers
         /// <param name="saveLCMS2DPlots">When true, save 2D LC/MS plots</param>
         /// <param name="saveTICAndBPI">When true, save TIC and BPI plots</param>
         /// <param name="checkCentroidingStatus">When true, check for centroided data</param>
+        /// <param name="computeNOMStats">When true, compute natural organic matter stats (using data stored in mLCMS2DPlot, even if mSaveLCMS2DPlots is false)</param>
         public ProteoWizardDataParser(
             MSDataFileReader msDataFileReader,
             DatasetStatsSummarizer datasetStatsSummarizer,
@@ -95,7 +98,8 @@ namespace MSFileInfoScanner.Readers
             LCMSDataPlotter lcms2DPlot,
             bool saveLCMS2DPlots,
             bool saveTICAndBPI,
-            bool checkCentroidingStatus)
+            bool checkCentroidingStatus,
+            bool computeNOMStats)
         {
             mMSDataFileReader = msDataFileReader;
             mDatasetStatsSummarizer = datasetStatsSummarizer;
@@ -105,6 +109,7 @@ namespace MSFileInfoScanner.Readers
             mSaveLCMS2DPlots = saveLCMS2DPlots;
             mSaveTICAndBPIPlots = saveTICAndBPI;
             mCheckCentroidingStatus = checkCentroidingStatus;
+            mComputeNOMStats = computeNOMStats;
 
             mGetQ1MZ = new Regex("Q[0-9]=([0-9.]+)", RegexOptions.Compiled);
 
@@ -1167,7 +1172,7 @@ namespace MSFileInfoScanner.Readers
                     parserInfo.TicAndBpiScansStored++;
                 }
 
-                if (mSaveLCMS2DPlots && !mLCMS2DPlot.ScanNumbers.Contains(scanStatsEntry.ScanNumber))
+                if ((mSaveLCMS2DPlots || mComputeNOMStats) && !mLCMS2DPlot.ScanNumbers.Contains(scanStatsEntry.ScanNumber))
                 {
                     var msLevel = msLevels[spectrumIndex];
 

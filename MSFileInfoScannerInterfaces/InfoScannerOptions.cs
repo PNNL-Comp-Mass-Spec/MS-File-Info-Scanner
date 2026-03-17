@@ -319,6 +319,13 @@ namespace MSFileInfoScannerInterfaces
         public bool CreateEmptyScanStatsFiles { get; set; } = true;
 
         /// <summary>
+        /// When true, compute natural organic matter stats
+        /// </summary>
+        [Option("NaturalOrganicMatterStats", "NOMStats", "NOM", HelpShowsDefault = false,
+            HelpText = "If defined, create file _NOMStats.txt")]
+        public bool ComputeNaturalOrganicMatterStats { get; set; }
+
+        /// <summary>
         /// When true, compute quality scores
         /// </summary>
         [Option("ComputeQualityScores", "QS",
