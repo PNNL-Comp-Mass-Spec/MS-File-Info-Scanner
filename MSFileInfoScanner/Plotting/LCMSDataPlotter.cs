@@ -1472,6 +1472,23 @@ namespace MSFileInfoScanner.Plotting
             return 0.6;
         }
 
+        private void GetMinMaxValues(IEnumerable<List<ScatterPoint>> pointsByCharge, out double xMinScan, out double xMaxScan, out double yMinIntensity, out double yMaxIntensity)
+        {
+
+            // These track the minimum and maximum values, using the Absolute value of any data in pointsByCharge
+            xMinScan = double.MaxValue;
+            xMaxScan = double.MinValue;
+            yMinIntensity = double.MaxValue;
+            yMaxIntensity = double.MinValue;
+
+            // Determine min/max values for the X and Y data
+            foreach (var dataSeries in pointsByCharge)
+            {
+                UpdateAbsValueRange((from item in dataSeries select item.X).ToList(), ref xMinScan, ref xMaxScan);
+                UpdateAbsValueRange((from item in dataSeries select item.Y).ToList(), ref yMinIntensity, ref yMaxIntensity);
+            }
+        }
+
         private List<List<ScatterPoint>> GetMonoMassSeriesByCharge(
             int msLevelFilter,
             double maxMonoMass,
@@ -1882,18 +1899,7 @@ namespace MSFileInfoScanner.Plotting
                 return new PythonPlotContainer3D();
             }
 
-            // These track the minimum and maximum values, using the Absolute value of any data in pointsByCharge
-            var xMinScan = double.MaxValue;
-            var xMaxScan = double.MinValue;
-            var yMinIntensity = double.MaxValue;
-            var yMaxIntensity = double.MinValue;
-
-            // Determine min/max values for the X and Y data
-            foreach (var dataSeries in pointsByCharge)
-            {
-                UpdateAbsValueRange((from item in dataSeries select item.X).ToList(), ref xMinScan, ref xMaxScan);
-                UpdateAbsValueRange((from item in dataSeries select item.Y).ToList(), ref yMinIntensity, ref yMaxIntensity);
-            }
+            GetMinMaxValues(pointsByCharge, out var xMinScan, out var xMaxScan, out var yMinIntensity, out var yMaxIntensity);
 
             if (Options.PlotMzVsIntensityIfSingleScan && Math.Abs(xMinScan - xMaxScan) < float.Epsilon)
             {
