@@ -367,16 +367,17 @@ namespace MSFileInfoScanner.Readers
             mLCMS2DPlotOverview.Reset();
         }
 
-        private bool CreateOverview2DPlots(string datasetName, string outputDirectoryPath, int overviewPlotDivisor)
+        private bool CreateOverview2DPlots(string datasetName, string outputDirectoryPath, int overviewPlotDivisor, out int pointsPlotted)
         {
-            return CreateOverview2DPlots(datasetName, outputDirectoryPath, overviewPlotDivisor, string.Empty);
+            return CreateOverview2DPlots(datasetName, outputDirectoryPath, overviewPlotDivisor, string.Empty, out pointsPlotted);
         }
 
-        private bool CreateOverview2DPlots(string datasetName, string outputDirectoryPath, int overviewPlotDivisor, string scanModeSuffixAddon)
+        private bool CreateOverview2DPlots(string datasetName, string outputDirectoryPath, int overviewPlotDivisor, string scanModeSuffixAddon, out int pointsPlotted)
         {
             if (overviewPlotDivisor <= 1)
             {
                 // Nothing to do; just return True
+                pointsPlotted = 0;
                 return true;
             }
 
@@ -399,7 +400,7 @@ namespace MSFileInfoScanner.Readers
 
             // Write out the Overview 2D plot of m/z vs. intensity
             // Plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-            return mLCMS2DPlotOverview.Save2DPlots(datasetName, outputDirectoryPath, "HighAbu_", scanModeSuffixAddon, out _);
+            return mLCMS2DPlotOverview.Save2DPlots(datasetName, outputDirectoryPath, "HighAbu_", scanModeSuffixAddon, out pointsPlotted);
         }
 
         /// <summary>
@@ -489,12 +490,13 @@ namespace MSFileInfoScanner.Readers
                     OnProgressUpdate("TIC and BPI plots saved", PROGRESS_SAVED_TIC_AND_BPI_PLOT);
                 }
 
+
                 if (Options.SaveLCMS2DPlots)
                 {
                     // Determine the number of times we'll be calling Save2DPlots or CreateOverview2DPlots
                     var lcMSPlotStepsTotal = 1;
 
-                    if (mLCMS2DPlot.Options.OverviewPlotDivisor > 0)
+                    if (mLCMS2DPlot.Options.OverviewPlotDivisor > 1)
                     {
                         lcMSPlotStepsTotal++;
                     }
@@ -503,72 +505,85 @@ namespace MSFileInfoScanner.Readers
                     {
                         lcMSPlotStepsTotal++;
 
-                        if (mLCMS2DPlot.Options.OverviewPlotDivisor > 0)
+                        if (mLCMS2DPlot.Options.OverviewPlotDivisor > 1)
                         {
                             lcMSPlotStepsTotal++;
                         }
                     }
 
-                    // Write out the 2D plot of m/z vs. intensity
-                    // Plots will be named Dataset_LCMS.png and Dataset_LCMSn.png
-                    var success3 = mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName, out var pointsPlotted);
-                    var lcMSPlotStepsComplete = 1;
-                    ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
+                    int overviewPlotDataCount;
 
-                    if (!success3)
+                    if (mLCMS2DPlot.Options.OverviewPlotDivisor > 1)
                     {
-                        successOverall = false;
+                        overviewPlotDataCount = (int)Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / (double)mLCMS2DPlot.Options.OverviewPlotDivisor, 0);
                     }
                     else
                     {
-                        int overviewPlotDataCount;
+                        overviewPlotDataCount = 0;
+                    }
 
-                        if (mLCMS2DPlot.Options.OverviewPlotDivisor > 1)
+                    var lcMSPlotStepsComplete = 0;
+                    int overviewPointsPlotted;
+
+                    if (overviewPlotDataCount > 0)
+                    {
+                        // Save the Overview 2D Plots (with a nominal maximum data point count of 20,000 data points)
+                        // The plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
+                        var success3 = CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DPlot.Options.OverviewPlotDivisor, out overviewPointsPlotted);
+
+                        lcMSPlotStepsComplete++;
+                        ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
+
+                        if (!success3)
                         {
-                            overviewPlotDataCount = (int)Math.Round(mLCMS2DPlot.Options.MaxPointsToPlot / (double)mLCMS2DPlot.Options.OverviewPlotDivisor, 0);
-                        }
-                        else
-                        {
-                            overviewPlotDataCount = 0;
-                        }
-
-                        if (overviewPlotDataCount > 0 && overviewPlotDataCount < pointsPlotted)
-                        {
-                            // Also save the Overview 2D Plots
-                            // The plots will be named Dataset_HighAbu_LCMS.png and Dataset_HighAbu_LCMSn.png
-                            var success4 = CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DPlot.Options.OverviewPlotDivisor);
-
-                            lcMSPlotStepsComplete++;
-                            ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
-
-                            if (!success4)
-                            {
-                                successOverall = false;
-                            }
-                        }
-                        else
-                        {
-                            mLCMS2DPlotOverview.ClearRecentFileInfo();
-                        }
-
-                        if (successOverall && mLCMS2DPlot.Options.PlottingDeisotopedData)
-                        {
-                            // Create two more 2D plots, but this time with a smaller maximum mass
-                            mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = LCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
-                            mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = LCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
-
-                            mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName, string.Empty, "_zoom", out var deisotopedPointsPlotted);
-                            lcMSPlotStepsComplete++;
-                            ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
-
-                            if (overviewPlotDataCount > 0 && overviewPlotDataCount < deisotopedPointsPlotted)
-                            {
-                                CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DPlot.Options.OverviewPlotDivisor, "_zoom");
-                                lcMSPlotStepsComplete++;
-                                ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
-                            }
+                            successOverall = false;
                         }
                     }
+                    else
+                    {
+                        mLCMS2DPlotOverview.ClearRecentFileInfo();
+                        overviewPointsPlotted = 0;
+                    }
+
+                    if (mLCMS2DPlot.PointCountCached > mLCMS2DPlotOverview.PointCountCached)
+                    {
+                        // Also save the 2D plot of m/z vs. intensity (with a maximum data point count of 200,000 data points)
+                        // Plots will be named Dataset_LCMS.png and Dataset_LCMSn.png
+                        var success4 = mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName, out var pointsPlotted);
+
+                        if (overviewPointsPlotted > 0 && pointsPlotted <= overviewPointsPlotted)
+                        {
+                            // The overview plot and the newly created plot have the same number of points; do not include the newly created plot in the index.html file
+                            mLCMS2DPlot.ClearRecentFileInfo();
+                        }
+
+                        lcMSPlotStepsComplete++;
+                        ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
+
+                        if (!success4)
+                        {
+                            successOverall = false;
+                        }
+                    }
+
+                    if (successOverall && mLCMS2DPlot.Options.PlottingDeisotopedData)
+                    {
+                        // Create two more 2D plots, but this time with a smaller maximum mass
+                        mLCMS2DPlot.Options.MaxMonoMassForDeisotopedPlot = LCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
+                        mLCMS2DPlotOverview.Options.MaxMonoMassForDeisotopedPlot = LCMSDataPlotterOptions.DEFAULT_MAX_MONO_MASS_FOR_ZOOMED_DEISOTOPED_PLOT;
+
+                        mLCMS2DPlot.Save2DPlots(datasetName, outputDirectory.FullName, string.Empty, scanModeSuffixAddon: "_zoom", out _);
+                        lcMSPlotStepsComplete++;
+                        ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
+
+                        if (overviewPlotDataCount > 0)
+                        {
+                            CreateOverview2DPlots(datasetName, outputDirectoryPath, mLCMS2DPlot.Options.OverviewPlotDivisor, scanModeSuffixAddon: "_zoom", out _);
+                            lcMSPlotStepsComplete++;
+                            ReportProgressSaving2DPlots(lcMSPlotStepsComplete, lcMSPlotStepsTotal);
+                        }
+                    }
+
                     createQCPlotHTMLFile = true;
 
                     OnProgressUpdate("2D plots saved", PROGRESS_SAVED_2D_PLOTS);
