@@ -100,6 +100,11 @@ namespace MSFileInfoScannerInterfaces
             DatasetHasNoSpectra = 15,
 
             /// <summary>
+            /// Error computing natural organic matter stats
+            /// </summary>
+            NaturalOrganicMatterStatsError = 16,
+
+            /// <summary>
             /// Unspecified error
             /// </summary>
             UnspecifiedError = -1

@@ -42,6 +42,11 @@ namespace MSFileInfoScanner.DatasetStats
         public const string DATASET_INFO_FILE_SUFFIX = "_DatasetInfo.xml";
 
         /// <summary>
+        /// Natural organic matter stats XML file suffix
+        /// </summary>
+        public const string NOM_STATS_FILE_SUFFIX = "_NOMStats.xml";
+
+        /// <summary>
         /// Date/time format string
         /// </summary>
         public const string DATE_TIME_FORMAT_STRING = "yyyy-MM-dd hh:mm:ss tt";
@@ -164,7 +169,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         public DatasetStatsSummarizer()
         {
-            FileDate = "October 22, 2025";
+            FileDate = "March 24, 2026";
 
             ErrorMessage = string.Empty;
 

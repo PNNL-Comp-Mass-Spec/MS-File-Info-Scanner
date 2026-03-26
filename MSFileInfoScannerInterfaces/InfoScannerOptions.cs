@@ -296,10 +296,14 @@ namespace MSFileInfoScannerInterfaces
         public int DatasetID { get; set; }
 
         /// <summary>
-        /// When true, create the dataset info XML file
+        /// When true, create the dataset info XML file (_DatasetInfo.xml)
         /// </summary>
+        /// <remarks>
+        /// If Natural Organic Matter stats were created, will also create the _NOMStats.xml file
+        /// </remarks>
         [Option("CreateDatasetInfoFile", "DI", HelpShowsDefault = false,
-            HelpText = "If defined, create a dataset info XML file for each dataset")]
+            HelpText = "If defined, create a dataset info XML file (_DatasetInfo.xml) for each dataset. " +
+                       "If Natural Organic Matter stats were created, will also create the _NOMStats.xml file")]
         public bool CreateDatasetInfoFile { get; set; }
 
         /// <summary>
@@ -324,6 +328,13 @@ namespace MSFileInfoScannerInterfaces
         [Option("NaturalOrganicMatterStats", "NOMStats", "NOM", HelpShowsDefault = false,
             HelpText = "If defined, create file _NOMStats.txt")]
         public bool ComputeNaturalOrganicMatterStats { get; set; }
+
+        /// <summary>
+        /// When true, compute natural organic matter stats
+        /// </summary>
+        [Option("IncludeNOMMetricDescriptions", "NOMDescriptions", HelpShowsDefault = false,
+            HelpText = "When true, include metric descriptions in the NOM Stats XML file")]
+        public bool IncludeMetricDescriptionsInNOMStatsXML { get; set; }
 
         /// <summary>
         /// When true, compute quality scores
@@ -528,7 +539,10 @@ namespace MSFileInfoScannerInterfaces
         /// <summary>
         /// When true, store the dataset info in the DMS database
         /// </summary>
-        [Option("PostResultsToDMS", "PostToDMS",
+        /// <remarks>
+        /// Also stores natural organic matter stats if they were computed
+        /// </remarks>
+        [Option("PostResultsToDMS", "PostToDMS", "DB",
             HelpShowsDefault = false, Hidden = true,
             HelpText = "If defined, store the dataset info in the DMS database\n" +
                        "To customize the server name and/or stored procedure to use for posting, " +
@@ -555,6 +569,14 @@ namespace MSFileInfoScannerInterfaces
             HelpShowsDefault = true, Hidden = true,
             HelpText = "Procedure to call to store dataset info in DMS")]
         public string DSInfoStoredProcedure { get; set; } = "update_dataset_file_info_xml";
+
+        /// <summary>
+        /// NOM stats procedure name
+        /// </summary>
+        [Option("NOMStatsProcedure",
+            HelpShowsDefault = true, Hidden = true,
+            HelpText = "Procedure to call to store dataset NOM stats in DMS")]
+        public string NOMStatsProcedure { get; set; } = "update_dataset_nom_stats_xml";
 
         /// <summary>
         /// When true, use Python script MSFileInfoScanner_Plotter.py instead of OxyPlot to create the plots

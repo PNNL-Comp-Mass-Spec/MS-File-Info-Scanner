@@ -39,7 +39,7 @@ namespace MSFileInfoScanner
     /// </remarks>
     public sealed class MSFileInfoScanner : iMSFileInfoScanner
     {
-        // Ignore Spelling: app, Bruker, centroiding, idx, LCMS, Micromass, OxyPlot, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
+        // Ignore Spelling: app, Bruker, centroiding, idx, LCMS, Micromass, OxyPlot, Recurse, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
 
         /// <summary>
         /// Program date
@@ -206,7 +206,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Returns the dataset info, formatted as XML
+        /// Dataset info, formatted as XML
         /// </summary>
         public override string DatasetInfoXML { get; protected set; }
 
@@ -406,6 +406,38 @@ namespace MSFileInfoScanner
             catch (Exception ex)
             {
                 HandleException("Error calling mFileIntegrityChecker", ex);
+            }
+        }
+
+        private bool ComputeNaturalOrganicMatterStats(MSFileInfoProcessorBaseClass scanner, DatasetFileInfo datasetFileInfo)
+        {
+            try
+            {
+                if (scanner.LCMS2DPlotScanCountCached == 0)
+                {
+                    ReportError("Cannot compute natural organic matter stats since no data is cached in the LCMS2DPlot object)");
+                    return false;
+                }
+
+                var nomProcessor = new NaturalOrganicMatterStatsProcessor(Options);
+                RegisterEvents(mFileIntegrityChecker);
+
+                var massSpectra = scanner.GetCachedLCMS2DPlotData();
+
+                var success = nomProcessor.ComputeStats(massSpectra);
+
+                if (success)
+                {
+                    scanner.NOMStatsXML = nomProcessor.CreateNOMStatsXML(datasetFileInfo.DatasetName, datasetFileInfo.DatasetID, nomProcessor.NOMStats);
+                }
+
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                HandleException("Error in ComputeNaturalOrganicMatterStats", ex);
+                return false;
             }
         }
 
@@ -1147,6 +1179,104 @@ namespace MSFileInfoScanner
             catch (Exception ex)
             {
                 HandleException("Error calling stored procedure", ex);
+                success = false;
+            }
+
+            return success;
+        }
+
+        /// <summary>
+        /// Post the natural organic matter stats XML to the database
+        /// </summary>
+        /// <param name="datasetName">Dataset name</param>
+        /// <param name="nomStatsXML">Natural organic matter stats, as XML</param>
+        /// <returns>True if success; false if failure</returns>
+        public bool PostNOMStatsToDB(string datasetName, string nomStatsXML)
+        {
+            return PostNOMStatsToDB(datasetName, nomStatsXML, Options.DatabaseConnectionString, Options.NOMStatsProcedure);
+        }
+
+        /// <summary>
+        /// Post the natural organic matter stats XML to the database, using the specified dataset name, connection string, and procedure
+        /// </summary>
+        /// <param name="datasetName">Dataset name</param>
+        /// <param name="nomStatsXML">Natural organic matter stats, as XML</param>
+        /// <param name="connectionString">Database connection string</param>
+        /// <param name="procedureName">Procedure name</param>
+        /// <returns>True if success; false if failure</returns>
+        public bool PostNOMStatsToDB(string datasetName, string nomStatsXML, string connectionString, string procedureName)
+        {
+            bool success;
+
+            try
+            {
+                ReportMessage("  Posting NOMStats XML to the database");
+
+                // We need to remove the encoding line from nomStatsXML before posting to the DB
+                // This line will look like this:
+                //   <?xml version="1.0" encoding="utf-16" standalone="yes"?>
+
+                var startIndex = nomStatsXML.IndexOf("?>", StringComparison.Ordinal);
+
+                string dsInfoXMLClean;
+
+                if (startIndex > 0)
+                {
+                    dsInfoXMLClean = nomStatsXML.Substring(startIndex + 2).Trim();
+                }
+                else
+                {
+                    dsInfoXMLClean = nomStatsXML;
+                }
+
+                // Call the procedure using connection string connectionString
+
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    ReportError("Connection string not defined; unable to post the dataset info to the database");
+                    SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(procedureName))
+                {
+                    procedureName = "update_dataset_nom_stats_xml";
+                }
+
+                var applicationName = "MSFileInfoScanner_" + datasetName;
+
+                var connectionStringToUse = DbToolsFactory.AddApplicationNameToConnectionString(connectionString, applicationName);
+
+                var dbTools = DbToolsFactory.GetDBTools(connectionStringToUse);
+                RegisterEvents(dbTools);
+
+                var cmd = dbTools.CreateCommand(procedureName, CommandType.StoredProcedure);
+
+                var returnParam = dbTools.AddParameter(cmd, "@Return", SqlType.Int, ParameterDirection.ReturnValue);
+
+                dbTools.AddParameter(cmd, "@NOMStatsXML", SqlType.XML).Value = dsInfoXMLClean;
+
+                var result = dbTools.ExecuteSP(cmd);
+
+                if (result == DbUtilsConstants.RET_VAL_OK)
+                {
+                    // No errors
+                    success = true;
+                }
+                else
+                {
+                    ReportError("Error calling procedure, return code = " + returnParam.Value.CastDBVal<string>());
+                    SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
+                    success = false;
+                }
+
+                // Uncomment this to test calling PostNOMStatsToDB with a DatasetID value
+                // Note that dataset Shew119-01_17july02_earth_0402-10_4-20 is DatasetID 6787
+                // PostNOMStatsToDB(32, nomStatsXML, "Data Source=gigasax;Initial Catalog=DMS_Capture_T3;Integrated Security=SSPI;", "cache_dataset_info_xml")
+            }
+            catch (Exception ex)
+            {
+                HandleException("Error calling procedure", ex);
                 SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                 success = false;
             }
@@ -1240,11 +1370,21 @@ namespace MSFileInfoScanner
 
             if (success)
             {
+                if (Options.ComputeNaturalOrganicMatterStats)
+                {
+                    var nomSuccess = ComputeNaturalOrganicMatterStats(scanner, datasetFileInfo);
+
+                    if (!nomSuccess)
+                    {
+                        SetErrorCode(MSFileScannerErrorCodes.NaturalOrganicMatterStatsError, leaveExistingErrorCodeUnchanged: true);
+                    }
+                }
+
                 success = scanner.CreateOutputFiles(inputFileOrDirectoryPath, outputDirectoryPath);
 
                 if (!success)
                 {
-                    SetErrorCode(MSFileScannerErrorCodes.OutputFileWriteError);
+                    SetErrorCode(MSFileScannerErrorCodes.OutputFileWriteError, leaveExistingErrorCodeUnchanged: true);
                 }
 
                 // Cache the Dataset Info XML
@@ -1263,7 +1403,18 @@ namespace MSFileInfoScanner
                 {
                     var dbSuccess = PostDatasetInfoToDB(datasetFileInfo.DatasetName, DatasetInfoXML);
 
-                    if (!dbSuccess)
+                    bool dbSuccessNOM;
+
+                    if (Options.ComputeNaturalOrganicMatterStats)
+                    {
+                        dbSuccessNOM = PostNOMStatsToDB(datasetFileInfo.DatasetName, scanner.NOMStatsXML);
+                    }
+                    else
+                    {
+                        dbSuccessNOM = true;
+                    }
+
+                    if (!dbSuccess || !dbSuccessNOM)
                     {
                         SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                         success = false;
@@ -2577,13 +2728,14 @@ namespace MSFileInfoScanner
             }
             Console.WriteLine();
 
-            Console.WriteLine("CheckCentroidingStatus:         {0}", TrueFalseToEnabledDisabled(Options.CheckCentroidingStatus));
-            Console.WriteLine("Compute Overall Quality Scores: {0}", TrueFalseToEnabledDisabled(Options.ComputeOverallQualityScores));
-            Console.WriteLine("Create dataset info XML file:   {0}", TrueFalseToEnabledDisabled(Options.CreateDatasetInfoFile));
-            Console.WriteLine("Create scan stats files:        {0}", TrueFalseToEnabledDisabled(Options.CreateScanStatsFiles));
-            Console.WriteLine("Create empty scan stats files:  {0}", TrueFalseToEnabledDisabled(Options.CreateEmptyScanStatsFiles));
-            Console.WriteLine("MS2MzMin:                       {0:N0}", Options.MS2MzMin);
-            Console.WriteLine("SHA-1 hashing:                  {0}", TrueFalseToEnabledDisabled(!Options.DisableInstrumentHash));
+            Console.WriteLine("CheckCentroidingStatus:               {0}", TrueFalseToEnabledDisabled(Options.CheckCentroidingStatus));
+            Console.WriteLine("Compute natural organic matter stats: {0}", TrueFalseToEnabledDisabled(Options.ComputeNaturalOrganicMatterStats));
+            Console.WriteLine("Compute Overall Quality Scores:       {0}", TrueFalseToEnabledDisabled(Options.ComputeOverallQualityScores));
+            Console.WriteLine("Create dataset info XML file:         {0}", TrueFalseToEnabledDisabled(Options.CreateDatasetInfoFile));
+            Console.WriteLine("Create scan stats files:              {0}", TrueFalseToEnabledDisabled(Options.CreateScanStatsFiles));
+            Console.WriteLine("Create empty scan stats files:        {0}", TrueFalseToEnabledDisabled(Options.CreateEmptyScanStatsFiles));
+            Console.WriteLine("MS2MzMin:                             {0:N0}", Options.MS2MzMin);
+            Console.WriteLine("SHA-1 hashing:                        {0}", TrueFalseToEnabledDisabled(!Options.DisableInstrumentHash));
 
             if (Options.ScanStart > 0 || Options.ScanEnd > 0)
             {

@@ -444,7 +444,7 @@ namespace MSFileInfoScanner.Readers
 
                 // ReSharper restore CommentTypo
 
-                var getCentroidedData = Options.SaveLCMS2DPlots;
+                var getCentroidedData = Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats;
 
                 return ProcessWithProteoWizard(
                     datasetFileOrDirectory,
@@ -978,13 +978,13 @@ namespace MSFileInfoScanner.Readers
                     if (!success)
                     {
                         // Use ProteoWizard to extract the scan counts and acquisition time information
-                        // If Options.SaveLCMS2DPlots is True, this method will also read the m/z and intensity values from each scan so that we can make 2D plots
+                        // If Options.SaveLCMS2DPlots or Options.ComputeNaturalOrganicMatterStats are True, this method will also read the m/z and intensity values from each scan so that we can make 2D plots
                         ParseBAFFile(primaryInstrumentFile, datasetFileInfo, out bafFileChecked);
                     }
 
                     if (datasetFileInfo.ScanCount == 0 ||
-                        Options.SaveTICAndBPIPlots && mTICAndBPIPlot.CountBPI + mTICAndBPIPlot.CountTIC == 0 ||
-                        Options.SaveLCMS2DPlots && mLCMS2DPlot.ScanCountCached == 0)
+                        (Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats) && mTICAndBPIPlot.CountBPI + mTICAndBPIPlot.CountTIC == 0 ||
+                        (Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats) && mLCMS2DPlot.ScanCountCached == 0)
                     {
                         bool successWithPrimaryFileOrDirectory;
 
@@ -1200,7 +1200,7 @@ namespace MSFileInfoScanner.Readers
                         "HMS", ref maxRunTimeMinutes,
                         ticAndBpiPlotDataAlreadyDefined);
 
-                    if (mzList.Length > 0 && Options.SaveLCMS2DPlots)
+                    if (mzList.Length > 0 && (Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats))
                     {
                         mLCMS2DPlot.AddScan2D(scanNumber, msLevel, elutionTime, mzList, intensityList, dataIsCentroided: false);
                     }

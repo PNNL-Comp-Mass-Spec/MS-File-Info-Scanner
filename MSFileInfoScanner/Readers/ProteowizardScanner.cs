@@ -33,7 +33,7 @@ namespace MSFileInfoScanner.Readers
                 InitializeTICAndBPI();
             }
 
-            if (options.SaveLCMS2DPlots)
+            if (Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats)
             {
                 InitializeLCMS2DPlot();
             }

@@ -63,13 +63,14 @@ namespace MSFileInfoScanner
                                             " [/P:ParameterFilePath] [/S[:MaxLevel]]\n" +
                                             " [/IE] [/L:LogFilePath]\n" +
                                             " [/LC[:MaxPointsToPlot]] [/TIC] [/LCGrad]\n" +
-                                            " [/DI] [/SS] [/QS] [/CC]\n" +
+                                            " [/DI] [/SS] [/CreateEmptySS]\n" +
+                                            " [/NOM] [/QS] [/CC]\n" +
                                             " [/MS2MzMin:MzValue] [/NoHash]\n" +
                                             " [/DST:DatasetStatsFileName]\n" +
                                             " [/ScanStart:0] [/ScanEnd:0] [/Debug]\n" +
                                             " [/C] [/M:nnn] [/H] [/QZ]\n" +
-                                            " [/CF] [/R] [/Z]\n" +
-                                            " [/PythonPlot]\n" +
+                                            " [/CF] [/R] [/Z] [/PostToDMS]\n" +
+                                            " [/PythonPlot] [/HideEmpty]\n" +
                                             " [/Conf:KeyValueParamFilePath] [/CreateParamFile]");
 
             // The default argument name for parameter files is /ParamFile or -ParamFile

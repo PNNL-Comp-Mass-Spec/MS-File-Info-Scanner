@@ -1343,6 +1343,36 @@ namespace MSFileInfoScanner.Plotting
             plotContainer.AddData(points, 0);
         }
 
+        /// <summary>
+        /// Obtain the m/z and intensity values (by scan) that are tracked by this class
+        /// </summary>
+        /// <param name="msLevelFilter">Optional MS level filter (0 to not filter)</param>
+        /// <returns>Dictionary where keys are scan number and values are lists of m/z and intensity pairs</returns>
+        public Dictionary<int, List<KeyValuePair<double, double>>> GetCachedMZsByScan(int msLevelFilter)
+        {
+            var massSpectra = new Dictionary<int, List<KeyValuePair<double, double>>>();
+
+            foreach (var scan in mScans)
+            {
+                if (msLevelFilter != 0 && scan.MSLevel != msLevelFilter)
+                {
+                    continue;
+                }
+
+                // Keys in this list are m/z values, values are intensity
+                var mzList = new List<KeyValuePair<double, double>>();
+
+                massSpectra.Add(scan.ScanNumber, mzList);
+
+                for (var ionIndex = 0; ionIndex < scan.IonCount; ionIndex++)
+                {
+                    mzList.Add(new KeyValuePair<double, double>(scan.IonsMZ[ionIndex], scan.IonsIntensity[ionIndex]));
+                }
+            }
+
+            return massSpectra;
+        }
+
         private IList<List<ScatterPoint>> GetDataToPlot(
             int msLevelFilter, bool skipTrimCachedData,
             out int pointsToPlot, out double scanTimeMax,

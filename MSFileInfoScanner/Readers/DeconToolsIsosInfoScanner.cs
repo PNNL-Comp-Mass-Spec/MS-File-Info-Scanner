@@ -142,7 +142,7 @@ namespace MSFileInfoScanner.Readers
                 InitializeTICAndBPI();
             }
 
-            if (Options.SaveLCMS2DPlots)
+            if (Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats)
             {
                 InitializeLCMS2DPlot();
             }
@@ -548,7 +548,7 @@ namespace MSFileInfoScanner.Readers
 
             mDatasetStatsSummarizer.ClearCachedData(Options.CreateEmptyScanStatsFiles);
 
-            if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFiles || Options.SaveLCMS2DPlots)
+            if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFiles || Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats)
             {
                 // Load data from each scan
                 // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File

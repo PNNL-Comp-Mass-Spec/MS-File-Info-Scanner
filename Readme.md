@@ -44,12 +44,13 @@ MSFileInfoScanner.exe
  [/P:ParameterFilePath] [/S[:MaxLevel]]
  [/IE] [/L:LogFilePath] [/SF:StatusFileName] 
  [/LC[:MaxPointsToPlot]] [/TIC] [/LCGrad]
- [/DI] [/SS] [/CreateEmptySS] [/QS] [/CC]
+ [/DI] [/SS] [/CreateEmptySS]
+ [/NOM] [/QS] [/CC]
  [/MS2MzMin:MzValue] [/NoHash]
  [/DST:DatasetStatsFileName]
  [/ScanStart:0] [/ScanEnd:0] [/Debug]
  [/C] [/M:nnn] [/H] [/QZ]
- [/CF] [/R] [/Z]
+ [/CF] [/R] [/Z] [/PostToDMS]
  [/PythonPlot] [/HideEmpty]
  [/Conf:KeyValueParamFilePath] [/CreateParamFile]
 ```
@@ -111,6 +112,9 @@ Use `/SS` to create files _ScanStats.txt and _ScanStatsEx.txt for each dataset
 
 Use `/CreateEmptySS=False` to prevent empty _ScanStats.txt files from being created
 
+Use `NOM` to create natural organic matter (NOM) stats
+* NOM stats are typically only applicable to Bruker scimaX (or similar) MALDI dataset files that have a single scan
+
 Use `/QS` to compute an overall quality score for the data in each datasets
 
 Use `/CC` to check spectral data for whether it is centroided or profile
@@ -159,12 +163,13 @@ Use `/R` to reprocess files that are already defined in the acquisition time fil
 Use `/Z` to reprocess files that are already defined in the acquisition time file
 only if their cached size is 0 bytes
 
-Use `/PostToDMS` to store the dataset info in the DMS database
-* To customize the server name and/or stored procedure to use for posting, use an XML parameter file
+Use `/PostToDMS` or `/DB` to store the dataset info in the DMS database
+* To customize the server name and/or procedure to use for posting, use an XML parameter file
 with the following settings:
   * `DSInfoConnectionString`
   * `DSInfoDBPostingEnabled`
-  * `DSInfoStoredProcedure`
+  * `DSInfoProcedure`
+  * `NOMStatsProcedure`
 
 By default, plots are created using OxyPlot, which only works on Windows
 * Use `/PythonPlot` to create plots with Python instead of OxyPlot

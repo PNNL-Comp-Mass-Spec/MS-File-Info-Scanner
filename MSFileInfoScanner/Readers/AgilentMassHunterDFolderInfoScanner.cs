@@ -538,7 +538,7 @@ namespace MSFileInfoScanner.Readers
 
             pressurePlot ??= new TICandBPIPlotter();
 
-            if (Options.SaveLCMS2DPlots)
+            if (Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats)
             {
                 InitializeLCMS2DPlot();
             }
@@ -1231,7 +1231,7 @@ namespace MSFileInfoScanner.Readers
                 scanStatsEntry.MzMin = data[0].MZ;
                 scanStatsEntry.MzMax = data[data.Count - 1].MZ;
 
-                if (Options.SaveLCMS2DPlots)
+                if (Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats)
                 {
                     mLCMS2DPlot.AddScan(scanStatsEntry.ScanNumber, scanStatsEntry.ScanType, (float)scan.RetentionTime, data, dataIsCentroided: true);
                 }

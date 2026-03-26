@@ -21,7 +21,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public class ThermoRawFileInfoScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: centroided, lcms, xcalibur
+        // Ignore Spelling: centroided, lcms, Thermo, xcalibur
 
         /// <summary>
         /// Thermo raw file extension
@@ -218,7 +218,7 @@ namespace MSFileInfoScanner.Readers
                 InitializeTICAndBPI();
             }
 
-            if (Options.SaveLCMS2DPlots)
+            if (Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats)
             {
                 InitializeLCMS2DPlot();
             }
@@ -299,7 +299,7 @@ namespace MSFileInfoScanner.Readers
 
                 try
                 {
-                    if (Options.SaveLCMS2DPlots || Options.CheckCentroidingStatus)
+                    if (Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats || Options.CheckCentroidingStatus)
                     {
                         // Also need to load the raw data
 
@@ -310,14 +310,14 @@ namespace MSFileInfoScanner.Readers
                         // If the mass spectrum was acquired in centroided mode, ionCount and ionCountCentroided will be the same value (as will the mass/intensity pair values)
                         var ionCountCentroided = xcaliburAccessor.GetScanData2D(scanNumber, out var massIntensityPairsCentroided, maxNumberOfPeaks: 0, centroidData: true);
 
-                        if (ionCountCentroided > 0 && Options.SaveLCMS2DPlots)
+                        if (ionCountCentroided > 0 && (Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats))
                         {
                             mLCMS2DPlot.AddScan2D(scanNumber, scanInfo.MSLevel, (float)scanInfo.RetentionTime, ionCountCentroided, massIntensityPairsCentroided, dataIsCentroided: true);
                         }
 
                         if (ionCount > 0)
                         {
-                            if (Options.SaveLCMS2DPlots && ionCountCentroided <= 0)
+                            if ((Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats) && ionCountCentroided <= 0)
                             {
                                 mLCMS2DPlot.AddScan2D(scanNumber, scanInfo.MSLevel, (float)scanInfo.RetentionTime, ionCount, massIntensityPairs, dataIsCentroided: false);
                             }
@@ -537,7 +537,8 @@ namespace MSFileInfoScanner.Readers
                     {
                         // If there is no MS device, there won't be any data returned to perform these operations anyway
                         if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFiles ||
-                            Options.SaveLCMS2DPlots || Options.CheckCentroidingStatus || Options.MS2MzMin > 0)
+                            Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats ||
+                            Options.CheckCentroidingStatus || Options.MS2MzMin > 0)
                         {
                             // Load data from each scan
                             // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File

@@ -271,7 +271,7 @@ namespace MSFileInfoScanner.Readers
                 pressurePlot = new TICandBPIPlotter();
             }
 
-            if (Options.SaveLCMS2DPlots)
+            if (Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats)
             {
                 InitializeLCMS2DPlot();
             }
@@ -459,7 +459,7 @@ namespace MSFileInfoScanner.Readers
 
                     mDatasetStatsSummarizer.AddDatasetScan(scanStatsEntry);
 
-                    if (Options.SaveLCMS2DPlots || Options.CheckCentroidingStatus)
+                    if (Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats || Options.CheckCentroidingStatus)
                     {
                         try
                         {
@@ -515,7 +515,7 @@ namespace MSFileInfoScanner.Readers
                                         Array.Resize(ref ionsIntensity, ionCount);
                                     }
 
-                                    if (Options.SaveLCMS2DPlots)
+                                    if (Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats)
                                     {
                                         mLCMS2DPlot.AddScan(frameNumber, msLevel, (float)elutionTime, ionCount, mzList, ionsIntensity, dataIsCentroided: false);
                                     }
@@ -948,7 +948,7 @@ namespace MSFileInfoScanner.Readers
                     OnWarningEvent("Exception extracting acquisition time information: {0}", ex.Message);
                 }
 
-                if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFiles || Options.SaveLCMS2DPlots)
+                if (Options.SaveTICAndBPIPlots || Options.CreateDatasetInfoFile || Options.CreateScanStatsFiles || Options.SaveLCMS2DPlots || Options.ComputeNaturalOrganicMatterStats)
                 {
                     // Load data from each frame
                     // This is used to create the TIC and BPI plot, the 2D LC/MS plot, and/or to create the Dataset Info File

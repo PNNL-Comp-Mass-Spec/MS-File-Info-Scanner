@@ -106,6 +106,11 @@ namespace MSFileInfoScanner.Readers
         protected readonly DatasetStatsSummarizer mDatasetStatsSummarizer;
 
         /// <summary>
+        /// Natural organic matter stats, formatted as XML
+        /// </summary>
+        public string NOMStatsXML { get; set; }
+
+        /// <summary>
         /// Processing error code
         /// </summary>
         public iMSFileInfoScanner.MSFileScannerErrorCodes ErrorCode { get; protected set; }
@@ -123,6 +128,11 @@ namespace MSFileInfoScanner.Readers
         public LCMSDataPlotterOptions LCMS2DPlotOptions => mLCMS2DPlot.Options;
 
         /// <summary>
+        /// Number of cached spectra in mLCMS2DPlot
+        /// </summary>
+        public int LCMS2DPlotScanCountCached => mLCMS2DPlot.ScanCountCached;
+
+        /// <summary>
         /// This will be True if the dataset has too many MS/MS spectra
         /// where the minimum m/z value is larger than MS2MzMin
         /// </summary>
@@ -138,12 +148,12 @@ namespace MSFileInfoScanner.Readers
         /// <summary>
         /// MS2MzMin validation error or warning message
         /// </summary>
-        public string MS2MzMinValidationMessage { get; set; }
+        public string MS2MzMinValidationMessage { get; protected set; }
 
         /// <summary>
         /// Processing Options
         /// </summary>
-        public InfoScannerOptions Options { get; }
+        public InfoScannerOptions Options { get; protected set; }
 
         /// <summary>
         /// Add a new TICAndBPIPlotter instance to mInstrumentSpecificPlots
@@ -205,35 +215,64 @@ namespace MSFileInfoScanner.Readers
 
         private bool CreateDatasetInfoFile(string inputFileName, string outputDirectoryPath)
         {
-            bool success;
-
             try
             {
                 var datasetName = GetDatasetNameViaPath(inputFileName);
-                var datasetInfoFilePath = Path.Combine(outputDirectoryPath, datasetName);
-                datasetInfoFilePath += DatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
+                var datasetInfoFileName = datasetName + DatasetStatsSummarizer.DATASET_INFO_FILE_SUFFIX;
+
+                var datasetInfoFilePath = Path.Combine(outputDirectoryPath, datasetInfoFileName);
 
                 if (mDatasetStatsSummarizer.DatasetFileInfo.DatasetID == 0 && Options.DatasetID > 0)
                 {
                     mDatasetStatsSummarizer.DatasetFileInfo.DatasetID = Options.DatasetID;
                 }
 
-                success = mDatasetStatsSummarizer.CreateDatasetInfoFile(datasetName, datasetInfoFilePath);
+                var success = mDatasetStatsSummarizer.CreateDatasetInfoFile(datasetName, datasetInfoFilePath);
 
                 if (!success)
                 {
                     OnErrorEvent("Error calling DatasetStatsSummarizer.CreateDatasetInfoFile: {0}", mDatasetStatsSummarizer.ErrorMessage);
                 }
+
+                return success;
             }
             catch (Exception ex)
             {
                 OnErrorEvent(string.Format("Error creating dataset info file: {0}", ex.Message), ex);
-                success = false;
+                return false;
             }
-
-            return success;
         }
 
+
+        /// <summary>
+        /// Creates an XML file with the natural organic matter stats
+        /// </summary>
+        /// <param name="datasetName">Dataset name</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="nomStatsXML">Natural organic matter stats XML</param>
+        /// <returns>True if success; False if failure</returns>
+        private void CreateNOMStatsXMLFile(string datasetName, string outputDirectoryPath, string nomStatsXML)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(nomStatsXML))
+                {
+                    OnWarningEvent("nomStatsXML is null; unable to continue in CreateNOMStatsXMLFile");
+                    return;
+                }
+
+                var nomStatsFileName = datasetName + DatasetStatsSummarizer.NOM_STATS_FILE_SUFFIX;
+                var nomStatsFilePath = Path.Combine(outputDirectoryPath, nomStatsFileName);
+
+                using var writer = new StreamWriter(new FileStream(nomStatsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read), Encoding.UTF8);
+
+                writer.WriteLine(nomStatsXML);
+            }
+            catch (Exception ex)
+            {
+                OnErrorEvent("Error in CreateNOMStatsXMLFile", ex);
+            }
+        }
         /// <summary>
         /// Creates a tab-delimited text file with details on each scan tracked by this class (stored in mDatasetScanStats)
         /// </summary>
@@ -336,6 +375,8 @@ namespace MSFileInfoScanner.Readers
             MS2MzMinValidationError = false;
             MS2MzMinValidationWarning = false;
             MS2MzMinValidationMessage = string.Empty;
+
+            NOMStatsXML = string.Empty;
 
             ErrorCode = iMSFileInfoScanner.MSFileScannerErrorCodes.NoError;
 
@@ -490,10 +531,6 @@ namespace MSFileInfoScanner.Readers
                     OnProgressUpdate("TIC and BPI plots saved", PROGRESS_SAVED_TIC_AND_BPI_PLOT);
                 }
 
-                if (Options.ComputeNaturalOrganicMatterStats)
-                {
-                }
-
                 if (Options.SaveLCMS2DPlots)
                 {
                     // Determine the number of times we'll be calling Save2DPlots or CreateOverview2DPlots
@@ -601,6 +638,13 @@ namespace MSFileInfoScanner.Readers
                     {
                         successOverall = false;
                     }
+
+                    if (!string.IsNullOrWhiteSpace(NOMStatsXML))
+                    {
+                        // Create the _NOMStats.xml file
+                        CreateNOMStatsXMLFile(datasetName, outputDirectoryPath, NOMStatsXML);
+                    }
+
                     createQCPlotHTMLFile = true;
                 }
 
@@ -911,6 +955,13 @@ namespace MSFileInfoScanner.Readers
                 writer.WriteLine("      <td>&nbsp;</td>");
             }
 
+            var nomStatsFileName = datasetName + DatasetStatsSummarizer.NOM_STATS_FILE_SUFFIX;
+
+            if (Options.CreateDatasetInfoFile || File.Exists(Path.Combine(outputDirectoryPath, nomStatsFileName)))
+            {
+                writer.WriteLine("      <td align=\"center\"><a href=\"" + nomStatsFileName + "\">Natural Organic Matter Stats XML file</a></td>");
+            }
+
             writer.WriteLine("    </tr>");
         }
 
@@ -1062,6 +1113,16 @@ namespace MSFileInfoScanner.Readers
             };
 
             // ReSharper restore UseRawString
+        }
+
+        /// <summary>
+        /// Obtain the m/z and intensity values (by scan) that are tracked by mLCMS2DPlot
+        /// </summary>
+        /// <param name="msLevelFilter">Optional MS level filter (default is 1)</param>
+        /// <returns>Dictionary where keys are scan number and values are lists of m/z and intensity pairs</returns>
+        public Dictionary<int, List<KeyValuePair<double, double>>> GetCachedLCMS2DPlotData(int msLevelFilter = 1)
+        {
+            return mLCMS2DPlot.GetCachedMZsByScan(msLevelFilter);
         }
 
         /// <summary>
