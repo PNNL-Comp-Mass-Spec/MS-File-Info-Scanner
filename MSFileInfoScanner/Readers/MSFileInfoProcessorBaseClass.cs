@@ -94,10 +94,13 @@ namespace MSFileInfoScanner.Readers
         protected readonly List<TICandBPIPlotter> mInstrumentSpecificPlots;
 
         /// <summary>
-        /// LCMS 2D plot
+        /// LC/MS 2D plot
         /// </summary>
         protected readonly LCMSDataPlotter mLCMS2DPlot;
 
+        /// <summary>
+        /// Overview LC/MS 2D plot
+        /// </summary>
         private readonly LCMSDataPlotter mLCMS2DPlotOverview;
 
         /// <summary>

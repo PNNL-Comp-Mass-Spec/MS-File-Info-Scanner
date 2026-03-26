@@ -547,7 +547,7 @@ namespace MSFileInfoScannerInterfaces
             HelpText = "If defined, store the dataset info in the DMS database\n" +
                        "To customize the server name and/or stored procedure to use for posting, " +
                        "use an XML parameter file with settings DSInfoConnectionString, " +
-                       "DSInfoDBPostingEnabled, and DSInfoStoredProcedure")]
+                       "DSInfoDBPostingEnabled, DSInfoProcedure, and NOMStatsProcedure")]
         public bool PostResultsToDMS { get; set; }
 
         // ReSharper disable StringLiteralTypo

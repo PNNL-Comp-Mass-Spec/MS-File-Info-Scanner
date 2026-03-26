@@ -173,7 +173,7 @@ namespace MSFileInfoScannerInterfaces
         public virtual string AcquisitionTimeFilename { get; set; }
 
         /// <summary>
-        /// Returns the dataset info, formatted as XML
+        /// Dataset info, formatted as XML
         /// </summary>
         public virtual string DatasetInfoXML { get; protected set; }
 

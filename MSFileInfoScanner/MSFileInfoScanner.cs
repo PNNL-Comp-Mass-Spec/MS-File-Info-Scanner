@@ -962,7 +962,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Post the most recently determine dataset into XML to the database, using the specified dataset name
+        /// Post the most recently determined dataset into XML to the database, using the specified dataset name
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <returns>True if success; false if failure</returns>
