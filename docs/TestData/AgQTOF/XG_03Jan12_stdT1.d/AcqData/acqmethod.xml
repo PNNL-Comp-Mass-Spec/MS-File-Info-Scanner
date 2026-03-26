@@ -1,0 +1,587 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AcqMethod>
+  <Version>1.0</Version>
+  <!--Method Properties-->
+  <MethodName>XG_Tmsms.m</MethodName>
+  <MethodPath>D:\MassHunter\data\XG_03Jan12_stdT1.d\AcqData\XG_Tmsms.m</MethodPath>
+  <MethodDescription>Default Method</MethodDescription>
+  <!--List of Devices-->
+  <DeviceList>MS Q-TOF</DeviceList>
+  <!--Device Specific Setpoints-->
+  <QTOF>
+    <ComponentModel>G6510A</ComponentModel>
+    <ComponentName>MS Q-TOF</ComponentName>
+    <IonSource>ESI</IonSource>
+    <TuneFile>AutoTune.tun</TuneFile>
+    <StopMode>Value</StopMode>
+    <StopTime>90.00</StopTime>
+    <NoWaitForTemp>Enable</NoWaitForTemp>
+    <FastPolarityEnabled>N/A</FastPolarityEnabled>
+    <MS1CentroidDataAbsThreshold>1000</MS1CentroidDataAbsThreshold>
+    <MS1CentroidDataRELThreshold>0.010</MS1CentroidDataRELThreshold>
+    <MS2CentroidDataAbsThreshold>5</MS2CentroidDataAbsThreshold>
+    <MS2CentroidDataRELThreshold>0.010</MS2CentroidDataRELThreshold>
+    <TimeSegment>
+      <Index>1</Index>
+      <StartTime>0.0</StartTime>
+      <DiverterValveState>MS</DiverterValveState>
+      <StorageMode>Both</StorageMode>
+      <IonMode>ESI</IonMode>
+      <TimeSourceParameter>
+        <Id>DGasHeater</Id>
+        <Value>325</Value>
+      </TimeSourceParameter>
+      <TimeSourceParameter>
+        <Id>DGasFlow</Id>
+        <Value>1.5</Value>
+      </TimeSourceParameter>
+      <TimeSourceParameter>
+        <Id>NebulizerPressure</Id>
+        <Value>1</Value>
+      </TimeSourceParameter>
+      <ScanSegment>
+        <Index>1</Index>
+        <ionPolarity>Positive</ionPolarity>
+        <ScanSourceParameter>
+          <Id>VCap</Id>
+          <Value>4000</Value>
+        </ScanSourceParameter>
+        <ScanInstParameter>
+          <Id>Fragmentor</Id>
+          <Value>195</Value>
+        </ScanInstParameter>
+        <ScanInstParameter>
+          <Id>Skimmer1</Id>
+          <Value>47.0</Value>
+        </ScanInstParameter>
+        <ScanInstParameter>
+          <Id>OctopoleRFPeak</Id>
+          <Value>750</Value>
+        </ScanInstParameter>
+      </ScanSegment>
+      <Acquisition>
+        <AcqMode>TargetedMS2</AcqMode>
+        <AcqTargetedMS2>
+          <MS1MinRange>300</MS1MinRange>
+          <MS1MaxRange>2000</MS1MaxRange>
+          <MS1ScanRate>6.00</MS1ScanRate>
+          <MS2MinRange>90</MS2MinRange>
+          <MS2MaxRange>2000</MS2MaxRange>
+          <MS2ScanRate>4.00</MS2ScanRate>
+          <MaxTimeBetweenMS1>0.0</MaxTimeBetweenMS1>
+          <CollisionEnergy>
+            <CollisionEnergyRamp>
+              <CollisionEnergySlope>3.0000</CollisionEnergySlope>
+              <CollisionEnergyOffset>10.0000</CollisionEnergyOffset>
+            </CollisionEnergyRamp>
+          </CollisionEnergy>
+          <Target>
+            <TargetMass>468.310000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>522.360000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>636.500000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>678.510000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>786.600000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>930.790000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>426.260000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>480.310000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>482.320000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>580.400000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>746.570000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>748.590000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>498.280000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>524.300000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>526.310000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>624.390000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>790.560000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>792.580000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>457.260000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>485.290000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>513.320000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>667.450000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>867.520000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>751.550000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>318.260000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>458.420000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>670.530000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>474.430000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>806.760000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>608.490000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>1155.100000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>404.390000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>544.510000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>684.670000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>752.730000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>717.590000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>729.590000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>647.510000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>552.540000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>622.610000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>650.650000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>644.510000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>700.570000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>810.680000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>806.560000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>862.630000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>974.750000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>1241.850000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>1258.880000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>1458.040000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>1475.070000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>776.630000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>966.710000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+          <Target>
+            <TargetMass>682.530000</TargetMass>
+            <TargetCharge>1</TargetCharge>
+            <TargetRetentionTime>0.00</TargetRetentionTime>
+            <TargetDeltaRetentionTime />
+            <TargetIsolationWidth>Medium (~4 amu)</TargetIsolationWidth>
+            <TargetCollisionEnergy />
+            <TargetScanRate />
+          </Target>
+        </AcqTargetedMS2>
+      </Acquisition>
+    </TimeSegment>
+    <Chromatogram>
+      <TypeName>BPC</TypeName>
+      <Label>BPC</Label>
+      <ExperimentType>MS</ExperimentType>
+      <ActualOrSetpointType />
+      <OffsetOrMin>15</OffsetOrMin>
+      <YRangeOrMax>10000000</YRangeOrMax>
+    </Chromatogram>
+    <Chromatogram>
+      <TypeName>TIC</TypeName>
+      <Label>TIC</Label>
+      <ExperimentType>MS</ExperimentType>
+      <ActualOrSetpointType />
+      <OffsetOrMin>15</OffsetOrMin>
+      <YRangeOrMax>10000000</YRangeOrMax>
+    </Chromatogram>
+    <RefMassParameters>
+      <EnableRefMassCorrection>Disabled</EnableRefMassCorrection>
+    </RefMassParameters>
+  </QTOF>
+</AcqMethod>

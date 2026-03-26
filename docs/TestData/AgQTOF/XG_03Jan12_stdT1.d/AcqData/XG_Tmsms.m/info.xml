@@ -1,0 +1,3 @@
+<?xml version="1.0"?>
+<!--Picard Method XML file-->
+<Properties><Version>A.00.01</Version><PreRunScript><ProjectName></ProjectName><ProcedureName></ProcedureName><InParameter></InParameter><DisplayString></DisplayString></PreRunScript><PostRunScript><ProjectName></ProjectName><ProcedureName></ProcedureName><InParameter></InParameter><DisplayString></DisplayString></PostRunScript><Description>Default Method</Description></Properties>
