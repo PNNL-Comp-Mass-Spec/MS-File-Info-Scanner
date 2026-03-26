@@ -1138,11 +1138,17 @@ namespace MSFileInfoScanner.Readers
             // On Bruker instruments, RunStartTime is not the actual time of day that the data was acquired
             // Possibly update the time, based on the instrument model
 
-            var instrumentConfig = msDataFileReader.GetInstrumentConfigInfoList();
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            foreach (var item in msDataFileReader.GetInstrumentConfigInfoList())
+            {
+                if (!string.IsNullOrWhiteSpace(item.Model) && item.Model.StartsWith("Bruker", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Convert to local time
+                    return runStartTime.ToUniversalTime();
+                }
+            }
 
-            var convertToLocalTime = instrumentConfig.Any(item => item.Model.StartsWith("Bruker"));
-
-            return convertToLocalTime ? runStartTime.ToUniversalTime() : runStartTime;
+            return runStartTime;
         }
 
         /// <summary>
