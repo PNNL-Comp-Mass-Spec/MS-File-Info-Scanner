@@ -50,6 +50,12 @@ namespace MSFileInfoScanner.Readers
         public const int MAX_SCANS_FOR_TIC_AND_BPI = 1000000;
 
         /// <summary>
+        /// Used for checking if over 10% of the spectra failed MS2MzMin validation
+        /// </summary>
+        // ReSharper disable once IdentifierTypo
+        public const int MAX_PERCENT_MS2_MZMIN_ALLOWED_FAILED = 10;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         protected MSFileInfoProcessorBaseClass(InfoScannerOptions options, LCMSDataPlotterOptions lcms2DPlotOptions)
@@ -75,12 +81,6 @@ namespace MSFileInfoScanner.Readers
 
             InitializeLocalVariables();
         }
-
-        /// <summary>
-        /// Used for checking if over 10% of the spectra failed MS2MzMin validation
-        /// </summary>
-        // ReSharper disable once IdentifierTypo
-        public const int MAX_PERCENT_MS2_MZMIN_ALLOWED_FAILED = 10;
 
         /// <summary>
         /// This variable tracks TIC and BPI data (vs. scan)
