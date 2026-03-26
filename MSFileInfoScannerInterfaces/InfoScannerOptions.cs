@@ -563,12 +563,12 @@ namespace MSFileInfoScannerInterfaces
         // ReSharper restore StringLiteralTypo
 
         /// <summary>
-        /// Dataset info stored procedure name
+        /// Dataset info procedure name
         /// </summary>
-        [Option("DSInfoStoredProcedure",
+        [Option("DSInfoStoredProcedure", "DSInfoProcedure",
             HelpShowsDefault = true, Hidden = true,
             HelpText = "Procedure to call to store dataset info in DMS")]
-        public string DSInfoStoredProcedure { get; set; } = "update_dataset_file_info_xml";
+        public string DSInfoProcedure { get; set; } = "update_dataset_file_info_xml";
 
         /// <summary>
         /// NOM stats procedure name

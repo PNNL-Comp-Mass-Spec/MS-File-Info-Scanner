@@ -968,7 +968,7 @@ namespace MSFileInfoScanner
         /// <returns>True if success; false if failure</returns>
         public override bool PostDatasetInfoToDB(string datasetName)
         {
-            return PostDatasetInfoToDB(datasetName, DatasetInfoXML, Options.DatabaseConnectionString, Options.DSInfoStoredProcedure);
+            return PostDatasetInfoToDB(datasetName, DatasetInfoXML, Options.DatabaseConnectionString, Options.DSInfoProcedure);
         }
 
         /// <summary>
@@ -979,30 +979,30 @@ namespace MSFileInfoScanner
         /// <returns>True if success; false if failure</returns>
         public override bool PostDatasetInfoToDB(string datasetName, string datasetInfoXML)
         {
-            return PostDatasetInfoToDB(datasetName, datasetInfoXML, Options.DatabaseConnectionString, Options.DSInfoStoredProcedure);
+            return PostDatasetInfoToDB(datasetName, datasetInfoXML, Options.DatabaseConnectionString, Options.DSInfoProcedure);
         }
 
         /// <summary>
-        /// Post the most recently determine dataset into XML to the database, using the specified dataset name, connection string, and stored procedure
+        /// Post the most recently determined dataset into XML to the database, using the specified dataset name, connection string, and procedure
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="connectionString">Database connection string</param>
-        /// <param name="storedProcedureName">Stored procedure</param>
+        /// <param name="procedureName">Procedure name</param>
         /// <returns>True if success; false if failure</returns>
-        public override bool PostDatasetInfoToDB(string datasetName, string connectionString, string storedProcedureName)
+        public override bool PostDatasetInfoToDB(string datasetName, string connectionString, string procedureName)
         {
-            return PostDatasetInfoToDB(datasetName, DatasetInfoXML, connectionString, storedProcedureName);
+            return PostDatasetInfoToDB(datasetName, DatasetInfoXML, connectionString, procedureName);
         }
 
         /// <summary>
-        /// Post the dataset info in datasetInfoXML to the database, using the specified dataset name, connection string, and stored procedure
+        /// Post the dataset info in datasetInfoXML to the database, using the specified dataset name, connection string, and procedure
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="datasetInfoXML">Database info XML</param>
         /// <param name="connectionString">Database connection string</param>
-        /// <param name="storedProcedureName">Stored procedure</param>
+        /// <param name="procedureName">Procedure name</param>
         /// <returns>True if success; false if failure</returns>
-        public override bool PostDatasetInfoToDB(string datasetName, string datasetInfoXML, string connectionString, string storedProcedureName)
+        public override bool PostDatasetInfoToDB(string datasetName, string datasetInfoXML, string connectionString, string procedureName)
         {
             bool success;
 
@@ -1027,7 +1027,7 @@ namespace MSFileInfoScanner
                     dsInfoXMLClean = datasetInfoXML;
                 }
 
-                // Call the stored procedure using connection string connectionString
+                // Call the procedure using connection string connectionString
 
                 if (string.IsNullOrEmpty(connectionString))
                 {
@@ -1036,9 +1036,9 @@ namespace MSFileInfoScanner
                     return false;
                 }
 
-                if (string.IsNullOrEmpty(storedProcedureName))
+                if (string.IsNullOrEmpty(procedureName))
                 {
-                    storedProcedureName = "update_dataset_file_info_xml";
+                    procedureName = "update_dataset_file_info_xml";
                 }
 
                 var applicationName = "MSFileInfoScanner_" + datasetName;
@@ -1048,7 +1048,7 @@ namespace MSFileInfoScanner
                 var dbTools = DbToolsFactory.GetDBTools(connectionStringToUse);
                 RegisterEvents(dbTools);
 
-                var cmd = dbTools.CreateCommand(storedProcedureName, CommandType.StoredProcedure);
+                var cmd = dbTools.CreateCommand(procedureName, CommandType.StoredProcedure);
 
                 var returnParam = dbTools.AddParameter(cmd, "@Return", SqlType.Int, ParameterDirection.ReturnValue);
 
@@ -1063,7 +1063,7 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    ReportError("Error calling stored procedure, return code = " + returnParam.Value.CastDBVal<string>());
+                    ReportError("Error calling procedure, return code = " + returnParam.Value.CastDBVal<string>());
                     SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                     success = false;
                 }
@@ -1074,7 +1074,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                HandleException("Error calling stored procedure", ex);
+                HandleException("Error calling procedure", ex);
                 SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                 success = false;
             }
@@ -1083,30 +1083,30 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Post the most recently determine dataset into XML to the database, using the specified dataset ID, connection string and stored procedure
-        /// This version assumes the stored procedure takes DatasetID as the first parameter
+        /// Post the most recently determined dataset into XML to the database, using the specified dataset ID, connection string, and procedure
+        /// This version assumes the procedure takes DatasetID as the first parameter
         /// </summary>
-        /// <param name="datasetID">Dataset ID to send to the stored procedure</param>
+        /// <param name="datasetID">Dataset ID to send to the procedure</param>
         /// <param name="connectionString">Database connection string</param>
-        /// <param name="storedProcedureName">Stored procedure</param>
+        /// <param name="procedureName">Procedure name</param>
         /// <returns>True if success; false if failure</returns>
         [Obsolete("This method has been moved to the DatasetInfoPlugin in the Capture Task Manager")]
-        public override bool PostDatasetInfoUseDatasetID(int datasetID, string connectionString, string storedProcedureName)
+        public override bool PostDatasetInfoUseDatasetID(int datasetID, string connectionString, string procedureName)
         {
-            return PostDatasetInfoUseDatasetID(datasetID, DatasetInfoXML, connectionString, storedProcedureName);
+            return PostDatasetInfoUseDatasetID(datasetID, DatasetInfoXML, connectionString, procedureName);
         }
 
         /// <summary>
-        /// Post the dataset info in datasetInfoXML to the database, using the specified dataset ID, connection string and stored procedure
-        /// This version assumes the stored procedure takes DatasetID as the first parameter
+        /// Post the dataset info in datasetInfoXML to the database, using the specified dataset ID, connection string and procedure
+        /// This version assumes the procedure takes DatasetID as the first parameter
         /// </summary>
-        /// <param name="datasetID">Dataset ID to send to the stored procedure</param>
+        /// <param name="datasetID">Dataset ID to send to the procedure</param>
         /// <param name="datasetInfoXML">Database info XML</param>
         /// <param name="connectionString">Database connection string</param>
-        /// <param name="storedProcedureName">Stored procedure</param>
+        /// <param name="procedureName">Procedure name</param>
         /// <returns>True if success; false if failure</returns>
         [Obsolete("This method has been moved to the DatasetInfoPlugin in the Capture Task Manager")]
-        public override bool PostDatasetInfoUseDatasetID(int datasetID, string datasetInfoXML, string connectionString, string storedProcedureName)
+        public override bool PostDatasetInfoUseDatasetID(int datasetID, string datasetInfoXML, string connectionString, string procedureName)
         {
             bool success;
 
@@ -1135,7 +1135,7 @@ namespace MSFileInfoScanner
                     dsInfoXMLClean = datasetInfoXML;
                 }
 
-                // Call stored procedure storedProcedure using connection string connectionString
+                // Call procedure storedProcedure using connection string connectionString
 
                 if (string.IsNullOrEmpty(connectionString))
                 {
@@ -1144,9 +1144,9 @@ namespace MSFileInfoScanner
                     return false;
                 }
 
-                if (string.IsNullOrEmpty(storedProcedureName))
+                if (string.IsNullOrEmpty(procedureName))
                 {
-                    storedProcedureName = "cache_dataset_info_xml";
+                    procedureName = "cache_dataset_info_xml";
                 }
 
                 var applicationName = "MSFileInfoScanner_DatasetID_" + datasetID;
@@ -1156,7 +1156,7 @@ namespace MSFileInfoScanner
                 var dbTools = DbToolsFactory.GetDBTools(connectionStringToUse);
                 RegisterEvents(dbTools);
 
-                var cmd = dbTools.CreateCommand(storedProcedureName, CommandType.StoredProcedure);
+                var cmd = dbTools.CreateCommand(procedureName, CommandType.StoredProcedure);
 
                 var returnParam = dbTools.AddParameter(cmd, "@Return", SqlType.Int, ParameterDirection.ReturnValue);
                 dbTools.AddParameter(cmd, "@DatasetID", SqlType.Int).Value = datasetID;
@@ -1171,14 +1171,15 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    ReportError("Error calling stored procedure, return code = " + returnParam.Value.CastDBVal<string>());
+                    ReportError("Error calling procedure, return code = " + returnParam.Value.CastDBVal<string>());
                     SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                     success = false;
                 }
             }
             catch (Exception ex)
             {
-                HandleException("Error calling stored procedure", ex);
+                HandleException("Error calling procedure", ex);
+                SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                 success = false;
             }
 
