@@ -58,7 +58,7 @@
         public double InorganicIntensitySum { get; set; }
 
         /// <summary>
-        /// Organic/inorganic ratio (0 if InorganicCount is 0)
+        /// Organic/inorganic ratio (NaN if InorganicCount is 0)
         /// </summary>
         /// <remarks>
         /// OrganicCount / InorganicCount
@@ -75,7 +75,7 @@
         }
 
         /// <summary>
-        /// Organic/inorganic ratio, intensity weighted (NAN if InorganicIntensitySum is 0)
+        /// Organic/inorganic ratio, intensity weighted (NaN if InorganicIntensitySum is 0)
         /// </summary>
         /// <remarks>
         /// OrganicIntensitySum / InorganicIntensitySum
@@ -92,7 +92,7 @@
         }
 
         /// <summary>
-        /// C13 count
+        /// Carbon-13 pair count
         /// </summary>
         /// <remarks>
         /// Count of pairs of peaks separated by 1.003355 (plus/minus tolerance of 0.0005)
@@ -100,7 +100,7 @@
         public int C13Count { get; set; }
 
         /// <summary>
-        /// C13 intensity sum
+        /// Carbon-13 intensity sum
         /// </summary>
         /// <remarks>
         /// Sum of the intensities of pairs of peaks separated by 1.003355 (plus/minus tolerance of 0.0005)
@@ -109,15 +109,15 @@
         public double C13IntensitySum { get; set; }
 
         /// <summary>
-        /// Chlorine-37 count
+        /// Chlorine-37 pair count
         /// </summary>
         /// <remarks>
-        /// count of pairs of peaks separated by 1.99705 (plus/minus tolerance of 0.0005)
+        /// Count of pairs of peaks separated by 1.99705 (plus/minus tolerance of 0.0005)
         /// </remarks>
         public int Chlorine37Count { get; set; }
 
         /// <summary>
-        /// Chlorine-37 intensity sum
+        /// Chlorine-37 pair intensity sum
         /// </summary>
         /// <remarks>
         /// Sum of the intensities of pairs of peaks separated by 1.99705 (plus/minus tolerance of 0.0005)
@@ -126,10 +126,10 @@
         public double Chlorine37IntensitySum { get; set; }
 
         /// <summary>
-        /// C13 Ratio (0 if Chlorine37Count is 0)
+        /// Carbon-13 to Chlorine-37 Pair Ratio (NaN if Chlorine37PairCount is 0)
         /// </summary>
         /// <remarks>
-        /// C13Count / Chlorine37Count
+        /// C13PairCount / Cl37PairCount
         /// </remarks>
         public double C13Ratio
         {
@@ -143,10 +143,10 @@
         }
 
         /// <summary>
-        /// C13 Ratio, intensity weighted (NAN if Chlorine37IntensitySum is 0)
+        /// C13 to Chlorine-37 Pair Intensity Ratio (NaN if Chlorine37IntensitySum is 0)
         /// </summary>
         /// <remarks>
-        /// C13IntensitySum / Chlorine37IntensitySum
+        /// C13PairIntensitySum / Cl37PairIntensitySum
         /// </remarks>
         public double C13RatioWeightedIntensity
         {

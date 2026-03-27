@@ -257,7 +257,7 @@ namespace MSFileInfoScanner
                     if (Math.Abs(binToSortAbundanceMaximum - binToSortAbundanceMinimum) < float.Epsilon)
                     {
                         // Is this code ever reached?
-                        // If yes, then the code below won't populate binnedData with any data
+                        // If yes, the code below won't populate binnedData with any data
                         useFullDataSort = true;
                     }
 

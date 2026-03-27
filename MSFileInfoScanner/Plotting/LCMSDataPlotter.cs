@@ -296,7 +296,7 @@ namespace MSFileInfoScanner.Plotting
                     if (massIntensityPairs[0, index] < massIntensityPairs[0, index - 1])
                     {
                         // May need to sort the data
-                        // However, if the intensity of both data points is zero, then we can simply swap the data
+                        // However, if the intensity of both data points is zero, we can simply swap the data
                         if (Math.Abs(massIntensityPairs[1, index]) < double.Epsilon && Math.Abs(massIntensityPairs[1, index - 1]) < double.Epsilon)
                         {
                             // Swap the m/z values
@@ -1075,7 +1075,7 @@ namespace MSFileInfoScanner.Plotting
         /// </para>
         /// <para>
         /// For example, if minPointsPerSpectrum = 5, and we have 5000 scans, there will be
-        /// at least 5*5000 = 25000 data points in memory.  If targetDataPointCount = 10000, then
+        /// at least 5*5000 = 25000 data points in memory.  If targetDataPointCount = 10000,
         /// there could be as many as 25000 + 10000 = 25000 points in memory
         /// </para>
         /// </remarks>
@@ -1157,7 +1157,7 @@ namespace MSFileInfoScanner.Plotting
 
                             for (var ionIndex = 0; ionIndex < scan.IonCount; ionIndex++)
                             {
-                                // If the point's intensity is >= 0, then we keep it
+                                // If the point's intensity is >= 0, we keep it
 
                                 if (filterDataArray.GetAbundanceByIndex(masterIonIndex) >= 0)
                                 {
@@ -1688,7 +1688,7 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="plotTitleSuffix">Text to append to the dataset name</param>
         /// <param name="msLevelFilter">0 to use all the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
-        /// <param name="skipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set skipTrimCachedData to False on the first call and True on subsequent calls)</param>
+        /// <param name="skipTrimCachedData">When True, doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set skipTrimCachedData to False on the first call and True on subsequent calls)</param>
         /// <param name="plottingSingleMassSpectrum">Output: true if the plot container is a 2D plot of the mass spectrum of a single scan</param>
         /// <param name="singleScanNumber">Output: the scan number being plotted when plottingSingleMassSpectrum is true</param>
         /// <param name="pointsPlotted">Output: number of points plotted (3D or 2D, max between MS1 and MS2)</param>
@@ -1717,7 +1717,7 @@ namespace MSFileInfoScanner.Plotting
         /// <param name="datasetName">Dataset name</param>
         /// <param name="plotTitleSuffix">Text to append to the dataset name</param>
         /// <param name="msLevelFilter">0 to use all the data, 1 to use data from MS scans, 2 to use data from MS2 scans, etc.</param>
-        /// <param name="skipTrimCachedData">When True, then doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set skipTrimCachedData to False on the first call and True on subsequent calls)</param>
+        /// <param name="skipTrimCachedData">When True, doesn't call TrimCachedData (when making several plots in success, each with a different value for msLevelFilter, set skipTrimCachedData to False on the first call and True on subsequent calls)</param>
         /// <param name="plottingSingleMassSpectrum">Output: true if the plot container is a 2D plot of the mass spectrum of a single scan</param>
         /// <param name="singleScanNumber">Output: the scan number being plotted when plottingSingleMassSpectrum is true</param>
         /// <param name="pointsPlotted">Output: number of points plotted (3D or 2D, max between MS1 and MS2)</param>
@@ -1739,7 +1739,7 @@ namespace MSFileInfoScanner.Plotting
                 out var minMZ, out var maxMZ,
                 out var colorScaleMinIntensity, out var colorScaleMaxIntensity);
 
-            // When this is true, then will write a text file of the mass spectrum before and after it is filtered
+            // When this is true, will write a text file of the mass spectrum before and after it is filtered
             // Used for debugging
             var writeDebugData = false;
             StreamWriter debugWriter = null;

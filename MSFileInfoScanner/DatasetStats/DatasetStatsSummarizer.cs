@@ -381,7 +381,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// Increments mSpectraTypeClassifier.TotalSpectra if data is found
         /// Increments mSpectraTypeClassifier.CentroidedSpectra if the data is centroided
         /// </remarks>
-        /// <param name="ionCount">Number of items in mzArray; if -1, then parses all data in mzArray</param>
+        /// <param name="ionCount">Number of items in mzArray; if -1, parses all data in mzArray</param>
         /// <param name="mzArray">m/z values</param>
         /// <param name="msLevel">MS level (1 for MS1, 2 for MS2, etc.)</param>
         /// <param name="spectrumTitle">Optional spectrum title (e.g. scan number)</param>
@@ -397,7 +397,7 @@ namespace MSFileInfoScanner.DatasetStats
         /// Increments mSpectraTypeClassifier.TotalSpectra if data is found
         /// Increments mSpectraTypeClassifier.CentroidedSpectra if the data is centroided
         /// </remarks>
-        /// <param name="ionCount">Number of items in mzArray; if -1, then parses all data in mzArray</param>
+        /// <param name="ionCount">Number of items in mzArray; if -1, parses all data in mzArray</param>
         /// <param name="mzArray">m/z values</param>
         /// <param name="msLevel">MS level (1 for MS1, 2 for MS2, etc.)</param>
         /// <param name="centroidingStatus">Centroiding status</param>

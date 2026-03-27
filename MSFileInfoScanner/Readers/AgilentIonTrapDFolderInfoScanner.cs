@@ -147,7 +147,7 @@ namespace MSFileInfoScanner.Readers
                         }
                     }
 
-                    // If this is the first method line, then parse out the date and store in .AcqTimeStart
+                    // If this is the first method line, parse out the date and store in .AcqTimeStart
                     if (!processedFirstMethodLine)
                     {
                         if (ExtractMethodLineDate(dataLine, out methodDate))

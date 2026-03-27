@@ -150,7 +150,7 @@ namespace MSFileInfoScanner
         public delegate void FileIntegrityFailureEventHandler(string filePath, string message);
 
         /// <summary>
-        /// When True, then computes an MD5 hash on every file
+        /// When True, compute an MD5 hash on every file
         /// </summary>
         public bool ComputeFileHashes { get; set; }
 
@@ -178,7 +178,7 @@ namespace MSFileInfoScanner
         public string StatusMessage { get; private set; }
 
         /// <summary>
-        /// When True, then performs an exhaustive CRC check of each Zip file; otherwise, performs a quick test
+        /// When True, perform an exhaustive CRC check of each Zip file; otherwise, perform a quick test
         /// </summary>
         public bool ZipFileCheckAllData { get; set; }
 
@@ -679,10 +679,10 @@ namespace MSFileInfoScanner
         /// <param name="minimumLineCount">Minimum number of lines to examine; maximum number of lines is defined by mMaximumTextFileLinesToCheck</param>
         /// <param name="minimumTabCount">Minimum number of tabs to require in each line</param>
         /// <param name="minimumCommaCount">Minimum number of commas to require in each line</param>
-        /// <param name="requireEqualTabsPerLine">If True, then requires that every line have an equal number of Tab characters</param>
-        /// <param name="requireEqualCommasPerLine">If True, then requires that every line have an equal number of commas</param>
+        /// <param name="requireEqualTabsPerLine">If True, requires that every line have an equal number of Tab characters</param>
+        /// <param name="requireEqualCommasPerLine">If True, requires that every line have an equal number of commas</param>
         /// <param name="requiredTextLineHeaders">Optional list of text that must be found at the start of the text lines (within the first mMaximumTextFileLinesToCheck lines); the search text is case-sensitive</param>
-        /// <param name="requiredTextMatchesLineStart">When True, then only examine the start of the line for the text in requiredTextLineHeaders</param>
+        /// <param name="requiredTextMatchesLineStart">When True, only examine the start of the line for the text in requiredTextLineHeaders</param>
         /// <param name="charCountSkipsBlankLines">When true, skip blank lines when counting characters</param>
         /// <param name="requiredTextMinMatchCount">Minimum number of items in requiredItemNames that needed to be found; 0 to require all items to be found</param>
         /// <returns>True if the file passes the integrity check; otherwise False</returns>
@@ -849,9 +849,9 @@ namespace MSFileInfoScanner
         /// <param name="charToCount">The character to look for</param>
         /// <param name="charDescription">A description of the character (used to populate message when an error occurs)</param>
         /// <param name="minimumCharCount">Minimum character count</param>
-        /// <param name="requireEqualCharsPerLine">If True, then each line must contain an equal occurrence count of the given character (based on the first line in the file)</param>
+        /// <param name="requireEqualCharsPerLine">If True, each line must contain an equal occurrence count of the given character (based on the first line in the file)</param>
         /// <param name="errorMessage">Error message</param>
-        /// <returns>True if the line is valid; otherwise False; when False, then updates errorMessage</returns>
+        /// <returns>True if the line is valid; otherwise False; when False, updates errorMessage</returns>
         private bool CheckTextFileCountChars(string dataLine, ref bool blankLineRead, int linesRead,
                                              ref int expectedCharCount, char charToCount, string charDescription,
                                              int minimumCharCount, bool requireEqualCharsPerLine,
@@ -1219,7 +1219,7 @@ namespace MSFileInfoScanner
         /// </remarks>
         /// <param name="zipFilePath">Path to the zip file to validate</param>
         /// <param name="checkAllData">When true, check all data</param>
-        /// <param name="throwExceptionIfInvalid">If True, then throws exceptions, otherwise simply returns True or False</param>
+        /// <param name="throwExceptionIfInvalid">If True, throw exceptions, otherwise simply return True or False</param>
         /// <returns>True if the file is Valid; false if an error</returns>
         private bool CheckZipFileIntegrity(string zipFilePath, bool checkAllData, bool throwExceptionIfInvalid)
         {
@@ -1855,7 +1855,7 @@ namespace MSFileInfoScanner
         }
 
         /// <summary>
-        /// Searches lineToSearch for each of the items in requiredText; if matchStart = True, then only checks the start of the line
+        /// Searches lineToSearch for each of the items in requiredText; if matchStart = True, only checks the start of the line
         /// </summary>
         /// <param name="textToSearch">Text to search</param>
         /// <param name="needToCheckItems">True if we have not yet found all the items</param>
@@ -2146,7 +2146,7 @@ namespace MSFileInfoScanner
         /// </summary>
         /// <param name="filePath">File path</param>
         /// <param name="itemDescription">Description of the types of items that were searched</param>
-        /// <param name="needToCheckItem">True if we were still checking for items when this code was reached; if True, then indicates that not all the items were found</param>
+        /// <param name="needToCheckItem">True if we were still checking for items when this code was reached; if True, indicates that not all the items were found</param>
         /// <param name="requiredItemNames">Names to find; values are True if found</param>
         /// <param name="requiredItemMatchCountMinimum">Minimum number of items in requiredItemNames that needed to be found; 0 to require all items to be found</param>
         /// <param name="errorLogged">Set to True if any items were missing</param>

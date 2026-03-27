@@ -473,7 +473,7 @@ namespace SpectraTypeClassifier
         /// <summary>
         /// Step through the MZ values in array mzValues and compute the ppm-based mass difference between adjacent points
         /// </summary>
-        /// <param name="ionCount">Number of items in mzValues; if -1, then parses all data in mzValues</param>
+        /// <param name="ionCount">Number of items in mzValues; if -1, parses all data in mzValues</param>
         /// <param name="mzValues">List of m/z values</param>
         /// <param name="msLevel">1 for MS1, 2 for MS2, etc.</param>
         /// <param name="centroidingStatus">Expected centroid mode</param>
