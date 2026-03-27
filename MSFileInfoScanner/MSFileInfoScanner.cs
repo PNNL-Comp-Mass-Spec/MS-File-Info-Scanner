@@ -1063,7 +1063,7 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    ReportError("Error calling procedure, return code = " + returnParam.Value.CastDBVal<string>());
+                    ReportError(string.Format("Error calling procedure {0}, return code = {1}", procedureName, returnParam.Value.CastDBVal<string>()));
                     SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                     success = false;
                 }
@@ -1074,7 +1074,7 @@ namespace MSFileInfoScanner
             }
             catch (Exception ex)
             {
-                HandleException("Error calling procedure", ex);
+                ReportError(string.Format("Error calling procedure {0}", procedureName), ex);
                 SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                 success = false;
             }
@@ -1171,14 +1171,14 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    ReportError("Error calling procedure, return code = " + returnParam.Value.CastDBVal<string>());
+                    ReportError(string.Format("Error calling procedure {0}, return code = {1}", procedureName, returnParam.Value.CastDBVal<string>()));
                     SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                     success = false;
                 }
             }
             catch (Exception ex)
             {
-                HandleException("Error calling procedure", ex);
+                ReportError(string.Format("Error calling procedure {0}", procedureName), ex);
                 SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                 success = false;
             }
@@ -1219,22 +1219,22 @@ namespace MSFileInfoScanner
 
                 var startIndex = nomStatsXML.IndexOf("?>", StringComparison.Ordinal);
 
-                string dsInfoXMLClean;
+                string nomStatsXMLClean;
 
                 if (startIndex > 0)
                 {
-                    dsInfoXMLClean = nomStatsXML.Substring(startIndex + 2).Trim();
+                    nomStatsXMLClean = nomStatsXML.Substring(startIndex + 2).Trim();
                 }
                 else
                 {
-                    dsInfoXMLClean = nomStatsXML;
+                    nomStatsXMLClean = nomStatsXML;
                 }
 
                 // Call the procedure using connection string connectionString
 
                 if (string.IsNullOrEmpty(connectionString))
                 {
-                    ReportError("Connection string not defined; unable to post the dataset info to the database");
+                    ReportError("Connection string not defined; unable to post the NOM stats to the database");
                     SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                     return false;
                 }
@@ -1255,7 +1255,7 @@ namespace MSFileInfoScanner
 
                 var returnParam = dbTools.AddParameter(cmd, "@Return", SqlType.Int, ParameterDirection.ReturnValue);
 
-                dbTools.AddParameter(cmd, "@NOMStatsXML", SqlType.XML).Value = dsInfoXMLClean;
+                dbTools.AddParameter(cmd, "@NOMStatsXML", SqlType.XML).Value = nomStatsXMLClean;
 
                 var result = dbTools.ExecuteSP(cmd);
 
@@ -1266,18 +1266,14 @@ namespace MSFileInfoScanner
                 }
                 else
                 {
-                    ReportError("Error calling procedure, return code = " + returnParam.Value.CastDBVal<string>());
+                    ReportError(string.Format("Error calling procedure {0}, return code = {1}", procedureName, returnParam.Value.CastDBVal<string>()));
                     SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                     success = false;
                 }
-
-                // Uncomment this to test calling PostNOMStatsToDB with a DatasetID value
-                // Note that dataset Shew119-01_17july02_earth_0402-10_4-20 is DatasetID 6787
-                // PostNOMStatsToDB(32, nomStatsXML, "Data Source=gigasax;Initial Catalog=DMS_Capture_T3;Integrated Security=SSPI;", "cache_dataset_info_xml")
             }
             catch (Exception ex)
             {
-                HandleException("Error calling procedure", ex);
+                ReportError(string.Format("Error calling procedure {0}", procedureName), ex);
                 SetErrorCode(MSFileScannerErrorCodes.DatabasePostingError);
                 success = false;
             }
