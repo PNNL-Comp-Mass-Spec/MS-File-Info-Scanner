@@ -205,18 +205,18 @@ namespace MSFileInfoScanner.DatasetStats
 
             // Calculate percentage of peaks in chloride clusters
 
-            nomStats.ChlorideClusterPeaksTotal = (int)totalPeaksInClusters;
+            nomStats.ChlorideClusterPeakCount = (int)totalPeaksInClusters;
 
             double totalIntensitySum;
 
             if (mzCount > 0)
             {
-                nomStats.ChlorideClusterPeaksPercent = totalPeaksInClusters / mzCount * 100.0;
+                nomStats.ChlorideClusterPeakPercent = totalPeaksInClusters / mzCount * 100.0;
                 totalIntensitySum = sortedPeaks.Sum(item => item.Value);
             }
             else
             {
-                nomStats.ChlorideClusterPeaksPercent = 0;
+                nomStats.ChlorideClusterPeakPercent = 0;
                 totalIntensitySum = 0;
             }
 
@@ -232,7 +232,7 @@ namespace MSFileInfoScanner.DatasetStats
                 }
             }
 
-            nomStats.ChlorideClusterIntensityTotal = clusterIntensitySum;
+            nomStats.ChlorideClusterIntensitySum = clusterIntensitySum;
 
             if (totalIntensitySum > 0)
             {
@@ -263,10 +263,10 @@ namespace MSFileInfoScanner.DatasetStats
 
             sortedMZs.AddRange(from item in massSpectrum orderby item.Key select item);
 
-            nomStats.C13Count = 0;
-            nomStats.Chlorine37Count = 0;
-            nomStats.C13IntensitySum = 0.0;
-            nomStats.Chlorine37IntensitySum = 0.0;
+            nomStats.C13PairCount = 0;
+            nomStats.Cl37PairCount = 0;
+            nomStats.C13PairIntensitySum = 0.0;
+            nomStats.Cl37PairIntensitySum = 0.0;
 
             for (var i = 0; i < sortedMZs.Count; i++)
             {
@@ -277,17 +277,17 @@ namespace MSFileInfoScanner.DatasetStats
                     // Check for C13 isotopologue (1.003355 ± 0.0005)
                     if (Math.Abs(delta - 1.003355) <= 0.0005)
                     {
-                        nomStats.C13Count++;
+                        nomStats.C13PairCount++;
 
                         //  Use minimum intensity of the pair for weighting
-                        nomStats.C13IntensitySum += Math.Min(sortedMZs[i].Value, sortedMZs[j].Value);
+                        nomStats.C13PairIntensitySum += Math.Min(sortedMZs[i].Value, sortedMZs[j].Value);
                     }
 
                     // Check for Chlorine37 isotopologue (1.99705 ± 0.0005)
                     if (Math.Abs(delta - 1.99705) <= 0.0005)
                     {
-                        nomStats.Chlorine37Count++;
-                        nomStats.Chlorine37IntensitySum += Math.Min(sortedMZs[i].Value, sortedMZs[j].Value);
+                        nomStats.Cl37PairCount++;
+                        nomStats.Cl37PairIntensitySum += Math.Min(sortedMZs[i].Value, sortedMZs[j].Value);
                     }
                 }
             }
@@ -356,17 +356,17 @@ namespace MSFileInfoScanner.DatasetStats
             var inorganicIntensitySums = nomStatsByScan.Values.Select(item => item.InorganicIntensitySum).ToList();
             NOMStats.InorganicIntensitySum = (int)inorganicIntensitySums.Median();
 
-            var c13Counts = nomStatsByScan.Values.Select(item => item.C13Count).Select(dummy => (double)dummy).ToList();
-            NOMStats.C13Count = (int)c13Counts.Median();
+            var c13Counts = nomStatsByScan.Values.Select(item => item.C13PairCount).Select(dummy => (double)dummy).ToList();
+            NOMStats.C13PairCount = (int)c13Counts.Median();
 
-            var c13IntensitySums = nomStatsByScan.Values.Select(item => item.C13IntensitySum).ToList();
-            NOMStats.C13IntensitySum = (int)c13IntensitySums.Median();
+            var c13IntensitySums = nomStatsByScan.Values.Select(item => item.C13PairIntensitySum).ToList();
+            NOMStats.C13PairIntensitySum = (int)c13IntensitySums.Median();
 
-            var chlorine37Counts = nomStatsByScan.Values.Select(item => item.Chlorine37Count).Select(dummy => (double)dummy).ToList();
-            NOMStats.Chlorine37Count = (int)chlorine37Counts.Median();
+            var chlorine37Counts = nomStatsByScan.Values.Select(item => item.Cl37PairCount).Select(dummy => (double)dummy).ToList();
+            NOMStats.Cl37PairCount = (int)chlorine37Counts.Median();
 
-            var chlorine37IntensitySums = nomStatsByScan.Values.Select(item => item.Chlorine37IntensitySum).ToList();
-            NOMStats.Chlorine37IntensitySum = (int)chlorine37IntensitySums.Median();
+            var chlorine37IntensitySums = nomStatsByScan.Values.Select(item => item.Cl37PairIntensitySum).ToList();
+            NOMStats.Cl37PairIntensitySum = (int)chlorine37IntensitySums.Median();
 
             var chlorideClusterCounts = nomStatsByScan.Values.Select(item => item.ChlorideClusterCount).Select(dummy => (double)dummy).ToList();
             NOMStats.ChlorideClusterCount = (int)chlorideClusterCounts.Median();
@@ -377,14 +377,14 @@ namespace MSFileInfoScanner.DatasetStats
             var chlorideClusterMeanLengths = nomStatsByScan.Values.Select(item => item.ChlorideClusterMeanLength).ToList();
             NOMStats.ChlorideClusterMeanLength = (int)chlorideClusterMeanLengths.Median();
 
-            var chlorideClusterPeaksTotals = nomStatsByScan.Values.Select(item => item.ChlorideClusterPeaksTotal).Select(dummy => (double)dummy).ToList();
-            NOMStats.ChlorideClusterPeaksTotal = (int)chlorideClusterPeaksTotals.Median();
+            var chlorideClusterPeaksTotals = nomStatsByScan.Values.Select(item => item.ChlorideClusterPeakCount).Select(dummy => (double)dummy).ToList();
+            NOMStats.ChlorideClusterPeakCount = (int)chlorideClusterPeaksTotals.Median();
 
-            var chlorideClusterPeaksPercents = nomStatsByScan.Values.Select(item => item.ChlorideClusterPeaksPercent).ToList();
-            NOMStats.ChlorideClusterPeaksPercent = (int)chlorideClusterPeaksPercents.Median();
+            var chlorideClusterPeaksPercents = nomStatsByScan.Values.Select(item => item.ChlorideClusterPeakPercent).ToList();
+            NOMStats.ChlorideClusterPeakPercent = (int)chlorideClusterPeaksPercents.Median();
 
-            var chlorideClusterIntensityTotals = nomStatsByScan.Values.Select(item => item.ChlorideClusterIntensityTotal).ToList();
-            NOMStats.ChlorideClusterIntensityTotal = (int)chlorideClusterIntensityTotals.Median();
+            var chlorideClusterIntensityTotals = nomStatsByScan.Values.Select(item => item.ChlorideClusterIntensitySum).ToList();
+            NOMStats.ChlorideClusterIntensitySum = (int)chlorideClusterIntensityTotals.Median();
 
             var chlorideClusterIntensityPercents = nomStatsByScan.Values.Select(item => item.ChlorideClusterIntensityPercent).ToList();
             NOMStats.ChlorideClusterIntensityPercent = (int)chlorideClusterIntensityPercents.Median();
@@ -498,28 +498,28 @@ namespace MSFileInfoScanner.DatasetStats
                 }
 
                 writer.WriteStartElement("metrics");
-                writer.WriteElementString("intrinsic_c13_pair_count", nomStats.C13Count.ToString());
-                writer.WriteElementString("intrinsic_c13_pair_intensity_sum", nomStats.C13IntensitySum.ToString(CultureInfo.InvariantCulture));
-                writer.WriteElementString("intrinsic_c13_to_cl37_pair_intensity_ratio", nomStats.C13RatioWeightedIntensity.ToString(CultureInfo.InvariantCulture));
-                writer.WriteElementString("intrinsic_c13_to_cl37_pair_ratio", nomStats.C13Ratio.ToString(CultureInfo.InvariantCulture));
+                writer.WriteElementString("intrinsic_c13_pair_count", nomStats.C13PairCount.ToString());
+                writer.WriteElementString("intrinsic_c13_pair_intensity_sum", nomStats.C13PairIntensitySum.ToString(CultureInfo.InvariantCulture));
+                writer.WriteElementString("intrinsic_c13_to_cl37_pair_intensity_ratio", StringUtilities.DblToString(nomStats.C13ToCl37PairIntensityRatio, 5));
+                writer.WriteElementString("intrinsic_c13_to_cl37_pair_ratio", StringUtilities.DblToString(nomStats.C13ToCl37PairRatio, 5));
                 writer.WriteElementString("intrinsic_chloride_cluster_count", nomStats.ChlorideClusterCount.ToString());
-                writer.WriteElementString("intrinsic_chloride_cluster_intensity_percent", nomStats.ChlorideClusterIntensityPercent.ToString(CultureInfo.InvariantCulture));
-                writer.WriteElementString("intrinsic_chloride_cluster_intensity_sum", nomStats.ChlorideClusterIntensityTotal.ToString(CultureInfo.InvariantCulture));
+                writer.WriteElementString("intrinsic_chloride_cluster_intensity_percent", StringUtilities.DblToString(nomStats.ChlorideClusterIntensityPercent, 4));
+                writer.WriteElementString("intrinsic_chloride_cluster_intensity_sum", nomStats.ChlorideClusterIntensitySum.ToString(CultureInfo.InvariantCulture));
                 writer.WriteElementString("intrinsic_chloride_cluster_max_length", nomStats.ChlorideClusterMaxLength.ToString());
-                writer.WriteElementString("intrinsic_chloride_cluster_mean_length", nomStats.ChlorideClusterMeanLength.ToString(CultureInfo.InvariantCulture));
-                writer.WriteElementString("intrinsic_chloride_cluster_peak_count", nomStats.ChlorideClusterPeaksTotal.ToString());
-                writer.WriteElementString("intrinsic_chloride_cluster_peak_percent", nomStats.ChlorideClusterPeaksPercent.ToString(CultureInfo.InvariantCulture));
-                writer.WriteElementString("intrinsic_cl37_pair_count", nomStats.Chlorine37Count.ToString());
-                writer.WriteElementString("intrinsic_cl37_pair_intensity_sum", nomStats.Chlorine37IntensitySum.ToString(CultureInfo.InvariantCulture));
+                writer.WriteElementString("intrinsic_chloride_cluster_mean_length", StringUtilities.DblToString(nomStats.ChlorideClusterMeanLength, 4));
+                writer.WriteElementString("intrinsic_chloride_cluster_peak_count", nomStats.ChlorideClusterPeakCount.ToString());
+                writer.WriteElementString("intrinsic_chloride_cluster_peak_percent", StringUtilities.DblToString(nomStats.ChlorideClusterPeakPercent, 4));
+                writer.WriteElementString("intrinsic_cl37_pair_count", nomStats.Cl37PairCount.ToString());
+                writer.WriteElementString("intrinsic_cl37_pair_intensity_sum", nomStats.Cl37PairIntensitySum.ToString(CultureInfo.InvariantCulture));
                 writer.WriteElementString("intrinsic_inorganic_count", nomStats.InorganicCount.ToString());
                 writer.WriteElementString("intrinsic_inorganic_intensity_sum", nomStats.InorganicIntensitySum.ToString(CultureInfo.InvariantCulture));
-                writer.WriteElementString("intrinsic_mz_kurtosis", nomStats.MzKurtosis.ToString(CultureInfo.InvariantCulture));
-                writer.WriteElementString("intrinsic_mz_median", nomStats.MzMedian.ToString(CultureInfo.InvariantCulture));
-                writer.WriteElementString("intrinsic_mz_skewness", nomStats.MzSkew.ToString(CultureInfo.InvariantCulture));
+                writer.WriteElementString("intrinsic_mz_kurtosis", StringUtilities.DblToString(nomStats.MzKurtosis, 5));
+                writer.WriteElementString("intrinsic_mz_median", StringUtilities.DblToString(nomStats.MzMedian, 4));
+                writer.WriteElementString("intrinsic_mz_skewness", StringUtilities.DblToString(nomStats.MzSkew, 5));
                 writer.WriteElementString("intrinsic_organic_count", nomStats.OrganicCount.ToString());
                 writer.WriteElementString("intrinsic_organic_intensity_sum", nomStats.OrganicIntensitySum.ToString(CultureInfo.InvariantCulture));
-                writer.WriteElementString("intrinsic_organic_to_inorganic_count_ratio", nomStats.OrganicInorganicRatio.ToString(CultureInfo.InvariantCulture));
-                writer.WriteElementString("intrinsic_organic_to_inorganic_intensity_ratio", nomStats.OrganicInorganicRatioWeightedIntensity.ToString(CultureInfo.InvariantCulture));
+                writer.WriteElementString("intrinsic_organic_to_inorganic_count_ratio", StringUtilities.DblToString(nomStats.OrganicToInorganicCountRatio, 5));
+                writer.WriteElementString("intrinsic_organic_to_inorganic_intensity_ratio", StringUtilities.DblToString(nomStats.OrganicToInorganicIntensityRatio, 5));
                 writer.WriteElementString("intrinsic_peak_count", nomStats.MzIonCount.ToString());
 
                 writer.WriteEndElement();       // metrics

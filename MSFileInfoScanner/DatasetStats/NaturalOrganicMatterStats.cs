@@ -63,7 +63,7 @@
         /// <remarks>
         /// OrganicCount / InorganicCount
         /// </remarks>
-        public double OrganicInorganicRatio
+        public double OrganicToInorganicCountRatio
         {
             get
             {
@@ -80,7 +80,7 @@
         /// <remarks>
         /// OrganicIntensitySum / InorganicIntensitySum
         /// </remarks>
-        public double OrganicInorganicRatioWeightedIntensity
+        public double OrganicToInorganicIntensityRatio
         {
             get
             {
@@ -97,7 +97,7 @@
         /// <remarks>
         /// Count of pairs of peaks separated by 1.003355 (plus/minus tolerance of 0.0005)
         /// </remarks>
-        public int C13Count { get; set; }
+        public int C13PairCount { get; set; }
 
         /// <summary>
         /// Carbon-13 intensity sum
@@ -106,7 +106,7 @@
         /// Sum of the intensities of pairs of peaks separated by 1.003355 (plus/minus tolerance of 0.0005)
         /// Use minimum intensity of the paired peaks
         /// </remarks>
-        public double C13IntensitySum { get; set; }
+        public double C13PairIntensitySum { get; set; }
 
         /// <summary>
         /// Chlorine-37 pair count
@@ -114,7 +114,7 @@
         /// <remarks>
         /// Count of pairs of peaks separated by 1.99705 (plus/minus tolerance of 0.0005)
         /// </remarks>
-        public int Chlorine37Count { get; set; }
+        public int Cl37PairCount { get; set; }
 
         /// <summary>
         /// Chlorine-37 pair intensity sum
@@ -123,7 +123,7 @@
         /// Sum of the intensities of pairs of peaks separated by 1.99705 (plus/minus tolerance of 0.0005)
         /// Use minimum intensity of the paired peaks
         /// </remarks>
-        public double Chlorine37IntensitySum { get; set; }
+        public double Cl37PairIntensitySum { get; set; }
 
         /// <summary>
         /// Carbon-13 to Chlorine-37 Pair Ratio (NaN if Chlorine37PairCount is 0)
@@ -131,14 +131,14 @@
         /// <remarks>
         /// C13PairCount / Cl37PairCount
         /// </remarks>
-        public double C13Ratio
+        public double C13ToCl37PairRatio
         {
             get
             {
-                if (Chlorine37Count <= 0)
+                if (Cl37PairCount <= 0)
                     return double.NaN;
 
-                return C13Count / (double)Chlorine37Count;
+                return C13PairCount / (double)Cl37PairCount;
             }
         }
 
@@ -148,14 +148,14 @@
         /// <remarks>
         /// C13PairIntensitySum / Cl37PairIntensitySum
         /// </remarks>
-        public double C13RatioWeightedIntensity
+        public double C13ToCl37PairIntensityRatio
         {
             get
             {
-                if (Chlorine37IntensitySum <= 0)
+                if (Cl37PairIntensitySum <= 0)
                     return double.NaN;
 
-                return C13IntensitySum / Chlorine37IntensitySum;
+                return C13PairIntensitySum / Cl37PairIntensitySum;
             }
         }
 
@@ -180,17 +180,17 @@
         /// <summary>
         /// Total number of peaks that are part of chloride clusters
         /// </summary>
-        public int ChlorideClusterPeaksTotal { get; set; }
+        public int ChlorideClusterPeakCount { get; set; }
 
         /// <summary>
         /// Percent of peaks that are members of a chloride cluster
         /// </summary>
-        public double ChlorideClusterPeaksPercent { get; set; }
+        public double ChlorideClusterPeakPercent { get; set; }
 
         /// <summary>
         /// Total intensity of peaks that are members of a chloride cluster
         /// </summary>
-        public double ChlorideClusterIntensityTotal { get; set; }
+        public double ChlorideClusterIntensitySum { get; set; }
 
         /// <summary>
         /// Percent of the total intensity of the peaks in the mass spectrum that is associated with chloride clusters
@@ -202,11 +202,10 @@
         /// </summary>
         public int ScanNumber { get; }
 
-
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="scanNumber"></param>
+        /// <param name="scanNumber">Scan number</param>
         public NaturalOrganicMatterStats(int scanNumber)
         {
             ScanNumber = scanNumber;
@@ -229,16 +228,16 @@
                 OrganicIntensitySum = sourceStats.OrganicIntensitySum,
                 InorganicCount = sourceStats.InorganicCount,
                 InorganicIntensitySum = sourceStats.InorganicIntensitySum,
-                C13Count = sourceStats.C13Count,
-                C13IntensitySum = sourceStats.C13IntensitySum,
-                Chlorine37Count = sourceStats.Chlorine37Count,
-                Chlorine37IntensitySum = sourceStats.Chlorine37IntensitySum,
+                C13PairCount = sourceStats.C13PairCount,
+                C13PairIntensitySum = sourceStats.C13PairIntensitySum,
+                Cl37PairCount = sourceStats.Cl37PairCount,
+                Cl37PairIntensitySum = sourceStats.Cl37PairIntensitySum,
                 ChlorideClusterCount = sourceStats.ChlorideClusterCount,
                 ChlorideClusterMaxLength = sourceStats.ChlorideClusterMaxLength,
                 ChlorideClusterMeanLength = sourceStats.ChlorideClusterMeanLength,
-                ChlorideClusterPeaksTotal = sourceStats.ChlorideClusterPeaksTotal,
-                ChlorideClusterPeaksPercent = sourceStats.ChlorideClusterPeaksPercent,
-                ChlorideClusterIntensityTotal = sourceStats.ChlorideClusterIntensityTotal,
+                ChlorideClusterPeakCount = sourceStats.ChlorideClusterPeakCount,
+                ChlorideClusterPeakPercent = sourceStats.ChlorideClusterPeakPercent,
+                ChlorideClusterIntensitySum = sourceStats.ChlorideClusterIntensitySum,
                 ChlorideClusterIntensityPercent = sourceStats.ChlorideClusterIntensityPercent
             };
         }
