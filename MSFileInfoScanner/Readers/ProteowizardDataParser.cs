@@ -531,7 +531,7 @@ namespace MSFileInfoScanner.Readers
 
                         var spectrumCount = GetSpectrumCountWithRetry(mMSDataFileReader);
 
-                        var storeInTICAndBPIPlot = (mSaveTICAndBPIPlots && spectrumCount == 0);
+                        var storeInTICAndBPIPlot = mSaveTICAndBPIPlots && spectrumCount == 0;
 
                         ProcessTIC(scanTimes, intensities, ticScanTimes, ticScanNumbers, ref runtimeMinutes, storeInTICAndBPIPlot, skipDuplicateTicOrBpiScans);
 
@@ -664,7 +664,7 @@ namespace MSFileInfoScanner.Readers
 
                 while (true)
                 {
-                    var useAlternateMethod = (attemptNumber > 1);
+                    var useAlternateMethod = attemptNumber > 1;
 
                     try
                     {

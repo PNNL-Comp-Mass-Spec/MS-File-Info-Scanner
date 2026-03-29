@@ -1782,7 +1782,7 @@ namespace MSFileInfoScanner.Plotting
                 // Instead of plotting a 2D plot, plot the mass spectrum as m/z vs. intensity
 
                 plottingSingleMassSpectrum = true;
-                singleScanNumber = (int)(Math.Round(xMinScan, 0));
+                singleScanNumber = (int)Math.Round(xMinScan, 0);
 
                 return InitializeOxyPlotMassSpectrum(
                     datasetName + " - Scan " + singleScanNumber,
@@ -2058,7 +2058,7 @@ namespace MSFileInfoScanner.Plotting
                 // Instead of plotting a 2D plot, plot the mass spectrum as m/z vs. intensity
 
                 plottingSingleMassSpectrum = true;
-                singleScanNumber = (int)(Math.Round(xMinScan, 0));
+                singleScanNumber = (int)Math.Round(xMinScan, 0);
 
                 return InitializePythonPlotMassSpectrum(
                     datasetName + " - Scan " + singleScanNumber,

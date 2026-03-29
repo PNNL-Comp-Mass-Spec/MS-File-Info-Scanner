@@ -825,7 +825,7 @@ namespace MSFileInfoScanner.Readers
                     switch (column.ColumnName.ToLower())
                     {
                         case "deviceid":
-                            //var deviceId = (int) value;
+                            //var deviceId = (int)value;
                             break;
                         case "name":
                             deviceInfo.InstrumentName = (string)value;
@@ -848,7 +848,7 @@ namespace MSFileInfoScanner.Readers
                             deviceInfo.StoredDataTypes = (StoredDataType)value; // flags
                             break;
                         case "delay":
-                            //var delay = (int) value;
+                            //var delay = (int)value;
                             break;
                         case "displayname":
                             deviceInfo.DisplayName = (string)value;
@@ -857,7 +857,7 @@ namespace MSFileInfoScanner.Readers
                             // Boolean; Ignore
                             break;
                         case "vendor":
-                            //var vendor = (DeviceVendor) value;
+                            //var vendor = (DeviceVendor)value;
                             break;
                         case "driverversion":
                             deviceInfo.DriverVersion = value?.ToString() ?? "";

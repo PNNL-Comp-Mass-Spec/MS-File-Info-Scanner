@@ -189,7 +189,8 @@ namespace MSFileInfoScanner.Readers
                 if (msDataFileReader.SpectrumCount > 0 && !srmDataCached)
                 {
                     // Process the spectral data (though only if we did not process SRM data)
-                    var skipExistingScans = (msDataFileReader.ChromatogramCount > 0);
+                    var skipExistingScans = msDataFileReader.ChromatogramCount > 0;
+
                     pWizParser.StoreMSSpectraInfo(ticStored, ref runtimeMinutes,
                                                   skipExistingScans,
                                                   skipScansWithNoIons: true,
