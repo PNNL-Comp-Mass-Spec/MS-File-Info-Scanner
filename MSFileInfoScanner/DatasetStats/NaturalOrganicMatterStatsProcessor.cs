@@ -1,13 +1,13 @@
-﻿using MathNet.Numerics.Statistics;
-using MSFileInfoScannerInterfaces;
-using PRISM;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using MathNet.Numerics.Statistics;
+using MSFileInfoScannerInterfaces;
+using PRISM;
 
 namespace MSFileInfoScanner.DatasetStats
 {
