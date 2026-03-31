@@ -1479,10 +1479,13 @@ namespace MSFileInfoScanner.Readers
                     // Convert to an array of bytes, reverse, convert back to integer (now RGBn), then shift right 8 bits to remove the 'n' value (now [0x00|0xFF]RGB) and mask with 0x00FFFFFF to drop a possible leading 'FF' since we don't have 'A' values
                     var bytes = BitConverter.GetBytes(colorInt);
 
-                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                    bytes.Reverse();
+                    var reversedBytes = new List<byte>();
 
-                    var rgbColor = (BitConverter.ToInt32(bytes.ToArray(), 0) >> 8) & 0x00FFFFFF;
+#pragma warning disable IDE0004
+                    reversedBytes.AddRange(((IEnumerable<byte>)bytes).Reverse());
+#pragma warning restore IDE0004
+
+                    var rgbColor = (BitConverter.ToInt32(reversedBytes.ToArray(), 0) >> 8) & 0x00FFFFFF;
 
                     traceDefinitions.Add(new ChromatographyTraceDefinition(definition, "Intensity", $"#{rgbColor:x6}"));
                 }
