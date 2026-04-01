@@ -58,7 +58,7 @@
         public double InorganicIntensitySum { get; set; }
 
         /// <summary>
-        /// Organic/inorganic ratio (NaN if InorganicCount is 0)
+        /// Organic to inorganic ratio (NaN if InorganicCount is 0)
         /// </summary>
         /// <remarks>
         /// OrganicCount / InorganicCount
@@ -75,7 +75,7 @@
         }
 
         /// <summary>
-        /// Organic/inorganic ratio, intensity weighted (NaN if InorganicIntensitySum is 0)
+        /// Organic to inorganic ratio, intensity weighted (NaN if InorganicIntensitySum is 0)
         /// </summary>
         /// <remarks>
         /// OrganicIntensitySum / InorganicIntensitySum
