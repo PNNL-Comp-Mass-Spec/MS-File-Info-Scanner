@@ -44,7 +44,6 @@ namespace MSFileInfoScanner.DatasetStats
         /// </summary>
         /// <param name="massSpectra">Dictionary where keys are scan number and values are lists of m/z and intensity pairs</param>
         /// <returns>True if successful, false if an error</returns>
-        /// <exception cref="NotImplementedException"></exception>
         public bool ComputeStats(Dictionary<int, List<KeyValuePair<double, double>>> massSpectra)
         {
             try
