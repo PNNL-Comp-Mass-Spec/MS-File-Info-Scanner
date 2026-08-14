@@ -13,7 +13,7 @@ namespace MSFileInfoScanner.Readers
     /// </summary>
     public abstract class ProteoWizardScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: Bpi, Centroided, lcms, Proteo
+        // Ignore Spelling: Bpi, Centroided, centroiding, lcms, Proteo
 
         /// <summary>
         /// Class MzMLFileInfoScanner sets this to true

@@ -939,9 +939,9 @@ namespace MSFileInfoScanner.Readers
                 datasetFileInfo.FileExtension = string.Empty;
 
                 // To only use the "primary" file for dataset size:
-                //datasetFileInfo.FileSizeBytes = primaryInstrumentFile.Length;
+                // datasetFileInfo.FileSizeBytes = primaryInstrumentFile.Length;
                 // To only use the "added" instrument files for dataset size:
-                //datasetFileInfo.FileSizeBytes = instrumentFilesToAdd.Sum(x => x.Length);
+                // datasetFileInfo.FileSizeBytes = instrumentFilesToAdd.Sum(x => x.Length);
                 // To use all dataset files for dataset size:
                 datasetFileInfo.FileSizeBytes = PathUtils.FindFilesWildcard(datasetDirectory, "*", true).Sum(x => x.Length);
 
