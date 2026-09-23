@@ -39,7 +39,8 @@ namespace MSFileInfoScanner
     /// </remarks>
     public sealed class MSFileInfoScanner : iMSFileInfoScanner
     {
-        // Ignore Spelling: app, Bruker, centroiding, idx, LCMS, Micromass, OxyPlot, Recurse, Shimadzu, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
+        // Ignore Spelling: app, Bruker, centroiding, idx, LCMS, Micromass, OxyPlot, Recurse
+        // Ignore Spelling: Shimadzu, Thermo, Uncomment, username, utf, yyyy-MM-dd, hh:mm:ss tt, xtr
 
         /// <summary>
         /// Program date

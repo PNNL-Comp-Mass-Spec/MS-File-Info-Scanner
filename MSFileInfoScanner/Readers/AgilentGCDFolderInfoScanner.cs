@@ -17,7 +17,7 @@ namespace MSFileInfoScanner.Readers
     /// </remarks>
     public class AgilentGCDFolderInfoScanner : MSFileInfoProcessorBaseClass
     {
-        // Ignore Spelling: Acq, acqmeth, AcqTimes, GC, Ini, Lcms
+        // Ignore Spelling: Acq, acqmeth, AcqTimes, Bruker, GC, Ini, Lcms
 
         // ReSharper disable once UnusedMember.Global
 
